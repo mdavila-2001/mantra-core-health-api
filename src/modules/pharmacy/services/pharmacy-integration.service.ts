@@ -9,11 +9,16 @@ import {
 } from '../../../common';
 import {
   PharmaciesRepository,
+  PharmacyReferencesRepository,
   PharmacyProductsRepository,
   PharmacyIntegrationConnectionsRepository,
   PharmacyExternalProductMappingsRepository,
 } from '../repositories';
 import { INTEGRATION_MODE_CONCEPT_BY_CODE, PHARM } from '../pharmacy.concepts';
+import {
+  assertReferenceInScope,
+  requireManagedPharmacy,
+} from './pharmacy-scope';
 import {
   ConnectionResponseDto,
   CreateConnectionDto,
@@ -37,6 +42,7 @@ export class PharmacyIntegrationService {
    * @param productsRepo - Valor de products repo requerido por la operación.
    * @param connectionsRepo - Valor de connections repo requerido por la operación.
    * @param mappingsRepo - Valor de mappings repo requerido por la operación.
+   * @param referencesRepo - Comprobación de propiedad de las referencias del cuerpo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -45,6 +51,7 @@ export class PharmacyIntegrationService {
     private readonly productsRepo: PharmacyProductsRepository,
     private readonly connectionsRepo: PharmacyIntegrationConnectionsRepository,
     private readonly mappingsRepo: PharmacyExternalProductMappingsRepository,
+    private readonly referencesRepo: PharmacyReferencesRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PharmacyIntegrationService.name);
@@ -65,15 +72,26 @@ export class PharmacyIntegrationService {
       'Creating integration connection',
     );
     return this.em.transactional(async (tx) => {
-      const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy)
-        throw new ResourceNotFoundException('Farmacia no encontrada', {
-          pharmacyId,
-        });
+      const pharmacy = await requireManagedPharmacy(
+        this.pharmaciesRepo,
+        tx,
+        pharmacyId,
+        actor,
+      );
       if (pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE) {
         throw new PreconditionFailedException('La farmacia no está activa', {
           pharmacyId,
         });
+      }
+
+      if (dto.pharmacySiteId) {
+        assertReferenceInScope(
+          (await this.referencesRepo.findPharmacySiteInPharmacy(
+            tx,
+            dto.pharmacySiteId,
+            pharmacy.id,
+          )) !== null,
+        );
       }
 
       if (dto.connectionId) {
@@ -144,6 +162,7 @@ export class PharmacyIntegrationService {
       'Mapping product to external code',
     );
     return this.em.transactional(async (tx) => {
+      await requireManagedPharmacy(this.pharmaciesRepo, tx, pharmacyId, actor);
       const connection = await this.connectionsRepo.findById(
         tx,
         connectionRowId,

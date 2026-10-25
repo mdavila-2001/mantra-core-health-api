@@ -35,6 +35,7 @@ export function coverageReport({
 }) {
   const nodes = taxonomy.nodes;
   const dxNodes = nodes.filter((n) => n.diagnostic === true);
+  const dxKeys = new Set(dxNodes.map((n) => n.key));
   const usedTypes = new Set(catalog.models.flatMap((m) => m.deviceTypes));
   const brands = new Set(
     catalog.models
@@ -64,7 +65,11 @@ export function coverageReport({
         taxonomy.crosswalks,
         (c) => `${c.from.split('|')[0]}→${c.to.split('|')[0]}`,
       ),
-      diagnosticTypesWithModels: usedTypes.size,
+      // Tipos con decisión de diagnóstico propia; `typesWithModels` cuenta
+      // también los sin decisión de filas que entraron por otro criterio.
+      diagnosticTypesWithModels: [...usedTypes].filter((k) => dxKeys.has(k))
+        .length,
+      typesWithModels: usedTypes.size,
       ivdPanelsMeasured: ivdPanels,
       panelParts,
     },
@@ -174,6 +179,8 @@ export function coverageReport({
         'Mapeos publicados': json.taxonomy.crosswalks,
         'Tipos de diagnóstico con al menos un modelo':
           json.taxonomy.diagnosticTypesWithModels,
+        'Tipos (con o sin decisión) en modelos del catálogo':
+          json.taxonomy.typesWithModels,
       },
       'Medida',
       'Valor',

@@ -8,7 +8,12 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ResidencyService } from './residency.service';
-import { ConflictException } from '../../../common';
+import {
+  ConflictException,
+  PreconditionFailedException,
+  ResourceNotFoundException,
+} from '../../../common';
+import { SystemOpsErrorReason } from '../system_ops.error-reasons';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -23,6 +28,9 @@ function build() {
     findPolicyByCode: mockFn(),
     createPolicy: mockFn(),
     createBinding: mockFn(),
+    findBindingPolicyById: mockFn(),
+    tenantExists: mockFn(),
+    findConceptCodes: mockFn(),
     findTransferByReference: mockFn(),
     createTransfer: mockFn(),
   };
@@ -60,18 +68,122 @@ describe('ResidencyService', () => {
   });
 
   describe('createBinding (UC-11-06)', () => {
-    it('creates the tenant binding', async () => {
-      const d = build();
+    const PRIMARY = 'primary-region';
+    const DR = 'dr-region';
+    const dto = {
+      tenantId: 't',
+      residencyPolicyId: 'r',
+      primaryRegionConceptId: PRIMARY,
+    };
+
+    /** Cablea tenant, política activa y regiones existentes. */
+    function wire(
+      d: ReturnType<typeof build>,
+      policy: any = { id: 'r', state: 'ACTIVE', allowedRegionCodes: [] },
+    ) {
+      d.repo.findBindingPolicyById.mockResolvedValue(policy);
+      d.repo.tenantExists.mockResolvedValue(true);
+      d.repo.findConceptCodes.mockResolvedValue(
+        new Map([
+          [PRIMARY, 'US-EAST'],
+          [DR, 'US-WEST'],
+        ]),
+      );
       d.repo.createBinding.mockReturnValue({ id: 'b1' });
-      const res = await d.service.createBinding(
-        {
-          tenantId: 't',
-          residencyPolicyId: 'r',
-          primaryRegionConceptId: 'reg',
-        },
+    }
+
+    it('creates the tenant binding against the policy the FK points to', async () => {
+      const d = build();
+      wire(d);
+      const res = await d.service.createBinding(dto, actor);
+      expect(res).toEqual({ id: 'b1' });
+      expect(d.repo.findBindingPolicyById).toHaveBeenCalledWith(
+        expect.anything(),
+        'r',
+      );
+    });
+
+    it('accepts a binding without a disaster-recovery region', async () => {
+      const d = build();
+      wire(d);
+      await d.service.createBinding(dto, actor);
+      expect(d.repo.createBinding.mock.calls[0][1]).toMatchObject({
+        primaryRegionConceptId: PRIMARY,
+        disasterRecoveryRegionConceptId: undefined,
+      });
+    });
+
+    it('accepts regions inside the allowed set, ignoring case', async () => {
+      const d = build();
+      wire(d, {
+        id: 'r',
+        state: 'ACTIVE',
+        allowedRegionCodes: ['us-east', 'us-west'],
+      });
+      await d.service.createBinding(
+        { ...dto, disasterRecoveryRegionConceptId: DR },
         actor,
       );
-      expect(res).toEqual({ id: 'b1' });
+      expect(d.repo.createBinding).toHaveBeenCalled();
+    });
+
+    it('answers 404 with a stable reason when the policy does not exist (system_ops-created ids do not exist in the FK target)', async () => {
+      const d = build();
+      wire(d, null);
+      const attempt = d.service.createBinding(dto, actor);
+      await expect(attempt).rejects.toBeInstanceOf(ResourceNotFoundException);
+      await expect(attempt).rejects.toMatchObject({
+        reason: SystemOpsErrorReason.SYSOPS_RESIDENCY_REFERENCE_NOT_FOUND,
+      });
+      expect(d.repo.createBinding).not.toHaveBeenCalled();
+    });
+
+    it('answers 404 with the same reason when the tenant does not exist', async () => {
+      const d = build();
+      wire(d);
+      d.repo.tenantExists.mockResolvedValue(false);
+      await expect(d.service.createBinding(dto, actor)).rejects.toMatchObject({
+        reason: SystemOpsErrorReason.SYSOPS_RESIDENCY_REFERENCE_NOT_FOUND,
+      });
+      expect(d.repo.createBinding).not.toHaveBeenCalled();
+    });
+
+    it('answers 404 when a region concept does not exist', async () => {
+      const d = build();
+      wire(d);
+      await expect(
+        d.service.createBinding(
+          { ...dto, disasterRecoveryRegionConceptId: 'unknown' },
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: SystemOpsErrorReason.SYSOPS_RESIDENCY_REFERENCE_NOT_FOUND,
+      });
+      expect(d.repo.createBinding).not.toHaveBeenCalled();
+    });
+
+    it('refuses a retired policy', async () => {
+      const d = build();
+      wire(d, { id: 'r', state: 'RETIRED', allowedRegionCodes: [] });
+      const attempt = d.service.createBinding(dto, actor);
+      await expect(attempt).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(attempt).rejects.toMatchObject({
+        reason: SystemOpsErrorReason.SYSOPS_RESIDENCY_POLICY_NOT_EFFECTIVE,
+      });
+      expect(d.repo.createBinding).not.toHaveBeenCalled();
+    });
+
+    it('refuses a region outside the set the policy allows', async () => {
+      const d = build();
+      wire(d, { id: 'r', state: 'ACTIVE', allowedRegionCodes: ['us-east'] });
+      const attempt = d.service.createBinding(
+        { ...dto, disasterRecoveryRegionConceptId: DR },
+        actor,
+      );
+      await expect(attempt).rejects.toMatchObject({
+        reason: SystemOpsErrorReason.SYSOPS_RESIDENCY_REGION_NOT_ALLOWED,
+      });
+      expect(d.repo.createBinding).not.toHaveBeenCalled();
     });
   });
 

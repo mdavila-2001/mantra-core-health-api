@@ -1,5 +1,6 @@
 export * from './governance-catalog.service';
 export * from './retention-execution.service';
+export * from './retention-disposition.executor';
 export * from './residency.service';
 export * from './legal-hold.service';
 export * from './backup.service';

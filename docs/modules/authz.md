@@ -9,7 +9,7 @@
 # Módulo `authz`
 
 **Fuente:** [`src/modules/authz/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/authz/README.md)
-· 9 controllers · 11 services · 15 repositories · 15 entidades · 21 DTO
+· 9 controllers · 12 services · 16 repositories · 15 entidades · 21 DTO
 
 ---
 
@@ -113,6 +113,37 @@ FKs como columnas `uuid` planas.
   activo único (409).
 - **Propósito de uso**: acceso clínico exige consentimiento salvo `TREATMENT`
   directo; break-the-glass usa `EMERGENCY`, sin consentimiento y ventana corta.
+- **Alcance de tenant de las bases de acceso** (`AuthzClinicalScopeService`): acceso
+  clínico, break-the-glass, relación asistencial y representación legal toman el
+  tenant de `requireTenantId()`; el `tenantId` del cuerpo sólo se contrasta (403
+  `AUTHZ_TENANT_SCOPE_REQUIRED`). El paciente tiene que existir y tener una huella
+  propia en el tenant, y el encuentro y el consentimiento citados, ser del tenant y
+  del mismo paciente. El modelo no guarda el tenant del paciente, así que la huella
+  se prueba a través de la cuenta vinculada al paciente y **sólo con actos que el
+  propio paciente realiza**: una reserva del tenant hecha por esa cuenta
+  (`booked_by_user_id`), o su membresía activa en el tenant cuando la creó el
+  autorregistro o la cuenta misma (`invited_by_user_id` nulo o igual a la cuenta; la
+  que un administrador da de alta con `POST /directory/tenants/:id/memberships` no
+  cuenta). **No son huella** los encuentros, turnos, reservas del personal ni
+  episodios de atención aunque sean del tenant y del paciente: el personal los crea
+  para cualquier paciente existente sin autorización previa
+  (`POST /clinical/encounters/check-in`, `POST /clinical/care-episodes`,
+  `POST /scheduling/appointments/direct`, confirmación de retenciones) y en cualquier
+  estado, incluidos «confirmada» y «atendida»; contarlos dejaría que otro tenant
+  fabricara el vínculo y concediera accesos sobre una historia ajena. Tampoco cuentan
+  las relaciones, accesos ni representaciones, que son lo que esta comprobación
+  protege. Un paciente sin cuenta, o sin huella propia, entra por la solicitud de
+  relación (abajo), que el paciente acepta. Los duplicados de acceso clínico,
+  relación asistencial (activa o pendiente) y representación legal se buscan sólo en
+  el tenant activo (`findActiveInTenant`/`findPendingInTenant`) y su 409 no lleva
+  `details`: una fila de otra organización ni bloquea ni se delata. Todo lo
+  ajeno responde igual que lo inexistente (404, mismo mensaje y `reason`, sin
+  `details`): `AUTHZ_PATIENT_OUT_OF_SCOPE`, `AUTHZ_ENCOUNTER_PATIENT_MISMATCH`,
+  `AUTHZ_CONSENT_PATIENT_MISMATCH`. La solicitud de relación del profesional
+  (`POST /authz/care-relationships/request`) sólo exige que el paciente exista: nace
+  `PENDING` y no concede nada hasta que el paciente la acepte. Revocar por id queda
+  acotado al tenant activo; el paciente titular revoca lo suyo en cualquier
+  organización y un actor de plataforma (`SUPERADMIN`/`SYSTEM`) sin tenant revoca por id.
 - **Masking**: `field_permissions` con check `canWrite ⇒ canRead` (412 si no).
 - **Vigencia**: `valid_from < valid_to`; la revocación distingue `revoked` de
   `expired` según `valid_to`.

@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import * as argon2 from 'argon2';
+import { randomUUID } from 'node:crypto';
 import {
   CONCEPTS,
   ConflictException,
@@ -11,6 +12,13 @@ import {
 } from '../../../../common';
 import { IamErrorReason } from '../../iam.error-reasons';
 import { composeAccountDisplayName } from '../../../profiles/domain/person-name';
+import { PROF } from '../../../profiles/profiles.concepts';
+import {
+  PatientProfilesRepository,
+  PersonAccountLinksRepository,
+  PersonProfilesRepository,
+  PersonsRepository,
+} from '../../../profiles/infrastructure/repositories';
 import {
   UsersRepository,
   CredentialsRepository,
@@ -43,6 +51,9 @@ const ACTIVATION_TTL_MS = 72 * 60 * 60 * 1000;
  *  - Antes de crear se busca coincidencia por el identificador verificado (email):
  *    si ya existe una cuenta se rechaza (conflicto) y se sugiere invitar en vez de
  *    duplicar.
+ *  - La cuenta nace con su persona (`profiles.persons`), su perfil de paciente y el
+ *    vínculo `SELF` cuenta-persona, en la misma transacción: sin ellos el titular
+ *    choca con `ACCOUNT_WITHOUT_LINKED_PERSON` al abrir su propio perfil.
  *  - Trazabilidad completa: creador, motivo, fecha y representación legal quedan en
  *    `iam.account_activations`, y cada paso emite un evento de seguridad.
  *  - En la activación el titular fija su propia contraseña (argon2id) y la cuenta
@@ -65,6 +76,10 @@ export class IamAssistedRegistrationService {
    * @param rolesRepo - Valor de roles repo requerido por la operación.
    * @param activationsRepo - Valor de activations repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param personsRepo - Valor de persons repo requerido por la operación.
+   * @param personProfilesRepo - Valor de person profiles repo requerido por la operación.
+   * @param patientProfilesRepo - Valor de patient profiles repo requerido por la operación.
+   * @param accountLinksRepo - Valor de account links repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -75,6 +90,10 @@ export class IamAssistedRegistrationService {
     private readonly rolesRepo: UserGlobalRolesRepository,
     private readonly activationsRepo: AccountActivationsRepository,
     private readonly eventsRepo: SecurityEventsRepository,
+    private readonly personsRepo: PersonsRepository,
+    private readonly personProfilesRepo: PersonProfilesRepository,
+    private readonly patientProfilesRepo: PatientProfilesRepository,
+    private readonly accountLinksRepo: PersonAccountLinksRepository,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IamAssistedRegistrationService.name);
@@ -117,8 +136,9 @@ export class IamAssistedRegistrationService {
       // Cuenta en estado PENDING, sin contraseña definitiva y con cambio exigido.
       // El nombre sale de las partes; si el cliente mandó la forma anterior,
       // manda esa.
+      const displayName = composeAccountDisplayName(dto);
       const user = this.usersRepo.create(tx, {
-        displayName: composeAccountDisplayName(dto),
+        displayName,
         statusConceptId: CONCEPTS.STATE_PENDING,
         mfaStatusConceptId: CONCEPTS.MFA_DISABLED,
         timeZone: dto.timeZone,
@@ -139,6 +159,52 @@ export class IamAssistedRegistrationService {
       this.rolesRepo.create(tx, {
         userId: user.id,
         roleConceptId: ROLE_CONCEPT_BY_CODE.USER,
+        actorUserId: actor.id,
+      });
+
+      // Persona + perfil de paciente + vínculo SELF con la cuenta. El nombre de la
+      // persona sale de las mismas partes (y del mismo `displayName`) que el de la
+      // cuenta, para que no puedan divergir. Es el mismo orden que el autoservicio:
+      // `persons`, luego `person_profiles`, luego `patient_profiles`, luego el
+      // vínculo; las FK son columnas uuid planas, así que cada padre se persiste
+      // antes de sus hijos.
+      const person = this.personsRepo.create(tx, {
+        personStatusConceptId: PROF.PERSON_ACTIVE,
+        vitalStatusConceptId: PROF.VITAL_ALIVE,
+        name: dto.name,
+        middleName: dto.middleName,
+        lastName: dto.lastName,
+        motherLastName: dto.motherLastName,
+        displayName,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      this.personProfilesRepo.create(tx, {
+        personId: person.id,
+        profileTypeConceptId: PROF.PROFILE_TYPE_PATIENT,
+        statusConceptId: PROF.PROFILE_ACTIVE,
+        actorUserId: actor.id,
+      });
+      await tx.flush();
+
+      // `patient_profiles.profile_id` ES `persons.id` (ver ProfilesPatientsService).
+      this.patientProfilesRepo.create(tx, {
+        profileId: person.id,
+        patientCode: `PAT-${randomUUID()}`,
+        recordLinkageStatusConceptId: PROF.LINKAGE_UNLINKED,
+        actorUserId: actor.id,
+      });
+
+      // El titular de la cuenta es el propio paciente (SELF): la cuenta se crea a su
+      // nombre, aunque la haya dado de alta un tercero.
+      this.accountLinksRepo.create(tx, {
+        personId: person.id,
+        userId: user.id,
+        linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
+        verificationStatusConceptId: PROF.ACCOUNT_LINK_VERIFIED,
+        statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
+        validFrom: new Date(),
         actorUserId: actor.id,
       });
 
@@ -164,6 +230,7 @@ export class IamAssistedRegistrationService {
           flow: 'assisted-registration',
           reason: dto.reason,
           createdBy: actor.id,
+          personId: person.id,
           legalRepresentationId: dto.legalRepresentationId,
           legalRepresentativeUserId: dto.legalRepresentativeUserId,
         },

@@ -1,13 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { IntegrationContractsErrorReason } from '../integration_contracts.error-reasons';
+import {
+  assertContractInTenant,
+  integrationResourceOutOfScope,
+} from '../integration_contracts.tenant-scope';
 import { ICON } from '../integration_contracts.concepts';
 import {
   ContractsRepository,
@@ -64,9 +70,32 @@ export class IntegrationContractsService {
       },
       'Defining integration contract',
     );
+    // El tenant es el del contexto autenticado; nunca viene del cuerpo.
+    const tenantId = requireTenantId();
+    try {
+      return await this.persistContract(dto, tenantId, actor);
+    } catch (error) {
+      if (error instanceof UniqueConstraintViolationException) {
+        throw new ConflictException(
+          'El código de contrato ya existe para el proveedor',
+          { contractCode: dto.contractCode },
+          IntegrationContractsErrorReason.INTEGRATION_CONTRACT_CODE_ALREADY_EXISTS,
+        );
+      }
+      throw error;
+    }
+  }
+
+  /** Alta del contrato dentro de su transacción. */
+  private persistContract(
+    dto: CreateContractDto,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<ContractResponseDto> {
     return this.em.transactional(async (tx) => {
       const clash = await this.contractsRepo.findByCodeAndProvider(
         tx,
+        tenantId,
         dto.contractCode,
         dto.externalProviderId,
       );
@@ -83,10 +112,12 @@ export class IntegrationContractsService {
           {
             contractCode: dto.contractCode,
           },
+          IntegrationContractsErrorReason.INTEGRATION_CONTRACT_CODE_ALREADY_EXISTS,
         );
       }
 
       const contract = this.contractsRepo.create(tx, {
+        tenantId,
         externalProviderId: dto.externalProviderId,
         contractCode: dto.contractCode,
         capabilityConceptId: dto.capabilityConceptId ?? ICON.CAPABILITY_GENERIC,
@@ -121,13 +152,17 @@ export class IntegrationContractsService {
       },
       'Publishing contract version',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const contract = await this.contractsRepo.findById(tx, contractId);
-      if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', {
+      // El bloqueo serializa publicaciones concurrentes (version_number = max+1).
+      const contract = assertContractInTenant(
+        await this.contractsRepo.findByIdInTenantForUpdate(
+          tx,
+          tenantId,
           contractId,
-        });
-      }
+        ),
+        tenantId,
+      );
       if (
         contract.statusConceptId !== ICON.CONTRACT_DRAFT &&
         contract.statusConceptId !== ICON.CONTRACT_ACTIVE
@@ -187,21 +222,20 @@ export class IntegrationContractsService {
       },
       'Activating contract version',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const contract = await this.contractsRepo.findById(tx, contractId);
-      if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', {
+      const contract = assertContractInTenant(
+        await this.contractsRepo.findByIdInTenantForUpdate(
+          tx,
+          tenantId,
           contractId,
-        });
-      }
+        ),
+        tenantId,
+      );
       const version = await this.versionsRepo.findById(tx, versionId);
-      if (!version || version.integrationContractId !== contractId) {
-        throw new ResourceNotFoundException(
+      if (!version || version.integrationContractId !== contract.id) {
+        throw integrationResourceOutOfScope(
           'Versión no encontrada para el contrato',
-          {
-            contractId,
-            versionId,
-          },
         );
       }
       if (version.statusConceptId !== ICON.VERSION_DRAFT) {
@@ -259,13 +293,16 @@ export class IntegrationContractsService {
       },
       'Retiring integration contract',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const contract = await this.contractsRepo.findById(tx, contractId);
-      if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', {
+      const contract = assertContractInTenant(
+        await this.contractsRepo.findByIdInTenantForUpdate(
+          tx,
+          tenantId,
           contractId,
-        });
-      }
+        ),
+        tenantId,
+      );
       if (contract.statusConceptId === ICON.CONTRACT_RETIRED) {
         throw new PreconditionFailedException('El contrato ya está retirado', {
           contractId,

@@ -8,6 +8,11 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import {
+  activeIntegrationsTenant,
+  assertConnectionInScope,
+  integrationsScope,
+} from '../integrations.tenant-scope';
+import {
   ExternalProvidersRepository,
   ProviderConnectionsRepository,
   ProviderCredentialsRepository,
@@ -65,11 +70,13 @@ export class IntegrationsConnectionsService {
     dto: ProvisionConnectionDto,
     actor: AuthenticatedUser,
   ): Promise<ConnectionResponseDto> {
+    // El tenant de la conexión es el del contexto; el cuerpo no es autoridad.
+    const tenantId = activeIntegrationsTenant(dto.tenantId);
     this.logger.info(
       {
         operation: 'integrations.connection.provision',
         providerId,
-        tenantId: dto.tenantId,
+        tenantId,
       },
       'Provisioning connection',
     );
@@ -87,7 +94,7 @@ export class IntegrationsConnectionsService {
 
       const connection = this.connectionsRepo.create(tx, {
         providerId,
-        tenantId: dto.tenantId,
+        tenantId,
         stateConceptId: INTEG.CONN_ACTIVE,
         environmentConceptId: dto.environment
           ? ENVIRONMENT_CONCEPT_BY_CODE[dto.environment]
@@ -140,12 +147,12 @@ export class IntegrationsConnectionsService {
       { operation: 'integrations.credential.rotate', connectionId },
       'Rotating credential',
     );
+    const scope = integrationsScope(actor);
     return this.em.transactional(async (tx) => {
-      const connection = await this.connectionsRepo.findById(tx, connectionId);
-      if (!connection)
-        throw new ResourceNotFoundException('Conexión no encontrada', {
-          connectionId,
-        });
+      const connection = assertConnectionInScope(
+        await this.connectionsRepo.findByIdInScope(tx, connectionId, scope),
+        scope,
+      );
       if (connection.stateConceptId !== INTEG.CONN_ACTIVE) {
         throw new PreconditionFailedException('La conexión no está activa', {
           connectionId,
@@ -195,12 +202,12 @@ export class IntegrationsConnectionsService {
       { operation: 'integrations.connection.pause', connectionId },
       'Pausing connection',
     );
+    const scope = integrationsScope(actor);
     return this.em.transactional(async (tx) => {
-      const connection = await this.connectionsRepo.findById(tx, connectionId);
-      if (!connection)
-        throw new ResourceNotFoundException('Conexión no encontrada', {
-          connectionId,
-        });
+      const connection = assertConnectionInScope(
+        await this.connectionsRepo.findByIdInScope(tx, connectionId, scope),
+        scope,
+      );
 
       // Transición idempotente: si ya está pausada, no-op.
       if (connection.stateConceptId === INTEG.CONN_PAUSED) {

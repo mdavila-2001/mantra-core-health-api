@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `data_catalog`
 
-Referencia exhaustiva de 37 operación(es) del módulo `data_catalog`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 38 operación(es) del módulo `data_catalog`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `admin-catalog`, `admin-portal`, `data-catalog-internal`
-- **Controladores:** `AdminCatalogController`, `AdminPortalController`, `InternalCatalogScansController`
+- **Controladores:** `AdminCatalogController`, `AdminPortalController`, `InternalCatalogInventoryController`, `InternalCatalogScansController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -47,7 +47,8 @@ Referencia exhaustiva de 37 operación(es) del módulo `data_catalog`, derivada 
 34. [GET /admin/portal/operaciones/{id}](#34-get-admin-portal-operaciones-id) — Ver la ficha de una operación
 35. [GET /admin/portal/operaciones/{id}/arbol](#35-get-admin-portal-operaciones-id-arbol) — Ver el árbol de decisión de una operación
 36. [GET /admin/portal/version](#36-get-admin-portal-version) — Versión y tamaño del inventario publicado
-37. [POST /internal/catalog/scans/run-next](#37-post-internal-catalog-scans-run-next) — Sonda: reclama y ejecuta el siguiente escaneo (worker)
+37. [POST /internal/catalog/inventory/import](#37-post-internal-catalog-inventory-import) — Importa el inventario de la API a las tablas de operaciones y procesos (worker)
+38. [POST /internal/catalog/scans/run-next](#38-post-internal-catalog-scans-run-next) — Sonda: reclama y ejecuta el siguiente escaneo (worker)
 
 ---
 
@@ -136,6 +137,7 @@ Content-Type: application/json
 | 422 | No está en revisión, falta evidencia o el rechazo no explica | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -245,6 +247,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ClassificationRunResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClassificationRunResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -432,6 +435,7 @@ Content-Type: application/json
 | 422 | No puede enviarse a revisión: falta la definición (`VALIDATION_FAILED`, `details.violations`) | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -528,6 +532,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | No existe la columna | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -645,6 +650,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -739,6 +745,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -838,6 +845,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -932,6 +940,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | No existe el objeto | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1091,6 +1100,7 @@ Content-Type: application/json
 | 422 | No puede enviarse a revisión: faltan respuestas (`VALIDATION_FAILED`, `details.violations`) | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1189,6 +1199,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1283,6 +1294,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1377,6 +1389,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1494,6 +1507,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1589,6 +1603,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1685,6 +1700,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1776,6 +1792,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1868,6 +1885,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1964,6 +1982,7 @@ Idempotency-Key: valor-ejemplo
 | 422 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ScanAcceptedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ScanAcceptedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2078,6 +2097,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -2169,6 +2189,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -2260,6 +2281,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `DerivaCatalogoDto` | No |
 | 500 | Consulta completada correctamente. | `DerivaCatalogoDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `DerivaCatalogoDto` | No |
+| 504 | Consulta completada correctamente. | `DerivaCatalogoDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DerivaCatalogoDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2376,6 +2398,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `TablasPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `TablasPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `TablasPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `TablasPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TablasPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2511,6 +2534,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `TablaFichaDto` | No |
 | 500 | Consulta completada correctamente. | `TablaFichaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `TablaFichaDto` | No |
+| 504 | Consulta completada correctamente. | `TablaFichaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TablaFichaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2679,6 +2703,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `ProcesosPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `ProcesosPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `ProcesosPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `ProcesosPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProcesosPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2821,6 +2846,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `ProcesoDetalleDto` | No |
 | 500 | Consulta completada correctamente. | `ProcesoDetalleDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `ProcesoDetalleDto` | No |
+| 504 | Consulta completada correctamente. | `ProcesoDetalleDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProcesoDetalleDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3015,6 +3041,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `GrafoDto` | No |
 | 500 | Consulta completada correctamente. | `GrafoDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `GrafoDto` | No |
+| 504 | Consulta completada correctamente. | `GrafoDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GrafoDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3138,6 +3165,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `HallazgoResumenDto[]` | No |
 | 500 | Consulta completada correctamente. | `HallazgoResumenDto[]` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `HallazgoResumenDto[]` | No |
+| 504 | Consulta completada correctamente. | `HallazgoResumenDto[]` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HallazgoResumenDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -3250,6 +3278,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `HallazgoDetalleDto` | No |
 | 500 | Consulta completada correctamente. | `HallazgoDetalleDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `HallazgoDetalleDto` | No |
+| 504 | Consulta completada correctamente. | `HallazgoDetalleDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HallazgoDetalleDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3383,6 +3412,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `MapaPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `MapaPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `MapaPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `MapaPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MapaPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3531,6 +3561,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `GlosarioPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `GlosarioPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `GlosarioPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `GlosarioPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlosarioPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3654,6 +3685,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `LinajeDto` | No |
 | 500 | Consulta completada correctamente. | `LinajeDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `LinajeDto` | No |
+| 504 | Consulta completada correctamente. | `LinajeDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinajeDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3774,6 +3806,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `LinajeTablaDto` | No |
 | 500 | Consulta completada correctamente. | `LinajeTablaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `LinajeTablaDto` | No |
+| 504 | Consulta completada correctamente. | `LinajeTablaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinajeTablaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3903,6 +3936,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `OperacionesPaginaDto` | No |
 | 500 | Consulta completada correctamente. | `OperacionesPaginaDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `OperacionesPaginaDto` | No |
+| 504 | Consulta completada correctamente. | `OperacionesPaginaDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperacionesPaginaDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4058,6 +4092,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `OperacionDetalleDto` | No |
 | 500 | Consulta completada correctamente. | `OperacionDetalleDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `OperacionDetalleDto` | No |
+| 504 | Consulta completada correctamente. | `OperacionDetalleDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperacionDetalleDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4377,6 +4412,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `ArbolDto` | No |
 | 500 | Consulta completada correctamente. | `ArbolDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `ArbolDto` | No |
+| 504 | Consulta completada correctamente. | `ArbolDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ArbolDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4504,6 +4540,7 @@ Authorization: Bearer <access_token_jwt>
 | 429 | Consulta completada correctamente. | `PortalVersionDto` | No |
 | 500 | Consulta completada correctamente. | `PortalVersionDto` | No |
 | 503 | El inventario no está disponible o está dañado (`DEPENDENCY_UNAVAILABLE`) | `PortalVersionDto` | No |
+| 504 | Consulta completada correctamente. | `PortalVersionDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PortalVersionDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4554,7 +4591,162 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /internal/catalog/scans/run-next
+## 37. POST /internal/catalog/inventory/import
+
+- **Módulo:** `data_catalog`
+- **Etiqueta OpenAPI:** `data-catalog-internal`
+- **Nombre:** Importa el inventario de la API a las tablas de operaciones y procesos (worker)
+- **Operation ID:** `InternalCatalogInventoryController_importInventory`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [InternalCatalogInventoryController.importInventory](../../src/modules/data_catalog/controllers/internal-catalog.controller.ts)
+
+### Descripción de negocio
+
+Lee `inventario/` y escribe `catalog_operations`, `catalog_operation_impacts`, `catalog_processes`, `catalog_process_steps` y `catalog_process_step_operations` en una transacción. Idempotente: lo que no cambió no se toca. Corre después de un escaneo, porque cada impacto apunta a un objeto de `catalog_objects`. Una operación que deja de aparecer queda `NOT_OBSERVED`. 503 si la instancia no tiene el inventario.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /internal/catalog/inventory/import` en `InternalCatalogInventoryController_importInventory`. El controlador delega en `InventoryImportService.importInventory`. No recibe body. El tipo de retorno estático es `Promise<InventoryImportResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /internal/catalog/inventory/import HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /internal/catalog/inventory/import HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<InventoryImportResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<InventoryImportResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<InventoryImportResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<InventoryImportResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<InventoryImportResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<InventoryImportResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<InventoryImportResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<InventoryImportResultDto>` | No |
+| 503 | El inventario no está disponible en esta instancia | `Promise<InventoryImportResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<InventoryImportResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InventoryImportResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "inventory": {
+    "hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "operaciones": 1,
+    "procesos": 1
+  },
+  "operations": {
+    "added": 1,
+    "changed": 1,
+    "reappeared": 1,
+    "unchanged": 1,
+    "notObserved": 1
+  },
+  "impacts": {
+    "written": 1,
+    "skippedNotCataloged": 1,
+    "skippedUnresolved": 1
+  },
+  "processes": {
+    "added": 1,
+    "changed": 1,
+    "unchanged": 1
+  },
+  "steps": {
+    "written": 1
+  },
+  "stepOperations": {
+    "written": 1,
+    "skippedUnresolved": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `inventory` | Sí | `InventoryImportSourceDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"hash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","operaciones":1,"procesos":1}` |
+| `inventory.hash` | Sí | `string` | Sin restricción adicional declarada | Huella del inventario (la misma de `GET /admin/portal/version`) | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `inventory.operaciones` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `inventory.procesos` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `operations` | Sí | `InventoryImportOperationsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"added":1,"changed":1,"reappeared":1,"unchanged":1,"notObserved":1}` |
+| `operations.added` | Sí | `number` | Sin restricción adicional declarada | Operaciones nuevas en la base | `1` |
+| `operations.changed` | Sí | `number` | Sin restricción adicional declarada | Operaciones cuya huella técnica cambió | `1` |
+| `operations.reappeared` | Sí | `number` | Sin restricción adicional declarada | Operaciones `NOT_OBSERVED` que volvieron a aparecer | `1` |
+| `operations.unchanged` | Sí | `number` | Sin restricción adicional declarada | Operaciones que no cambiaron: no se tocó su fila | `1` |
+| `operations.notObserved` | Sí | `number` | Sin restricción adicional declarada | Operaciones que dejaron de aparecer y pasaron a `NOT_OBSERVED` (no se borran) | `1` |
+| `impacts` | Sí | `InventoryImportImpactsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"written":1,"skippedNotCataloged":1,"skippedUnresolved":1}` |
+| `impacts.written` | Sí | `number` | Sin restricción adicional declarada | Impactos escritos en esta corrida | `1` |
+| `impacts.skippedNotCataloged` | Sí | `number` | Sin restricción adicional declarada | Tablas que el inventario no tiene catalogadas y la sonda tampoco observó (estado actual, no sólo esta corrida) | `1` |
+| `impacts.skippedUnresolved` | Sí | `number` | Sin restricción adicional declarada | Tablas que el inventario da por catalogadas y la sonda aún no observó: correr un escaneo y volver a importar | `1` |
+| `processes` | Sí | `InventoryImportProcessesDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"added":1,"changed":1,"unchanged":1}` |
+| `processes.added` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `processes.changed` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `processes.unchanged` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `steps` | Sí | `InventoryImportStepsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"written":1}` |
+| `steps.written` | Sí | `number` | Sin restricción adicional declarada | Etapas escritas en esta corrida | `1` |
+| `stepOperations` | Sí | `InventoryImportStepOperationsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"written":1,"skippedUnresolved":1}` |
+| `stepOperations.written` | Sí | `number` | Sin restricción adicional declarada | Enlaces etapa-operación escritos | `1` |
+| `stepOperations.skippedUnresolved` | Sí | `number` | Sin restricción adicional declarada | Enlaces cuya operación no está en el inventario de endpoints | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/internal/catalog/inventory/import"
+}
+```
+
+---
+
+## 38. POST /internal/catalog/scans/run-next
 
 - **Módulo:** `data_catalog`
 - **Etiqueta OpenAPI:** `data-catalog-internal`
@@ -4617,6 +4809,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RunNextResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RunNextResultDto`. Ejemplo completo derivado de ese DTO:
 

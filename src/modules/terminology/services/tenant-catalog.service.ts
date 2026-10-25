@@ -5,9 +5,12 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
+import { TerminologyErrorReason } from '../terminology.error-reasons';
 import {
   CatalogConceptsRepository,
   TenantCatalogRepository,
@@ -54,12 +57,31 @@ export class TenantCatalogService {
     this.logger.setContext(TenantCatalogService.name);
   }
 
-  /** UC-03-12: define (o redefine) la política de catálogo del tenant. */
+  /**
+   * UC-03-12: define (o redefine) la política de catálogo del tenant.
+   *
+   * El tenant de la ruta sólo es válido si es el tenant activo de la petición,
+   * el que `TenantScopeGuard` verificó contra las membresías y los roles del
+   * actor. Cualquier otro (existente o no) responde `404` con el mismo mensaje y
+   * `reason`, antes de leer o bloquear nada: un administrador de un tenant no
+   * puede deshabilitar, renombrar ni fijar valores por omisión en el catálogo
+   * de otro.
+   *
+   * @param tenantId - Tenant de la ruta.
+   * @param dto - Política y configuraciones por concepto.
+   * @param actor - Usuario autenticado.
+   * @throws PreconditionFailedException si la petición no fija un tenant activo.
+   * @throws ResourceNotFoundException si el tenant de la ruta no es el activo.
+   */
   async upsertPolicy(
     tenantId: string,
     dto: UpsertTenantCatalogPolicyDto,
     actor: AuthenticatedUser,
   ): Promise<TenantCatalogPolicyResponseDto> {
+    assertResourceInTenant(tenantId, tenantId, requireTenantId(), {
+      message: 'Tenant no encontrado',
+      reason: TerminologyErrorReason.TENANT_NOT_AVAILABLE,
+    });
     this.logger.info(
       {
         operation: 'terminology.tenant-catalog.upsert',

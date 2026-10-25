@@ -9,7 +9,7 @@
 # Módulo `accounting`
 
 **Fuente:** [`src/modules/accounting/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/accounting/README.md)
-· 10 controllers · 11 services · 10 repositories · 45 entidades · 13 DTO
+· 10 controllers · 12 services · 10 repositories · 45 entidades · 13 DTO
 
 ---
 
@@ -47,7 +47,7 @@ Importa (`accounting.module.ts`): `AuditModule`, `PracticeModule`, `BillingModul
 | `GET /accounting/journal-transactions/:id/document-flow` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-cockpit` |
 | `GET /accounting/assets` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-cockpit` |
 | `GET /accounting/accrual-objects` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-cockpit` |
-| `POST /accounting/exchange-rates` | SECURITY_ADMIN | `accounting-exchange-rate` |
+| `POST /accounting/exchange-rates` | SYSTEM | `accounting-exchange-rate` |
 | `POST /accounting/fiscal-years` | SECURITY_ADMIN | `accounting-fiscal` |
 | `POST /accounting/fiscal-periods/:id/lock` | SECURITY_ADMIN | `accounting-fiscal` |
 | `GET /accounting/accounts` | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `accounting-ledger` |
@@ -80,6 +80,19 @@ Importa (`accounting.module.ts`): `AuditModule`, `PracticeModule`, `BillingModul
 | `GET /accounting/practitioner/liabilities/:id/schedule` | PRACTITIONER | `accounting-practitioner` |
 | `PATCH /accounting/practitioner/liabilities/:id/automation` | PRACTITIONER | `accounting-practitioner` |
 | `POST /accounting/practitioner/liabilities/:id/progress` | PRACTITIONER | `accounting-practitioner` |
+| `GET /accounting/practitioner/simple/summary` | PRACTITIONER | `accounting-practitioner` |
+| `GET /accounting/practitioner/simple/accounts` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/simple/accounts` | PRACTITIONER | `accounting-practitioner` |
+| `PUT /accounting/practitioner/simple/accounts/:id` | PRACTITIONER | `accounting-practitioner` |
+| `DELETE /accounting/practitioner/simple/accounts/:id` | PRACTITIONER | `accounting-practitioner` |
+| `GET /accounting/practitioner/simple/records` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/simple/records` | PRACTITIONER | `accounting-practitioner` |
+| `PUT /accounting/practitioner/simple/records/:id` | PRACTITIONER | `accounting-practitioner` |
+| `DELETE /accounting/practitioner/simple/records/:id` | PRACTITIONER | `accounting-practitioner` |
+| `GET /accounting/practitioner/simple/transactions` | PRACTITIONER | `accounting-practitioner` |
+| `POST /accounting/practitioner/simple/transactions` | PRACTITIONER | `accounting-practitioner` |
+| `PUT /accounting/practitioner/simple/transactions/:id` | PRACTITIONER | `accounting-practitioner` |
+| `DELETE /accounting/practitioner/simple/transactions/:id` | PRACTITIONER | `accounting-practitioner` |
 | `POST /accounting/open-items` | SECURITY_ADMIN | `accounting-subledger` |
 | `POST /accounting/clearing-documents` | SECURITY_ADMIN | `accounting-subledger` |
 
@@ -94,7 +107,7 @@ conversión de entrada sigue pasando por `Number`, con sus límites de precisió
 
 ## Endpoints por caso de uso (UC-16-01..14, subconjunto)
 
-Sólo los 14 casos de uso originales más el alta de cuenta. El módulo expone además el cockpit (6 lecturas, sección siguiente) y el auto-servicio contable del profesional (`/accounting/practitioner/*`, 12 rutas, rol `PRACTITIONER`, controller `accounting-practitioner`); la lista completa está en [Rutas HTTP](#rutas-http-y-alcance-medido).
+Sólo los 14 casos de uso originales más el alta de cuenta. El módulo expone además el cockpit (6 lecturas, sección siguiente) y el auto-servicio contable del profesional (`/accounting/practitioner/*`, 12 rutas, rol `PRACTITIONER`, controller `accounting-practitioner`) y su contabilidad simple (P49, `/accounting/practitioner/simple/*`, 13 rutas, mismo rol); la lista completa está en [Rutas HTTP](#rutas-http-y-alcance-medido).
 
 | UC | Método y ruta | Descripción |
 |----|---------------|-------------|
@@ -191,8 +204,20 @@ transversal se usa `CONCEPTS.STATE_ACTIVE` / `CONCEPTS.FILE_CATEGORY_DOCUMENT`.
 Guard global de auth, sin `@Public()`. Los comandos administrativos exigen
 `SECURITY_ADMIN`; el flujo de borrador, clasificación y adjuntos admite además
 `PRACTITIONER`, y la aprobación admite `ACCOUNTING_APPROVER`. El servicio
-comprueba la vinculación activa del profesional para esas rutas. Los comandos
-administrativos no aplican una política de alcance por práctica y recurso.
+comprueba la vinculación activa del profesional para esas rutas.
+
+**Alcance de tenant de las escrituras (ACC-01).** `AccountingScopeService` resuelve
+el tenant del contexto verificado —nunca el del cuerpo— y acota cada recurso que
+una escritura referencia **antes** de mutar: la práctica; el periodo (a través de
+su ejercicio); las cuentas, que deben ser del plan de la práctica del asiento; los
+centros de costo (de la práctica) y de beneficio (del tenant); los asientos y
+líneas del mayor; subledgers, partidas abiertas y cuentas bancarias de la empresa;
+objetos de devengo; áreas de depreciación; y los activos, pasivos y facturas del
+auto-servicio. `PostingHelper` repite la comprobación para todo asiento generado
+(devengo, activos, pasivos, clearing). Un recurso ajeno responde `404` idéntico al
+inexistente (mismo mensaje y `reason`, sin `details`). Sin tenant en el contexto
+las escrituras responden `412`. `exchange_rates` no tiene tenant ni práctica: es
+una tabla de plataforma y sólo la escribe `SYSTEM` o `SUPERADMIN`.
 
 ## Logs
 
@@ -215,7 +240,9 @@ secretos ni PHI.
 
 ## Límites conocidos
 
-Los writes no validan práctica/tenant ni los recursos relacionados; la clave de
-número de asiento, la aritmética decimal exacta y los topes de lotes tampoco
-están resueltos. Las pruebas unitarias no sustituyen integración con PostgreSQL,
+Las lecturas del libro mayor y del cockpit siguen respondiendo `403` ante una
+práctica de otra organización y no acotan sin tenant en el contexto. El índice
+único de `journal_transactions.transaction_number` es global en el modelo (no por
+práctica), `exchange_rates` no lleva `tenant_id`, y la aritmética decimal exacta
+y los topes de lotes no están resueltos. Las pruebas unitarias no sustituyen integración con PostgreSQL,
 dos tenants ni pruebas de concurrencia.

@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -219,6 +220,11 @@ export class IamUsersController {
    * activación de un solo uso para entregar al titular por canal seguro — NUNCA
    * una contraseña.
    */
+  @Audited({
+    action: 'USER_ASSISTED_REGISTERED',
+    entity: 'user',
+    entityId: 'result.id',
+  })
   @Post('assisted-registration')
   @Roles('CLINICIAN', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -245,6 +251,11 @@ export class IamUsersController {
    * Devuelve el token de activación de un solo uso para entregar al titular por
    * canal seguro — **NUNCA** una contraseña.
    */
+  @Audited({
+    action: 'PRACTITIONER_ASSISTED_REGISTERED',
+    entity: 'user',
+    entityId: 'result.id',
+  })
   @Post('assisted-practitioner-registration')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -263,6 +274,11 @@ export class IamUsersController {
   }
 
   /** UC-01-01. */
+  @Audited({
+    action: 'USER_CREATED',
+    entity: 'user',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -277,6 +293,11 @@ export class IamUsersController {
   }
 
   /** UC-01-02. */
+  @Audited({
+    action: 'FEDERATED_CREDENTIAL_LINKED',
+    entity: 'authentication_credential',
+    entityId: 'result.id',
+  })
   @Post(':id/credentials/federated')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -290,6 +311,11 @@ export class IamUsersController {
   }
 
   /** UC-01-09. */
+  @Audited({
+    action: 'CREDENTIAL_REVOKED',
+    entity: 'authentication_credential',
+    entityId: 'param:cid',
+  })
   @Post(':id/credentials/:cid/revoke')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -303,6 +329,11 @@ export class IamUsersController {
   }
 
   /** UC-01-03. */
+  @Audited({
+    action: 'MFA_FACTOR_ENROLLED',
+    entity: 'mfa_factor',
+    entityId: 'result.id',
+  })
   @Post(':id/mfa-factors')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Enrolar o verificar un factor MFA' })
@@ -315,6 +346,11 @@ export class IamUsersController {
   }
 
   /** UC-01-05. */
+  @Audited({
+    action: 'DEVICE_REGISTERED',
+    entity: 'device',
+    entityId: 'result.id',
+  })
   @Post(':id/devices')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un dispositivo del usuario' })
@@ -327,6 +363,11 @@ export class IamUsersController {
   }
 
   /** UC-01-07. */
+  @Audited({
+    action: 'USER_LOCKED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
   @Post(':id/lock')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -340,6 +381,11 @@ export class IamUsersController {
   }
 
   /** UC-01-10. */
+  @Audited({
+    action: 'USER_GLOBAL_ROLE_CHANGED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
   @Post(':id/global-roles')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -353,6 +399,11 @@ export class IamUsersController {
   }
 
   /** UC-01-12. */
+  @Audited({
+    action: 'USER_ANONYMIZED',
+    entity: 'user',
+    entityId: 'param:id',
+  })
   @Post(':id/anonymize')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

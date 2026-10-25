@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import { ChangeSetType, type FlushEventArgs } from '@mikro-orm/core';
+import { Logger } from '@nestjs/common';
 import { runWithAuditRequestContext } from '../../common/audit-trail';
 import { HistoryMirrorSubscriber } from './history-mirror.subscriber';
 
@@ -83,6 +84,49 @@ describe('HistoryMirrorSubscriber', () => {
     const { args, inserts } = flushArgs(ALLERGIES);
     await new HistoryMirrorSubscriber().afterFlush(args);
     expect(inserts[0][3]).toBeNull();
+  });
+
+  it('ORMN-02: un fallo de persistencia se loguea sin el mensaje ni el DETAIL del driver', async () => {
+    const logged: string[] = [];
+    const stderr = jest.spyOn(process.stderr, 'write');
+    const stdout = jest.spyOn(process.stdout, 'write');
+    const spy = jest.spyOn(Logger.prototype, 'error').mockImplementation(((
+      message: string,
+    ) => {
+      logged.push(message);
+    }) as never);
+    const { args } = flushArgs(ALLERGIES);
+    const em = (
+      args as unknown as {
+        em: { execute: jest.Mock<(sql: string) => Promise<unknown[]>> };
+      }
+    ).em;
+    em.execute.mockImplementation(async (sql: string) => {
+      if (sql.startsWith('UPDATE'))
+        throw Object.assign(
+          new Error(
+            'insert ... DETAIL: Key (doc)=(MARCADOR-SENSIBLE-9931) already exists',
+          ),
+          { code: '23505' },
+        );
+      return [];
+    });
+
+    await expect(
+      new HistoryMirrorSubscriber().afterFlush(args),
+    ).rejects.toThrow();
+
+    expect(logged).toHaveLength(1);
+    expect(logged[0]).toContain('clinical.allergy_intolerances');
+    expect(logged[0]).toContain('23505');
+    expect(logged[0]).not.toContain('MARCADOR-SENSIBLE-9931');
+    // Nada por consola cruda.
+    expect(
+      [...stderr.mock.calls, ...stdout.mock.calls].flat().join(''),
+    ).not.toContain('MARCADOR-SENSIBLE-9931');
+    spy.mockRestore();
+    stderr.mockRestore();
+    stdout.mockRestore();
   });
 
   it('no duplica la historia que ConditionsService ya versiona', async () => {

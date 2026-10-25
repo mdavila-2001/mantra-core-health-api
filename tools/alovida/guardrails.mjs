@@ -16,6 +16,7 @@
 // =============================================================================
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, sep } from 'node:path';
+import { sinRolesAutorizado } from './exenciones.mjs';
 
 // Rutas siempre con `/`: todas las reglas y allowlists las comparan con
 // patrones como `modules/x/` o `src/...#metodo`. Con los separadores de
@@ -182,7 +183,8 @@ for (const file of controllers) {
       ['Post', 'Put', 'Patch', 'Delete'].includes(verb) &&
       !hasRolesHere &&
       !hasPublic &&
-      !(GLOBAL_JWT_GUARD && AUTHN_NON_ROLE_ALLOWLIST.test(file))
+      !(GLOBAL_JWT_GUARD && AUTHN_NON_ROLE_ALLOWLIST.test(file)) &&
+      !(GLOBAL_JWT_GUARD && sinRolesAutorizado(rel(file), verb, path))
     ) {
       add(
         'UNSCOPED_MUTATION',

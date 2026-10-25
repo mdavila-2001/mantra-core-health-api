@@ -63,6 +63,7 @@ export class OrderSetsController {
     entityId: 'param:id',
   })
   @Post(':id/apply')
+  @Roles('CLINICIAN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Aplicar un order set (fan-out de órdenes)' })
   apply(

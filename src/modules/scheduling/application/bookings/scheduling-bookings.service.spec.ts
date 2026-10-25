@@ -22,6 +22,8 @@ import { SCHED } from '../../domain/scheduling.concepts';
 import { CLIN } from '../../../clinical/clinical.concepts';
 
 const actor = { id: 'user-1', roles: ['SCHEDULING_AGENT'] };
+/** Tenant activo de las pruebas de lectura: el de los recursos que se listan. */
+const SEARCH_TENANT = '55555555-5555-5555-5555-555555555555';
 const SLOT_ID = '11111111-1111-1111-1111-111111111111';
 const PATIENT = '22222222-2222-2222-2222-222222222222';
 
@@ -204,7 +206,17 @@ function build() {
     formOrigin,
     serviceAgenda,
   });
+  // El listado exige el tenant activo (SCHED-01): estas pruebas actúan dentro
+  // de SEARCH_TENANT. `searchWithoutTenant` y `searchIn` prueban otros contextos.
+  const searchBookings = service.searchBookings.bind(service);
+  service.searchBookings = ((...args: Parameters<typeof searchBookings>) =>
+    runWithTenant(SEARCH_TENANT, () =>
+      searchBookings(...args),
+    )) as typeof service.searchBookings;
   return {
+    searchIn: (tenantId: string, ...args: Parameters<typeof searchBookings>) =>
+      runWithTenant(tenantId, () => searchBookings(...args)),
+    searchWithoutTenant: searchBookings,
     serviceAgenda,
     formOrigin,
     claimReadRepo,
@@ -2093,6 +2105,7 @@ describe('SchedulingBookingsService', () => {
         d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([]);
         d.catalogRepo.findResourceById.mockResolvedValue({
           id: 'res-1',
+          tenantId: SEARCH_TENANT,
           resourceRefId: 'hp-1',
           resourceRefType: 'health_practitioner_profiles',
         });
@@ -2117,6 +2130,7 @@ describe('SchedulingBookingsService', () => {
         d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
         d.catalogRepo.findResourceById.mockResolvedValue({
           id: 'res-1',
+          tenantId: SEARCH_TENANT,
           resourceRefId: 'hp-1',
           resourceRefType: 'health_practitioner_profiles',
         });
@@ -2177,6 +2191,7 @@ describe('SchedulingBookingsService', () => {
         // más: el recurso apunta a su propio perfil profesional.
         d.catalogRepo.findResourceById.mockResolvedValue({
           id: 'res-1',
+          tenantId: SEARCH_TENANT,
           resourceRefId: 'hp-1',
           resourceRefType: 'health_practitioner_profiles',
         });
@@ -2941,6 +2956,7 @@ describe('SchedulingBookingsService', () => {
       d.bookingsRepo.findBookings.mockResolvedValue(page());
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-medico',
       });
       d.bookingsRepo.findPatientNames.mockResolvedValue(
@@ -2974,6 +2990,7 @@ describe('SchedulingBookingsService', () => {
       function servicePage(d: ReturnType<typeof build>) {
         d.catalogRepo.findResourceById.mockResolvedValue({
           id: 'res-1',
+          tenantId: SEARCH_TENANT,
           resourceRefId: 'perfil-medico',
         });
         d.bookingsRepo.findBookings.mockResolvedValue({
@@ -3030,19 +3047,23 @@ describe('SchedulingBookingsService', () => {
       it('otro profesional NO lo ve: el nombre de un servicio puede revelar un dato de salud', async () => {
         const d = servicePage(build());
 
-        const res = await d.service.searchBookings(
-          { resourceId: 'res-1', includeCancelled: false },
-          50,
-          practitioner('otro-medico') as any,
-        );
-
-        expect(res.items[0]).not.toHaveProperty('service');
+        await expect(
+          d.service.searchBookings(
+            { resourceId: 'res-1', includeCancelled: false },
+            50,
+            practitioner('otro-medico') as any,
+          ),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        // Una agenda ajena no se lee: ni las citas ni lo que las acompaña.
+        expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+        expect(d.bookingsRepo.findPatientNames).not.toHaveBeenCalled();
       });
 
       it('una consulta no trae `service`', async () => {
         const d = build();
         d.catalogRepo.findResourceById.mockResolvedValue({
           id: 'res-1',
+          tenantId: SEARCH_TENANT,
           resourceRefId: 'perfil-medico',
         });
         d.bookingsRepo.findBookings.mockResolvedValue(page());
@@ -3061,6 +3082,7 @@ describe('SchedulingBookingsService', () => {
       function withResource(d: ReturnType<typeof build>) {
         d.catalogRepo.findResourceById.mockResolvedValue({
           id: 'res-1',
+          tenantId: SEARCH_TENANT,
           resourceRefId: 'perfil-medico',
         });
         return d;
@@ -3140,14 +3162,16 @@ describe('SchedulingBookingsService', () => {
         const d = withResource(build());
         d.bookingsRepo.findBookings.mockResolvedValue(page());
 
-        const res = await d.service.searchBookings(
-          { resourceId: 'res-1', includeCancelled: false },
-          50,
-          practitioner('otro-medico') as any,
-        );
-
-        expect('followUpOf' in res.items[0]).toBe(false);
-        expect('followUpBookingId' in res.items[0]).toBe(false);
+        await expect(
+          d.service.searchBookings(
+            { resourceId: 'res-1', includeCancelled: false },
+            50,
+            practitioner('otro-medico') as any,
+          ),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        // Una agenda ajena no se lee: ni las citas ni lo que las acompaña.
+        expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+        expect(d.bookingsRepo.findFollowUpsOf).not.toHaveBeenCalled();
       });
     });
 
@@ -3156,6 +3180,7 @@ describe('SchedulingBookingsService', () => {
       d.bookingsRepo.findBookings.mockResolvedValue(page());
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-medico',
       });
       d.coverageRepo.findActiveCarriersByPatients.mockResolvedValue(
@@ -3178,6 +3203,7 @@ describe('SchedulingBookingsService', () => {
       d.bookingsRepo.findBookings.mockResolvedValue(page());
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-medico',
       });
       d.coverageRepo.findActiveCarriersByPatients.mockResolvedValue(new Map());
@@ -3196,20 +3222,25 @@ describe('SchedulingBookingsService', () => {
       d.bookingsRepo.findBookings.mockResolvedValue(page());
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-DE-OTRO',
       });
       d.coverageRepo.findActiveCarriersByPatients.mockResolvedValue(
         new Map([[PATIENT, 'Seguros Illimani']]),
       );
 
-      const res = await d.service.searchBookings(
-        { resourceId: 'res-1', includeCancelled: false },
-        50,
-        practitioner('perfil-propio') as any,
-      );
-
-      expect(res.items[0].insuranceCarrierName).toBeUndefined();
-      expect(JSON.stringify(res)).not.toContain('Illimani');
+      await expect(
+        d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          practitioner('perfil-propio') as any,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      // Una agenda ajena no se lee: ni las citas ni lo que las acompaña.
+      expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+      expect(
+        d.coverageRepo.findActiveCarriersByPatients,
+      ).not.toHaveBeenCalled();
     });
 
     /* ------------------------------------------------------------------
@@ -3250,6 +3281,7 @@ describe('SchedulingBookingsService', () => {
       );
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-medico',
       });
       d.encountersRepo.findIdsByAppointmentIds.mockResolvedValue(
@@ -3289,6 +3321,7 @@ describe('SchedulingBookingsService', () => {
       );
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-medico',
       });
       d.encountersRepo.findIdsByAppointmentIds.mockResolvedValue(
@@ -3317,6 +3350,7 @@ describe('SchedulingBookingsService', () => {
       );
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-medico',
       });
       d.encountersRepo.findIdsByAppointmentIds.mockResolvedValue(
@@ -3363,6 +3397,7 @@ describe('SchedulingBookingsService', () => {
       );
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-DE-OTRO',
       });
       d.encountersRepo.findIdsByAppointmentIds.mockResolvedValue(
@@ -3372,18 +3407,27 @@ describe('SchedulingBookingsService', () => {
         summary({}),
       ]);
 
-      const res = await d.service.searchBookings(
-        { resourceId: 'res-1', includeCancelled: false },
-        50,
-        practitioner('perfil-propio') as any,
-      );
-
-      expect(res.items[0]).not.toHaveProperty('insuranceClaim');
-      expect(JSON.stringify(res)).not.toContain('SOL-0001');
+      await expect(
+        d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          practitioner('perfil-propio') as any,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      // Una agenda ajena no se lee: ni las citas ni lo que las acompaña.
+      expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+      expect(
+        d.claimReadRepo.findSummariesByEncounterIds,
+      ).not.toHaveBeenCalled();
     });
 
     it('sin actor que pueda ver al paciente, ni siquiera se consulta', async () => {
       const d = build();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        tenantId: SEARCH_TENANT,
+        resourceRefId: 'perfil-medico',
+      });
       d.bookingsRepo.findBookings.mockResolvedValue(
         pageWithBookings([{ id: 'b1', appointmentId: 'appt-1' }]),
       );
@@ -3411,6 +3455,7 @@ describe('SchedulingBookingsService', () => {
       );
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-medico',
       });
       d.encountersRepo.findIdsByAppointmentIds.mockResolvedValue(
@@ -3456,6 +3501,7 @@ describe('SchedulingBookingsService', () => {
       d.bookingsRepo.findBookings.mockResolvedValue(page(['b1', 'b2']));
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-medico',
       });
       d.bookingsRepo.findPaymentStatesForBookings.mockResolvedValue(
@@ -3496,20 +3542,23 @@ describe('SchedulingBookingsService', () => {
       d.bookingsRepo.findBookings.mockResolvedValue(page());
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-DE-OTRO',
       });
       d.bookingsRepo.findPatientNames.mockResolvedValue(
         new Map([[PATIENT, 'Marisol Quispe']]),
       );
 
-      const res = await d.service.searchBookings(
-        { resourceId: 'res-1', includeCancelled: false },
-        50,
-        practitioner('perfil-propio') as any,
-      );
-
-      expect(res.items[0].patientName).toBeUndefined();
-      expect(JSON.stringify(res)).not.toContain('Marisol');
+      await expect(
+        d.service.searchBookings(
+          { resourceId: 'res-1', includeCancelled: false },
+          50,
+          practitioner('perfil-propio') as any,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      // Una agenda ajena no se lee: ni las citas ni lo que las acompaña.
+      expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+      expect(d.bookingsRepo.findPatientNames).not.toHaveBeenCalled();
     });
 
     it('MAC-6 · los nombres se piden UNA vez para toda la página', async () => {
@@ -3519,6 +3568,7 @@ describe('SchedulingBookingsService', () => {
       d.bookingsRepo.findBookings.mockResolvedValue(page(['b1', 'b2']));
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'perfil-medico',
       });
 
@@ -3537,6 +3587,11 @@ describe('SchedulingBookingsService', () => {
 
     it('la tipología de la cita llega en el listado', async () => {
       const d = build();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        tenantId: SEARCH_TENANT,
+        resourceRefId: 'perfil-medico',
+      });
       d.bookingsRepo.findBookings.mockResolvedValue({
         rows: [
           {
@@ -3565,6 +3620,11 @@ describe('SchedulingBookingsService', () => {
 
     it('se pide UNA vez para toda la página, no una por cita', async () => {
       const d = build();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        tenantId: SEARCH_TENANT,
+        resourceRefId: 'perfil-medico',
+      });
       d.bookingsRepo.findBookings.mockResolvedValue({
         rows: ['b1', 'b2', 'b3'].map((id, i) => ({
           booking: {
@@ -3592,6 +3652,11 @@ describe('SchedulingBookingsService', () => {
       // Una reserva que nunca se confirmó no crea `clinical.appointments`: su
       // id no entra en la consulta y el campo se omite.
       const d = build();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        tenantId: SEARCH_TENANT,
+        resourceRefId: 'perfil-medico',
+      });
       d.bookingsRepo.findBookings.mockResolvedValue({
         rows: [
           {
@@ -3619,6 +3684,11 @@ describe('SchedulingBookingsService', () => {
 
     it('una cita clínica sin tipo declarado omite el campo, no lo vacía', async () => {
       const d = build();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        tenantId: SEARCH_TENANT,
+        resourceRefId: 'perfil-medico',
+      });
       d.bookingsRepo.findBookings.mockResolvedValue({
         rows: [
           {
@@ -3650,6 +3720,11 @@ describe('SchedulingBookingsService', () => {
 
     it('el encuentro de la cita llega en el listado', async () => {
       const d = build();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        tenantId: SEARCH_TENANT,
+        resourceRefId: 'perfil-medico',
+      });
       d.bookingsRepo.findBookings.mockResolvedValue({
         rows: [
           {
@@ -3681,6 +3756,11 @@ describe('SchedulingBookingsService', () => {
 
     it('una reserva sin cita clínica trae encounterId null y no pide el lote', async () => {
       const d = build();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        tenantId: SEARCH_TENANT,
+        resourceRefId: 'perfil-medico',
+      });
       d.bookingsRepo.findBookings.mockResolvedValue({
         rows: [
           {
@@ -4395,6 +4475,11 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
 
     it('sin filtro por paciente no hay nada que comprobar', async () => {
       const d = build();
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        tenantId: SEARCH_TENANT,
+        resourceRefId: 'perfil-medico',
+      });
       d.bookingsRepo.findBookings.mockResolvedValue({
         rows: [],
         fetchCapReached: false,
@@ -4407,6 +4492,204 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
       );
 
       expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listar por agenda: alcance de tenant y de actor (SCHED-01)', () => {
+    const OTHER_TENANT = '66666666-6666-6666-6666-666666666666';
+    const dueño = {
+      id: 'user-dueño',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: 'perfil-medico',
+    } as any;
+    const mostrador = {
+      id: 'user-mostrador',
+      roles: ['SCHEDULING_AGENT'],
+    } as any;
+    const FILTERS = { resourceId: 'res-1', includeCancelled: false };
+
+    /** La agenda `res-1` del tenant indicado, de la que es dueño `perfil-medico`. */
+    function agenda(d: ReturnType<typeof build>, tenantId = SEARCH_TENANT) {
+      d.catalogRepo.findResourceById.mockResolvedValue({
+        id: 'res-1',
+        tenantId,
+        resourceRefId: 'perfil-medico',
+      });
+      d.bookingsRepo.findBookings.mockResolvedValue({
+        rows: [],
+        fetchCapReached: false,
+      });
+      return d;
+    }
+
+    /** Falla esperada: devuelve la excepción o lanza si no hubo. */
+    async function failure(promise: Promise<unknown>) {
+      try {
+        await promise;
+      } catch (error) {
+        return error as ResourceNotFoundException;
+      }
+      throw new Error('debía rechazar');
+    }
+
+    it('Correcto: el profesional dueño de la agenda lista sus citas, acotadas al tenant', async () => {
+      const d = agenda(build());
+
+      const res = await d.service.searchBookings(FILTERS, 50, dueño);
+
+      expect(res.count).toBe(0);
+      expect(d.bookingsRepo.findBookings).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          tenantId: SEARCH_TENANT,
+          resourceId: 'res-1',
+        }),
+        51,
+      );
+    });
+
+    it('Correcto: el mostrador lista la agenda de su organización', async () => {
+      const d = agenda(build());
+
+      await d.service.searchBookings(FILTERS, 50, mostrador);
+
+      expect(d.bookingsRepo.findBookings).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ tenantId: SEARCH_TENANT }),
+        51,
+      );
+    });
+
+    it('Límite: el paciente con representación vigente lista al dependiente, siempre con tenant', async () => {
+      const d = agenda(build());
+      d.representation.assertMayActForPatient.mockResolvedValue(undefined);
+
+      await d.service.searchBookings(
+        { patientProfileId: 'pat-hijo', includeCancelled: false },
+        50,
+        {
+          id: 'u-madre',
+          roles: ['PATIENT'],
+          patientProfileId: 'pat-madre',
+        } as any,
+      );
+
+      expect(d.representation.assertMayActForPatient).toHaveBeenCalledWith(
+        'pat-hijo',
+        expect.objectContaining({ id: 'u-madre' }),
+        undefined,
+      );
+      expect(d.bookingsRepo.findBookings).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          tenantId: SEARCH_TENANT,
+          patientProfileId: 'pat-hijo',
+        }),
+        51,
+      );
+    });
+
+    it('un paciente que lista una agenda de su tenant sólo recibe lo suyo y lo de quienes representa', async () => {
+      const d = agenda(build());
+      d.representation.findActiveProxiedPatientIds.mockResolvedValue(
+        new Set(['pat-hijo']),
+      );
+
+      await d.service.searchBookings(FILTERS, 50, {
+        id: 'u-madre',
+        roles: ['PATIENT'],
+        patientProfileId: 'pat-madre',
+      } as any);
+
+      const [, filters] = d.bookingsRepo.findBookings.mock.calls[0];
+      expect(filters.patientProfileIds).toEqual(['pat-madre', 'pat-hijo']);
+      expect(filters.patientProfileId).toBeUndefined();
+    });
+
+    it('una cuenta sin perfil de paciente ni representados no lista la agenda: 403 y sin consultar citas', async () => {
+      const d = agenda(build());
+
+      await expect(
+        d.service.searchBookings(FILTERS, 50, {
+          id: 'u-sin-perfil',
+          roles: ['PATIENT'],
+        } as any),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+    });
+
+    it('Error: el paciente de T1 con el resourceId de una agenda de T2 recibe 404, sin filas ni consultas de nombre o cobertura', async () => {
+      const d = agenda(build(), OTHER_TENANT);
+
+      const error = await failure(
+        d.service.searchBookings(FILTERS, 50, {
+          id: 'u-pac',
+          roles: ['PATIENT'],
+          patientProfileId: PATIENT,
+        } as any),
+      );
+
+      expect(error).toBeInstanceOf(ResourceNotFoundException);
+      expect(error.getStatus()).toBe(404);
+      expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+      expect(d.bookingsRepo.findPatientNames).not.toHaveBeenCalled();
+      expect(
+        d.coverageRepo.findActiveCarriersByPatients,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('Falla catalogada: la agenda de T2 responde 404/SCHEDULING_RESOURCE_NOT_AVAILABLE, igual que una inexistente y sin details', async () => {
+      const ajena = agenda(build(), OTHER_TENANT);
+      const inexistente = build();
+      inexistente.catalogRepo.findResourceById.mockResolvedValue(null);
+
+      for (const actorUnderTest of [mostrador, dueño]) {
+        const a = await failure(
+          ajena.service.searchBookings(FILTERS, 50, actorUnderTest),
+        );
+        const b = await failure(
+          inexistente.service.searchBookings(FILTERS, 50, actorUnderTest),
+        );
+
+        expect(a.reason).toBe('SCHEDULING_RESOURCE_NOT_AVAILABLE');
+        expect(a.details).toBeUndefined();
+        expect(a.getResponse()).toEqual(b.getResponse());
+      }
+      expect(ajena.bookingsRepo.findBookings).not.toHaveBeenCalled();
+    });
+
+    it('un profesional que no es dueño de la agenda de su tenant recibe 403 y nada se consulta', async () => {
+      const d = agenda(build());
+
+      await expect(
+        d.service.searchBookings(FILTERS, 50, {
+          id: 'u-colega',
+          roles: ['PRACTITIONER'],
+          practitionerProfileId: 'perfil-colega',
+        } as any),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+    });
+
+    it('el tenant sale del contexto: el mostrador de otro tenant no ve la agenda', async () => {
+      const d = agenda(build());
+
+      const error = await failure(
+        d.searchIn(OTHER_TENANT, FILTERS, 50, mostrador),
+      );
+
+      expect(error.reason).toBe('SCHEDULING_RESOURCE_NOT_AVAILABLE');
+      expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant activo la lectura falla cerrada (412) antes de consultar', async () => {
+      const d = agenda(build());
+
+      await expect(
+        d.searchWithoutTenant(FILTERS, 50, mostrador),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.catalogRepo.findResourceById).not.toHaveBeenCalled();
+      expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
     });
   });
 
@@ -4509,6 +4792,7 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
       d.bookingsRepo.findBookingById.mockResolvedValue(foreignBooking());
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'hp-otro',
         resourceRefType: 'practitioner_profiles',
       });
@@ -4524,6 +4808,7 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
       d.bookingsRepo.findSlotById.mockResolvedValue(openSlot());
       d.catalogRepo.findResourceById.mockResolvedValue({
         id: 'res-1',
+        tenantId: SEARCH_TENANT,
         resourceRefId: 'hp-1',
         resourceRefType: 'practitioner_profiles',
       });

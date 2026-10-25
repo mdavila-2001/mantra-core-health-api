@@ -1,7 +1,0 @@
-uberon filas 2268 códigos 2246 en corpus 2113 de 13412 fuera ej: UBERON:0000018 UBERON:0000022 UBERON:0000023
-cl filas 230 códigos 229 en corpus 217 de 3070 fuera ej: CL:0000548 CL:0000599 CL:0000600
-fma filas 2774 códigos 2770 en corpus 2747 de 100077 fuera ej: FMA:0326751 FMA:23269 FMA:23272
-hgnc filas 42426 códigos 42388 en corpus 41605 de 45277 fuera ej: HGNC:1000 HGNC:10015 HGNC:10030
-ncbitaxon filas 1007 códigos 1006 en corpus 1006 de 1331 fuera ej: 
-gene-ontology filas 837 códigos 837 en corpus 812 de 37948 fuera ej: GO:0000003 GO:0004295 GO:0005615
-sequence-ontology filas 73 códigos 71 en corpus 70 de 2409 fuera ej: SO:0000292

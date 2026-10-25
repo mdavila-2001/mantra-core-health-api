@@ -171,8 +171,9 @@ export class CrmServiceRepository {
   findActivityById(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<CrmActivities | null> {
-    return em.findOne(CrmActivities, { id });
+    return em.findOne(CrmActivities, { id, tenantId });
   }
 
   /** Subtipo tarea: extiende la actividad con vencimiento y prioridad. */
@@ -429,12 +430,29 @@ export class CrmServiceRepository {
   findCaseByIdForUpdate(
     em: EntityManager,
     id: string,
+    tenantId: string,
   ): Promise<CrmCases | null> {
     return em.findOne(
       CrmCases,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * Caso del tenant, sin bloqueo (resolución de referencias).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del caso.
+   * @param tenantId - Tenant activo.
+   * @returns El caso, o `null` si no existe o es de otro tenant.
+   */
+  findCaseById(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<CrmCases | null> {
+    return em.findOne(CrmCases, { id, tenantId });
   }
 
   /** El número de caso es único por tenant; esta lectura anticipa el conflicto. */
@@ -532,11 +550,12 @@ export class CrmServiceRepository {
   findActivitiesByAccount(
     em: EntityManager,
     crmAccountId: string,
+    tenantId: string,
     limit: number,
   ): Promise<CrmActivities[]> {
     return em.find(
       CrmActivities,
-      { crmAccountId },
+      { crmAccountId, tenantId },
       { orderBy: { createdAt: 'DESC' }, limit },
     );
   }
@@ -552,11 +571,12 @@ export class CrmServiceRepository {
   findCasesByAccount(
     em: EntityManager,
     crmAccountId: string,
+    tenantId: string,
     limit: number,
   ): Promise<CrmCases[]> {
     return em.find(
       CrmCases,
-      { crmAccountId },
+      { crmAccountId, tenantId },
       { orderBy: { openedAt: 'DESC' }, limit },
     );
   }

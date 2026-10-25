@@ -66,4 +66,14 @@ export enum PromotionsErrorReason {
 
   // --- Contexto de petición ---
   TENANT_ID_REQUIRED_FOR_LISTING = 'TENANT_ID_REQUIRED_FOR_LISTING',
+
+  // --- Alcance de tenant ---
+  /**
+   * El programa, la promoción, la membresía, el cupón, la redención o el
+   * referido pedido no existe o es de otro tenant. Los dos casos responden
+   * igual: distinguirlos confirmaría que el uuid existe en otra organización.
+   */
+  PROMOTIONS_RESOURCE_OUT_OF_SCOPE = 'PROMOTIONS_RESOURCE_OUT_OF_SCOPE',
+  /** La clave de idempotencia ya respalda otro movimiento del ledger. */
+  IDEMPOTENCY_KEY_IN_USE = 'IDEMPOTENCY_KEY_IN_USE',
 }

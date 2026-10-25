@@ -1,16 +1,24 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { MikroORM } from '@mikro-orm/postgresql';
+import { SchemaIntegrityState } from './orm/bootstrap/schema-integrity.state';
+import {
+  describeViolations,
+  inspectRuntimeRole,
+  shouldVerifyRuntimeRole,
+} from './orm/config/runtime-role.guard';
 import { DocumentStoreService } from './modules/document_store/services';
 import { RedisRuntimeService } from './modules/redis_runtime/services';
 import { SearchIndexService } from './modules/search_platform/services';
-import { ErrorCode } from './common';
+import { SystemErrorReason } from './common/errors/system-error-reasons';
+import { serviceUnavailableWithReason } from './common/errors/reasoned-http-exceptions';
 
 const READINESS_TIMEOUT_MS = 3_000;
 
 interface DependencyStatus {
   status: 'up' | 'down';
   latencyMs: number;
-  reason?: string;
+  /** Clase del error de la sonda; sólo para el log, nunca para la respuesta. */
+  errorType?: string;
 }
 
 export interface ReadinessResult {
@@ -22,17 +30,23 @@ export interface ReadinessResult {
 /** Sonda agregada de las cuatro dependencias síncronas obligatorias de la API. */
 @Injectable()
 export class AppReadinessService {
+  private readonly logger = new Logger(AppReadinessService.name);
+
   constructor(
     private readonly orm: MikroORM,
     private readonly documents: DocumentStoreService,
     private readonly redis: RedisRuntimeService,
     private readonly search: SearchIndexService,
+    // ORMN-01: opcional para no romper a quien construye la sonda a mano.
+    @Optional() private readonly schemaIntegrity?: SchemaIntegrityState,
   ) {}
 
   async check(): Promise<ReadinessResult> {
     const entries = await Promise.all([
       this.probe('postgresql', async () => {
         await this.orm.em.getConnection().execute('select 1');
+        // ORMN-01: una base con FKs/únicos sin crear no está lista aunque responda.
+        await this.checkSchemaIntegrity();
       }),
       this.probe('mongodb', () => this.documents.ping()),
       this.probe('redis', () => this.redis.ping()),
@@ -48,11 +62,20 @@ export class AppReadinessService {
           { status: check.status, latencyMs: check.latencyMs },
         ]),
       );
-      throw new ServiceUnavailableException({
-        code: ErrorCode.DEPENDENCY_UNAVAILABLE,
-        message: 'Una o más dependencias obligatorias no están disponibles',
-        details: { status: 'error', checks: publicChecks, timestamp },
-      });
+      // El diagnóstico (qué dependencia y de qué clase fue el error) queda en
+      // el log; el mensaje del error, que puede traer host, usuario o SQL, no
+      // sale de acá ni viaja en la respuesta pública.
+      this.logger.warn(
+        `Readiness degradada: ${entries
+          .filter(([, check]) => check.status === 'down')
+          .map(([name, check]) => `${name}(${check.errorType ?? 'Error'})`)
+          .join(', ')}`,
+      );
+      throw serviceUnavailableWithReason(
+        'Una o más dependencias obligatorias no están disponibles',
+        SystemErrorReason.SYSTEM_READINESS_DEPENDENCY_UNAVAILABLE,
+        { status: 'error', checks: publicChecks, timestamp },
+      );
     }
     return { status: 'ok', checks, timestamp };
   }
@@ -61,9 +84,9 @@ export class AppReadinessService {
    * MCH-013 · la readiness no puede anunciar aislamiento por tenant que en
    * realidad no rige.
    *
-   * Sin `RLS_ENFORCE=true` esta sonda no consulta nada: el modo no está
-   * activado en ningún despliegue actual y agregar una consulta para un
-   * control apagado no cambiaría nada salvo el costo. Con el modo activado, el
+   * Fuera de producción y sin `RLS_ENFORCE=true` esta sonda no consulta nada
+   * (HZ-05: en producción sí, porque un runtime con el rol dueño anula RLS
+   * aunque el interruptor esté apagado). Con el modo activado, el
    * operador está afirmando que las políticas de PostgreSQL aíslan por
    * tenant — y eso es falso si el rol de runtime tiene `BYPASSRLS` o es
    * superusuario, porque esos roles ignoran toda política sin excepción. En
@@ -74,20 +97,43 @@ export class AppReadinessService {
    * se niega a certificar como seguro un rol que no puede serlo.
    */
   private async checkRls(): Promise<void> {
-    if (process.env.RLS_ENFORCE !== 'true') return;
+    // HZ-05: además de `RLS_ENFORCE=true`, en producción (salvo el proceso de
+    // migración) la sonda verifica el rol de conexión: un runtime que ignora RLS
+    // no se certifica aunque el interruptor esté apagado.
+    if (!shouldVerifyRuntimeRole()) return;
+    // Excepción transitoria declarada para producción (el arranque ya la dejó
+    // registrada como error). Con RLS_ENFORCE=true no hay excepción que valga.
+    if (
+      process.env.DB_ALLOW_PRIVILEGED_RUNTIME_ROLE === 'true' &&
+      process.env.RLS_ENFORCE !== 'true'
+    ) {
+      return;
+    }
 
-    const [role] = await this.orm.em
-      .getConnection()
-      .execute<{ rolbypassrls: boolean; rolsuper: boolean }[]>(
-        'select rolbypassrls, rolsuper from pg_roles where rolname = current_user',
-      );
-    if (!role || role.rolbypassrls || role.rolsuper) {
+    const connection = this.orm.em.getConnection();
+    const facts = await inspectRuntimeRole(<T>(sql: string) =>
+      connection.execute<T[]>(sql),
+    );
+    const violations = describeViolations(facts);
+    if (violations.length > 0) {
       throw new Error(
-        role
-          ? `RLS_ENFORCE=true pero el rol de runtime "${
-              role.rolsuper ? 'es superusuario' : 'tiene BYPASSRLS'
-            }": las políticas no aíslan nada`
-          : 'RLS_ENFORCE=true pero no se pudo resolver el rol de runtime en pg_roles',
+        `El rol de runtime ${violations.join('; ')}: las políticas no aíslan nada`,
+      );
+    }
+  }
+
+  /**
+   * ORMN-01 · no se anuncia listo con FKs o únicos de integridad sin crear.
+   *
+   * Lee el reporte del bootstrap del DDL; `SCHEMA_INTEGRITY_ENFORCE=false` es la
+   * válvula explícita para un despliegue que sabe que tiene datos huérfanos.
+   */
+  private async checkSchemaIntegrity(): Promise<void> {
+    if (process.env.SCHEMA_INTEGRITY_ENFORCE === 'false') return;
+    if (this.schemaIntegrity && !this.schemaIntegrity.isComplete()) {
+      const report = this.schemaIntegrity.current();
+      throw new Error(
+        `Integridad del esquema incompleta: ${report?.blockingCount ?? 0} restricciones sin aplicar`,
       );
     }
   }
@@ -116,7 +162,7 @@ export class AppReadinessService {
         {
           status: 'down',
           latencyMs: Date.now() - startedAt,
-          reason: error instanceof Error ? error.message : 'error desconocido',
+          errorType: error instanceof Error ? error.name : 'desconocido',
         },
       ];
     } finally {

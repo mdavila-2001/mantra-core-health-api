@@ -4,6 +4,7 @@ import { RouteIndexModule } from '../../observability/route-index/route-index.mo
 import * as entities from './entities';
 import {
   AuditController,
+  AuditMeController,
   AuditQueryController,
   ComplianceController,
   PrivacyController,
@@ -16,6 +17,7 @@ import {
   AuditTrailService,
   ComplianceService,
   ModerationService,
+  MyDataAccessService,
   ThirdPartyAccessService,
 } from './services';
 import {
@@ -27,7 +29,15 @@ import {
   ModerationRepository,
   ThirdPartyAccessRepository,
   HistoryRepository,
+  PatientAccessLogRepository,
 } from './repositories';
+// PAC-HIST-004/005: el titular de la sesión sale del vínculo cuenta ↔ persona. Clases
+// sin estado que reciben el `EntityManager` por parámetro, provistas sueltas como en
+// `authz` y `clinical` (importar `ProfilesModule` entero cerraría un ciclo).
+import {
+  PatientProfilesRepository,
+  PersonAccountLinksRepository,
+} from '../profiles/infrastructure/repositories';
 
 /**
  * Módulo 10 — Audit, Provenance and Version Histories. Auditoría WORM
@@ -42,6 +52,7 @@ import {
   ],
   controllers: [
     AuditController,
+    AuditMeController,
     AuditQueryController,
     ComplianceController,
     PrivacyController,
@@ -57,6 +68,9 @@ import {
     ModerationRepository,
     ThirdPartyAccessRepository,
     HistoryRepository,
+    PatientAccessLogRepository,
+    PersonAccountLinksRepository,
+    PatientProfilesRepository,
     // Servicios
     AuditEventsService,
     AuditHistoryService,
@@ -64,6 +78,7 @@ import {
     AuditTrailService,
     ComplianceService,
     ModerationService,
+    MyDataAccessService,
     ThirdPartyAccessService,
   ],
   // Exportados para la auditoría TRANSVERSAL (CAN-AUDIT-001): otros dominios

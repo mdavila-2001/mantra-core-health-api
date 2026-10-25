@@ -82,7 +82,7 @@ SHA-256, fecha, licencia, URI del término).
 
 | Fuente | Motivo |
 |---|---|
-| DeCS/MeSH en castellano (BIREME/OPS) | 2026-10-24, con la red habilitada: `decs.bvsalud.org` y `api.bvsalud.org` cortan la conexión del lado del servidor (reset), `bvsalud.org` responde 403 de su CDN y la API pide clave. No se pudo leer la descarga ni la licencia: sin importador. |
+| DeCS/MeSH en castellano (BIREME/OPS) | Leído el 2026-10-25: `decs.bvsalud.org` responde (200) y su página «Para desenvolvedores» dice que el DeCS se usa gratis bajo un **contrato de licencia con BIREME/OPS/OMS**, en dos formas: descarga XML o token de la API (`api.bvsalud.org`, responde 401 sin token). Las [condiciones de descarga](https://decs.bvsalud.org/condicoes-para-download-do-decs-mesh/) exigen: acuerdo con la institución solicitante, una licencia por edición, no exclusiva y de tres años; los datos no se venden ni se ponen a disposición por separado del producto; mencionar el derecho de autor de OPS/BIREME y la edición del DeCS usada; aceptar los términos del MeSH de la NLM; proteger los códigos y términos contra acceso, copia o transmisión no autorizados por terceros. Sin el contrato no hay archivo ni token, así que no hay importador. `bvsalud.org` responde 403 de su CDN. |
 | Terminologia Anatomica 2 (FIPAT) | `fipat.library.dal.ca` y `ta2viewer.openanatomy.org` bloqueados. El TA98 en latín entra vía FMA. |
 | Diccionario de Términos Médicos (RANM) / Diccionario panhispánico (RAE-RANM) | Con copyright: no se copian; además `dtme.ranm.es` y `dpej.rae.es` bloqueados. A lo sumo, enlace. |
 | Cosnautas / Tremédica, TERMCAT, IATE | De pago (Cosnautas) o hosts bloqueados (`www.termcat.cat`, `iate.europa.eu`). |

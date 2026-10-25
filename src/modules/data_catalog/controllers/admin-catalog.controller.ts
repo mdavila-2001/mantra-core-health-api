@@ -372,6 +372,11 @@ export class AdminCatalogController {
     return this.read.scan(p.id);
   }
 
+  @Audited({
+    action: 'DATA_CATALOG_SCAN_REQUESTED',
+    entity: 'catalog_scan_run',
+    entityId: 'result.id',
+  })
   @Post('scans')
   @Roles(...CATALOG_WRITE_ROLES)
   @HttpCode(HttpStatus.ACCEPTED)

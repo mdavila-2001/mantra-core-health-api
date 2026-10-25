@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { SurveyTemplates, SurveyVersions, SurveyQuestions } from '../entities';
 import { createdBy } from '../../../common';
@@ -110,6 +111,40 @@ export class TemplatesRepository {
     id: string,
   ): Promise<SurveyTemplates | null> {
     return em.findOne(SurveyTemplates, { id });
+  }
+
+  /**
+   * Bloquea la plantilla (`FOR UPDATE`) hasta el fin de la transacción.
+   *
+   * Serializa a quienes numeran versiones a partir de la última leída: el
+   * segundo espera y ve la versión que el primero ya confirmó.
+   *
+   * @param em - Transacción activa.
+   * @param id - Identificador de la plantilla.
+   */
+  async lockTemplate(em: EntityManager, id: string): Promise<void> {
+    await em.findOne(
+      SurveyTemplates,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Bloquea la versión (`FOR UPDATE`) hasta el fin de la transacción.
+   *
+   * Serializa a quienes consultan «¿ya hay una asignación activa de esta
+   * versión?» antes de insertarla.
+   *
+   * @param em - Transacción activa.
+   * @param id - Identificador de la versión.
+   */
+  async lockVersion(em: EntityManager, id: string): Promise<void> {
+    await em.findOne(
+      SurveyVersions,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
   }
 
   /**

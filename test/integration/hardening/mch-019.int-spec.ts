@@ -27,16 +27,17 @@ import {
  * Se observa el estado en la base, no sólo el código HTTP: un callback
  * rechazado no debe dejar la transacción en CAPTURED.
  *
- * Referencias: la columna guarda `env:WEBHOOK_SECRET_*`, nunca la clave. Las
+ * Referencias: la columna guarda `env:WEBHOOK_SECRET_<TENANT>_*` (variables del tenant dueño de la conexión), nunca la clave. Las
  * variables se definen antes de arrancar la app porque el resolvedor lee el
  * entorno del proceso (en despliegue, alimentado por el gestor de secretos).
  */
 const SECRETO_A = 'secreto-de-la-conexion-A-para-mch019-int';
 const SECRETO_B = 'secreto-de-la-conexion-B-para-mch019-int';
 const SECRETO_A_V2 = 'secreto-rotado-de-la-conexion-A-mch019-int';
-process.env.WEBHOOK_SECRET_MCH019_A = SECRETO_A;
-process.env.WEBHOOK_SECRET_MCH019_A_V2 = SECRETO_A_V2;
-process.env.WEBHOOK_SECRET_MCH019_B = SECRETO_B;
+const SECRET_PREFIX = `WEBHOOK_SECRET_${SEED.tenantId.replace(/-/g, '').toUpperCase()}_`;
+process.env[`${SECRET_PREFIX}MCH019_A`] = SECRETO_A;
+process.env[`${SECRET_PREFIX}MCH019_A_V2`] = SECRETO_A_V2;
+process.env[`${SECRET_PREFIX}MCH019_B`] = SECRETO_B;
 
 describe('MCH-019 · el callback se verifica con el secreto de la conexión (integración)', () => {
   let ctx: TestContext;
@@ -170,8 +171,8 @@ describe('MCH-019 · el callback se verifica con el secreto de la conexión (int
         TEST_ADMIN_ID,
       ],
     );
-    await crearConexion(connA, 'env:WEBHOOK_SECRET_MCH019_A');
-    await crearConexion(connB, 'env:WEBHOOK_SECRET_MCH019_B');
+    await crearConexion(connA, `env:${SECRET_PREFIX}MCH019_A`);
+    await crearConexion(connB, `env:${SECRET_PREFIX}MCH019_B`);
     await crearConexion(connSinRef, null);
   });
 
@@ -234,7 +235,7 @@ describe('MCH-019 · el callback se verifica con el secreto de la conexión (int
     await sql(
       `update payments.gateway_connections set webhook_secret_ref = ?
         where id = ?`,
-      ['env:WEBHOOK_SECRET_MCH019_A_V2,env:WEBHOOK_SECRET_MCH019_A', connA],
+      [`env:${SECRET_PREFIX}MCH019_A_V2,env:${SECRET_PREFIX}MCH019_A`, connA],
     );
     const enVentana = await transaccionEnEspera(connA);
     await callback(enVentana.ref, SECRETO_A_V2).expect(200);
@@ -246,7 +247,7 @@ describe('MCH-019 · el callback se verifica con el secreto de la conexión (int
     await sql(
       `update payments.gateway_connections set webhook_secret_ref = ?
         where id = ?`,
-      ['env:WEBHOOK_SECRET_MCH019_A_V2', connA],
+      [`env:${SECRET_PREFIX}MCH019_A_V2`, connA],
     );
     const rotada = await transaccionEnEspera(connA);
     await callback(rotada.ref, SECRETO_A).expect(401);

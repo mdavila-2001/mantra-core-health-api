@@ -130,15 +130,16 @@ describe('ErpController', () => {
     );
   });
 
-  it('forwards the request id when approving time off (UC-38-09)', async () => {
+  it('forwards both the employee id and the request id when approving time off (UC-38-09)', async () => {
     const d = build();
     const dto = { approved: true } as any;
     d.operationsService.approveTimeOff.mockResolvedValue({ id: 'to-1' });
 
     await d.controller.approveTimeOff(ID, ACC, dto, actor);
 
-    // El servicio resuelve por la solicitud, no por el empleado.
+    // El servicio exige que la solicitud sea del empleado de la ruta (ERP-02).
     expect(d.operationsService.approveTimeOff).toHaveBeenCalledWith(
+      ID,
       ACC,
       dto,
       actor,

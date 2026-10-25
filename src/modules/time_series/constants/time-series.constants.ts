@@ -59,6 +59,14 @@ export const METRIC_CODES = {
   VITALS_NORMALIZED: 'vitals_normalized',
 } as const;
 
+/**
+ * `code` de `consent.processing_purposes` que amparan el registro de ubicación.
+ * Un consentimiento de otro propósito (atención, marketing…) no autoriza pings.
+ */
+export const LOCATION_CONSENT_PURPOSE_CODES: readonly string[] = [
+  'LOCATION_TRACKING',
+];
+
 /** Pipeline al que se atribuyen las métricas que emite este módulo. */
 export const PIPELINE_CODE = 'time-series';
 

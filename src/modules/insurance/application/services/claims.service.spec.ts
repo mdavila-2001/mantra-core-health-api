@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import { ForbiddenException } from '@nestjs/common';
-import { runWithTenant } from '../../../../common';
+import { PreconditionFailedException, runWithTenant } from '../../../../common';
 import { ClaimsService } from './claims.service';
 import { INS } from '../../domain/insurance.concepts';
 
@@ -358,5 +358,110 @@ describe('ClaimsService.adjudicate', () => {
     await withTenant(() => serviceWith(r2).adjudicate(CLAIM, dto, actor));
 
     expect((claim as any).statusConceptId).toBe(INS.CLAIM_ADJUDICATED);
+  });
+});
+
+/**
+ * Mutar un reclamo legacy ya presentado (INS-01): el rol no basta, el tenant
+ * tiene que ser parte (prestador o aseguradora) del reclamo.
+ */
+describe('ClaimsService — alcance de la mutación de reclamos legacy', () => {
+  const CARRIER = 'carrier-1';
+  const adjudication = {
+    outcome: 'APPROVED',
+    lineAdjudications: [],
+    totalApprovedAmount: '0',
+    totalPatientAmount: '0',
+    totalDeniedAmount: '0',
+  } as never;
+
+  function legacyClaim(over: Record<string, unknown> = {}) {
+    return claim({
+      insuranceCarrierId: CARRIER,
+      statusConceptId: INS.CLAIM_SUBMITTED,
+      ...over,
+    });
+  }
+
+  function build(
+    found: unknown,
+    practices: string[] = [PRACTICE],
+    tenantCarrier: { id: string } | null = null,
+  ) {
+    const r = {
+      findClaim: mockFn().mockResolvedValue(found),
+      latestVersion: mockFn().mockResolvedValue(null),
+      createVersion: mockFn(() => ({ id: VERSION })),
+      createLineAdjudication: mockFn(),
+    };
+    const catalog = {
+      findCarrierByTenantId: mockFn().mockResolvedValue(tenantCarrier),
+    };
+    const service = new ClaimsService(
+      em(),
+      r as never,
+      {} as never,
+      catalog as never,
+      practiceLookup(practices) as never,
+      logger,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+    return { service, r, catalog };
+  }
+
+  it('el prestador dueño del reclamo (práctica del tenant) puede mutarlo', async () => {
+    const d = build(legacyClaim());
+    await expect(
+      withTenant(() => d.service.adjudicate(CLAIM, adjudication, actor)),
+    ).resolves.toEqual({ id: VERSION });
+    expect(d.catalog.findCarrierByTenantId).not.toHaveBeenCalled();
+  });
+
+  it('la aseguradora del tenant puede mutarlo aunque no sea su prestador', async () => {
+    const d = build(
+      legacyClaim({ billingProviderEntityId: OTHER_PRACTICE }),
+      [PRACTICE],
+      { id: CARRIER },
+    );
+    await expect(
+      withTenant(() => d.service.adjudicate(CLAIM, adjudication, actor)),
+    ).resolves.toEqual({ id: VERSION });
+  });
+
+  it('un tercero (ni prestador ni aseguradora) recibe 403 y no se escribe nada', async () => {
+    const d = build(
+      legacyClaim({ billingProviderEntityId: OTHER_PRACTICE }),
+      [PRACTICE],
+      { id: 'otra-aseguradora' },
+    );
+    await expect(
+      withTenant(() => d.service.adjudicate(CLAIM, adjudication, actor)),
+    ).rejects.toThrow(ForbiddenException);
+    expect(d.r.createVersion).not.toHaveBeenCalled();
+  });
+
+  it('un reclamo de otro tenant y uno inexistente responden con el mismo cuerpo', async () => {
+    const foreign = build(
+      legacyClaim({ billingProviderEntityId: OTHER_PRACTICE }),
+    );
+    const missing = build(null);
+    const a = await rejection(() =>
+      withTenant(() => foreign.service.adjudicate(CLAIM, adjudication, actor)),
+    );
+    const b = await rejection(() =>
+      withTenant(() => missing.service.adjudicate(CLAIM, adjudication, actor)),
+    );
+    expect(a.getStatus()).toBe(b.getStatus());
+    expect(a.getResponse()).toEqual(b.getResponse());
+  });
+
+  it('sin tenant en el contexto se rechaza (412) y no se escribe nada', async () => {
+    const d = build(legacyClaim());
+    await expect(
+      d.service.adjudicate(CLAIM, adjudication, actor),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.r.createVersion).not.toHaveBeenCalled();
   });
 });

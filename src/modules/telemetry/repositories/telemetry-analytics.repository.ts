@@ -2,8 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import type { AnalyticsWindow } from '../domain/analytics-window';
 
-/** Filtros comunes a toda consulta: ventana obligatoria, portal opcional. */
+/**
+ * Filtros comunes a toda consulta: tenant y ventana obligatorios, portal opcional.
+ *
+ * El tenant es el que resolvió el guard para la petición; no existe lectura
+ * global. `user_activity_events` lo lleva en su columna; las sesiones, los
+ * contextos de cliente, los vitales y las conversiones no, así que se derivan de
+ * los eventos (ver `sessionInTenant` y `rowInTenant`).
+ */
 export interface AnalyticsScope {
+  tenantId: string;
   window: AnalyticsWindow;
   portalConceptId?: string;
 }
@@ -39,8 +47,62 @@ export class TelemetryAnalyticsRepository {
     return { where: clauses.join(' AND '), params };
   }
 
+  /** Ventana + portal + tenant sobre `user_activity_events`, que lleva `tenant_id`. */
+  private eventScope(column: string, scope: AnalyticsScope, alias = '') {
+    const base = this.scope(column, scope, alias);
+    const prefix = alias ? `${alias}.` : '';
+    return {
+      where: `${base.where} AND ${prefix}tenant_id = ?`,
+      params: [...base.params, scope.tenantId],
+    };
+  }
+
+  /**
+   * Predicado «esta sesión es del tenant»: la sesión tiene al menos un evento
+   * del tenant y ninguno de otro (ni sin tenant). Una sesión que mezcla tenants
+   * no se lista ni se lee: no hay forma de atribuirla a uno solo.
+   *
+   * @param column - Columna **calificada** con el `session_id` de la fila externa.
+   */
+  private sessionInTenant(column: string, tenantId: string) {
+    return {
+      sql: `(EXISTS (SELECT 1 FROM telemetry.user_activity_events te
+                      WHERE te.session_id = ${column} AND te.tenant_id = ?)
+             AND NOT EXISTS (SELECT 1 FROM telemetry.user_activity_events xe
+                              WHERE xe.session_id = ${column}
+                                AND xe.tenant_id IS DISTINCT FROM ?))`,
+      params: [tenantId, tenantId],
+    };
+  }
+
+  /**
+   * Predicado de tenant para filas sin `tenant_id` propio (vitales,
+   * conversiones): se atribuyen por el evento al que apuntan y, si no apuntan a
+   * ninguno, por el journey. Sin ninguno de los dos no hay tenant demostrable y
+   * la fila queda fuera.
+   *
+   * @param eventColumn - Columna calificada con el id de evento de la fila.
+   * @param journeyColumn - Columna calificada con el id de journey de la fila.
+   */
+  private rowInTenant(
+    eventColumn: string,
+    journeyColumn: string,
+    tenantId: string,
+  ) {
+    const session = this.sessionInTenant('vj.session_id', tenantId);
+    return {
+      sql: `(CASE WHEN ${eventColumn} IS NOT NULL
+                  THEN ${eventColumn} IN (SELECT ve.id FROM telemetry.user_activity_events ve
+                                           WHERE ve.tenant_id = ?)
+                  ELSE ${journeyColumn} IN (SELECT vj.id FROM telemetry.session_journeys vj
+                                             WHERE ${session.sql})
+             END)`,
+      params: [tenantId, ...session.params],
+    };
+  }
+
   async overview(scope: AnalyticsScope) {
-    const { where, params } = this.scope('occurred_at', scope);
+    const { where, params } = this.eventScope('occurred_at', scope);
     const [totals] = await this.sql<{
       events: number;
       sessions: number;
@@ -85,7 +147,7 @@ export class TelemetryAnalyticsRepository {
 
   /** Serie temporal con cubos vacíos rellenados en 0: un hueco es un dato. */
   timeseries(scope: AnalyticsScope) {
-    const { where, params } = this.scope('occurred_at', scope);
+    const { where, params } = this.eventScope('occurred_at', scope);
     const unit = scope.window.interval;
     return this.sql<{ bucket: Date; events: number; sessions: number }>(
       `WITH buckets AS (
@@ -111,8 +173,14 @@ export class TelemetryAnalyticsRepository {
    * promediando percentiles de grupos.
    */
   async webVitals(scope: AnalyticsScope, route?: string) {
-    const { where, params } = this.scope('measured_at', scope);
-    const filter = `${where} AND metric_value IS NOT NULL${route ? ' AND route_template = ?' : ''}`;
+    const base = this.scope('measured_at', scope, 'w');
+    const tenant = this.rowInTenant(
+      'w.user_activity_event_id',
+      'w.session_journey_id',
+      scope.tenantId,
+    );
+    const filter = `${base.where} AND ${tenant.sql} AND w.metric_value IS NOT NULL${route ? ' AND w.route_template = ?' : ''}`;
+    const params = [...base.params, ...tenant.params];
     const args = route ? [...params, route] : params;
     const percentiles = await this.sql<{
       metric_concept_id: string;
@@ -121,14 +189,14 @@ export class TelemetryAnalyticsRepository {
       p75: string | null;
       p95: string | null;
     }>(
-      `SELECT metric_concept_id, count(*)::int AS samples,
-              percentile_cont(0.50) WITHIN GROUP (ORDER BY metric_value)::text AS p50,
-              percentile_cont(0.75) WITHIN GROUP (ORDER BY metric_value)::text AS p75,
-              percentile_cont(0.95) WITHIN GROUP (ORDER BY metric_value)::text AS p95
-         FROM telemetry.web_vitals
+      `SELECT w.metric_concept_id, count(*)::int AS samples,
+              percentile_cont(0.50) WITHIN GROUP (ORDER BY w.metric_value)::text AS p50,
+              percentile_cont(0.75) WITHIN GROUP (ORDER BY w.metric_value)::text AS p75,
+              percentile_cont(0.95) WITHIN GROUP (ORDER BY w.metric_value)::text AS p95
+         FROM telemetry.web_vitals w
         WHERE ${filter}
-        GROUP BY metric_concept_id
-        ORDER BY metric_concept_id`,
+        GROUP BY w.metric_concept_id
+        ORDER BY w.metric_concept_id`,
       args,
     );
     const ratings = await this.sql<{
@@ -136,8 +204,8 @@ export class TelemetryAnalyticsRepository {
       rating_concept_id: string | null;
       n: number;
     }>(
-      `SELECT metric_concept_id, rating_concept_id, count(*)::int AS n
-         FROM telemetry.web_vitals
+      `SELECT w.metric_concept_id, w.rating_concept_id, count(*)::int AS n
+         FROM telemetry.web_vitals w
         WHERE ${filter}
         GROUP BY 1, 2`,
       args,
@@ -147,14 +215,20 @@ export class TelemetryAnalyticsRepository {
 
   /** p75 de una métrica por ruta, para encontrar las páginas lentas. */
   webVitalsByRoute(scope: AnalyticsScope, metricConceptId: string) {
-    const { where, params } = this.scope('measured_at', scope);
+    const base = this.scope('measured_at', scope, 'w');
+    const tenant = this.rowInTenant(
+      'w.user_activity_event_id',
+      'w.session_journey_id',
+      scope.tenantId,
+    );
     return this.sql<{ route: string; samples: number; p75: string | null }>(
-      `SELECT coalesce(route_template, '(sin ruta)') AS route, count(*)::int AS samples,
-              percentile_cont(0.75) WITHIN GROUP (ORDER BY metric_value)::text AS p75
-         FROM telemetry.web_vitals
-        WHERE ${where} AND metric_concept_id = ? AND metric_value IS NOT NULL
+      `SELECT coalesce(w.route_template, '(sin ruta)') AS route, count(*)::int AS samples,
+              percentile_cont(0.75) WITHIN GROUP (ORDER BY w.metric_value)::text AS p75
+         FROM telemetry.web_vitals w
+        WHERE ${base.where} AND ${tenant.sql}
+          AND w.metric_concept_id = ? AND w.metric_value IS NOT NULL
         GROUP BY 1 ORDER BY samples DESC, route LIMIT ${TOP_LIMIT}`,
-      [...params, metricConceptId],
+      [...base.params, ...tenant.params, metricConceptId],
     );
   }
 
@@ -163,9 +237,12 @@ export class TelemetryAnalyticsRepository {
     after: { startedAt: string; id: string } | undefined,
     limit: number,
   ) {
-    const { where, params } = this.scope('started_at', scope);
+    const base = this.scope('started_at', scope, 'sj');
+    const tenant = this.sessionInTenant('sj.session_id', scope.tenantId);
+    const where = `${base.where} AND ${tenant.sql}`;
+    const params = [...base.params, ...tenant.params];
     const cursor = after
-      ? ' AND (started_at, id) < (?::timestamptz, ?::uuid)'
+      ? ' AND (sj.started_at, sj.id) < (?::timestamptz, ?::uuid)'
       : '';
     return this.sql<{
       id: string;
@@ -176,17 +253,19 @@ export class TelemetryAnalyticsRepository {
       event_count: number | null;
       has_subject: boolean;
     }>(
-      `SELECT id, portal_type_concept_id, journey_status_concept_id, started_at, ended_at,
-              event_count, analytics_subject_id IS NOT NULL AS has_subject
-         FROM telemetry.session_journeys
+      `SELECT sj.id, sj.portal_type_concept_id, sj.journey_status_concept_id, sj.started_at,
+              sj.ended_at, sj.event_count, sj.analytics_subject_id IS NOT NULL AS has_subject
+         FROM telemetry.session_journeys sj
         WHERE ${where}${cursor}
-        ORDER BY started_at DESC, id DESC
+        ORDER BY sj.started_at DESC, sj.id DESC
         LIMIT ?`,
       [...params, ...(after ? [after.startedAt, after.id] : []), limit + 1],
     );
   }
 
-  async findSession(id: string) {
+  /** Journey por id, sólo si su sesión es del tenant; si no, `null` como si no existiera. */
+  async findSession(id: string, tenantId: string) {
+    const tenant = this.sessionInTenant('sj.session_id', tenantId);
     const [row] = await this.sql<{
       id: string;
       session_id: string;
@@ -197,16 +276,18 @@ export class TelemetryAnalyticsRepository {
       event_count: number | null;
       has_subject: boolean;
     }>(
-      `SELECT id, session_id, portal_type_concept_id, journey_status_concept_id,
-              started_at, ended_at, event_count, analytics_subject_id IS NOT NULL AS has_subject
-         FROM telemetry.session_journeys WHERE id = ?`,
-      [id],
+      `SELECT sj.id, sj.session_id, sj.portal_type_concept_id, sj.journey_status_concept_id,
+              sj.started_at, sj.ended_at, sj.event_count,
+              sj.analytics_subject_id IS NOT NULL AS has_subject
+         FROM telemetry.session_journeys sj
+        WHERE sj.id = ? AND ${tenant.sql}`,
+      [id, ...tenant.params],
     );
     return row ?? null;
   }
 
   /** Timeline de una sesión: qué pasó y cuándo, con nombres de propiedad pero sin valores. */
-  sessionTimeline(sessionId: string) {
+  sessionTimeline(sessionId: string, tenantId: string) {
     return this.sql<{
       id: string;
       event_name: string;
@@ -220,10 +301,10 @@ export class TelemetryAnalyticsRepository {
                  FROM telemetry.user_activity_event_properties p
                 WHERE p.user_activity_event_id = e.id) AS property_names
          FROM telemetry.user_activity_events e
-        WHERE e.session_id = ?
+        WHERE e.session_id = ? AND e.tenant_id = ?
         ORDER BY e.occurred_at, e.id
         LIMIT ${TIMELINE_LIMIT}`,
-      [sessionId],
+      [sessionId, tenantId],
     );
   }
 
@@ -262,6 +343,7 @@ export class TelemetryAnalyticsRepository {
    */
   async funnelReach(
     window: AnalyticsWindow,
+    tenantId: string,
     stepSchemaIds: readonly string[],
   ): Promise<number[]> {
     if (stepSchemaIds.length === 0) return [];
@@ -273,17 +355,19 @@ export class TelemetryAnalyticsRepository {
           SELECT session_id, min(occurred_at) AS t
             FROM telemetry.user_activity_events
            WHERE event_schema_definition_id = ? AND session_id IS NOT NULL
+             AND tenant_id = ?
              AND occurred_at >= ? AND occurred_at < ?
            GROUP BY session_id)`);
-        params.push(schemaId, window.from, window.to);
+        params.push(schemaId, tenantId, window.from, window.to);
       } else {
         ctes.push(`s${index} AS (
           SELECT e.session_id, min(e.occurred_at) AS t
             FROM telemetry.user_activity_events e
             JOIN s${index - 1} p ON p.session_id = e.session_id AND e.occurred_at >= p.t
-           WHERE e.event_schema_definition_id = ? AND e.occurred_at < ?
+           WHERE e.event_schema_definition_id = ? AND e.tenant_id = ?
+             AND e.occurred_at < ?
            GROUP BY e.session_id)`);
-        params.push(schemaId, window.to);
+        params.push(schemaId, tenantId, window.to);
       }
     });
     const selects = stepSchemaIds
@@ -296,19 +380,32 @@ export class TelemetryAnalyticsRepository {
     return stepSchemaIds.map((_, index) => Number(row?.[`r${index}`] ?? 0));
   }
 
-  /** Conversiones registradas por el servidor (confirmadas), no reclamadas por el navegador. */
-  async serverConversions(window: AnalyticsWindow, funnelId: string) {
+  /**
+   * Conversiones registradas por el servidor (confirmadas), no reclamadas por el
+   * navegador, atribuidas al tenant por su evento de cierre o su journey.
+   */
+  async serverConversions(
+    window: AnalyticsWindow,
+    tenantId: string,
+    funnelId: string,
+  ) {
+    const tenant = this.rowInTenant(
+      'ce.completion_event_id',
+      'ce.session_journey_id',
+      tenantId,
+    );
     const [row] = await this.sql<{ n: number }>(
-      `SELECT count(*)::int AS n FROM telemetry.conversion_events
-        WHERE funnel_definition_id = ? AND converted_at >= ? AND converted_at < ?`,
-      [funnelId, window.from, window.to],
+      `SELECT count(*)::int AS n FROM telemetry.conversion_events ce
+        WHERE ce.funnel_definition_id = ? AND ce.converted_at >= ? AND ce.converted_at < ?
+          AND ${tenant.sql}`,
+      [funnelId, window.from, window.to, ...tenant.params],
     );
     return row?.n ?? 0;
   }
 
   /** Salud de la ingesta medida sobre lo que sí se persistió. */
   async pipelineHealth(scope: AnalyticsScope) {
-    const { where, params } = this.scope('received_at', scope);
+    const { where, params } = this.eventScope('received_at', scope);
     const [ingest] = await this.sql<{
       accepted: number;
       last_received_at: Date | null;
@@ -331,18 +428,19 @@ export class TelemetryAnalyticsRepository {
         WHERE ${where}`,
       params,
     );
-    const ctx = this.scope('created_at', scope);
+    const ctx = this.scope('created_at', scope, 'cc');
+    const tenant = this.sessionInTenant('cc.session_id', scope.tenantId);
     const [clients] = await this.sql<{
       contexts: number;
       bots: number;
       bot_unknown: number;
     }>(
       `SELECT count(*)::int AS contexts,
-              count(*) FILTER (WHERE is_bot)::int AS bots,
-              count(*) FILTER (WHERE is_bot IS NULL)::int AS bot_unknown
-         FROM telemetry.client_contexts
-        WHERE ${ctx.where}`,
-      ctx.params,
+              count(*) FILTER (WHERE cc.is_bot)::int AS bots,
+              count(*) FILTER (WHERE cc.is_bot IS NULL)::int AS bot_unknown
+         FROM telemetry.client_contexts cc
+        WHERE ${ctx.where} AND ${tenant.sql}`,
+      [...ctx.params, ...tenant.params],
     );
     return { ingest, clients };
   }

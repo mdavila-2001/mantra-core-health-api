@@ -14,3 +14,5 @@ export * from './patient-reported-health-statements.repository';
 export * from './prescription-signature-policies.repository';
 export * from './procedures.repository';
 export * from './immunizations.repository';
+export * from './received-services.repository';
+export * from './prescription-expiry.repository';

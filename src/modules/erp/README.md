@@ -112,6 +112,22 @@ factura ── invoice-match-run ──> matched | variance
 ausencias, `BUYER`/`WAREHOUSE` en compras y recepción, `ACCOUNTS_PAYABLE` en conciliación, `SALES`
 en órdenes de venta, `ACCOUNTANT` en valoraciones y `SYSTEM_WORKER` en la generación de cronogramas.
 
+## Alcance de tenant
+
+`ErpScopeService` resuelve cada UUID dentro del tenant activo (`requireTenantId()`), nunca del
+cuerpo: socios, contratos, requisiciones y órdenes de compra se buscan por `id + tenant` en la misma
+consulta que las bloquea; la cuenta bancaria hereda el tenant de su socio, el arrendamiento de su
+contrato y el empleado o la factura de su práctica. Un `tenantId` del cuerpo es opcional y solo se
+acepta si coincide con el activo. Lo ajeno responde igual que lo inexistente (`404`, `reason`
+`ERP_RESOURCE_NOT_FOUND`, sin `details`).
+
+- **Ausencias**: un `EMPLOYEE` solo opera sobre el empleado vinculado a su usuario
+  (`403` `ERP_EMPLOYEE_SELF_ONLY` en otro caso); `ERP_ADMIN` y `HR_ADMIN` autorizados en el tenant
+  operan sobre cualquier empleado de su organización. La aprobación exige que la solicitud sea del
+  empleado de la ruta; cualquier discrepancia responde `404` `ERP_TIME_OFF_NOT_FOUND`.
+- **Recepción**: cada línea debe existir, no repetirse y ser hija de la orden (carga `id IN (...)` +
+  `purchaseOrderId`); si no, `422` `ERP_PO_ITEM_NOT_IN_ORDER` antes de crear la recepción.
+
 ## Concurrencia
 
 `FOR UPDATE` sobre contrato, cuenta bancaria, solicitud de ausencia y orden de compra antes de

@@ -267,27 +267,33 @@ export class MarketingCampaignsRepository {
   }
 
   /**
-   * Obtiene find segment by id.
+   * Obtiene un segmento del tenant activo; uno ajeno cuenta como inexistente.
    *
    * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant activo del actor.
    * @param id - Identificador de id.
    * @returns Resultado de find segment by id conforme al contrato `Promise<MarketingSegments | null>`.
    */
   findSegmentById(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<MarketingSegments | null> {
-    return em.findOne(MarketingSegments, { id });
+    return em.findOne(MarketingSegments, { id, tenantId });
   }
 
-  /** El refresco es exclusivo por segmento: bloquear la fila evita recomputos concurrentes. */
+  /**
+   * El refresco es exclusivo por segmento: bloquear la fila evita recomputos
+   * concurrentes. El bloqueo sólo alcanza filas del tenant activo.
+   */
   findSegmentForUpdate(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<MarketingSegments | null> {
     return em.findOne(
       MarketingSegments,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -399,19 +405,53 @@ export class MarketingCampaignsRepository {
   }
 
   /**
-   * Obtiene find campaign for update.
+   * Campaña del tenant activo, sin bloqueo; una ajena cuenta como inexistente.
    *
    * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant activo del actor.
+   * @param id - Identificador de la campaña.
+   * @returns La campaña o `null`.
+   */
+  findCampaignById(
+    em: EntityManager,
+    tenantId: string,
+    id: string,
+  ): Promise<MarketingCampaigns | null> {
+    return em.findOne(MarketingCampaigns, { id, tenantId });
+  }
+
+  /**
+   * Campaña de marketing del tenant referida por `id` o por la identidad de su
+   * campaña publicitaria (`ad_campaign_ref_id`). Los touchpoints y los enlaces
+   * rastreables guardan `campaign_id` con FK a `ads.campaigns`.
+   */
+  findCampaignByIdOrAdRef(
+    em: EntityManager,
+    tenantId: string,
+    id: string,
+  ): Promise<MarketingCampaigns | null> {
+    return em.findOne(MarketingCampaigns, {
+      tenantId,
+      $or: [{ id }, { adCampaignRefId: id }],
+    });
+  }
+
+  /**
+   * Obtiene la campaña del tenant activo, bloqueada para actualizar.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant activo del actor.
    * @param id - Identificador de id.
    * @returns Resultado de find campaign for update conforme al contrato `Promise<MarketingCampaigns | null>`.
    */
   findCampaignForUpdate(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<MarketingCampaigns | null> {
     return em.findOne(
       MarketingCampaigns,
-      { id },
+      { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -465,6 +505,20 @@ export class MarketingCampaignsRepository {
     campaignId: string,
   ): Promise<CampaignMembers[]> {
     return em.find(CampaignMembers, { campaignId });
+  }
+
+  /** Miembro de campaña por referencia polimórfica, sin bloqueo (¿es destinatario?). */
+  findCampaignMemberByRef(
+    em: EntityManager,
+    campaignId: string,
+    memberTypeConceptId: string,
+    memberRefId: string,
+  ): Promise<CampaignMembers | null> {
+    return em.findOne(CampaignMembers, {
+      campaignId,
+      memberTypeConceptId,
+      memberRefId,
+    });
   }
 
   /** Miembro de campaña por referencia polimórfica; UC-50-11 actualiza su estado. */
@@ -531,21 +585,33 @@ export class MarketingCampaignsRepository {
   }
 
   /**
-   * Obtiene find published template.
+   * Obtiene la plantilla publicada del tenant activo.
    *
    * @param em - Contexto de persistencia o transacción activa.
+   * @param tenantId - Tenant activo del actor.
    * @param id - Identificador de id.
    * @param publishedStatusConceptId - Identificador de published status concept.
    * @returns Resultado de find published template conforme al contrato `Promise<ContentTemplates | null>`.
    */
   findPublishedTemplate(
     em: EntityManager,
+    tenantId: string,
     id: string,
     publishedStatusConceptId: string,
   ): Promise<ContentTemplates | null> {
     return em.findOne(ContentTemplates, {
       id,
+      tenantId,
       statusConceptId: publishedStatusConceptId,
     });
+  }
+
+  /** Plantilla del tenant activo en cualquier estado (versiones archivadas incluidas). */
+  findTemplateById(
+    em: EntityManager,
+    tenantId: string,
+    id: string,
+  ): Promise<ContentTemplates | null> {
+    return em.findOne(ContentTemplates, { id, tenantId });
   }
 }

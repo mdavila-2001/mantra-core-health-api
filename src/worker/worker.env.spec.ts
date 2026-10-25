@@ -1,5 +1,7 @@
+import { SEED } from '../common/constants/concepts';
 import {
   assertMockProviderNotInProduction,
+  loadWorkerEnv,
   workerEnvSchema,
 } from './worker.env';
 
@@ -94,5 +96,38 @@ describe('workerEnvSchema · default de MOCK_PROVIDER_BASE_URL', () => {
     };
 
     expect(value.MOCK_PROVIDER_BASE_URL).toBe('');
+  });
+});
+
+/**
+ * El mantenimiento físico de `time_series` actúa sobre tablas compartidas por
+ * todos los tenants: su atribución es una decisión del despliegue, no una
+ * constante escondida en cada job.
+ */
+describe('TS_ADMIN_TENANT_ID', () => {
+  const original = process.env.TS_ADMIN_TENANT_ID;
+  afterEach(() => {
+    if (original === undefined) delete process.env.TS_ADMIN_TENANT_ID;
+    else process.env.TS_ADMIN_TENANT_ID = original;
+  });
+
+  it('sin valor, el sujeto de plataforma es el tenant DEFAULT del seed', () => {
+    delete process.env.TS_ADMIN_TENANT_ID;
+    expect(loadWorkerEnv().tsAdminTenantId).toBe(SEED.tenantId);
+  });
+
+  it('toma el tenant de plataforma declarado por el despliegue', () => {
+    process.env.TS_ADMIN_TENANT_ID = '  7B1E5C0A-6C1B-4E0E-9B7B-0A6F4D2E9C11 ';
+    expect(loadWorkerEnv().tsAdminTenantId).toBe(
+      '7b1e5c0a-6c1b-4e0e-9b7b-0a6f4d2e9c11',
+    );
+  });
+
+  it('un valor que no es UUID aborta en vez de caer a otro tenant', () => {
+    process.env.TS_ADMIN_TENANT_ID = 'acme';
+    expect(() => loadWorkerEnv()).toThrow(/TS_ADMIN_TENANT_ID/);
+    expect(
+      workerEnvSchema.validate({ TS_ADMIN_TENANT_ID: 'acme' }).error,
+    ).toBeDefined();
   });
 });

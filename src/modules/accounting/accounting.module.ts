@@ -26,6 +26,7 @@ import {
   AssetService,
   LiabilityService,
   ExchangeRateService,
+  AccountingScopeService,
   PostingHelper,
   PractitionerAccountingService,
   PractitionerSimpleAccountingService,
@@ -87,6 +88,7 @@ import {
     AccountingControllingRepository,
     PractitionerSimpleAccountingRepository,
     // Servicios
+    AccountingScopeService,
     PostingHelper,
     LedgerService,
     LedgerReadService,

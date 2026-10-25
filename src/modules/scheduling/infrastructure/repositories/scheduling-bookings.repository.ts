@@ -495,8 +495,18 @@ export class SchedulingBookingsRepository {
   async findBookings(
     em: EntityManager,
     filters: {
+      /**
+       * Tenant activo. Obligatorio y parte del `where`: filtrar después de
+       * cargar las filas ya habría leído citas de otra organización.
+       */
+      tenantId: string;
       /** Paciente titular de la cita. */
       patientProfileId?: string;
+      /**
+       * Pacientes titulares admitidos (el propio perfil y los representados);
+       * es el acotamiento de una cuenta de paciente que lista por agenda.
+       */
+      patientProfileIds?: readonly string[];
       /** Recurso (agenda) al que pertenece. */
       resourceId?: string;
       /** Inicio de la ventana sobre el instante del slot. */
@@ -513,9 +523,11 @@ export class SchedulingBookingsRepository {
     /** `true` si la lectura previa al filtro por ventana agotó su tope. */
     fetchCapReached: boolean;
   }> {
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = { tenantId: filters.tenantId };
     if (filters.patientProfileId) {
       where.patientProfileId = filters.patientProfileId;
+    } else if (filters.patientProfileIds) {
+      where.patientProfileId = { $in: [...filters.patientProfileIds] };
     }
     if (filters.resourceId) where.resourceId = filters.resourceId;
     if (filters.statusConceptIds && filters.statusConceptIds.length > 0) {

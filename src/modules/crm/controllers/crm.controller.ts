@@ -10,7 +10,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { CrmSalesService, CrmServiceService } from '../services';
 import {
   CreateAccountDto,
@@ -56,6 +61,11 @@ export class CrmController {
   ) {}
 
   /** UC-49-01. */
+  @Audited({
+    action: 'CRM_ACCOUNT_CREATED',
+    entity: 'crm_account',
+    entityId: 'result.id',
+  })
   @Post('accounts')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.CREATED)
@@ -68,6 +78,11 @@ export class CrmController {
   }
 
   /** UC-49-02. */
+  @Audited({
+    action: 'CRM_ACCOUNT_TEAM_MEMBER_ADDED',
+    entity: 'account_team_member',
+    entityId: 'result.id',
+  })
   @Post('accounts/:id/team-members')
   @Roles('CRM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -96,6 +111,11 @@ export class CrmController {
   }
 
   /** UC-49-03. */
+  @Audited({
+    action: 'CRM_LEAD_CREATED',
+    entity: 'lead',
+    entityId: 'result.id',
+  })
   @Post('leads')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.CREATED)
@@ -108,6 +128,11 @@ export class CrmController {
   }
 
   /** UC-49-03. */
+  @Audited({
+    action: 'CRM_LEAD_QUALIFIED',
+    entity: 'lead',
+    entityId: 'param:id',
+  })
   @Patch('leads/:id/qualify')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.OK)
@@ -121,6 +146,11 @@ export class CrmController {
   }
 
   /** UC-49-04. */
+  @Audited({
+    action: 'CRM_LEAD_CONVERTED',
+    entity: 'lead',
+    entityId: 'param:id',
+  })
   @Post('leads/:id/convert')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.CREATED)
@@ -134,6 +164,11 @@ export class CrmController {
   }
 
   /** UC-49-05 y UC-49-06. */
+  @Audited({
+    action: 'CRM_ACTIVITY_CREATED',
+    entity: 'crm_activity',
+    entityId: 'result.id',
+  })
   @Post('activities')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.CREATED)
@@ -149,6 +184,11 @@ export class CrmController {
   }
 
   /** UC-49-07. */
+  @Audited({
+    action: 'CRM_OPPORTUNITY_STAGE_ADVANCED',
+    entity: 'opportunity',
+    entityId: 'param:id',
+  })
   @Post('opportunities/:id/advance-stage')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.OK)
@@ -162,6 +202,11 @@ export class CrmController {
   }
 
   /** UC-49-08. */
+  @Audited({
+    action: 'CRM_OPPORTUNITY_WON',
+    entity: 'opportunity',
+    entityId: 'param:id',
+  })
   @Post('opportunities/:id/win')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.OK)
@@ -174,6 +219,11 @@ export class CrmController {
   }
 
   /** UC-49-09. */
+  @Audited({
+    action: 'CRM_OPPORTUNITY_LOST',
+    entity: 'opportunity',
+    entityId: 'param:id',
+  })
   @Post('opportunities/:id/lose')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.OK)
@@ -187,6 +237,11 @@ export class CrmController {
   }
 
   /** UC-49-10. */
+  @Audited({
+    action: 'CRM_PARTNERSHIP_CREATED',
+    entity: 'partnership',
+    entityId: 'result.id',
+  })
   @Post('partnerships')
   @Roles('CRM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -199,6 +254,11 @@ export class CrmController {
   }
 
   /** UC-49-11. */
+  @Audited({
+    action: 'CRM_CASE_CREATED',
+    entity: 'crm_case',
+    entityId: 'result.id',
+  })
   @Post('cases')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.CREATED)
@@ -211,6 +271,11 @@ export class CrmController {
   }
 
   /** UC-49-12. */
+  @Audited({
+    action: 'CRM_CASE_COMMENT_ADDED',
+    entity: 'crm_case_comment',
+    entityId: 'result.id',
+  })
   @Post('cases/:id/comments')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.CREATED)
@@ -232,6 +297,11 @@ export class CrmController {
   }
 
   /** UC-49-12. */
+  @Audited({
+    action: 'CRM_CASE_STATUS_CHANGED',
+    entity: 'crm_case',
+    entityId: 'param:id',
+  })
   @Patch('cases/:id/status')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.OK)
@@ -245,6 +315,11 @@ export class CrmController {
   }
 
   /** UC-49-13. */
+  @Audited({
+    action: 'CRM_CASE_RESOLVED',
+    entity: 'crm_case',
+    entityId: 'param:id',
+  })
   @Post('cases/:id/resolve')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.OK)
@@ -261,6 +336,11 @@ export class CrmController {
   }
 
   /** UC-49-15. */
+  @Audited({
+    action: 'CRM_CONTACT_CHANNEL_OPT_IN_SET',
+    entity: 'contact_channel',
+    entityId: 'param:cid',
+  })
   @Patch('contacts/:id/channels/:cid/opt-in')
   @Roles('CRM_ADMIN', 'CRM_AGENT')
   @HttpCode(HttpStatus.OK)
