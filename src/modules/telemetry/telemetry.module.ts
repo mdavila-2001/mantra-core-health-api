@@ -7,6 +7,7 @@ import {
   TelemetryEventsController,
   TelemetryAnalyticsController,
 } from './controllers';
+import { TelemetryOnboardingAnalyticsController } from './controllers/telemetry-onboarding-analytics.controller';
 import {
   TelemetryGovernanceService,
   TelemetryConsentService,
@@ -14,6 +15,7 @@ import {
   TelemetryWebAnalyticsService,
   TelemetryAnalyticsService,
 } from './services';
+import { TelemetryOnboardingAnalyticsService } from './services/telemetry-onboarding-analytics.service';
 import { WEB_ANALYTICS_PORT } from './domain/web-analytics.port';
 import { DisabledWebAnalyticsAdapter } from './infrastructure/disabled-web-analytics.adapter';
 import { GoogleAnalyticsAdapter } from './infrastructure/google-analytics/google-analytics.adapter';
@@ -56,6 +58,7 @@ import {
     TelemetryConsentController,
     TelemetryEventsController,
     TelemetryAnalyticsController,
+    TelemetryOnboardingAnalyticsController,
   ],
   providers: [
     // Repositorios
@@ -93,7 +96,12 @@ import {
     TelemetryWebAnalyticsService,
     TelemetryEventsService,
     TelemetryAnalyticsService,
+    TelemetryOnboardingAnalyticsService,
   ],
-  exports: [WEB_ANALYTICS_PORT, TelemetryWebAnalyticsService],
+  exports: [
+    WEB_ANALYTICS_PORT,
+    TelemetryWebAnalyticsService,
+    TelemetryOnboardingAnalyticsService,
+  ],
 })
 export class TelemetryModule {}

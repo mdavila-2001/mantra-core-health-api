@@ -1,10 +1,10 @@
 # Equipos de diagnóstico y sus marcas — registros de Europa (EUDAMED, MHRA, Swissmedic)
 
 Sesión `seed-dx-devices-eu` · rama `claude/adoring-curie-xdkt83` (desde `dev`) · código en
-[`tools/terminology-import/diagnostic-devices/eu/`](https://github.com/mdavila-2001/mantra-core-health-api/tree/dev/tools/terminology-import/diagnostic-devices/eu/)
+[`tools/terminology-import/diagnostic-devices/eu/`](../../tools/terminology-import/diagnostic-devices/eu/)
 · formato común: `tools/terminology-import/diagnostic-devices/README.md`, escrito por la sesión
 `master` (rama `justin/seed-dx-devices-master`); esta rama lo respeta y no lo modifica
-· fuentes y términos en [`SOURCES.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/diagnostic-devices/eu/SOURCES.md).
+· fuentes y términos en [`SOURCES.md`](../../tools/terminology-import/diagnostic-devices/eu/SOURCES.md).
 
 ## Resumen honesto
 
@@ -46,7 +46,7 @@ la propuesta al final.
 ## Alcance «diagnóstico» según la EMDN
 
 Regla: se decide por **código**, nunca por palabras del nombre (implementado en
-[`lib/emdn-scope.mjs`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/diagnostic-devices/eu/lib/emdn-scope.mjs)).
+[`lib/emdn-scope.mjs`](../../tools/terminology-import/diagnostic-devices/eu/lib/emdn-scope.mjs)).
 Las descripciones de categoría son paráfrasis propias para justificar; el nombre oficial sale de
 la EMDN descargada.
 
@@ -82,14 +82,6 @@ node tools/terminology-import/diagnostic-devices/eu/load.mjs     # dry-run; --ap
 node --test "tools/terminology-import/diagnostic-devices/eu/test/*.test.mjs"
 ```
 
-- **Carga verificada** (2026-10-25, PostgreSQL 16.15 local desechable, DDL de `database/SQL` sin tocar):
-  `load.mjs --apply` inserta 8 516 conceptos EMDN y 68 105 propiedades; la segunda corrida inserta 0
-  (solo registra su lote). El ESM de `xlsx` no trae `fs`, así que `readFirstSheet` lo declara con
-  `XLSX.set_fs`. Las 503 648 filas de equipos (`out/manifest.json`) validan sin error contra el
-  formato común que lee `master/` (`validateRow`); la mitad `it-salute-bdrdm` (200 563 filas) trae
-  `denominazione_commerciale` como marca y `cod_catalogo_fabbr_ass` como modelo, y la marca contiene
-  o iguala al modelo en 5,5 % de las filas (11 121). La licencia de la CND es *Italian Open Data
-  Licence v2.0*, leída en vivo en la ficha del conjunto.
 - **Formato de salida** (el de `master`): `out/manifest.json` con región, archivos (filas, sha256)
   y huecos; una parte `<source>-0001.ndjson.gz` por fuente (`eudamed-udi`, `it-salute-bdrdm`, …);
   `manufacturerRegistryId` con prefijo `srn:`; clase con esquema (`eu-mdr:IIa`, `eu-ivdr:C`) solo
@@ -168,8 +160,8 @@ Deduplicación: UDI-DI, certificado + modelo, o fabricante + modelo normalizados
 
 - `probe.mjs`: 0/11 alcanzables (`out/probe/probe-20261024T0335.json`). Sin cambios en la
   política de red: no se descargó nada.
-- Nuevos tras deduplicar: **0 · 0 · 0**. Loop detenido: **BLOQUEADO** por los hosts listados
-  arriba.
+- Nuevos tras deduplicar: **0 · 0 · 0**. Loop detenido: **BLOQUEADO**. Para reanudar, habilitar
+  los hosts listados arriba y relanzar el /loop (o `probe → fetch → build`).
 
 ### Pasada 4 — 2026-10-24 · réplicas públicas en GitHub (aviso de `master`)
 
@@ -221,7 +213,7 @@ Deduplicación: UDI-DI, certificado + modelo, o fabricante + modelo normalizados
   BD/RDM y CND de dati.salute.gov.it. Términos leídos en vivo: EMDN (CC BY 4.0 de la Comisión),
   IODL 2.0, Swissmedic (prohíbe la extracción automatizada) y PARD (solo Crown Copyright).
 - Resultado: **+303 085 equipos de EUDAMED y +200 563 de la BD/RDM**; 0 huecos de descarga.
-  Evidencia en [el historial de git](https://github.com/mdavila-2001/mantra-core-health-api/tree/79a7e4865ae3a5e94c3fb1304c90e19d61e1fdaa/docs/trabajo/2026-10-24-seed-dx-devices-eu-oficial/evidencia).
+  Evidencia en `docs/trabajo/2026-10-24-seed-dx-devices-eu-oficial/evidencia/`.
 - Arreglos que salieron al usar datos reales: espacio inicial en `NOMENCLATURE_CODE`; `$after`
   que cambia en cada página; encabezado del Excel v2026; la deduplicación colapsaba UDI-DI
   distintos con el mismo modelo (ahora el UDI-DI manda); 21 páginas sin metadatos de corridas
