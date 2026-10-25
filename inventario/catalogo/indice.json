@@ -21,8 +21,8 @@
     "tablasAppendOnlyDeclaradas": 140,
     "tablasConOperaciones": 947,
     "orm": {
-      "COINCIDE": 1207,
-      "DIVERGE": 23
+      "COINCIDE": 1206,
+      "DIVERGE": 24
     },
     "columnasOrm": {
       "COINCIDE": 16826,
@@ -404,7 +404,7 @@
     ],
     "tablasSinEntidad": [],
     "columnasAusentesEnOrm": 1,
-    "columnasDeMasEnOrm": 16,
+    "columnasDeMasEnOrm": 17,
     "nulabilidad": 24,
     "tipos": 0,
     "esquemasSinCatalogoDeApi": [],
@@ -535,7 +535,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 11,
       "indices": 5,
-      "operaciones": 4,
+      "operaciones": 5,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -568,7 +568,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 20,
       "indices": 8,
-      "operaciones": 12,
+      "operaciones": 13,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -678,7 +678,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 11,
       "indices": 4,
-      "operaciones": 20,
+      "operaciones": 21,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3813,8 +3813,8 @@
       "dominio": "Financiero y ERP",
       "columnas": 17,
       "indices": 8,
-      "operaciones": 24,
-      "orm": "COINCIDE",
+      "operaciones": 31,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -11557,7 +11557,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 8,
-      "operaciones": 143,
+      "operaciones": 145,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11568,7 +11568,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 20,
       "indices": 12,
-      "operaciones": 66,
+      "operaciones": 68,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12085,7 +12085,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 9,
       "indices": 6,
-      "operaciones": 41,
+      "operaciones": 49,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12096,7 +12096,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 27,
       "indices": 14,
-      "operaciones": 110,
+      "operaciones": 118,
       "orm": "COINCIDE",
       "appendOnly": false
     },

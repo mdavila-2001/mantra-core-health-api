@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1551,
+    "total": 1553,
     "porOrigen": {
-      "CONTRATO": 1533,
-      "CONTRATO_AUSENTE": 18
+      "CONTRATO": 1536,
+      "CONTRATO_AUSENTE": 17
     },
     "porRiesgo": {
-      "BAJO": 497,
+      "BAJO": 499,
       "MEDIO": 875,
       "ALTO": 179
     },
-    "conTablas": 1479,
+    "conTablas": 1481,
     "sinTablasSinDeterminar": 19,
     "sinExplicacionDeNegocio": 0,
     "conPruebas": 882,
-    "conRequerimientos": 1551
+    "conRequerimientos": 1553
   },
   "endpoints": [
     {
@@ -672,6 +672,24 @@
         "PRACTITIONER"
       ],
       "tablas": 7,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerController_readAssetDepreciations",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/accounting/practitioner/assets/{id}/depreciations",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Histórico de depreciación de un activo propio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -4442,12 +4460,12 @@
     },
     {
       "id": "ClinicalReadController_getReceivedServices",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/clinical/patients/{patientProfileId}/received-services",
       "modulo": "clinical",
       "bloque": "Clínico y Diagnóstico",
-      "nombre": "Servicios que el paciente recibió: intervenciones médicas realizadas y vacunas. Es la pestaña «Servicios recibidos» de la historia. El estudio de laboratorio y la imagenología no entran: viven en «Resultados». La política de acceso es la del resumen (`ClinicalRecordAccessGuard`) y la lectura deja su asiento en `audit.data_access_log` antes de ejecutarse (`@AccessLogged`).",
+      "nombre": "Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -16275,7 +16293,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 2,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -16294,7 +16312,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 25,
+      "tablas": 27,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -16313,7 +16331,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16332,7 +16350,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16351,7 +16369,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 4,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16370,7 +16388,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16389,7 +16407,26 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MedicalGroupsController_listEligibleMembers",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/medical-groups/eligible-members",
+      "modulo": "medical_groups",
+      "bloque": null,
+      "nombre": "Colegas que se pueden invitar a un grupo de este servicio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"

@@ -2,9 +2,9 @@
 
 # Inventario de flujos
 
-**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1551 árboles de decisión**.
+**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1553 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1384 · sin ellas: 167
+- Operaciones con decisiones propias: 1386 · sin ellas: 167
 - Operaciones sin proceso asignado: 0
 - Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 32 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
 
@@ -12,7 +12,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 
 | Módulo | Procesos | Operaciones | Máquinas | Documento |
 |---|---|---|---|---|
-| `accounting` | 1 | 45 | 1 | [accounting.md](accounting.md) |
+| `accounting` | 1 | 46 | 1 | [accounting.md](accounting.md) |
 | `ads` | 1 | 18 | 0 | [ads.md](ads.md) |
 | `app` | 1 | 6 | 0 | [app.md](app.md) |
 | `audio_assets` | 1 | 10 | 0 | [audio_assets.md](audio_assets.md) |
@@ -51,7 +51,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `integrations` | 1 | 15 | 0 | [integrations.md](integrations.md) |
 | `lakehouse` | 1 | 13 | 0 | [lakehouse.md](lakehouse.md) |
 | `marketing` | 1 | 15 | 0 | [marketing.md](marketing.md) |
-| `medical_groups` | 1 | 8 | 0 | [medical_groups.md](medical_groups.md) |
+| `medical_groups` | 1 | 9 | 0 | [medical_groups.md](medical_groups.md) |
 | `messaging` | 1 | 21 | 0 | [messaging.md](messaging.md) |
 | `object_storage` | 1 | 14 | 0 | [object_storage.md](object_storage.md) |
 | `ops_console` | 1 | 9 | 0 | [ops_console.md](ops_console.md) |
