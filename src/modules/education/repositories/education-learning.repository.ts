@@ -193,6 +193,22 @@ export class EducationLearningRepository {
     return em.findOne(PaymentIntents, { id });
   }
 
+  /**
+   * Relee el intento de pago con bloqueo de escritura. Serializa dos
+   * inscripciones simultáneas que citan el mismo pago: la segunda espera al
+   * commit de la primera y ya ve su inscripción.
+   */
+  findPaymentIntentForUpdate(
+    em: EntityManager,
+    id: string,
+  ): Promise<PaymentIntents | null> {
+    return em.findOne(
+      PaymentIntents,
+      { id },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
   /** Inscripción que ya se apoya en ese intento de pago, de cualquier estado. */
   findEnrollmentByPaymentIntent(
     em: EntityManager,

@@ -319,6 +319,14 @@ export class PromotionsLoyaltyService {
 
     return this.em.transactional(async (tx) => {
       const program = await this.loadProgramInScope(tx, programId, scope);
+
+      // Un `MEMBER` sólo inscribe a sí mismo y no fija su propio bono: el
+      // programa no define bono de bienvenida, así que para él es 0. Quien
+      // administra el programa inscribe a cualquiera y puede otorgarlo.
+      const staff = this.mayActOnAnyMembership(actor, scope);
+      if (!staff) this.assertOwnMemberRef(dto, actor);
+      const signupBonusPoints = staff ? dto.signupBonusPoints : undefined;
+
       if (program.stateConceptId !== CONCEPTS.LOYALTY_ACTIVE) {
         throw new PreconditionFailedException(
           'El programa no está activo',
@@ -367,24 +375,21 @@ export class PromotionsLoyaltyService {
         actorUserId: actor.id,
       });
 
-      if (dto.signupBonusPoints && Number(dto.signupBonusPoints) > 0) {
+      if (signupBonusPoints && Number(signupBonusPoints) > 0) {
         this.loyaltyRepo.createLedgerEntry(tx, {
           loyaltyMembershipId: membership.id,
           directionConceptId: CONCEPTS.POINTS_EARN,
-          points: dto.signupBonusPoints,
+          points: signupBonusPoints,
           reasonConceptId: CONCEPTS.REASON_SIGNUP,
-          balanceAfter: dto.signupBonusPoints,
+          balanceAfter: signupBonusPoints,
           // La clave sale de la propia membresía: el bono de bienvenida es único
           // por definición, así que no hace falta que el cliente la aporte.
           idempotencyKey: `signup:${membership.id}`,
           recordedByUserId: actor.id,
         });
-        membership.pointsBalance = dto.signupBonusPoints;
-        membership.lifetimePoints = dto.signupBonusPoints;
-        membership.currentTierId = this.tierFor(
-          tiers,
-          dto.signupBonusPoints,
-        )?.id;
+        membership.pointsBalance = signupBonusPoints;
+        membership.lifetimePoints = signupBonusPoints;
+        membership.currentTierId = this.tierFor(tiers, signupBonusPoints)?.id;
       }
 
       return {
@@ -1067,6 +1072,26 @@ export class PromotionsLoyaltyService {
       roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined) ||
       roleAuthorizesInTenant(actor, 'SYSTEM', undefined)
     );
+  }
+
+  /**
+   * Exige que el miembro que se inscribe sea el propio actor: su usuario
+   * (`USER`) o su perfil de paciente (`PATIENT`, claim `pid`).
+   *
+   * @throws ResourceNotFoundException uniforme si es otra persona.
+   */
+  private assertOwnMemberRef(
+    dto: { memberType: RewardMemberType; memberRefId: string },
+    actor: AuthenticatedUser,
+  ): void {
+    const owner =
+      (dto.memberType === 'USER' && dto.memberRefId === actor.id) ||
+      (dto.memberType === 'PATIENT' &&
+        actor.patientProfileId !== undefined &&
+        dto.memberRefId === actor.patientProfileId);
+    if (!owner) {
+      throw promotionsOutOfScope('Membresía no encontrada');
+    }
   }
 
   /**

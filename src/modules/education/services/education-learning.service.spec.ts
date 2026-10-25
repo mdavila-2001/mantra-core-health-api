@@ -44,6 +44,7 @@ function build() {
     findEnrollmentForUpdate: mockFn(),
     findLiveEnrollment: mockFn(),
     findPaymentIntent: mockFn(),
+    findPaymentIntentForUpdate: mockFn(),
     findEnrollmentByPaymentIntent: mockFn(),
     createLessonProgress: mockFn(),
     findProgressByEnrollment: mockFn(),
@@ -151,6 +152,12 @@ function activeEnrollment(overrides: Record<string, unknown> = {}): any {
     progressPercent: '0',
     ...overrides,
   };
+}
+
+/** Deja el intento de pago disponible para la lectura sin bloqueo y para la bloqueada. */
+function seedIntent(d: ReturnType<typeof build>, intent: any) {
+  d.learningRepo.findPaymentIntent.mockResolvedValue(intent);
+  d.learningRepo.findPaymentIntentForUpdate.mockResolvedValue(intent);
 }
 
 /** Intento de pago confirmado del tenant T1. */
@@ -261,7 +268,7 @@ describe('EducationLearningService', () => {
       const d = build();
       d.catalogRepo.findCourseById.mockResolvedValue(publishedCourse());
       d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
-      d.learningRepo.findPaymentIntent.mockResolvedValue(paidIntent());
+      seedIntent(d, paidIntent());
       d.learningRepo.findEnrollmentByPaymentIntent.mockResolvedValue(null);
       d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
 
@@ -273,15 +280,154 @@ describe('EducationLearningService', () => {
       expect(res.id).toBe(ENROLLMENT);
     });
 
+    describe('fuentes y cursos de pago para un aprendiz', () => {
+      const learner = {
+        id: 'user-7',
+        roles: ['LEARNER'],
+        practitionerProfileId: LEARNER,
+      } as any;
+      const own = (overrides: Record<string, unknown> = {}) =>
+        dto({ learnerRefId: undefined, ...overrides });
+      const paidCourse = () =>
+        publishedCourse({ price: '120.00', currencyConceptId: 'cur-1' });
+
+      it.each(['ASSIGNED', 'PARTNER'] as const)(
+        'un aprendiz no puede inscribirse con la fuente administrativa %s',
+        async (source) => {
+          const d = build();
+          d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+
+          await expect(
+            d.service.enrollLearner(own({ source }), learner),
+          ).rejects.toMatchObject({
+            reason: EducationErrorReason.ENROLLMENT_SOURCE_NOT_ALLOWED,
+          });
+          expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+        },
+      );
+
+      it('quien administra la formación sí puede usar ASSIGNED y PARTNER', async () => {
+        const d = build();
+        d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+        d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+
+        for (const source of ['ASSIGNED', 'PARTNER'] as const) {
+          await expect(
+            d.service.enrollLearner(dto({ source }), actor),
+          ).resolves.toMatchObject({ id: ENROLLMENT });
+        }
+      });
+
+      it('un curso de pago no admite a un aprendiz con SELF', async () => {
+        const d = build();
+        d.catalogRepo.findCourseById.mockResolvedValue(paidCourse());
+        d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+
+        await expect(
+          d.service.enrollLearner(own({ source: 'SELF' }), learner),
+        ).rejects.toMatchObject({
+          reason: EducationErrorReason.ENROLLMENT_PAYMENT_REQUIRED,
+        });
+        expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+      });
+
+      it('un curso gratuito sí admite SELF; uno de pago, con compra confirmada', async () => {
+        const free = build();
+        free.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+        free.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+        await expect(
+          free.service.enrollLearner(own({ source: 'SELF' }), learner),
+        ).resolves.toMatchObject({ id: ENROLLMENT });
+
+        const paid = build();
+        paid.catalogRepo.findCourseById.mockResolvedValue(paidCourse());
+        paid.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+        seedIntent(paid, paidIntent());
+        paid.learningRepo.findEnrollmentByPaymentIntent.mockResolvedValue(null);
+        paid.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+        await expect(
+          paid.service.enrollLearner(
+            own({ source: 'PURCHASED', paymentIntentId: INTENT }),
+            learner,
+          ),
+        ).resolves.toMatchObject({ id: ENROLLMENT });
+      });
+
+      it('quien administra puede inscribir sin pago en un curso de pago (cortesía)', async () => {
+        const d = build();
+        d.catalogRepo.findCourseById.mockResolvedValue(paidCourse());
+        d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+        d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+
+        await expect(
+          d.service.enrollLearner(dto({ source: 'ASSIGNED' }), actor),
+        ).resolves.toMatchObject({ id: ENROLLMENT });
+      });
+
+      it.each(['SELF', 'ASSIGNED', 'PARTNER'] as const)(
+        'un intento de pago con la fuente %s se rechaza',
+        async (source) => {
+          const d = build();
+
+          await expect(
+            d.service.enrollLearner(
+              dto({ source, paymentIntentId: INTENT }),
+              actor,
+            ),
+          ).rejects.toMatchObject({
+            reason: EducationErrorReason.ENROLLMENT_PAYMENT_NOT_APPLICABLE,
+          });
+          expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+        },
+      );
+    });
+
     describe('verificación del pago de una inscripción comprada', () => {
+      it('bloquea la fila del pago tras comprobar su tenant y antes de ver si ya se usó', async () => {
+        const d = build();
+        const order: string[] = [];
+        d.learningRepo.findPaymentIntent.mockImplementation(async () => {
+          order.push('lectura');
+          return paidIntent();
+        });
+        d.learningRepo.findPaymentIntentForUpdate.mockImplementation(
+          async () => {
+            order.push('bloqueo');
+            return paidIntent();
+          },
+        );
+        d.learningRepo.findEnrollmentByPaymentIntent.mockImplementation(
+          async () => {
+            order.push('uso');
+            return null;
+          },
+        );
+        d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+        d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+
+        await d.service.enrollLearner(purchased(), actor);
+
+        expect(order).toEqual(['lectura', 'bloqueo', 'uso']);
+      });
+
+      it('un intento ajeno no llega a bloquearse', async () => {
+        const d = build();
+        d.learningRepo.findPaymentIntent.mockResolvedValue(
+          paidIntent({ tenantId: T2 }),
+        );
+
+        await expectOutOfScope(d.service.enrollLearner(purchased(), actor));
+        expect(
+          d.learningRepo.findPaymentIntentForUpdate,
+        ).not.toHaveBeenCalled();
+      });
+
       const purchased = () =>
         dto({ source: 'PURCHASED' as const, paymentIntentId: INTENT });
 
       it('un intento de pago de otro tenant responde como inexistente y no inscribe', async () => {
         const d = build();
-        d.learningRepo.findPaymentIntent.mockResolvedValue(
-          paidIntent({ tenantId: T2 }),
-        );
+        seedIntent(d, paidIntent({ tenantId: T2 }));
 
         await expectOutOfScope(d.service.enrollLearner(purchased(), actor));
         expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
@@ -289,7 +435,7 @@ describe('EducationLearningService', () => {
 
       it('un intento de pago inexistente responde igual que uno ajeno', async () => {
         const d = build();
-        d.learningRepo.findPaymentIntent.mockResolvedValue(null);
+        seedIntent(d, null);
 
         await expectOutOfScope(d.service.enrollLearner(purchased(), actor));
         expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
@@ -297,9 +443,7 @@ describe('EducationLearningService', () => {
 
       it('un pago sin confirmar (pendiente, fallido) no habilita la inscripción', async () => {
         const d = build();
-        d.learningRepo.findPaymentIntent.mockResolvedValue(
-          paidIntent({ statusConceptId: CONCEPTS.PI_PENDING }),
-        );
+        seedIntent(d, paidIntent({ statusConceptId: CONCEPTS.PI_PENDING }));
 
         await expect(
           d.service.enrollLearner(purchased(), actor),
@@ -311,7 +455,7 @@ describe('EducationLearningService', () => {
 
       it('un pago que ya respalda otra inscripción no se reutiliza', async () => {
         const d = build();
-        d.learningRepo.findPaymentIntent.mockResolvedValue(paidIntent());
+        seedIntent(d, paidIntent());
         d.learningRepo.findEnrollmentByPaymentIntent.mockResolvedValue({
           id: 'enr-prev',
         });

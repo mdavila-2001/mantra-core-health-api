@@ -11,6 +11,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import {
   EducationCatalogRepository,
@@ -119,6 +120,28 @@ export class EducationLearningService {
         { courseId: dto.courseId },
       );
     }
+    // Un pago sólo respalda una compra: en otra fuente no significa nada y
+    // aceptarlo dejaría un intento de pago colgado de una inscripción gratuita.
+    if (dto.source !== 'PURCHASED' && dto.paymentIntentId) {
+      throw new PreconditionFailedException(
+        'El intento de pago sólo aplica a una inscripción comprada',
+        { courseId: dto.courseId },
+        EducationErrorReason.ENROLLMENT_PAYMENT_NOT_APPLICABLE,
+      );
+    }
+    // `ASSIGNED` y `PARTNER` son altas administrativas: un aprendiz que opera
+    // por su cuenta se inscribe solo (`SELF`) o pagando (`PURCHASED`).
+    const learnerOnly = this.scope.isLearnerOnly(actor);
+    if (
+      learnerOnly &&
+      (dto.source === 'ASSIGNED' || dto.source === 'PARTNER')
+    ) {
+      throw new InsufficientRoleException(
+        'Esta forma de inscripción es administrativa',
+        undefined,
+        EducationErrorReason.ENROLLMENT_SOURCE_NOT_ALLOWED,
+      );
+    }
 
     // El aprendiz de la inscripción sale del servidor para un `LEARNER`: un
     // identificador ajeno en el cuerpo se rechaza antes de abrir la transacción.
@@ -140,6 +163,21 @@ export class EducationLearningService {
         throw new PreconditionFailedException('El curso no está publicado', {
           courseId: dto.courseId,
         });
+      }
+
+      // Un curso de pago sólo admite a un aprendiz con una compra confirmada:
+      // `SELF` no es una puerta de entrada gratuita. Quien administra la
+      // formación puede inscribir sin pago (cortesías, convenios).
+      if (
+        learnerOnly &&
+        dto.source !== 'PURCHASED' &&
+        Number(course.price ?? '0') > 0
+      ) {
+        throw new PreconditionFailedException(
+          'El curso es de pago: la inscripción requiere una compra confirmada',
+          { courseId: dto.courseId },
+          EducationErrorReason.ENROLLMENT_PAYMENT_REQUIRED,
+        );
       }
 
       // Una inscripción comprada exige un pago real: el intento tiene que ser
@@ -246,14 +284,21 @@ export class EducationLearningService {
     courseId: string,
     paymentIntentId: string,
   ): Promise<void> {
-    const intent = await this.learningRepo.findPaymentIntent(
+    const unlocked = await this.learningRepo.findPaymentIntent(
       tx,
       paymentIntentId,
     );
-    assertResourceInTenant(intent, intent?.tenantId, requireTenantId(), {
+    assertResourceInTenant(unlocked, unlocked?.tenantId, requireTenantId(), {
       message: 'Intento de pago no encontrado',
       reason: EducationErrorReason.EDUCATION_RESOURCE_OUT_OF_SCOPE,
     });
+    // Se bloquea la fila del pago DESPUÉS de comprobar su tenant y ANTES de
+    // mirar si ya respalda otra inscripción: sin el bloqueo, dos peticiones
+    // simultáneas con el mismo pago pasaban las dos la comprobación.
+    const intent = await this.learningRepo.findPaymentIntentForUpdate(
+      tx,
+      paymentIntentId,
+    );
     if (intent?.statusConceptId !== CONCEPTS.PI_SUCCEEDED) {
       throw new PreconditionFailedException(
         'El pago de la inscripción no está confirmado',

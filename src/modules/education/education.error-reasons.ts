@@ -19,6 +19,12 @@ export enum EducationErrorReason {
   LEARNER_ENROLLMENT_OWNER_REQUIRED = 'LEARNER_ENROLLMENT_OWNER_REQUIRED',
   /** El intento de pago de una inscripción comprada no está confirmado (`PI_SUCCEEDED`). */
   ENROLLMENT_PAYMENT_NOT_CONFIRMED = 'ENROLLMENT_PAYMENT_NOT_CONFIRMED',
+  /** Un aprendiz no puede inscribirse con una fuente administrativa (`ASSIGNED`, `PARTNER`). */
+  ENROLLMENT_SOURCE_NOT_ALLOWED = 'ENROLLMENT_SOURCE_NOT_ALLOWED',
+  /** El curso es de pago: el aprendiz sólo se inscribe con una compra confirmada. */
+  ENROLLMENT_PAYMENT_REQUIRED = 'ENROLLMENT_PAYMENT_REQUIRED',
+  /** Se envió un intento de pago en una inscripción que no es `PURCHASED`. */
+  ENROLLMENT_PAYMENT_NOT_APPLICABLE = 'ENROLLMENT_PAYMENT_NOT_APPLICABLE',
   /** El intento de pago ya respalda otra inscripción. */
   ENROLLMENT_PAYMENT_ALREADY_USED = 'ENROLLMENT_PAYMENT_ALREADY_USED',
 }

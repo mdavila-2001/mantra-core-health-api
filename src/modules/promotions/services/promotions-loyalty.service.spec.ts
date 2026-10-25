@@ -307,6 +307,105 @@ describe('PromotionsLoyaltyService', () => {
       expect(d.loyaltyRepo.createLedgerEntry).not.toHaveBeenCalled();
     });
 
+    describe('inscripción por un MEMBER', () => {
+      const self = { id: MEMBER, roles: ['MEMBER'] } as any;
+      const activeProgram = () => ({
+        id: PROGRAM,
+        tenantId: TENANT,
+        stateConceptId: CONCEPTS.LOYALTY_ACTIVE,
+      });
+
+      function wire(d: ReturnType<typeof build>) {
+        d.loyaltyRepo.findProgramById.mockResolvedValue(activeProgram());
+        d.loyaltyRepo.findMembershipByMember.mockResolvedValue(null);
+        d.loyaltyRepo.findTiersByProgram.mockResolvedValue(tiers());
+        d.loyaltyRepo.createMembership.mockReturnValue({
+          id: MEMBERSHIP,
+          currentTierId: 'tier-bronze',
+          pointsBalance: '0',
+          lifetimePoints: '0',
+        });
+      }
+
+      it('un MEMBER no inscribe a otra persona: 404 uniforme y no crea nada', async () => {
+        const d = build();
+        wire(d);
+
+        await expectOutOfScope(
+          d.service.enrollMember(
+            PROGRAM,
+            { memberType: 'USER', memberRefId: 'otra-persona' } as any,
+            self,
+          ),
+          'Membresía no encontrada',
+        );
+
+        expect(d.loyaltyRepo.createMembership).not.toHaveBeenCalled();
+        expect(d.loyaltyRepo.createLedgerEntry).not.toHaveBeenCalled();
+      });
+
+      it('un MEMBER con perfil de paciente sólo inscribe su propio perfil', async () => {
+        const d = build();
+        wire(d);
+        const patient = {
+          id: 'user-9',
+          roles: ['MEMBER'],
+          patientProfileId: PATIENT_PROFILE,
+        } as any;
+
+        await expectOutOfScope(
+          d.service.enrollMember(
+            PROGRAM,
+            { memberType: 'PATIENT', memberRefId: 'perfil-ajeno' } as any,
+            patient,
+          ),
+          'Membresía no encontrada',
+        );
+        const res = await d.service.enrollMember(
+          PROGRAM,
+          { memberType: 'PATIENT', memberRefId: PATIENT_PROFILE } as any,
+          patient,
+        );
+        expect(res.alreadyEnrolled).toBe(false);
+      });
+
+      it('un MEMBER que se inscribe a sí mismo no se acuña un bono: signupBonusPoints se ignora', async () => {
+        const d = build();
+        wire(d);
+
+        const res = await d.service.enrollMember(
+          PROGRAM,
+          { ...dto, signupBonusPoints: '1000000' } as any,
+          self,
+        );
+
+        expect(res.alreadyEnrolled).toBe(false);
+        expect(res.pointsBalance).toBe('0');
+        expect(d.loyaltyRepo.createLedgerEntry).not.toHaveBeenCalled();
+      });
+
+      it('quien administra el programa inscribe a otros y puede otorgar el bono', async () => {
+        const d = build();
+        wire(d);
+        d.loyaltyRepo.createLedgerEntry.mockImplementation(
+          (_tx: any, data: any) => ({ id: 'entry-1', ...data }),
+        );
+
+        const res = await d.service.enrollMember(
+          PROGRAM,
+          {
+            memberType: 'USER',
+            memberRefId: 'otra-persona',
+            signupBonusPoints: '25',
+          } as any,
+          actor,
+        );
+
+        expect(res.pointsBalance).toBe('25');
+        expect(d.loyaltyRepo.createLedgerEntry).toHaveBeenCalledTimes(1);
+      });
+    });
+
     it('credits the signup bonus and moves the member to the tier it reaches', async () => {
       const d = build();
       d.loyaltyRepo.findProgramById.mockResolvedValue({
