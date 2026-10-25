@@ -1,7 +1,7 @@
 # Catálogo de módulos
 
 > Generado por `yarn docs:modules:sync` desde `src/modules/*/README.md` reales — no editar a
-> mano. 70 módulos, de los cuales 63 tienen entidades propias (ver
+> mano. 71 módulos, de los cuales 63 tienen entidades propias (ver
 > [`docs/reports/system-inventory.md`](../reports/system-inventory.md) §2 para la reconciliación
 > del conteo).
 
@@ -66,6 +66,7 @@
 | [`education`](education.md) | 1 | 3 | 2 | 15 | 1 |
 | [`erp`](erp.md) | 1 | 3 | 3 | 51 | 1 |
 | [`health_context`](health_context.md) | 1 | 2 | 1 | 10 | 1 |
+| [`medical_centers`](medical_centers.md) | 1 | 2 | 3 | 0 | 1 |
 | [`medical_groups`](medical_groups.md) | 1 | 1 | 2 | 2 | 1 |
 | [`ops_console`](ops_console.md) | 1 | 2 | 2 | 0 | 1 |
 | [`platform_ops`](platform_ops.md) | 1 | 5 | 5 | 38 | 1 |
@@ -77,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **285** | **459** | **431** | **1274** | **532** |
+| **Total** | **286** | **461** | **434** | **1274** | **533** |
