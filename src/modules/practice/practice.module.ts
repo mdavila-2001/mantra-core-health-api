@@ -22,6 +22,7 @@ import {
   PracticeOrganizationReadService,
   PracticeAccessService,
   PracticeAdministrationService,
+  HealthcareServiceOffersService,
 } from './services';
 import {
   PracticesRepository,
@@ -38,6 +39,7 @@ import {
   PracticeOrganizationReadRepository,
 } from './repositories';
 import { ServiceCatalogRepository } from '../billing/repositories';
+import { ProcedureReferenceReader } from '../billing/services/procedure-reference.reader';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { AddressesRepository } from '../common/repositories';
 // ALV-005/006: `PractitionerSitesService.createOwnSite` necesita saber de
@@ -93,6 +95,8 @@ import {
     // e importarlo cerraría el ciclo. El repositorio no guarda estado —recibe el
     // `em` en cada llamada—, así que una segunda instancia es la misma cosa.
     ServiceCatalogRepository,
+    // Lector sin estado del nomenclador: se registra la clase, no `BillingModule`.
+    ProcedureReferenceReader,
     AddressesRepository,
     PersonAccountLinksRepository,
     HealthPractitionerProfilesRepository,
@@ -111,6 +115,7 @@ import {
     PracticeOrganizationReadService,
     PracticeAccessService,
     PracticeAdministrationService,
+    HealthcareServiceOffersService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que

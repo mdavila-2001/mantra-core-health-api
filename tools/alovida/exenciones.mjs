@@ -91,6 +91,14 @@ const SIN_ROLES_AUTORIZADOS = [
     endpoints: ['POST :noticeId/read'],
   },
   {
+    file: 'src/modules/practice/controllers/practices.controller.ts',
+    why: 'Membresía administrativa en la organización de la ruta: `ClinicalStructureService.publishHealthcareService` y `HealthcareServiceOffersService.updateOffer` llaman a `PracticeAdministrationService.assertCanAdministerPractice` antes de leer o escribir nada (404 si la práctica no existe, 403 si el actor administra otra organización; pasan los roles de plataforma).',
+    endpoints: [
+      'POST :practiceId/healthcare-services',
+      'PATCH :practiceId/healthcare-services/:id',
+    ],
+  },
+  {
     file: 'src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts',
     why: 'Autoservicio del profesional: `PractitionerSignatureAssetsService.setOwn` resuelve el perfil con `requireOwnPractitionerProfileId` y valida que los archivos sean utilizables por el actor.',
     endpoints: ['PUT '],

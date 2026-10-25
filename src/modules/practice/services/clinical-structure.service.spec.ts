@@ -9,7 +9,10 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { ClinicalStructureService } from './clinical-structure.service';
 import { PRAC } from '../practice.concepts';
+import { ForbiddenException } from '@nestjs/common';
+import { UniqueConstraintViolationException } from '@mikro-orm/postgresql';
 import {
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
   runWithTenant,
@@ -77,7 +80,19 @@ function build() {
     findBySite: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
-  const servicesRepo = { create: mockFn() };
+  const servicesRepo = {
+    create: mockFn(),
+    findBySiteAndConcept: mockFn().mockResolvedValue(null),
+  };
+  const administration = {
+    assertCanAdministerPractice: mockFn().mockResolvedValue({
+      id: 'p1',
+      tenantId: TENANT_A,
+      statusConceptId: PRAC.PRACTICE_ACTIVE,
+    }),
+  };
+  const catalogRepo = { findById: mockFn() };
+  const procedures = { isProcedure: mockFn().mockResolvedValue(true) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new ClinicalStructureService(
     em as any,
@@ -86,6 +101,9 @@ function build() {
     unitsRepo,
     spacesRepo,
     servicesRepo as any,
+    administration as any,
+    catalogRepo as any,
+    procedures as any,
     logger as any,
   );
   return {
@@ -97,6 +115,9 @@ function build() {
     unitsRepo,
     spacesRepo,
     servicesRepo,
+    administration,
+    catalogRepo,
+    procedures,
   };
 }
 
@@ -189,34 +210,202 @@ describe('ClinicalStructureService', () => {
     });
   });
 
-  describe('publishHealthcareService (UC-14-06)', () => {
-    it('throws when the practice is missing', async () => {
-      const d = build();
-      d.practicesRepo.findById.mockResolvedValue(null);
-      await expect(
-        d.service.publishHealthcareService('p1', {} as any, actor),
-      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  describe('publishHealthcareService (UC-14-06, A-6, A-13)', () => {
+    const PROCEDURE = 'proc-endoscopia';
+    const dto = (overrides: Record<string, unknown> = {}): any => ({
+      practiceSiteId: 's1',
+      serviceConceptId: PROCEDURE,
+      serviceCatalogId: 'cat-1',
+      ...overrides,
+    });
+    const goodItem = (overrides: Record<string, unknown> = {}): any => ({
+      id: 'cat-1',
+      practiceId: 'p1',
+      isActive: true,
+      serviceConceptId: PROCEDURE,
+      ...overrides,
     });
 
-    it('publishes an active service', async () => {
+    /**
+     * Sistema bajo prueba listo para publicar: sede de la práctica y un ítem de
+     * catálogo que sirve.
+     * @returns Resultado de build.
+     */
+    function ready() {
       const d = build();
-      d.practicesRepo.findById.mockResolvedValue({
-        id: 'p1',
-        statusConceptId: PRAC.PRACTICE_ACTIVE,
-      });
-      const created = {
+      d.sitesRepo.findById.mockResolvedValue({ id: 's1', practiceId: 'p1' });
+      d.catalogRepo.findById.mockResolvedValue(goodItem());
+      d.servicesRepo.create.mockImplementation((_tx: any, data: any) => ({
         id: 'hs1',
-        practiceId: 'p1',
-        statusConceptId: PRAC.SERVICE_ACTIVE,
+        practiceId: data.practiceId,
+        statusConceptId: data.statusConceptId,
         createdAt: new Date(),
-      };
-      d.servicesRepo.create.mockReturnValue(created);
-      const res = await d.service.publishHealthcareService(
+        ...data,
+      }));
+      return d;
+    }
+
+    it('throws when the practice is missing', async () => {
+      const d = build();
+      d.administration.assertCanAdministerPractice.mockRejectedValue(
+        new ResourceNotFoundException('Práctica no encontrada'),
+      );
+      await expect(
+        d.service.publishHealthcareService('p1', dto(), actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.servicesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el administrador de otra organización recibe 403 y no se persiste nada', async () => {
+      const d = ready();
+      d.administration.assertCanAdministerPractice.mockRejectedValue(
+        new ForbiddenException('otra organización'),
+      );
+
+      await expect(
+        d.service.publishHealthcareService('p1', dto(), actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.servicesRepo.create).not.toHaveBeenCalled();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('rejects when the practice is not active', async () => {
+      const d = ready();
+      d.administration.assertCanAdministerPractice.mockResolvedValue({
+        id: 'p1',
+        statusConceptId: 'otra',
+      });
+
+      await expect(
+        d.service.publishHealthcareService('p1', dto(), actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('publishes an active service y guarda el ítem de catálogo que fija el precio', async () => {
+      const d = ready();
+
+      const res = await d.service.publishHealthcareService('p1', dto(), actor);
+
+      expect(res.status).toBe(PRAC.SERVICE_ACTIVE);
+      expect(d.servicesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          practiceId: 'p1',
+          practiceSiteId: 's1',
+          serviceConceptId: PROCEDURE,
+          serviceCatalogId: 'cat-1',
+          statusConceptId: PRAC.SERVICE_ACTIVE,
+        }),
+      );
+    });
+
+    it('una sede de otra práctica da 422', async () => {
+      const d = ready();
+      d.sitesRepo.findById.mockResolvedValue({ id: 's1', practiceId: 'otra' });
+
+      await expect(
+        d.service.publishHealthcareService('p1', dto(), actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.servicesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un concepto fuera de VS_BO_MEDICAL_PROCEDURE da 422', async () => {
+      const d = ready();
+      d.procedures.isProcedure.mockResolvedValue(false);
+
+      const failure = await d.service
+        .publishHealthcareService('p1', dto(), actor)
+        .catch((e: unknown) => e);
+
+      expect(failure).toBeInstanceOf(PreconditionFailedException);
+      expect((failure as PreconditionFailedException).reason).toBe(
+        PracticeErrorReason.SERVICE_CONCEPT_NOT_A_PROCEDURE,
+      );
+      expect(d.servicesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['de otra práctica', { practiceId: 'otra' }],
+      ['con otro serviceConceptId', { serviceConceptId: 'otro-proc' }],
+      ['inactivo', { isActive: false }],
+    ])('un ítem de catálogo %s da 422', async (_name, change) => {
+      const d = ready();
+      d.catalogRepo.findById.mockResolvedValue(goodItem(change));
+
+      const failure = await d.service
+        .publishHealthcareService('p1', dto(), actor)
+        .catch((e: unknown) => e);
+
+      expect(failure).toBeInstanceOf(PreconditionFailedException);
+      expect((failure as PreconditionFailedException).reason).toBe(
+        PracticeErrorReason.CATALOG_ITEM_NOT_ELIGIBLE,
+      );
+      expect(d.servicesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un ítem de catálogo inexistente da 422', async () => {
+      const d = ready();
+      d.catalogRepo.findById.mockResolvedValue(null);
+
+      await expect(
+        d.service.publishHealthcareService('p1', dto(), actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('la misma sede y el mismo procedimiento por segunda vez da 409', async () => {
+      const d = ready();
+      d.servicesRepo.findBySiteAndConcept.mockResolvedValue({ id: 'hs0' });
+
+      const failure = await d.service
+        .publishHealthcareService('p1', dto(), actor)
+        .catch((e: unknown) => e);
+
+      expect(failure).toBeInstanceOf(ConflictException);
+      expect((failure as ConflictException).reason).toBe(
+        PracticeErrorReason.SERVICE_ALREADY_OFFERED_AT_SITE,
+      );
+      expect(d.servicesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('una violación del único ux_healthcare_services_site_service (23505) también da 409', async () => {
+      const d = ready();
+      d.tx.flush.mockRejectedValue(
+        new UniqueConstraintViolationException(new Error('duplicate key')),
+      );
+
+      await expect(
+        d.service.publishHealthcareService('p1', dto(), actor),
+      ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    it('A-13: dos sedes de la misma práctica pueden fijar su precio con ítems distintos', async () => {
+      const d = ready();
+      d.sitesRepo.findById.mockImplementation((_tx: any, id: string) =>
+        Promise.resolve({ id, practiceId: 'p1' }),
+      );
+      d.catalogRepo.findById.mockImplementation((_tx: any, id: string) =>
+        Promise.resolve(goodItem({ id })),
+      );
+
+      await d.service.publishHealthcareService(
         'p1',
-        {} as any,
+        dto({ practiceSiteId: 's1', serviceCatalogId: 'cat-norte' }),
         actor,
       );
-      expect(res.status).toBe(PRAC.SERVICE_ACTIVE);
+      await d.service.publishHealthcareService(
+        'p1',
+        dto({ practiceSiteId: 's2', serviceCatalogId: 'cat-sur' }),
+        actor,
+      );
+
+      const created = d.servicesRepo.create.mock.calls.map((call: any[]) => [
+        call[1].practiceSiteId,
+        call[1].serviceCatalogId,
+      ]);
+      expect(created).toEqual([
+        ['s1', 'cat-norte'],
+        ['s2', 'cat-sur'],
+      ]);
     });
   });
 });
@@ -312,32 +501,22 @@ describe('ClinicalStructureService · alcance de tenant (PRAC-01)', () => {
     expect(d.sitesRepo.findById).not.toHaveBeenCalled();
   });
 
-  it('publicar un servicio en la práctica de otro tenant: 404 uniforme y no persiste', async () => {
-    const d = build();
-    d.practicesRepo.findById.mockResolvedValue(foreignPractice());
-
-    await expectOutOfScope(
-      d.service.publishHealthcareService('p1', {} as any, actor),
-      'Práctica no encontrada',
-    );
-
-    expect(d.servicesRepo.create).not.toHaveBeenCalled();
-  });
-
   it('publicar un servicio con una unidad de otra práctica se rechaza como unidad inexistente', async () => {
     const d = build();
-    d.practicesRepo.findById.mockResolvedValue({
-      id: 'p1',
-      tenantId: TENANT_A,
-      statusConceptId: PRAC.PRACTICE_ACTIVE,
-    });
     d.unitsRepo.findById.mockResolvedValue({ id: 'u1', practiceSiteId: 's9' });
-    d.sitesRepo.findById.mockResolvedValue(siteOf('practica-de-b'));
+    d.sitesRepo.findById.mockImplementation((_tx: any, id: string) =>
+      Promise.resolve(id === 's9' ? siteOf('practica-de-b') : siteOf('p1')),
+    );
 
     await expect(
       d.service.publishHealthcareService(
         'p1',
-        { clinicalUnitId: 'u1' } as any,
+        {
+          practiceSiteId: 's1',
+          serviceConceptId: 'proc',
+          serviceCatalogId: 'cat',
+          clinicalUnitId: 'u1',
+        } as any,
         actor,
       ),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
