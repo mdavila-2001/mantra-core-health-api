@@ -210,11 +210,28 @@ reconcile_pair() {
 # `backup` (deploy/nginx.coolify.conf del front).
 reconcile_api() {
   local app="$1" uuid="$2" front_net="$3" live standby="alovida-api-standby-$1"
+  guard_data_stack "${app#api-}" "$uuid"
   live="$(live_container api "$uuid")"
   [ -n "$live" ] || return 0
   [ "$(healthy_for_seconds "$live")" -ge "$MIN_HEALTHY_SECONDS" ] || return 0
   [ "$(image_id "$live")" = "$(image_id "$standby")" ] && return 0
   replace_from "$live" "$standby" "$uuid" "" 1536m "$front_net" alovida-api-standby
+}
+
+# Baranda del stack de datos propio (infra/resilience/data-stack/): una vez hecho
+# el cambio, ninguna base del compose de Coolify puede volver a correr. Un
+# despliegue con el compose viejo o un reinicio del servidor la levantarían con
+# el mismo alias (`postgres`…) que la del stack, y la API podría escribir en
+# cualquiera de las dos.
+guard_data_stack() {
+  local env="$1" uuid="$2" c s
+  [ -f "$STATE/data-$env.active" ] || return 0
+  for s in postgres mongodb redis opensearch minio; do
+    for c in $(docker ps --filter "name=^$s-$uuid-" --format '{{.Names}}'); do
+      docker update --restart=no "$c" >/dev/null 2>&1
+      docker stop -t 30 "$c" >/dev/null 2>&1 && log "BARANDA: parado $c (las bases de $env viven en alovida-data-$env)"
+    done
+  done
 }
 
 # Una app apagada a propósito no se sigue sirviendo desde el standby.
