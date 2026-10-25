@@ -14,3 +14,4 @@ export * from './immunization.dto';
 export * from './clinical-read.dto';
 export * from './prescription-verification.dto';
 export * from './prescription-expiry-notice.dto';
+export * from './procedure-centers.dto';

@@ -31,6 +31,7 @@ import {
   ClinicalPrescriptionPoliciesController,
   ClinicalRecordsController,
   ClinicalReadController,
+  ClinicalProcedureCentersController,
   ClinicalPrescriptionsController,
   ClinicalPrescriptionsPublicController,
   ClinicalPrescriptionExpiryController,
@@ -52,6 +53,7 @@ import {
   ProceduresService,
   ImmunizationsService,
   ClinicalReadService,
+  ProcedureCentersService,
   ClinicalNotificationsService,
   PrescriptionExpiryNoticesService,
   PrescriptionPdfService,
@@ -78,6 +80,7 @@ import {
   PatientReportedHealthStatementsRepository,
   PrescriptionSignaturePoliciesRepository,
   ProceduresRepository,
+  ProcedureCentersReadRepository,
   ImmunizationsRepository,
   PrescriptionExpiryRepository,
 } from './repositories';
@@ -172,6 +175,9 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ClinicalPrescriptionPoliciesController,
     ClinicalRecordsController,
     ClinicalReadController,
+    // Carril 19: `GET /clinical/me/procedure-centers`, la pestaña «Centros
+    // médicos» de la pantalla de la receta.
+    ClinicalProcedureCentersController,
     ClinicalPrescriptionsController,
     ClinicalPrescriptionsPublicController,
     // PAC-REC-002: `POST /clinical/internal/prescription-expiry-notices` (SYSTEM), el
@@ -202,6 +208,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     PatientReportedHealthStatementsRepository,
     PrescriptionSignaturePoliciesRepository,
     ProceduresRepository,
+    ProcedureCentersReadRepository,
     ImmunizationsRepository,
     PrescriptionExpiryRepository,
     ClinicalNotesRepository,
@@ -229,6 +236,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ProceduresService,
     ImmunizationsService,
     ClinicalReadService,
+    ProcedureCentersService,
     ClinicalNotificationsService,
     PrescriptionExpiryNoticesService,
     ClinicalRecordAccessGuard,

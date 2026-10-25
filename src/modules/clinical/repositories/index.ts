@@ -15,3 +15,4 @@ export * from './prescription-signature-policies.repository';
 export * from './procedures.repository';
 export * from './immunizations.repository';
 export * from './prescription-expiry.repository';
+export * from './procedure-centers-read.repository';
