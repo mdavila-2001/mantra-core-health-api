@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { OrgextHospitalsService } from '../services';
 import {
   CreateHospitalDto,
@@ -36,6 +41,11 @@ export class OrgextHospitalsController {
   constructor(private readonly hospitalsService: OrgextHospitalsService) {}
 
   /** UC-22-01. */
+  @Audited({
+    action: 'HOSPITAL_SPECIALIZED',
+    entity: 'hospital',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -48,6 +58,11 @@ export class OrgextHospitalsController {
   }
 
   /** UC-22-02. */
+  @Audited({
+    action: 'HOSPITAL_ACTIVATED',
+    entity: 'hospital',
+    entityId: 'param:id',
+  })
   @Post(':id/activate')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -61,6 +76,11 @@ export class OrgextHospitalsController {
   }
 
   /** UC-22-03. */
+  @Audited({
+    action: 'HOSPITAL_SERVICE_LINE_ADDED',
+    entity: 'hospital_service_line',
+    entityId: 'result.id',
+  })
   @Post(':id/service-lines')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -74,6 +94,11 @@ export class OrgextHospitalsController {
   }
 
   /** UC-22-04. */
+  @Audited({
+    action: 'HOSPITAL_SERVICE_LINE_RETIRED',
+    entity: 'hospital_service_line',
+    entityId: 'param:lineId',
+  })
   @Delete(':id/service-lines/:lineId')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

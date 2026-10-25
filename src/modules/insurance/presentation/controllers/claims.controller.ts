@@ -57,6 +57,11 @@ export class ClaimsController {
   }
 
   /** UC-26-07. */
+  @Audited({
+    action: 'INSURANCE_CLAIM_ADJUDICATED',
+    entity: 'claim_adjudication_version',
+    entityId: 'result.id',
+  })
   @Post(':id/adjudications')
   @Roles()
   @HttpCode(HttpStatus.CREATED)
@@ -70,6 +75,11 @@ export class ClaimsController {
   }
 
   /** UC-26-08. */
+  @Audited({
+    action: 'EXPLANATION_OF_BENEFIT_PUBLISHED',
+    entity: 'patient_explanations_of_benefit',
+    entityId: 'result.id',
+  })
   @Post(':id/eob')
   @Roles()
   @HttpCode(HttpStatus.CREATED)
@@ -83,6 +93,11 @@ export class ClaimsController {
   }
 
   /** UC-26-10. */
+  @Audited({
+    action: 'INSURANCE_CLAIM_REVERSED',
+    entity: 'claim_reversal',
+    entityId: 'result.id',
+  })
   @Post(':id/reversals')
   @Roles()
   @HttpCode(HttpStatus.CREATED)

@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { SetOrganizationLogoDto } from '../dto/set-organization-logo.dto';
 import { OrganizationLogoService } from '../services/organization-logo.service';
 
@@ -29,6 +29,11 @@ export class OrganizationLogoController {
     return this.logos.get(id, actor);
   }
 
+  @Audited({
+    action: 'TENANT_LOGO_SET',
+    entity: 'tenant',
+    entityId: 'param:tenantId',
+  })
   @Put()
   @ApiOperation({
     summary: 'Cambiar o quitar el logo como administrador de la organización',

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { Roles } from '../../common';
+import { Audited, Roles } from '../../common';
 import { CONTENT_PACKS } from './content-packs.catalog';
 import { ContentPacksService } from './content-packs.service';
 import {
@@ -66,6 +66,10 @@ export class ContentPacksController {
    * @param dto - Opciones de la aplicación.
    * @returns Los contadores de lo que dejó.
    */
+  @Audited({
+    action: 'CONTENT_PACK_APPLIED',
+    entity: 'content_pack',
+  })
   @Post(':code/apply')
   @Roles('SUPERADMIN')
   @HttpCode(HttpStatus.OK)

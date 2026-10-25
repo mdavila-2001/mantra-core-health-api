@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { LegalHoldService } from '../services';
 import {
   CreateLegalHoldDto,
@@ -30,6 +35,11 @@ export class LegalHoldController {
   constructor(private readonly service: LegalHoldService) {}
 
   /** UC-11-08. */
+  @Audited({
+    action: 'LEGAL_HOLD_PLACED',
+    entity: 'legal_hold',
+    entityId: 'result.id',
+  })
   @Post('legal-holds')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -42,6 +52,11 @@ export class LegalHoldController {
   }
 
   /** UC-11-08. */
+  @Audited({
+    action: 'LEGAL_HOLD_RELEASED',
+    entity: 'legal_hold',
+    entityId: 'param:id',
+  })
   @Post('legal-holds/:id/release')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

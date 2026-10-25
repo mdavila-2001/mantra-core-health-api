@@ -18,6 +18,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   type AuthenticatedUser,
@@ -74,6 +75,11 @@ export class CommunityGroupsController {
   ) {}
 
   /** Bootstrap: crea un grupo. */
+  @Audited({
+    action: 'COMMUNITY_GROUP_CREATED',
+    entity: 'group',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear un grupo/comunidad' })
@@ -85,6 +91,11 @@ export class CommunityGroupsController {
   }
 
   /** UC-19-13. */
+  @Audited({
+    action: 'COMMUNITY_GROUP_JOINED',
+    entity: 'group_member',
+    entityId: 'result.id',
+  })
   @Post(':groupId/members')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Unirse a un grupo / comunidad' })
@@ -97,6 +108,11 @@ export class CommunityGroupsController {
   }
 
   /** P7: resuelve un alta pendiente y/o cambia el rol de un integrante. */
+  @Audited({
+    action: 'COMMUNITY_GROUP_MEMBER_UPDATED',
+    entity: 'group_member',
+    entityId: 'param:member',
+  })
   @Patch(':groupId/members/:member')
   @ApiOperation({ summary: 'Aprobar/rechazar un alta o cambiar el rol' })
   @ApiParam({
@@ -124,6 +140,11 @@ export class CommunityGroupsController {
    * que sólo difieran en el nombre del parámetro (`no-identical-paths`). El
    * nombre no viaja en la URL: la diferencia queda dicha en `@ApiParam`.
    */
+  @Audited({
+    action: 'COMMUNITY_GROUP_LEFT',
+    entity: 'group_member',
+    entityId: 'param:member',
+  })
   @Delete(':groupId/members/:member')
   @ApiOperation({ summary: 'Salir del grupo o dar de baja a un integrante' })
   @ApiParam({
@@ -140,6 +161,11 @@ export class CommunityGroupsController {
   }
 
   /** P7: publica en el muro del grupo, o responde a una publicación. */
+  @Audited({
+    action: 'COMMUNITY_GROUP_POST_CREATED',
+    entity: 'social_post',
+    entityId: 'result.id',
+  })
   @Post(':groupId/posts')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar en el muro del grupo' })
