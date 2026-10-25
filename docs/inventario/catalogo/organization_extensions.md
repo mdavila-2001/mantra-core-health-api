@@ -10,10 +10,10 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [facility_licenses](#facility_licenses) | Conserva licencias y habilitaciones de instalaciones sanitarias para documentar autorización operativa. | 18 | 11 | 5 | COINCIDE |
+| [facility_licenses](#facility_licenses) | Conserva licencias y habilitaciones de instalaciones sanitarias para documentar autorización operativa. | 18 | 11 | 4 | COINCIDE |
 | [hospital_service_lines](#hospital_service_lines) | Cataloga líneas de servicio hospitalarias para describir áreas de atención ofrecidas por cada hospital. | 14 | 9 | 3 | COINCIDE |
 | [hospitals](#hospitals) | Representa hospitales como una especialización de organización sanitaria con atributos propios de ese tipo de institución. | 18 | 15 | 5 | COINCIDE |
-| [organization_affiliations](#organization_affiliations) | Vincula organizaciones sanitarias para representar afiliaciones y relaciones institucionales relevantes a la prestación. | 16 | 9 | 4 | COINCIDE |
+| [organization_affiliations](#organization_affiliations) | Vincula organizaciones sanitarias para representar afiliaciones y relaciones institucionales relevantes a la prestación. | 16 | 9 | 3 | COINCIDE |
 | [organization_data_boundaries](#organization_data_boundaries) | Define límites de datos entre organizaciones para hacer explícitos los ámbitos de custodia e intercambio. | 18 | 11 | 3 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -62,7 +62,7 @@ Conserva licencias y habilitaciones de instalaciones sanitarias para documentar 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_22_organization_extensions.puml: facility_licenses`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_22_organization_extensions.puml` · **DDL:** `SQL/22_organization_extensions/02_tables.sql`
 - **Entidad del ORM:** `FacilityLicenses` — `src/modules/organization_extensions/entities/facility_licenses.entity.ts`
-- **Resumen:** 18 columnas · 11 índices · 10 FK salientes · 0 entrantes · 5 operaciones
+- **Resumen:** 18 columnas · 11 índices · 10 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -106,7 +106,7 @@ Conserva licencias y habilitaciones de instalaciones sanitarias para documentar 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_facility_licenses_tenant_id` | no | tenant_id | Soporta la clave foránea fk_facility_licenses_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_facility_licenses_tenant_id` | no | tenant_id | Soporta la clave foránea fk_facility_licenses_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_facility_licenses_practice_site_id` | no | practice_site_id | Soporta la clave foránea fk_facility_licenses_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_facility_licenses_facility_type_concept_id` | no | facility_type_concept_id | Soporta la clave foránea fk_facility_licenses_facility_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_facility_licenses_license_type_concept_id` | no | license_type_concept_id | Soporta la clave foránea fk_facility_licenses_license_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «license_type_concept_id», la primera columna del índice _(CONSULTA)_ |
@@ -124,7 +124,6 @@ Conserva licencias y habilitaciones de instalaciones sanitarias para documentar 
 |---|---|---|
 | POST /orgext/facility-licenses | CREA | DIRECTA |
 | POST /orgext/facility-licenses | LEE | DIRECTA |
-| POST /orgext/facility-licenses/{id}/verify | ACTUALIZA | POR_TIPO |
 | POST /orgext/facility-licenses/{id}/verify | LEE | DIRECTA |
 | POST /orgext/hospitals/{id}/activate | LEE | DIRECTA |
 
@@ -279,9 +278,9 @@ Representa hospitales como una especialización de organización sanitaria con a
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_hospitals_tenant_id` | sí | tenant_id | Garantiza que no se repita la combinación (tenant_id) _(DOCUMENTO)_; Soporta la clave foránea fk_hospitals_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uq_hospitals_tenant_id` | sí | tenant_id | Garantiza que no se repita la combinación (tenant_id) _(DOCUMENTO)_; Soporta la clave foránea fk_hospitals_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `uq_hospitals_practice_id` | sí | practice_id | Garantiza que no se repita la combinación (practice_id) _(DOCUMENTO)_; Soporta la clave foránea fk_hospitals_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_hospitals_tenant_id` | no | tenant_id | Soporta la clave foránea fk_hospitals_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_hospitals_tenant_id` | no | tenant_id | Soporta la clave foránea fk_hospitals_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_hospitals_practice_id` | no | practice_id | Soporta la clave foránea fk_hospitals_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_hospitals_primary_practice_site_id` | no | primary_practice_site_id | Soporta la clave foránea fk_hospitals_primary_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_hospitals_public_profile_id` | no | public_profile_id | Soporta la clave foránea fk_hospitals_public_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -308,9 +307,9 @@ Representa hospitales como una especialización de organización sanitaria con a
 |---|---|---|
 | POST /orgext/hospitals | CREA | DIRECTA |
 | POST /orgext/hospitals | LEE | DIRECTA |
-| POST /orgext/hospitals/{id}/activate | ACTUALIZA | POR_TIPO |
 | POST /orgext/hospitals/{id}/activate | LEE | DIRECTA |
 | POST /orgext/hospitals/{id}/service-lines | LEE | DIRECTA |
+| DELETE /orgext/hospitals/{id}/service-lines/{lineId} | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -335,7 +334,7 @@ Vincula organizaciones sanitarias para representar afiliaciones y relaciones ins
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_22_organization_extensions.puml: organization_affiliations`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_22_organization_extensions.puml` · **DDL:** `SQL/22_organization_extensions/02_tables.sql`
 - **Entidad del ORM:** `OrganizationAffiliations` — `src/modules/organization_extensions/entities/organization_affiliations.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 1 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -392,7 +391,6 @@ Vincula organizaciones sanitarias para representar afiliaciones y relaciones ins
 |---|---|---|
 | POST /orgext/affiliations | CREA | DIRECTA |
 | POST /orgext/affiliations | LEE | DIRECTA |
-| POST /orgext/affiliations/{id}/terminate | ACTUALIZA | POR_TIPO |
 | POST /orgext/affiliations/{id}/terminate | LEE | DIRECTA |
 
 #### Gobierno

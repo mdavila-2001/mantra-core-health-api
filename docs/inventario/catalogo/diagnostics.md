@@ -28,11 +28,11 @@
 | [imaging_procedure_steps](#imaging_procedure_steps) | Registra etapas de procedimientos de imagenología para representar el flujo técnico de adquisición de un estudio. | 17 | 10 | 0 | COINCIDE |
 | [imaging_selection_items](#imaging_selection_items) | Relaciona instancias de imagen con una selección para especificar qué imágenes forman parte de un conjunto revisable. | 8 | 4 | 0 | COINCIDE |
 | [imaging_selections](#imaging_selections) | Define selecciones o conjuntos de imágenes organizados para revisión diagnóstica o tareas clínicas específicas. | 13 | 7 | 0 | COINCIDE |
-| [imaging_series](#imaging_series) | Agrupa series de imágenes pertenecientes a un estudio para organizar sus instancias diagnósticas. | 11 | 5 | 1 | COINCIDE |
-| [imaging_studies](#imaging_studies) | Representa estudios de imágenes de un paciente y mantiene su asociación clínica y su contexto de adquisición. | 22 | 15 | 4 | COINCIDE |
+| [imaging_series](#imaging_series) | Agrupa series de imágenes pertenecientes a un estudio para organizar sus instancias diagnósticas. | 11 | 5 | 2 | COINCIDE |
+| [imaging_studies](#imaging_studies) | Representa estudios de imágenes de un paciente y mantiene su asociación clínica y su contexto de adquisición. | 22 | 15 | 6 | COINCIDE |
 | [laboratory_accessions](#laboratory_accessions) | Representa accesiones de laboratorio que agrupan y asignan identidad operativa a muestras y solicitudes recibidas. | 17 | 13 | 5 | COINCIDE |
 | [laboratory_work_order_tests](#laboratory_work_order_tests) | Desglosa cada orden de laboratorio en pruebas solicitadas para controlar el trabajo diagnóstico requerido. | 17 | 12 | 5 | COINCIDE |
-| [laboratory_work_orders](#laboratory_work_orders) | Organiza órdenes de trabajo de laboratorio y su ciclo operativo de procesamiento diagnóstico. | 16 | 9 | 2 | COINCIDE |
+| [laboratory_work_orders](#laboratory_work_orders) | Organiza órdenes de trabajo de laboratorio y su ciclo operativo de procesamiento diagnóstico. | 16 | 9 | 3 | COINCIDE |
 | [media_annotations](#media_annotations) | Guarda anotaciones vinculadas a medios clínicos para conservar marcas o descripciones interpretativas asociadas al contenido. | 16 | 8 | 1 | COINCIDE |
 | [observation_specimens](#observation_specimens) | Vincula observaciones clínicas o de laboratorio con las muestras que les dieron origen. | 5 | 3 | 0 | COINCIDE |
 | [radiation_dose_events](#radiation_dose_events) | Registra eventos y datos de dosis de radiación asociados a estudios para dar seguimiento a la exposición durante imagenología. | 14 | 8 | 1 | COINCIDE |
@@ -40,12 +40,12 @@
 | [specimen_chain_of_custody_events](#specimen_chain_of_custody_events) | Preserva los traspasos y controles de custodia de muestras para reconstruir su recorrido y responsables. | 14 | 10 | 5 | COINCIDE |
 | [specimen_collection_events](#specimen_collection_events) | Registra eventos de recolección de muestras para documentar cuándo, dónde y bajo qué contexto se obtuvieron. | 12 | 8 | 0 | COINCIDE |
 | [specimen_container_events](#specimen_container_events) | Traza cambios y eventos relacionados con recipientes de muestras durante su preparación, traslado o recepción. | 11 | 6 | 1 | COINCIDE |
-| [specimen_containers](#specimen_containers) | Representa recipientes que contienen muestras para identificar el soporte físico usado en su manejo diagnóstico. | 16 | 10 | 6 | COINCIDE |
+| [specimen_containers](#specimen_containers) | Representa recipientes que contienen muestras para identificar el soporte físico usado en su manejo diagnóstico. | 16 | 10 | 7 | COINCIDE |
 | [specimen_identifiers](#specimen_identifiers) | Conserva identificadores alternativos de muestras para reconciliar etiquetas internas y referencias de laboratorio externo. | 14 | 6 | 0 | COINCIDE |
 | [specimen_parent_links](#specimen_parent_links) | Expresa relaciones entre muestras derivadas y muestras de origen para mantener trazabilidad de la cadena de procesamiento. | 7 | 6 | 0 | COINCIDE |
 | [specimen_processing_steps](#specimen_processing_steps) | Traza los pasos de procesamiento aplicados a cada muestra para conservar cómo se preparó antes de producir resultados. | 9 | 5 | 0 | COINCIDE |
 | [specimen_rejection_events](#specimen_rejection_events) | Documenta rechazos de muestras y sus motivos para explicar por qué un análisis no pudo continuar o requirió nueva toma. | 9 | 5 | 1 | COINCIDE |
-| [specimens](#specimens) | Registra muestras biológicas asociadas a pacientes y solicitudes para mantener su identidad, recolección y estado durante el proceso diagnóstico. | 21 | 14 | 9 | COINCIDE |
+| [specimens](#specimens) | Registra muestras biológicas asociadas a pacientes y solicitudes para mantener su identidad, recolección y estado durante el proceso diagnóstico. | 21 | 14 | 12 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -1814,7 +1814,7 @@ Agrupa series de imágenes pertenecientes a un estudio para organizar sus instan
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: imaging_series`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `ImagingSeries` — `src/modules/diagnostics/entities/imaging_series.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 3 entrantes · 1 operaciones
+- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 3 entrantes · 2 operaciones
 
 #### Columnas
 
@@ -1849,7 +1849,7 @@ Agrupa series de imágenes pertenecientes a un estudio para organizar sus instan
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `uq_imaging_series_dicom_series_instance_uid` | sí | dicom_series_instance_uid | Garantiza que no se repita la combinación (dicom_series_instance_uid) _(DOCUMENTO)_ |
-| `ix_imaging_series_imaging_study_id` | no | imaging_study_id | Soporta la clave foránea fk_imaging_series_imaging_study_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_imaging_series_imaging_study_id` | no | imaging_study_id | Soporta la clave foránea fk_imaging_series_imaging_study_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «imaging_study_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_imaging_series_modality_concept_id` | no | modality_concept_id | Soporta la clave foránea fk_imaging_series_modality_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_imaging_series_body_site_concept_id` | no | body_site_concept_id | Soporta la clave foránea fk_imaging_series_body_site_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_imaging_series_laterality_concept_id` | no | laterality_concept_id | Soporta la clave foránea fk_imaging_series_laterality_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1864,6 +1864,7 @@ Agrupa series de imágenes pertenecientes a un estudio para organizar sus instan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /diagnostics/imaging-studies/{id}/dose-events | LEE | DIRECTA |
 | POST /dicomweb/studies | CREA | DIRECTA |
 
 #### Gobierno
@@ -1889,7 +1890,7 @@ Representa estudios de imágenes de un paciente y mantiene su asociación clíni
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: imaging_studies`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `ImagingStudies` — `src/modules/diagnostics/entities/imaging_studies.entity.ts`
-- **Resumen:** 22 columnas · 15 índices · 13 FK salientes · 7 entrantes · 4 operaciones
+- **Resumen:** 22 columnas · 15 índices · 13 FK salientes · 7 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -1961,7 +1962,7 @@ Representa estudios de imágenes de un paciente y mantiene su asociación clíni
 | `ix_imaging_studies_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_imaging_studies_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_imaging_studies_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_imaging_studies_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_imaging_studies_patient_profile_id_updated_at` | no | patient_profile_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
-| `ix_imaging_studies_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_imaging_studies_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_imaging_studies_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_imaging_studies_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -1973,10 +1974,12 @@ Representa estudios de imágenes de un paciente y mantiene su asociación clíni
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /diagnostics/data-quality-events | LEE | DIRECTA |
 | POST /diagnostics/imaging-studies/{id}/dose-events | LEE | DIRECTA |
 | GET /diagnostics/patients/{patientProfileId}/imaging-studies | LEE | DIRECTA |
 | POST /dicomweb/studies | CREA | DIRECTA |
 | POST /dicomweb/studies | LEE | DIRECTA |
+| POST /object-storage/dicom/studies/catalog | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2197,7 +2200,7 @@ Organiza órdenes de trabajo de laboratorio y su ciclo operativo de procesamient
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: laboratory_work_orders`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `LaboratoryWorkOrders` — `src/modules/diagnostics/entities/laboratory_work_orders.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 1 entrantes · 2 operaciones
+- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 1 entrantes · 3 operaciones
 
 #### Columnas
 
@@ -2258,6 +2261,7 @@ Organiza órdenes de trabajo de laboratorio y su ciclo operativo de procesamient
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /diagnostics/analyzer-runs/{id}/messages | LEE | DIRECTA |
 | GET /diagnostics/work-orders | LEE | DIRECTA |
 | POST /diagnostics/work-orders | CREA | DIRECTA |
 
@@ -2787,7 +2791,7 @@ Representa recipientes que contienen muestras para identificar el soporte físic
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: specimen_containers`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `SpecimenContainers` — `src/modules/diagnostics/entities/specimen_containers.entity.ts`
-- **Resumen:** 16 columnas · 10 índices · 9 FK salientes · 3 entrantes · 6 operaciones
+- **Resumen:** 16 columnas · 10 índices · 9 FK salientes · 3 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -2858,6 +2862,7 @@ Representa recipientes que contienen muestras para identificar el soporte físic
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
 | GET /diagnostics/specimens/{id} | LEE | DIRECTA |
 | POST /diagnostics/specimens/{id}/containers | CREA | DIRECTA |
+| POST /diagnostics/specimens/{id}/containers | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -3150,7 +3155,7 @@ Registra muestras biológicas asociadas a pacientes y solicitudes para mantener 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_20_diagnostics.puml: specimens`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_20_diagnostics.puml` · **DDL:** `SQL/20_diagnostics/02_tables.sql`
 - **Entidad del ORM:** `Specimens` — `src/modules/diagnostics/entities/specimens.entity.ts`
-- **Resumen:** 21 columnas · 14 índices · 13 FK salientes · 13 entrantes · 9 operaciones
+- **Resumen:** 21 columnas · 14 índices · 13 FK salientes · 13 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -3235,12 +3240,15 @@ Registra muestras biológicas asociadas a pacientes y solicitudes para mantener 
 | POST /diagnostics/accessions | ACTUALIZA | POR_TIPO |
 | POST /diagnostics/accessions | LEE | DIRECTA |
 | GET /diagnostics/accessions/{id} | LEE | DIRECTA |
+| POST /diagnostics/containers/{id}/custody-events | LEE | DIRECTA |
+| POST /diagnostics/data-quality-events | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
 | POST /diagnostics/specimens | CREA | DIRECTA |
 | GET /diagnostics/specimens/{id} | LEE | DIRECTA |
 | POST /diagnostics/specimens/{id}/containers | LEE | DIRECTA |
 | POST /diagnostics/specimens/{id}/rejection | ACTUALIZA | POR_TIPO |
 | POST /diagnostics/specimens/{id}/rejection | LEE | DIRECTA |
+| POST /diagnostics/work-orders | LEE | DIRECTA |
 
 #### Gobierno
 

@@ -23,8 +23,8 @@ _Fuente: `src/modules/quotations/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `ctrl:QuotationsController` | Operaciones de QuotationsController que el README no asigna a un caso de uso | GET /quotations | Cualquier sesión válida | BAJO | 4 |
-|  |  | POST /quotations | PRACTITIONER · CLINICIAN | MEDIO | 5 |
+| `ctrl:QuotationsController` | Operaciones de QuotationsController que el README no asigna a un caso de uso | GET /quotations | Cualquier sesión válida | BAJO | 22 |
+|  |  | POST /quotations | PRACTITIONER · CLINICIAN | MEDIO | 24 |
 |  |  | GET /quotations/{id} | Cualquier sesión válida | BAJO | 4 |
 
 ### Diagrama — etapas `ctrl:QuotationsController`
@@ -32,33 +32,45 @@ _Fuente: `src/modules/quotations/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a8(["PRACTITIONER · CLINICIAN"]):::actor
-  t3[("billing.quotation_installments")]:::tabla
-  t4[("billing.quotations")]:::tabla
-  t5[("practice.practices")]:::tabla
-  t6[("practice.practitioner_role_assignments")]:::tabla
-  t9[("billing.service_catalog")]:::tabla
+  a11(["PRACTITIONER · CLINICIAN"]):::actor
+  t3[("authz.access_policies")]:::tabla
+  t4[("authz.care_relationships")]:::tabla
+  t5[("authz.clinical_access_grants")]:::tabla
+  t6[("authz.field_permissions")]:::tabla
+  t7[("authz.patient_legal_representations")]:::tabla
+  t8[("authz.permissions")]:::tabla
+  t14[("billing.quotation_installments")]:::tabla
+  t15[("billing.quotations")]:::tabla
+  t16[("practice.practices")]:::tabla
+  t17[("practice.practitioner_role_assignments")]:::tabla
+  t9[("+16 tablas más")]
+  t12[("+18 tablas más")]
   subgraph s0["ctrl:QuotationsController · Operaciones de QuotationsController que el README n…"]
     o1["GET /quotations"]:::op
-    o7["POST /quotations"]:::op
-    o10["GET /quotations/{id}"]:::op
+    o10["POST /quotations"]:::op
+    o13["GET /quotations/{id}"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
   o1 -->|"LEE"| t5
   o1 -->|"LEE"| t6
-  a8 --> o7
-  o7 -->|"CREA"| t3
-  o7 -->|"CREA"| t4
-  o7 -->|"LEE"| t9
-  o7 -->|"LEE"| t5
-  o7 -->|"LEE"| t6
-  a2 --> o10
+  o1 -->|"LEE"| t7
+  o1 -->|"LEE"| t8
+  o1 -.-> t9
+  a11 --> o10
   o10 -->|"LEE"| t3
   o10 -->|"LEE"| t4
   o10 -->|"LEE"| t5
   o10 -->|"LEE"| t6
+  o10 -->|"LEE"| t7
+  o10 -->|"LEE"| t8
+  o10 -.-> t12
+  a2 --> o13
+  o13 -->|"LEE"| t14
+  o13 -->|"LEE"| t15
+  o13 -->|"LEE"| t16
+  o13 -->|"LEE"| t17
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -81,6 +93,7 @@ Listar las cotizaciones de un paciente
 | 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {PATIENT_NOT_AVAILABLE.message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -90,39 +103,52 @@ flowchart TD
   n1 --> n2
   n3["Llama a QuotationsService.listQuotationsByPatient"]:::llamada
   n2 --> n3
-  n4["Llama a QuotationsService.reachablePractices"]:::llamada
+  n4["Llama a QuotationsService.reachablePracticesForPatient"]:::llamada
   n3 --> n4
-  n5{"actor.practitionerProfileId !== undefined"}:::decision
+  n5{"actor.roles.includes('SECURITY_ADMIN')"}:::decision
   n4 --> n5
-  n6["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n6{"tenantId !== undefined"}:::decision
   n5 -->|"sí"| n6
-  n7["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
-  n6 --> n7
-  n8[("LEE practice.practitioner_role_assignments")]:::efecto
+  n7["Llama a PracticeTenantLookupService.findActivePracticeIdsForTenant"]:::llamada
+  n6 -->|"sí"| n7
+  n8["Llama a PracticesRepository.findByTenant"]:::llamada
   n7 --> n8
-  n9{"actor.roles.includes('SECURITY_ADMIN')"}:::decision
+  n9[("LEE practice.practices")]:::efecto
   n8 --> n9
-  n5 -->|"no"| n9
-  n10{"tenantId !== undefined"}:::decision
-  n9 -->|"sí"| n10
-  n11["Llama a PracticeTenantLookupService.findActivePracticeIdsForTenant"]:::llamada
+  n10{"actor.practitionerProfileId !== undefined"}:::decision
+  n9 --> n10
+  n6 -->|"no"| n10
+  n5 -->|"no"| n10
+  n11["Llama a QuotationsService.hasClinicalBasis"]:::llamada
   n10 -->|"sí"| n11
-  n12["Llama a PracticesRepository.findByTenant"]:::llamada
+  n12["Intenta"]:::intento
   n11 --> n12
-  n13[("LEE practice.practices")]:::efecto
-  n12 --> n13
-  n14["Llama a QuotationsRepository.findByPatient"]:::llamada
-  n13 --> n14
-  n10 -->|"no"| n14
-  n9 -->|"no"| n14
-  n15[("LEE billing.quotations")]:::efecto
-  n14 --> n15
-  n16["Llama a QuotationInstallmentsRepository.findByQuotationIds"]:::llamada
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"si falla"| n13
+  n14{"await this.hasClinicalBasis(patientProfileId, actor)"}:::decision
+  n12 --> n14
+  n15["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n14 -->|"sí"| n15
+  n16["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
   n15 --> n16
-  n17[("LEE billing.quotation_installments")]:::efecto
+  n17[("LEE practice.practitioner_role_assignments")]:::efecto
   n16 --> n17
-  n18(("200 Responde con éxito")):::ok
-  n17 --> n18
+  n18{"!administrativeScope"}:::decision
+  n14 -->|"no"| n18
+  n19(["404 NOT_FOUND {PATIENT_NOT_AVAILABLE.message}"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a QuotationsRepository.findByPatient"]:::llamada
+  n17 --> n20
+  n18 -->|"no"| n20
+  n10 -->|"no"| n20
+  n21[("LEE billing.quotations")]:::efecto
+  n20 --> n21
+  n22["Llama a QuotationInstallmentsRepository.findByQuotationIds"]:::llamada
+  n21 --> n22
+  n23[("LEE billing.quotation_installments")]:::efecto
+  n22 --> n23
+  n24(("200 Responde con éxito")):::ok
+  n23 --> n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -184,26 +210,46 @@ flowchart TD
   n15 -->|"no"| n17
   n18(["422 PRECONDITION_FAILED validUntil debe ser posterior a attentionDate"]):::error
   n17 -->|"sí"| n18
-  n19["Transacción: transactional(…)"]:::transaccion
+  n19["Llama a QuotationsService.assertPatientAndAppointmentAvailable"]:::llamada
   n17 -->|"no"| n19
-  n20["Llama a ServiceCatalogRepository.findById"]:::llamada
+  n20["Llama a QuotationsService.hasClinicalBasis"]:::llamada
   n19 --> n20
-  n21[("LEE billing.service_catalog")]:::efecto
+  n21["Intenta"]:::intento
   n20 --> n21
-  n22{"service === null || service.practiceId !== dto.practiceId"}:::decision
-  n21 --> n22
-  n23(["404 NOT_FOUND Servicio no encontrado en el catálogo"]):::error
-  n22 -->|"sí"| n23
-  n24["Llama a QuotationsRepository.create"]:::llamada
-  n22 -->|"no"| n24
-  n25[("CREA billing.quotations")]:::efecto
-  n24 --> n25
-  n26["Llama a QuotationInstallmentsRepository.createMany"]:::llamada
+  n22(["↩ (relanza el error capturado)"]):::error
+  n21 -->|"si falla"| n22
+  n23{"!(await this.hasClinicalBasis(patientProfileId, actor))"}:::decision
+  n21 --> n23
+  n24(["↩ (relanza el error capturado)"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a QuotationsRepository.findAppointmentById"]:::llamada
+  n23 -->|"no"| n25
+  n26[("LEE clinical.appointments")]:::efecto
   n25 --> n26
-  n27[("CREA billing.quotation_installments")]:::efecto
+  n27{"appointment === null || appointment.patientProfileId !== patientProfileId || (tenantId !== undefined && appoi…"}:::decision
   n26 --> n27
-  n28(("201 Responde con éxito")):::ok
-  n27 --> n28
+  n28(["↩ (relanza el error capturado)"]):::error
+  n27 -->|"sí"| n28
+  n29["Transacción: transactional(…)"]:::transaccion
+  n27 -->|"no"| n29
+  n30["Llama a ServiceCatalogRepository.findById"]:::llamada
+  n29 --> n30
+  n31[("LEE billing.service_catalog")]:::efecto
+  n30 --> n31
+  n32{"service === null || service.practiceId !== dto.practiceId"}:::decision
+  n31 --> n32
+  n33(["404 NOT_FOUND Servicio no encontrado en el catálogo"]):::error
+  n32 -->|"sí"| n33
+  n34["Llama a QuotationsRepository.create"]:::llamada
+  n32 -->|"no"| n34
+  n35[("CREA billing.quotations")]:::efecto
+  n34 --> n35
+  n36["Llama a QuotationInstallmentsRepository.createMany"]:::llamada
+  n35 --> n36
+  n37[("CREA billing.quotation_installments")]:::efecto
+  n36 --> n37
+  n38(("201 Responde con éxito")):::ok
+  n37 --> n38
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

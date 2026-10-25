@@ -32,7 +32,7 @@
 - **Bloque:** —
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AudioAssetsController.contentById` — `src/modules/audio_assets/controllers/audio-assets.controller.ts:39`
+- **Implementación:** `AudioAssetsController.contentById` — `src/modules/audio_assets/controllers/audio-assets.controller.ts:44`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -42,16 +42,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /audio-assets/{assetId}/content` la atiende `AudioAssetsController.contentById` (src/modules/audio_assets/controllers/audio-assets.controller.ts:39). Exige sesión; el controlador no declara roles. Delega en `AudioContentService.get`. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets.
+`GET /audio-assets/{assetId}/content` la atiende `AudioAssetsController.contentById` (src/modules/audio_assets/controllers/audio-assets.controller.ts:44). Exige sesión; el controlador no declara roles. Delega en `AudioContentService.get`. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/audio_assets/controllers/audio-assets.controller.ts:39` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/audio_assets/controllers/audio-assets.controller.ts:44` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/controllers/audio-assets.controller.ts:39` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/controllers/audio-assets.controller.ts:44` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -85,7 +85,7 @@ _No se identificó un DTO de respuesta con campos._
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Asset de audio listo no encontrado; ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: El contenido no está disponible en el almacenamiento local; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: El contenido no está disponible en el almacenamiento configurado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; Error: S3 object body is empty |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; Error: S3 object body is empty |
 
 El árbol de decisión completo está en [flujos](../flujos/audio_assets.md).
 
@@ -215,7 +215,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AudioAssetsInternalController.deprecate` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:67`
+- **Implementación:** `AudioAssetsInternalController.deprecate` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:84`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -225,16 +225,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/audio-assets/{assetId}/deprecate` la atiende `AudioAssetsInternalController.deprecate` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:67). Exige sesión con alguno de los roles SYSTEM. Delega en `AudioMaintenanceService.deprecate`. Crea filas en audio_assets.audio_generation_events. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets.
+`POST /internal/audio-assets/{assetId}/deprecate` la atiende `AudioAssetsInternalController.deprecate` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:84). Exige sesión con alguno de los roles SYSTEM. Delega en `AudioMaintenanceService.deprecate`. Crea filas en audio_assets.audio_generation_events. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:67` |
+| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:84` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:67` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:84` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -291,7 +291,7 @@ El árbol de decisión completo está en [flujos](../flujos/audio_assets.md).
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AudioAssetsInternalController.generated` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:81`
+- **Implementación:** `AudioAssetsInternalController.generated` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:108`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -301,16 +301,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/audio-assets/{assetId}/generated` la atiende `AudioAssetsInternalController.generated` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:81). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `GeneratedAudioAssetDto` (6 campos, 3 obligatorios). Delega en `AudioGenerationUseCase.generated`. Crea filas en audio_assets.audio_generation_events.
+`POST /internal/audio-assets/{assetId}/generated` la atiende `AudioAssetsInternalController.generated` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:108). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `GeneratedAudioAssetDto` (6 campos, 3 obligatorios). Delega en `AudioGenerationUseCase.generated`. Crea filas en audio_assets.audio_generation_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:81` |
+| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:108` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:81` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:108` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -400,7 +400,7 @@ El árbol de decisión completo está en [flujos](../flujos/audio_assets.md).
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AudioAssetsInternalController.failed` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:91`
+- **Implementación:** `AudioAssetsInternalController.failed` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:123`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -410,16 +410,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/audio-assets/{assetId}/generation-failed` la atiende `AudioAssetsInternalController.failed` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:91). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `FailedAudioAssetDto` (3 campos, 2 obligatorios). Delega en `AudioGenerationUseCase.failed`. Crea filas en audio_assets.audio_generation_events. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets.
+`POST /internal/audio-assets/{assetId}/generation-failed` la atiende `AudioAssetsInternalController.failed` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:123). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `FailedAudioAssetDto` (3 campos, 2 obligatorios). Delega en `AudioGenerationUseCase.failed`. Crea filas en audio_assets.audio_generation_events. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:91` |
+| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:123` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:91` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:123` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -504,7 +504,7 @@ El árbol de decisión completo está en [flujos](../flujos/audio_assets.md).
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AudioAssetsInternalController.prepare` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:75`
+- **Implementación:** `AudioAssetsInternalController.prepare` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:97`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -514,16 +514,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/audio-assets/{assetId}/prepare-generation` la atiende `AudioAssetsInternalController.prepare` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:75). Exige sesión con alguno de los roles SYSTEM. Delega en `AudioGenerationUseCase.prepare`. Crea filas en audio_assets.audio_generation_events. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets, audio_assets.audio_generation_usage.
+`POST /internal/audio-assets/{assetId}/prepare-generation` la atiende `AudioAssetsInternalController.prepare` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:97). Exige sesión con alguno de los roles SYSTEM. Delega en `AudioGenerationUseCase.prepare`. Crea filas en audio_assets.audio_generation_events. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets, audio_assets.audio_generation_usage.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:75` |
+| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:97` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:75` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: assetId | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:97` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -583,7 +583,7 @@ El árbol de decisión completo está en [flujos](../flujos/audio_assets.md).
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AudioAssetsInternalController.garbageCollect` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:58`
+- **Implementación:** `AudioAssetsInternalController.garbageCollect` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:71`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -593,14 +593,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/audio-assets/garbage-collect` la atiende `AudioAssetsInternalController.garbageCollect` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:58). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `AudioMaintenanceDto` (1 campo, 0 obligatorios). Delega en `AudioMaintenanceService.garbageCollect`. Crea filas en audio_assets.audio_generation_events. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets.
+`POST /internal/audio-assets/garbage-collect` la atiende `AudioAssetsInternalController.garbageCollect` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:71). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `AudioMaintenanceDto` (1 campo, 0 obligatorios). Delega en `AudioMaintenanceService.garbageCollect`. Crea filas en audio_assets.audio_generation_events. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:58` |
+| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:71` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -651,7 +651,7 @@ _No se identificó un DTO de respuesta con campos._
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | StorageLifecycleDenied: DELETE_PERMIT_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3 |
+| 500 | `INTERNAL` | StorageLifecycleDenied: DELETE_PERMIT_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; DomainException: {HttpStatus.SERVICE_UNAVAILABLE} |
 
 El árbol de decisión completo está en [flujos](../flujos/audio_assets.md).
 
@@ -674,7 +674,7 @@ El árbol de decisión completo está en [flujos](../flujos/audio_assets.md).
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AudioAssetsInternalController.pregenerateAssets` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:41`
+- **Implementación:** `AudioAssetsInternalController.pregenerateAssets` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:46`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -684,14 +684,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/audio-assets/pregenerate` la atiende `AudioAssetsInternalController.pregenerateAssets` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:41). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `PregenerateAudioAssetsDto` (1 campo, 0 obligatorios). Delega en `PregenerateAudioAssetsUseCase.execute`. Crea filas en audio_assets.audio_assets, messaging.queued_jobs. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets, audio_assets.audio_generation_usage, audio_assets.audio_templates, messaging.message_queues, messaging.queued_jobs. Encola audio-generation.
+`POST /internal/audio-assets/pregenerate` la atiende `AudioAssetsInternalController.pregenerateAssets` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:46). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `PregenerateAudioAssetsDto` (1 campo, 0 obligatorios). Delega en `PregenerateAudioAssetsUseCase.execute`. Crea filas en audio_assets.audio_assets, messaging.queued_jobs. Actualiza audio_assets.audio_assets. Lee audio_assets.audio_assets, audio_assets.audio_generation_usage, audio_assets.audio_templates, messaging.message_queues, messaging.queued_jobs. Encola audio-generation.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:41` |
+| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:46` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -777,7 +777,7 @@ El árbol de decisión completo está en [flujos](../flujos/audio_assets.md).
 - **Bloque:** —
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AudioAssetsInternalController.status` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:32`
+- **Implementación:** `AudioAssetsInternalController.status` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:37`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -787,14 +787,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /internal/audio-assets/status` la atiende `AudioAssetsInternalController.status` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:32). Exige sesión con alguno de los roles SYSTEM. Delega en `AudioMaintenanceService.status`. Lee audio_assets.audio_assets.
+`GET /internal/audio-assets/status` la atiende `AudioAssetsInternalController.status` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:37). Exige sesión con alguno de los roles SYSTEM. Delega en `AudioMaintenanceService.status`. Lee audio_assets.audio_assets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:32` |
+| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:37` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
@@ -842,7 +842,7 @@ El árbol de decisión completo está en [flujos](../flujos/audio_assets.md).
 - **Bloque:** —
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AudioAssetsInternalController.verify` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:52`
+- **Implementación:** `AudioAssetsInternalController.verify` — `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:61`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -852,14 +852,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/audio-assets/verify` la atiende `AudioAssetsInternalController.verify` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:52). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `AudioMaintenanceDto` (1 campo, 0 obligatorios). Delega en `AudioMaintenanceService.verify`. Crea filas en audio_assets.audio_generation_events. Lee audio_assets.audio_assets.
+`POST /internal/audio-assets/verify` la atiende `AudioAssetsInternalController.verify` (src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:61). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `AudioMaintenanceDto` (1 campo, 0 obligatorios). Delega en `AudioMaintenanceService.verify`. Crea filas en audio_assets.audio_generation_events. Lee audio_assets.audio_assets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:52` |
+| ROL | Alguno de: SYSTEM | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:61` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -909,7 +909,7 @@ _No se identificó un DTO de respuesta con campos._
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: El contenido no está disponible en el almacenamiento local; ResourceNotFoundException: El contenido no está disponible en el almacenamiento configurado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; Error: S3 object body is empty |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; Error: S3 object body is empty |
 
 El árbol de decisión completo está en [flujos](../flujos/audio_assets.md).
 

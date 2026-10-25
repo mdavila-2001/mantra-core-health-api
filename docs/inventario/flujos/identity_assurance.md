@@ -25,30 +25,30 @@ _Fuente: `src/modules/identity_assurance/README.md:3`_
 |---|---|---|---|---|---|
 | `ctrl:IdentityAssertionsController` | Operaciones de IdentityAssertionsController que el README no asigna a un caso de uso | POST /identity/assertions/{id}/revoke | SECURITY_ADMIN | MEDIO | 11 |
 | `ctrl:IdentityAuthoritiesController` | Operaciones de IdentityAuthoritiesController que el README no asigna a un caso de uso | POST /identity/authorities | SECURITY_ADMIN | MEDIO | 1 |
-|  |  | POST /identity/authorities/{id}/endpoints | SECURITY_ADMIN | MEDIO | 2 |
-| `ctrl:IdentityCasesController` | Operaciones de IdentityCasesController que el README no asigna a un caso de uso | GET /identity/verification-cases | SECURITY_ADMIN | BAJO | 1 |
-|  |  | POST /identity/verification-cases | SECURITY_ADMIN | MEDIO | 2 |
-|  |  | GET /identity/verification-cases/{id} | SECURITY_ADMIN | BAJO | 2 |
-|  |  | POST /identity/verification-cases/{id}/assertions | SECURITY_ADMIN | MEDIO | 3 |
-|  |  | POST /identity/verification-cases/{id}/checks:plan | SECURITY_ADMIN | MEDIO | 2 |
-|  |  | POST /identity/verification-cases/{id}/evidence | SECURITY_ADMIN | MEDIO | 5 |
-|  |  | POST /identity/verification-cases/{id}/fraud-signals | SECURITY_ADMIN | MEDIO | 2 |
-|  |  | POST /identity/verification-cases/{id}/manual-review | SECURITY_ADMIN | MEDIO | 3 |
-|  |  | POST /identity/verification-cases/expire-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 10 |
-| `ctrl:IdentityChecksController` | Operaciones de IdentityChecksController que el README no asigna a un caso de uso | POST /identity/checks/{id}/attempts | SECURITY_ADMIN | MEDIO | 4 |
-|  |  | POST /identity/checks/{id}/results | SECURITY_ADMIN | MEDIO | 22 |
-| `ctrl:IdentityManualReviewController` | Operaciones de IdentityManualReviewController que el README no asigna a un caso de uso | POST /identity/manual-review/{id}/decision | SECURITY_ADMIN | MEDIO | 25 |
+|  |  | POST /identity/authorities/{id}/endpoints | SECURITY_ADMIN | MEDIO | 4 |
+| `ctrl:IdentityCasesController` | Operaciones de IdentityCasesController que el README no asigna a un caso de uso | GET /identity/verification-cases | SECURITY_ADMIN | BAJO | 4 |
+|  |  | POST /identity/verification-cases | SECURITY_ADMIN | MEDIO | 5 |
+|  |  | GET /identity/verification-cases/{id} | SECURITY_ADMIN | BAJO | 5 |
+|  |  | POST /identity/verification-cases/{id}/assertions | SECURITY_ADMIN | MEDIO | 8 |
+|  |  | POST /identity/verification-cases/{id}/checks:plan | SECURITY_ADMIN | MEDIO | 7 |
+|  |  | POST /identity/verification-cases/{id}/evidence | SECURITY_ADMIN | MEDIO | 10 |
+|  |  | POST /identity/verification-cases/{id}/fraud-signals | SECURITY_ADMIN | MEDIO | 6 |
+|  |  | POST /identity/verification-cases/{id}/manual-review | SECURITY_ADMIN | MEDIO | 7 |
+|  |  | POST /identity/verification-cases/expire-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 11 |
+| `ctrl:IdentityChecksController` | Operaciones de IdentityChecksController que el README no asigna a un caso de uso | POST /identity/checks/{id}/attempts | SECURITY_ADMIN | MEDIO | 8 |
+|  |  | POST /identity/checks/{id}/results | SECURITY_ADMIN | MEDIO | 24 |
+| `ctrl:IdentityManualReviewController` | Operaciones de IdentityManualReviewController que el README no asigna a un caso de uso | POST /identity/manual-review/{id}/decision | SECURITY_ADMIN | MEDIO | 26 |
 | `ctrl:IdentityPoliciesController` | Operaciones de IdentityPoliciesController que el README no asigna a un caso de uso | POST /identity/verification-policies | SECURITY_ADMIN | MEDIO | 1 |
-| `ctrl:IdentitySelfServiceController` | Operaciones de IdentitySelfServiceController que el README no asigna a un caso de uso | POST /identity/me/identity-verification | Cualquier sesión válida | ALTO | 8 |
-|  |  | POST /identity/me/practitioner/identity-verification | Cualquier sesión válida | ALTO | 9 |
-|  |  | POST /identity/me/practitioner/license-verification | Cualquier sesión válida | ALTO | 10 |
-|  |  | POST /identity/me/tenants/{tenantId}/verification | Cualquier sesión válida | ALTO | 8 |
+| `ctrl:IdentitySelfServiceController` | Operaciones de IdentitySelfServiceController que el README no asigna a un caso de uso | POST /identity/me/identity-verification | Cualquier sesión válida | ALTO | 15 |
+|  |  | POST /identity/me/practitioner/identity-verification | Cualquier sesión válida | ALTO | 16 |
+|  |  | POST /identity/me/practitioner/license-verification | Cualquier sesión válida | ALTO | 17 |
+|  |  | POST /identity/me/tenants/{tenantId}/verification | Cualquier sesión válida | ALTO | 15 |
 |  |  | GET /identity/me/verification-cases | Cualquier sesión válida | BAJO | 7 |
 |  |  | GET /identity/me/verification-cases/{caseId} | Cualquier sesión válida | BAJO | 8 |
 |  |  | GET /identity/me/verification-types | Cualquier sesión válida | BAJO | 4 |
-| `ctrl:IdentityWorkerController` | Operaciones de IdentityWorkerController que el README no asigna a un caso de uso | POST /internal/identity/checks/{id}/attempts | SYSTEM · SECURITY_ADMIN | MEDIO | 4 |
-|  |  | POST /internal/identity/checks/{id}/results | SYSTEM · SECURITY_ADMIN | MEDIO | 22 |
-|  |  | GET /internal/identity/checks/dispatchable | SYSTEM · SECURITY_ADMIN | BAJO | 2 |
+| `ctrl:IdentityWorkerController` | Operaciones de IdentityWorkerController que el README no asigna a un caso de uso | POST /internal/identity/checks/{id}/attempts | SYSTEM · SECURITY_ADMIN | MEDIO | 8 |
+|  |  | POST /internal/identity/checks/{id}/results | SYSTEM · SECURITY_ADMIN | MEDIO | 24 |
+|  |  | GET /internal/identity/checks/dispatchable | SYSTEM · SECURITY_ADMIN | BAJO | 6 |
 |  |  | POST /internal/identity/evidence/lifecycle-scan | SYSTEM | ALTO | 36 |
 |  |  | POST /internal/identity/evidence/storage-purge-review | SYSTEM | MEDIO | 21 |
 
@@ -57,29 +57,33 @@ _Fuente: `src/modules/identity_assurance/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a30(["SYSTEM · SECURITY_ADMIN"]):::actor
-  a40(["Cualquier sesión válida"]):::actor
+  a39(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a50(["Cualquier sesión válida"]):::actor
   t3[("audit.verified_badges_history")]:::tabla
   t4[("community.public_profiles")]:::tabla
   t5[("community.verified_badges")]:::tabla
-  t6[("identity_assurance.identity_assertions")]:::tabla
+  t6[("directory.tenant_memberships")]:::tabla
   t9[("identity_assurance.identity_authorities")]:::tabla
   t11[("identity_assurance.identity_authority_endpoints")]:::tabla
-  t13[("identity_assurance.identity_verification_cases")]:::tabla
-  t15[("identity_assurance.identity_verification_policies")]:::tabla
-  t17[("identity_assurance.identity_evidence_records")]:::tabla
-  t19[("identity_assurance.identity_checks")]:::tabla
-  t22[("common.file_versions")]:::tabla
-  t23[("common.files")]:::tabla
-  t24[("messaging.queued_jobs")]:::tabla
-  t26[("identity_assurance.identity_fraud_signals")]:::tabla
-  t28[("identity_assurance.identity_manual_review_cases")]:::tabla
-  t33[("identity_assurance.identity_verification_attempts")]:::tabla
-  t47[("directory.tenant_memberships")]:::tabla
-  t50[("identity_assurance.identity_check_results")]:::tabla
-  t51[("profiles.jurisdiction_authorizations")]:::tabla
-  t56[("profiles.health_practitioner_profiles")]:::tabla
-  t57[("profiles.person_account_links")]:::tabla
+  t12[("integrations.integration_endpoints")]:::tabla
+  t13[("integrations.provider_connections")]:::tabla
+  t15[("identity_assurance.identity_verification_cases")]:::tabla
+  t16[("profiles.jurisdiction_authorizations")]:::tabla
+  t17[("profiles.person_account_links")]:::tabla
+  t19[("identity_assurance.identity_verification_policies")]:::tabla
+  t21[("identity_assurance.identity_evidence_records")]:::tabla
+  t23[("identity_assurance.identity_assertions")]:::tabla
+  t24[("identity_assurance.identity_checks")]:::tabla
+  t29[("common.file_versions")]:::tabla
+  t30[("common.files")]:::tabla
+  t31[("consent.consents")]:::tabla
+  t34[("identity_assurance.identity_fraud_signals")]:::tabla
+  t36[("identity_assurance.identity_manual_review_cases")]:::tabla
+  t42[("identity_assurance.identity_verification_attempts")]:::tabla
+  t51[("iam.authentication_credentials")]:::tabla
+  t52[("iam.email_verifications")]:::tabla
+  t61[("identity_assurance.identity_check_results")]:::tabla
+  t66[("profiles.health_practitioner_profiles")]:::tabla
   t7[("+5 tablas más")]
   subgraph s0["ctrl:IdentityAssertionsController · Operaciones de IdentityAssertionsController…"]
     o1["POST /identity/assertions/{id}/revoke"]:::op
@@ -88,44 +92,49 @@ flowchart LR
     o8["POST /identity/authorities"]:::op
     o10["POST /identity/authorities/{id}/endpoints"]:::op
   end
-  t31[("+4 tablas más")]
+  t25[("+2 tablas más")]
+  t27[("+1 tablas más")]
+  t32[("+4 tablas más")]
+  t37[("+1 tablas más")]
+  t40[("+5 tablas más")]
   subgraph s2["ctrl:IdentityCasesController · Operaciones de IdentityCasesController que el RE…"]
-    o12["GET /identity/verification-cases"]:::op
-    o14["POST /identity/verification-cases"]:::op
-    o16["GET /identity/verification-cases/{id}"]:::op
-    o18["POST /identity/verification-cases/{id}/assertions"]:::op
-    o20["POST /identity/verification-cases/{id}/checks:plan"]:::op
-    o21["POST /identity/verification-cases/{id}/evidence"]:::op
-    o25["POST /identity/verification-cases/{id}/fraud-signals"]:::op
-    o27["POST /identity/verification-cases/{id}/manual-review"]:::op
-    o29["POST /identity/verification-cases/expire-sweep"]:::op
+    o14["GET /identity/verification-cases"]:::op
+    o18["POST /identity/verification-cases"]:::op
+    o20["GET /identity/verification-cases/{id}"]:::op
+    o22["POST /identity/verification-cases/{id}/assertions"]:::op
+    o26["POST /identity/verification-cases/{id}/checks:plan"]:::op
+    o28["POST /identity/verification-cases/{id}/evidence"]:::op
+    o33["POST /identity/verification-cases/{id}/fraud-signals"]:::op
+    o35["POST /identity/verification-cases/{id}/manual-review"]:::op
+    o38["POST /identity/verification-cases/expire-sweep"]:::op
   end
-  t35[("+16 tablas más")]
+  t43[("+2 tablas más")]
+  t45[("+18 tablas más")]
   subgraph s3["ctrl:IdentityChecksController · Operaciones de IdentityChecksController que el…"]
-    o32["POST /identity/checks/{id}/attempts"]:::op
-    o34["POST /identity/checks/{id}/results"]:::op
+    o41["POST /identity/checks/{id}/attempts"]:::op
+    o44["POST /identity/checks/{id}/results"]:::op
   end
-  t37[("+19 tablas más")]
+  t47[("+20 tablas más")]
   subgraph s4["ctrl:IdentityManualReviewController · Operaciones de IdentityManualReviewContro…"]
-    o36["POST /identity/manual-review/{id}/decision"]:::op
+    o46["POST /identity/manual-review/{id}/decision"]:::op
   end
   subgraph s5["ctrl:IdentityPoliciesController · Operaciones de IdentityPoliciesController que…"]
-    o38["POST /identity/verification-policies"]:::op
+    o48["POST /identity/verification-policies"]:::op
   end
-  t41[("+2 tablas más")]
-  t43[("+3 tablas más")]
-  t45[("+4 tablas más")]
-  t48[("+2 tablas más")]
-  t52[("+1 tablas más")]
-  t54[("+2 tablas más")]
+  t53[("+9 tablas más")]
+  t55[("+10 tablas más")]
+  t57[("+11 tablas más")]
+  t59[("+9 tablas más")]
+  t62[("+1 tablas más")]
+  t64[("+2 tablas más")]
   subgraph s6["ctrl:IdentitySelfServiceController · Operaciones de IdentitySelfServiceControll…"]
-    o39["POST /identity/me/identity-verification"]:::op
-    o42["POST /identity/me/practitioner/identity-verification"]:::op
-    o44["POST /identity/me/practitioner/license-verification"]:::op
-    o46["POST /identity/me/tenants/{tenantId}/verification"]:::op
-    o49["GET /identity/me/verification-cases"]:::op
-    o53["GET /identity/me/verification-cases/{caseId}"]:::op
-    o55["GET /identity/me/verification-types"]:::op
+    o49["POST /identity/me/identity-verification"]:::op
+    o54["POST /identity/me/practitioner/identity-verification"]:::op
+    o56["POST /identity/me/practitioner/license-verification"]:::op
+    o58["POST /identity/me/tenants/{tenantId}/verification"]:::op
+    o60["GET /identity/me/verification-cases"]:::op
+    o63["GET /identity/me/verification-cases/{caseId}"]:::op
+    o65["GET /identity/me/verification-types"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -133,125 +142,158 @@ flowchart LR
   o1 -->|"LEE"| t4
   o1 -->|"ACTUALIZA"| t5
   o1 -->|"LEE"| t5
-  o1 -->|"ACTUALIZA"| t6
+  o1 -->|"LEE"| t6
   o1 -.-> t7
   a2 --> o8
   o8 -->|"CREA"| t9
   a2 --> o10
   o10 -->|"LEE"| t9
   o10 -->|"CREA"| t11
-  a2 --> o12
-  o12 -->|"LEE"| t13
+  o10 -->|"LEE"| t12
+  o10 -->|"LEE"| t13
   a2 --> o14
-  o14 -->|"CREA"| t13
+  o14 -->|"LEE"| t6
   o14 -->|"LEE"| t15
-  a2 --> o16
-  o16 -->|"LEE"| t17
-  o16 -->|"LEE"| t13
+  o14 -->|"LEE"| t16
+  o14 -->|"LEE"| t17
   a2 --> o18
-  o18 -->|"CREA"| t6
+  o18 -->|"LEE"| t6
+  o18 -->|"CREA"| t15
   o18 -->|"LEE"| t19
-  o18 -->|"LEE"| t13
+  o18 -->|"LEE"| t16
+  o18 -->|"LEE"| t17
   a2 --> o20
-  o20 -->|"CREA"| t19
-  o20 -->|"LEE"| t13
-  a2 --> o21
-  o21 -->|"LEE"| t22
-  o21 -->|"LEE"| t23
-  o21 -->|"CREA"| t17
-  o21 -->|"LEE"| t13
-  o21 -->|"LEE"| t24
-  a2 --> o25
-  o25 -->|"CREA"| t26
-  o25 -->|"LEE"| t13
-  a2 --> o27
-  o27 -->|"CREA"| t28
-  o27 -->|"LEE"| t28
-  o27 -->|"LEE"| t13
-  a30 --> o29
-  o29 -->|"CREA"| t3
-  o29 -->|"ACTUALIZA"| t4
-  o29 -->|"LEE"| t4
-  o29 -->|"ACTUALIZA"| t5
-  o29 -->|"LEE"| t5
-  o29 -->|"ACTUALIZA"| t19
-  o29 -.-> t31
-  a2 --> o32
-  o32 -->|"ACTUALIZA"| t19
-  o32 -->|"LEE"| t19
-  o32 -->|"CREA"| t33
-  o32 -->|"LEE"| t33
-  a2 --> o34
-  o34 -->|"CREA"| t3
-  o34 -->|"ACTUALIZA"| t4
-  o34 -->|"LEE"| t4
-  o34 -->|"ACTUALIZA"| t5
-  o34 -->|"CREA"| t5
-  o34 -->|"LEE"| t5
-  o34 -.-> t35
-  a2 --> o36
-  o36 -->|"CREA"| t3
-  o36 -->|"ACTUALIZA"| t4
-  o36 -->|"LEE"| t4
-  o36 -->|"ACTUALIZA"| t5
-  o36 -->|"CREA"| t5
-  o36 -->|"LEE"| t5
-  o36 -.-> t37
-  a2 --> o38
-  o38 -->|"CREA"| t15
-  a40 --> o39
-  o39 -->|"LEE"| t22
-  o39 -->|"LEE"| t23
-  o39 -->|"CREA"| t19
-  o39 -->|"CREA"| t17
-  o39 -->|"CREA"| t13
-  o39 -->|"LEE"| t13
-  o39 -.-> t41
-  a40 --> o42
-  o42 -->|"LEE"| t22
-  o42 -->|"LEE"| t23
-  o42 -->|"CREA"| t19
-  o42 -->|"CREA"| t17
-  o42 -->|"CREA"| t13
-  o42 -->|"LEE"| t13
-  o42 -.-> t43
-  a40 --> o44
-  o44 -->|"LEE"| t22
-  o44 -->|"LEE"| t23
-  o44 -->|"CREA"| t19
-  o44 -->|"CREA"| t17
-  o44 -->|"CREA"| t13
-  o44 -->|"LEE"| t13
+  o20 -->|"LEE"| t6
+  o20 -->|"LEE"| t21
+  o20 -->|"LEE"| t15
+  o20 -->|"LEE"| t16
+  o20 -->|"LEE"| t17
+  a2 --> o22
+  o22 -->|"LEE"| t6
+  o22 -->|"CREA"| t23
+  o22 -->|"LEE"| t9
+  o22 -->|"LEE"| t24
+  o22 -->|"ACTUALIZA"| t15
+  o22 -->|"LEE"| t15
+  o22 -.-> t25
+  a2 --> o26
+  o26 -->|"LEE"| t6
+  o26 -->|"LEE"| t9
+  o26 -->|"CREA"| t24
+  o26 -->|"ACTUALIZA"| t15
+  o26 -->|"LEE"| t15
+  o26 -->|"LEE"| t16
+  o26 -.-> t27
+  a2 --> o28
+  o28 -->|"LEE"| t29
+  o28 -->|"LEE"| t30
+  o28 -->|"LEE"| t31
+  o28 -->|"LEE"| t6
+  o28 -->|"LEE"| t9
+  o28 -->|"CREA"| t21
+  o28 -.-> t32
+  a2 --> o33
+  o33 -->|"LEE"| t6
+  o33 -->|"CREA"| t34
+  o33 -->|"ACTUALIZA"| t15
+  o33 -->|"LEE"| t15
+  o33 -->|"LEE"| t16
+  o33 -->|"LEE"| t17
+  a2 --> o35
+  o35 -->|"LEE"| t6
+  o35 -->|"CREA"| t36
+  o35 -->|"LEE"| t36
+  o35 -->|"ACTUALIZA"| t15
+  o35 -->|"LEE"| t15
+  o35 -->|"LEE"| t16
+  o35 -.-> t37
+  a39 --> o38
+  o38 -->|"CREA"| t3
+  o38 -->|"ACTUALIZA"| t4
+  o38 -->|"LEE"| t4
+  o38 -->|"ACTUALIZA"| t5
+  o38 -->|"LEE"| t5
+  o38 -->|"LEE"| t6
+  o38 -.-> t40
+  a2 --> o41
+  o41 -->|"LEE"| t6
+  o41 -->|"ACTUALIZA"| t24
+  o41 -->|"LEE"| t24
+  o41 -->|"CREA"| t42
+  o41 -->|"LEE"| t42
+  o41 -->|"LEE"| t15
+  o41 -.-> t43
+  a2 --> o44
+  o44 -->|"CREA"| t3
+  o44 -->|"ACTUALIZA"| t4
+  o44 -->|"LEE"| t4
+  o44 -->|"ACTUALIZA"| t5
+  o44 -->|"CREA"| t5
+  o44 -->|"LEE"| t5
   o44 -.-> t45
-  a40 --> o46
-  o46 -->|"LEE"| t22
-  o46 -->|"LEE"| t23
-  o46 -->|"LEE"| t47
-  o46 -->|"CREA"| t19
-  o46 -->|"CREA"| t17
-  o46 -->|"CREA"| t13
-  o46 -.-> t48
-  a40 --> o49
-  o49 -->|"LEE"| t50
-  o49 -->|"LEE"| t19
-  o49 -->|"LEE"| t17
-  o49 -->|"LEE"| t28
-  o49 -->|"LEE"| t13
+  a2 --> o46
+  o46 -->|"CREA"| t3
+  o46 -->|"ACTUALIZA"| t4
+  o46 -->|"LEE"| t4
+  o46 -->|"ACTUALIZA"| t5
+  o46 -->|"CREA"| t5
+  o46 -->|"LEE"| t5
+  o46 -.-> t47
+  a2 --> o48
+  o48 -->|"CREA"| t19
+  a50 --> o49
+  o49 -->|"LEE"| t29
+  o49 -->|"LEE"| t30
   o49 -->|"LEE"| t51
-  o49 -.-> t52
-  a40 --> o53
-  o53 -->|"LEE"| t47
-  o53 -->|"LEE"| t50
-  o53 -->|"LEE"| t19
-  o53 -->|"LEE"| t17
-  o53 -->|"LEE"| t28
-  o53 -->|"LEE"| t13
-  o53 -.-> t54
-  a40 --> o55
-  o55 -->|"LEE"| t13
-  o55 -->|"LEE"| t56
-  o55 -->|"LEE"| t51
-  o55 -->|"LEE"| t57
+  o49 -->|"LEE"| t52
+  o49 -->|"CREA"| t24
+  o49 -->|"CREA"| t21
+  o49 -.-> t53
+  a50 --> o54
+  o54 -->|"LEE"| t29
+  o54 -->|"LEE"| t30
+  o54 -->|"LEE"| t51
+  o54 -->|"LEE"| t52
+  o54 -->|"CREA"| t24
+  o54 -->|"CREA"| t21
+  o54 -.-> t55
+  a50 --> o56
+  o56 -->|"LEE"| t29
+  o56 -->|"LEE"| t30
+  o56 -->|"LEE"| t51
+  o56 -->|"LEE"| t52
+  o56 -->|"CREA"| t24
+  o56 -->|"CREA"| t21
+  o56 -.-> t57
+  a50 --> o58
+  o58 -->|"LEE"| t29
+  o58 -->|"LEE"| t30
+  o58 -->|"LEE"| t6
+  o58 -->|"LEE"| t51
+  o58 -->|"LEE"| t52
+  o58 -->|"CREA"| t24
+  o58 -.-> t59
+  a50 --> o60
+  o60 -->|"LEE"| t61
+  o60 -->|"LEE"| t24
+  o60 -->|"LEE"| t21
+  o60 -->|"LEE"| t36
+  o60 -->|"LEE"| t15
+  o60 -->|"LEE"| t16
+  o60 -.-> t62
+  a50 --> o63
+  o63 -->|"LEE"| t6
+  o63 -->|"LEE"| t61
+  o63 -->|"LEE"| t24
+  o63 -->|"LEE"| t21
+  o63 -->|"LEE"| t36
+  o63 -->|"LEE"| t15
+  o63 -.-> t64
+  a50 --> o65
+  o65 -->|"LEE"| t15
+  o65 -->|"LEE"| t66
+  o65 -->|"LEE"| t16
+  o65 -->|"LEE"| t17
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -263,61 +305,72 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["SYSTEM · SECURITY_ADMIN"]):::actor
-  a12(["SYSTEM"]):::actor
-  t3[("identity_assurance.identity_checks")]:::tabla
-  t4[("identity_assurance.identity_verification_attempts")]:::tabla
-  t6[("audit.verified_badges_history")]:::tabla
-  t7[("community.public_profiles")]:::tabla
-  t8[("community.verified_badges")]:::tabla
-  t13[("audio_assets.audio_assets")]:::tabla
-  t14[("common.file_derivatives")]:::tabla
-  t15[("common.file_versions")]:::tabla
-  t16[("common.files")]:::tabla
-  t19[("cross_store_consistency.deletion_targets")]:::tabla
-  t20[("identity_assurance.identity_evidence_records")]:::tabla
-  t21[("identity_assurance.identity_verification_cases")]:::tabla
-  t9[("+16 tablas más")]
-  t17[("+30 tablas más")]
-  t22[("+15 tablas más")]
+  a17(["SYSTEM"]):::actor
+  t3[("directory.tenant_memberships")]:::tabla
+  t4[("identity_assurance.identity_checks")]:::tabla
+  t5[("identity_assurance.identity_verification_attempts")]:::tabla
+  t6[("identity_assurance.identity_verification_cases")]:::tabla
+  t9[("audit.verified_badges_history")]:::tabla
+  t10[("community.public_profiles")]:::tabla
+  t11[("community.verified_badges")]:::tabla
+  t14[("profiles.jurisdiction_authorizations")]:::tabla
+  t15[("profiles.person_account_links")]:::tabla
+  t18[("audio_assets.audio_assets")]:::tabla
+  t19[("common.file_derivatives")]:::tabla
+  t20[("common.file_versions")]:::tabla
+  t21[("common.files")]:::tabla
+  t24[("cross_store_consistency.deletion_targets")]:::tabla
+  t25[("identity_assurance.identity_evidence_records")]:::tabla
+  t7[("+2 tablas más")]
+  t12[("+18 tablas más")]
+  t22[("+30 tablas más")]
+  t26[("+15 tablas más")]
   subgraph s0["ctrl:IdentityWorkerController · Operaciones de IdentityWorkerController que el…"]
     o1["POST /internal/identity/checks/{id}/attempts"]:::op
-    o5["POST /internal/identity/checks/{id}/results"]:::op
-    o10["GET /internal/identity/checks/dispatchable"]:::op
-    o11["POST /internal/identity/evidence/lifecycle-scan"]:::op
-    o18["POST /internal/identity/evidence/storage-purge-review"]:::op
+    o8["POST /internal/identity/checks/{id}/results"]:::op
+    o13["GET /internal/identity/checks/dispatchable"]:::op
+    o16["POST /internal/identity/evidence/lifecycle-scan"]:::op
+    o23["POST /internal/identity/evidence/storage-purge-review"]:::op
   end
   a2 --> o1
-  o1 -->|"ACTUALIZA"| t3
   o1 -->|"LEE"| t3
-  o1 -->|"CREA"| t4
+  o1 -->|"ACTUALIZA"| t4
   o1 -->|"LEE"| t4
-  a2 --> o5
-  o5 -->|"CREA"| t6
-  o5 -->|"ACTUALIZA"| t7
-  o5 -->|"LEE"| t7
-  o5 -->|"ACTUALIZA"| t8
-  o5 -->|"CREA"| t8
-  o5 -->|"LEE"| t8
-  o5 -.-> t9
-  a2 --> o10
-  o10 -->|"LEE"| t3
-  o10 -->|"LEE"| t4
-  a12 --> o11
-  o11 -->|"LEE"| t13
-  o11 -->|"BORRA"| t14
-  o11 -->|"LEE"| t14
-  o11 -->|"BORRA"| t15
-  o11 -->|"LEE"| t15
-  o11 -->|"BORRA"| t16
-  o11 -.-> t17
-  a12 --> o18
-  o18 -->|"LEE"| t13
-  o18 -->|"LEE"| t15
-  o18 -->|"LEE"| t19
-  o18 -->|"LEE"| t20
-  o18 -->|"LEE"| t4
-  o18 -->|"LEE"| t21
-  o18 -.-> t22
+  o1 -->|"CREA"| t5
+  o1 -->|"LEE"| t5
+  o1 -->|"LEE"| t6
+  o1 -.-> t7
+  a2 --> o8
+  o8 -->|"CREA"| t9
+  o8 -->|"ACTUALIZA"| t10
+  o8 -->|"LEE"| t10
+  o8 -->|"ACTUALIZA"| t11
+  o8 -->|"CREA"| t11
+  o8 -->|"LEE"| t11
+  o8 -.-> t12
+  a2 --> o13
+  o13 -->|"LEE"| t3
+  o13 -->|"LEE"| t4
+  o13 -->|"LEE"| t5
+  o13 -->|"LEE"| t6
+  o13 -->|"LEE"| t14
+  o13 -->|"LEE"| t15
+  a17 --> o16
+  o16 -->|"LEE"| t18
+  o16 -->|"BORRA"| t19
+  o16 -->|"LEE"| t19
+  o16 -->|"BORRA"| t20
+  o16 -->|"LEE"| t20
+  o16 -->|"BORRA"| t21
+  o16 -.-> t22
+  a17 --> o23
+  o23 -->|"LEE"| t18
+  o23 -->|"LEE"| t20
+  o23 -->|"LEE"| t24
+  o23 -->|"LEE"| t25
+  o23 -->|"LEE"| t5
+  o23 -->|"LEE"| t6
+  o23 -.-> t26
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -340,7 +393,6 @@ Revocar una aserción de identidad
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Aserción de identidad no encontrada; ResourceNotFoundException: Caso de verificación no encontrado |
 | 409 | `CONFLICT` | ConflictException: La aserción ya está revocada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Para derivar una señal de fraude se requieren tipo y severidad |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -358,104 +410,59 @@ flowchart TD
   n4 --> n5
   n6[("LEE identity_assurance.identity_assertions")]:::efecto
   n5 --> n6
-  n7{"!assertion"}:::decision
+  n7["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Aserción de identidad no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"assertion.revokedAt"}:::decision
-  n7 -->|"no"| n9
-  n10(["409 CONFLICT La aserción ya está revocada"]):::error
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA identity_assurance.identity_assertions · ACTUALIZA identity_assurance.identity_assertions")]:::efecto
-  n9 -->|"no"| n11
-  n12["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
-  n11 --> n12
-  n13[("LEE identity_assurance.identity_verification_cases")]:::efecto
-  n12 --> n13
-  n14{"!kase"}:::decision
-  n13 --> n14
-  n15(["404 NOT_FOUND Caso de verificación no encontrado"]):::error
-  n14 -->|"sí"| n15
-  n16[("ACTUALIZA identity_assurance.identity_verification_cases")]:::efecto
-  n14 -->|"no"| n16
-  n17["Llama a IdentityVerificationEffectsService.applyRevoked"]:::llamada
-  n16 --> n17
-  n18["Llama a IdentityVerificationEffectsService.publicSubjectOf"]:::llamada
-  n17 --> n18
-  n19["Llama a JurisdictionAuthorizationsRepository.findById"]:::llamada
-  n18 --> n19
-  n20[("LEE profiles.jurisdiction_authorizations")]:::efecto
-  n19 --> n20
-  n21["Llama a CommunityVerificationService.applyRevoked"]:::llamada
-  n20 --> n21
-  n22["Llama a VerifiedBadgesRepository.findProfileByTarget"]:::llamada
-  n21 --> n22
-  n23[("LEE community.public_profiles")]:::efecto
-  n22 --> n23
-  n24["Llama a CommunityVerificationService.revokeProfileBadges"]:::llamada
-  n23 --> n24
-  n25{"profile.verificationStatusConceptId === CONCEPTS.STATE_ACTIVE"}:::decision
-  n24 --> n25
-  n26[("ACTUALIZA community.public_profiles")]:::efecto
-  n25 -->|"sí"| n26
-  n27{"dto.raiseFraudSignal"}:::decision
-  n26 --> n27
-  n25 -->|"no"| n27
-  n28{"!dto.fraudSignalTypeConceptId || !dto.fraudSeverityConceptId"}:::decision
-  n27 -->|"sí"| n28
-  n29(["422 PRECONDITION_FAILED Para derivar una señal de fraude se requieren tipo y severidad"]):::error
-  n28 -->|"sí"| n29
-  n30["Llama a IdentityFraudSignalsRepository.create"]:::llamada
-  n28 -->|"no"| n30
-  n31[("CREA identity_assurance.identity_fraud_signals")]:::efecto
-  n30 --> n31
-  n32(("200 Responde con éxito")):::ok
-  n31 --> n32
-  n27 -->|"no"| n32
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 2. POST /identity/authorities/{id}/endpoints
-
-Publicar un endpoint de verificación de la autoridad
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Autoridad de identidad no encontrada |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
-  n1 --> n2
-  n3["Llama a IdentityAuthoritiesService.addEndpoint"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a IdentityAuthoritiesRepository.findById"]:::llamada
-  n4 --> n5
-  n6[("LEE identity_assurance.identity_authorities")]:::efecto
-  n5 --> n6
-  n7{"!authority"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Autoridad de identidad no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a IdentityAuthorityEndpointsRepository.create"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA identity_assurance.identity_authority_endpoints")]:::efecto
+  n8["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n8 --> n9
+  n10["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
   n9 --> n10
-  n11(("201 Responde con éxito")):::ok
+  n11{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
   n10 --> n11
+  n12[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n11 -->|"sí"| n12
+  n13[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
+  n12 --> n13
+  n11 -->|"no"| n13
+  n14{"assertion.revokedAt"}:::decision
+  n13 --> n14
+  n15(["409 CONFLICT La aserción ya está revocada"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a IdentityVerificationEffectsService.applyRevoked"]:::llamada
+  n14 -->|"no"| n16
+  n17["Llama a IdentityVerificationEffectsService.publicSubjectOf"]:::llamada
+  n16 --> n17
+  n18["Llama a JurisdictionAuthorizationsRepository.findById"]:::llamada
+  n17 --> n18
+  n19[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n18 --> n19
+  n20["Llama a CommunityVerificationService.applyRevoked"]:::llamada
+  n19 --> n20
+  n21["Llama a VerifiedBadgesRepository.findProfileByTarget"]:::llamada
+  n20 --> n21
+  n22[("LEE community.public_profiles")]:::efecto
+  n21 --> n22
+  n23["Llama a CommunityVerificationService.revokeProfileBadges"]:::llamada
+  n22 --> n23
+  n24{"profile.verificationStatusConceptId === CONCEPTS.STATE_ACTIVE"}:::decision
+  n23 --> n24
+  n25[("ACTUALIZA community.public_profiles")]:::efecto
+  n24 -->|"sí"| n25
+  n26{"dto.raiseFraudSignal"}:::decision
+  n25 --> n26
+  n24 -->|"no"| n26
+  n27{"!dto.fraudSignalTypeConceptId || !dto.fraudSeverityConceptId"}:::decision
+  n26 -->|"sí"| n27
+  n28(["422 PRECONDITION_FAILED Para derivar una señal de fraude se requieren tipo y severidad"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a IdentityFraudSignalsRepository.create"]:::llamada
+  n27 -->|"no"| n29
+  n30[("CREA identity_assurance.identity_fraud_signals")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
+  n26 -->|"no"| n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -464,7 +471,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /identity/checks/{id}/attempts
+#### 2. POST /identity/checks/{id}/attempts
 
 Ejecutar un intento contra la autoridad externa (idempotente)
 
@@ -492,22 +499,37 @@ flowchart TD
   n5 --> n6
   n7[("LEE identity_assurance.identity_checks")]:::efecto
   n6 --> n7
-  n8{"!check"}:::decision
+  n8["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n7 --> n8
-  n9(["404 NOT_FOUND Check de identidad no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a IdentityVerificationAttemptsRepository.countByCase"]:::llamada
-  n8 -->|"no"| n10
-  n11[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n9["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n9 --> n10
+  n11["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
   n10 --> n11
-  n12["Llama a IdentityVerificationAttemptsRepository.create"]:::llamada
+  n12{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
   n11 --> n12
-  n13[("CREA identity_assurance.identity_verification_attempts")]:::efecto
-  n12 --> n13
-  n14[("ACTUALIZA identity_assurance.identity_checks")]:::efecto
+  n13[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n12 -->|"sí"| n13
+  n14[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
   n13 --> n14
-  n15(("201 Responde con éxito")):::ok
+  n12 -->|"no"| n14
+  n15{"!check || !owned"}:::decision
   n14 --> n15
+  n16(["404 NOT_FOUND Check de identidad no encontrado"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a IdentityVerificationAttemptsRepository.countByCase"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n17 --> n18
+  n19["Llama a IdentityVerificationAttemptsRepository.create"]:::llamada
+  n18 --> n19
+  n20[("CREA identity_assurance.identity_verification_attempts")]:::efecto
+  n19 --> n20
+  n21[("ACTUALIZA identity_assurance.identity_checks")]:::efecto
+  n20 --> n21
+  n22(("201 Responde con éxito")):::ok
+  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -516,7 +538,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /identity/checks/{id}/results
+#### 3. POST /identity/checks/{id}/results
 
 Registrar el resultado inmutable del check (con supersede)
 
@@ -545,69 +567,84 @@ flowchart TD
   n5 --> n6
   n7[("LEE identity_assurance.identity_checks")]:::efecto
   n6 --> n7
-  n8{"!check"}:::decision
+  n8["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n7 --> n8
-  n9(["404 NOT_FOUND Check de identidad no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a IdentityChecksService.completeInFlightAttempt"]:::llamada
-  n8 -->|"no"| n10
-  n11["Llama a IdentityVerificationAttemptsRepository.findLatestByCase"]:::llamada
+  n9["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n9 --> n10
+  n11["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
   n10 --> n11
-  n12[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n12{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
   n11 --> n12
-  n13[("ACTUALIZA identity_assurance.identity_verification_attempts · ACTUALIZA identity_assurance.identity_verificat…")]:::efecto
-  n12 --> n13
-  n14["Llama a IdentityVerificationAttemptsRepository.existsCompletedForCase"]:::llamada
+  n13[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n12 -->|"sí"| n13
+  n14[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
   n13 --> n14
-  n15[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n12 -->|"no"| n14
+  n15{"!check || !owned"}:::decision
   n14 --> n15
-  n16{"!hasCompleted"}:::decision
-  n15 --> n16
-  n17(["422 PRECONDITION_FAILED No existe un intento completado para registrar resultado"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a IdentityCheckResultsRepository.findLatestByCheck"]:::llamada
-  n16 -->|"no"| n18
-  n19[("LEE identity_assurance.identity_check_results")]:::efecto
+  n16(["404 NOT_FOUND Check de identidad no encontrado"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a IdentityChecksService.completeInFlightAttempt"]:::llamada
+  n15 -->|"no"| n17
+  n18["Llama a IdentityVerificationAttemptsRepository.findLatestByCase"]:::llamada
+  n17 --> n18
+  n19[("LEE identity_assurance.identity_verification_attempts")]:::efecto
   n18 --> n19
-  n20["Llama a IdentityCheckResultsRepository.countByCheck"]:::llamada
+  n20[("ACTUALIZA identity_assurance.identity_verification_attempts · ACTUALIZA identity_assurance.identity_verificat…")]:::efecto
   n19 --> n20
-  n21[("LEE identity_assurance.identity_check_results")]:::efecto
+  n21["Llama a IdentityVerificationAttemptsRepository.existsCompletedForCase"]:::llamada
   n20 --> n21
-  n22["Llama a IdentityCheckResultsRepository.create"]:::llamada
+  n22[("LEE identity_assurance.identity_verification_attempts")]:::efecto
   n21 --> n22
-  n23[("CREA identity_assurance.identity_check_results")]:::efecto
+  n23{"!hasCompleted"}:::decision
   n22 --> n23
-  n24[("ACTUALIZA identity_assurance.identity_checks")]:::efecto
-  n23 --> n24
-  n25["Llama a IdentityChecksService.settleCase"]:::llamada
-  n24 --> n25
-  n26["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n24(["422 PRECONDITION_FAILED No existe un intento completado para registrar resultado"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a IdentityCheckResultsRepository.findLatestByCheck"]:::llamada
+  n23 -->|"no"| n25
+  n26[("LEE identity_assurance.identity_check_results")]:::efecto
   n25 --> n26
-  n27[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n27["Llama a IdentityCheckResultsRepository.countByCheck"]:::llamada
   n26 --> n27
-  n28{"result === 'NO_MATCH'"}:::decision
+  n28[("LEE identity_assurance.identity_check_results")]:::efecto
   n27 --> n28
-  n29[("ACTUALIZA identity_assurance.identity_verification_cases · ACTUALIZA identity_assurance.identity_verification…")]:::efecto
-  n28 -->|"sí"| n29
-  n30["Llama a IdentityChecksRepository.countOpenRequiredByCase"]:::llamada
+  n29["Llama a IdentityCheckResultsRepository.create"]:::llamada
+  n28 --> n29
+  n30[("CREA identity_assurance.identity_check_results")]:::efecto
   n29 --> n30
-  n28 -->|"no"| n30
-  n31[("LEE identity_assurance.identity_checks")]:::efecto
+  n31[("ACTUALIZA identity_assurance.identity_checks")]:::efecto
   n30 --> n31
-  n32["Llama a IdentityChecksService.verifyCase"]:::llamada
+  n32["Llama a IdentityChecksService.settleCase"]:::llamada
   n31 --> n32
-  n33[("ACTUALIZA identity_assurance.identity_verification_cases")]:::efecto
+  n33["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
   n32 --> n33
-  n34["Llama a IdentityChecksService.issueAssertion"]:::llamada
+  n34[("LEE identity_assurance.identity_verification_cases")]:::efecto
   n33 --> n34
-  n35{"!authorityEndpoint"}:::decision
+  n35{"result === 'NO_MATCH'"}:::decision
   n34 --> n35
-  n36(["422 PRECONDITION_FAILED No se pudo determinar la autoridad que verificó el caso"]):::error
+  n36[("ACTUALIZA identity_assurance.identity_verification_cases · ACTUALIZA identity_assurance.identity_verification…")]:::efecto
   n35 -->|"sí"| n36
-  n37[("ACTUALIZA identity_assurance.identity_verification_cases · ACTUALIZA identity_assurance.identity_verification…")]:::efecto
+  n37["Llama a IdentityChecksRepository.countOpenRequiredByCase"]:::llamada
+  n36 --> n37
   n35 -->|"no"| n37
-  n38(("201 Responde con éxito")):::ok
+  n38[("LEE identity_assurance.identity_checks")]:::efecto
   n37 --> n38
+  n39["Llama a IdentityChecksService.verifyCase"]:::llamada
+  n38 --> n39
+  n40[("ACTUALIZA identity_assurance.identity_verification_cases")]:::efecto
+  n39 --> n40
+  n41["Llama a IdentityChecksService.issueAssertion"]:::llamada
+  n40 --> n41
+  n42{"!authorityEndpoint"}:::decision
+  n41 --> n42
+  n43(["422 PRECONDITION_FAILED No se pudo determinar la autoridad que verificó el caso"]):::error
+  n42 -->|"sí"| n43
+  n44[("ACTUALIZA identity_assurance.identity_verification_cases · ACTUALIZA identity_assurance.identity_verification…")]:::efecto
+  n42 -->|"no"| n44
+  n45(("201 Responde con éxito")):::ok
+  n44 --> n45
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -616,7 +653,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /identity/manual-review/{id}/decision
+#### 4. POST /identity/manual-review/{id}/decision
 
 Resolver una revisión manual (decisión)
 
@@ -626,7 +663,6 @@ Resolver una revisión manual (decisión)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Revisión manual no encontrada; ResourceNotFoundException: Caso de verificación no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La revisión ya fue decidida; PreconditionFailedException: La revisión está asignada a otro revisor; PreconditionFailedException: La revisión quedó obsoleta: el caso ya no admite aprobación; PreconditionFailedException: No se pudo determinar la autoridad que verificó el caso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -643,30 +679,31 @@ flowchart TD
   n4 --> n5
   n6[("LEE identity_assurance.identity_manual_review_cases")]:::efecto
   n5 --> n6
-  n7{"!review"}:::decision
+  n7["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Revisión manual no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"review.statusConceptId !== IDA.REVIEW_OPEN"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La revisión ya fue decidida"]):::error
-  n9 -->|"sí"| n10
-  n11{"review.assignedToUserId && review.assignedToUserId !== actor.id"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED La revisión está asignada a otro revisor"]):::error
+  n8["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n8 --> n9
+  n10["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
+  n9 --> n10
+  n11{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
+  n10 --> n11
+  n12[("LEE profiles.jurisdiction_authorizations")]:::efecto
   n11 -->|"sí"| n12
-  n13["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n13[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
+  n12 --> n13
   n11 -->|"no"| n13
-  n14[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n14{"review.statusConceptId !== IDA.REVIEW_OPEN"}:::decision
   n13 --> n14
-  n15{"!kase"}:::decision
-  n14 --> n15
-  n16(["404 NOT_FOUND Caso de verificación no encontrado"]):::error
-  n15 -->|"sí"| n16
-  n17[("ACTUALIZA identity_assurance.identity_manual_review_cases · ACTUALIZA identity_assurance.identity_manual_revi…")]:::efecto
-  n15 -->|"no"| n17
+  n15(["422 PRECONDITION_FAILED La revisión ya fue decidida"]):::error
+  n14 -->|"sí"| n15
+  n16{"review.assignedToUserId && review.assignedToUserId !== actor.id"}:::decision
+  n14 -->|"no"| n16
+  n17(["422 PRECONDITION_FAILED La revisión está asignada a otro revisor"]):::error
+  n16 -->|"sí"| n17
   n18{"approved"}:::decision
-  n17 --> n18
+  n16 -->|"no"| n18
   n19["Llama a IdentityChecksService.settleManualApproval"]:::llamada
   n18 -->|"sí"| n19
   n20{"!APPROVABLE_CASE_STATES.includes(kase.statusConceptId)"}:::decision
@@ -706,20 +743,18 @@ flowchart TD
   n35 -->|"sí"| n36
   n37[("ACTUALIZA identity_assurance.identity_verification_cases · ACTUALIZA identity_assurance.identity_verification…")]:::efecto
   n35 -->|"no"| n37
-  n38[("ACTUALIZA identity_assurance.identity_verification_cases · ACTUALIZA identity_assurance.identity_verification…")]:::efecto
+  n38["Llama a IdentityFraudSignalsRepository.resolveOpenForCase"]:::llamada
+  n37 --> n38
   n18 -->|"no"| n38
-  n39["Llama a IdentityFraudSignalsRepository.resolveOpenForCase"]:::llamada
-  n37 --> n39
+  n39[("LEE identity_assurance.identity_fraud_signals")]:::efecto
   n38 --> n39
-  n40[("LEE identity_assurance.identity_fraud_signals")]:::efecto
+  n40["Repite: por cada const s de open"]:::bucle
   n39 --> n40
-  n41["Repite: por cada const s de open"]:::bucle
-  n40 --> n41
-  n42[("ACTUALIZA identity_assurance.identity_fraud_signals · ACTUALIZA identity_assurance.identity_fraud_signals")]:::efecto
-  n41 -->|"cada elemento"| n42
-  n43(("200 Responde con éxito")):::ok
-  n42 --> n43
-  n41 -->|"al terminar"| n43
+  n41[("ACTUALIZA identity_assurance.identity_fraud_signals · ACTUALIZA identity_assurance.identity_fraud_signals")]:::efecto
+  n40 -->|"cada elemento"| n41
+  n42(("200 Responde con éxito")):::ok
+  n41 --> n42
+  n40 -->|"al terminar"| n42
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -728,7 +763,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /identity/me/identity-verification
+#### 5. POST /identity/me/identity-verification
 
 Solicitar la verificación de la propia identidad (paciente)
 
@@ -738,8 +773,9 @@ Solicitar la verificación de la propia identidad (paciente)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
@@ -836,8 +872,47 @@ flowchart TD
   n29 -->|"al terminar"| n43
   n44[("CREA identity_assurance.identity_checks")]:::efecto
   n43 --> n44
-  n45(("201 Responde con éxito")):::ok
+  n45["Llama a IdentitySelfServiceService.sendConfirmationEmail"]:::llamada
   n44 --> n45
+  n46["Intenta"]:::intento
+  n45 --> n46
+  n47["Llama a IdentitySelfServiceService.findEmailForUser"]:::llamada
+  n46 --> n47
+  n48[("LEE iam.authentication_credentials · LEE iam.email_verifications")]:::efecto
+  n47 --> n48
+  n49["Llama a NotificationsService.createRequest"]:::llamada
+  n48 --> n49
+  n50{"!recipientUserId"}:::decision
+  n49 --> n50
+  n51(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n50 -->|"sí"| n51
+  n52["Transacción: transactional(…)"]:::transaccion
+  n50 -->|"no"| n52
+  n53{"!channel"}:::decision
+  n52 --> n53
+  n54(["404 NOT_FOUND Canal no encontrado"]):::error
+  n53 -->|"sí"| n54
+  n55{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n53 -->|"no"| n55
+  n56(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n55 -->|"sí"| n56
+  n57{"dto.templateId"}:::decision
+  n55 -->|"no"| n57
+  n58{"!template"}:::decision
+  n57 -->|"sí"| n58
+  n59(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n58 -->|"sí"| n59
+  n60{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n58 -->|"no"| n60
+  n61(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
+  n60 -->|"sí"| n61
+  n62{"template.channelId !== dto.channelId"}:::decision
+  n60 -->|"no"| n62
+  n63(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
+  n62 -->|"sí"| n63
+  n64(("201 Responde con éxito")):::ok
+  n62 -->|"no"| n64
+  n57 -->|"no"| n64
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -846,7 +921,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /identity/me/practitioner/identity-verification
+#### 6. POST /identity/me/practitioner/identity-verification
 
 Solicitar la verificación de la propia identidad (profesional)
 
@@ -856,8 +931,9 @@ Solicitar la verificación de la propia identidad (profesional)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
@@ -964,8 +1040,47 @@ flowchart TD
   n34 -->|"al terminar"| n48
   n49[("CREA identity_assurance.identity_checks")]:::efecto
   n48 --> n49
-  n50(("201 Responde con éxito")):::ok
+  n50["Llama a IdentitySelfServiceService.sendConfirmationEmail"]:::llamada
   n49 --> n50
+  n51["Intenta"]:::intento
+  n50 --> n51
+  n52["Llama a IdentitySelfServiceService.findEmailForUser"]:::llamada
+  n51 --> n52
+  n53[("LEE iam.authentication_credentials · LEE iam.email_verifications")]:::efecto
+  n52 --> n53
+  n54["Llama a NotificationsService.createRequest"]:::llamada
+  n53 --> n54
+  n55{"!recipientUserId"}:::decision
+  n54 --> n55
+  n56(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n55 -->|"sí"| n56
+  n57["Transacción: transactional(…)"]:::transaccion
+  n55 -->|"no"| n57
+  n58{"!channel"}:::decision
+  n57 --> n58
+  n59(["404 NOT_FOUND Canal no encontrado"]):::error
+  n58 -->|"sí"| n59
+  n60{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n58 -->|"no"| n60
+  n61(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n60 -->|"sí"| n61
+  n62{"dto.templateId"}:::decision
+  n60 -->|"no"| n62
+  n63{"!template"}:::decision
+  n62 -->|"sí"| n63
+  n64(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n63 -->|"sí"| n64
+  n65{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n63 -->|"no"| n65
+  n66(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
+  n65 -->|"sí"| n66
+  n67{"template.channelId !== dto.channelId"}:::decision
+  n65 -->|"no"| n67
+  n68(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
+  n67 -->|"sí"| n68
+  n69(("201 Responde con éxito")):::ok
+  n67 -->|"no"| n69
+  n62 -->|"no"| n69
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -974,7 +1089,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /identity/me/practitioner/license-verification
+#### 7. POST /identity/me/practitioner/license-verification
 
 Solicitar la verificación de la propia matrícula
 
@@ -984,9 +1099,9 @@ Solicitar la verificación de la propia matrícula
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Matrícula no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Matrícula no encontrada; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional; PreconditionFailedException: Indique qué matrícula quiere verificar; PreconditionFailedException: La matrícula pertenece a otro profesional; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene un perfil profesional; PreconditionFailedException: Indique qué matrícula quiere verificar; PreconditionFailedException: La matrícula pertenece a otro profesional; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
@@ -1109,8 +1224,34 @@ flowchart TD
   n42 -->|"al terminar"| n56
   n57[("CREA identity_assurance.identity_checks")]:::efecto
   n56 --> n57
-  n58(("201 Responde con éxito")):::ok
+  n58["Llama a IdentitySelfServiceService.sendConfirmationEmail"]:::llamada
   n57 --> n58
+  n59["Intenta"]:::intento
+  n58 --> n59
+  n60["Llama a IdentitySelfServiceService.findEmailForUser"]:::llamada
+  n59 --> n60
+  n61[("LEE iam.authentication_credentials · LEE iam.email_verifications")]:::efecto
+  n60 --> n61
+  n62["Llama a NotificationsService.createRequest"]:::llamada
+  n61 --> n62
+  n63{"!recipientUserId"}:::decision
+  n62 --> n63
+  n64(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n63 -->|"sí"| n64
+  n65["Transacción: transactional(…)"]:::transaccion
+  n63 -->|"no"| n65
+  n66{"!channel"}:::decision
+  n65 --> n66
+  n67(["404 NOT_FOUND Canal no encontrado"]):::error
+  n66 -->|"sí"| n67
+  n68{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n66 -->|"no"| n68
+  n69(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n68 -->|"sí"| n69
+  n70{"dto.templateId"}:::decision
+  n68 -->|"no"| n70
+  n71["… el resto del árbol (6 nodos) está en el JSON del inventario"]:::corte
+  n70 -->|"sí"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1119,7 +1260,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /identity/me/tenants/{tenantId}/verification
+#### 8. POST /identity/me/tenants/{tenantId}/verification
 
 Solicitar la verificación de una institución propia
 
@@ -1129,8 +1270,9 @@ Solicitar la verificación de una institución propia
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya hay una verificación en curso para este sujeto |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No pertenece a esa institución; PreconditionFailedException: Sólo el titular o un administrador de la institución puede pedir su verificación; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No pertenece a esa institución; PreconditionFailedException: Sólo el titular o un administrador de la institución puede pedir su verificación; PreconditionFailedException: Envía el archivo histórico o las cinco evidencias nuevas, no ambos; PreconditionFailedException: La verificación requiere las cinco evidencias en el orden solicitado; PreconditionFailedException: Adjunta el frente, el reverso y las tres capturas de prueba de vida; PreconditionFailedException: Una evidencia no existe, no pertenece a esta cuenta o no está protegida; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
@@ -1229,8 +1371,47 @@ flowchart TD
   n30 -->|"al terminar"| n44
   n45[("CREA identity_assurance.identity_checks")]:::efecto
   n44 --> n45
-  n46(("201 Responde con éxito")):::ok
+  n46["Llama a IdentitySelfServiceService.sendConfirmationEmail"]:::llamada
   n45 --> n46
+  n47["Intenta"]:::intento
+  n46 --> n47
+  n48["Llama a IdentitySelfServiceService.findEmailForUser"]:::llamada
+  n47 --> n48
+  n49[("LEE iam.authentication_credentials · LEE iam.email_verifications")]:::efecto
+  n48 --> n49
+  n50["Llama a NotificationsService.createRequest"]:::llamada
+  n49 --> n50
+  n51{"!recipientUserId"}:::decision
+  n50 --> n51
+  n52(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n51 -->|"sí"| n52
+  n53["Transacción: transactional(…)"]:::transaccion
+  n51 -->|"no"| n53
+  n54{"!channel"}:::decision
+  n53 --> n54
+  n55(["404 NOT_FOUND Canal no encontrado"]):::error
+  n54 -->|"sí"| n55
+  n56{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n54 -->|"no"| n56
+  n57(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n56 -->|"sí"| n57
+  n58{"dto.templateId"}:::decision
+  n56 -->|"no"| n58
+  n59{"!template"}:::decision
+  n58 -->|"sí"| n59
+  n60(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n59 -->|"sí"| n60
+  n61{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n59 -->|"no"| n61
+  n62(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
+  n61 -->|"sí"| n62
+  n63{"template.channelId !== dto.channelId"}:::decision
+  n61 -->|"no"| n63
+  n64(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
+  n63 -->|"sí"| n64
+  n65(("201 Responde con éxito")):::ok
+  n63 -->|"no"| n65
+  n58 -->|"no"| n65
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1239,7 +1420,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. GET /identity/me/verification-cases
+#### 9. GET /identity/me/verification-cases
 
 Listar los casos de verificación propios
 
@@ -1300,7 +1481,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. GET /identity/me/verification-cases/{caseId}
+#### 10. GET /identity/me/verification-cases/{caseId}
 
 Consultar el estado de un caso propio
 
@@ -1380,7 +1561,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. GET /identity/me/verification-types
+#### 11. GET /identity/me/verification-types
 
 Listar los tipos de solicitud de verificación disponibles
 
@@ -1431,6 +1612,58 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+#### 12. GET /identity/verification-cases
+
+Listar los casos que esperan revisión
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a IdentityCasesService.listQueue"]:::llamada
+  n2 --> n3
+  n4["Repite: ciclo for"]:::bucle
+  n3 --> n4
+  n5["Llama a IdentityVerificationCasesRepository.findByStatuses"]:::llamada
+  n4 -->|"cada elemento"| n5
+  n6[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n5 --> n6
+  n7["Llama a IdentityCaseScope.filterToTenant"]:::llamada
+  n6 --> n7
+  n8["Repite: por cada const kase de cases"]:::bucle
+  n7 --> n8
+  n9{"owned === undefined"}:::decision
+  n8 -->|"cada elemento"| n9
+  n10["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
+  n9 -->|"sí"| n10
+  n11{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
+  n10 --> n11
+  n12[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n11 -->|"sí"| n12
+  n13[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
+  n12 --> n13
+  n11 -->|"no"| n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
+  n9 -->|"no"| n14
+  n8 -->|"al terminar"| n14
+  n4 -->|"al terminar"| n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
 #### 13. POST /identity/verification-cases
 
 Iniciar un caso de verificación de identidad
@@ -1453,20 +1686,31 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a IdentityVerificationPoliciesRepository.findById"]:::llamada
+  n5["Llama a IdentityCaseScope.assertSubjectInTenant"]:::llamada
   n4 --> n5
-  n6[("LEE identity_assurance.identity_verification_policies")]:::efecto
+  n6["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
   n5 --> n6
-  n7{"!policy"}:::decision
+  n7{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Política de verificación no encontrada"]):::error
+  n8[("LEE profiles.jurisdiction_authorizations")]:::efecto
   n7 -->|"sí"| n8
-  n9["Llama a IdentityVerificationCasesRepository.create"]:::llamada
+  n9[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
+  n8 --> n9
   n7 -->|"no"| n9
-  n10[("CREA identity_assurance.identity_verification_cases")]:::efecto
+  n10["Llama a IdentityVerificationPoliciesRepository.findById"]:::llamada
   n9 --> n10
-  n11(("201 Responde con éxito")):::ok
+  n11[("LEE identity_assurance.identity_verification_policies")]:::efecto
   n10 --> n11
+  n12{"!policy"}:::decision
+  n11 --> n12
+  n13(["404 NOT_FOUND Política de verificación no encontrada"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a IdentityVerificationCasesRepository.create"]:::llamada
+  n12 -->|"no"| n14
+  n15[("CREA identity_assurance.identity_verification_cases")]:::efecto
+  n14 --> n15
+  n16(("201 Responde con éxito")):::ok
+  n15 --> n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1485,7 +1729,6 @@ Consultar expediente y evidencias de un caso
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1495,20 +1738,29 @@ flowchart TD
   n1 --> n2
   n3["Llama a IdentityCasesService.getCaseDetail"]:::llamada
   n2 --> n3
-  n4["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n4["Llama a IdentityCaseScope.loadAuthorizedCase"]:::llamada
   n3 --> n4
-  n5[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n5["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n4 --> n5
-  n6{"!kase"}:::decision
+  n6["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
   n5 --> n6
-  n7(["404 NOT_FOUND Caso de verificación no encontrado"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a IdentityEvidenceRecordsRepository.findByCase"]:::llamada
-  n6 -->|"no"| n8
-  n9[("LEE identity_assurance.identity_evidence_records")]:::efecto
+  n7[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n6 --> n7
+  n8["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
+  n7 --> n8
+  n9{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
   n8 --> n9
-  n10(("200 Responde con éxito")):::ok
-  n9 --> n10
+  n10[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n9 -->|"sí"| n10
+  n11[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
+  n10 --> n11
+  n9 -->|"no"| n11
+  n12["Llama a IdentityEvidenceRecordsRepository.findByCase"]:::llamada
+  n11 --> n12
+  n13[("LEE identity_assurance.identity_evidence_records")]:::efecto
+  n12 --> n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1527,7 +1779,6 @@ Emitir una aserción de identidad con nivel de aseguramiento
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo un caso verificado puede emitir una aserción; PreconditionFailedException: No hay checks completados que sustenten la aserción; PreconditionFailedException: No se pudo determinar el nivel de aseguramiento |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1540,38 +1791,51 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a IdentityCasesService.loadCase"]:::llamada
+  n5["Llama a IdentityCaseScope.loadAuthorizedCase"]:::llamada
   n4 --> n5
-  n6["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n6["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n5 --> n6
-  n7[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n7["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!kase"}:::decision
+  n8[("LEE identity_assurance.identity_verification_cases")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Caso de verificación no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10{"kase.statusConceptId !== IDA.CASE_VERIFIED"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED Solo un caso verificado puede emitir una aserción"]):::error
+  n9["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
+  n8 --> n9
+  n10{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
+  n9 --> n10
+  n11[("LEE profiles.jurisdiction_authorizations")]:::efecto
   n10 -->|"sí"| n11
-  n12["Llama a IdentityChecksRepository.countByCaseAndStatus"]:::llamada
+  n12[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
+  n11 --> n12
   n10 -->|"no"| n12
-  n13[("LEE identity_assurance.identity_checks")]:::efecto
+  n13{"kase.statusConceptId !== IDA.CASE_VERIFIED"}:::decision
   n12 --> n13
-  n14{"completed ‹ 1"}:::decision
-  n13 --> n14
-  n15(["422 PRECONDITION_FAILED No hay checks completados que sustenten la aserción"]):::error
-  n14 -->|"sí"| n15
-  n16{"!assuranceLevel"}:::decision
-  n14 -->|"no"| n16
-  n17(["422 PRECONDITION_FAILED No se pudo determinar el nivel de aseguramiento"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a IdentityAssertionsRepository.create"]:::llamada
-  n16 -->|"no"| n18
-  n19[("CREA identity_assurance.identity_assertions")]:::efecto
-  n18 --> n19
-  n20(("201 Responde con éxito")):::ok
+  n14(["422 PRECONDITION_FAILED Solo un caso verificado puede emitir una aserción"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a IdentityChecksRepository.countByCaseAndStatus"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE identity_assurance.identity_checks")]:::efecto
+  n15 --> n16
+  n17{"completed ‹ 1"}:::decision
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED No hay checks completados que sustenten la aserción"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a IdentityCaseScope.assertAuthorityInTenant"]:::llamada
+  n17 -->|"no"| n19
+  n20[("LEE identity_assurance.identity_authorities")]:::efecto
   n19 --> n20
+  n21{"!assuranceLevel"}:::decision
+  n20 --> n21
+  n22(["422 PRECONDITION_FAILED No se pudo determinar el nivel de aseguramiento"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a IdentityAssertionsRepository.create"]:::llamada
+  n21 -->|"no"| n23
+  n24[("CREA identity_assurance.identity_assertions")]:::efecto
+  n23 --> n24
+  n25[("ACTUALIZA identity_assurance.identity_verification_cases · ACTUALIZA identity_assurance.identity_verification…")]:::efecto
+  n24 --> n25
+  n26(("201 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1590,7 +1854,6 @@ Planificar los checks requeridos del caso
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo un caso abierto puede planificar checks |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1603,29 +1866,45 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a IdentityCasesService.loadCase"]:::llamada
+  n5["Llama a IdentityCaseScope.loadAuthorizedCase"]:::llamada
   n4 --> n5
-  n6["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n6["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n5 --> n6
-  n7[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n7["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!kase"}:::decision
+  n8[("LEE identity_assurance.identity_verification_cases")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Caso de verificación no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10{"kase.statusConceptId !== IDA.CASE_OPEN"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED Solo un caso abierto puede planificar checks"]):::error
+  n9["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
+  n8 --> n9
+  n10{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
+  n9 --> n10
+  n11[("LEE profiles.jurisdiction_authorizations")]:::efecto
   n10 -->|"sí"| n11
-  n12["Repite: forEach(…)"]:::bucle
+  n12[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
+  n11 --> n12
   n10 -->|"no"| n12
-  n13["Llama a IdentityChecksRepository.create"]:::llamada
-  n12 -->|"cada elemento"| n13
-  n14[("CREA identity_assurance.identity_checks")]:::efecto
-  n13 --> n14
-  n15(("201 Responde con éxito")):::ok
-  n14 --> n15
-  n12 -->|"al terminar"| n15
+  n13{"kase.statusConceptId !== IDA.CASE_OPEN"}:::decision
+  n12 --> n13
+  n14(["422 PRECONDITION_FAILED Solo un caso abierto puede planificar checks"]):::error
+  n13 -->|"sí"| n14
+  n15["Repite: por cada const item de dto.checks"]:::bucle
+  n13 -->|"no"| n15
+  n16["Llama a IdentityCaseScope.assertAuthorityInTenant"]:::llamada
+  n15 -->|"cada elemento"| n16
+  n17[("LEE identity_assurance.identity_authorities")]:::efecto
+  n16 --> n17
+  n18["Repite: forEach(…)"]:::bucle
+  n17 --> n18
+  n15 -->|"al terminar"| n18
+  n19["Llama a IdentityChecksRepository.create"]:::llamada
+  n18 -->|"cada elemento"| n19
+  n20[("CREA identity_assurance.identity_checks")]:::efecto
+  n19 --> n20
+  n21[("ACTUALIZA identity_assurance.identity_verification_cases")]:::efecto
+  n20 --> n21
+  n18 -->|"al terminar"| n21
+  n22(("201 Responde con éxito")):::ok
+  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1644,7 +1923,6 @@ Aportar evidencia documental bajo consentimiento
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no admite evidencia en su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: {identity.reasonCode}; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PRODUCER_OR_PURGE_IN_FLIGHT |
@@ -1658,65 +1936,88 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a IdentityCasesService.loadCase"]:::llamada
+  n5["Llama a IdentityCaseScope.loadAuthorizedCase"]:::llamada
   n4 --> n5
-  n6["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n6["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n5 --> n6
-  n7[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n7["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!kase"}:::decision
+  n8[("LEE identity_assurance.identity_verification_cases")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Caso de verificación no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10{"kase.statusConceptId !== IDA.CASE_OPEN && kase.statusConceptId !== IDA.CASE_IN_VERIFICATION"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED El caso no admite evidencia en su estado actual"]):::error
+  n9["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
+  n8 --> n9
+  n10{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
+  n9 --> n10
+  n11[("LEE profiles.jurisdiction_authorizations")]:::efecto
   n10 -->|"sí"| n11
-  n12["Llama a IdentityEvidenceRecordsRepository.create"]:::llamada
+  n12[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
+  n11 --> n12
   n10 -->|"no"| n12
-  n13{"data.evidenceFileId"}:::decision
+  n13{"kase.statusConceptId !== IDA.CASE_OPEN && kase.statusConceptId !== IDA.CASE_IN_VERIFICATION"}:::decision
   n12 --> n13
-  n14["Llama a StoragePublicationService.guardFile"]:::llamada
+  n14(["422 PRECONDITION_FAILED El caso no admite evidencia en su estado actual"]):::error
   n13 -->|"sí"| n14
-  n15["Llama a StoragePublicationService.lockNamespace"]:::llamada
-  n14 --> n15
-  n16{"identity.kind === 'UNKNOWN'"}:::decision
+  n15["Llama a IdentityCaseScope.assertAuthorityInTenant"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE identity_assurance.identity_authorities")]:::efecto
   n15 --> n16
-  n17(["500 INTERNAL {identity.reasonCode}"]):::error
-  n16 -->|"sí"| n17
-  n18[("LEE common.files")]:::efecto
-  n16 -->|"no"| n18
-  n19{"!file || file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED || !file.currentVersionId"}:::decision
-  n18 --> n19
-  n20(["500 INTERNAL FILE_NOT_LIVE"]):::error
-  n19 -->|"sí"| n20
-  n21[("LEE common.file_versions")]:::efecto
-  n19 -->|"no"| n21
-  n22{"!versions.some((version) =› version.id === file.currentVersionId)"}:::decision
+  n17["Llama a IdentityCaseScope.assertEvidenceReferences"]:::llamada
+  n16 --> n17
+  n18{"refs.evidenceFileId"}:::decision
+  n17 --> n18
+  n19[("LEE common.files")]:::efecto
+  n18 -->|"sí"| n19
+  n20{"refs.collectedUnderConsentId"}:::decision
+  n19 --> n20
+  n18 -->|"no"| n20
+  n21[("LEE consent.consents")]:::efecto
+  n20 -->|"sí"| n21
+  n22["Llama a IdentityEvidenceRecordsRepository.create"]:::llamada
   n21 --> n22
-  n23(["500 INTERNAL VERSION_UNKNOWN"]):::error
-  n22 -->|"sí"| n23
-  n24["Repite: por cada const version de versions"]:::bucle
-  n22 -->|"no"| n24
-  n25{"!identity || identity.kind === 'UNKNOWN'"}:::decision
-  n24 -->|"cada elemento"| n25
-  n26(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
-  n25 -->|"sí"| n26
-  n27["Llama a StorageLifecycleCoordinator.assertNoContender"]:::llamada
-  n25 -->|"no"| n27
-  n28["Repite: por cada const job de await this.queues.findStorageIntents(tx)"]:::bucle
-  n27 --> n28
-  n29{"physicalContentionKey(intent.identity) === physicalContentionKey(identity) && intentExcludesPublication(inten…"}:::decision
-  n28 -->|"cada elemento"| n29
-  n30(["500 INTERNAL PRODUCER_OR_PURGE_IN_FLIGHT"]):::error
+  n20 -->|"no"| n22
+  n23{"data.evidenceFileId"}:::decision
+  n22 --> n23
+  n24["Llama a StoragePublicationService.guardFile"]:::llamada
+  n23 -->|"sí"| n24
+  n25["Llama a StoragePublicationService.lockNamespace"]:::llamada
+  n24 --> n25
+  n26{"identity.kind === 'UNKNOWN'"}:::decision
+  n25 --> n26
+  n27(["500 INTERNAL {identity.reasonCode}"]):::error
+  n26 -->|"sí"| n27
+  n28[("LEE common.files")]:::efecto
+  n26 -->|"no"| n28
+  n29{"!file || file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED || !file.currentVersionId"}:::decision
+  n28 --> n29
+  n30(["500 INTERNAL FILE_NOT_LIVE"]):::error
   n29 -->|"sí"| n30
-  n31[("CREA identity_assurance.identity_evidence_records")]:::efecto
+  n31[("LEE common.file_versions")]:::efecto
   n29 -->|"no"| n31
-  n28 -->|"al terminar"| n31
-  n24 -->|"al terminar"| n31
-  n13 -->|"no"| n31
-  n32(("201 Responde con éxito")):::ok
+  n32{"!versions.some((version) =› version.id === file.currentVersionId)"}:::decision
   n31 --> n32
+  n33(["500 INTERNAL VERSION_UNKNOWN"]):::error
+  n32 -->|"sí"| n33
+  n34["Repite: por cada const version de versions"]:::bucle
+  n32 -->|"no"| n34
+  n35{"!identity || identity.kind === 'UNKNOWN'"}:::decision
+  n34 -->|"cada elemento"| n35
+  n36(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
+  n35 -->|"sí"| n36
+  n37["Llama a StorageLifecycleCoordinator.assertNoContender"]:::llamada
+  n35 -->|"no"| n37
+  n38["Repite: por cada const job de await this.queues.findStorageIntents(tx)"]:::bucle
+  n37 --> n38
+  n39{"physicalContentionKey(intent.identity) === physicalContentionKey(identity) && intentExcludesPublication(inten…"}:::decision
+  n38 -->|"cada elemento"| n39
+  n40(["500 INTERNAL PRODUCER_OR_PURGE_IN_FLIGHT"]):::error
+  n39 -->|"sí"| n40
+  n41[("CREA identity_assurance.identity_evidence_records")]:::efecto
+  n39 -->|"no"| n41
+  n38 -->|"al terminar"| n41
+  n34 -->|"al terminar"| n41
+  n23 -->|"no"| n41
+  n42(("201 Responde con éxito")):::ok
+  n41 --> n42
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1735,7 +2036,6 @@ Detectar y registrar una señal de fraude
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1747,22 +2047,36 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a IdentityCasesService.loadCase"]:::llamada
+  n5["Llama a IdentityCaseScope.loadAuthorizedCase"]:::llamada
   n4 --> n5
-  n6["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n6["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n5 --> n6
-  n7[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n7["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!kase"}:::decision
+  n8[("LEE identity_assurance.identity_verification_cases")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Caso de verificación no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a IdentityFraudSignalsRepository.create"]:::llamada
-  n8 -->|"no"| n10
-  n11[("CREA identity_assurance.identity_fraud_signals")]:::efecto
-  n10 --> n11
-  n12(("201 Responde con éxito")):::ok
+  n9["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
+  n8 --> n9
+  n10{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
+  n9 --> n10
+  n11[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n10 -->|"sí"| n11
+  n12[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
   n11 --> n12
+  n10 -->|"no"| n12
+  n13["Llama a IdentityFraudSignalsRepository.create"]:::llamada
+  n12 --> n13
+  n14[("CREA identity_assurance.identity_fraud_signals")]:::efecto
+  n13 --> n14
+  n15[("ACTUALIZA identity_assurance.identity_verification_cases")]:::efecto
+  n14 --> n15
+  n16{"kase.statusConceptId === IDA.CASE_OPEN || kase.statusConceptId === IDA.CASE_IN_VERIFICATION || kase.statusCon…"}:::decision
+  n15 --> n16
+  n17[("ACTUALIZA identity_assurance.identity_verification_cases")]:::efecto
+  n16 -->|"sí"| n17
+  n18(("201 Responde con éxito")):::ok
+  n17 --> n18
+  n16 -->|"no"| n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1781,7 +2095,6 @@ Escalar el caso a revisión manual
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso de verificación no encontrado |
 | 409 | `CONFLICT` | ConflictException: El caso ya tiene una revisión manual abierta |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso no es escalable a revisión manual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1795,34 +2108,43 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a IdentityCasesService.loadCase"]:::llamada
+  n5["Llama a IdentityCaseScope.loadAuthorizedCase"]:::llamada
   n4 --> n5
-  n6["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n6["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n5 --> n6
-  n7[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n7["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!kase"}:::decision
+  n8[("LEE identity_assurance.identity_verification_cases")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Caso de verificación no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10{"kase.statusConceptId !== IDA.CASE_IN_VERIFICATION && kase.statusConceptId !== IDA.CASE_AT_RISK"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED El caso no es escalable a revisión manual"]):::error
+  n9["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
+  n8 --> n9
+  n10{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
+  n9 --> n10
+  n11[("LEE profiles.jurisdiction_authorizations")]:::efecto
   n10 -->|"sí"| n11
-  n12["Llama a IdentityManualReviewCasesRepository.countOpenByCase"]:::llamada
+  n12[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
+  n11 --> n12
   n10 -->|"no"| n12
-  n13[("LEE identity_assurance.identity_manual_review_cases")]:::efecto
+  n13{"kase.statusConceptId !== IDA.CASE_IN_VERIFICATION && kase.statusConceptId !== IDA.CASE_AT_RISK"}:::decision
   n12 --> n13
-  n14{"openReviews › 0"}:::decision
-  n13 --> n14
-  n15(["409 CONFLICT El caso ya tiene una revisión manual abierta"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a IdentityManualReviewCasesRepository.create"]:::llamada
-  n14 -->|"no"| n16
-  n17[("CREA identity_assurance.identity_manual_review_cases")]:::efecto
+  n14(["422 PRECONDITION_FAILED El caso no es escalable a revisión manual"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a IdentityManualReviewCasesRepository.countOpenByCase"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE identity_assurance.identity_manual_review_cases")]:::efecto
+  n15 --> n16
+  n17{"openReviews › 0"}:::decision
   n16 --> n17
-  n18(("201 Responde con éxito")):::ok
-  n17 --> n18
+  n18(["409 CONFLICT El caso ya tiene una revisión manual abierta"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a IdentityManualReviewCasesRepository.create"]:::llamada
+  n17 -->|"no"| n19
+  n20[("CREA identity_assurance.identity_manual_review_cases")]:::efecto
+  n19 --> n20
+  n21[("ACTUALIZA identity_assurance.identity_verification_cases")]:::efecto
+  n20 --> n21
+  n22(("201 Responde con éxito")):::ok
+  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1855,43 +2177,58 @@ flowchart TD
   n4 --> n5
   n6[("LEE identity_assurance.identity_verification_cases")]:::efecto
   n5 --> n6
-  n7["Repite: por cada const kase de expirable"]:::bucle
+  n7["Llama a IdentityCaseScope.filterToTenant"]:::llamada
   n6 --> n7
-  n8[("ACTUALIZA identity_assurance.identity_verification_cases")]:::efecto
-  n7 -->|"cada elemento"| n8
-  n9["Llama a IdentityChecksRepository.findPendingByCase"]:::llamada
-  n8 --> n9
-  n10[("LEE identity_assurance.identity_checks")]:::efecto
-  n9 --> n10
-  n11["Repite: por cada const check de pending"]:::bucle
+  n8["Repite: por cada const kase de cases"]:::bucle
+  n7 --> n8
+  n9{"owned === undefined"}:::decision
+  n8 -->|"cada elemento"| n9
+  n10["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
+  n9 -->|"sí"| n10
+  n11{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
   n10 --> n11
-  n12[("ACTUALIZA identity_assurance.identity_checks")]:::efecto
-  n11 -->|"cada elemento"| n12
-  n13["Llama a IdentityVerificationEffectsService.applyRevoked"]:::llamada
+  n12[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n11 -->|"sí"| n12
+  n13[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
   n12 --> n13
-  n11 -->|"al terminar"| n13
-  n14["Llama a IdentityVerificationEffectsService.publicSubjectOf"]:::llamada
+  n11 -->|"no"| n13
+  n14["Repite: por cada const kase de expirable"]:::bucle
   n13 --> n14
-  n15["Llama a JurisdictionAuthorizationsRepository.findById"]:::llamada
-  n14 --> n15
-  n16[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n9 -->|"no"| n14
+  n8 -->|"al terminar"| n14
+  n15["Llama a IdentityChecksRepository.findPendingByCase"]:::llamada
+  n14 -->|"cada elemento"| n15
+  n16[("LEE identity_assurance.identity_checks")]:::efecto
   n15 --> n16
-  n17["Llama a CommunityVerificationService.applyRevoked"]:::llamada
+  n17["Repite: por cada const check de pending"]:::bucle
   n16 --> n17
-  n18["Llama a VerifiedBadgesRepository.findProfileByTarget"]:::llamada
-  n17 --> n18
-  n19[("LEE community.public_profiles")]:::efecto
+  n18[("ACTUALIZA identity_assurance.identity_checks")]:::efecto
+  n17 -->|"cada elemento"| n18
+  n19["Llama a IdentityVerificationEffectsService.applyRevoked"]:::llamada
   n18 --> n19
-  n20["Llama a CommunityVerificationService.revokeProfileBadges"]:::llamada
+  n17 -->|"al terminar"| n19
+  n20["Llama a IdentityVerificationEffectsService.publicSubjectOf"]:::llamada
   n19 --> n20
-  n21{"profile.verificationStatusConceptId === CONCEPTS.STATE_ACTIVE"}:::decision
+  n21["Llama a JurisdictionAuthorizationsRepository.findById"]:::llamada
   n20 --> n21
-  n22[("ACTUALIZA community.public_profiles")]:::efecto
-  n21 -->|"sí"| n22
-  n23(("200 Responde con éxito")):::ok
+  n22[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n21 --> n22
+  n23["Llama a CommunityVerificationService.applyRevoked"]:::llamada
   n22 --> n23
-  n21 -->|"no"| n23
-  n7 -->|"al terminar"| n23
+  n24["Llama a VerifiedBadgesRepository.findProfileByTarget"]:::llamada
+  n23 --> n24
+  n25[("LEE community.public_profiles")]:::efecto
+  n24 --> n25
+  n26["Llama a CommunityVerificationService.revokeProfileBadges"]:::llamada
+  n25 --> n26
+  n27{"profile.verificationStatusConceptId === CONCEPTS.STATE_ACTIVE"}:::decision
+  n26 --> n27
+  n28[("ACTUALIZA community.public_profiles")]:::efecto
+  n27 -->|"sí"| n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
+  n27 -->|"no"| n29
+  n14 -->|"al terminar"| n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1928,22 +2265,37 @@ flowchart TD
   n5 --> n6
   n7[("LEE identity_assurance.identity_checks")]:::efecto
   n6 --> n7
-  n8{"!check"}:::decision
+  n8["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n7 --> n8
-  n9(["404 NOT_FOUND Check de identidad no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a IdentityVerificationAttemptsRepository.countByCase"]:::llamada
-  n8 -->|"no"| n10
-  n11[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n9["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n9 --> n10
+  n11["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
   n10 --> n11
-  n12["Llama a IdentityVerificationAttemptsRepository.create"]:::llamada
+  n12{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
   n11 --> n12
-  n13[("CREA identity_assurance.identity_verification_attempts")]:::efecto
-  n12 --> n13
-  n14[("ACTUALIZA identity_assurance.identity_checks")]:::efecto
+  n13[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n12 -->|"sí"| n13
+  n14[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
   n13 --> n14
-  n15(("201 Responde con éxito")):::ok
+  n12 -->|"no"| n14
+  n15{"!check || !owned"}:::decision
   n14 --> n15
+  n16(["404 NOT_FOUND Check de identidad no encontrado"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a IdentityVerificationAttemptsRepository.countByCase"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n17 --> n18
+  n19["Llama a IdentityVerificationAttemptsRepository.create"]:::llamada
+  n18 --> n19
+  n20[("CREA identity_assurance.identity_verification_attempts")]:::efecto
+  n19 --> n20
+  n21[("ACTUALIZA identity_assurance.identity_checks")]:::efecto
+  n20 --> n21
+  n22(("201 Responde con éxito")):::ok
+  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1981,69 +2333,84 @@ flowchart TD
   n5 --> n6
   n7[("LEE identity_assurance.identity_checks")]:::efecto
   n6 --> n7
-  n8{"!check"}:::decision
+  n8["Llama a IdentityCaseScope.findAuthorizedCase"]:::llamada
   n7 --> n8
-  n9(["404 NOT_FOUND Check de identidad no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a IdentityChecksService.completeInFlightAttempt"]:::llamada
-  n8 -->|"no"| n10
-  n11["Llama a IdentityVerificationAttemptsRepository.findLatestByCase"]:::llamada
+  n9["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n9 --> n10
+  n11["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
   n10 --> n11
-  n12[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n12{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
   n11 --> n12
-  n13[("ACTUALIZA identity_assurance.identity_verification_attempts · ACTUALIZA identity_assurance.identity_verificat…")]:::efecto
-  n12 --> n13
-  n14["Llama a IdentityVerificationAttemptsRepository.existsCompletedForCase"]:::llamada
+  n13[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n12 -->|"sí"| n13
+  n14[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
   n13 --> n14
-  n15[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n12 -->|"no"| n14
+  n15{"!check || !owned"}:::decision
   n14 --> n15
-  n16{"!hasCompleted"}:::decision
-  n15 --> n16
-  n17(["422 PRECONDITION_FAILED No existe un intento completado para registrar resultado"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a IdentityCheckResultsRepository.findLatestByCheck"]:::llamada
-  n16 -->|"no"| n18
-  n19[("LEE identity_assurance.identity_check_results")]:::efecto
+  n16(["404 NOT_FOUND Check de identidad no encontrado"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a IdentityChecksService.completeInFlightAttempt"]:::llamada
+  n15 -->|"no"| n17
+  n18["Llama a IdentityVerificationAttemptsRepository.findLatestByCase"]:::llamada
+  n17 --> n18
+  n19[("LEE identity_assurance.identity_verification_attempts")]:::efecto
   n18 --> n19
-  n20["Llama a IdentityCheckResultsRepository.countByCheck"]:::llamada
+  n20[("ACTUALIZA identity_assurance.identity_verification_attempts · ACTUALIZA identity_assurance.identity_verificat…")]:::efecto
   n19 --> n20
-  n21[("LEE identity_assurance.identity_check_results")]:::efecto
+  n21["Llama a IdentityVerificationAttemptsRepository.existsCompletedForCase"]:::llamada
   n20 --> n21
-  n22["Llama a IdentityCheckResultsRepository.create"]:::llamada
+  n22[("LEE identity_assurance.identity_verification_attempts")]:::efecto
   n21 --> n22
-  n23[("CREA identity_assurance.identity_check_results")]:::efecto
+  n23{"!hasCompleted"}:::decision
   n22 --> n23
-  n24[("ACTUALIZA identity_assurance.identity_checks")]:::efecto
-  n23 --> n24
-  n25["Llama a IdentityChecksService.settleCase"]:::llamada
-  n24 --> n25
-  n26["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n24(["422 PRECONDITION_FAILED No existe un intento completado para registrar resultado"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a IdentityCheckResultsRepository.findLatestByCheck"]:::llamada
+  n23 -->|"no"| n25
+  n26[("LEE identity_assurance.identity_check_results")]:::efecto
   n25 --> n26
-  n27[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n27["Llama a IdentityCheckResultsRepository.countByCheck"]:::llamada
   n26 --> n27
-  n28{"result === 'NO_MATCH'"}:::decision
+  n28[("LEE identity_assurance.identity_check_results")]:::efecto
   n27 --> n28
-  n29[("ACTUALIZA identity_assurance.identity_verification_cases · ACTUALIZA identity_assurance.identity_verification…")]:::efecto
-  n28 -->|"sí"| n29
-  n30["Llama a IdentityChecksRepository.countOpenRequiredByCase"]:::llamada
+  n29["Llama a IdentityCheckResultsRepository.create"]:::llamada
+  n28 --> n29
+  n30[("CREA identity_assurance.identity_check_results")]:::efecto
   n29 --> n30
-  n28 -->|"no"| n30
-  n31[("LEE identity_assurance.identity_checks")]:::efecto
+  n31[("ACTUALIZA identity_assurance.identity_checks")]:::efecto
   n30 --> n31
-  n32["Llama a IdentityChecksService.verifyCase"]:::llamada
+  n32["Llama a IdentityChecksService.settleCase"]:::llamada
   n31 --> n32
-  n33[("ACTUALIZA identity_assurance.identity_verification_cases")]:::efecto
+  n33["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
   n32 --> n33
-  n34["Llama a IdentityChecksService.issueAssertion"]:::llamada
+  n34[("LEE identity_assurance.identity_verification_cases")]:::efecto
   n33 --> n34
-  n35{"!authorityEndpoint"}:::decision
+  n35{"result === 'NO_MATCH'"}:::decision
   n34 --> n35
-  n36(["422 PRECONDITION_FAILED No se pudo determinar la autoridad que verificó el caso"]):::error
+  n36[("ACTUALIZA identity_assurance.identity_verification_cases · ACTUALIZA identity_assurance.identity_verification…")]:::efecto
   n35 -->|"sí"| n36
-  n37[("ACTUALIZA identity_assurance.identity_verification_cases · ACTUALIZA identity_assurance.identity_verification…")]:::efecto
+  n37["Llama a IdentityChecksRepository.countOpenRequiredByCase"]:::llamada
+  n36 --> n37
   n35 -->|"no"| n37
-  n38(("201 Responde con éxito")):::ok
+  n38[("LEE identity_assurance.identity_checks")]:::efecto
   n37 --> n38
+  n39["Llama a IdentityChecksService.verifyCase"]:::llamada
+  n38 --> n39
+  n40[("ACTUALIZA identity_assurance.identity_verification_cases")]:::efecto
+  n39 --> n40
+  n41["Llama a IdentityChecksService.issueAssertion"]:::llamada
+  n40 --> n41
+  n42{"!authorityEndpoint"}:::decision
+  n41 --> n42
+  n43(["422 PRECONDITION_FAILED No se pudo determinar la autoridad que verificó el caso"]):::error
+  n42 -->|"sí"| n43
+  n44[("ACTUALIZA identity_assurance.identity_verification_cases · ACTUALIZA identity_assurance.identity_verification…")]:::efecto
+  n42 -->|"no"| n44
+  n45(("201 Responde con éxito")):::ok
+  n44 --> n45
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2075,15 +2442,44 @@ flowchart TD
   n3 --> n4
   n5[("LEE identity_assurance.identity_checks")]:::efecto
   n4 --> n5
-  n6["Repite: por cada const check de checks"]:::bucle
+  n6{"tenantId"}:::decision
   n5 --> n6
-  n7["Llama a IdentityVerificationAttemptsRepository.findLatestByCase"]:::llamada
-  n6 -->|"cada elemento"| n7
-  n8[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n7["Llama a IdentityChecksService.filterChecksToTenant"]:::llamada
+  n6 -->|"sí"| n7
+  n8["Repite: por cada const caseId de new Set( checks.map((check) =› check.identityVeri…"]:::bucle
   n7 --> n8
-  n9(("200 Responde con éxito")):::ok
-  n8 --> n9
-  n6 -->|"al terminar"| n9
+  n9["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n8 -->|"cada elemento"| n9
+  n10[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n9 --> n10
+  n11["Llama a IdentityCaseScope.filterToTenant"]:::llamada
+  n10 --> n11
+  n8 -->|"al terminar"| n11
+  n12["Repite: por cada const kase de cases"]:::bucle
+  n11 --> n12
+  n13{"owned === undefined"}:::decision
+  n12 -->|"cada elemento"| n13
+  n14["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
+  n13 -->|"sí"| n14
+  n15{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
+  n14 --> n15
+  n16[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n15 -->|"sí"| n16
+  n17[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
+  n16 --> n17
+  n15 -->|"no"| n17
+  n18["Repite: por cada const check de checks"]:::bucle
+  n17 --> n18
+  n13 -->|"no"| n18
+  n12 -->|"al terminar"| n18
+  n6 -->|"no"| n18
+  n19["Llama a IdentityVerificationAttemptsRepository.findLatestByCase"]:::llamada
+  n18 -->|"cada elemento"| n19
+  n20[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n19 --> n20
+  n21(("200 Responde con éxito")):::ok
+  n20 --> n21
+  n18 -->|"al terminar"| n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2437,5 +2833,5 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
 | POST /identity/authorities | 201, 400, 401, 403, 429 | 1 |
-| GET /identity/verification-cases | 200, 401, 403, 429 | 1 |
+| POST /identity/authorities/{id}/endpoints | 201, 400, 401, 403, 429 | 4 |
 | POST /identity/verification-policies | 201, 400, 401, 403, 429 | 1 |

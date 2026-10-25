@@ -10,7 +10,7 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [dynamic_field_definitions](#dynamic_field_definitions) | Define campos configurables con tipo y semántica para extender formularios sin alterar cada tabla de negocio. | 31 | 9 | 17 | COINCIDE |
+| [dynamic_field_definitions](#dynamic_field_definitions) | Define campos configurables con tipo y semántica para extender formularios sin alterar cada tabla de negocio. | 31 | 9 | 20 | DIVERGE |
 | [dynamic_field_sections](#dynamic_field_sections) | Agrupa campos dinámicos en secciones para configurar formularios usados por módulos del sistema médico. | 11 | 5 | 5 | COINCIDE |
 | [extension_target_policies](#extension_target_policies) | Restringe qué entidades pueden extenderse con campos dinámicos para mantener control sobre el modelo de datos. | 15 | 8 | 4 | COINCIDE |
 | [field_assignments](#field_assignments) | Asigna definiciones de campo a formularios, entidades o contextos donde deben capturarse. | 21 | 13 | 16 | COINCIDE |
@@ -24,7 +24,7 @@
 | [field_value_access_rules](#field_value_access_rules) | Define reglas de acceso a valores de campos para proteger información según usuario, rol o finalidad. | 15 | 10 | 3 | COINCIDE |
 | [field_value_audit](#field_value_audit) | Preserva cambios de valores dinámicos para atribuir quién los modificó y reconstruir respuestas previas. | 9 | 6 | 3 | COINCIDE |
 | [field_value_provenance](#field_value_provenance) | Registra procedencia de valores dinámicos para conocer origen, actor o proceso de captura. | 14 | 7 | 1 | COINCIDE |
-| [field_values](#field_values) | Conserva valores capturados en campos dinámicos para mantener respuestas estructuradas fuera de los esquemas fijos. | 34 | 12 | 10 | COINCIDE |
+| [field_values](#field_values) | Conserva valores capturados en campos dinámicos para mantener respuestas estructuradas fuera de los esquemas fijos. | 34 | 12 | 10 | DIVERGE |
 | [form_instances](#form_instances) | Representa instancias concretas de formularios completadas o en curso por pacientes y usuarios. | 12 | 5 | 16 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -207,7 +207,7 @@ Define campos configurables con tipo y semántica para extender formularios sin 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_09_forms.puml: dynamic_field_definitions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_09_forms.puml` · **DDL:** `SQL/09_forms/02_tables.sql`
 - **Entidad del ORM:** `DynamicFieldDefinitions` — `src/modules/forms/entities/dynamic_field_definitions.entity.ts`
-- **Resumen:** 31 columnas · 9 índices · 8 FK salientes · 8 entrantes · 17 operaciones
+- **Resumen:** 31 columnas · 9 índices · 8 FK salientes · 8 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -239,11 +239,11 @@ Define campos configurables con tipo y semántica para extender formularios sin 
 | 24 | `fhir_extension_url` | `text` | Opcional | _sin dato_ | coincide |
 | 25 | `schema_version` | `integer` | Opcional | _sin dato_ | coincide |
 | 26 | `state_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 27 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:196`)_ | coincide |
-| 28 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:202`)_ | coincide |
+| 27 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:238`)_ | coincide |
+| 28 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:244`)_ | coincide |
 | 29 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 30 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 31 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:220`)_ | coincide |
+| 31 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:262`)_ | coincide |
 
 #### Relaciones
 
@@ -306,7 +306,10 @@ Define campos configurables con tipo y semántica para extender formularios sin 
 | POST /forms/fields/{id}/dependencies | LEE | DIRECTA |
 | PUT /forms/fields/{id}/localizations/{lang} | LEE | DIRECTA |
 | GET /forms/instances/{id} | LEE | DIRECTA |
+| POST /forms/instances/{id}/values | LEE | DIRECTA |
 | GET /forms/me/instances/{id} | LEE | DIRECTA |
+| PATCH /forms/values/{id} | LEE | DIRECTA |
+| POST /forms/values/import | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1369,11 +1372,11 @@ Conserva valores capturados en campos dinámicos para mantener respuestas estruc
 | 27 | `effective_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 28 | `value_version` | `integer` | Opcional | _sin dato_ | coincide |
 | 29 | `supersedes_value_id` | `uuid` | Clave foránea → forms.field_values.id; Opcional | _sin dato_ | coincide |
-| 30 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/forms/entities/field_values.entity.ts:223`)_ | coincide |
-| 31 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/forms/entities/field_values.entity.ts:229`)_ | coincide |
+| 30 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/forms/entities/field_values.entity.ts:241`)_ | coincide |
+| 31 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/forms/entities/field_values.entity.ts:247`)_ | coincide |
 | 32 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 33 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 34 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/forms/entities/field_values.entity.ts:247`)_ | coincide |
+| 34 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/forms/entities/field_values.entity.ts:265`)_ | coincide |
 
 #### Relaciones
 
@@ -1401,7 +1404,7 @@ Conserva valores capturados en campos dinámicos para mantener respuestas estruc
 |---|---|---|---|
 | `ix_field_values_form_instance_id` | no | form_instance_id | Soporta la clave foránea fk_field_values_form_instance_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «form_instance_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_field_values_resource_type_concept_id` | no | resource_type_concept_id | Soporta la clave foránea fk_field_values_resource_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_field_values_field_id` | no | field_id | Soporta la clave foránea fk_field_values_field_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «field_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_field_values_field_id` | no | field_id | Soporta la clave foránea fk_field_values_field_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «field_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_field_values_assignment_id` | no | assignment_id | Soporta la clave foránea fk_field_values_assignment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_values_value_concept_id` | no | value_concept_id | Soporta la clave foránea fk_field_values_value_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_values_file_id` | no | file_id | Soporta la clave foránea fk_field_values_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |

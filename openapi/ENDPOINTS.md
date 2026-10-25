@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1541 de 1541 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1542 de 1542 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -16,7 +16,7 @@ Se documentan **1541 de 1541 endpoints** en **72 módulos**. La referencia compl
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
 | `billing` | 34 | [Abrir referencia](endpoints/billing.md) |
 | `chart` | 23 | [Abrir referencia](endpoints/chart.md) |
-| `clinical` | 40 | [Abrir referencia](endpoints/clinical.md) |
+| `clinical` | 41 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 27 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 19 | [Abrir referencia](endpoints/common.md) |
 | `community` | 98 | [Abrir referencia](endpoints/community.md) |
