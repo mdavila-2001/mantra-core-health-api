@@ -29,7 +29,7 @@ patrón de capas de `iam`: controladores finos → servicios con la unidad de tr
   find src/modules/diagnostics -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **7 controllers, 31 rutas HTTP, 36 entidades y 8 servicios**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **7 controllers, 31 rutas HTTP, 36 entidades y 8 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -37,62 +37,62 @@ Importa (`InsurancePatientSettlementModule`, `ProfilesModule`, `AuthzModule`, `C
 
 Entidades (`tableName`, 36 de 36 archivos `*.entity.ts`): `accession_specimens`, `analyzer_result_messages`, `analyzer_runs`, `clinical_media`, `critical_result_notifications`, `diagnostic_data_quality_events`, `diagnostic_provenance_links`, `diagnostic_release_events`, `diagnostic_report_files`, `diagnostic_report_results`, `diagnostic_report_versions`, `dicom_object_locations`, `dicom_structured_reports`, `imaging_endpoints`, `imaging_instances`, `imaging_procedure_steps`, `imaging_selection_items`, `imaging_selections`, `imaging_series`, `imaging_studies`, `laboratory_accessions`, `laboratory_work_order_tests`, `laboratory_work_orders`, `media_annotations`, `observation_specimens`, `radiation_dose_events`, `result_verifications`, `specimen_chain_of_custody_events`, `specimen_collection_events`, `specimen_container_events`, `specimen_containers`, `specimen_identifiers`, `specimen_parent_links`, `specimen_processing_steps`, `specimen_rejection_events`, `specimens`.
 
-| Método y ruta                                                     | Acceso                  | Controller                    |
-| ----------------------------------------------------------------- | ----------------------- | ----------------------------- |
-| `GET /diagnostics/patients/:patientProfileId/imaging-studies`     | CLINICIAN, PRACTITIONER | `diagnostics-imaging`         |
-| `POST /diagnostics/imaging-endpoints`                             | CLINICIAN, PRACTITIONER | `diagnostics-imaging`         |
-| `POST /dicomweb/studies`                                          | CLINICIAN, PRACTITIONER | `diagnostics-imaging`         |
-| `POST /diagnostics/clinical-media`                                | CLINICIAN, PRACTITIONER | `diagnostics-imaging`         |
-| `POST /diagnostics/imaging-studies/:id/dose-events`               | CLINICIAN, PRACTITIONER | `diagnostics-imaging`         |
-| `POST /diagnostics/data-quality-events`                           | CLINICIAN, PRACTITIONER | `diagnostics-imaging`         |
-| `GET /diagnostics/work-orders`                                    | sesión                  | `diagnostics-lab`             |
-| `POST /diagnostics/work-orders`                                   | sesión                  | `diagnostics-lab`             |
-| `POST /diagnostics/analyzer-runs`                                 | sesión                  | `diagnostics-lab`             |
-| `POST /diagnostics/analyzer-runs/:id/messages`                    | sesión                  | `diagnostics-lab`             |
-| `POST /diagnostics/results/:observationId/verifications`          | sesión                  | `diagnostics-lab`             |
-| `GET /diagnostics/patients/:patientProfileId/orders`              | CLINICIAN, PRACTITIONER | `diagnostics-orders`          |
-| `GET /diagnostic-results/me`                                      | PATIENT                 | `diagnostics-patient-results` |
-| `GET /diagnostic-results/me/orders`                               | PATIENT                 | `diagnostics-patient-results` |
-| `GET /diagnostic-results/me/:reportId`                            | PATIENT                 | `diagnostics-patient-results` |
-| `GET /diagnostic-results/me/:reportId/files/:fileId/content`      | PATIENT                 | `diagnostics-patient-results` |
-| `POST /diagnostic-results/me/:reportId/shares`                    | PATIENT                 | `diagnostics-patient-results` |
-| `GET /diagnostic-results/me/:reportId/shares`                     | PATIENT                 | `diagnostics-patient-results` |
-| `POST /diagnostic-results/me/:reportId/shares/:shareId/revoke`    | PATIENT                 | `diagnostics-patient-results` |
-| `POST /diagnostics/service-requests/inbox`                        | sesión                  | `diagnostics-reception`       |
-| `POST /diagnostics/reports/:reportId/versions`                    | CLINICIAN, PRACTITIONER | `diagnostics-reports`         |
-| `POST /diagnostics/reports/:reportId/versions/:versionId/release` | CLINICIAN, PRACTITIONER | `diagnostics-reports`         |
-| `POST /diagnostics/critical-results`                              | CLINICIAN, PRACTITIONER | `diagnostics-reports`         |
-| `POST /diagnostics/critical-results/:id/acknowledge`              | CLINICIAN, PRACTITIONER | `diagnostics-reports`         |
-| `POST /diagnostics/specimens`                                     | sesión                  | `diagnostics-specimens`       |
-| `GET /diagnostics/accessions/:id`                                 | sesión                  | `diagnostics-specimens`       |
-| `GET /diagnostics/specimens/:id`                                  | sesión                  | `diagnostics-specimens`       |
-| `POST /diagnostics/accessions`                                    | sesión                  | `diagnostics-specimens`       |
-| `POST /diagnostics/specimens/:id/rejection`                       | sesión                  | `diagnostics-specimens`       |
-| `POST /diagnostics/specimens/:id/containers`                      | sesión                  | `diagnostics-specimens`       |
-| `POST /diagnostics/containers/:id/custody-events`                 | sesión                  | `diagnostics-specimens`       |
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `GET /diagnostics/patients/:patientProfileId/imaging-studies` | CLINICIAN, PRACTITIONER | `diagnostics-imaging` |
+| `POST /diagnostics/imaging-endpoints` | CLINICIAN, PRACTITIONER | `diagnostics-imaging` |
+| `POST /dicomweb/studies` | CLINICIAN, PRACTITIONER | `diagnostics-imaging` |
+| `POST /diagnostics/clinical-media` | CLINICIAN, PRACTITIONER | `diagnostics-imaging` |
+| `POST /diagnostics/imaging-studies/:id/dose-events` | CLINICIAN, PRACTITIONER | `diagnostics-imaging` |
+| `POST /diagnostics/data-quality-events` | CLINICIAN, PRACTITIONER | `diagnostics-imaging` |
+| `GET /diagnostics/work-orders` | sesión | `diagnostics-lab` |
+| `POST /diagnostics/work-orders` | sesión | `diagnostics-lab` |
+| `POST /diagnostics/analyzer-runs` | sesión | `diagnostics-lab` |
+| `POST /diagnostics/analyzer-runs/:id/messages` | sesión | `diagnostics-lab` |
+| `POST /diagnostics/results/:observationId/verifications` | sesión | `diagnostics-lab` |
+| `GET /diagnostics/patients/:patientProfileId/orders` | CLINICIAN, PRACTITIONER | `diagnostics-orders` |
+| `GET /diagnostic-results/me` | PATIENT | `diagnostics-patient-results` |
+| `GET /diagnostic-results/me/orders` | PATIENT | `diagnostics-patient-results` |
+| `GET /diagnostic-results/me/:reportId` | PATIENT | `diagnostics-patient-results` |
+| `GET /diagnostic-results/me/:reportId/files/:fileId/content` | PATIENT | `diagnostics-patient-results` |
+| `POST /diagnostic-results/me/:reportId/shares` | PATIENT | `diagnostics-patient-results` |
+| `GET /diagnostic-results/me/:reportId/shares` | PATIENT | `diagnostics-patient-results` |
+| `POST /diagnostic-results/me/:reportId/shares/:shareId/revoke` | PATIENT | `diagnostics-patient-results` |
+| `POST /diagnostics/service-requests/inbox` | sesión | `diagnostics-reception` |
+| `POST /diagnostics/reports/:reportId/versions` | CLINICIAN, PRACTITIONER | `diagnostics-reports` |
+| `POST /diagnostics/reports/:reportId/versions/:versionId/release` | CLINICIAN, PRACTITIONER | `diagnostics-reports` |
+| `POST /diagnostics/critical-results` | CLINICIAN, PRACTITIONER | `diagnostics-reports` |
+| `POST /diagnostics/critical-results/:id/acknowledge` | CLINICIAN, PRACTITIONER | `diagnostics-reports` |
+| `POST /diagnostics/specimens` | sesión | `diagnostics-specimens` |
+| `GET /diagnostics/accessions/:id` | sesión | `diagnostics-specimens` |
+| `GET /diagnostics/specimens/:id` | sesión | `diagnostics-specimens` |
+| `POST /diagnostics/accessions` | sesión | `diagnostics-specimens` |
+| `POST /diagnostics/specimens/:id/rejection` | sesión | `diagnostics-specimens` |
+| `POST /diagnostics/specimens/:id/containers` | sesión | `diagnostics-specimens` |
+| `POST /diagnostics/containers/:id/custody-events` | sesión | `diagnostics-specimens` |
 
 ## Endpoints (UC → ruta / método)
 
-| UC       | Método y ruta                                                       | Descripción                                         |
-| -------- | ------------------------------------------------------------------- | --------------------------------------------------- |
-| soporte  | `POST /diagnostics/specimens`                                       | Alta de espécimen (padre de acesión/orden/custodia) |
-| UC-20-01 | `POST /diagnostics/accessions`                                      | Acesionar especímenes recibidos                     |
-| UC-20-02 | `POST /diagnostics/specimens/{id}/rejection`                        | Rechazar espécimen y solicitar recolección          |
-| soporte  | `POST /diagnostics/specimens/{id}/containers`                       | Alta de contenedor                                  |
-| UC-20-03 | `POST /diagnostics/containers/{id}/custody-events`                  | Cadena de custodia / traslado                       |
-| UC-20-04 | `POST /diagnostics/work-orders`                                     | Abrir orden de trabajo y desglosar pruebas          |
-| soporte  | `POST /diagnostics/analyzer-runs`                                   | Abrir corrida de analizador                         |
-| UC-20-05 | `POST /diagnostics/analyzer-runs/{id}/messages`                     | Ingerir mensaje de resultado (LIS/HL7/ASTM)         |
-| UC-20-06 | `POST /diagnostics/results/{observationId}/verifications`           | Verificar (técnica/facultativa)                     |
-| UC-20-07 | `POST /diagnostics/reports/{reportId}/versions`                     | Crear/enmendar versión de informe                   |
-| UC-20-08 | `POST /diagnostics/reports/{reportId}/versions/{versionId}/release` | Validar y liberar                                   |
-| UC-20-09 | `POST /diagnostics/critical-results`                                | Detectar y notificar resultado crítico              |
-| UC-20-10 | `POST /diagnostics/critical-results/{id}/acknowledge`               | Acusar recibo / escalar                             |
-| soporte  | `POST /diagnostics/imaging-endpoints`                               | Alta de endpoint DICOM                              |
-| UC-20-11 | `POST /dicomweb/studies`                                            | Ingestar estudio DICOM (STOW-RS)                    |
-| UC-20-12 | `POST /diagnostics/clinical-media`                                  | Adjuntar media clínica / imagen                     |
-| UC-20-13 | `POST /diagnostics/imaging-studies/{id}/dose-events`                | Registrar dosis de radiación                        |
-| UC-20-14 | `POST /diagnostics/data-quality-events`                             | Evento de calidad de datos + provenance             |
+| UC | Método y ruta | Descripción |
+|----|---------------|-------------|
+| soporte | `POST /diagnostics/specimens` | Alta de espécimen (padre de acesión/orden/custodia) |
+| UC-20-01 | `POST /diagnostics/accessions` | Acesionar especímenes recibidos |
+| UC-20-02 | `POST /diagnostics/specimens/{id}/rejection` | Rechazar espécimen y solicitar recolección |
+| soporte | `POST /diagnostics/specimens/{id}/containers` | Alta de contenedor |
+| UC-20-03 | `POST /diagnostics/containers/{id}/custody-events` | Cadena de custodia / traslado |
+| UC-20-04 | `POST /diagnostics/work-orders` | Abrir orden de trabajo y desglosar pruebas |
+| soporte | `POST /diagnostics/analyzer-runs` | Abrir corrida de analizador |
+| UC-20-05 | `POST /diagnostics/analyzer-runs/{id}/messages` | Ingerir mensaje de resultado (LIS/HL7/ASTM) |
+| UC-20-06 | `POST /diagnostics/results/{observationId}/verifications` | Verificar (técnica/facultativa) |
+| UC-20-07 | `POST /diagnostics/reports/{reportId}/versions` | Crear/enmendar versión de informe |
+| UC-20-08 | `POST /diagnostics/reports/{reportId}/versions/{versionId}/release` | Validar y liberar |
+| UC-20-09 | `POST /diagnostics/critical-results` | Detectar y notificar resultado crítico |
+| UC-20-10 | `POST /diagnostics/critical-results/{id}/acknowledge` | Acusar recibo / escalar |
+| soporte | `POST /diagnostics/imaging-endpoints` | Alta de endpoint DICOM |
+| UC-20-11 | `POST /dicomweb/studies` | Ingestar estudio DICOM (STOW-RS) |
+| UC-20-12 | `POST /diagnostics/clinical-media` | Adjuntar media clínica / imagen |
+| UC-20-13 | `POST /diagnostics/imaging-studies/{id}/dose-events` | Registrar dosis de radiación |
+| UC-20-14 | `POST /diagnostics/data-quality-events` | Evento de calidad de datos + provenance |
 
 ## Entidades (esquema `diagnostics`)
 

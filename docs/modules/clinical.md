@@ -27,77 +27,77 @@ los 14 casos de uso UC-08-01..14 como endpoints REST bajo el prefijo `/clinical`
   find src/modules/clinical -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **10 controllers, 40 rutas HTTP, 23 entidades y 18 servicios** (incluye los ya documentados más abajo). La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **10 controllers, 40 rutas HTTP, 23 entidades y 18 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
 Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`, `AuthzModule`, `TerminologyModule`.
 
-| Método y ruta                                                   | Acceso                           | Controller                       |
-| --------------------------------------------------------------- | -------------------------------- | -------------------------------- |
-| `POST /clinical/care-episodes`                                  | CLINICIAN, PRACTITIONER          | `clinical-encounters`            |
-| `POST /clinical/encounters/check-in`                            | CLINICIAN, PRACTITIONER          | `clinical-encounters`            |
-| `POST /clinical/encounters/:id/close`                           | CLINICIAN, PRACTITIONER          | `clinical-encounters`            |
-| `POST /clinical/encounters/:id/attachments`                     | CLINICIAN, PRACTITIONER          | `clinical-encounters`            |
-| `GET /clinical/encounters/:id/attachments`                      | CLINICIAN, PRACTITIONER, PATIENT | `clinical-encounters`            |
-| `GET /clinical/me/medical-aspects`                              | sesión                           | `clinical-medical-aspects`       |
-| `PUT /clinical/me/medical-aspects`                              | sesión                           | `clinical-medical-aspects`       |
-| `POST /clinical/observations`                                   | CLINICIAN, PRACTITIONER          | `clinical-observations`          |
-| `PATCH /clinical/observations/:id/amend`                        | CLINICIAN, PRACTITIONER          | `clinical-observations`          |
-| `POST /clinical/service-requests/duplicate-check`               | CLINICIAN, PRACTITIONER          | `clinical-orders`                |
-| `POST /clinical/service-requests`                               | CLINICIAN, PRACTITIONER          | `clinical-orders`                |
-| `POST /clinical/diagnostic-reports`                             | CLINICIAN, PRACTITIONER          | `clinical-orders`                |
-| `POST /clinical/diagnostic-reports/:id/release`                 | CLINICIAN, PRACTITIONER          | `clinical-orders`                |
-| `POST /clinical/prescription-signature-policies`                | CLINICIAN, SECURITY_ADMIN        | `clinical-prescription-policies` |
-| `GET /clinical/prescription-signature-policies`                 | CLINICIAN, SECURITY_ADMIN        | `clinical-prescription-policies` |
-| `POST /clinical/prescription-signature-policies/:id/deactivate` | CLINICIAN, SECURITY_ADMIN        | `clinical-prescription-policies` |
-| `GET /public/prescriptions/:id/verify`                          | pública                          | `clinical-prescriptions-public`  |
-| `GET /clinical/prescriptions/:id/pdf`                           | CLINICIAN, PRACTITIONER, PATIENT | `clinical-prescriptions`         |
-| `GET /clinical/patients/:patientProfileId/summary`              | CLINICIAN, PRACTITIONER, PATIENT | `clinical-read`                  |
-| `GET /clinical/patients/:patientProfileId/received-services`    | CLINICIAN, PRACTITIONER, PATIENT | `clinical-read`                  |
-| `POST /clinical/conditions`                                     | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/conditions/:id/change-status`                   | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/conditions/:id/verification`                    | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/conditions/:id/attachments`                     | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/allergy-intolerances`                           | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/allergy-intolerances/:id/attachments`           | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `GET /clinical/allergy-intolerances/:id/attachments`            | CLINICIAN, PRACTITIONER, PATIENT | `clinical-records`               |
-| `POST /clinical/medication-requests`                            | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/medication-requests/:id/attachments`            | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `GET /clinical/medication-requests/:id/attachments`             | CLINICIAN, PRACTITIONER, PATIENT | `clinical-records`               |
-| `POST /clinical/medication-records`                             | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/medication-requests/:id/edit`                   | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/medication-requests/:id/sign`                   | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/medication-requests/:id/issue`                  | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/medication-requests/:id/invalidate`             | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/medication-requests/:id/replace`                | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/medication-requests/:id/renew`                  | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/procedures`                                     | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/procedures/:id/attachments`                     | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/immunizations`                                  | CLINICIAN, PRACTITIONER          | `clinical-records`               |
-| `POST /clinical/internal/prescription-expiry-notices`           | SYSTEM, SYSTEM_WORKER            | `clinical-prescription-expiry`   |
+| Método y ruta | Acceso | Controller |
+| --- | --- | --- |
+| `POST /clinical/care-episodes` | CLINICIAN, PRACTITIONER | `clinical-encounters` |
+| `POST /clinical/encounters/check-in` | CLINICIAN, PRACTITIONER | `clinical-encounters` |
+| `POST /clinical/encounters/:id/close` | CLINICIAN, PRACTITIONER | `clinical-encounters` |
+| `POST /clinical/encounters/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-encounters` |
+| `GET /clinical/encounters/:id/attachments` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-encounters` |
+| `GET /clinical/me/medical-aspects` | sesión | `clinical-medical-aspects` |
+| `PUT /clinical/me/medical-aspects` | sesión | `clinical-medical-aspects` |
+| `POST /clinical/observations` | CLINICIAN, PRACTITIONER | `clinical-observations` |
+| `PATCH /clinical/observations/:id/amend` | CLINICIAN, PRACTITIONER | `clinical-observations` |
+| `POST /clinical/service-requests/duplicate-check` | CLINICIAN, PRACTITIONER | `clinical-orders` |
+| `POST /clinical/service-requests` | CLINICIAN, PRACTITIONER | `clinical-orders` |
+| `POST /clinical/diagnostic-reports` | CLINICIAN, PRACTITIONER | `clinical-orders` |
+| `POST /clinical/diagnostic-reports/:id/release` | CLINICIAN, PRACTITIONER | `clinical-orders` |
+| `POST /clinical/prescription-signature-policies` | CLINICIAN, SECURITY_ADMIN | `clinical-prescription-policies` |
+| `GET /clinical/prescription-signature-policies` | CLINICIAN, SECURITY_ADMIN | `clinical-prescription-policies` |
+| `POST /clinical/prescription-signature-policies/:id/deactivate` | CLINICIAN, SECURITY_ADMIN | `clinical-prescription-policies` |
+| `GET /public/prescriptions/:id/verify` | pública | `clinical-prescriptions-public` |
+| `GET /clinical/prescriptions/:id/pdf` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-prescriptions` |
+| `GET /clinical/patients/:patientProfileId/summary` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-read` |
+| `GET /clinical/patients/:patientProfileId/received-services` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-read` |
+| `POST /clinical/conditions` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/conditions/:id/change-status` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/conditions/:id/verification` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/conditions/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/allergy-intolerances` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/allergy-intolerances/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `GET /clinical/allergy-intolerances/:id/attachments` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-records` |
+| `POST /clinical/medication-requests` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `GET /clinical/medication-requests/:id/attachments` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-records` |
+| `POST /clinical/medication-records` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/edit` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/sign` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/issue` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/invalidate` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/replace` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/medication-requests/:id/renew` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/procedures` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/procedures/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/immunizations` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/internal/prescription-expiry-notices` | SYSTEM, SYSTEM_WORKER | `clinical-prescription-expiry` |
 
 ## Endpoints por caso de uso (subconjunto: UC-08-01..14 y adiciones puntuales)
 
-| UC         | Endpoint                                                  | Método | Descripción                                                                   |
-| ---------- | --------------------------------------------------------- | ------ | ----------------------------------------------------------------------------- |
-| UC-08-01   | `/clinical/care-episodes`                                 | POST   | Abrir episodio de cuidado                                                     |
-| UC-08-02   | `/clinical/encounters/check-in`                           | POST   | Check-in de encuentro (participantes + ubicación)                             |
-| UC-08-03   | `/clinical/observations`                                  | POST   | Registrar observación (componentes, rangos, ejecutantes, notas)               |
-| UC-08-04   | `/clinical/observations/{id}/amend`                       | PATCH  | Corregir/enmendar observación                                                 |
-| UC-08-05   | `/clinical/service-requests`                              | POST   | Crear orden de servicio                                                       |
-| 3.2 (T-26) | `/clinical/service-requests/duplicate-check`              | POST   | Pre-validar duplicidad de estudios (antiduplicación)                          |
-| UC-08-06   | `/clinical/diagnostic-reports`                            | POST   | Emitir reporte diagnóstico desde la orden                                     |
-| UC-08-07   | `/clinical/diagnostic-reports/{id}/release`               | POST   | Liberar resultados del reporte                                                |
-| UC-08-08   | `/clinical/conditions`                                    | POST   | Registrar condición/diagnóstico (presuntivo o confirmado)                     |
-| C3 / P41   | `/clinical/conditions/{id}/verification`                  | POST   | Confirmar o refutar un diagnóstico presuntivo, con motivo o evidencia         |
-| UC-08-09   | `/clinical/allergy-intolerances`                          | POST   | Registrar alergia con reacciones                                              |
-| UC-08-10   | `/clinical/medication-requests`                           | POST   | Prescribir medicación                                                         |
-| UC-08-11   | `/clinical/medication-records`                            | POST   | Administrar/registrar medicación                                              |
-| UC-08-12   | `/clinical/procedures`                                    | POST   | Registrar procedimiento                                                       |
-| UC-08-13   | `/clinical/immunizations`                                 | POST   | Registrar inmunización                                                        |
-| UC-08-14   | `/clinical/encounters/{id}/close`                         | POST   | Cerrar encuentro (gatilla facturación)                                        |
-| —          | `/clinical/patients/{patientProfileId}/received-services` | GET    | Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas |
+| UC | Endpoint | Método | Descripción |
+|----|----------|--------|-------------|
+| UC-08-01 | `/clinical/care-episodes` | POST | Abrir episodio de cuidado |
+| UC-08-02 | `/clinical/encounters/check-in` | POST | Check-in de encuentro (participantes + ubicación) |
+| UC-08-03 | `/clinical/observations` | POST | Registrar observación (componentes, rangos, ejecutantes, notas) |
+| UC-08-04 | `/clinical/observations/{id}/amend` | PATCH | Corregir/enmendar observación |
+| UC-08-05 | `/clinical/service-requests` | POST | Crear orden de servicio |
+| 3.2 (T-26) | `/clinical/service-requests/duplicate-check` | POST | Pre-validar duplicidad de estudios (antiduplicación) |
+| UC-08-06 | `/clinical/diagnostic-reports` | POST | Emitir reporte diagnóstico desde la orden |
+| UC-08-07 | `/clinical/diagnostic-reports/{id}/release` | POST | Liberar resultados del reporte |
+| UC-08-08 | `/clinical/conditions` | POST | Registrar condición/diagnóstico (presuntivo o confirmado) |
+| C3 / P41 | `/clinical/conditions/{id}/verification` | POST | Confirmar o refutar un diagnóstico presuntivo, con motivo o evidencia |
+| UC-08-09 | `/clinical/allergy-intolerances` | POST | Registrar alergia con reacciones |
+| UC-08-10 | `/clinical/medication-requests` | POST | Prescribir medicación |
+| UC-08-11 | `/clinical/medication-records` | POST | Administrar/registrar medicación |
+| UC-08-12 | `/clinical/procedures` | POST | Registrar procedimiento |
+| UC-08-13 | `/clinical/immunizations` | POST | Registrar inmunización |
+| UC-08-14 | `/clinical/encounters/{id}/close` | POST | Cerrar encuentro (gatilla facturación) |
+| — | `/clinical/patients/{patientProfileId}/received-services` | GET | Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas |
 
 > Nota: los sufijos `:accion` de la spec (`encounters:check-in`,
 > `observations/{id}:amend`, …) se realizan como **segmento de ruta**
@@ -167,7 +167,7 @@ check-in).
 - **Verificación de diagnósticos (C3 / P41)**: un diagnóstico nace confirmado, o
   presuntivo (`COND_PROVISIONAL`) si el alta manda `verificationStatusConceptId`;
   refutado (`COND_REFUTED`) no es un estado de alta. `POST
-/clinical/conditions/{id}/verification` lleva un presuntivo a confirmado
+  /clinical/conditions/{id}/verification` lleva un presuntivo a confirmado
   (activo) o refutado (inactivo, con `resolvedAt`). Ambos son terminales: decidir
   de nuevo es 409. Exige **motivo o evidencia** (422 si faltan las dos); la
   evidencia (`NOTE` o `ANALYSIS`) debe ser **del mismo paciente**, y una ajena
