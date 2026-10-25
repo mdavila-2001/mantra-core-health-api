@@ -495,6 +495,61 @@ describe('MedicalGroupsService', () => {
       );
     });
 
+    it('el invitado ve al paciente recién cuando acepta; pendiente o rechazado, no', async () => {
+      const d = build();
+      const created = await d.service.create(
+        baseDto({
+          patientProfileId: PATIENT_A,
+          members: [
+            {
+              practitionerProfileId: 'pract-invitee',
+              roleTitle: 'Anestesista',
+              agreedPaymentAmount: '100.00',
+            },
+          ],
+        }),
+        creator,
+      );
+      const memberId = created.members.find((m) => !m.isCreator)!.id;
+
+      const pendiente = await d.service.findOne(created.id, invitee);
+      expect(pendiente.patientProfileId).toBe(PATIENT_A);
+      expect(pendiente.patientName).toBeNull();
+
+      const aceptado = await d.service.respondToInvitation(
+        created.id,
+        memberId,
+        'ACCEPTED',
+        invitee,
+      );
+      expect(aceptado.patientName).toBe(`Nombre de person-${PATIENT_A}`);
+    });
+
+    it('quien rechaza la invitación no recibe el nombre del paciente', async () => {
+      const d = build();
+      const created = await d.service.create(
+        baseDto({
+          patientProfileId: PATIENT_A,
+          members: [
+            {
+              practitionerProfileId: 'pract-invitee',
+              roleTitle: 'Anestesista',
+              agreedPaymentAmount: '100.00',
+            },
+          ],
+        }),
+        creator,
+      );
+      const memberId = created.members.find((m) => !m.isCreator)!.id;
+      const rechazado = await d.service.respondToInvitation(
+        created.id,
+        memberId,
+        'REJECTED',
+        invitee,
+      );
+      expect(rechazado.patientName).toBeNull();
+    });
+
     it('sin nombre cargado el miembro viaja con null, no con el id', async () => {
       const d = build();
       // Ningún perfil resuelve a una persona: cuenta a medio crear.

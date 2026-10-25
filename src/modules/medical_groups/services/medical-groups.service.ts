@@ -256,6 +256,7 @@ export class MedicalGroupsService {
         tx,
         group,
         await this.membersRepo.findByGroup(tx, group.id),
+        requestingPractitionerId,
       );
     });
   }
@@ -274,7 +275,7 @@ export class MedicalGroupsService {
     const members = await this.membersRepo.findByGroup(em, id);
     this.assertActorSeesGroup(group, members, actor);
     await this.closeIfExpired(em, group);
-    return this.toDto(em, group, members);
+    return this.toDto(em, group, members, actor.practitionerProfileId);
   }
 
   async list(
@@ -458,6 +459,7 @@ export class MedicalGroupsService {
         tx,
         group,
         await this.membersRepo.findByGroup(tx, groupId),
+        practitionerProfileId,
       );
     });
   }
@@ -509,7 +511,7 @@ export class MedicalGroupsService {
       }
       touch(group, actor.id);
       await tx.flush();
-      return this.toDto(tx, group, members);
+      return this.toDto(tx, group, members, practitionerProfileId);
     });
   }
 
@@ -548,6 +550,7 @@ export class MedicalGroupsService {
         tx,
         group,
         await this.membersRepo.findByGroup(tx, groupId),
+        practitionerProfileId,
       );
     });
   }
@@ -584,7 +587,7 @@ export class MedicalGroupsService {
       group.exerciseNotesUpdatedAt = new Date();
       touch(group, actor.id);
       await tx.flush();
-      return this.toDto(tx, group, members);
+      return this.toDto(tx, group, members, practitionerProfileId);
     });
   }
 
@@ -699,9 +702,9 @@ export class MedicalGroupsService {
    * Los nombres que el formulario de consulta muestra en vez de ids: el del
    * servicio, el de cada miembro y el del paciente. Un invitado de otra
    * práctica no puede leer el catálogo del creador ni el directorio del
-   * paciente por su cuenta, así que viajan con el grupo. El paciente ya se
-   * revela al equipo al asociarlo (ver `create`), así que nombrarlo no expone
-   * más de lo que el modelo del grupo ya expone.
+   * paciente por su cuenta, así que viajan con el grupo. El nombre del
+   * paciente se filtra después en `toDto`: sólo lo ve quien ya está en el
+   * equipo (el creador o un miembro que aceptó).
    */
   private async namesFor(
     em: EntityManager,
@@ -752,8 +755,22 @@ export class MedicalGroupsService {
     em: EntityManager,
     group: MedicalGroups,
     members: MedicalGroupMembers[],
+    viewerPractitionerId: string | undefined,
   ): Promise<MedicalGroupDto> {
     const names = await this.namesFor(em, [group], members);
+    // El nombre del paciente sólo para quien ya forma parte del equipo: el
+    // creador y los miembros que ACEPTARON. Un invitado que todavía no
+    // respondió —o que rechazó— ve el resto del formulario para decidir, pero
+    // no la identidad de la persona atendida.
+    const viewerIsInTeam =
+      viewerPractitionerId !== undefined &&
+      (group.requestingPractitionerId === viewerPractitionerId ||
+        members.some(
+          (m) =>
+            m.practitionerProfileId === viewerPractitionerId &&
+            m.invitationStatus ===
+              MEDICAL_GROUP_MEMBER_INVITATION_STATUS.ACCEPTED,
+        ));
     const isRealized = isRealizedNow(group);
     const isClosed =
       group.closedAt !== undefined || isPastCloseWindowNow(group);
@@ -764,7 +781,7 @@ export class MedicalGroupsService {
       requestingPractitionerId: group.requestingPractitionerId,
       patientProfileId: group.patientProfileId,
       patientName:
-        group.patientProfileId === undefined
+        group.patientProfileId === undefined || !viewerIsInTeam
           ? null
           : (names.people.get(group.patientProfileId) ?? null),
       conditionId: group.conditionId,
