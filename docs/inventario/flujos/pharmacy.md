@@ -23,18 +23,18 @@ _Fuente: `src/modules/pharmacy/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `P47 §2` | Editar marca, genérico, concentración, empaque y receta de un producto activo (null borra el dato) | PATCH /pharmacies/{pharmacyId}/products/{productId} | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
+| `P47 §2` | Editar marca, genérico, concentración, empaque y receta de un producto activo (null borra el dato) | PATCH /pharmacies/{pharmacyId}/products/{productId} | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 3 |
 | `UC-24-01` | Alta de farmacia con licencia inicial (DRAFT / PENDING) | POST /pharmacies | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 3 |
-| `UC-24-02` | Registrar sede dispensadora (requiere farmacia ACTIVE) | POST /pharmacies/{pharmacyId}/sites | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 3 |
-| `UC-24-03` | Verificar licencia y aprobar farmacia | POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
-| `UC-24-04` | Publicar producto con identificadores (GTIN/NDC) | POST /pharmacies/{pharmacyId}/products | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 8 |
-| `UC-24-05` | Crear lista de precios (pública / por aseguradora) | POST /pharmacies/{pharmacyId}/price-lists | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 3 |
+| `UC-24-02` | Registrar sede dispensadora (requiere farmacia ACTIVE) | POST /pharmacies/{pharmacyId}/sites | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
+| `UC-24-03` | Verificar licencia y aprobar farmacia | POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 2 |
+| `UC-24-04` | Publicar producto con identificadores (GTIN/NDC) | POST /pharmacies/{pharmacyId}/products | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 7 |
+| `UC-24-05` | Crear lista de precios (pública / por aseguradora) | POST /pharmacies/{pharmacyId}/price-lists | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
 | `UC-24-06` | Fijar/versionar precio | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 5 |
 | `UC-24-07` | Establecer conexión de integración | POST /pharmacies/{pharmacyId}/integration-connections | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 3 |
 | `UC-24-08` | Mapear producto a código externo | POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
 | `UC-24-09` | Retirar (soft-delete) producto en cascada | DELETE /pharmacies/{pharmacyId}/products/{productId} | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 6 |
 | `UC-24-10` | Cerrar/expirar lista de precios | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
-| `UC-24-11` | Proyectar catálogo y precios a read-model | POST /pharmacies/{pharmacyId}/projections | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 3 |
+| `UC-24-11` | Proyectar catálogo y precios a read-model | POST /pharmacies/{pharmacyId}/projections | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 2 |
 | `ctrl:PharmacyController` | Operaciones de PharmacyController que el README no asigna a un caso de uso | GET /pharmacies/{pharmacyId}/categories | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 2 |
 | `ctrl:PharmacyPublicController` | Operaciones de PharmacyPublicController que el README no asigna a un caso de uso | GET /public/medications | Público (sin sesión) | BAJO | 11 |
 |  |  | GET /public/medications/{conceptId}/availability | Público (sin sesión) | BAJO | 11 |
@@ -53,149 +53,151 @@ _Fuente: `src/modules/pharmacy/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN · PHARMACY_STAFF"]):::actor
-  a29(["Público (sin sesión)"]):::actor
-  t3[("pharmacy.pharmacies")]:::tabla
-  t4[("pharmacy.pharmacy_products")]:::tabla
-  t5[("terminology.catalog_concepts")]:::tabla
+  a33(["Público (sin sesión)"]):::actor
+  t3[("pharmacy.pharmacy_products")]:::tabla
+  t4[("terminology.catalog_concepts")]:::tabla
+  t6[("pharmacy.pharmacies")]:::tabla
   t7[("pharmacy.pharmacy_licenses")]:::tabla
   t9[("pharmacy.pharmacy_sites")]:::tabla
-  t12[("pharmacy.pharmacy_product_identifiers")]:::tabla
-  t13[("terminology.code_system_versions")]:::tabla
-  t16[("pharmacy.pharmacy_price_lists")]:::tabla
-  t18[("pharmacy.pharmacy_product_prices")]:::tabla
-  t20[("pharmacy.pharmacy_integration_connections")]:::tabla
-  t22[("pharmacy.pharmacy_external_product_mappings")]:::tabla
-  t27[("directory.tenant_memberships")]:::tabla
-  t30[("common.addresses")]:::tabla
-  t31[("community.public_profiles")]:::tabla
-  t32[("pharmacy_inventory.inventory_locations")]:::tabla
-  t33[("pharmacy_inventory.inventory_stock_positions")]:::tabla
+  t10[("practice.practice_sites")]:::tabla
+  t11[("practice.practices")]:::tabla
+  t14[("pharmacy.pharmacy_product_identifiers")]:::tabla
+  t15[("terminology.code_system_versions")]:::tabla
+  t16[("terminology.code_systems")]:::tabla
+  t19[("insurance.insurance_carriers")]:::tabla
+  t20[("pharmacy.pharmacy_price_lists")]:::tabla
+  t22[("pharmacy.pharmacy_product_prices")]:::tabla
+  t24[("pharmacy.pharmacy_integration_connections")]:::tabla
+  t26[("pharmacy.pharmacy_external_product_mappings")]:::tabla
+  t31[("directory.tenant_memberships")]:::tabla
+  t34[("common.addresses")]:::tabla
+  t35[("community.public_profiles")]:::tabla
+  t36[("pharmacy_inventory.inventory_locations")]:::tabla
+  t37[("pharmacy_inventory.inventory_stock_positions")]:::tabla
   subgraph s0["P47 §2 · Editar marca, genérico, concentración, empaque y receta de un producto…"]
     o1["PATCH /pharmacies/{pharmacyId}/products/{productId}"]:::op
   end
   subgraph s1["UC-24-01 · Alta de farmacia con licencia inicial (DRAFT / PENDING)"]
-    o6["POST /pharmacies"]:::op
+    o5["POST /pharmacies"]:::op
   end
   subgraph s2["UC-24-02 · Registrar sede dispensadora (requiere farmacia ACTIVE)"]
     o8["POST /pharmacies/{pharmacyId}/sites"]:::op
   end
   subgraph s3["UC-24-03 · Verificar licencia y aprobar farmacia"]
-    o10["POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify"]:::op
+    o12["POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify"]:::op
   end
-  t14[("+2 tablas más")]
+  t17[("+1 tablas más")]
   subgraph s4["UC-24-04 · Publicar producto con identificadores (GTIN/NDC)"]
-    o11["POST /pharmacies/{pharmacyId}/products"]:::op
+    o13["POST /pharmacies/{pharmacyId}/products"]:::op
   end
   subgraph s5["UC-24-05 · Crear lista de precios (pública / por aseguradora)"]
-    o15["POST /pharmacies/{pharmacyId}/price-lists"]:::op
+    o18["POST /pharmacies/{pharmacyId}/price-lists"]:::op
   end
   subgraph s6["UC-24-06 · Fijar/versionar precio"]
-    o17["POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices"]:::op
+    o21["POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices"]:::op
   end
   subgraph s7["UC-24-07 · Establecer conexión de integración"]
-    o19["POST /pharmacies/{pharmacyId}/integration-connections"]:::op
+    o23["POST /pharmacies/{pharmacyId}/integration-connections"]:::op
   end
   subgraph s8["UC-24-08 · Mapear producto a código externo"]
-    o21["POST /pharmacies/{pharmacyId}/integration-connections/{connId}/produc…"]:::op
+    o25["POST /pharmacies/{pharmacyId}/integration-connections/{connId}/produc…"]:::op
   end
   subgraph s9["UC-24-09 · Retirar (soft-delete) producto en cascada"]
-    o23["DELETE /pharmacies/{pharmacyId}/products/{productId}"]:::op
+    o27["DELETE /pharmacies/{pharmacyId}/products/{productId}"]:::op
   end
   subgraph s10["UC-24-10 · Cerrar/expirar lista de precios"]
-    o24["POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close"]:::op
+    o28["POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close"]:::op
   end
   subgraph s11["UC-24-11 · Proyectar catálogo y precios a read-model"]
-    o25["POST /pharmacies/{pharmacyId}/projections"]:::op
+    o29["POST /pharmacies/{pharmacyId}/projections"]:::op
   end
   subgraph s12["ctrl:PharmacyController · Operaciones de PharmacyController que el README no as…"]
-    o26["GET /pharmacies/{pharmacyId}/categories"]:::op
+    o30["GET /pharmacies/{pharmacyId}/categories"]:::op
   end
-  t34[("+5 tablas más")]
-  t36[("+5 tablas más")]
+  t38[("+5 tablas más")]
+  t40[("+5 tablas más")]
   subgraph s13["ctrl:PharmacyPublicController · Operaciones de PharmacyPublicController que el…"]
-    o28["GET /public/medications"]:::op
-    o35["GET /public/medications/{conceptId}/availability"]:::op
+    o32["GET /public/medications"]:::op
+    o39["GET /public/medications/{conceptId}/availability"]:::op
   end
   a2 --> o1
+  o1 -->|"ACTUALIZA"| t3
   o1 -->|"LEE"| t3
-  o1 -->|"ACTUALIZA"| t4
   o1 -->|"LEE"| t4
-  o1 -->|"LEE"| t5
-  a2 --> o6
-  o6 -->|"CREA"| t3
-  o6 -->|"LEE"| t3
-  o6 -->|"CREA"| t7
+  a2 --> o5
+  o5 -->|"CREA"| t6
+  o5 -->|"LEE"| t6
+  o5 -->|"CREA"| t7
   a2 --> o8
-  o8 -->|"LEE"| t3
   o8 -->|"CREA"| t9
   o8 -->|"LEE"| t9
-  a2 --> o10
-  o10 -->|"ACTUALIZA"| t3
-  o10 -->|"LEE"| t3
-  o10 -->|"ACTUALIZA"| t7
-  o10 -->|"LEE"| t7
-  a2 --> o11
-  o11 -->|"LEE"| t3
-  o11 -->|"CREA"| t12
-  o11 -->|"CREA"| t4
-  o11 -->|"LEE"| t4
-  o11 -->|"LEE"| t5
-  o11 -->|"LEE"| t13
-  o11 -.-> t14
-  a2 --> o15
-  o15 -->|"LEE"| t3
-  o15 -->|"CREA"| t16
-  o15 -->|"LEE"| t16
-  a2 --> o17
-  o17 -->|"LEE"| t16
-  o17 -->|"ACTUALIZA"| t18
-  o17 -->|"CREA"| t18
-  o17 -->|"LEE"| t18
-  o17 -->|"LEE"| t4
-  a2 --> o19
-  o19 -->|"LEE"| t3
-  o19 -->|"CREA"| t20
-  o19 -->|"LEE"| t20
+  o8 -->|"LEE"| t10
+  o8 -->|"LEE"| t11
+  a2 --> o12
+  o12 -->|"ACTUALIZA"| t7
+  o12 -->|"LEE"| t7
+  a2 --> o13
+  o13 -->|"CREA"| t14
+  o13 -->|"CREA"| t3
+  o13 -->|"LEE"| t3
+  o13 -->|"LEE"| t4
+  o13 -->|"LEE"| t15
+  o13 -->|"LEE"| t16
+  o13 -.-> t17
+  a2 --> o18
+  o18 -->|"LEE"| t19
+  o18 -->|"CREA"| t20
+  o18 -->|"LEE"| t20
+  o18 -->|"LEE"| t9
   a2 --> o21
+  o21 -->|"LEE"| t20
+  o21 -->|"ACTUALIZA"| t22
   o21 -->|"CREA"| t22
   o21 -->|"LEE"| t22
-  o21 -->|"LEE"| t20
-  o21 -->|"LEE"| t4
+  o21 -->|"LEE"| t3
   a2 --> o23
-  o23 -->|"ACTUALIZA"| t22
-  o23 -->|"LEE"| t22
-  o23 -->|"ACTUALIZA"| t18
-  o23 -->|"LEE"| t18
-  o23 -->|"ACTUALIZA"| t4
-  o23 -->|"LEE"| t4
-  a2 --> o24
-  o24 -->|"ACTUALIZA"| t16
-  o24 -->|"LEE"| t16
-  o24 -->|"ACTUALIZA"| t18
-  o24 -->|"LEE"| t18
+  o23 -->|"CREA"| t24
+  o23 -->|"LEE"| t24
+  o23 -->|"LEE"| t9
   a2 --> o25
+  o25 -->|"CREA"| t26
+  o25 -->|"LEE"| t26
+  o25 -->|"LEE"| t24
   o25 -->|"LEE"| t3
-  o25 -->|"LEE"| t18
-  o25 -->|"LEE"| t4
-  a2 --> o26
-  o26 -->|"LEE"| t27
-  o26 -->|"LEE"| t3
-  a29 --> o28
-  o28 -->|"LEE"| t30
-  o28 -->|"LEE"| t31
-  o28 -->|"LEE"| t32
-  o28 -->|"LEE"| t33
-  o28 -->|"LEE"| t3
-  o28 -->|"LEE"| t16
-  o28 -.-> t34
-  a29 --> o35
-  o35 -->|"LEE"| t30
-  o35 -->|"LEE"| t31
-  o35 -->|"LEE"| t32
-  o35 -->|"LEE"| t33
-  o35 -->|"LEE"| t3
-  o35 -->|"LEE"| t16
-  o35 -.-> t36
+  a2 --> o27
+  o27 -->|"ACTUALIZA"| t26
+  o27 -->|"LEE"| t26
+  o27 -->|"ACTUALIZA"| t22
+  o27 -->|"LEE"| t22
+  o27 -->|"ACTUALIZA"| t3
+  o27 -->|"LEE"| t3
+  a2 --> o28
+  o28 -->|"ACTUALIZA"| t20
+  o28 -->|"LEE"| t20
+  o28 -->|"ACTUALIZA"| t22
+  o28 -->|"LEE"| t22
+  a2 --> o29
+  o29 -->|"LEE"| t22
+  o29 -->|"LEE"| t3
+  a2 --> o30
+  o30 -->|"LEE"| t31
+  o30 -->|"LEE"| t6
+  a33 --> o32
+  o32 -->|"LEE"| t34
+  o32 -->|"LEE"| t35
+  o32 -->|"LEE"| t36
+  o32 -->|"LEE"| t37
+  o32 -->|"LEE"| t6
+  o32 -->|"LEE"| t20
+  o32 -.-> t38
+  a33 --> o39
+  o39 -->|"LEE"| t34
+  o39 -->|"LEE"| t35
+  o39 -->|"LEE"| t36
+  o39 -->|"LEE"| t37
+  o39 -->|"LEE"| t6
+  o39 -->|"LEE"| t20
+  o39 -.-> t40
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -413,7 +415,6 @@ Establecer conexión de integración externa
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Farmacia no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una conexión para esa integración |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -427,35 +428,34 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PharmaciesRepository.findById"]:::llamada
+  n5{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
   n4 --> n5
-  n6[("LEE pharmacy.pharmacies")]:::efecto
-  n5 --> n6
-  n7{"!pharmacy"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Farmacia no encontrada"]):::error
+  n6(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
+  n5 -->|"sí"| n6
+  n7{"dto.pharmacySiteId"}:::decision
+  n5 -->|"no"| n7
+  n8["Llama a PharmacyReferencesRepository.findPharmacySiteInPharmacy"]:::llamada
   n7 -->|"sí"| n8
-  n9{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
-  n9 -->|"sí"| n10
-  n11{"dto.connectionId"}:::decision
-  n9 -->|"no"| n11
-  n12["Llama a PharmacyIntegrationConnectionsRepository.findByPharmacyAndConnection"]:::llamada
-  n11 -->|"sí"| n12
-  n13[("LEE pharmacy.pharmacy_integration_connections")]:::efecto
+  n9[("LEE pharmacy.pharmacy_sites")]:::efecto
+  n8 --> n9
+  n10{"dto.connectionId"}:::decision
+  n9 --> n10
+  n7 -->|"no"| n10
+  n11["Llama a PharmacyIntegrationConnectionsRepository.findByPharmacyAndConnection"]:::llamada
+  n10 -->|"sí"| n11
+  n12[("LEE pharmacy.pharmacy_integration_connections")]:::efecto
+  n11 --> n12
+  n13{"clash"}:::decision
   n12 --> n13
-  n14{"clash"}:::decision
-  n13 --> n14
-  n15(["409 CONFLICT Ya existe una conexión para esa integración"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a PharmacyIntegrationConnectionsRepository.create"]:::llamada
-  n14 -->|"no"| n16
-  n11 -->|"no"| n16
-  n17[("CREA pharmacy.pharmacy_integration_connections")]:::efecto
+  n14(["409 CONFLICT Ya existe una conexión para esa integración"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PharmacyIntegrationConnectionsRepository.create"]:::llamada
+  n13 -->|"no"| n15
+  n10 -->|"no"| n15
+  n16[("CREA pharmacy.pharmacy_integration_connections")]:::efecto
+  n15 --> n16
+  n17(("201 Responde con éxito")):::ok
   n16 --> n17
-  n18(("201 Responde con éxito")):::ok
-  n17 --> n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -548,7 +548,7 @@ Verificar licencia y aprobar farmacia
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Farmacia no encontrada; ResourceNotFoundException: Licencia no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Licencia no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La licencia no está pendiente de verificación |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -561,47 +561,34 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PharmaciesRepository.findById"]:::llamada
+  n5["Llama a PharmacyLicensesRepository.findById"]:::llamada
   n4 --> n5
-  n6[("LEE pharmacy.pharmacies")]:::efecto
+  n6[("LEE pharmacy.pharmacy_licenses")]:::efecto
   n5 --> n6
-  n7{"!pharmacy"}:::decision
+  n7{"!license || license.pharmacyId !== pharmacyId"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Farmacia no encontrada"]):::error
+  n8(["404 NOT_FOUND Licencia no encontrada"]):::error
   n7 -->|"sí"| n8
-  n9["Llama a PharmacyLicensesRepository.findById"]:::llamada
+  n9{"license.verificationStatusConceptId !== PHARM.VERIFICATION_PENDING"}:::decision
   n7 -->|"no"| n9
-  n10[("LEE pharmacy.pharmacy_licenses")]:::efecto
-  n9 --> n10
-  n11{"!license || license.pharmacyId !== pharmacyId"}:::decision
-  n10 --> n11
-  n12(["404 NOT_FOUND Licencia no encontrada"]):::error
-  n11 -->|"sí"| n12
-  n13{"license.verificationStatusConceptId !== PHARM.VERIFICATION_PENDING"}:::decision
-  n11 -->|"no"| n13
-  n14(["422 PRECONDITION_FAILED La licencia no está pendiente de verificación"]):::error
-  n13 -->|"sí"| n14
-  n15[("ACTUALIZA pharmacy.pharmacy_licenses · ACTUALIZA pharmacy.pharmacy_licenses")]:::efecto
-  n13 -->|"no"| n15
-  n16{"dto.evidenceFileId"}:::decision
+  n10(["422 PRECONDITION_FAILED La licencia no está pendiente de verificación"]):::error
+  n9 -->|"sí"| n10
+  n11[("ACTUALIZA pharmacy.pharmacy_licenses · ACTUALIZA pharmacy.pharmacy_licenses")]:::efecto
+  n9 -->|"no"| n11
+  n12{"dto.evidenceFileId"}:::decision
+  n11 --> n12
+  n13[("ACTUALIZA pharmacy.pharmacy_licenses")]:::efecto
+  n12 -->|"sí"| n13
+  n14{"approve"}:::decision
+  n13 --> n14
+  n12 -->|"no"| n14
+  n15["Llama a PharmacyLicensesRepository.countUnverified"]:::llamada
+  n14 -->|"sí"| n15
+  n16[("LEE pharmacy.pharmacy_licenses")]:::efecto
   n15 --> n16
-  n17[("ACTUALIZA pharmacy.pharmacy_licenses")]:::efecto
-  n16 -->|"sí"| n17
-  n18{"approve"}:::decision
-  n17 --> n18
-  n16 -->|"no"| n18
-  n19["Llama a PharmacyLicensesRepository.countUnverified"]:::llamada
-  n18 -->|"sí"| n19
-  n20[("LEE pharmacy.pharmacy_licenses")]:::efecto
-  n19 --> n20
-  n21{"remaining === 0"}:::decision
-  n20 --> n21
-  n22[("ACTUALIZA pharmacy.pharmacies · ACTUALIZA pharmacy.pharmacies")]:::efecto
-  n21 -->|"sí"| n22
-  n23(("200 Responde con éxito")):::ok
-  n22 --> n23
-  n21 -->|"no"| n23
-  n18 -->|"no"| n23
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
+  n14 -->|"no"| n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -620,7 +607,6 @@ Crear lista de precios (pública / por aseguradora)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Farmacia no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una lista con ese código en la farmacia |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa; PreconditionFailedException: Una lista por aseguradora requiere insurerTenantId |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -634,36 +620,42 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PharmaciesRepository.findById"]:::llamada
+  n5{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
   n4 --> n5
-  n6[("LEE pharmacy.pharmacies")]:::efecto
-  n5 --> n6
-  n7{"!pharmacy"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Farmacia no encontrada"]):::error
+  n6(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
+  n5 -->|"sí"| n6
+  n7{"dto.priceListType === 'INSURER' && !dto.insurerTenantId"}:::decision
+  n5 -->|"no"| n7
+  n8(["422 PRECONDITION_FAILED Una lista por aseguradora requiere insurerTenantId"]):::error
   n7 -->|"sí"| n8
-  n9{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
+  n9{"dto.pharmacySiteId"}:::decision
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
+  n10["Llama a PharmacyReferencesRepository.findPharmacySiteInPharmacy"]:::llamada
   n9 -->|"sí"| n10
-  n11{"dto.priceListType === 'INSURER' && !dto.insurerTenantId"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED Una lista por aseguradora requiere insurerTenantId"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a PharmacyPriceListsRepository.findByPharmacyAndCode"]:::llamada
-  n11 -->|"no"| n13
-  n14[("LEE pharmacy.pharmacy_price_lists")]:::efecto
+  n11[("LEE pharmacy.pharmacy_sites")]:::efecto
+  n10 --> n11
+  n12{"dto.insurerTenantId"}:::decision
+  n11 --> n12
+  n9 -->|"no"| n12
+  n13["Llama a PharmacyReferencesRepository.isRegisteredInsurer"]:::llamada
+  n12 -->|"sí"| n13
+  n14[("LEE insurance.insurance_carriers")]:::efecto
   n13 --> n14
-  n15{"clash"}:::decision
+  n15["Llama a PharmacyPriceListsRepository.findByPharmacyAndCode"]:::llamada
   n14 --> n15
-  n16(["409 CONFLICT Ya existe una lista con ese código en la farmacia"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a PharmacyPriceListsRepository.create"]:::llamada
-  n15 -->|"no"| n17
-  n18[("CREA pharmacy.pharmacy_price_lists")]:::efecto
-  n17 --> n18
-  n19(("201 Responde con éxito")):::ok
-  n18 --> n19
+  n12 -->|"no"| n15
+  n16[("LEE pharmacy.pharmacy_price_lists")]:::efecto
+  n15 --> n16
+  n17{"clash"}:::decision
+  n16 --> n17
+  n18(["409 CONFLICT Ya existe una lista con ese código en la farmacia"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a PharmacyPriceListsRepository.create"]:::llamada
+  n17 -->|"no"| n19
+  n20[("CREA pharmacy.pharmacy_price_lists")]:::efecto
+  n19 --> n20
+  n21(("201 Responde con éxito")):::ok
+  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -812,7 +804,7 @@ Publicar producto en catálogo con identificadores
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: catalogPresentationCode sólo se manda junto con catalogProductId; BadRequestException: {supplied.join(', ')} vienen del catálogo oficial y no se mandan con catalogProductId; BadRequestException: El producto tiene más de una presentación: mande catalogPresentationCode; BadRequestException: catalogPresentationCode no es una presentación de ese producto |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Farmacia no encontrada; ResourceNotFoundException: Producto del catálogo no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Producto del catálogo no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe un producto con ese código en la farmacia; ConflictException: Ya cargó ese producto y presentación |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa; PreconditionFailedException: El registro sanitario de ese producto no está vigente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -826,93 +818,85 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PharmaciesRepository.findById"]:::llamada
+  n5{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
   n4 --> n5
-  n6[("LEE pharmacy.pharmacies")]:::efecto
-  n5 --> n6
-  n7{"!pharmacy"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Farmacia no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
+  n6(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PharmacyProductsRepository.findByPharmacyAndCode"]:::llamada
+  n5 -->|"no"| n7
+  n8[("LEE pharmacy.pharmacy_products")]:::efecto
+  n7 --> n8
+  n9{"clash"}:::decision
+  n8 --> n9
+  n10(["409 CONFLICT Ya existe un producto con ese código en la farmacia"]):::error
   n9 -->|"sí"| n10
-  n11["Llama a PharmacyProductsRepository.findByPharmacyAndCode"]:::llamada
+  n11["Llama a PharmacyProductsService.deriveFromCatalog"]:::llamada
   n9 -->|"no"| n11
-  n12[("LEE pharmacy.pharmacy_products")]:::efecto
+  n12{"dto.catalogProductId === undefined"}:::decision
   n11 --> n12
-  n13{"clash"}:::decision
-  n12 --> n13
-  n14(["409 CONFLICT Ya existe un producto con ese código en la farmacia"]):::error
+  n13{"dto.catalogPresentationCode !== undefined"}:::decision
+  n12 -->|"sí"| n13
+  n14(["400 VALIDATION_FAILED catalogPresentationCode sólo se manda junto con catalogProductId"]):::error
   n13 -->|"sí"| n14
-  n15["Llama a PharmacyProductsService.deriveFromCatalog"]:::llamada
+  n15["Llama a MedicineCatalogRepository.findProductById"]:::llamada
   n13 -->|"no"| n15
-  n16{"dto.catalogProductId === undefined"}:::decision
+  n12 -->|"no"| n15
+  n16[("LEE terminology.catalog_concepts · LEE terminology.code_system_versions · LEE terminology.code_systems")]:::efecto
   n15 --> n16
-  n17{"dto.catalogPresentationCode !== undefined"}:::decision
-  n16 -->|"sí"| n17
-  n18(["400 VALIDATION_FAILED catalogPresentationCode sólo se manda junto con catalogProductId"]):::error
-  n17 -->|"sí"| n18
-  n19["Llama a MedicineCatalogRepository.findProductById"]:::llamada
-  n17 -->|"no"| n19
-  n16 -->|"no"| n19
-  n20[("LEE terminology.catalog_concepts · LEE terminology.code_system_versions · LEE terminology.code_systems")]:::efecto
-  n19 --> n20
-  n21["Llama a MedicineCatalogRepository.hydrate"]:::llamada
-  n20 --> n21
-  n22[("LEE terminology.catalog_concepts · LEE terminology.concept_properties")]:::efecto
-  n21 --> n22
-  n23{"!catalog"}:::decision
-  n22 --> n23
-  n24(["404 NOT_FOUND Producto del catálogo no encontrado"]):::error
+  n17["Llama a MedicineCatalogRepository.hydrate"]:::llamada
+  n16 --> n17
+  n18[("LEE terminology.catalog_concepts · LEE terminology.concept_properties")]:::efecto
+  n17 --> n18
+  n19{"!catalog"}:::decision
+  n18 --> n19
+  n20(["404 NOT_FOUND Producto del catálogo no encontrado"]):::error
+  n19 -->|"sí"| n20
+  n21{"!catalog.selectable"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED El registro sanitario de ese producto no está vigente"]):::error
+  n21 -->|"sí"| n22
+  n23{"supplied.length › 0"}:::decision
+  n21 -->|"no"| n23
+  n24(["400 VALIDATION_FAILED {supplied.join(', ')} vienen del catálogo oficial y no se mandan con catalogProductId"]):::error
   n23 -->|"sí"| n24
-  n25{"!catalog.selectable"}:::decision
+  n25["Llama a PharmacyProductsService.pickPresentation"]:::llamada
   n23 -->|"no"| n25
-  n26(["422 PRECONDITION_FAILED El registro sanitario de ese producto no está vigente"]):::error
-  n25 -->|"sí"| n26
-  n27{"supplied.length › 0"}:::decision
-  n25 -->|"no"| n27
-  n28(["400 VALIDATION_FAILED {supplied.join(', ')} vienen del catálogo oficial y no se mandan con catalogProductId"]):::error
+  n26{"code === undefined"}:::decision
+  n25 --> n26
+  n27{"sellable.length › 1"}:::decision
+  n26 -->|"sí"| n27
+  n28(["400 VALIDATION_FAILED El producto tiene más de una presentación: mande catalogPresentationCode"]):::error
   n27 -->|"sí"| n28
-  n29["Llama a PharmacyProductsService.pickPresentation"]:::llamada
+  n29{"!found"}:::decision
   n27 -->|"no"| n29
-  n30{"code === undefined"}:::decision
-  n29 --> n30
-  n31{"sellable.length › 1"}:::decision
-  n30 -->|"sí"| n31
-  n32(["400 VALIDATION_FAILED El producto tiene más de una presentación: mande catalogPresentationCode"]):::error
-  n31 -->|"sí"| n32
-  n33{"!found"}:::decision
-  n31 -->|"no"| n33
-  n30 -->|"no"| n33
-  n34(["400 VALIDATION_FAILED catalogPresentationCode no es una presentación de ese producto"]):::error
+  n26 -->|"no"| n29
+  n30(["400 VALIDATION_FAILED catalogPresentationCode no es una presentación de ese producto"]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a PharmacyProductsRepository.findByPharmacyAndCatalog"]:::llamada
+  n29 -->|"no"| n31
+  n32[("LEE pharmacy.pharmacy_products")]:::efecto
+  n31 --> n32
+  n33{"duplicate"}:::decision
+  n32 --> n33
+  n34(["409 CONFLICT Ya cargó ese producto y presentación"]):::error
   n33 -->|"sí"| n34
-  n35["Llama a PharmacyProductsRepository.findByPharmacyAndCatalog"]:::llamada
+  n35["Llama a MedicineCatalogRepository.findVademecumConceptIdByAtc"]:::llamada
   n33 -->|"no"| n35
-  n36[("LEE pharmacy.pharmacy_products")]:::efecto
+  n36[("LEE terminology.catalog_concepts · LEE terminology.code_system_versions · LEE terminology.code_systems")]:::efecto
   n35 --> n36
-  n37{"duplicate"}:::decision
+  n37["Llama a PharmacyProductsRepository.create"]:::llamada
   n36 --> n37
-  n38(["409 CONFLICT Ya cargó ese producto y presentación"]):::error
-  n37 -->|"sí"| n38
-  n39["Llama a MedicineCatalogRepository.findVademecumConceptIdByAtc"]:::llamada
-  n37 -->|"no"| n39
-  n40[("LEE terminology.catalog_concepts · LEE terminology.code_system_versions · LEE terminology.code_systems")]:::efecto
-  n39 --> n40
-  n41["Llama a PharmacyProductsRepository.create"]:::llamada
+  n38[("CREA pharmacy.pharmacy_products")]:::efecto
+  n37 --> n38
+  n39["Repite: por cada const idf de identifiers"]:::bucle
+  n38 --> n39
+  n40["Llama a PharmacyProductIdentifiersRepository.create"]:::llamada
+  n39 -->|"cada elemento"| n40
+  n41[("CREA pharmacy.pharmacy_product_identifiers")]:::efecto
   n40 --> n41
-  n42[("CREA pharmacy.pharmacy_products")]:::efecto
+  n42(("201 Responde con éxito")):::ok
   n41 --> n42
-  n43["Repite: por cada const idf de identifiers"]:::bucle
-  n42 --> n43
-  n44["Llama a PharmacyProductIdentifiersRepository.create"]:::llamada
-  n43 -->|"cada elemento"| n44
-  n45[("CREA pharmacy.pharmacy_product_identifiers")]:::efecto
-  n44 --> n45
-  n46(("201 Responde con éxito")):::ok
-  n45 --> n46
-  n43 -->|"al terminar"| n46
+  n39 -->|"al terminar"| n42
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -996,7 +980,7 @@ Editar los datos descriptivos de un producto del catálogo
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: {changed.join(', ')} vienen del catálogo oficial y no se editan |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Farmacia no encontrada; ResourceNotFoundException: Producto no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Producto no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El producto no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1009,44 +993,36 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PharmaciesRepository.findById"]:::llamada
+  n5["Llama a PharmacyProductsRepository.findById"]:::llamada
   n4 --> n5
-  n6[("LEE pharmacy.pharmacies")]:::efecto
+  n6[("LEE pharmacy.pharmacy_products")]:::efecto
   n5 --> n6
-  n7{"!pharmacy"}:::decision
+  n7{"!product || product.pharmacyId !== pharmacyId"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Farmacia no encontrada"]):::error
+  n8(["404 NOT_FOUND Producto no encontrado"]):::error
   n7 -->|"sí"| n8
-  n9["Llama a PharmacyProductsRepository.findById"]:::llamada
+  n9{"product.statusConceptId !== PHARM.PRODUCT_ACTIVE"}:::decision
   n7 -->|"no"| n9
-  n10[("LEE pharmacy.pharmacy_products")]:::efecto
-  n9 --> n10
-  n11{"!product || product.pharmacyId !== pharmacyId"}:::decision
-  n10 --> n11
-  n12(["404 NOT_FOUND Producto no encontrado"]):::error
+  n10(["422 PRECONDITION_FAILED El producto no está activo"]):::error
+  n9 -->|"sí"| n10
+  n11{"product.catalogProductConceptId != null && changed.length › 0"}:::decision
+  n9 -->|"no"| n11
+  n12(["400 VALIDATION_FAILED {changed.join(', ')} vienen del catálogo oficial y no se editan"]):::error
   n11 -->|"sí"| n12
-  n13{"product.statusConceptId !== PHARM.PRODUCT_ACTIVE"}:::decision
+  n13{"changed.length › 0"}:::decision
   n11 -->|"no"| n13
-  n14(["422 PRECONDITION_FAILED El producto no está activo"]):::error
+  n14["Repite: por cada const field de changed"]:::bucle
   n13 -->|"sí"| n14
-  n15{"product.catalogProductConceptId != null && changed.length › 0"}:::decision
-  n13 -->|"no"| n15
-  n16(["400 VALIDATION_FAILED {changed.join(', ')} vienen del catálogo oficial y no se editan"]):::error
-  n15 -->|"sí"| n16
-  n17{"changed.length › 0"}:::decision
-  n15 -->|"no"| n17
-  n18["Repite: por cada const field de changed"]:::bucle
-  n17 -->|"sí"| n18
-  n19[("ACTUALIZA pharmacy.pharmacy_products")]:::efecto
-  n18 -->|"cada elemento"| n19
-  n20["Llama a PharmacyReadRepository.findConcepts"]:::llamada
-  n19 --> n20
-  n18 -->|"al terminar"| n20
-  n17 -->|"no"| n20
-  n21[("LEE terminology.catalog_concepts")]:::efecto
-  n20 --> n21
-  n22(("200 Responde con éxito")):::ok
-  n21 --> n22
+  n15[("ACTUALIZA pharmacy.pharmacy_products")]:::efecto
+  n14 -->|"cada elemento"| n15
+  n16["Llama a PharmacyReadRepository.findConcepts"]:::llamada
+  n15 --> n16
+  n14 -->|"al terminar"| n16
+  n13 -->|"no"| n16
+  n17[("LEE terminology.catalog_concepts")]:::efecto
+  n16 --> n17
+  n18(("200 Responde con éxito")):::ok
+  n17 --> n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1065,7 +1041,6 @@ Proyectar catálogo y precios a read-model
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Farmacia no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1075,27 +1050,19 @@ flowchart TD
   n1 --> n2
   n3["Llama a PharmacyCatalogService.projectCatalog"]:::llamada
   n2 --> n3
-  n4["Llama a PharmaciesRepository.findById"]:::llamada
+  n4["Llama a PharmacyProductsRepository.findByPharmacyAndStatus"]:::llamada
   n3 --> n4
-  n5[("LEE pharmacy.pharmacies")]:::efecto
+  n5[("LEE pharmacy.pharmacy_products")]:::efecto
   n4 --> n5
-  n6{"!pharmacy"}:::decision
+  n6["Repite: por cada const product de products"]:::bucle
   n5 --> n6
-  n7(["404 NOT_FOUND Farmacia no encontrada"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a PharmacyProductsRepository.findByPharmacyAndStatus"]:::llamada
-  n6 -->|"no"| n8
-  n9[("LEE pharmacy.pharmacy_products")]:::efecto
+  n7["Llama a PharmacyProductPricesRepository.findActiveByProduct"]:::llamada
+  n6 -->|"cada elemento"| n7
+  n8[("LEE pharmacy.pharmacy_product_prices")]:::efecto
+  n7 --> n8
+  n9(("200 Responde con éxito")):::ok
   n8 --> n9
-  n10["Repite: por cada const product de products"]:::bucle
-  n9 --> n10
-  n11["Llama a PharmacyProductPricesRepository.findActiveByProduct"]:::llamada
-  n10 -->|"cada elemento"| n11
-  n12[("LEE pharmacy.pharmacy_product_prices")]:::efecto
-  n11 --> n12
-  n13(("200 Responde con éxito")):::ok
-  n12 --> n13
-  n10 -->|"al terminar"| n13
+  n6 -->|"al terminar"| n9
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1114,7 +1081,6 @@ Registrar sede dispensadora
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Farmacia no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una sede con ese código en la farmacia |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1128,32 +1094,28 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PharmaciesRepository.findById"]:::llamada
+  n5{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
   n4 --> n5
-  n6[("LEE pharmacy.pharmacies")]:::efecto
-  n5 --> n6
-  n7{"!pharmacy"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Farmacia no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a PharmacySitesRepository.findByPharmacyAndCode"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE pharmacy.pharmacy_sites")]:::efecto
-  n11 --> n12
-  n13{"clash"}:::decision
-  n12 --> n13
-  n14(["409 CONFLICT Ya existe una sede con ese código en la farmacia"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a PharmacySitesRepository.create"]:::llamada
-  n13 -->|"no"| n15
-  n16[("CREA pharmacy.pharmacy_sites")]:::efecto
-  n15 --> n16
-  n17(("201 Responde con éxito")):::ok
-  n16 --> n17
+  n6(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PharmacyReferencesRepository.practiceSiteBelongsToTenant"]:::llamada
+  n5 -->|"no"| n7
+  n8[("LEE practice.practice_sites · LEE practice.practices")]:::efecto
+  n7 --> n8
+  n9["Llama a PharmacySitesRepository.findByPharmacyAndCode"]:::llamada
+  n8 --> n9
+  n10[("LEE pharmacy.pharmacy_sites")]:::efecto
+  n9 --> n10
+  n11{"clash"}:::decision
+  n10 --> n11
+  n12(["409 CONFLICT Ya existe una sede con ese código en la farmacia"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PharmacySitesRepository.create"]:::llamada
+  n11 -->|"no"| n13
+  n14[("CREA pharmacy.pharmacy_sites")]:::efecto
+  n13 --> n14
+  n15(("201 Responde con éxito")):::ok
+  n14 --> n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

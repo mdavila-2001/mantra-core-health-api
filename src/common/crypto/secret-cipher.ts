@@ -4,6 +4,7 @@ import {
   randomBytes,
   scryptSync,
 } from 'node:crypto';
+import { SecretCipherError } from '../errors/secret-cipher.error';
 
 /**
  * Cifrado simétrico reversible para secretos TOTP (UC-01-03).
@@ -27,6 +28,7 @@ const ALGORITHM = 'aes-256-gcm';
 const IV_BYTES = 12;
 const KEY_BYTES = 32;
 const SALT_BYTES = 16;
+const TAG_BYTES = 16;
 
 /**
  * Passphrase de desarrollo. Solo apta para pruebas y arranque local sin `.env`.
@@ -93,30 +95,61 @@ export function encryptSecret(plain: string): string {
 }
 
 /**
+ * Decodifica un segmento base64 **canónico** (el que produce `encryptSecret`).
+ *
+ * `Buffer.from(x, 'base64')` es permisivo: ignora caracteres ajenos y corta en
+ * silencio un segmento truncado, así que un valor dañado seguía hasta las
+ * primitivas de `node:crypto` con bytes que no eran los guardados. Comparar la
+ * recodificación detecta eso antes de tocar la clave.
+ */
+function decodeSegment(segment: string, expectedBytes?: number): Buffer {
+  const bytes = Buffer.from(segment, 'base64');
+  if (
+    bytes.toString('base64') !== segment ||
+    (expectedBytes !== undefined && bytes.length !== expectedBytes)
+  ) {
+    throw new SecretCipherError();
+  }
+  return bytes;
+}
+
+/**
  * Descifra un valor producido por `encryptSecret` y devuelve el secreto en claro.
  * Acepta el formato actual (4 partes, sal propia) y el anterior (3 partes, sal
- * fija). Lanza si el formato es inválido o si la etiqueta de autenticación no cuadra
- * (secreto manipulado o clave incorrecta).
+ * fija).
+ *
+ * @throws SecretCipherError (`SECRET_CIPHER_INVALID`) si el formato es inválido
+ *   —partes de más o de menos, base64 no canónico, longitudes de sal/IV/tag
+ *   incorrectas— o si la etiqueta de autenticación no cuadra (secreto
+ *   manipulado o clave incorrecta). El mensaje es fijo: no incluye el valor ni
+ *   el error original de `node:crypto`.
  */
 export function decryptSecret(enc: string): string {
   const parts = enc.split('.');
   if (parts.length !== 3 && parts.length !== 4) {
-    throw new Error('Formato de secreto cifrado inválido');
+    throw new SecretCipherError();
   }
   // 4 partes: la sal va primero. 3 partes: formato anterior, sal fija.
-  const [salt, ivB64, tagB64, dataB64] =
-    parts.length === 4
-      ? [Buffer.from(parts[0], 'base64'), parts[1], parts[2], parts[3]]
-      : [KEY_SALT, parts[0], parts[1], parts[2]];
-  const key = deriveKey(salt);
-  const iv = Buffer.from(ivB64, 'base64');
-  const tag = Buffer.from(tagB64, 'base64');
-  const ciphertext = Buffer.from(dataB64, 'base64');
+  const hasOwnSalt = parts.length === 4;
+  const [saltB64, ivB64, tagB64, dataB64]: string[] = hasOwnSalt
+    ? parts
+    : ['', ...parts];
+  const salt = hasOwnSalt ? decodeSegment(saltB64, SALT_BYTES) : KEY_SALT;
+  const iv = decodeSegment(ivB64, IV_BYTES);
+  const tag = decodeSegment(tagB64, TAG_BYTES);
+  const ciphertext = decodeSegment(dataB64);
 
-  const decipher = createDecipheriv(ALGORITHM, key, iv);
-  decipher.setAuthTag(tag);
-  return Buffer.concat([
-    decipher.update(ciphertext),
-    decipher.final(),
-  ]).toString('utf8');
+  // `deriveKey` queda fuera del `try`: un error de configuración (clave de
+  // producción ausente) no es un secreto corrupto y no debe disfrazarse de uno.
+  const key = deriveKey(salt);
+  try {
+    const decipher = createDecipheriv(ALGORITHM, key, iv);
+    decipher.setAuthTag(tag);
+    return Buffer.concat([
+      decipher.update(ciphertext),
+      decipher.final(),
+    ]).toString('utf8');
+  } catch {
+    throw new SecretCipherError();
+  }
 }

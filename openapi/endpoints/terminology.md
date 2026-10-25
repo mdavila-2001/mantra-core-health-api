@@ -101,6 +101,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListCodeSystemsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListCodeSystemsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -242,6 +243,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CodeSystemResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CodeSystemResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CodeSystemResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CodeSystemResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CodeSystemResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -355,6 +357,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListCodeSystemVersionsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListCodeSystemVersionsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -495,6 +498,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CodeSystemVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CodeSystemVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CodeSystemVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CodeSystemVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CodeSystemVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -607,6 +611,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<LookupResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<LookupResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<LookupResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LookupResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LookupResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -770,6 +775,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TranslateResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TranslateResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TranslateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TranslateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TranslateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -906,6 +912,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<SearchConceptsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SearchConceptsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SearchConceptsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SearchConceptsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchConceptsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1072,6 +1079,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ConceptDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConceptDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1298,6 +1306,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeprecateConceptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeprecateConceptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeprecateConceptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeprecateConceptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeprecateConceptResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1451,6 +1460,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DesignationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DesignationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DesignationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DesignationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DesignationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1571,6 +1581,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<unknown>` | No |
 | 429 | Consulta completada correctamente. | `Promise<unknown>` | No |
 | 500 | Consulta completada correctamente. | `Promise<unknown>` | No |
+| 504 | Consulta completada correctamente. | `Promise<unknown>` | No |
 
 El controlador declara `unknown`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -1672,6 +1683,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GlossaryNeighborhoodDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlossaryNeighborhoodDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1854,6 +1866,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConceptPropertiesResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConceptPropertiesResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConceptPropertiesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConceptPropertiesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConceptPropertiesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1988,6 +2001,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RelationshipResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RelationshipResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2106,6 +2120,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GlossaryGraphDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlossaryGraphDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2249,6 +2264,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `StreamableFile` | No |
 | 429 | Consulta completada correctamente. | `StreamableFile` | No |
 | 500 | Consulta completada correctamente. | `StreamableFile` | No |
+| 504 | Consulta completada correctamente. | `StreamableFile` | No |
 
 El controlador declara `StreamableFile`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -2387,6 +2403,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TenantCatalogPolicyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TenantCatalogPolicyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TenantCatalogPolicyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TenantCatalogPolicyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TenantCatalogPolicyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2511,6 +2528,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SearchValueSetsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchValueSetsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2676,6 +2694,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ValueSetResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ValueSetResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ValueSetResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ValueSetResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ValueSetResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2792,6 +2811,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReadValueSetExpansionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReadValueSetExpansionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2930,6 +2950,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GlossaryFacetsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GlossaryFacetsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3099,6 +3120,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExpandValueSetResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExpandValueSetResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExpandValueSetResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExpandValueSetResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExpandValueSetResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3251,6 +3273,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ImportConceptsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ImportConceptsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ImportConceptsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ImportConceptsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImportConceptsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3386,6 +3409,7 @@ Content-Type: multipart/form-data
 | 422 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ImportConceptsFileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImportConceptsFileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3533,6 +3557,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PublishVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PublishVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 

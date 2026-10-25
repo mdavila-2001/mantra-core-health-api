@@ -3,7 +3,7 @@
 # Flujos del módulo `system_ops`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 24 (22 con decisiones propias, 2 sin ellas)
+- **Operaciones:** 24 (23 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [system_ops](../endpoints/system_ops.md)
 
 ## Proceso: Módulo `system_ops` (11) — Data Governance & System Operations
@@ -32,7 +32,7 @@ _Fuente: `src/modules/system_ops/README.md:3`_
 |  |  | PATCH /admin/governance/field-registry/{id} | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-11-05` | Ejecutar barrido de retención (excluye objetivos bajo legal hold) | POST /internal/governance/retention-executions/run | SECURITY_ADMIN | ALTO | 38 |
 | `UC-11-06` | Definir política de residencia | POST /admin/governance/residency-policies | SECURITY_ADMIN | MEDIO | 3 |
-|  |  | POST /admin/governance/tenant-residency-bindings | SECURITY_ADMIN | MEDIO | 1 |
+|  |  | POST /admin/governance/tenant-residency-bindings | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-11-07` | Registrar transferencia transfronteriza (append-only) | POST /admin/governance/cross-border-transfers | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-11-08` | Colocar legal hold | POST /admin/governance/legal-holds | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /admin/governance/legal-holds/{id}/release | SECURITY_ADMIN | MEDIO | 3 |
@@ -66,18 +66,21 @@ flowchart LR
   t21[("common.file_versions")]:::tabla
   t22[("common.files")]:::tabla
   t25[("system_ops.data_residency_policies")]:::tabla
-  t27[("system_ops.tenant_residency_bindings")]:::tabla
-  t29[("system_ops.cross_border_transfer_events")]:::tabla
-  t31[("system_ops.legal_holds")]:::tabla
-  t34[("system_ops.backup_policies")]:::tabla
-  t36[("system_ops.restore_test_runs")]:::tabla
-  t38[("system_ops.operational_framework_controls")]:::tabla
-  t39[("system_ops.operational_frameworks")]:::tabla
-  t41[("system_ops.workload_assessments")]:::tabla
-  t43[("system_ops.assessment_control_results")]:::tabla
-  t45[("system_ops.assessment_findings")]:::tabla
-  t47[("system_ops.remediation_actions")]:::tabla
-  t48[("system_ops.remediation_plans")]:::tabla
+  t27[("directory.tenants")]:::tabla
+  t28[("polyglot_storage.residency_policies")]:::tabla
+  t29[("system_ops.tenant_residency_bindings")]:::tabla
+  t30[("terminology.catalog_concepts")]:::tabla
+  t32[("system_ops.cross_border_transfer_events")]:::tabla
+  t34[("system_ops.legal_holds")]:::tabla
+  t37[("system_ops.backup_policies")]:::tabla
+  t39[("system_ops.restore_test_runs")]:::tabla
+  t41[("system_ops.operational_framework_controls")]:::tabla
+  t42[("system_ops.operational_frameworks")]:::tabla
+  t44[("system_ops.workload_assessments")]:::tabla
+  t46[("system_ops.assessment_control_results")]:::tabla
+  t48[("system_ops.assessment_findings")]:::tabla
+  t50[("system_ops.remediation_actions")]:::tabla
+  t51[("system_ops.remediation_plans")]:::tabla
   t7[("+1 tablas más")]
   subgraph s0["UC-11-01 · Registrar dominio, clasificación y catalogar entidad + campos"]
     o1["POST /admin/governance/entity-registry"]:::op
@@ -103,28 +106,28 @@ flowchart LR
     o26["POST /admin/governance/tenant-residency-bindings"]:::op
   end
   subgraph s6["UC-11-07 · Registrar transferencia transfronteriza (append-only)"]
-    o28["POST /admin/governance/cross-border-transfers"]:::op
+    o31["POST /admin/governance/cross-border-transfers"]:::op
   end
   subgraph s7["UC-11-08 · Colocar legal hold"]
-    o30["POST /admin/governance/legal-holds"]:::op
-    o32["POST /admin/governance/legal-holds/{id}/release"]:::op
+    o33["POST /admin/governance/legal-holds"]:::op
+    o35["POST /admin/governance/legal-holds/{id}/release"]:::op
   end
   subgraph s8["UC-11-09 · Definir política de backup (RPO/RTO/inmutabilidad)"]
-    o33["POST /admin/ops/backup-policies"]:::op
+    o36["POST /admin/ops/backup-policies"]:::op
   end
   subgraph s9["UC-11-10 · Registrar prueba de restauración con evidencia"]
-    o35["POST /internal/ops/restore-test-runs"]:::op
+    o38["POST /internal/ops/restore-test-runs"]:::op
   end
   subgraph s10["UC-11-11 · Publicar framework con controles (jerárquicos)"]
-    o37["POST /admin/governance/operational-frameworks"]:::op
+    o40["POST /admin/governance/operational-frameworks"]:::op
   end
   subgraph s11["UC-11-12 · Iniciar evaluación de workload"]
-    o40["POST /admin/governance/workload-assessments"]:::op
-    o42["PUT /admin/governance/workload-assessments/{id}/control-results"]:::op
+    o43["POST /admin/governance/workload-assessments"]:::op
+    o45["PUT /admin/governance/workload-assessments/{id}/control-results"]:::op
   end
   subgraph s12["UC-11-13 · Abrir hallazgo"]
-    o44["POST /admin/governance/assessments/{id}/findings"]:::op
-    o46["POST /admin/governance/assessments/{id}/remediation-plans"]:::op
+    o47["POST /admin/governance/assessments/{id}/findings"]:::op
+    o49["POST /admin/governance/assessments/{id}/remediation-plans"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -173,45 +176,48 @@ flowchart LR
   o24 -->|"LEE"| t25
   o24 -->|"CREA"| t9
   a2 --> o26
-  o26 -->|"CREA"| t27
-  a2 --> o28
-  o28 -->|"CREA"| t29
-  o28 -->|"LEE"| t29
-  a2 --> o30
-  o30 -->|"CREA"| t9
-  o30 -->|"CREA"| t31
-  o30 -->|"LEE"| t31
-  a2 --> o32
-  o32 -->|"CREA"| t9
-  o32 -->|"ACTUALIZA"| t31
-  o32 -->|"LEE"| t31
+  o26 -->|"LEE"| t27
+  o26 -->|"LEE"| t28
+  o26 -->|"CREA"| t29
+  o26 -->|"LEE"| t30
+  a2 --> o31
+  o31 -->|"CREA"| t32
+  o31 -->|"LEE"| t32
   a2 --> o33
+  o33 -->|"CREA"| t9
   o33 -->|"CREA"| t34
+  o33 -->|"LEE"| t34
   a2 --> o35
+  o35 -->|"CREA"| t9
+  o35 -->|"ACTUALIZA"| t34
   o35 -->|"LEE"| t34
-  o35 -->|"CREA"| t36
-  a2 --> o37
-  o37 -->|"CREA"| t38
-  o37 -->|"CREA"| t39
-  o37 -->|"LEE"| t39
+  a2 --> o36
+  o36 -->|"CREA"| t37
+  a2 --> o38
+  o38 -->|"LEE"| t37
+  o38 -->|"CREA"| t39
   a2 --> o40
-  o40 -->|"LEE"| t39
   o40 -->|"CREA"| t41
-  a2 --> o42
-  o42 -->|"ACTUALIZA"| t43
-  o42 -->|"CREA"| t43
-  o42 -->|"LEE"| t43
-  o42 -->|"LEE"| t41
-  a2 --> o44
-  o44 -->|"CREA"| t45
-  o44 -->|"LEE"| t45
-  o44 -->|"LEE"| t41
-  a2 --> o46
-  o46 -->|"LEE"| t45
-  o46 -->|"CREA"| t47
-  o46 -->|"CREA"| t48
-  o46 -->|"LEE"| t48
-  o46 -->|"LEE"| t41
+  o40 -->|"CREA"| t42
+  o40 -->|"LEE"| t42
+  a2 --> o43
+  o43 -->|"LEE"| t42
+  o43 -->|"CREA"| t44
+  a2 --> o45
+  o45 -->|"ACTUALIZA"| t46
+  o45 -->|"CREA"| t46
+  o45 -->|"LEE"| t46
+  o45 -->|"LEE"| t44
+  a2 --> o47
+  o47 -->|"CREA"| t48
+  o47 -->|"LEE"| t48
+  o47 -->|"LEE"| t44
+  a2 --> o49
+  o49 -->|"LEE"| t48
+  o49 -->|"CREA"| t50
+  o49 -->|"CREA"| t51
+  o49 -->|"LEE"| t51
+  o49 -->|"LEE"| t44
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1173,7 +1179,72 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /admin/governance/workload-assessments
+#### 17. POST /admin/governance/tenant-residency-bindings
+
+Vincular un tenant a una política de residencia
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El tenant o la política de residencia no existen; ResourceNotFoundException: Una de las regiones indicadas no existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política de residencia no está activa; PreconditionFailedException: Una de las regiones queda fuera de las que la política permite |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ResidencyService.createBinding"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a ResidencyRepository.findBindingPolicyById"]:::llamada
+  n4 --> n5
+  n6[("LEE polyglot_storage.residency_policies")]:::efecto
+  n5 --> n6
+  n7["Llama a ResidencyRepository.tenantExists"]:::llamada
+  n6 --> n7
+  n8[("LEE directory.tenants")]:::efecto
+  n7 --> n8
+  n9{"!policy || !(await this.repo.tenantExists(tx, dto.tenantId))"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND El tenant o la política de residencia no existen"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a ResidencyRepository.findConceptCodes"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE terminology.catalog_concepts")]:::efecto
+  n11 --> n12
+  n13{"regionIds.some((id) =› !regionCodes.has(id))"}:::decision
+  n12 --> n13
+  n14(["404 NOT_FOUND Una de las regiones indicadas no existe"]):::error
+  n13 -->|"sí"| n14
+  n15{"policy.state !== POLICY_STATE.ACTIVE"}:::decision
+  n13 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED La política de residencia no está activa"]):::error
+  n15 -->|"sí"| n16
+  n17{"allowedRegions.length › 0 && regionIds.some( (id) =› !allowedRegions.includes(regionCodes.get(id)!.toLowerCas…"}:::decision
+  n15 -->|"no"| n17
+  n18(["422 PRECONDITION_FAILED Una de las regiones queda fuera de las que la política permite"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a ResidencyRepository.createBinding"]:::llamada
+  n17 -->|"no"| n19
+  n20[("CREA system_ops.tenant_residency_bindings")]:::efecto
+  n19 --> n20
+  n21(("201 Responde con éxito")):::ok
+  n20 --> n21
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 18. POST /admin/governance/workload-assessments
 
 Iniciar una evaluación de workload
 
@@ -1222,7 +1293,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. PUT /admin/governance/workload-assessments/{id}/control-results
+#### 19. PUT /admin/governance/workload-assessments/{id}/control-results
 
 Registrar (UPSERT) resultados de control de una evaluación
 
@@ -1278,7 +1349,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /admin/governance/write-policies
+#### 20. POST /admin/governance/write-policies
 
 Definir una política de escritura
 
@@ -1326,7 +1397,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /admin/ops/backup-policies
+#### 21. POST /admin/ops/backup-policies
 
 Definir una política de backup (RPO/RTO/inmutabilidad)
 
@@ -1366,7 +1437,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /internal/governance/retention-executions/run
+#### 22. POST /internal/governance/retention-executions/run
 
 Ejecutar un barrido de retención (excluye objetivos bajo legal hold)
 
@@ -1377,7 +1448,7 @@ Ejecutar un barrido de retención (excluye objetivos bajo legal hold)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Política de retención no encontrada; ResourceNotFoundException: Entidad objetivo no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política de retención no está ACTIVE |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política de retención no está ACTIVE; PreconditionFailedException: La entidad no tiene un ejecutor de retención registrado; PreconditionFailedException: La política de retención no declara plazo y disposición ejecutables |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: EXTERNAL_REFERENCE_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: PHYSICAL_METADATA_CONFLICT |
 
@@ -1410,73 +1481,88 @@ flowchart TD
   n12 --> n13
   n14(["404 NOT_FOUND Entidad objetivo no encontrada"]):::error
   n13 -->|"sí"| n14
-  n15["Llama a RetentionExecutionRepository.createExecution"]:::llamada
+  n15{"!isIdentityEvidence && !executor"}:::decision
   n13 -->|"no"| n15
-  n16[("CREA system_ops.retention_executions")]:::efecto
-  n15 --> n16
-  n17{"entity.schemaName === 'identity_assurance' && entity.tableName === 'identity_evidence_records'"}:::decision
-  n16 --> n17
-  n18{"!this.identityLifecycle"}:::decision
+  n16(["422 PRECONDITION_FAILED La entidad no tiene un ejecutor de retención registrado"]):::error
+  n15 -->|"sí"| n16
+  n17{"executor && (!disposition || !policy.retentionPeriodDays || policy.retentionPeriodDays ‹ 1)"}:::decision
+  n15 -->|"no"| n17
+  n18(["422 PRECONDITION_FAILED La política de retención no declara plazo y disposición ejecutables"]):::error
   n17 -->|"sí"| n18
-  n19(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a IdentityEvidenceLifecycleService.scan"]:::llamada
-  n18 -->|"no"| n20
-  n21[("LEE terminology.catalog_concepts · LEE identity_assurance.identity_evidence_records")]:::efecto
+  n19["Llama a RetentionExecutionRepository.createExecution"]:::llamada
+  n17 -->|"no"| n19
+  n20[("CREA system_ops.retention_executions")]:::efecto
+  n19 --> n20
+  n21{"isIdentityEvidence"}:::decision
   n20 --> n21
-  n22["Repite: por cada const evidence de records"]:::bucle
-  n21 --> n22
-  n23["Repite: por cada const rule de rules.filter( (rule) =› rule.evidenceTypeConceptC…"]:::bucle
-  n22 -->|"cada elemento"| n23
-  n24["Llama a IdentityEvidenceLifecycleService.executeRule"]:::llamada
-  n23 -->|"cada elemento"| n24
-  n25["Llama a IdentityEvidenceLifecycleService.execute"]:::llamada
+  n22{"!this.identityLifecycle"}:::decision
+  n21 -->|"sí"| n22
+  n23(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a IdentityEvidenceLifecycleService.scan"]:::llamada
+  n22 -->|"no"| n24
+  n25[("LEE terminology.catalog_concepts · LEE identity_assurance.identity_evidence_records")]:::efecto
   n24 --> n25
-  n26["Intenta"]:::intento
+  n26["Repite: por cada const evidence de records"]:::bucle
   n25 --> n26
-  n27["Transacción: transactional(…)"]:::transaccion
-  n26 --> n27
-  n28{"graph.opaqueReference"}:::decision
-  n27 --> n28
-  n29(["500 INTERNAL EXTERNAL_REFERENCE_UNKNOWN"]):::error
-  n28 -->|"sí"| n29
-  n30["Repite: por cada const version de graph.versions"]:::bucle
-  n28 -->|"no"| n30
-  n31{"!isKnownPhysicalIdentity(identity)"}:::decision
-  n30 -->|"cada elemento"| n31
-  n32(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
-  n31 -->|"sí"| n32
-  n33{"(version.objectKey && version.objectKey !== identity.exactObjectKey) || (version.bucketOrContainer && version…"}:::decision
-  n31 -->|"no"| n33
-  n34(["500 INTERNAL PHYSICAL_METADATA_CONFLICT"]):::error
-  n33 -->|"sí"| n34
-  n35{"contentByIdentity.has(key) && contentByIdentity.get(key) !== content"}:::decision
-  n33 -->|"no"| n35
-  n36(["500 INTERNAL PHYSICAL_METADATA_CONFLICT"]):::error
+  n27["Repite: por cada const rule de rules.filter( (rule) =› rule.evidenceTypeConceptC…"]:::bucle
+  n26 -->|"cada elemento"| n27
+  n28["Llama a IdentityEvidenceLifecycleService.executeRule"]:::llamada
+  n27 -->|"cada elemento"| n28
+  n29["Llama a IdentityEvidenceLifecycleService.execute"]:::llamada
+  n28 --> n29
+  n30["Intenta"]:::intento
+  n29 --> n30
+  n31["Transacción: transactional(…)"]:::transaccion
+  n30 --> n31
+  n32{"graph.opaqueReference"}:::decision
+  n31 --> n32
+  n33(["500 INTERNAL EXTERNAL_REFERENCE_UNKNOWN"]):::error
+  n32 -->|"sí"| n33
+  n34["Repite: por cada const version de graph.versions"]:::bucle
+  n32 -->|"no"| n34
+  n35{"!isKnownPhysicalIdentity(identity)"}:::decision
+  n34 -->|"cada elemento"| n35
+  n36(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
   n35 -->|"sí"| n36
-  n37[("ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.…")]:::efecto
+  n37{"(version.objectKey && version.objectKey !== identity.exactObjectKey) || (version.bucketOrContainer && version…"}:::decision
   n35 -->|"no"| n37
-  n30 -->|"al terminar"| n37
-  n23 -->|"al terminar"| n37
-  n22 -->|"al terminar"| n37
-  n38["Llama a RetentionExecutionRepository.countActiveHoldsForTarget"]:::llamada
-  n37 --> n38
-  n17 -->|"no"| n38
-  n39[("LEE system_ops.legal_holds")]:::efecto
-  n38 --> n39
-  n40{"activeHolds › 0"}:::decision
-  n39 --> n40
+  n38(["500 INTERNAL PHYSICAL_METADATA_CONFLICT"]):::error
+  n37 -->|"sí"| n38
+  n39{"contentByIdentity.has(key) && contentByIdentity.get(key) !== content"}:::decision
+  n37 -->|"no"| n39
+  n40(["500 INTERNAL PHYSICAL_METADATA_CONFLICT"]):::error
+  n39 -->|"sí"| n40
   n41[("ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.…")]:::efecto
-  n40 -->|"sí"| n41
-  n42["Llama a RetentionExecutionRepository.createRevision"]:::llamada
+  n39 -->|"no"| n41
+  n34 -->|"al terminar"| n41
+  n27 -->|"al terminar"| n41
+  n26 -->|"al terminar"| n41
+  n42["Llama a RetentionExecutionRepository.countActiveHoldsForTarget"]:::llamada
   n41 --> n42
-  n40 -->|"no"| n42
-  n43[("CREA system_ops.record_revisions")]:::efecto
+  n21 -->|"no"| n42
+  n43[("LEE system_ops.legal_holds")]:::efecto
   n42 --> n43
-  n44[("ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.…")]:::efecto
+  n44{"activeHolds › 0"}:::decision
   n43 --> n44
-  n45(("200 Responde con éxito")):::ok
-  n44 --> n45
+  n45[("ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.retention_executions · ACTUALIZA system_ops.…")]:::efecto
+  n44 -->|"sí"| n45
+  n46["Llama a RetentionExecutionService.sweepBatch"]:::llamada
+  n45 --> n46
+  n44 -->|"no"| n46
+  n47["Repite: por cada const record de batch"]:::bucle
+  n46 --> n47
+  n48["Llama a RetentionExecutionRepository.countActiveHoldsForTarget"]:::llamada
+  n47 -->|"cada elemento"| n48
+  n49[("LEE system_ops.legal_holds")]:::efecto
+  n48 --> n49
+  n50["Llama a RetentionExecutionRepository.createRevision"]:::llamada
+  n49 --> n50
+  n51[("CREA system_ops.record_revisions")]:::efecto
+  n50 --> n51
+  n52(("200 Responde con éxito")):::ok
+  n51 --> n52
+  n47 -->|"al terminar"| n52
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1485,7 +1571,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /internal/ops/restore-test-runs
+#### 23. POST /internal/ops/restore-test-runs
 
 Registrar una prueba de restauración con evidencia
 
@@ -1541,4 +1627,3 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
 | POST /admin/governance/drafts | 201, 400, 401, 403, 429 | 1 |
-| POST /admin/governance/tenant-residency-bindings | 201, 400, 401, 403, 429 | 1 |

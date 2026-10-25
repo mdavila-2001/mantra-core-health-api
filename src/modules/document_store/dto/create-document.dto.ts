@@ -1,5 +1,11 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsObject, IsUUID, Matches } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsUUID,
+  Matches,
+} from 'class-validator';
 import { MaxJsonSize } from '../../../common/validators/max-json-size.validator';
 
 /** Patrón de `documentType`: minúsculas, dígitos y separadores acotados. */
@@ -8,8 +14,8 @@ const DOCUMENT_TYPE_RE = /^[a-z][a-z0-9_.-]{1,60}$/;
 /**
  * Cuerpo de `POST /document-store/collections/:collection/documents`.
  *
- * El `tenantId` viaja explícito en el cuerpo (scoping por tenant) hasta que se
- * derive del contexto de sesión. El `payload` es libre por diseño -es el valor
+ * El tenant propietario es el del contexto de sesión; un `tenantId` en el cuerpo
+ * solo se acepta si coincide. El `payload` es libre por diseño -es el valor
  * del almacén flexible-, pero se exige que sea un objeto para no almacenar
  * escalares sueltos.
  */
@@ -17,12 +23,14 @@ export class CreateFlexibleDocumentDto {
   /**
    * Identificador asociado a tenant.
    */
-  @ApiProperty({
-    description: 'Tenant propietario del documento',
+  @ApiPropertyOptional({
+    description:
+      'Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404',
     format: 'uuid',
   })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de document type mantenido por la instancia.

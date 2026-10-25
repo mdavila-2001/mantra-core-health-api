@@ -14,6 +14,10 @@ import {
 } from '../repositories';
 import { PHARM } from '../pharmacy.concepts';
 import {
+  requireManagedPharmacy,
+  resolvePharmacyOwnerTenantId,
+} from './pharmacy-scope';
+import {
   CreatePharmacyDto,
   PharmacyResponseDto,
   StatusResultDto,
@@ -54,14 +58,15 @@ export class PharmaciesService {
     dto: CreatePharmacyDto,
     actor: AuthenticatedUser,
   ): Promise<PharmacyResponseDto> {
+    const tenantId = resolvePharmacyOwnerTenantId(dto.tenantId, actor);
     this.logger.info(
-      { operation: 'pharmacy.create', tenantId: dto.tenantId, code: dto.code },
+      { operation: 'pharmacy.create', tenantId, code: dto.code },
       'Creating pharmacy',
     );
     return this.em.transactional(async (tx) => {
       const clash = await this.pharmaciesRepo.findByTenantAndCode(
         tx,
-        dto.tenantId,
+        tenantId,
         dto.code,
       );
       if (clash) {
@@ -82,7 +87,7 @@ export class PharmaciesService {
       }
 
       const pharmacy = this.pharmaciesRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         legalName: dto.legalName,
         tradeName: dto.tradeName,
@@ -151,11 +156,12 @@ export class PharmaciesService {
       'Verifying pharmacy license',
     );
     return this.em.transactional(async (tx) => {
-      const pharmacy = await this.pharmaciesRepo.findById(tx, pharmacyId);
-      if (!pharmacy)
-        throw new ResourceNotFoundException('Farmacia no encontrada', {
-          pharmacyId,
-        });
+      const pharmacy = await requireManagedPharmacy(
+        this.pharmaciesRepo,
+        tx,
+        pharmacyId,
+        actor,
+      );
 
       const license = await this.licensesRepo.findById(tx, licenseId);
       if (!license || license.pharmacyId !== pharmacyId) {

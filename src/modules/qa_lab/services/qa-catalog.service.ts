@@ -6,12 +6,18 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { QaCatalogRepository, QaRunsRepository } from '../repositories';
 import { TestSchedules } from '../entities';
+import {
+  assertQaResource,
+  qaOutOfScope,
+  resolveQaScope,
+  sameQaOwner,
+} from './qa-scope';
 import {
   CreateEnvironmentDto,
   EnvironmentResponseDto,
@@ -121,6 +127,8 @@ export class QaCatalogService {
     dto: CreateEnvironmentDto,
     actor: AuthenticatedUser,
   ): Promise<EnvironmentResponseDto> {
+    // El tenant sale del contexto verificado; el del cuerpo no es fuente de verdad.
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'qa.environment.create', code: dto.code },
       'Registering test environment',
@@ -150,7 +158,7 @@ export class QaCatalogService {
         name: dto.name,
         environmentConceptId: ENVIRONMENT_CONCEPT[dto.environment],
         baseUrl: dto.baseUrl,
-        tenantId: dto.tenantId,
+        tenantId,
         configJson: dto.configJson,
         isProductionSafe: dto.isProductionSafe ?? false,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
@@ -175,6 +183,7 @@ export class QaCatalogService {
     dto: CreateTestCaseDto,
     actor: AuthenticatedUser,
   ): Promise<TestCaseResponseDto> {
+    const scope = resolveQaScope(actor);
     this.logger.info(
       { operation: 'qa.case.create', suiteId, code: dto.code },
       'Defining test case',
@@ -203,10 +212,12 @@ export class QaCatalogService {
     }
 
     return this.em.transactional(async (tx) => {
-      const suite = await this.catalogRepo.findSuiteForUpdate(tx, suiteId);
-      if (!suite) {
-        throw new ResourceNotFoundException('Suite no encontrada', { suiteId });
-      }
+      // El tenant va en la consulta que bloquea: no se toca una suite ajena.
+      const suite = assertQaResource(
+        await this.catalogRepo.findSuiteForUpdate(tx, suiteId, scope),
+        scope,
+        'Suite no encontrada',
+      );
 
       const duplicate = await this.catalogRepo.findCaseByCode(
         tx,
@@ -283,16 +294,18 @@ export class QaCatalogService {
     dto: PublishSuiteDto,
     actor: AuthenticatedUser,
   ): Promise<PublishSuiteResponseDto> {
+    const scope = resolveQaScope(actor);
     this.logger.info(
       { operation: 'qa.suite.publish', suiteId },
       'Publishing test suite',
     );
 
     return this.em.transactional(async (tx) => {
-      const suite = await this.catalogRepo.findSuiteForUpdate(tx, suiteId);
-      if (!suite) {
-        throw new ResourceNotFoundException('Suite no encontrada', { suiteId });
-      }
+      const suite = assertQaResource(
+        await this.catalogRepo.findSuiteForUpdate(tx, suiteId, scope),
+        scope,
+        'Suite no encontrada',
+      );
 
       const cases = await this.catalogRepo.findCasesBySuiteForUpdate(
         tx,
@@ -350,29 +363,29 @@ export class QaCatalogService {
       'Scheduling test suite',
     );
 
+    const scope = resolveQaScope(actor);
     const nextRunAt = new Date(dto.firstRunAt);
 
     return this.em.transactional(async (tx) => {
-      const suite = await this.catalogRepo.findSuiteById(tx, dto.suiteId);
-      if (!suite) {
-        throw new ResourceNotFoundException('Suite no encontrada', {
-          suiteId: dto.suiteId,
-        });
-      }
+      const suite = assertQaResource(
+        await this.catalogRepo.findSuiteById(tx, dto.suiteId),
+        scope,
+        'Suite no encontrada',
+      );
       if (suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE) {
         throw new PreconditionFailedException('La suite no está publicada', {
           suiteId: dto.suiteId,
         });
       }
 
-      const environment = await this.catalogRepo.findEnvironmentById(
-        tx,
-        dto.environmentId,
+      // El entorno cuelga de la suite: debe ser del mismo tenant.
+      const environment = assertQaResource(
+        await this.catalogRepo.findEnvironmentById(tx, dto.environmentId),
+        scope,
+        'Entorno no encontrado',
       );
-      if (!environment) {
-        throw new ResourceNotFoundException('Entorno no encontrado', {
-          environmentId: dto.environmentId,
-        });
+      if (!sameQaOwner(environment, suite)) {
+        throw qaOutOfScope('Entorno no encontrado');
       }
       if (environment.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException('El entorno no está activo', {
@@ -396,7 +409,8 @@ export class QaCatalogService {
       const schedule = this.catalogRepo.createSchedule(tx, {
         suiteId: dto.suiteId,
         environmentId: dto.environmentId,
-        tenantId: dto.tenantId,
+        // El tenant de la programación es el de la suite ya acotada, no el del cuerpo.
+        tenantId: suite.tenantId,
         code: dto.code,
         name: dto.name,
         cronExpression: dto.cronExpression,
@@ -435,6 +449,9 @@ export class QaCatalogService {
     dto: RunDueSchedulesDto,
     actor: AuthenticatedUser,
   ): Promise<RunDueSchedulesResponseDto> {
+    // Sin tenant en contexto es el barrido global del worker SYSTEM; con él (o
+    // con un QA_ADMIN), sólo las programaciones de ese tenant.
+    const scope = resolveQaScope(actor);
     const now = new Date();
     const limit = dto.limit ?? 20;
 
@@ -449,6 +466,7 @@ export class QaCatalogService {
         now,
         CONCEPTS.STATE_ACTIVE,
         limit,
+        scope,
       );
 
       const results: DueScheduleRunResultDto[] = [];
@@ -503,6 +521,12 @@ export class QaCatalogService {
 
     if (!suite || suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE) {
       skippedReason = 'SUITE_NOT_ACTIVE';
+    } else if (
+      !sameQaOwner(suite, schedule) ||
+      (environment && !sameQaOwner(environment, schedule))
+    ) {
+      // La programación de un tenant nunca ejecuta la suite ni el entorno de otro.
+      skippedReason = 'SCHEDULE_OUT_OF_SCOPE';
     } else if (
       !environment ||
       environment.stateConceptId !== CONCEPTS.STATE_ACTIVE

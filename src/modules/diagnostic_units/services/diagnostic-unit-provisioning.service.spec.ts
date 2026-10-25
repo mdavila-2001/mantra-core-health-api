@@ -327,5 +327,52 @@ describe('DiagnosticUnitProvisioningService', () => {
       // filas con FK a la anterior.
       expect(d.tx.flush).toHaveBeenCalledTimes(6);
     });
+
+    it('crea cada sucursal como sede de práctica y sede de unidad con rol de toma de muestras', async () => {
+      const d = build();
+      let n = 0;
+      d.sitesRepo.create.mockImplementation(() => ({ id: `site-${++n}` }));
+
+      const res = await d.service.provision(
+        d.tx as never,
+        OWNER,
+        {
+          diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_LABORATORY,
+          branches: [
+            {
+              name: 'Sucursal Norte',
+              address: {
+                lines: ['Av. Banzer 100'],
+                latitude: -17.7,
+                longitude: -63.1,
+              },
+            },
+            { name: 'Sucursal Sur' },
+          ],
+        },
+        OWNER.ownerUserId,
+      );
+
+      // central + 2 sucursales
+      expect(d.sitesRepo.create).toHaveBeenCalledTimes(3);
+      expect(d.sitesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          practiceId: 'practice-1',
+          name: 'Sucursal Norte',
+        }),
+      );
+      expect(d.addressesRepo.create).toHaveBeenCalledTimes(1);
+      expect(d.unitSitesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          practiceSiteId: 'site-3',
+          siteRoleConceptId: DUNIT.SITE_ROLE_COLLECTION,
+          sampleCollectionAvailable: true,
+        }),
+      );
+      expect(res.siteId).toBe('site-1');
+      expect(res.branchSiteIds).toEqual(['site-2', 'site-3']);
+    });
   });
 });

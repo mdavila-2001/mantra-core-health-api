@@ -12,18 +12,18 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/automation/agent-runs/{id}/approvals` | Solicitar aprobación y pausar la ejecución | MEDIO | 10 | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN |
-| 2 | POST | `/automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute` | Ejecutar una automatización de registro con deduplicación | MEDIO | 8 | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN |
-| 3 | POST | `/automation/agent-runs/{id}/steps` | Registrar un paso de la traza del agente | MEDIO | 15 | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN |
+| 1 | POST | `/automation/agent-runs/{id}/approvals` | Solicitar aprobación y pausar la ejecución | MEDIO | 8 | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN |
+| 2 | POST | `/automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute` | Ejecutar una automatización de registro con deduplicación | MEDIO | 6 | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN |
+| 3 | POST | `/automation/agent-runs/{id}/steps` | Registrar un paso de la traza del agente | MEDIO | 13 | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN |
 | 4 | POST | `/automation/agents` | Registrar un agente con su primera versión | MEDIO | 6 | AUTOMATION_ENGINEER, PLATFORM_ADMIN |
 | 5 | POST | `/automation/agents/{id}/guardrails` | Adjuntar una política de guardrail a un agente | MEDIO | 7 | AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN |
 | 6 | POST | `/automation/agents/{id}/memory` | Persistir memoria del agente | MEDIO | 7 | SYSTEM, AGENT_RUNTIME, AUTOMATION_ENGINEER, PLATFORM_ADMIN |
-| 7 | POST | `/automation/agents/{id}/versions/{versionId}/tool-bindings` | Enlazar herramientas a una versión del agente | MEDIO | 7 | AUTOMATION_ENGINEER, PLATFORM_ADMIN |
-| 8 | POST | `/automation/agents/{id}/versions/publish` | Publicar una versión del agente | MEDIO | 7 | AUTOMATION_ENGINEER, PLATFORM_ADMIN |
-| 9 | POST | `/automation/approvals/{id}/decide` | Decidir la aprobación y reanudar o abortar el run | MEDIO | 11 | CLINICAL_APPROVER, OPERATIONAL_APPROVER, PLATFORM_ADMIN |
+| 7 | POST | `/automation/agents/{id}/versions/{versionId}/tool-bindings` | Enlazar herramientas a una versión del agente | MEDIO | 8 | AUTOMATION_ENGINEER, PLATFORM_ADMIN |
+| 8 | POST | `/automation/agents/{id}/versions/publish` | Publicar una versión del agente | MEDIO | 6 | AUTOMATION_ENGINEER, PLATFORM_ADMIN |
+| 9 | POST | `/automation/approvals/{id}/decide` | Decidir la aprobación y reanudar o abortar el run | MEDIO | 9 | CLINICAL_APPROVER, OPERATIONAL_APPROVER, PLATFORM_ADMIN |
 | 10 | POST | `/automation/guardrails` | Definir una política de guardrail | MEDIO | 2 | AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN |
 | 11 | POST | `/automation/runs/{workflowRunId}/agent-runs` | Arrancar la ejecución de un agente dentro del run | MEDIO | 4 | SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN |
-| 12 | POST | `/automation/runs/{workflowRunId}/finalize` | Cerrar la ejecución con el resumen de coste | MEDIO | 8 | SYSTEM, PLATFORM_ADMIN |
+| 12 | POST | `/automation/runs/{workflowRunId}/finalize` | Cerrar la ejecución con el resumen de coste | MEDIO | 7 | SYSTEM, PLATFORM_ADMIN |
 | 13 | POST | `/automation/tools` | Registrar una herramienta de agente | MEDIO | 5 | AUTOMATION_ENGINEER, PLATFORM_ADMIN |
 | 14 | POST | `/automation/triggers` | Configurar un disparador de automatización | MEDIO | 6 | AUTOMATION_ENGINEER, PLATFORM_ADMIN |
 | 15 | POST | `/automation/triggers/calendar/tick` | Evaluar los disparadores de calendario vencidos | MEDIO | 7 | SYSTEM |
@@ -39,7 +39,7 @@
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AutomationOrchestrationController.requestApproval` — `src/modules/automation/controllers/automation-orchestration.controller.ts:158`
+- **Implementación:** `AutomationOrchestrationController.requestApproval` — `src/modules/automation/controllers/automation-orchestration.controller.ts:192`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -49,16 +49,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/agent-runs/{id}/approvals` la atiende `AutomationOrchestrationController.requestApproval` (src/modules/automation/controllers/automation-orchestration.controller.ts:158). Exige sesión con alguno de los roles SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. Valida el cuerpo como `AutomationRequestApprovalDto` (5 campos, 1 obligatorio). Delega en `AutomationExecutionService.requestApproval`. Crea filas en automation.automation_approvals, messaging.domain_events, messaging.outbox_messages. Actualiza automation.agent_runs, automation.workflow_runs. Lee automation.agent_runs, automation.agents, automation.automation_approvals, automation.workflow_runs, messaging.outbox_messages. Publica ApprovalRequested.
+`POST /automation/agent-runs/{id}/approvals` la atiende `AutomationOrchestrationController.requestApproval` (src/modules/automation/controllers/automation-orchestration.controller.ts:192). Exige sesión con alguno de los roles SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. Valida el cuerpo como `AutomationRequestApprovalDto` (5 campos, 1 obligatorio). Delega en `AutomationExecutionService.requestApproval`. Crea filas en automation.automation_approvals, messaging.domain_events, messaging.outbox_messages. Actualiza automation.agent_runs, automation.workflow_runs. Lee automation.automation_approvals, automation.workflow_runs, messaging.outbox_messages. Publica ApprovalRequested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:158` |
+| ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:192` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:158` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:192` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -67,22 +67,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `automation.agent_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationExecutionService.pauseForApproval | `src/modules/automation/services/automation-execution.service.ts:1125` |
-| `automation.agent_runs` | LEE | LEE | DIRECTA | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationRunsRepository.findAgentRunForUpdate | `src/modules/automation/repositories/automation-runs.repository.ts:343` |
-| `automation.agents` | LEE | LEE | DIRECTA | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AgentsRepository.findAgentById | `src/modules/automation/repositories/agents.repository.ts:287` |
+| `automation.agent_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationExecutionService.pauseForApproval | `src/modules/automation/services/automation-execution.service.ts:1164` |
 | `automation.automation_approvals` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationExecutionService.pauseForApproval → AutomationRunsRepository.createApproval | `src/modules/automation/repositories/automation-runs.repository.ts:444` |
 | `automation.automation_approvals` | LEE | LEE | DIRECTA | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationRunsRepository.findPendingApprovalsByAgentRuns | `src/modules/automation/repositories/automation-runs.repository.ts:485` |
-| `automation.workflow_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationExecutionService.pauseForApproval | `src/modules/automation/services/automation-execution.service.ts:1135` |
+| `automation.workflow_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationExecutionService.pauseForApproval | `src/modules/automation/services/automation-execution.service.ts:1174` |
 | `automation.workflow_runs` | LEE | LEE | DIRECTA | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationExecutionService.pauseForApproval → AutomationRunsRepository.findWorkflowRunForUpdate | `src/modules/automation/repositories/automation-runs.repository.ts:251` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationExecutionService.pauseForApproval → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationExecutionService.pauseForApproval → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationExecutionService.pauseForApproval → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationExecutionService.pauseForApproval → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.requestApproval → AutomationExecutionService.requestApproval → AutomationExecutionService.pauseForApproval → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `ApprovalRequested` | `src/modules/automation/services/automation-execution.service.ts:1140` |
+| Evento de dominio | `ApprovalRequested` | `src/modules/automation/services/automation-execution.service.ts:1179` |
 
 ### Parámetros
 
@@ -139,7 +137,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución de agente no encontrada. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución del agente ya terminó; no admite aprobaciones. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -162,7 +159,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AutomationOrchestrationController.executeRecordAutomation` — `src/modules/automation/controllers/automation-orchestration.controller.ts:191`
+- **Implementación:** `AutomationOrchestrationController.executeRecordAutomation` — `src/modules/automation/controllers/automation-orchestration.controller.ts:235`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -172,16 +169,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute` la atiende `AutomationOrchestrationController.executeRecordAutomation` (src/modules/automation/controllers/automation-orchestration.controller.ts:191). Exige sesión con alguno de los roles SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. Valida el cuerpo como `ExecuteRecordAutomationDto` (2 campos, 1 obligatorio). Delega en `RecordAutomationService.executeRecordAutomation`. Crea filas en automation.agent_run_steps, messaging.domain_events, messaging.outbox_messages. Lee automation.agent_run_steps, automation.agent_runs, automation.agents, automation.record_automations, messaging.outbox_messages. Publica RecordAutomated.
+`POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute` la atiende `AutomationOrchestrationController.executeRecordAutomation` (src/modules/automation/controllers/automation-orchestration.controller.ts:235). Exige sesión con alguno de los roles SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. Valida el cuerpo como `ExecuteRecordAutomationDto` (2 campos, 1 obligatorio). Delega en `RecordAutomationService.executeRecordAutomation`. Crea filas en automation.agent_run_steps, messaging.domain_events, messaging.outbox_messages. Lee automation.agent_run_steps, automation.record_automations, messaging.outbox_messages. Publica RecordAutomated.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:191` |
+| ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:235` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, recordAutomationId | `src/modules/automation/controllers/automation-orchestration.controller.ts:191` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, recordAutomationId | `src/modules/automation/controllers/automation-orchestration.controller.ts:235` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -192,18 +189,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|---|---|---|
 | `automation.agent_run_steps` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.executeRecordAutomation → RecordAutomationService.executeRecordAutomation → AutomationRunsRepository.createAgentRunStep | `src/modules/automation/repositories/automation-runs.repository.ts:378` |
 | `automation.agent_run_steps` | LEE | LEE | DIRECTA | AutomationOrchestrationController.executeRecordAutomation → RecordAutomationService.executeRecordAutomation → AutomationRunsRepository.findMaxSequenceNo | `src/modules/automation/repositories/automation-runs.repository.ts:414` |
-| `automation.agent_runs` | LEE | LEE | DIRECTA | AutomationOrchestrationController.executeRecordAutomation → RecordAutomationService.executeRecordAutomation → AutomationRunsRepository.findAgentRunForUpdate | `src/modules/automation/repositories/automation-runs.repository.ts:343` |
-| `automation.agents` | LEE | LEE | DIRECTA | AutomationOrchestrationController.executeRecordAutomation → RecordAutomationService.executeRecordAutomation → AgentsRepository.findAgentById | `src/modules/automation/repositories/agents.repository.ts:287` |
 | `automation.record_automations` | LEE | LEE | DIRECTA | AutomationOrchestrationController.executeRecordAutomation → RecordAutomationService.executeRecordAutomation → AutomationGovernanceRepository.findRecordAutomationForUpdate | `src/modules/automation/repositories/automation-governance.repository.ts:560` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.executeRecordAutomation → RecordAutomationService.executeRecordAutomation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.executeRecordAutomation → RecordAutomationService.executeRecordAutomation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.executeRecordAutomation → RecordAutomationService.executeRecordAutomation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.executeRecordAutomation → RecordAutomationService.executeRecordAutomation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.executeRecordAutomation → RecordAutomationService.executeRecordAutomation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `RecordAutomated` | `src/modules/automation/services/record-automation.service.ts:207` |
+| Evento de dominio | `RecordAutomated` | `src/modules/automation/services/record-automation.service.ts:221` |
 
 ### Parámetros
 
@@ -255,10 +250,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución de agente no encontrada.; ResourceNotFoundException: Automatización de registro no encontrada. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución del agente no está en marcha; no puede escribir registros.; PreconditionFailedException: La automatización de registro no está activa.; PreconditionFailedException: La automatización de registro pertenece a otro agente.; PreconditionFailedException: El agente no tiene identidad de servicio; su escritura no sería atribuible.; PreconditionFailedException: La automatización de registro no declara mapeo de campos.; PreconditionFailedException: El mapeo de campos tiene una regla que no se entiende.; PreconditionFailedException: El origen de un campo mapeado tiene que ser una ruta.; PreconditionFailedException: Una regla de mapeo tiene que declarar `from` o `value`.; PreconditionFailedException: Falta un campo obligatorio del mapeo.; PreconditionFailedException: La validación de la automatización exige un campo que no llegó.; PreconditionFailedException: Un modo de escritura `upsert` necesita una clave de deduplicación. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | — | InternalServerErrorException: La automatización de registro no produjo ninguna columna que escribir. |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.BAD_REQUEST} |
 
 El árbol de decisión completo está en [flujos](../flujos/automation.md).
 
@@ -279,7 +273,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AutomationOrchestrationController.recordAgentStep` — `src/modules/automation/controllers/automation-orchestration.controller.ts:141`
+- **Implementación:** `AutomationOrchestrationController.recordAgentStep` — `src/modules/automation/controllers/automation-orchestration.controller.ts:170`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -289,16 +283,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/agent-runs/{id}/steps` la atiende `AutomationOrchestrationController.recordAgentStep` (src/modules/automation/controllers/automation-orchestration.controller.ts:141). Exige sesión con alguno de los roles SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. Valida el cuerpo como `RecordAgentStepDto` (8 campos, 1 obligatorio). Delega en `AutomationExecutionService.recordAgentStep`. Crea filas en automation.agent_run_steps, automation.automation_approvals, messaging.domain_events, messaging.outbox_messages. Actualiza automation.agent_runs, automation.workflow_runs. Lee automation.agent_guardrails, automation.agent_run_steps, automation.agent_runs, automation.agent_tool_bindings, automation.agent_tools, automation.agents, automation.guardrail_policies, automation.workflow_runs y 1 más. Publica AgentStepRecorded, ApprovalRequested.
+`POST /automation/agent-runs/{id}/steps` la atiende `AutomationOrchestrationController.recordAgentStep` (src/modules/automation/controllers/automation-orchestration.controller.ts:170). Exige sesión con alguno de los roles SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. Valida el cuerpo como `RecordAgentStepDto` (8 campos, 1 obligatorio). Delega en `AutomationExecutionService.recordAgentStep`. Crea filas en automation.agent_run_steps, automation.automation_approvals, messaging.domain_events, messaging.outbox_messages. Actualiza automation.agent_runs, automation.workflow_runs. Lee automation.agent_guardrails, automation.agent_run_steps, automation.agent_tool_bindings, automation.agent_tools, automation.guardrail_policies, automation.workflow_runs, messaging.outbox_messages. Publica AgentStepRecorded, ApprovalRequested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:141` |
+| ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:170` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:141` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:170` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -310,25 +304,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `automation.agent_guardrails` | LEE | LEE | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationExecutionService.findBlocker → AutomationGovernanceRepository.findEnabledGuardrailsByAgent | `src/modules/automation/repositories/automation-governance.repository.ts:337` |
 | `automation.agent_run_steps` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationRunsRepository.createAgentRunStep | `src/modules/automation/repositories/automation-runs.repository.ts:378` |
 | `automation.agent_run_steps` | LEE | LEE | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationRunsRepository.findMaxSequenceNo | `src/modules/automation/repositories/automation-runs.repository.ts:414` |
-| `automation.agent_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationExecutionService.pauseForApproval | `src/modules/automation/services/automation-execution.service.ts:1125` |
-| `automation.agent_runs` | LEE | LEE | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationRunsRepository.findAgentRunForUpdate | `src/modules/automation/repositories/automation-runs.repository.ts:343` |
+| `automation.agent_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationExecutionService.pauseForApproval | `src/modules/automation/services/automation-execution.service.ts:1164` |
 | `automation.agent_tool_bindings` | LEE | LEE | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationExecutionService.findBlocker → AgentsRepository.findBinding | `src/modules/automation/repositories/agents.repository.ts:466` |
 | `automation.agent_tools` | LEE | LEE | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationExecutionService.findBlocker → AgentsRepository.findToolById | `src/modules/automation/repositories/agents.repository.ts:415` |
-| `automation.agents` | LEE | LEE | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AgentsRepository.findAgentById | `src/modules/automation/repositories/agents.repository.ts:287` |
 | `automation.automation_approvals` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationExecutionService.pauseForApproval → AutomationRunsRepository.createApproval | `src/modules/automation/repositories/automation-runs.repository.ts:444` |
 | `automation.guardrail_policies` | LEE | LEE | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationExecutionService.findBlocker → AutomationGovernanceRepository.findGuardrailPolicyById | `src/modules/automation/repositories/automation-governance.repository.ts:259` |
-| `automation.workflow_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationExecutionService.pauseForApproval | `src/modules/automation/services/automation-execution.service.ts:1135` |
+| `automation.workflow_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationExecutionService.pauseForApproval | `src/modules/automation/services/automation-execution.service.ts:1174` |
 | `automation.workflow_runs` | LEE | LEE | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → AutomationExecutionService.pauseForApproval → AutomationRunsRepository.findWorkflowRunForUpdate | `src/modules/automation/repositories/automation-runs.repository.ts:251` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.recordAgentStep → AutomationExecutionService.recordAgentStep → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `AgentStepRecorded` | `src/modules/automation/services/automation-execution.service.ts:409` |
-| Evento de dominio | `ApprovalRequested` | `src/modules/automation/services/automation-execution.service.ts:1140` |
+| Evento de dominio | `AgentStepRecorded` | `src/modules/automation/services/automation-execution.service.ts:421` |
+| Evento de dominio | `ApprovalRequested` | `src/modules/automation/services/automation-execution.service.ts:1179` |
 
 ### Parámetros
 
@@ -392,7 +384,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución de agente no encontrada.; ResourceNotFoundException: Herramienta no encontrada. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Herramienta no encontrada. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución del agente no está en marcha; no admite pasos nuevos.; PreconditionFailedException: La herramienta no está enlazada a la versión que se está ejecutando.; PreconditionFailedException: El enlace deniega el uso de esa herramienta para esta versión.; PreconditionFailedException: La herramienta agotó su tope de llamadas para esta ejecución. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -415,7 +407,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AgentCatalogController.registerAgent` — `src/modules/automation/controllers/agent-catalog.controller.ts:43`
+- **Implementación:** `AgentCatalogController.registerAgent` — `src/modules/automation/controllers/agent-catalog.controller.ts:48`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -425,14 +417,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/agents` la atiende `AgentCatalogController.registerAgent` (src/modules/automation/controllers/agent-catalog.controller.ts:43). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RegisterAgentDto` (14 campos, 5 obligatorios). Delega en `AgentCatalogService.registerAgent`. Crea filas en automation.agent_versions, automation.agents, messaging.domain_events, messaging.outbox_messages. Lee automation.agents, messaging.outbox_messages. Publica AgentRegistered.
+`POST /automation/agents` la atiende `AgentCatalogController.registerAgent` (src/modules/automation/controllers/agent-catalog.controller.ts:48). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RegisterAgentDto` (14 campos, 5 obligatorios). Delega en `AgentCatalogService.registerAgent`. Crea filas en automation.agent_versions, automation.agents, messaging.domain_events, messaging.outbox_messages. Lee automation.agents, messaging.outbox_messages. Publica AgentRegistered.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:43` |
+| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:48` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -446,14 +438,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `automation.agents` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.registerAgent → AgentCatalogService.registerAgent → AgentsRepository.createAgent | `src/modules/automation/repositories/agents.repository.ts:259` |
 | `automation.agents` | LEE | LEE | DIRECTA | AgentCatalogController.registerAgent → AgentCatalogService.registerAgent → AgentsRepository.findAgentByCode | `src/modules/automation/repositories/agents.repository.ts:303` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.registerAgent → AgentCatalogService.registerAgent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.registerAgent → AgentCatalogService.registerAgent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.registerAgent → AgentCatalogService.registerAgent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.registerAgent → AgentCatalogService.registerAgent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.registerAgent → AgentCatalogService.registerAgent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `AgentRegistered` | `src/modules/automation/services/agent-catalog.service.ts:127` |
+| Evento de dominio | `AgentRegistered` | `src/modules/automation/services/agent-catalog.service.ts:138` |
 
 ### Cuerpo — DTO `RegisterAgentDto` · `application/json`
 
@@ -548,7 +540,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AgentCatalogController.attachGuardrail` — `src/modules/automation/controllers/agent-catalog.controller.ts:126`
+- **Implementación:** `AgentCatalogController.attachGuardrail` — `src/modules/automation/controllers/agent-catalog.controller.ts:156`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -558,16 +550,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/agents/{id}/guardrails` la atiende `AgentCatalogController.attachGuardrail` (src/modules/automation/controllers/agent-catalog.controller.ts:126). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN. Valida el cuerpo como `AttachGuardrailDto` (2 campos, 1 obligatorio). Delega en `AgentCatalogService.attachGuardrail`. Crea filas en automation.agent_guardrails, messaging.domain_events, messaging.outbox_messages. Lee automation.agent_guardrails, automation.agents, automation.guardrail_policies, messaging.outbox_messages. Publica GuardrailAttached.
+`POST /automation/agents/{id}/guardrails` la atiende `AgentCatalogController.attachGuardrail` (src/modules/automation/controllers/agent-catalog.controller.ts:156). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN. Valida el cuerpo como `AttachGuardrailDto` (2 campos, 1 obligatorio). Delega en `AgentCatalogService.attachGuardrail`. Crea filas en automation.agent_guardrails, messaging.domain_events, messaging.outbox_messages. Lee automation.agent_guardrails, automation.agents, automation.guardrail_policies, messaging.outbox_messages. Publica GuardrailAttached.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:126` |
+| ROL | Alguno de: AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:156` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/agent-catalog.controller.ts:126` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/agent-catalog.controller.ts:156` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -581,14 +573,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `automation.agents` | LEE | LEE | DIRECTA | AgentCatalogController.attachGuardrail → AgentCatalogService.attachGuardrail → AgentsRepository.findAgentForUpdate | `src/modules/automation/repositories/agents.repository.ts:292` |
 | `automation.guardrail_policies` | LEE | LEE | DIRECTA | AgentCatalogController.attachGuardrail → AgentCatalogService.attachGuardrail → AutomationGovernanceRepository.findGuardrailPolicyById | `src/modules/automation/repositories/automation-governance.repository.ts:259` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.attachGuardrail → AgentCatalogService.attachGuardrail → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.attachGuardrail → AgentCatalogService.attachGuardrail → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.attachGuardrail → AgentCatalogService.attachGuardrail → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.attachGuardrail → AgentCatalogService.attachGuardrail → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.attachGuardrail → AgentCatalogService.attachGuardrail → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `GuardrailAttached` | `src/modules/automation/services/agent-catalog.service.ts:564` |
+| Evento de dominio | `GuardrailAttached` | `src/modules/automation/services/agent-catalog.service.ts:594` |
 
 ### Parámetros
 
@@ -639,7 +631,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Agente no encontrado.; ResourceNotFoundException: Política de guardrail no encontrada. |
 | 409 | `CONFLICT` | ConflictException: La política ya está adjunta a este agente. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La política de guardrail no está activa. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -663,7 +654,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AgentCatalogController.upsertMemory` — `src/modules/automation/controllers/agent-catalog.controller.ts:139`
+- **Implementación:** `AgentCatalogController.upsertMemory` — `src/modules/automation/controllers/agent-catalog.controller.ts:174`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -673,16 +664,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/agents/{id}/memory` la atiende `AgentCatalogController.upsertMemory` (src/modules/automation/controllers/agent-catalog.controller.ts:139). Exige sesión con alguno de los roles SYSTEM, AGENT_RUNTIME, AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `UpsertAgentMemoryDto` (7 campos, 3 obligatorios). Delega en `AgentCatalogService.upsertMemory`. Crea filas en automation.agent_memory, messaging.domain_events, messaging.outbox_messages. Actualiza automation.agent_memory. Lee automation.agent_memory, automation.agents, messaging.outbox_messages. Publica AgentMemoryUpserted.
+`POST /automation/agents/{id}/memory` la atiende `AgentCatalogController.upsertMemory` (src/modules/automation/controllers/agent-catalog.controller.ts:174). Exige sesión con alguno de los roles SYSTEM, AGENT_RUNTIME, AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `UpsertAgentMemoryDto` (7 campos, 3 obligatorios). Delega en `AgentCatalogService.upsertMemory`. Crea filas en automation.agent_memory, messaging.domain_events, messaging.outbox_messages. Actualiza automation.agent_memory. Lee automation.agent_memory, automation.agents, messaging.outbox_messages. Publica AgentMemoryUpserted.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, AGENT_RUNTIME, AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:139` |
+| ROL | Alguno de: SYSTEM, AGENT_RUNTIME, AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:174` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/agent-catalog.controller.ts:139` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/agent-catalog.controller.ts:174` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -691,19 +682,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `automation.agent_memory` | ESCRIBE | ACTUALIZA | POR_TIPO | AgentCatalogController.upsertMemory → AgentCatalogService.upsertMemory | `src/modules/automation/services/agent-catalog.service.ts:638` |
+| `automation.agent_memory` | ESCRIBE | ACTUALIZA | POR_TIPO | AgentCatalogController.upsertMemory → AgentCatalogService.upsertMemory | `src/modules/automation/services/agent-catalog.service.ts:669` |
 | `automation.agent_memory` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.upsertMemory → AgentCatalogService.upsertMemory → AgentsRepository.createMemory | `src/modules/automation/repositories/agents.repository.ts:532` |
 | `automation.agent_memory` | LEE | LEE | DIRECTA | AgentCatalogController.upsertMemory → AgentCatalogService.upsertMemory → AgentsRepository.findMemoryForUpdate | `src/modules/automation/repositories/agents.repository.ts:512` |
 | `automation.agents` | LEE | LEE | DIRECTA | AgentCatalogController.upsertMemory → AgentCatalogService.upsertMemory → AgentsRepository.findAgentById | `src/modules/automation/repositories/agents.repository.ts:287` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.upsertMemory → AgentCatalogService.upsertMemory → AgentCatalogService.publishMemoryEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.upsertMemory → AgentCatalogService.upsertMemory → AgentCatalogService.publishMemoryEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.upsertMemory → AgentCatalogService.upsertMemory → AgentCatalogService.publishMemoryEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.upsertMemory → AgentCatalogService.upsertMemory → AgentCatalogService.publishMemoryEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.upsertMemory → AgentCatalogService.upsertMemory → AgentCatalogService.publishMemoryEvent → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `AgentMemoryUpserted` | `src/modules/automation/services/agent-catalog.service.ts:708` |
+| Evento de dominio | `AgentMemoryUpserted` | `src/modules/automation/services/agent-catalog.service.ts:739` |
 
 ### Parámetros
 
@@ -766,7 +757,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Agente no encontrado. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Fuera del ámbito global la memoria tiene que declarar a qué se refiere. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -789,7 +779,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AgentCatalogController.bindTools` — `src/modules/automation/controllers/agent-catalog.controller.ts:92`
+- **Implementación:** `AgentCatalogController.bindTools` — `src/modules/automation/controllers/agent-catalog.controller.ts:112`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -799,16 +789,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/agents/{id}/versions/{versionId}/tool-bindings` la atiende `AgentCatalogController.bindTools` (src/modules/automation/controllers/agent-catalog.controller.ts:92). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `BindToolsDto` (5 campos, 3 obligatorios). Delega en `AgentCatalogService.bindTools`. Crea filas en automation.agent_tool_bindings, messaging.domain_events, messaging.outbox_messages. Lee automation.agent_tool_bindings, automation.agent_tools, automation.agent_versions, messaging.outbox_messages. Publica AgentToolBound.
+`POST /automation/agents/{id}/versions/{versionId}/tool-bindings` la atiende `AgentCatalogController.bindTools` (src/modules/automation/controllers/agent-catalog.controller.ts:112). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `BindToolsDto` (5 campos, 3 obligatorios). Delega en `AgentCatalogService.bindTools`. Crea filas en automation.agent_tool_bindings, messaging.domain_events, messaging.outbox_messages. Lee automation.agent_tool_bindings, automation.agent_tools, automation.agent_versions, automation.agents, messaging.outbox_messages. Publica AgentToolBound.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:92` |
+| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:112` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, versionId | `src/modules/automation/controllers/agent-catalog.controller.ts:92` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, versionId | `src/modules/automation/controllers/agent-catalog.controller.ts:112` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -821,15 +811,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `automation.agent_tool_bindings` | LEE | LEE | DIRECTA | AgentCatalogController.bindTools → AgentCatalogService.bindTools → AgentsRepository.findBinding | `src/modules/automation/repositories/agents.repository.ts:466` |
 | `automation.agent_tools` | LEE | LEE | DIRECTA | AgentCatalogController.bindTools → AgentCatalogService.bindTools → AgentsRepository.findToolById | `src/modules/automation/repositories/agents.repository.ts:415` |
 | `automation.agent_versions` | LEE | LEE | DIRECTA | AgentCatalogController.bindTools → AgentCatalogService.bindTools → AgentsRepository.findVersionById | `src/modules/automation/repositories/agents.repository.ts:349` |
+| `automation.agents` | LEE | LEE | DIRECTA | AgentCatalogController.bindTools → AgentCatalogService.bindTools → AgentsRepository.findAgentById | `src/modules/automation/repositories/agents.repository.ts:287` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.bindTools → AgentCatalogService.bindTools → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.bindTools → AgentCatalogService.bindTools → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.bindTools → AgentCatalogService.bindTools → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.bindTools → AgentCatalogService.bindTools → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.bindTools → AgentCatalogService.bindTools → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `AgentToolBound` | `src/modules/automation/services/agent-catalog.service.ts:417` |
+| Evento de dominio | `AgentToolBound` | `src/modules/automation/services/agent-catalog.service.ts:445` |
 
 ### Parámetros
 
@@ -893,7 +884,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: La versión no existe para ese agente.; ResourceNotFoundException: Herramienta no encontrada. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {AUTOMATION_SCOPE_FAILURES.agentVersion.message}; ResourceNotFoundException: Herramienta no encontrada. |
 | 409 | `CONFLICT` | ConflictException: La misma herramienta viene dos veces en el lote.; ConflictException: La herramienta ya está enlazada a esta versión. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La herramienta no está activa. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -917,7 +908,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AgentCatalogController.publishAgentVersion` — `src/modules/automation/controllers/agent-catalog.controller.ts:59`
+- **Implementación:** `AgentCatalogController.publishAgentVersion` — `src/modules/automation/controllers/agent-catalog.controller.ts:69`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -927,16 +918,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/agents/{id}/versions/publish` la atiende `AgentCatalogController.publishAgentVersion` (src/modules/automation/controllers/agent-catalog.controller.ts:59). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `PublishAgentVersionDto` (7 campos, 0 obligatorios). Delega en `AgentCatalogService.publishAgentVersion`. Crea filas en automation.agent_versions, messaging.domain_events, messaging.outbox_messages. Actualiza automation.agents. Lee automation.agent_versions, automation.agents, messaging.outbox_messages. Publica AgentVersionPublished.
+`POST /automation/agents/{id}/versions/publish` la atiende `AgentCatalogController.publishAgentVersion` (src/modules/automation/controllers/agent-catalog.controller.ts:69). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `PublishAgentVersionDto` (7 campos, 0 obligatorios). Delega en `AgentCatalogService.publishAgentVersion`. Crea filas en automation.agent_versions, messaging.domain_events, messaging.outbox_messages. Lee automation.agent_versions, automation.agents, messaging.outbox_messages. Publica AgentVersionPublished.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:59` |
+| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:69` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/agent-catalog.controller.ts:59` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/agent-catalog.controller.ts:69` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -947,17 +938,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|---|---|---|
 | `automation.agent_versions` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.publishAgentVersion → AgentCatalogService.publishAgentVersion → AgentsRepository.createAgentVersion | `src/modules/automation/repositories/agents.repository.ts:319` |
 | `automation.agent_versions` | LEE | LEE | DIRECTA | AgentCatalogController.publishAgentVersion → AgentCatalogService.publishAgentVersion → AgentsRepository.findVersionById | `src/modules/automation/repositories/agents.repository.ts:349` |
-| `automation.agents` | ESCRIBE | ACTUALIZA | POR_TIPO | AgentCatalogController.publishAgentVersion → AgentCatalogService.publishAgentVersion | `src/modules/automation/services/agent-catalog.service.ts:223` |
 | `automation.agents` | LEE | LEE | DIRECTA | AgentCatalogController.publishAgentVersion → AgentCatalogService.publishAgentVersion → AgentsRepository.findAgentForUpdate | `src/modules/automation/repositories/agents.repository.ts:292` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.publishAgentVersion → AgentCatalogService.publishAgentVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.publishAgentVersion → AgentCatalogService.publishAgentVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.publishAgentVersion → AgentCatalogService.publishAgentVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.publishAgentVersion → AgentCatalogService.publishAgentVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.publishAgentVersion → AgentCatalogService.publishAgentVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `AgentVersionPublished` | `src/modules/automation/services/agent-catalog.service.ts:229` |
+| Evento de dominio | `AgentVersionPublished` | `src/modules/automation/services/agent-catalog.service.ts:244` |
 
 ### Parámetros
 
@@ -1017,7 +1007,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Agente no encontrado.; ResourceNotFoundException: La versión no existe para ese agente. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {AUTOMATION_SCOPE_FAILURES.agentVersion.message} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión ya no está en borrador.; PreconditionFailedException: Para crear una versión nueva hace falta su plantilla de prompt. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1040,7 +1030,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AutomationOrchestrationController.decideApproval` — `src/modules/automation/controllers/automation-orchestration.controller.ts:175`
+- **Implementación:** `AutomationOrchestrationController.decideApproval` — `src/modules/automation/controllers/automation-orchestration.controller.ts:214`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1050,16 +1040,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/approvals/{id}/decide` la atiende `AutomationOrchestrationController.decideApproval` (src/modules/automation/controllers/automation-orchestration.controller.ts:175). Exige sesión con alguno de los roles CLINICAL_APPROVER, OPERATIONAL_APPROVER, PLATFORM_ADMIN. Valida el cuerpo como `DecideApprovalDto` (2 campos, 1 obligatorio). Delega en `AutomationExecutionService.decideApproval`. Crea filas en automation.agent_run_steps, messaging.domain_events, messaging.outbox_messages. Actualiza automation.agent_runs, automation.automation_approvals, automation.workflow_runs. Lee automation.agent_run_steps, automation.agent_runs, automation.automation_approvals, automation.workflow_runs, messaging.outbox_messages. Publica ApprovalDecided.
+`POST /automation/approvals/{id}/decide` la atiende `AutomationOrchestrationController.decideApproval` (src/modules/automation/controllers/automation-orchestration.controller.ts:214). Exige sesión con alguno de los roles CLINICAL_APPROVER, OPERATIONAL_APPROVER, PLATFORM_ADMIN. Valida el cuerpo como `DecideApprovalDto` (2 campos, 1 obligatorio). Delega en `AutomationExecutionService.decideApproval`. Crea filas en automation.agent_run_steps, messaging.domain_events, messaging.outbox_messages. Actualiza automation.automation_approvals, automation.workflow_runs. Lee automation.agent_run_steps, automation.automation_approvals, automation.workflow_runs, messaging.outbox_messages. Publica ApprovalDecided.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICAL_APPROVER, OPERATIONAL_APPROVER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:175` |
+| ROL | Alguno de: CLINICAL_APPROVER, OPERATIONAL_APPROVER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:214` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:175` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:214` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1070,21 +1060,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|---|---|---|
 | `automation.agent_run_steps` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval → AutomationRunsRepository.createAgentRunStep | `src/modules/automation/repositories/automation-runs.repository.ts:378` |
 | `automation.agent_run_steps` | LEE | LEE | DIRECTA | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval → AutomationRunsRepository.findMaxSequenceNo | `src/modules/automation/repositories/automation-runs.repository.ts:414` |
-| `automation.agent_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval | `src/modules/automation/services/automation-execution.service.ts:599` |
-| `automation.agent_runs` | LEE | LEE | DIRECTA | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval → AutomationRunsRepository.findAgentRunForUpdate | `src/modules/automation/repositories/automation-runs.repository.ts:343` |
-| `automation.automation_approvals` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval | `src/modules/automation/services/automation-execution.service.ts:591` |
+| `automation.automation_approvals` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval | `src/modules/automation/services/automation-execution.service.ts:612` |
 | `automation.automation_approvals` | LEE | LEE | DIRECTA | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval → AutomationRunsRepository.findApprovalForUpdate | `src/modules/automation/repositories/automation-runs.repository.ts:471` |
-| `automation.workflow_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval | `src/modules/automation/services/automation-execution.service.ts:627` |
+| `automation.workflow_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval | `src/modules/automation/services/automation-execution.service.ts:648` |
 | `automation.workflow_runs` | LEE | LEE | DIRECTA | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval → AutomationRunsRepository.findWorkflowRunForUpdate | `src/modules/automation/repositories/automation-runs.repository.ts:251` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.decideApproval → AutomationExecutionService.decideApproval → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `ApprovalDecided` | `src/modules/automation/services/automation-execution.service.ts:638` |
+| Evento de dominio | `ApprovalDecided` | `src/modules/automation/services/automation-execution.service.ts:659` |
 
 ### Parámetros
 
@@ -1136,7 +1124,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Aprobación no encontrada.; ResourceNotFoundException: Ejecución de agente no encontrada. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {AUTOMATION_SCOPE_FAILURES.approval.message} |
 | 409 | `CONFLICT` | ConflictException: La aprobación ya está decidida. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución del agente no está en pausa. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1160,7 +1148,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AgentCatalogController.defineGuardrail` — `src/modules/automation/controllers/agent-catalog.controller.ts:110`
+- **Implementación:** `AgentCatalogController.defineGuardrail` — `src/modules/automation/controllers/agent-catalog.controller.ts:135`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1170,14 +1158,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/guardrails` la atiende `AgentCatalogController.defineGuardrail` (src/modules/automation/controllers/agent-catalog.controller.ts:110). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN. Valida el cuerpo como `DefineGuardrailDto` (8 campos, 4 obligatorios). Delega en `AgentCatalogService.defineGuardrail`. Crea filas en automation.guardrail_policies. Lee automation.guardrail_policies.
+`POST /automation/guardrails` la atiende `AgentCatalogController.defineGuardrail` (src/modules/automation/controllers/agent-catalog.controller.ts:135). Exige sesión con alguno de los roles AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN. Valida el cuerpo como `DefineGuardrailDto` (8 campos, 4 obligatorios). Delega en `AgentCatalogService.defineGuardrail`. Crea filas en automation.guardrail_policies. Lee automation.guardrail_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:110` |
+| ROL | Alguno de: AI_GOVERNANCE_OFFICER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:135` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1270,7 +1258,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AutomationOrchestrationController.startAgentRun` — `src/modules/automation/controllers/automation-orchestration.controller.ts:124`
+- **Implementación:** `AutomationOrchestrationController.startAgentRun` — `src/modules/automation/controllers/automation-orchestration.controller.ts:148`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1280,16 +1268,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/runs/{workflowRunId}/agent-runs` la atiende `AutomationOrchestrationController.startAgentRun` (src/modules/automation/controllers/automation-orchestration.controller.ts:124). Exige sesión con alguno de los roles SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. Valida el cuerpo como `StartAgentRunDto` (4 campos, 2 obligatorios). Delega en `AutomationExecutionService.startAgentRun`. Crea filas en automation.agent_runs. Lee automation.agent_versions, automation.agents, automation.workflow_runs.
+`POST /automation/runs/{workflowRunId}/agent-runs` la atiende `AutomationOrchestrationController.startAgentRun` (src/modules/automation/controllers/automation-orchestration.controller.ts:148). Exige sesión con alguno de los roles SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN. Valida el cuerpo como `StartAgentRunDto` (4 campos, 2 obligatorios). Delega en `AutomationExecutionService.startAgentRun`. Crea filas en automation.agent_runs. Lee automation.agent_versions, automation.agents, automation.workflow_runs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:124` |
+| ROL | Alguno de: SYSTEM, AGENT_RUNTIME, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:148` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: workflowRunId | `src/modules/automation/controllers/automation-orchestration.controller.ts:124` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: workflowRunId | `src/modules/automation/controllers/automation-orchestration.controller.ts:148` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1356,7 +1344,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución de workflow no encontrada.; ResourceNotFoundException: Agente no encontrado.; ResourceNotFoundException: La versión no existe para ese agente. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La versión no existe para ese agente. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución del workflow no está en marcha.; PreconditionFailedException: El agente no está activo.; PreconditionFailedException: Sólo se puede ejecutar una versión publicada del agente. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1379,7 +1367,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AutomationOrchestrationController.finalizeWorkflowRun` — `src/modules/automation/controllers/automation-orchestration.controller.ts:214`
+- **Implementación:** `AutomationOrchestrationController.finalizeWorkflowRun` — `src/modules/automation/controllers/automation-orchestration.controller.ts:263`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1389,16 +1377,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/runs/{workflowRunId}/finalize` la atiende `AutomationOrchestrationController.finalizeWorkflowRun` (src/modules/automation/controllers/automation-orchestration.controller.ts:214). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `FinalizeWorkflowRunDto` (2 campos, 0 obligatorios). Delega en `AutomationExecutionService.finalizeWorkflowRun`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza automation.agent_runs, automation.workflow_runs. Lee automation.agent_runs, automation.automation_approvals, automation.workflow_runs, messaging.outbox_messages. Publica WorkflowRunCompleted.
+`POST /automation/runs/{workflowRunId}/finalize` la atiende `AutomationOrchestrationController.finalizeWorkflowRun` (src/modules/automation/controllers/automation-orchestration.controller.ts:263). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `FinalizeWorkflowRunDto` (2 campos, 0 obligatorios). Delega en `AutomationExecutionService.finalizeWorkflowRun`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza automation.agent_runs. Lee automation.agent_runs, automation.automation_approvals, automation.workflow_runs, messaging.outbox_messages. Publica WorkflowRunCompleted.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:214` |
+| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:263` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: workflowRunId | `src/modules/automation/controllers/automation-orchestration.controller.ts:214` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: workflowRunId | `src/modules/automation/controllers/automation-orchestration.controller.ts:263` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1407,20 +1395,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `automation.agent_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.finalizeWorkflowRun → AutomationExecutionService.finalizeWorkflowRun | `src/modules/automation/services/automation-execution.service.ts:732` |
+| `automation.agent_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.finalizeWorkflowRun → AutomationExecutionService.finalizeWorkflowRun | `src/modules/automation/services/automation-execution.service.ts:748` |
 | `automation.agent_runs` | LEE | LEE | DIRECTA | AutomationOrchestrationController.finalizeWorkflowRun → AutomationExecutionService.finalizeWorkflowRun → AutomationRunsRepository.findAgentRunsByWorkflowRunForUpdate | `src/modules/automation/repositories/automation-runs.repository.ts:361` |
 | `automation.automation_approvals` | LEE | LEE | DIRECTA | AutomationOrchestrationController.finalizeWorkflowRun → AutomationExecutionService.finalizeWorkflowRun → AutomationRunsRepository.findPendingApprovalsByAgentRuns | `src/modules/automation/repositories/automation-runs.repository.ts:485` |
-| `automation.workflow_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.finalizeWorkflowRun → AutomationExecutionService.finalizeWorkflowRun | `src/modules/automation/services/automation-execution.service.ts:748` |
 | `automation.workflow_runs` | LEE | LEE | DIRECTA | AutomationOrchestrationController.finalizeWorkflowRun → AutomationExecutionService.finalizeWorkflowRun → AutomationRunsRepository.findWorkflowRunForUpdate | `src/modules/automation/repositories/automation-runs.repository.ts:251` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.finalizeWorkflowRun → AutomationExecutionService.finalizeWorkflowRun → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.finalizeWorkflowRun → AutomationExecutionService.finalizeWorkflowRun → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.finalizeWorkflowRun → AutomationExecutionService.finalizeWorkflowRun → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.finalizeWorkflowRun → AutomationExecutionService.finalizeWorkflowRun → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.finalizeWorkflowRun → AutomationExecutionService.finalizeWorkflowRun → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `WorkflowRunCompleted` | `src/modules/automation/services/automation-execution.service.ts:756` |
+| Evento de dominio | `WorkflowRunCompleted` | `src/modules/automation/services/automation-execution.service.ts:772` |
 
 ### Parámetros
 
@@ -1470,7 +1457,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución de workflow no encontrada. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ejecución tiene aprobaciones pendientes y no puede cerrarse. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1493,7 +1479,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AgentCatalogController.registerTool` — `src/modules/automation/controllers/agent-catalog.controller.ts:76`
+- **Implementación:** `AgentCatalogController.registerTool` — `src/modules/automation/controllers/agent-catalog.controller.ts:91`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1503,14 +1489,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/tools` la atiende `AgentCatalogController.registerTool` (src/modules/automation/controllers/agent-catalog.controller.ts:76). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RegisterToolDto` (9 campos, 3 obligatorios). Delega en `AgentCatalogService.registerTool`. Crea filas en automation.agent_tools, messaging.domain_events, messaging.outbox_messages. Lee automation.agent_tools, messaging.outbox_messages. Publica AgentToolRegistered.
+`POST /automation/tools` la atiende `AgentCatalogController.registerTool` (src/modules/automation/controllers/agent-catalog.controller.ts:91). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RegisterToolDto` (9 campos, 3 obligatorios). Delega en `AgentCatalogService.registerTool`. Crea filas en automation.agent_tools, messaging.domain_events, messaging.outbox_messages. Lee automation.agent_tools, messaging.outbox_messages. Publica AgentToolRegistered.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:76` |
+| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/agent-catalog.controller.ts:91` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1523,14 +1509,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `automation.agent_tools` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.registerTool → AgentCatalogService.registerTool → AgentsRepository.createTool | `src/modules/automation/repositories/agents.repository.ts:388` |
 | `automation.agent_tools` | LEE | LEE | DIRECTA | AgentCatalogController.registerTool → AgentCatalogService.registerTool → AgentsRepository.findToolByCode | `src/modules/automation/repositories/agents.repository.ts:426` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.registerTool → AgentCatalogService.registerTool → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.registerTool → AgentCatalogService.registerTool → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.registerTool → AgentCatalogService.registerTool → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AgentCatalogController.registerTool → AgentCatalogService.registerTool → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AgentCatalogController.registerTool → AgentCatalogService.registerTool → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `AgentToolRegistered` | `src/modules/automation/services/agent-catalog.service.ts:305` |
+| Evento de dominio | `AgentToolRegistered` | `src/modules/automation/services/agent-catalog.service.ts:322` |
 
 ### Cuerpo — DTO `RegisterToolDto` · `application/json`
 
@@ -1615,7 +1601,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AutomationOrchestrationController.configureTrigger` — `src/modules/automation/controllers/automation-orchestration.controller.ts:75`
+- **Implementación:** `AutomationOrchestrationController.configureTrigger` — `src/modules/automation/controllers/automation-orchestration.controller.ts:85`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1625,14 +1611,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/triggers` la atiende `AutomationOrchestrationController.configureTrigger` (src/modules/automation/controllers/automation-orchestration.controller.ts:75). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `ConfigureTriggerDto` (10 campos, 4 obligatorios). Delega en `AutomationDefinitionService.configureTrigger`. Crea filas en automation.automation_triggers, messaging.domain_events, messaging.outbox_messages. Lee automation.automation_triggers, automation.workflows, messaging.outbox_messages. Publica TriggerRegistered.
+`POST /automation/triggers` la atiende `AutomationOrchestrationController.configureTrigger` (src/modules/automation/controllers/automation-orchestration.controller.ts:85). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `ConfigureTriggerDto` (10 campos, 4 obligatorios). Delega en `AutomationDefinitionService.configureTrigger`. Crea filas en automation.automation_triggers, messaging.domain_events, messaging.outbox_messages. Lee automation.automation_triggers, automation.workflows, messaging.outbox_messages. Publica TriggerRegistered.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:75` |
+| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:85` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1646,14 +1632,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `automation.automation_triggers` | LEE | LEE | DIRECTA | AutomationOrchestrationController.configureTrigger → AutomationDefinitionService.configureTrigger → AutomationGovernanceRepository.findTriggerByCode | `src/modules/automation/repositories/automation-governance.repository.ts:499` |
 | `automation.workflows` | LEE | LEE | DIRECTA | AutomationOrchestrationController.configureTrigger → AutomationDefinitionService.configureTrigger → AutomationGovernanceRepository.findWorkflowById | `src/modules/automation/repositories/automation-governance.repository.ts:375` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.configureTrigger → AutomationDefinitionService.configureTrigger → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.configureTrigger → AutomationDefinitionService.configureTrigger → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.configureTrigger → AutomationDefinitionService.configureTrigger → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.configureTrigger → AutomationDefinitionService.configureTrigger → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.configureTrigger → AutomationDefinitionService.configureTrigger → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `TriggerRegistered` | `src/modules/automation/services/automation-definition.service.ts:294` |
+| Evento de dominio | `TriggerRegistered` | `src/modules/automation/services/automation-definition.service.ts:313` |
 
 ### Cuerpo — DTO `ConfigureTriggerDto` · `application/json`
 
@@ -1717,7 +1703,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Workflow no encontrado. |
 | 409 | `CONFLICT` | ConflictException: Ya existe un disparador con ese código. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se puede disparar un workflow archivado.; PreconditionFailedException: Un disparador por evento tiene que declarar qué evento suscribe.; PreconditionFailedException: Un disparador por calendario tiene que declarar su cron.; PreconditionFailedException: La expresión cron tiene que tener cinco campos. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1741,7 +1726,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AutomationOrchestrationController.evaluateCalendarTriggers` — `src/modules/automation/controllers/automation-orchestration.controller.ts:91`
+- **Implementación:** `AutomationOrchestrationController.evaluateCalendarTriggers` — `src/modules/automation/controllers/automation-orchestration.controller.ts:106`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1751,14 +1736,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/triggers/calendar/tick` la atiende `AutomationOrchestrationController.evaluateCalendarTriggers` (src/modules/automation/controllers/automation-orchestration.controller.ts:91). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `EvaluateCalendarTriggersDto` (1 campo, 0 obligatorios). Delega en `AutomationExecutionService.evaluateCalendarTriggers`. Crea filas en automation.workflow_runs, messaging.domain_events, messaging.outbox_messages. Lee automation.automation_triggers, automation.workflow_runs, automation.workflows, messaging.outbox_messages. Publica WorkflowRunStarted.
+`POST /automation/triggers/calendar/tick` la atiende `AutomationOrchestrationController.evaluateCalendarTriggers` (src/modules/automation/controllers/automation-orchestration.controller.ts:106). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `EvaluateCalendarTriggersDto` (1 campo, 0 obligatorios). Delega en `AutomationExecutionService.evaluateCalendarTriggers`. Crea filas en automation.workflow_runs, messaging.domain_events, messaging.outbox_messages. Lee automation.automation_triggers, automation.workflow_runs, automation.workflows, messaging.outbox_messages. Publica WorkflowRunStarted.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/automation/controllers/automation-orchestration.controller.ts:91` |
+| ROL | Alguno de: SYSTEM | `src/modules/automation/controllers/automation-orchestration.controller.ts:106` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1773,14 +1758,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `automation.workflow_runs` | LEE | LEE | DIRECTA | AutomationOrchestrationController.evaluateCalendarTriggers → AutomationExecutionService.evaluateCalendarTriggers → AutomationRunsRepository.countRunsByWorkflow | `src/modules/automation/repositories/automation-runs.repository.ts:292` |
 | `automation.workflows` | LEE | LEE | DIRECTA | AutomationOrchestrationController.evaluateCalendarTriggers → AutomationExecutionService.evaluateCalendarTriggers → AutomationGovernanceRepository.findWorkflowById | `src/modules/automation/repositories/automation-governance.repository.ts:375` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.evaluateCalendarTriggers → AutomationExecutionService.evaluateCalendarTriggers → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.evaluateCalendarTriggers → AutomationExecutionService.evaluateCalendarTriggers → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.evaluateCalendarTriggers → AutomationExecutionService.evaluateCalendarTriggers → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.evaluateCalendarTriggers → AutomationExecutionService.evaluateCalendarTriggers → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.evaluateCalendarTriggers → AutomationExecutionService.evaluateCalendarTriggers → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `WorkflowRunStarted` | `src/modules/automation/services/automation-execution.service.ts:912` |
+| Evento de dominio | `WorkflowRunStarted` | `src/modules/automation/services/automation-execution.service.ts:944` |
 
 ### Cuerpo — DTO `EvaluateCalendarTriggersDto` · `application/json`
 
@@ -1845,7 +1830,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AutomationOrchestrationController.defineWorkflow` — `src/modules/automation/controllers/automation-orchestration.controller.ts:59`
+- **Implementación:** `AutomationOrchestrationController.defineWorkflow` — `src/modules/automation/controllers/automation-orchestration.controller.ts:64`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1855,14 +1840,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/workflows` la atiende `AutomationOrchestrationController.defineWorkflow` (src/modules/automation/controllers/automation-orchestration.controller.ts:59). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `DefineWorkflowDto` (15 campos, 7 obligatorios). Delega en `AutomationDefinitionService.defineWorkflow`. Crea filas en automation.workflow_steps, automation.workflows, messaging.domain_events, messaging.outbox_messages. Actualiza automation.workflow_steps. Lee automation.agent_tools, automation.agents, automation.workflows, messaging.outbox_messages. Publica WorkflowDefined.
+`POST /automation/workflows` la atiende `AutomationOrchestrationController.defineWorkflow` (src/modules/automation/controllers/automation-orchestration.controller.ts:64). Exige sesión con alguno de los roles AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `DefineWorkflowDto` (15 campos, 7 obligatorios). Delega en `AutomationDefinitionService.defineWorkflow`. Crea filas en automation.workflow_steps, automation.workflows, messaging.domain_events, messaging.outbox_messages. Actualiza automation.workflow_steps. Lee automation.agent_tools, automation.agents, automation.workflows, messaging.outbox_messages. Publica WorkflowDefined.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:59` |
+| ROL | Alguno de: AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:64` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1874,19 +1859,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 |---|---|---|---|---|---|
 | `automation.agent_tools` | LEE | LEE | DIRECTA | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow → AgentsRepository.findToolById | `src/modules/automation/repositories/agents.repository.ts:415` |
 | `automation.agents` | LEE | LEE | DIRECTA | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow → AgentsRepository.findAgentById | `src/modules/automation/repositories/agents.repository.ts:287` |
-| `automation.workflow_steps` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow | `src/modules/automation/services/automation-definition.service.ts:181` |
+| `automation.workflow_steps` | ESCRIBE | ACTUALIZA | POR_TIPO | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow | `src/modules/automation/services/automation-definition.service.ts:193` |
 | `automation.workflow_steps` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow → AutomationGovernanceRepository.createWorkflowStep | `src/modules/automation/repositories/automation-governance.repository.ts:403` |
 | `automation.workflows` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow → AutomationGovernanceRepository.createWorkflow | `src/modules/automation/repositories/automation-governance.repository.ts:350` |
 | `automation.workflows` | LEE | LEE | DIRECTA | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow → AutomationGovernanceRepository.findWorkflowByCode | `src/modules/automation/repositories/automation-governance.repository.ts:389` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.defineWorkflow → AutomationDefinitionService.defineWorkflow → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `WorkflowDefined` | `src/modules/automation/services/automation-definition.service.ts:188` |
+| Evento de dominio | `WorkflowDefined` | `src/modules/automation/services/automation-definition.service.ts:200` |
 
 ### Cuerpo — DTO `DefineWorkflowDto` · `application/json`
 
@@ -1969,7 +1954,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Agente referenciado por un paso no encontrado.; ResourceNotFoundException: Herramienta referenciada por un paso no encontrada. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Herramienta referenciada por un paso no encontrada. |
 | 409 | `CONFLICT` | ConflictException: Ya existe un workflow de automatización con ese código.; ConflictException: Dos pasos comparten el mismo código. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un paso salta a otro que no está declarado en el workflow.; PreconditionFailedException: Un paso de llamada a agente tiene que declarar qué agente llama.; PreconditionFailedException: Un paso de llamada a herramienta tiene que declarar qué herramienta usa. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1993,7 +1978,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AutomationOrchestrationController.startWorkflowRun` — `src/modules/automation/controllers/automation-orchestration.controller.ts:107`
+- **Implementación:** `AutomationOrchestrationController.startWorkflowRun` — `src/modules/automation/controllers/automation-orchestration.controller.ts:126`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2003,16 +1988,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 
 ### Cómo se atiende (sistema)
 
-`POST /automation/workflows/{id}/runs` la atiende `AutomationOrchestrationController.startWorkflowRun` (src/modules/automation/controllers/automation-orchestration.controller.ts:107). Exige sesión con alguno de los roles SYSTEM, AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `StartWorkflowRunDto` (6 campos, 1 obligatorio). Delega en `AutomationExecutionService.startWorkflowRun`. Crea filas en automation.workflow_runs, messaging.domain_events, messaging.outbox_messages. Lee automation.automation_triggers, automation.workflow_runs, automation.workflows, messaging.outbox_messages. Publica WorkflowRunStarted.
+`POST /automation/workflows/{id}/runs` la atiende `AutomationOrchestrationController.startWorkflowRun` (src/modules/automation/controllers/automation-orchestration.controller.ts:126). Exige sesión con alguno de los roles SYSTEM, AUTOMATION_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `StartWorkflowRunDto` (6 campos, 1 obligatorio). Delega en `AutomationExecutionService.startWorkflowRun`. Crea filas en automation.workflow_runs, messaging.domain_events, messaging.outbox_messages. Lee automation.automation_triggers, automation.workflow_runs, automation.workflows, messaging.outbox_messages. Publica WorkflowRunStarted.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:107` |
+| ROL | Alguno de: SYSTEM, AUTOMATION_ENGINEER, PLATFORM_ADMIN | `src/modules/automation/controllers/automation-orchestration.controller.ts:126` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:107` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/automation/controllers/automation-orchestration.controller.ts:126` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -2026,14 +2011,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | `automation.workflow_runs` | LEE | LEE | DIRECTA | AutomationOrchestrationController.startWorkflowRun → AutomationExecutionService.startWorkflowRun → AutomationRunsRepository.findLiveRunByContext | `src/modules/automation/repositories/automation-runs.repository.ts:283` |
 | `automation.workflows` | LEE | LEE | DIRECTA | AutomationOrchestrationController.startWorkflowRun → AutomationExecutionService.startWorkflowRun → AutomationGovernanceRepository.findWorkflowById | `src/modules/automation/repositories/automation-governance.repository.ts:375` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.startWorkflowRun → AutomationExecutionService.startWorkflowRun → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.startWorkflowRun → AutomationExecutionService.startWorkflowRun → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.startWorkflowRun → AutomationExecutionService.startWorkflowRun → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | AutomationOrchestrationController.startWorkflowRun → AutomationExecutionService.startWorkflowRun → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | AutomationOrchestrationController.startWorkflowRun → AutomationExecutionService.startWorkflowRun → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `WorkflowRunStarted` | `src/modules/automation/services/automation-execution.service.ts:222` |
+| Evento de dominio | `WorkflowRunStarted` | `src/modules/automation/services/automation-execution.service.ts:233` |
 
 ### Parámetros
 
@@ -2092,7 +2077,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/automat
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Workflow no encontrado.; ResourceNotFoundException: Disparador no encontrado. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El workflow está archivado.; PreconditionFailedException: El disparador está deshabilitado.; PreconditionFailedException: El disparador no pertenece a ese workflow. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 

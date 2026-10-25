@@ -286,6 +286,37 @@ describe('TenantTypeProfileService', () => {
       ).toThrow(PreconditionFailedException);
     });
 
+    it('acepta sucursales en una unidad de laboratorio', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Laboratorio Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: {
+            diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_LABORATORY,
+            branches: [{ name: 'Sucursal Norte' }],
+          },
+        }),
+      ).not.toThrow();
+    });
+
+    it('rechaza sucursales en una unidad de imágenes (el tipo por defecto)', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Centro de Imagen Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: { branches: [{ name: 'Sucursal Norte' }] },
+        }),
+      ).toThrow(PreconditionFailedException);
+    });
+
     it('rechaza un tipo de unidad que no es IMAGING ni LABORATORY', () => {
       const { service } = build();
 

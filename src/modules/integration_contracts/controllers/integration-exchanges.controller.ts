@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   IntegrationExchangesService,
   IntegrationWebhooksService,
@@ -43,6 +48,11 @@ export class IntegrationExchangesController {
   ) {}
 
   /** UC-31-07. */
+  @Audited({
+    action: 'INTEGRATION_EXCHANGE_RETRIED',
+    entity: 'integration_exchange_record',
+    entityId: 'param:recordId',
+  })
   @Post('exchanges/:recordId/retry')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Reintentar un intercambio fallido' })
@@ -55,6 +65,11 @@ export class IntegrationExchangesController {
   }
 
   /** UC-31-09. */
+  @Audited({
+    action: 'CONTRACT_WEBHOOK_DELIVERED',
+    entity: 'webhook_delivery_evidence',
+    entityId: 'result.id',
+  })
   @Post('webhooks/:subscriptionId/deliveries')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Entregar y verificar un webhook firmado' })

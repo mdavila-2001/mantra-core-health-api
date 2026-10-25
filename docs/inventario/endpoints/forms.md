@@ -5,7 +5,7 @@
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 25 (25 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 16 · BAJO 9
-- **Tablas distintas que tocan:** 17
+- **Tablas distintas que tocan:** 35
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/forms.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -28,15 +28,15 @@
 | 14 | POST | `/forms/fields/{id}/access-rules` | Definir reglas de acceso y enmascarado por campo | MEDIO | 2 | SECURITY_ADMIN |
 | 15 | POST | `/forms/fields/{id}/dependencies` | Definir dependencias condicionales entre campos | MEDIO | 3 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
 | 16 | PUT | `/forms/fields/{id}/localizations/{lang}` | Localizar (i18n) una definición de campo | MEDIO | 4 | CLINICIAN, PRACTITIONER, SECURITY_ADMIN |
-| 17 | GET | `/forms/instances` | Listar las instancias de formulario de un encuentro | BAJO | 2 | CLINICIAN, PRACTITIONER |
+| 17 | GET | `/forms/instances` | Listar las instancias de formulario de un encuentro | BAJO | 20 | CLINICIAN, PRACTITIONER |
 | 18 | POST | `/forms/instances` | Abrir una instancia de formulario para un recurso | MEDIO | 3 | CLINICIAN, PRACTITIONER |
-| 19 | GET | `/forms/instances/{id}` | Leer una instancia con sus valores vigentes, por tipo resuelto | BAJO | 5 | CLINICIAN, PRACTITIONER |
+| 19 | GET | `/forms/instances/{id}` | Leer una instancia con sus valores vigentes, por tipo resuelto | BAJO | 23 | CLINICIAN, PRACTITIONER |
 | 20 | POST | `/forms/instances/{id}/close` | Cerrar formulario y proyectar vista de recurso | MEDIO | 4 | CLINICIAN, PRACTITIONER |
-| 21 | POST | `/forms/instances/{id}/values` | Capturar valores de formulario (value[x] exclusivo) | MEDIO | 3 | CLINICIAN, PRACTITIONER |
+| 21 | POST | `/forms/instances/{id}/values` | Capturar valores de formulario (value[x] exclusivo) | MEDIO | 4 | CLINICIAN, PRACTITIONER |
 | 22 | GET | `/forms/me/instances` | Ver mis formularios clínicos | BAJO | 2 | sesión (sin roles) |
 | 23 | GET | `/forms/me/instances/{id}` | Leer un formulario propio con sus respuestas | BAJO | 5 | sesión (sin roles) |
-| 24 | PATCH | `/forms/values/{id}` | Corregir valor con supersede y snapshot inmutable | MEDIO | 4 | CLINICIAN, PRACTITIONER |
-| 25 | POST | `/forms/values/import` | Registrar procedencia de valores importados (batch ETL) | MEDIO | 4 | CLINICIAN, PRACTITIONER |
+| 24 | PATCH | `/forms/values/{id}` | Corregir valor con supersede y snapshot inmutable | MEDIO | 5 | CLINICIAN, PRACTITIONER |
+| 25 | POST | `/forms/values/import` | Registrar procedencia de valores importados (batch ETL) | MEDIO | 5 | CLINICIAN, PRACTITIONER |
 
 ---
 
@@ -171,7 +171,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsAssignmentsController.createAssignment → FormsAssignmentsService.createAssignment → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:237` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsAssignmentsController.createAssignment → FormsAssignmentsService.createAssignment → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:245` |
 | `forms.dynamic_field_sections` | ESCRIBE | CREA | DIRECTA | FormsAssignmentsController.createAssignment → FormsAssignmentsService.createAssignment → AssignmentsRepository.createSection | `src/modules/forms/repositories/assignments.repository.ts:159` |
 | `forms.extension_target_policies` | LEE | LEE | DIRECTA | FormsAssignmentsController.createAssignment → FormsAssignmentsService.createAssignment → AssignmentsRepository.findActivePolicyForTenant | `src/modules/forms/repositories/assignments.repository.ts:113` |
 | `forms.field_assignments` | ESCRIBE | CREA | DIRECTA | FormsAssignmentsController.createAssignment → FormsAssignmentsService.createAssignment → AssignmentsRepository.createAssignment | `src/modules/forms/repositories/assignments.repository.ts:178` |
@@ -818,14 +818,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → FieldDefinitionsRepository.findFieldsByIds | `src/modules/forms/repositories/field-definitions.repository.ts:403` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → FieldDefinitionsRepository.findFieldsByIds | `src/modules/forms/repositories/field-definitions.repository.ts:411` |
 | `forms.dynamic_field_sections` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → AssignmentsRepository.findSectionsByIds | `src/modules/forms/repositories/assignments.repository.ts:298` |
-| `forms.field_definition_localizations` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → FieldDefinitionsRepository.findLocalizationsByFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:456` |
+| `forms.field_definition_localizations` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → FieldDefinitionsRepository.findLocalizationsByFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:464` |
 | `forms.field_definition_set_versions` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → DefinitionSetsRepository.findVersionsBySet | `src/modules/forms/repositories/definition-sets.repository.ts:235` |
 | `forms.field_definition_sets` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → DefinitionSetsRepository.findSetById | `src/modules/forms/repositories/definition-sets.repository.ts:116` |
-| `forms.field_dependencies` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → FieldDefinitionsRepository.findDependenciesByTargetFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:437` |
+| `forms.field_dependencies` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → FieldDefinitionsRepository.findDependenciesByTargetFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:445` |
 | `forms.field_set_members` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → DefinitionSetsRepository.findMembersByVersions | `src/modules/forms/repositories/definition-sets.repository.ts:255` |
-| `forms.field_validation_rules` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → FieldDefinitionsRepository.findValidationRulesByFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:418` |
+| `forms.field_validation_rules` | LEE | LEE | DIRECTA | FormsDefinitionSetsController.getDefinitionSet → FormsReadService.getDefinitionSet → FieldDefinitionsRepository.findValidationRulesByFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:426` |
 
 ### Parámetros
 
@@ -1171,7 +1171,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/field-definitions` la atiende `FormsFieldsController.createFieldDefinition` (src/modules/forms/controllers/forms-fields.controller.ts:47). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `CreateFieldDefinitionDto` (16 campos, 3 obligatorios). Delega en `FormsFieldsService.createFieldDefinition`. Crea filas en forms.dynamic_field_definitions, forms.field_validation_rules. Lee forms.dynamic_field_definitions.
+`POST /forms/field-definitions` la atiende `FormsFieldsController.createFieldDefinition` (src/modules/forms/controllers/forms-fields.controller.ts:47). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `CreateFieldDefinitionDto` (20 campos, 3 obligatorios). Delega en `FormsFieldsService.createFieldDefinition`. Crea filas en forms.dynamic_field_definitions, forms.field_validation_rules. Lee forms.dynamic_field_definitions.
 
 ### Requerimientos
 
@@ -1188,30 +1188,34 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.dynamic_field_definitions` | ESCRIBE | CREA | DIRECTA | FormsFieldsController.createFieldDefinition → FormsFieldsService.createFieldDefinition → FieldDefinitionsRepository.createField | `src/modules/forms/repositories/field-definitions.repository.ts:266` |
-| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.createFieldDefinition → FormsFieldsService.createFieldDefinition → FieldDefinitionsRepository.findFieldByCode | `src/modules/forms/repositories/field-definitions.repository.ts:251` |
-| `forms.field_validation_rules` | ESCRIBE | CREA | DIRECTA | FormsFieldsController.createFieldDefinition → FormsFieldsService.createFieldDefinition → FieldDefinitionsRepository.createValidationRule | `src/modules/forms/repositories/field-definitions.repository.ts:285` |
+| `forms.dynamic_field_definitions` | ESCRIBE | CREA | DIRECTA | FormsFieldsController.createFieldDefinition → FormsFieldsService.createFieldDefinition → FieldDefinitionsRepository.createField | `src/modules/forms/repositories/field-definitions.repository.ts:274` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.createFieldDefinition → FormsFieldsService.createFieldDefinition → FieldDefinitionsRepository.findFieldByCode | `src/modules/forms/repositories/field-definitions.repository.ts:259` |
+| `forms.field_validation_rules` | ESCRIBE | CREA | DIRECTA | FormsFieldsController.createFieldDefinition → FormsFieldsService.createFieldDefinition → FieldDefinitionsRepository.createValidationRule | `src/modules/forms/repositories/field-definitions.repository.ts:293` |
 
 ### Cuerpo — DTO `CreateFieldDefinitionDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `code` | `string` | Sí | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Código único del campo | `src/modules/forms/dto/create-field-definition.dto.ts:88` |
-| `name` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@MinLength(1)` `@MaxLength(200)` | Nombre legible | `src/modules/forms/dto/create-field-definition.dto.ts:97` |
-| `dataType` | `string` | Sí | valores: string, text, integer, decimal, boolean, date, datetime, time, uuid, json, binary, reference, code | `@IsIn(TECHNICAL_DATA_TYPES)` | Tipo de dato técnico | `src/modules/forms/dto/create-field-definition.dto.ts:107` |
-| `sensitivityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sensibilidad (concept id) | `src/modules/forms/dto/create-field-definition.dto.ts:118` |
-| `semanticConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto semántico (concept id) | `src/modules/forms/dto/create-field-definition.dto.ts:129` |
-| `valueSetId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Value set de valores permitidos | `src/modules/forms/dto/create-field-definition.dto.ts:140` |
-| `unitValueSetId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Value set de unidades | `src/modules/forms/dto/create-field-definition.dto.ts:148` |
-| `cardinalityMin` | `number` | No | — | `@IsOptional()` `@IsInt()` | Cardinalidad mínima | `src/modules/forms/dto/create-field-definition.dto.ts:156` |
-| `cardinalityMax` | `number` | No | — | `@IsOptional()` `@IsInt()` | Cardinalidad máxima | `src/modules/forms/dto/create-field-definition.dto.ts:164` |
-| `regex` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | Expresión regular de validación | `src/modules/forms/dto/create-field-definition.dto.ts:173` |
-| `validationRules` | `array<ValidationRuleInputDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ValidationRuleInputDto)` | Reglas de validación | `src/modules/forms/dto/create-field-definition.dto.ts:186` |
-| `validationRules[].ruleType` | `string` | No | valores: REQUIRED, RANGE, REGEX | `@IsIn(['REQUIRED', 'RANGE', 'REGEX'])` | — | `src/modules/forms/dto/create-field-definition.dto.ts:44` |
-| `validationRules[].operator` | `string` | No | valores: EQ, NEQ, GT, LT | `@IsOptional()` `@IsIn(['EQ', 'NEQ', 'GT', 'LT'])` | — | `src/modules/forms/dto/create-field-definition.dto.ts:52` |
-| `validationRules[].parameters` | `object` | No | — | `@IsObject()` | Parámetros de la regla | `src/modules/forms/dto/create-field-definition.dto.ts:59` |
-| `validationRules[].severity` | `string` | No | valores: ERROR, WARNING | `@IsOptional()` `@IsIn(['ERROR', 'WARNING'])` | — | `src/modules/forms/dto/create-field-definition.dto.ts:67` |
-| `validationRules[].errorMessage` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Mensaje de error asociado | `src/modules/forms/dto/create-field-definition.dto.ts:76` |
+| `code` | `string` | Sí | longitud mínima 1; longitud máxima 100 | `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Código único del campo | `src/modules/forms/dto/create-field-definition.dto.ts:90` |
+| `name` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@MinLength(1)` `@MaxLength(200)` | Nombre legible | `src/modules/forms/dto/create-field-definition.dto.ts:99` |
+| `dataType` | `string` | Sí | valores: string, text, integer, decimal, boolean, date, datetime, time, uuid, json, binary, reference, code | `@IsIn(TECHNICAL_DATA_TYPES)` | Tipo de dato técnico | `src/modules/forms/dto/create-field-definition.dto.ts:109` |
+| `sensitivityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sensibilidad (concept id) | `src/modules/forms/dto/create-field-definition.dto.ts:120` |
+| `semanticConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto semántico (concept id) | `src/modules/forms/dto/create-field-definition.dto.ts:131` |
+| `valueSetId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Value set de valores permitidos | `src/modules/forms/dto/create-field-definition.dto.ts:142` |
+| `unitValueSetId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Value set de unidades | `src/modules/forms/dto/create-field-definition.dto.ts:150` |
+| `cardinalityMin` | `number` | No | — | `@IsOptional()` `@IsInt()` | Cardinalidad mínima | `src/modules/forms/dto/create-field-definition.dto.ts:158` |
+| `cardinalityMax` | `number` | No | — | `@IsOptional()` `@IsInt()` | Cardinalidad máxima | `src/modules/forms/dto/create-field-definition.dto.ts:166` |
+| `regex` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | Expresión regular de validación | `src/modules/forms/dto/create-field-definition.dto.ts:175` |
+| `validationRules` | `array<ValidationRuleInputDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ValidationRuleInputDto)` | Reglas de validación | `src/modules/forms/dto/create-field-definition.dto.ts:188` |
+| `validationRules[].ruleType` | `string` | No | valores: REQUIRED, RANGE, REGEX | `@IsIn(['REQUIRED', 'RANGE', 'REGEX'])` | — | `src/modules/forms/dto/create-field-definition.dto.ts:46` |
+| `validationRules[].operator` | `string` | No | valores: EQ, NEQ, GT, LT | `@IsOptional()` `@IsIn(['EQ', 'NEQ', 'GT', 'LT'])` | — | `src/modules/forms/dto/create-field-definition.dto.ts:54` |
+| `validationRules[].parameters` | `object` | No | — | `@IsObject()` | Parámetros de la regla | `src/modules/forms/dto/create-field-definition.dto.ts:61` |
+| `validationRules[].severity` | `string` | No | valores: ERROR, WARNING | `@IsOptional()` `@IsIn(['ERROR', 'WARNING'])` | — | `src/modules/forms/dto/create-field-definition.dto.ts:69` |
+| `validationRules[].errorMessage` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Mensaje de error asociado | `src/modules/forms/dto/create-field-definition.dto.ts:78` |
+| `options` | `array<string>` | No | mínimo 2 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMinSize(2, { message: 'Un campo de elección necesita al menos dos opciones', })` `@IsString({ each: true })` | Opciones propias de un campo de elección (dataType "code" sin valueSetId) | `src/modules/forms/dto/create-field-definition.dto.ts:206` |
+| `multiple` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Admite varias respuestas en vez de una sola | `src/modules/forms/dto/create-field-definition.dto.ts:218` |
+| `allowOther` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Ofrece «Otro», con texto libre | `src/modules/forms/dto/create-field-definition.dto.ts:230` |
+| `description` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | Ayuda que se lee bajo la pregunta (se sirve como "hint") | `src/modules/forms/dto/create-field-definition.dto.ts:242` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1245,7 +1249,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
       "severity": "ERROR",
       "errorMessage": "valor-ejemplo"
     }
-  ]
+  ],
+  "options": [
+    "valor-ejemplo",
+    "valor-ejemplo"
+  ],
+  "multiple": false,
+  "allowOther": false,
+  "description": "Texto descriptivo de ejemplo"
 }
 ```
 
@@ -1266,6 +1277,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: El código de campo ya existe |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: `options` sólo aplica a dataType "code"; PreconditionFailedException: `allowOther` sólo aplica a dataType "code"; PreconditionFailedException: Un campo "code" declara valueSetId u options, no los dos; PreconditionFailedException: `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología; PreconditionFailedException: Un campo "code" sin valueSetId necesita al menos dos opciones; PreconditionFailedException: Una opción no puede estar vacía; PreconditionFailedException: Las opciones no pueden repetirse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/forms.md).
@@ -1297,7 +1309,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /forms/field-definitions/{id}` la atiende `FormsFieldsController.updateFieldDefinition` (src/modules/forms/controllers/forms-fields.controller.ts:71). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `UpdateFieldDefinitionDto` (2 campos, 0 obligatorios). Delega en `FormsFieldsService.updateFieldDefinition`. Actualiza forms.dynamic_field_definitions. Lee forms.dynamic_field_definitions, forms.field_assignments, forms.field_values.
+`PATCH /forms/field-definitions/{id}` la atiende `FormsFieldsController.updateFieldDefinition` (src/modules/forms/controllers/forms-fields.controller.ts:71). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER, SECURITY_ADMIN. Valida el cuerpo como `UpdateFieldDefinitionDto` (6 campos, 0 obligatorios). Delega en `FormsFieldsService.updateFieldDefinition`. Actualiza forms.dynamic_field_definitions. Lee forms.dynamic_field_definitions, forms.field_assignments, forms.field_values.
 
 ### Requerimientos
 
@@ -1315,10 +1327,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.dynamic_field_definitions` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsFieldsController.updateFieldDefinition → FormsFieldsService.updateFieldDefinition | `src/modules/forms/services/forms-fields.service.ts:120` |
-| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.updateFieldDefinition → FormsFieldsService.updateFieldDefinition → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:237` |
+| `forms.dynamic_field_definitions` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsFieldsController.updateFieldDefinition → FormsFieldsService.updateFieldDefinition | `src/modules/forms/services/forms-fields.service.ts:211` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.updateFieldDefinition → FormsFieldsService.updateFieldDefinition → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:245` |
 | `forms.field_assignments` | LEE | LEE | DIRECTA | FormsFieldsController.updateFieldDefinition → FormsFieldsService.updateFieldDefinition → AssignmentsRepository.findAssignmentsByField | `src/modules/forms/repositories/assignments.repository.ts:282` |
-| `forms.field_values` | LEE | LEE | DIRECTA | FormsFieldsController.updateFieldDefinition → FormsFieldsService.updateFieldDefinition → FieldValuesRepository.countByField | `src/modules/forms/repositories/field-values.repository.ts:217` |
+| `forms.field_values` | LEE | LEE | DIRECTA | FormsFieldsController.updateFieldDefinition → FormsFieldsService.updateFieldDefinition → FieldValuesRepository.countByField | `src/modules/forms/repositories/field-values.repository.ts:222` |
 
 ### Parámetros
 
@@ -1330,8 +1342,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `name` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(200)` | Nombre legible del campo | `src/modules/forms/dto/update-field-definition.dto.ts:37` |
-| `dataType` | `string` | No | valores: string, text, integer, decimal, boolean, date, datetime, time, uuid, json, binary, reference, code | `@IsOptional()` `@IsIn(TECHNICAL_DATA_TYPES)` | Tipo de dato técnico; con valores capturados no se cambia (409) | `src/modules/forms/dto/update-field-definition.dto.ts:49` |
+| `name` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(200)` | Nombre legible del campo | `src/modules/forms/dto/update-field-definition.dto.ts:40` |
+| `dataType` | `string` | No | valores: string, text, integer, decimal, boolean, date, datetime, time, uuid, json, binary, reference, code | `@IsOptional()` `@IsIn(TECHNICAL_DATA_TYPES)` | Tipo de dato técnico; con valores capturados no se cambia (409) | `src/modules/forms/dto/update-field-definition.dto.ts:52` |
+| `options` | `array<string>` | No | mínimo 2 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMinSize(2, { message: 'Un campo de elección necesita al menos dos opciones', })` `@IsString({ each: true })` | Opciones, reemplazadas enteras | `src/modules/forms/dto/update-field-definition.dto.ts:68` |
+| `multiple` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Admite varias respuestas | `src/modules/forms/dto/update-field-definition.dto.ts:74` |
+| `allowOther` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Ofrece «Otro», con texto libre | `src/modules/forms/dto/update-field-definition.dto.ts:80` |
+| `description` | `object` | No | longitud máxima 1000; admite null | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | Ayuda bajo la pregunta; null la quita | `src/modules/forms/dto/update-field-definition.dto.ts:93` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1344,7 +1360,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 ```json
 {
   "name": "Nombre de ejemplo",
-  "dataType": "string"
+  "dataType": "string",
+  "options": [
+    "valor-ejemplo",
+    "valor-ejemplo"
+  ],
+  "multiple": true,
+  "allowOther": true,
+  "description": {}
 }
 ```
 
@@ -1366,6 +1389,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo se pueden corregir los campos propios de la organización; los del estándar no se editan desde acá |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Campo no encontrado |
 | 409 | `CONFLICT` | ConflictException: El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: `options` sólo aplica a dataType "code"; PreconditionFailedException: `allowOther` sólo aplica a dataType "code"; PreconditionFailedException: Un campo "code" declara valueSetId u options, no los dos; PreconditionFailedException: `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología; PreconditionFailedException: Un campo "code" sin valueSetId necesita al menos dos opciones; PreconditionFailedException: Una opción no puede estar vacía; PreconditionFailedException: Las opciones no pueden repetirse; PreconditionFailedException: No se puede quitar una opción que ya tiene respuestas capturadas |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/forms.md).
@@ -1415,8 +1439,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.createAccessRule → FormsFieldsService.createAccessRule → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:237` |
-| `forms.field_value_access_rules` | ESCRIBE | CREA | DIRECTA | FormsFieldsController.createAccessRule → FormsFieldsService.createAccessRule → FieldDefinitionsRepository.createAccessRule | `src/modules/forms/repositories/field-definitions.repository.ts:383` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.createAccessRule → FormsFieldsService.createAccessRule → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:245` |
+| `forms.field_value_access_rules` | ESCRIBE | CREA | DIRECTA | FormsFieldsController.createAccessRule → FormsFieldsService.createAccessRule → FieldDefinitionsRepository.createAccessRule | `src/modules/forms/repositories/field-definitions.repository.ts:391` |
 
 ### Parámetros
 
@@ -1524,9 +1548,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.addDependency → FormsFieldsService.addDependency → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:237` |
-| `forms.field_dependencies` | ESCRIBE | CREA | DIRECTA | FormsFieldsController.addDependency → FormsFieldsService.addDependency → FieldDefinitionsRepository.createDependency | `src/modules/forms/repositories/field-definitions.repository.ts:326` |
-| `forms.field_dependencies` | LEE | LEE | DIRECTA | FormsFieldsController.addDependency → FormsFieldsService.addDependency → FieldDefinitionsRepository.findDependency | `src/modules/forms/repositories/field-definitions.repository.ts:307` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.addDependency → FormsFieldsService.addDependency → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:245` |
+| `forms.field_dependencies` | ESCRIBE | CREA | DIRECTA | FormsFieldsController.addDependency → FormsFieldsService.addDependency → FieldDefinitionsRepository.createDependency | `src/modules/forms/repositories/field-definitions.repository.ts:334` |
+| `forms.field_dependencies` | LEE | LEE | DIRECTA | FormsFieldsController.addDependency → FormsFieldsService.addDependency → FieldDefinitionsRepository.findDependency | `src/modules/forms/repositories/field-definitions.repository.ts:315` |
 
 ### Parámetros
 
@@ -1636,10 +1660,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:237` |
-| `forms.field_definition_localizations` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization | `src/modules/forms/services/forms-fields.service.ts:291` |
-| `forms.field_definition_localizations` | ESCRIBE | CREA | DIRECTA | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization → FieldDefinitionsRepository.createLocalization | `src/modules/forms/repositories/field-definitions.repository.ts:364` |
-| `forms.field_definition_localizations` | LEE | LEE | DIRECTA | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization → FieldDefinitionsRepository.findLocalization | `src/modules/forms/repositories/field-definitions.repository.ts:346` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:245` |
+| `forms.field_definition_localizations` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization | `src/modules/forms/services/forms-fields.service.ts:415` |
+| `forms.field_definition_localizations` | ESCRIBE | CREA | DIRECTA | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization → FieldDefinitionsRepository.createLocalization | `src/modules/forms/repositories/field-definitions.repository.ts:372` |
+| `forms.field_definition_localizations` | LEE | LEE | DIRECTA | FormsFieldsController.upsertLocalization → FormsFieldsService.upsertLocalization → FieldDefinitionsRepository.findLocalization | `src/modules/forms/repositories/field-definitions.repository.ts:354` |
 
 ### Parámetros
 
@@ -1713,7 +1737,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsInstancesController.listInstances` — `src/modules/forms/controllers/forms-instances.controller.ts:70`
+- **Implementación:** `FormsInstancesController.listInstances` — `src/modules/forms/controllers/forms-instances.controller.ts:72`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1723,14 +1747,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /forms/instances` la atiende `FormsInstancesController.listInstances` (src/modules/forms/controllers/forms-instances.controller.ts:70). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsReadService.listInstancesByEncounter`. Lee clinical.encounters, forms.form_instances.
+`GET /forms/instances` la atiende `FormsInstancesController.listInstances` (src/modules/forms/controllers/forms-instances.controller.ts:72). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsReadService.listInstancesByEncounter`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 12 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:70` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:72` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | encounter (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1739,8 +1763,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical.encounters` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadOwnEncounter | `src/modules/forms/services/forms-read.service.ts:597` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter | `src/modules/forms/services/forms-read.service.ts:643` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormInstancesRepository.findByResourceId | `src/modules/forms/repositories/form-instances.repository.ts:102` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | FormsInstancesController.listInstances → FormsReadService.listInstancesByEncounter → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
 
 ### Parámetros
 
@@ -1776,8 +1818,8 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada / Encuentro no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {failure.message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/forms.md).
@@ -1799,7 +1841,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsInstancesController.openInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:105`
+- **Implementación:** `FormsInstancesController.openInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:113`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1809,14 +1851,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/instances` la atiende `FormsInstancesController.openInstance` (src/modules/forms/controllers/forms-instances.controller.ts:105). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `OpenInstanceDto` (4 campos, 1 obligatorio). Delega en `FormsInstancesService.openInstance`. Crea filas en forms.form_instances. Lee clinical.encounters, forms.form_instances.
+`POST /forms/instances` la atiende `FormsInstancesController.openInstance` (src/modules/forms/controllers/forms-instances.controller.ts:113). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `OpenInstanceDto` (4 campos, 1 obligatorio). Delega en `FormsInstancesService.openInstance`. Crea filas en forms.form_instances. Lee clinical.encounters, forms.form_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:105` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:113` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1898,7 +1940,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsInstancesController.getInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:93`
+- **Implementación:** `FormsInstancesController.getInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:100`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1908,27 +1950,45 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /forms/instances/{id}` la atiende `FormsInstancesController.getInstance` (src/modules/forms/controllers/forms-instances.controller.ts:93). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsReadService.getInstance`. Lee clinical.encounters, forms.dynamic_field_definitions, forms.field_value_access_rules, forms.field_values, forms.form_instances.
+`GET /forms/instances/{id}` la atiende `FormsInstancesController.getInstance` (src/modules/forms/controllers/forms-instances.controller.ts:100). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsReadService.getInstance`. Lee authz.access_policies, authz.care_relationships, authz.clinical_access_grants, authz.field_permissions, authz.patient_legal_representations, authz.permissions, authz.resource_scope_grants, authz.role_permissions y 15 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:93` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:100` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:93` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:100` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical.encounters` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadOwnEncounter | `src/modules/forms/services/forms-read.service.ts:597` |
-| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findFieldsByIds | `src/modules/forms/repositories/field-definitions.repository.ts:403` |
-| `forms.field_value_access_rules` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findActiveAccessRulesByFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:480` |
-| `forms.field_values` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.composeInstanceDetail → FieldValuesRepository.findCurrentByInstance | `src/modules/forms/repositories/field-values.repository.ts:254` |
+| `authz.access_policies` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
+| `authz.field_permissions` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
+| `authz.permissions` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
+| `authz.roles` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.resolveRoleInheritance → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
+| `authz.user_permission_grants` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserPermissionGrantsRepository.findActiveForUser | `src/modules/authz/repositories/user-permission-grants.repository.ts:85` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → UserRoleAssignmentsRepository.findActiveForUser | `src/modules/authz/repositories/user-role-assignments.repository.ts:102` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter | `src/modules/forms/services/forms-read.service.ts:643` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findFieldsByIds | `src/modules/forms/repositories/field-definitions.repository.ts:411` |
+| `forms.field_value_access_rules` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findActiveAccessRulesByFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:488` |
+| `forms.field_values` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.composeInstanceDetail → FieldValuesRepository.findCurrentByInstance | `src/modules/forms/repositories/field-values.repository.ts:295` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormInstancesRepository.findById | `src/modules/forms/repositories/form-instances.repository.ts:45` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | FormsInstancesController.getInstance → FormsReadService.getInstance → FormsReadService.loadReadableEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
 
 ### Parámetros
 
@@ -1964,8 +2024,8 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada; ResourceNotFoundException: Instancia no encontrada / Encuentro no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {INSTANCE_NOT_FOUND.message}; ResourceNotFoundException: {failure.message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/forms.md).
@@ -1987,7 +2047,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsInstancesController.closeInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:142`
+- **Implementación:** `FormsInstancesController.closeInstance` — `src/modules/forms/controllers/forms-instances.controller.ts:150`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1997,16 +2057,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/instances/{id}/close` la atiende `FormsInstancesController.closeInstance` (src/modules/forms/controllers/forms-instances.controller.ts:142). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsInstancesService.closeInstance`. Actualiza forms.field_values, forms.form_instances. Lee forms.field_values, forms.form_instances.
+`POST /forms/instances/{id}/close` la atiende `FormsInstancesController.closeInstance` (src/modules/forms/controllers/forms-instances.controller.ts:150). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `FormsInstancesService.closeInstance`. Actualiza forms.field_values, forms.form_instances. Lee forms.field_values, forms.form_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:142` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:150` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:142` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:150` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -2014,7 +2074,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `forms.field_values` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsInstancesController.closeInstance → FormsInstancesService.closeInstance | `src/modules/forms/services/forms-instances.service.ts:151` |
-| `forms.field_values` | LEE | LEE | DIRECTA | FormsInstancesController.closeInstance → FormsInstancesService.closeInstance → FieldValuesRepository.findPreliminaryByInstance | `src/modules/forms/repositories/field-values.repository.ts:233` |
+| `forms.field_values` | LEE | LEE | DIRECTA | FormsInstancesController.closeInstance → FormsInstancesService.closeInstance → FieldValuesRepository.findPreliminaryByInstance | `src/modules/forms/repositories/field-values.repository.ts:274` |
 | `forms.form_instances` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsInstancesController.closeInstance → FormsInstancesService.closeInstance | `src/modules/forms/services/forms-instances.service.ts:155` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsInstancesController.closeInstance → FormsInstancesService.closeInstance → FormInstancesRepository.findById | `src/modules/forms/repositories/form-instances.repository.ts:45` |
 
@@ -2065,7 +2125,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `FormsInstancesController.captureValues` — `src/modules/forms/controllers/forms-instances.controller.ts:123`
+- **Implementación:** `FormsInstancesController.captureValues` — `src/modules/forms/controllers/forms-instances.controller.ts:131`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2075,16 +2135,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/instances/{id}/values` la atiende `FormsInstancesController.captureValues` (src/modules/forms/controllers/forms-instances.controller.ts:123). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CaptureValuesDto` (7 campos, 4 obligatorios). Delega en `FormsValuesService.captureValues`. Crea filas en forms.field_value_audit, forms.field_values. Lee forms.form_instances.
+`POST /forms/instances/{id}/values` la atiende `FormsInstancesController.captureValues` (src/modules/forms/controllers/forms-instances.controller.ts:131). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CaptureValuesDto` (7 campos, 4 obligatorios). Delega en `FormsValuesService.captureValues`. Crea filas en forms.field_value_audit, forms.field_values. Lee forms.dynamic_field_definitions, forms.form_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:123` |
+| ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/forms/controllers/forms-instances.controller.ts:131` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:123` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/forms/controllers/forms-instances.controller.ts:131` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -2093,8 +2153,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsInstancesController.captureValues → FormsValuesService.captureValues → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:291` |
-| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsInstancesController.captureValues → FormsValuesService.captureValues → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:276` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsInstancesController.captureValues → FormsValuesService.captureValues → FormsValuesService.fieldsById → FieldDefinitionsRepository.findFieldsByIds | `src/modules/forms/repositories/field-definitions.repository.ts:411` |
+| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsInstancesController.captureValues → FormsValuesService.captureValues → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:332` |
+| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsInstancesController.captureValues → FormsValuesService.captureValues → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:317` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsInstancesController.captureValues → FormsValuesService.captureValues → FormInstancesRepository.findById | `src/modules/forms/repositories/form-instances.repository.ts:45` |
 
 ### Parámetros
@@ -2163,7 +2224,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La instancia no está abierta |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La instancia no está abierta; PreconditionFailedException: El campo no tiene opciones declaradas; PreconditionFailedException: El valor no está entre las opciones del campo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/forms.md).
@@ -2210,7 +2271,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical.encounters` | LEE | LEE | DIRECTA | FormsMeController.listMyInstances → FormsReadService.listMyInstances | `src/modules/forms/services/forms-read.service.ts:343` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | FormsMeController.listMyInstances → FormsReadService.listMyInstances | `src/modules/forms/services/forms-read.service.ts:383` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsMeController.listMyInstances → FormsReadService.listMyInstances → FormInstancesRepository.findByResourceIds | `src/modules/forms/repositories/form-instances.repository.ts:128` |
 
 ### Parámetros
@@ -2293,10 +2354,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `clinical.encounters` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance | `src/modules/forms/services/forms-read.service.ts:390` |
-| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findFieldsByIds | `src/modules/forms/repositories/field-definitions.repository.ts:403` |
-| `forms.field_value_access_rules` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findActiveAccessRulesByFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:480` |
-| `forms.field_values` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormsReadService.composeInstanceDetail → FieldValuesRepository.findCurrentByInstance | `src/modules/forms/repositories/field-values.repository.ts:254` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance | `src/modules/forms/services/forms-read.service.ts:430` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findFieldsByIds | `src/modules/forms/repositories/field-definitions.repository.ts:411` |
+| `forms.field_value_access_rules` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormsReadService.composeInstanceDetail → FieldDefinitionsRepository.findActiveAccessRulesByFieldIds | `src/modules/forms/repositories/field-definitions.repository.ts:488` |
+| `forms.field_values` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormsReadService.composeInstanceDetail → FieldValuesRepository.findCurrentByInstance | `src/modules/forms/repositories/field-values.repository.ts:295` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsMeController.getMyInstance → FormsReadService.getMyInstance → FormInstancesRepository.findById | `src/modules/forms/repositories/form-instances.repository.ts:45` |
 
 ### Parámetros
@@ -2367,7 +2428,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 ### Cómo se atiende (sistema)
 
-`PATCH /forms/values/{id}` la atiende `FormsValuesController.correctValue` (src/modules/forms/controllers/forms-values.controller.ts:62). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CorrectValueDto` (3 campos, 2 obligatorios). Delega en `FormsValuesService.correctValue`. Crea filas en forms.field_value_audit, forms.field_values. Actualiza forms.field_values. Lee forms.field_values.
+`PATCH /forms/values/{id}` la atiende `FormsValuesController.correctValue` (src/modules/forms/controllers/forms-values.controller.ts:62). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CorrectValueDto` (3 campos, 2 obligatorios). Delega en `FormsValuesService.correctValue`. Crea filas en forms.field_value_audit, forms.field_values. Actualiza forms.field_values. Lee forms.dynamic_field_definitions, forms.field_values.
 
 ### Requerimientos
 
@@ -2385,10 +2446,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:291` |
-| `forms.field_values` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsValuesController.correctValue → FormsValuesService.correctValue | `src/modules/forms/services/forms-values.service.ts:150` |
-| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:276` |
-| `forms.field_values` | LEE | LEE | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldValuesRepository.findById | `src/modules/forms/repositories/field-values.repository.ts:205` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldDefinitionsRepository.findFieldById | `src/modules/forms/repositories/field-definitions.repository.ts:245` |
+| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:332` |
+| `forms.field_values` | ESCRIBE | ACTUALIZA | POR_TIPO | FormsValuesController.correctValue → FormsValuesService.correctValue | `src/modules/forms/services/forms-values.service.ts:217` |
+| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:317` |
+| `forms.field_values` | LEE | LEE | DIRECTA | FormsValuesController.correctValue → FormsValuesService.correctValue → FieldValuesRepository.findById | `src/modules/forms/repositories/field-values.repository.ts:210` |
 
 ### Parámetros
 
@@ -2440,7 +2502,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Valor no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El valor ya fue superado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El valor ya fue superado; PreconditionFailedException: El campo no tiene opciones declaradas; PreconditionFailedException: El valor no está entre las opciones del campo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/forms.md).
@@ -2472,7 +2534,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 ### Cómo se atiende (sistema)
 
-`POST /forms/values/import` la atiende `FormsValuesController.importValues` (src/modules/forms/controllers/forms-values.controller.ts:44). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ImportValuesDto` (10 campos, 6 obligatorios). Delega en `FormsValuesService.importValues`. Crea filas en forms.field_value_audit, forms.field_value_provenance, forms.field_values. Lee forms.form_instances.
+`POST /forms/values/import` la atiende `FormsValuesController.importValues` (src/modules/forms/controllers/forms-values.controller.ts:44). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `ImportValuesDto` (10 campos, 6 obligatorios). Delega en `FormsValuesService.importValues`. Crea filas en forms.field_value_audit, forms.field_value_provenance, forms.field_values. Lee forms.dynamic_field_definitions, forms.form_instances.
 
 ### Requerimientos
 
@@ -2489,9 +2551,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:291` |
-| `forms.field_value_provenance` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.createProvenance | `src/modules/forms/repositories/field-values.repository.ts:310` |
-| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:276` |
+| `forms.dynamic_field_definitions` | LEE | LEE | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FormsValuesService.fieldsById → FieldDefinitionsRepository.findFieldsByIds | `src/modules/forms/repositories/field-definitions.repository.ts:411` |
+| `forms.field_value_audit` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.createAudit | `src/modules/forms/repositories/field-values.repository.ts:332` |
+| `forms.field_value_provenance` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.createProvenance | `src/modules/forms/repositories/field-values.repository.ts:351` |
+| `forms.field_values` | ESCRIBE | CREA | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FieldValuesRepository.create | `src/modules/forms/repositories/field-values.repository.ts:317` |
 | `forms.form_instances` | LEE | LEE | DIRECTA | FormsValuesController.importValues → FormsValuesService.importValues → FormInstancesRepository.findById | `src/modules/forms/repositories/form-instances.repository.ts:45` |
 
 ### Cuerpo — DTO `ImportValuesDto` · `application/json`
@@ -2562,6 +2625,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/forms/R
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Instancia no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El campo no tiene opciones declaradas; PreconditionFailedException: El valor no está entre las opciones del campo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/forms.md).

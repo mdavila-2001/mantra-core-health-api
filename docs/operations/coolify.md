@@ -112,6 +112,38 @@ openssl rand -hex 32
 - `TRUST_PROXY_HOPS=2`. (`ALOVIDA_NETWORK` solo si querés que la red se llame
   distinto de `alovida`; hay que ponerle el mismo valor a los dos recursos.)
 
+### Rol de base de datos de la API (HZ-05)
+
+`POSTGRES_USER` (`alovida`) es el **dueño y superusuario** de la imagen: ignora
+RLS sin ningún error. Si la API conecta con él, las políticas por tenant de las
+~288 tablas que las tienen no aíslan nada. Por eso hay dos credenciales:
+
+| Quién | Rol | Variables |
+| --- | --- | --- |
+| `postgres-init`, `api-migrate` (DDL, migraciones, seed) | dueño | `POSTGRES_USER` / `POSTGRES_PASSWORD` |
+| `api` y workers (tráfico) | `mantra_app`, sin SUPERUSER ni BYPASSRLS | `DB_APP_USER=mantra_app`, `DB_APP_PASSWORD`, `RLS_ENFORCE=true` |
+
+Puesta en marcha (una vez): definir en Coolify `DB_APP_USER=mantra_app`,
+`DB_APP_PASSWORD` (`openssl rand -base64 24`) y `RLS_ENFORCE=true`, y redesplegar.
+`postgres-init` aplica `2026-08-05_tenant_rls.sql` (crea `mantra_app` NOLOGIN con
+DML y RLS forzada) y luego le habilita LOGIN con esa contraseña, verificando que
+quedó sin SUPERUSER ni BYPASSRLS. `api-migrate` vacía esas dos variables y sigue
+usando el dueño. Las tres van juntas: el rol de aplicación sin `RLS_ENFORCE=true`
+no recibe `app.current_tenant_id` y las políticas le ocultan todas las filas.
+
+En producción la API **se niega a arrancar** (`SYSTEM_DB_ROLE_PRIVILEGED`) si su
+rol de conexión es superusuario, tiene `BYPASSRLS` o es dueño de tablas con RLS
+sin `FORCE`, y `/readiness` falla (503) por la misma causa. La única excepción es
+transitoria y explícita: `DB_ALLOW_PRIVILEGED_RUNTIME_ROLE=true` (cada arranque
+deja un `error` en el log; con `RLS_ENFORCE=true` no hay excepción que valga).
+Esto no sustituye la autorización por recurso dentro de los servicios: RLS por
+`tenant_id` no distingue pacientes dentro de un mismo tenant.
+
+Dos variables más de integridad: `/readiness` también falla si el arranque no
+pudo crear una FK o un índice único del modelo (ORMN-01; válvula explícita
+`SCHEMA_INTEGRITY_ENFORCE=false`), y un seed `core` fallido aborta el arranque
+(SEED-01; siempre en producción, `SEED_CORE_FAILURE_FATAL=true` fuera de ella).
+
 Para el arranque en frío, además:
 
 ```
@@ -307,32 +339,46 @@ que ninguna otra cosa.
 
 ## 7 · Acceso remoto a PostgreSQL para testers de datos
 
-El servicio `postgres` del compose publica el puerto **5432 del host** hacia
-internet (`POSTGRES_PUBLIC_PORT`, por defecto `5432`). Es la **única** base del
-stack que se expone: Mongo, Redis, OpenSearch y MinIO siguen solo en la red
-interna `alovida`.
+El servicio `postgres` del compose publica el puerto 5432 **atado al loopback
+del servidor** (`POSTGRES_PUBLIC_BIND=127.0.0.1`, por defecto): desde internet no
+se llega. Los testers entran por túnel SSH:
 
-### El tráfico va sin cifrar
+```bash
+ssh -N -L 5432:localhost:5432 usuario@servidor      # en la máquina del tester
+psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@localhost:5432/alovida_health"
+```
 
-`DB_SSL` está vacío y el contenedor no lleva certificado, así que la conexión
-del tester viaja en claro: contraseña incluida en el primer intercambio, y
-después las filas. Sobre una base con historias clínicas eso es material
-sensible atravesando internet sin TLS.
+Es la **única** base del stack que se publica en el host: Mongo, Redis,
+OpenSearch y MinIO siguen solo en la red interna `alovida`.
 
-Mientras siga así, lo que reduce el riesgo es que el rol expuesto solo lea, que
-la contraseña sea larga y de un solo uso, y que el puerto se cierre en cuanto
-los testers terminen. Para cerrarlo del todo hay que montar un certificado en
-el contenedor y exigir `hostssl` en `pg_hba.conf`; eso no está hecho.
+### Abrirlo a internet exige TLS
+
+`POSTGRES_PUBLIC_BIND=0.0.0.0` publica el puerto en todas las interfaces. La
+imagen no lleva certificado ni TLS de servidor, así que la conexión viajaría en
+claro: contraseña en el primer intercambio y después las filas, que son datos
+clínicos. No lo abras así. Si el acceso directo es un requisito:
+
+1. Montar un certificado y activar `ssl=on` en el servidor, y exigir `hostssl`
+   (y rechazar `host`) en `pg_hba.conf`.
+2. Limitar el firewall a las IP de origen de los testers
+   (`sudo ufw allow from <IP> to any port 5432 proto tcp`), nunca
+   `ufw allow 5432/tcp` a todo internet.
+3. Exigir `sslmode=verify-full` en el cliente y comprobar desde una máquina
+   autorizada que una conexión con `sslmode=disable` es **rechazada**.
+
+Con cualquiera de las dos vías, el rol expuesto solo lee, la contraseña es larga
+y temporal, y se revoca cuando los testers terminan.
 
 ### Lo que hay que hacer una sola vez en el servidor
 
-1. **Abrir el puerto en el firewall** del servidor. En Ubuntu con `ufw`:
+1. **Con túnel SSH no hay que abrir nada** en el firewall: el puerto solo
+   escucha en el loopback. Solo si se decidió el acceso directo (ver arriba,
+   con TLS), abrir el puerto **a las IP de los testers** y no a internet. En
+   Ubuntu con `ufw`:
 
    ```bash
-   sudo ufw allow 5432/tcp
+   sudo ufw allow from <IP-del-tester> to any port 5432 proto tcp
    ```
-
-   Sin esto el contenedor publica el puerto pero nadie llega.
 
 2. **Crear el rol de solo lectura.** El rol `alovida` (`POSTGRES_USER`) es el
    dueño del esquema y **no se reparte**: quien tenga esa contraseña puede
@@ -361,29 +407,33 @@ el contenedor y exigir `hostssl` en `pg_hba.conf`; eso no está hecho.
 ### Lo que se entrega a los testers
 
 ```
-postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health
+postgresql://alovida_reader:<PASSWORD_LECTOR>@localhost:5432/alovida_health
 ```
+
+(con el túnel SSH abierto; `localhost` es el extremo local del túnel). Con
+acceso directo con TLS, el host del servidor y `sslmode=verify-full`.
 
 Comprobación desde fuera. La segunda es la que importa: leer el catálogo de
 concesiones describe la intención, pero que el lector no puede escribir solo se
 demuestra intentando escribir y recibiendo un `42501`.
 
 ```bash
-psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health" \
+psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@localhost:5432/alovida_health" \
   -c 'select count(*) from information_schema.tables'
 
-psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@<IP-o-dominio-del-servidor>:5432/alovida_health" \
+psql "postgresql://alovida_reader:<PASSWORD_LECTOR>@localhost:5432/alovida_health" \
   -c 'insert into accounting.account_determination_rules default values'
 #   ERROR: permission denied for table account_determination_rules
 ```
 
-### Para volver a cerrarlo
+### Verificar que quedó cerrado
 
-Cambiar `POSTGRES_PUBLIC_PORT` no basta: hay que dejar el puerto atado al
-loopback del servidor. En `docker-compose.coolify.yml`, en el servicio
-`postgres`, poner `"127.0.0.1:5432:5432"`, redesplegar y cerrar el puerto en el
-firewall (`sudo ufw delete allow 5432/tcp`). Desde ese momento se entra por
-túnel SSH: `ssh -L 5432:localhost:5432 usuario@servidor`.
+Desde una máquina **sin** túnel, el puerto no debe responder:
+
+```bash
+nc -zv <IP-o-dominio-del-servidor> 5432      # debe fallar / agotar el tiempo
+ss -ltn 'sport = :5432'                      # en el servidor: 127.0.0.1:5432, no 0.0.0.0
+```
 
 ---
 

@@ -22,6 +22,7 @@ import {
   UpdateGroupMemberDto,
 } from '../dto';
 import { CommunityGroupAccessService } from './community-group-access.service';
+import { AUDIENCE_VISIBILITIES } from './community-group-audience.service';
 import { CommunityGroupNotificationsService } from './community-group-notifications.service';
 import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityErrorReason } from '../community.error-reasons';
@@ -30,6 +31,12 @@ const GROUP_VISIBILITY_BY_CODE: Record<string, string> = {
   PUBLIC: COMM.GROUP_VISIBILITY_PUBLIC,
   PRIVATE: COMM.GROUP_VISIBILITY_PRIVATE,
   SECRET: COMM.GROUP_VISIBILITY_SECRET,
+  // Público autorizado (API#837): doctores verificados, personal de la
+  // organización y pacientes atendidos. «Invitados» es PRIVATE y «público
+  // general» es PUBLIC.
+  VERIFIED_DOCTORS: COMM.GROUP_VISIBILITY_VERIFIED_DOCTORS,
+  ORGANIZATION_STAFF: COMM.GROUP_VISIBILITY_ORGANIZATION_STAFF,
+  ATTENDED_PATIENTS: COMM.GROUP_VISIBILITY_ATTENDED_PATIENTS,
 };
 
 const GROUP_TYPE_BY_CODE: Record<string, string> = {
@@ -151,6 +158,15 @@ export class CommunityGroupsService {
     return this.em.transactional(async (tx) => {
       const tenantId = getCurrentTenantId();
 
+      // API#837 · ORG-FOR-001 / DOC-SOC-010: una aseguradora no abre foros. Va
+      // antes que cualquier lectura para que la negativa no dependa de si el
+      // slug o el tema existen.
+      await this.access.assertOrganizationMayStartForums(
+        tx,
+        tenantId,
+        'CREATE_GROUP',
+      );
+
       const duplicate = await this.groupsRepo.findBySlug(
         tx,
         tenantId,
@@ -212,13 +228,21 @@ export class CommunityGroupsService {
         await this.assertPublicCompleteProfile(tx, ownerProfileId);
       }
 
+      const visibilityConceptId =
+        GROUP_VISIBILITY_BY_CODE[dto.visibility ?? 'PUBLIC'];
+      await this.access.assertActorBelongsToAudience(
+        tx,
+        visibilityConceptId,
+        tenantId,
+        actor,
+      );
+
       const group = this.groupsRepo.create(tx, {
         tenantId,
         slug: dto.slug,
         name: dto.name,
         description: dto.description,
-        visibilityConceptId:
-          GROUP_VISIBILITY_BY_CODE[dto.visibility ?? 'PUBLIC'],
+        visibilityConceptId,
         groupTypeConceptId: GROUP_TYPE_BY_CODE[dto.groupType ?? 'GENERAL'],
         topicId: dto.topicId,
         ownerProfileId,
@@ -262,6 +286,16 @@ export class CommunityGroupsService {
           CommunityErrorReason.GROUP_NOT_FOUND,
         );
 
+      // API#837: en un foro de público autorizado el ingreso lo decide la
+      // sesión, no el cuerpo. `resolve` responde 404 a quien no pertenece al
+      // público y verifica que `memberProfileId` sea un perfil suyo: sin eso,
+      // un integrante del público podría inscribir a quien no lo es.
+      const audienceGroup = AUDIENCE_VISIBILITIES.includes(
+        group.visibilityConceptId,
+      );
+      if (audienceGroup)
+        await this.access.resolve(tx, groupId, actor, dto.memberProfileId);
+
       const dup = await this.groupsRepo.findMember(
         tx,
         groupId,
@@ -280,8 +314,11 @@ export class CommunityGroupsService {
           CommunityErrorReason.ALREADY_GROUP_MEMBER,
         );
 
+      // El público autorizado ya es la autorización: quien pertenece a él entra
+      // activo, como en un grupo público; quien no, no llegó hasta acá.
       const isPublic =
-        group.visibilityConceptId === COMM.GROUP_VISIBILITY_PUBLIC;
+        group.visibilityConceptId === COMM.GROUP_VISIBILITY_PUBLIC ||
+        audienceGroup;
       const joinStatus = isPublic
         ? COMM.GROUP_JOIN_ACTIVE
         : COMM.GROUP_JOIN_PENDING;

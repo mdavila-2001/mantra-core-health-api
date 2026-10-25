@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -8,7 +8,9 @@ import {
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { Encounters } from '../../clinical/entities';
+import { ClinicalReadService } from '../../clinical/services/clinical-read.service';
 import {
   DefinitionSetsRepository,
   FieldDefinitionsRepository,
@@ -36,6 +38,7 @@ import {
   MyFormInstanceListResponseDto,
 } from '../dto';
 import { FORMS } from '../forms.concepts';
+import { FormsErrorReason } from '../forms.error-reasons';
 
 /**
  * Columna `value_*` que corresponde leer para cada tipo técnico: el inverso de
@@ -80,6 +83,20 @@ const VALUE_FALLBACK_ORDER: ((v: FieldValues) => unknown)[] = [
   (v) => v.valueJson,
 ];
 
+/** Estado HTTP con el que `ClinicalReadService` niega la lectura de la historia. */
+const FORBIDDEN_STATUS = 403;
+
+/** El 404 de una instancia: idéntico para inexistente, ajena y no autorizada. */
+const INSTANCE_NOT_FOUND = {
+  message: 'Instancia no encontrada',
+  reason: FormsErrorReason.FORM_INSTANCE_OUT_OF_SCOPE,
+} as const;
+/** El 404 de un encuentro: idéntico para inexistente, ajeno y no autorizado. */
+const ENCOUNTER_NOT_FOUND = {
+  message: 'Encuentro no encontrado',
+  reason: FormsErrorReason.FORM_INSTANCE_OUT_OF_SCOPE,
+} as const;
+
 /**
  * Cara de lectura del módulo forms (Fase 1 del carril de consulta).
  *
@@ -105,6 +122,17 @@ const VALUE_FALLBACK_ORDER: ((v: FieldValues) => unknown)[] = [
  * closed—, igual que para lo ajeno: confirmar que existe algo de otro ya
  * filtra información (mismo criterio que las lecturas de surveys).
  *
+ * ## Lectura de la historia del paciente
+ *
+ * Pertenecer al tenant no basta: los valores de un formulario son contenido
+ * clínico del paciente del encuentro. Tras anclar el encuentro, las lecturas
+ * clínicas exigen `ClinicalReadService.assertCanReadHistory(patientProfileId,
+ * actor)` —la misma puerta que el resumen clínico: titular, turno vigente,
+ * relación asistencial o acceso autorizado—. Si el actor no la pasa, la
+ * respuesta es el mismo 404 que para un encuentro inexistente o ajeno (sin
+ * `details`, mismo mensaje y `reason`): un 403 confirmaría que el UUID existe.
+ * La denegación se registra con identificadores, nunca con contenido.
+ *
  * ## Enmascarado deny-by-default
  *
  * Las `field_value_access_rules` se escriben pero ningún componente del
@@ -124,6 +152,7 @@ export class FormsReadService {
    * @param assignmentsRepo - Acceso a asignaciones y secciones.
    * @param instancesRepo - Acceso a instancias de formulario.
    * @param valuesRepo - Acceso a valores capturados.
+   * @param clinicalRead - Gate de lectura de la historia del paciente.
    * @param logger - Registro estructurado.
    */
   constructor(
@@ -133,6 +162,7 @@ export class FormsReadService {
     private readonly assignmentsRepo: AssignmentsRepository,
     private readonly instancesRepo: FormInstancesRepository,
     private readonly valuesRepo: FieldValuesRepository,
+    private readonly clinicalRead: ClinicalReadService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(FormsReadService.name);
@@ -258,19 +288,22 @@ export class FormsReadService {
    *
    * @param encounterId - Encuentro cuyos formularios se listan.
    * @param limit - Tope del listado.
+   * @param actor - Sujeto autenticado que lee.
    * @returns Instancias del encuentro, con el recorte declarado.
-   * @throws ResourceNotFoundException si el encuentro no existe o es de otro tenant.
+   * @throws ResourceNotFoundException si el encuentro no existe, es de otro
+   *   tenant o el actor no puede leer la historia de su paciente.
    */
   async listInstancesByEncounter(
     encounterId: string,
     limit: number,
+    actor: AuthenticatedUser,
   ): Promise<FormInstanceListResponseDto> {
     this.logger.info(
       { operation: 'forms.read.instances', encounterId, limit },
       'Listando instancias del encuentro',
     );
     const em = this.em.fork();
-    await this.loadOwnEncounter(em, encounterId);
+    await this.loadReadableEncounter(em, encounterId, actor);
 
     const rows = await this.instancesRepo.findByResourceId(
       em,
@@ -291,10 +324,15 @@ export class FormsReadService {
    * columna `value_*` resuelta según el tipo del campo.
    *
    * @param id - Identificador de la instancia.
+   * @param actor - Sujeto autenticado que lee.
    * @returns La instancia y sus valores.
-   * @throws ResourceNotFoundException si no existe, no ancla a un encuentro o es ajena.
+   * @throws ResourceNotFoundException si no existe, no ancla a un encuentro, es
+   *   ajena o el actor no puede leer la historia de su paciente.
    */
-  async getInstance(id: string): Promise<FormInstanceDetailResponseDto> {
+  async getInstance(
+    id: string,
+    actor: AuthenticatedUser,
+  ): Promise<FormInstanceDetailResponseDto> {
     this.logger.info(
       { operation: 'forms.read.instance', instanceId: id },
       'Leyendo instancia de formulario',
@@ -303,12 +341,14 @@ export class FormsReadService {
 
     const instance = await this.instancesRepo.findById(em, id);
     if (!instance) {
-      throw new ResourceNotFoundException('Instancia no encontrada', {
-        instanceId: id,
-      });
+      throw new ResourceNotFoundException(
+        INSTANCE_NOT_FOUND.message,
+        undefined,
+        INSTANCE_NOT_FOUND.reason,
+      );
     }
     // El ancla de propiedad es el encuentro del recurso; sin él no se sirve.
-    await this.loadOwnEncounter(em, instance.resourceId, id);
+    await this.loadReadableEncounter(em, instance.resourceId, actor, true);
 
     return this.composeInstanceDetail(em, instance);
   }
@@ -577,29 +617,61 @@ export class FormsReadService {
   }
 
   /**
-   * Carga el encuentro y exige que pertenezca al tenant del contexto.
+   * Carga el encuentro, exige que pertenezca al tenant del contexto y que el
+   * actor pueda leer la historia de su paciente.
    *
-   * 404 y no 403 para lo ajeno o lo inexistente, y también cuando el recurso
-   * no resuelve a un encuentro: sin ancla de tenant no hay lectura segura.
+   * 404 y no 403 para lo ajeno, lo inexistente, lo que no resuelve a un
+   * encuentro y lo que el actor no está autorizado a leer: las cuatro
+   * respuestas son idénticas (mismo mensaje, mismo `reason`, sin `details`).
+   * La autorización clínica va **después** de anclar el tenant y **antes** de
+   * cargar instancias o valores.
    *
    * @param em - Contexto de persistencia de la lectura.
    * @param encounterId - Encuentro que ancla la propiedad.
-   * @param instanceId - Instancia que motivó la carga, para el detalle del error.
-   * @returns El encuentro, ya verificado.
-   * @throws ResourceNotFoundException si no existe o es de otro tenant.
+   * @param actor - Sujeto autenticado que lee.
+   * @param byInstance - `true` si la lectura nace de una instancia (cambia el texto del 404).
+   * @returns El encuentro, ya verificado y autorizado.
+   * @throws ResourceNotFoundException si no existe, es de otro tenant o no puede leerse.
    */
-  private async loadOwnEncounter(
+  private async loadReadableEncounter(
     em: EntityManager,
     encounterId: string,
-    instanceId?: string,
+    actor: AuthenticatedUser,
+    byInstance = false,
   ): Promise<Encounters> {
-    const tenantId = requireTenantId();
-    const encounter = await em.findOne(Encounters, { id: encounterId });
-    if (!encounter || encounter.tenantId !== tenantId) {
-      throw new ResourceNotFoundException(
-        instanceId ? 'Instancia no encontrada' : 'Encuentro no encontrado',
-        instanceId ? { instanceId } : { encounterId },
+    const failure = byInstance ? INSTANCE_NOT_FOUND : ENCOUNTER_NOT_FOUND;
+    const found = await em.findOne(Encounters, { id: encounterId });
+    const encounter = assertResourceInTenant(
+      found,
+      found?.tenantId,
+      requireTenantId(),
+      failure,
+    );
+    try {
+      await this.clinicalRead.assertCanReadHistory(
+        encounter.patientProfileId,
+        actor,
       );
+    } catch (error) {
+      if (
+        error instanceof HttpException &&
+        error.getStatus() === FORBIDDEN_STATUS
+      ) {
+        this.logger.warn(
+          {
+            operation: 'forms.read.denied',
+            actorId: actor.id,
+            encounterId,
+          },
+          'Lectura de formularios denegada por la historia clínica',
+        );
+        throw new ResourceNotFoundException(
+          failure.message,
+          undefined,
+          failure.reason,
+        );
+      }
+      throw error;
     }
     return encounter;
   }

@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { GraphProjectionService } from '../services';
 import {
   UpsertNodeDto,
@@ -42,6 +47,11 @@ export class GraphProjectionController {
   constructor(private readonly projectionService: GraphProjectionService) {}
 
   /** UC-61-01. */
+  @Audited({
+    action: 'GRAPH_NODE_UPSERTED',
+    entity: 'graph_node',
+    entityId: 'result.id',
+  })
   @Post('projections/nodes/upsert')
   @Roles('SYSTEM', 'GRAPH_PROJECTION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -58,6 +68,11 @@ export class GraphProjectionController {
   }
 
   /** UC-61-02. */
+  @Audited({
+    action: 'GRAPH_EDGE_UPSERTED',
+    entity: 'graph_edge',
+    entityId: 'result.id',
+  })
   @Post('projections/edges/upsert')
   @Roles('SYSTEM', 'GRAPH_PROJECTION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -74,6 +89,10 @@ export class GraphProjectionController {
   }
 
   /** UC-61-12. */
+  @Audited({
+    action: 'GRAPH_SOURCE_VERSION_RECONCILED',
+    entity: 'graph_node',
+  })
   @Post('projections/reconcile')
   @Roles('SYSTEM', 'GRAPH_PROJECTION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -90,6 +109,11 @@ export class GraphProjectionController {
   }
 
   /** UC-61-03 (arranque). */
+  @Audited({
+    action: 'GRAPH_PROJECTION_RUN_STARTED',
+    entity: 'graph_projection_run',
+    entityId: 'result.id',
+  })
   @Post('projection-definitions/:id/runs')
   @Roles('SYSTEM', 'GRAPH_ANALYST', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -107,6 +131,11 @@ export class GraphProjectionController {
   }
 
   /** UC-61-03 (avance). */
+  @Audited({
+    action: 'GRAPH_PROJECTION_RUN_ADVANCED',
+    entity: 'graph_projection_run',
+    entityId: 'param:id',
+  })
   @Post('projection-runs/:id/advance')
   @Roles('SYSTEM', 'GRAPH_PROJECTION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -123,6 +152,11 @@ export class GraphProjectionController {
   }
 
   /** UC-61-10. */
+  @Audited({
+    action: 'GRAPH_EDGE_EXPIRED',
+    entity: 'graph_edge',
+    entityId: 'param:id',
+  })
   @Post('edges/:id/expire')
   @Roles('SYSTEM', 'GRAPH_PROJECTION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

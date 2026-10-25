@@ -16,10 +16,11 @@ import {
  * sí mismo. NO se envía ninguna contraseña: el titular la fijará al activar. El
  * `email` actúa como identificador verificado para evitar duplicados.
  *
- * El nombre se declara en partes, como en el resto de las altas. Ojo: esta vía
- * crea la cuenta y nada más —no hay fila en `profiles.persons`—, así que las
- * partes sólo sobreviven compuestas en `iam.users.display_name`; la persona se
- * registra después, cuando el titular completa su perfil.
+ * El nombre se declara en partes, como en el resto de las altas. Con ellas se
+ * crean, junto a la cuenta y en la misma transacción, la persona
+ * (`profiles.persons`), su perfil de paciente y el vínculo `SELF` cuenta-persona,
+ * de modo que el titular puede abrir su perfil apenas activa la cuenta. Si el
+ * cliente sólo manda `displayName`, la persona nace con ese nombre y sin partes.
  */
 export class AssistedRegistrationDto {
   /**

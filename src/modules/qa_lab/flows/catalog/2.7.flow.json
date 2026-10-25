@@ -7,14 +7,8 @@
     "document": "SALUD/📋 Registro de procesos por módulo.md",
     "section": "2.7 · Facturación y/o pago por la consulta medica"
   },
-  "actors": [
-    "PRACTITIONER",
-    "PATIENT",
-    "INSURER"
-  ],
-  "frontRoutes": [
-    "/medical-records/:profileId/consultation"
-  ],
+  "actors": ["PRACTITIONER", "PATIENT", "INSURER"],
+  "frontRoutes": ["/medical-records/:profileId/consultation"],
   "root": "decidir-seguro",
   "nodes": [
     {

@@ -4,10 +4,10 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 
 ## Servicios
 
-| Servicio | Casos de uso | Responsabilidad |
-| --- | --- | --- |
+| Servicio           | Casos de uso   | Responsabilidad                                            |
+| ------------------ | -------------- | ---------------------------------------------------------- |
 | `QaCatalogService` | 01, 02, 03, 11 | Entornos, casos con aserciones, publicación y programación |
-| `QaRunsService` | 04 … 10, 12 | Corridas, captura, evaluación, cierre, defectos y release |
+| `QaRunsService`    | 04 … 10, 12    | Corridas, captura, evaluación, cierre, defectos y release  |
 
 ## Reglas de negocio
 
@@ -51,13 +51,13 @@ multiplicarse. Que la firma **no** incluya la corrida ni la fecha es justamente 
 
 ## Transiciones del defecto
 
-| Desde | Hacia |
-| --- | --- |
-| `OPEN` | `TRIAGED`, `REJECTED` |
-| `TRIAGED` | `IN_PROGRESS`, `REJECTED` |
-| `IN_PROGRESS` | `RESOLVED`, `TRIAGED` |
-| `RESOLVED` | `CLOSED`, `IN_PROGRESS` |
-| `CLOSED`, `REJECTED` | — |
+| Desde                | Hacia                     |
+| -------------------- | ------------------------- |
+| `OPEN`               | `TRIAGED`, `REJECTED`     |
+| `TRIAGED`            | `IN_PROGRESS`, `REJECTED` |
+| `IN_PROGRESS`        | `RESOLVED`, `TRIAGED`     |
+| `RESOLVED`           | `CLOSED`, `IN_PROGRESS`   |
+| `CLOSED`, `REJECTED` | —                         |
 
 Repetir el estado actual se admite (permite reclasificar gravedad o reasignar sin mover el flujo).
 Reabrir un cerrado no: si el fallo vuelve a verse, lo reabre `registerDefect`, con la evidencia

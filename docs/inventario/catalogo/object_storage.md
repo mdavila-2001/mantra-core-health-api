@@ -231,9 +231,9 @@ Registra manifests de estudios DICOM para localizar y gobernar imágenes médica
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_dicom_study_uid` | no | tenant_id, study_instance_uid | 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_dicom_study_uid` | no | tenant_id, study_instance_uid | 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_dicom_study_patient_date` | no | tenant_id, patient_profile_id, ("study_date" DESC) | _sin uso detectado estáticamente_ |
-| `ix_dicom_study_accession` | no | tenant_id, accession_number | 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_dicom_study_accession` | no | tenant_id, accession_number | 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Operaciones que la tocan
 

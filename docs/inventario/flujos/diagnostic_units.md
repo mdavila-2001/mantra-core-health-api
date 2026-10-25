@@ -3,7 +3,7 @@
 # Flujos del módulo `diagnostic_units`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 21 (19 con decisiones propias, 2 sin ellas)
+- **Operaciones:** 21 (17 con decisiones propias, 4 sin ellas)
 - Inventario de endpoints del módulo: [diagnostic_units](../endpoints/diagnostic_units.md)
 
 ## Proceso: Módulo 23 — Diagnostic Units, Studies, Specialists and Prices
@@ -26,20 +26,20 @@ _Fuente: `src/modules/diagnostic_units/README.md:3`_
 | `Directorio P3` | Listar unidades activas y verificadas del tenant activo | GET /diagnostic-units | Cualquier sesión válida | BAJO | 5 |
 |  |  | GET /diagnostic-units/{id} | Cualquier sesión válida | BAJO | 10 |
 | `UC-23-01` | Alta de unidad con sitios (1..N) y acreditaciones (0..N) | POST /diagnostic-units | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-23-02` | Actualizar sitio | PATCH /diagnostic-unit-sites/{siteId} | SECURITY_ADMIN | MEDIO | 2 |
+| `UC-23-02` | Actualizar sitio | PATCH /diagnostic-unit-sites/{siteId} | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /diagnostic-units/{id}/sites | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-23-03` | Verificar y publicar perfil público | POST /diagnostic-units/{id}/verify-and-publish | SECURITY_ADMIN | MEDIO | 8 |
 | `UC-23-04` | Declarar especialidades (upsert + soft-close) | PUT /diagnostic-units/{id}/specialties | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-23-05` | Publicar oferta con componentes (panel) | POST /diagnostic-units/{id}/study-offerings | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-23-06` | Crear cronograma de precios | POST /diagnostic-units/{id}/price-schedules | SECURITY_ADMIN | MEDIO | 3 |
-| `UC-23-07` | Fijar/versionar precio (append-only) | POST /price-schedules/{scheduleId}/study-prices | SECURITY_ADMIN | MEDIO | 5 |
-| `UC-23-08` | Retirar (soft-delete) oferta | DELETE /diagnostic-study-offerings/{id} | SECURITY_ADMIN | MEDIO | 2 |
-|  |  | POST /study-prices/{priceId}/close | SECURITY_ADMIN | MEDIO | 2 |
-| `UC-23-09` | Actualizar estado/calibración de equipo | PATCH /diagnostic-equipment/{id} | SECURITY_ADMIN | MEDIO | 2 |
-|  |  | POST /diagnostic-unit-sites/{siteId}/equipment | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-23-10` | Asignar especialista | POST /diagnostic-units/{id}/practitioner-assignments | SECURITY_ADMIN | MEDIO | 5 |
-| `UC-23-11` | Renovar acreditación | POST /diagnostic-unit-accreditations/{id}/renew | SECURITY_ADMIN | MEDIO | 3 |
-|  |  | POST /diagnostic-units/{id}/accreditations | SECURITY_ADMIN | MEDIO | 2 |
+| `UC-23-05` | Publicar oferta con componentes (panel) | POST /diagnostic-units/{id}/study-offerings | SECURITY_ADMIN | MEDIO | 5 |
+| `UC-23-06` | Crear cronograma de precios | POST /diagnostic-units/{id}/price-schedules | SECURITY_ADMIN | MEDIO | 4 |
+| `UC-23-07` | Fijar/versionar precio (append-only) | POST /price-schedules/{scheduleId}/study-prices | SECURITY_ADMIN | MEDIO | 6 |
+| `UC-23-08` | Retirar (soft-delete) oferta | DELETE /diagnostic-study-offerings/{id} | SECURITY_ADMIN | MEDIO | 3 |
+|  |  | POST /study-prices/{priceId}/close | SECURITY_ADMIN | MEDIO | 4 |
+| `UC-23-09` | Actualizar estado/calibración de equipo | PATCH /diagnostic-equipment/{id} | SECURITY_ADMIN | MEDIO | 4 |
+|  |  | POST /diagnostic-unit-sites/{siteId}/equipment | SECURITY_ADMIN | MEDIO | 5 |
+| `UC-23-10` | Asignar especialista | POST /diagnostic-units/{id}/practitioner-assignments | SECURITY_ADMIN | MEDIO | 6 |
+| `UC-23-11` | Renovar acreditación | POST /diagnostic-unit-accreditations/{id}/renew | SECURITY_ADMIN | MEDIO | 4 |
+|  |  | POST /diagnostic-units/{id}/accreditations | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-23-12` | Reconstruir proyección del perfil público | POST /diagnostic-units/{id}/reproject | SECURITY_ADMIN | BAJO | 1 |
 | `ctrl:DiagnosticUnitsController` | Operaciones de DiagnosticUnitsController que el README no asigna a un caso de uso | GET /diagnostic-units/{id}/administration | SECURITY_ADMIN | BAJO | 11 |
 |  |  | GET /diagnostic-units/administration | SECURITY_ADMIN | BAJO | 5 |
@@ -132,6 +132,7 @@ flowchart LR
   a15 --> o16
   o16 -->|"ACTUALIZA"| t5
   o16 -->|"LEE"| t5
+  o16 -->|"LEE"| t6
   a15 --> o17
   o17 -->|"CREA"| t5
   o17 -->|"LEE"| t6
@@ -152,10 +153,12 @@ flowchart LR
   o23 -->|"CREA"| t24
   o23 -->|"CREA"| t4
   o23 -->|"LEE"| t4
+  o23 -->|"LEE"| t5
   o23 -->|"LEE"| t6
   a15 --> o25
   o25 -->|"CREA"| t10
   o25 -->|"LEE"| t10
+  o25 -->|"LEE"| t5
   o25 -->|"LEE"| t6
   a15 --> o26
   o26 -->|"LEE"| t10
@@ -163,23 +166,31 @@ flowchart LR
   o26 -->|"ACTUALIZA"| t11
   o26 -->|"CREA"| t11
   o26 -->|"LEE"| t11
+  o26 -->|"LEE"| t6
   a15 --> o27
   o27 -->|"ACTUALIZA"| t4
   o27 -->|"LEE"| t4
+  o27 -->|"LEE"| t6
   a15 --> o28
+  o28 -->|"LEE"| t10
   o28 -->|"ACTUALIZA"| t11
   o28 -->|"LEE"| t11
+  o28 -->|"LEE"| t6
   a15 --> o29
   o29 -->|"ACTUALIZA"| t3
   o29 -->|"LEE"| t3
+  o29 -->|"LEE"| t5
+  o29 -->|"LEE"| t6
   a15 --> o30
   o30 -->|"CREA"| t3
   o30 -->|"LEE"| t3
   o30 -->|"ACTUALIZA"| t5
   o30 -->|"LEE"| t5
+  o30 -->|"LEE"| t6
   a15 --> o31
   o31 -->|"CREA"| t32
   o31 -->|"LEE"| t32
+  o31 -->|"LEE"| t5
   o31 -->|"CREA"| t20
   o31 -->|"LEE"| t20
   o31 -->|"LEE"| t6
@@ -187,8 +198,10 @@ flowchart LR
   o33 -->|"ACTUALIZA"| t12
   o33 -->|"CREA"| t12
   o33 -->|"LEE"| t12
+  o33 -->|"LEE"| t6
   a15 --> o34
   o34 -->|"CREA"| t12
+  o34 -->|"LEE"| t5
   o34 -->|"LEE"| t6
   a15 --> o35
   o35 -->|"LEE"| t6
@@ -266,7 +279,7 @@ Actualizar estado/calibración de un equipo
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Equipo no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -278,43 +291,55 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a DiagnosticEquipmentRepository.findById"]:::llamada
+  n5["Llama a DiagnosticUnitScopeService.equipment"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostic_units.diagnostic_equipment")]:::efecto
+  n6["Llama a DiagnosticEquipmentRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!equipment"}:::decision
+  n7[("LEE diagnostic_units.diagnostic_equipment")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Equipo no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"dto.manufacturer !== undefined"}:::decision
-  n7 -->|"no"| n9
-  n10[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
-  n10 --> n11
-  n9 -->|"no"| n11
-  n12{"dto.model !== undefined"}:::decision
-  n11 --> n12
-  n13[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
-  n12 -->|"sí"| n13
-  n14{"dto.lastCalibrationAt !== undefined"}:::decision
-  n13 --> n14
-  n12 -->|"no"| n14
-  n15[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
-  n14 -->|"sí"| n15
-  n16{"dto.nextCalibrationDueAt !== undefined"}:::decision
-  n15 --> n16
-  n14 -->|"no"| n16
+  n8["Llama a DiagnosticUnitScopeService.siteOrFail"]:::llamada
+  n7 --> n8
+  n9["Llama a DiagnosticUnitScopeService.notFound"]:::llamada
+  n8 --> n9
+  n10(["404 NOT_FOUND {message}"]):::error
+  n9 --> n10
+  n11{"!siteId"}:::decision
+  n12["Llama a DiagnosticUnitScopeService.notFound"]:::llamada
+  n11 -->|"sí"| n12
+  n13(["404 NOT_FOUND {message}"]):::error
+  n12 --> n13
+  n14["Llama a DiagnosticUnitScopeService.notFound"]:::llamada
+  n11 -->|"no"| n14
+  n15(["404 NOT_FOUND {message}"]):::error
+  n14 --> n15
+  n16{"dto.manufacturer !== undefined"}:::decision
   n17[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
   n16 -->|"sí"| n17
-  n18{"dto.operationalStatusConceptId !== undefined"}:::decision
+  n18[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
   n17 --> n18
   n16 -->|"no"| n18
-  n19[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
-  n18 -->|"sí"| n19
-  n20(("200 Responde con éxito")):::ok
-  n19 --> n20
-  n18 -->|"no"| n20
+  n19{"dto.model !== undefined"}:::decision
+  n18 --> n19
+  n20[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
+  n19 -->|"sí"| n20
+  n21{"dto.lastCalibrationAt !== undefined"}:::decision
+  n20 --> n21
+  n19 -->|"no"| n21
+  n22[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
+  n21 -->|"sí"| n22
+  n23{"dto.nextCalibrationDueAt !== undefined"}:::decision
+  n22 --> n23
+  n21 -->|"no"| n23
+  n24[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
+  n23 -->|"sí"| n24
+  n25{"dto.operationalStatusConceptId !== undefined"}:::decision
+  n24 --> n25
+  n23 -->|"no"| n25
+  n26[("ACTUALIZA diagnostic_units.diagnostic_equipment")]:::efecto
+  n25 -->|"sí"| n26
+  n27(("200 Responde con éxito")):::ok
+  n26 --> n27
+  n25 -->|"no"| n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -333,7 +358,6 @@ Retirar (soft-delete) una oferta de estudio
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Oferta no encontrada |
 | 409 | `CONFLICT` | ConflictException: La oferta ya está retirada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -346,68 +370,26 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a DiagnosticStudyOfferingsRepository.findById"]:::llamada
+  n5["Llama a DiagnosticUnitScopeService.offering"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n6["Llama a DiagnosticStudyOfferingsRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!offering"}:::decision
+  n7[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Oferta no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"offering.statusConceptId === DUNIT.OFFERING_RETIRED"}:::decision
-  n7 -->|"no"| n9
-  n10(["409 CONFLICT La oferta ya está retirada"]):::error
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA diagnostic_units.diagnostic_study_offerings")]:::efecto
-  n9 -->|"no"| n11
-  n12(("200 Responde con éxito")):::ok
-  n11 --> n12
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 3. POST /diagnostic-unit-accreditations/{id}/renew
-
-Renovar/registrar acreditación con evidencia
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Acreditación no encontrada |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
-  n1 --> n2
-  n3["Llama a DiagnosticUnitsService.renewAccreditation"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a DiagnosticUnitAccreditationsRepository.findById"]:::llamada
-  n4 --> n5
-  n6[("LEE diagnostic_units.diagnostic_unit_accreditations")]:::efecto
-  n5 --> n6
-  n7{"!previous"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Acreditación no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9[("ACTUALIZA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
-  n7 -->|"no"| n9
-  n10["Llama a DiagnosticUnitAccreditationsRepository.create"]:::llamada
+  n8["Llama a DiagnosticUnitScopeService.viaUnit"]:::llamada
+  n7 --> n8
+  n9["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n9 --> n10
-  n11[("CREA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
+  n11{"offering.statusConceptId === DUNIT.OFFERING_RETIRED"}:::decision
   n10 --> n11
-  n12(("201 Responde con éxito")):::ok
-  n11 --> n12
+  n12(["409 CONFLICT La oferta ya está retirada"]):::error
+  n11 -->|"sí"| n12
+  n13[("ACTUALIZA diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n11 -->|"no"| n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -416,7 +398,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. PATCH /diagnostic-unit-sites/{siteId}
+#### 3. PATCH /diagnostic-unit-sites/{siteId}
 
 Actualizar un sitio operativo de la unidad
 
@@ -426,7 +408,6 @@ Actualizar un sitio operativo de la unidad
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -438,36 +419,40 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a DiagnosticUnitSitesRepository.findById"]:::llamada
+  n5["Llama a DiagnosticUnitScopeService.site"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n6["Llama a DiagnosticUnitSitesRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!site"}:::decision
+  n7[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Sitio no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"dto.siteRoleConceptId !== undefined"}:::decision
-  n7 -->|"no"| n9
-  n10[("ACTUALIZA diagnostic_units.diagnostic_unit_sites")]:::efecto
-  n9 -->|"sí"| n10
-  n11{"dto.accessionPrefix !== undefined"}:::decision
+  n8["Llama a DiagnosticUnitScopeService.viaUnit"]:::llamada
+  n7 --> n8
+  n9["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n9 --> n10
+  n11{"dto.siteRoleConceptId !== undefined"}:::decision
   n10 --> n11
-  n9 -->|"no"| n11
   n12[("ACTUALIZA diagnostic_units.diagnostic_unit_sites")]:::efecto
   n11 -->|"sí"| n12
-  n13{"dto.sampleCollectionAvailable !== undefined"}:::decision
+  n13{"dto.accessionPrefix !== undefined"}:::decision
   n12 --> n13
   n11 -->|"no"| n13
   n14[("ACTUALIZA diagnostic_units.diagnostic_unit_sites")]:::efecto
   n13 -->|"sí"| n14
-  n15{"dto.imagingAvailable !== undefined"}:::decision
+  n15{"dto.sampleCollectionAvailable !== undefined"}:::decision
   n14 --> n15
   n13 -->|"no"| n15
   n16[("ACTUALIZA diagnostic_units.diagnostic_unit_sites")]:::efecto
   n15 -->|"sí"| n16
-  n17(("200 Responde con éxito")):::ok
+  n17{"dto.imagingAvailable !== undefined"}:::decision
   n16 --> n17
   n15 -->|"no"| n17
+  n18[("ACTUALIZA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n17 -->|"sí"| n18
+  n19(("200 Responde con éxito")):::ok
+  n18 --> n19
+  n17 -->|"no"| n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -476,7 +461,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /diagnostic-unit-sites/{siteId}/equipment
+#### 4. POST /diagnostic-unit-sites/{siteId}/equipment
 
 Registrar equipamiento y calibración del sitio
 
@@ -486,7 +471,6 @@ Registrar equipamiento y calibración del sitio
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe un equipo con ese número de serie en el sitio |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sitio no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -500,40 +484,44 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a DiagnosticUnitSitesRepository.findById"]:::llamada
+  n5["Llama a DiagnosticUnitScopeService.site"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n6["Llama a DiagnosticUnitSitesRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!site"}:::decision
+  n7[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Sitio no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"site.statusConceptId !== DUNIT.SITE_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El sitio no está activo"]):::error
-  n9 -->|"sí"| n10
-  n11{"dto.serialNumber"}:::decision
-  n9 -->|"no"| n11
-  n12["Llama a DiagnosticEquipmentRepository.findBySerial"]:::llamada
+  n8["Llama a DiagnosticUnitScopeService.viaUnit"]:::llamada
+  n7 --> n8
+  n9["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n9 --> n10
+  n11{"site.statusConceptId !== DUNIT.SITE_ACTIVE"}:::decision
+  n10 --> n11
+  n12(["422 PRECONDITION_FAILED El sitio no está activo"]):::error
   n11 -->|"sí"| n12
-  n13[("LEE diagnostic_units.diagnostic_equipment")]:::efecto
-  n12 --> n13
-  n14{"clash"}:::decision
-  n13 --> n14
-  n15(["409 CONFLICT Ya existe un equipo con ese número de serie en el sitio"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a DiagnosticEquipmentRepository.create"]:::llamada
-  n14 -->|"no"| n16
-  n11 -->|"no"| n16
-  n17[("CREA diagnostic_units.diagnostic_equipment")]:::efecto
-  n16 --> n17
-  n18{"dto.modalityConceptId && !site.imagingAvailable"}:::decision
-  n17 --> n18
-  n19[("ACTUALIZA diagnostic_units.diagnostic_unit_sites")]:::efecto
-  n18 -->|"sí"| n19
-  n20(("201 Responde con éxito")):::ok
+  n13{"dto.serialNumber"}:::decision
+  n11 -->|"no"| n13
+  n14["Llama a DiagnosticEquipmentRepository.findBySerial"]:::llamada
+  n13 -->|"sí"| n14
+  n15[("LEE diagnostic_units.diagnostic_equipment")]:::efecto
+  n14 --> n15
+  n16{"clash"}:::decision
+  n15 --> n16
+  n17(["409 CONFLICT Ya existe un equipo con ese número de serie en el sitio"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a DiagnosticEquipmentRepository.create"]:::llamada
+  n16 -->|"no"| n18
+  n13 -->|"no"| n18
+  n19[("CREA diagnostic_units.diagnostic_equipment")]:::efecto
+  n18 --> n19
+  n20{"dto.modalityConceptId && !site.imagingAvailable"}:::decision
   n19 --> n20
-  n18 -->|"no"| n20
+  n21[("ACTUALIZA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n20 -->|"sí"| n21
+  n22(("201 Responde con éxito")):::ok
+  n21 --> n22
+  n20 -->|"no"| n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -542,7 +530,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /diagnostic-units
+#### 5. POST /diagnostic-units
 
 Alta de unidad diagnóstica con sitios y acreditaciones
 
@@ -552,6 +540,7 @@ Alta de unidad diagnóstica con sitios y acreditaciones
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
 | 409 | `CONFLICT` | ConflictException: El código ya existe en el tenant |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -562,36 +551,42 @@ flowchart TD
   n1 --> n2
   n3["Llama a DiagnosticUnitsService.create"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a DiagnosticUnitScopeService.activeTenantFor"]:::llamada
   n3 --> n4
-  n5["Llama a DiagnosticUnitsRepository.findByCode"]:::llamada
+  n5{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
   n4 --> n5
-  n6[("LEE diagnostic_units.diagnostic_units")]:::efecto
-  n5 --> n6
-  n7{"clash"}:::decision
-  n6 --> n7
-  n8(["409 CONFLICT El código ya existe en el tenant"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a DiagnosticUnitsRepository.create"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA diagnostic_units.diagnostic_units")]:::efecto
+  n6(["404 NOT_FOUND Unidad no encontrada"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a DiagnosticUnitsRepository.findByCode"]:::llamada
+  n7 --> n8
+  n9[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n8 --> n9
+  n10{"clash"}:::decision
   n9 --> n10
-  n11["Repite: por cada const s de sites"]:::bucle
-  n10 --> n11
-  n12["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
-  n11 -->|"cada elemento"| n12
-  n13[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n11(["409 CONFLICT El código ya existe en el tenant"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a DiagnosticUnitsRepository.create"]:::llamada
+  n10 -->|"no"| n12
+  n13[("CREA diagnostic_units.diagnostic_units")]:::efecto
   n12 --> n13
-  n14["Repite: por cada const a de accreditations"]:::bucle
+  n14["Repite: por cada const s de sites"]:::bucle
   n13 --> n14
-  n11 -->|"al terminar"| n14
-  n15["Llama a DiagnosticUnitAccreditationsRepository.create"]:::llamada
+  n15["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
   n14 -->|"cada elemento"| n15
-  n16[("CREA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
+  n16[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
   n15 --> n16
-  n17(("201 Responde con éxito")):::ok
+  n17["Repite: por cada const a de accreditations"]:::bucle
   n16 --> n17
   n14 -->|"al terminar"| n17
+  n18["Llama a DiagnosticUnitAccreditationsRepository.create"]:::llamada
+  n17 -->|"cada elemento"| n18
+  n19[("CREA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
+  n18 --> n19
+  n20(("201 Responde con éxito")):::ok
+  n19 --> n20
+  n17 -->|"al terminar"| n20
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -600,7 +595,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. GET /diagnostic-units/{id}
+#### 6. GET /diagnostic-units/{id}
 
 Consultar el perfil de una unidad diagnóstica
 
@@ -674,7 +669,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /diagnostic-units/{id}/accreditations
+#### 7. POST /diagnostic-units/{id}/accreditations
 
 Registrar una acreditación con evidencia
 
@@ -684,7 +679,7 @@ Registrar una acreditación con evidencia
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -699,24 +694,37 @@ flowchart TD
   n3 --> n4
   n5["Llama a DiagnosticUnitsService.loadActiveUnit"]:::llamada
   n4 --> n5
-  n6["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n6["Llama a DiagnosticUnitScopeService.unit"]:::llamada
   n5 --> n6
-  n7[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n7["Llama a DiagnosticUnitsRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!unit"}:::decision
+  n8[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Unidad no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a DiagnosticUnitAccreditationsRepository.create"]:::llamada
-  n10 -->|"no"| n12
-  n13[("CREA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
+  n9{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
+  n9 -->|"sí"| n10
+  n11{"dto.diagnosticUnitSiteId"}:::decision
+  n9 -->|"no"| n11
+  n12["Llama a DiagnosticUnitScopeService.siteOfUnit"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a DiagnosticUnitScopeService.site"]:::llamada
   n12 --> n13
-  n14(("201 Responde con éxito")):::ok
+  n14["Llama a DiagnosticUnitSitesRepository.findById"]:::llamada
   n13 --> n14
+  n15[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n14 --> n15
+  n16{"site.diagnosticUnitId !== unitId"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a DiagnosticUnitAccreditationsRepository.create"]:::llamada
+  n16 -->|"no"| n18
+  n11 -->|"no"| n18
+  n19[("CREA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
+  n18 --> n19
+  n20(("201 Responde con éxito")):::ok
+  n19 --> n20
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -725,7 +733,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. GET /diagnostic-units/{id}/administration
+#### 8. GET /diagnostic-units/{id}/administration
 
 Consola de administración de una unidad diagnóstica
 
@@ -803,7 +811,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /diagnostic-units/{id}/practitioner-assignments
+#### 9. POST /diagnostic-units/{id}/practitioner-assignments
 
 Asignar un especialista a la unidad/sitio
 
@@ -813,7 +821,7 @@ Asignar un especialista a la unidad/sitio
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
 | 409 | `CONFLICT` | ConflictException: El profesional ya tiene una asignación activa en ese rol/sitio |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -829,46 +837,59 @@ flowchart TD
   n3 --> n4
   n5["Llama a DiagnosticUnitsService.loadActiveUnit"]:::llamada
   n4 --> n5
-  n6["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n6["Llama a DiagnosticUnitScopeService.unit"]:::llamada
   n5 --> n6
-  n7[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n7["Llama a DiagnosticUnitsRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!unit"}:::decision
+  n8[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Unidad no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a DiagnosticUnitPractitionerAssignmentsRepository.findActiveOverlap"]:::llamada
-  n10 -->|"no"| n12
-  n13[("LEE diagnostic_units.diagnostic_unit_practitioner_assignments")]:::efecto
+  n9{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
+  n9 -->|"sí"| n10
+  n11{"dto.diagnosticUnitSiteId"}:::decision
+  n9 -->|"no"| n11
+  n12["Llama a DiagnosticUnitScopeService.siteOfUnit"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a DiagnosticUnitScopeService.site"]:::llamada
   n12 --> n13
-  n14{"overlap"}:::decision
+  n14["Llama a DiagnosticUnitSitesRepository.findById"]:::llamada
   n13 --> n14
-  n15(["409 CONFLICT El profesional ya tiene una asignación activa en ese rol/sitio"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a DiagnosticUnitPractitionerAssignmentsRepository.create"]:::llamada
-  n14 -->|"no"| n16
-  n17[("CREA diagnostic_units.diagnostic_unit_practitioner_assignments")]:::efecto
-  n16 --> n17
-  n18{"dto.specialtyConceptId"}:::decision
-  n17 --> n18
-  n19["Llama a DiagnosticUnitSpecialtiesRepository.findOpenByConcept"]:::llamada
-  n18 -->|"sí"| n19
-  n20[("LEE diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n15[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n14 --> n15
+  n16{"site.diagnosticUnitId !== unitId"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a DiagnosticUnitPractitionerAssignmentsRepository.findActiveOverlap"]:::llamada
+  n16 -->|"no"| n18
+  n11 -->|"no"| n18
+  n19[("LEE diagnostic_units.diagnostic_unit_practitioner_assignments")]:::efecto
+  n18 --> n19
+  n20{"overlap"}:::decision
   n19 --> n20
-  n21{"!existing"}:::decision
-  n20 --> n21
-  n22["Llama a DiagnosticUnitSpecialtiesRepository.create"]:::llamada
-  n21 -->|"sí"| n22
-  n23[("CREA diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n21(["409 CONFLICT El profesional ya tiene una asignación activa en ese rol/sitio"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a DiagnosticUnitPractitionerAssignmentsRepository.create"]:::llamada
+  n20 -->|"no"| n22
+  n23[("CREA diagnostic_units.diagnostic_unit_practitioner_assignments")]:::efecto
   n22 --> n23
-  n24(("201 Responde con éxito")):::ok
+  n24{"dto.specialtyConceptId"}:::decision
   n23 --> n24
-  n21 -->|"no"| n24
-  n18 -->|"no"| n24
+  n25["Llama a DiagnosticUnitSpecialtiesRepository.findOpenByConcept"]:::llamada
+  n24 -->|"sí"| n25
+  n26[("LEE diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n25 --> n26
+  n27{"!existing"}:::decision
+  n26 --> n27
+  n28["Llama a DiagnosticUnitSpecialtiesRepository.create"]:::llamada
+  n27 -->|"sí"| n28
+  n29[("CREA diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n28 --> n29
+  n30(("201 Responde con éxito")):::ok
+  n29 --> n30
+  n27 -->|"no"| n30
+  n24 -->|"no"| n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -877,7 +898,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /diagnostic-units/{id}/price-schedules
+#### 10. POST /diagnostic-units/{id}/price-schedules
 
 Crear un cronograma de precios
 
@@ -887,7 +908,7 @@ Crear un cronograma de precios
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
 | 409 | `CONFLICT` | ConflictException: El código de cronograma ya existe en la unidad |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -901,32 +922,45 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n5["Llama a DiagnosticUnitScopeService.unit"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n6["Llama a DiagnosticUnitsRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!unit"}:::decision
+  n7[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Unidad no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a DiagnosticPriceSchedulesRepository.findByCode"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE diagnostic_units.diagnostic_price_schedules")]:::efecto
+  n8{"dto.diagnosticUnitSiteId"}:::decision
+  n7 --> n8
+  n9["Llama a DiagnosticUnitScopeService.siteOfUnit"]:::llamada
+  n8 -->|"sí"| n9
+  n10["Llama a DiagnosticUnitScopeService.site"]:::llamada
+  n9 --> n10
+  n11["Llama a DiagnosticUnitSitesRepository.findById"]:::llamada
+  n10 --> n11
+  n12[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
   n11 --> n12
-  n13{"clash"}:::decision
+  n13{"site.diagnosticUnitId !== unitId"}:::decision
   n12 --> n13
-  n14(["409 CONFLICT El código de cronograma ya existe en la unidad"]):::error
+  n14(["404 NOT_FOUND Sitio no encontrado"]):::error
   n13 -->|"sí"| n14
-  n15["Llama a DiagnosticPriceSchedulesRepository.create"]:::llamada
+  n15{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
   n13 -->|"no"| n15
-  n16[("CREA diagnostic_units.diagnostic_price_schedules")]:::efecto
-  n15 --> n16
-  n17(("201 Responde con éxito")):::ok
-  n16 --> n17
+  n8 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a DiagnosticPriceSchedulesRepository.findByCode"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE diagnostic_units.diagnostic_price_schedules")]:::efecto
+  n17 --> n18
+  n19{"clash"}:::decision
+  n18 --> n19
+  n20(["409 CONFLICT El código de cronograma ya existe en la unidad"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a DiagnosticPriceSchedulesRepository.create"]:::llamada
+  n19 -->|"no"| n21
+  n22[("CREA diagnostic_units.diagnostic_price_schedules")]:::efecto
+  n21 --> n22
+  n23(("201 Responde con éxito")):::ok
+  n22 --> n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -935,45 +969,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /diagnostic-units/{id}/reproject
-
-Reconstruir la proyección del perfil público
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a DiagnosticUnitsService.reproject"]:::llamada
-  n2 --> n3
-  n4["Llama a DiagnosticUnitsRepository.findById"]:::llamada
-  n3 --> n4
-  n5[("LEE diagnostic_units.diagnostic_units")]:::efecto
-  n4 --> n5
-  n6{"!unit"}:::decision
-  n5 --> n6
-  n7(["404 NOT_FOUND Unidad no encontrada"]):::error
-  n6 -->|"sí"| n7
-  n8(("200 Responde con éxito")):::ok
-  n6 -->|"no"| n8
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 13. POST /diagnostic-units/{id}/sites
+#### 11. POST /diagnostic-units/{id}/sites
 
 Registrar un sitio operativo de la unidad
 
@@ -983,7 +979,6 @@ Registrar un sitio operativo de la unidad
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -998,24 +993,22 @@ flowchart TD
   n3 --> n4
   n5["Llama a DiagnosticUnitsService.loadActiveUnit"]:::llamada
   n4 --> n5
-  n6["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n6["Llama a DiagnosticUnitScopeService.unit"]:::llamada
   n5 --> n6
-  n7[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n7["Llama a DiagnosticUnitsRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!unit"}:::decision
+  n8[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Unidad no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
-  n10 -->|"no"| n12
-  n13[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n9{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a DiagnosticUnitSitesRepository.create"]:::llamada
+  n9 -->|"no"| n11
+  n12[("CREA diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n11 --> n12
+  n13(("201 Responde con éxito")):::ok
   n12 --> n13
-  n14(("201 Responde con éxito")):::ok
-  n13 --> n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1024,7 +1017,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. PUT /diagnostic-units/{id}/specialties
+#### 12. PUT /diagnostic-units/{id}/specialties
 
 Declarar las especialidades de la unidad
 
@@ -1034,7 +1027,6 @@ Declarar las especialidades de la unidad
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: A lo sumo una especialidad puede ser primaria; PreconditionFailedException: La unidad no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1053,48 +1045,46 @@ flowchart TD
   n4 -->|"no"| n6
   n7["Llama a DiagnosticUnitsService.loadActiveUnit"]:::llamada
   n6 --> n7
-  n8["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n8["Llama a DiagnosticUnitScopeService.unit"]:::llamada
   n7 --> n8
-  n9[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n9["Llama a DiagnosticUnitsRepository.findById"]:::llamada
   n8 --> n9
-  n10{"!unit"}:::decision
+  n10[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n9 --> n10
-  n11(["404 NOT_FOUND Unidad no encontrada"]):::error
-  n10 -->|"sí"| n11
-  n12{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
-  n10 -->|"no"| n12
-  n13(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a DiagnosticUnitSpecialtiesRepository.findOpenForUnit"]:::llamada
-  n12 -->|"no"| n14
-  n15[("LEE diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n11{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
+  n10 --> n11
+  n12(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a DiagnosticUnitSpecialtiesRepository.findOpenForUnit"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n13 --> n14
+  n15["Repite: por cada const existing de open"]:::bucle
   n14 --> n15
-  n16["Repite: por cada const existing de open"]:::bucle
-  n15 --> n16
-  n17{"!desired.has(existing.specialtyConceptId)"}:::decision
-  n16 -->|"cada elemento"| n17
-  n18[("ACTUALIZA diagnostic_units.diagnostic_unit_specialties")]:::efecto
-  n17 -->|"sí"| n18
-  n19["Repite: por cada const item de dto.specialties"]:::bucle
-  n18 --> n19
-  n17 -->|"no"| n19
-  n16 -->|"al terminar"| n19
-  n20["Llama a DiagnosticUnitSpecialtiesRepository.findOpenByConcept"]:::llamada
-  n19 -->|"cada elemento"| n20
-  n21[("LEE diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n16{"!desired.has(existing.specialtyConceptId)"}:::decision
+  n15 -->|"cada elemento"| n16
+  n17[("ACTUALIZA diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n16 -->|"sí"| n17
+  n18["Repite: por cada const item de dto.specialties"]:::bucle
+  n17 --> n18
+  n16 -->|"no"| n18
+  n15 -->|"al terminar"| n18
+  n19["Llama a DiagnosticUnitSpecialtiesRepository.findOpenByConcept"]:::llamada
+  n18 -->|"cada elemento"| n19
+  n20[("LEE diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n19 --> n20
+  n21{"current"}:::decision
   n20 --> n21
-  n22{"current"}:::decision
-  n21 --> n22
-  n23[("ACTUALIZA diagnostic_units.diagnostic_unit_specialties")]:::efecto
-  n22 -->|"sí"| n23
-  n24["Llama a DiagnosticUnitSpecialtiesRepository.create"]:::llamada
-  n22 -->|"no"| n24
-  n25[("CREA diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n22[("ACTUALIZA diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n21 -->|"sí"| n22
+  n23["Llama a DiagnosticUnitSpecialtiesRepository.create"]:::llamada
+  n21 -->|"no"| n23
+  n24[("CREA diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n22 --> n25
   n24 --> n25
-  n26(("200 Responde con éxito")):::ok
-  n23 --> n26
-  n25 --> n26
-  n19 -->|"al terminar"| n26
+  n18 -->|"al terminar"| n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1103,7 +1093,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /diagnostic-units/{id}/study-offerings
+#### 13. POST /diagnostic-units/{id}/study-offerings
 
 Publicar oferta de estudio con componentes (panel)
 
@@ -1113,7 +1103,7 @@ Publicar oferta de estudio con componentes (panel)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
 | 409 | `CONFLICT` | ConflictException: El código de estudio ya existe en la unidad |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa; PreconditionFailedException: Un panel no puede referenciarse a sí mismo como componente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1127,43 +1117,71 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n5["Llama a DiagnosticUnitScopeService.unit"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n6["Llama a DiagnosticUnitsRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!unit"}:::decision
+  n7[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Unidad no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a DiagnosticStudyOfferingsRepository.findByStudyCode"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n8{"dto.diagnosticUnitSiteId"}:::decision
+  n7 --> n8
+  n9["Llama a DiagnosticUnitScopeService.siteOfUnit"]:::llamada
+  n8 -->|"sí"| n9
+  n10["Llama a DiagnosticUnitScopeService.site"]:::llamada
+  n9 --> n10
+  n11["Llama a DiagnosticUnitSitesRepository.findById"]:::llamada
+  n10 --> n11
+  n12[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
   n11 --> n12
-  n13{"clash"}:::decision
+  n13{"site.diagnosticUnitId !== unitId"}:::decision
   n12 --> n13
-  n14(["409 CONFLICT El código de estudio ya existe en la unidad"]):::error
+  n14(["404 NOT_FOUND Sitio no encontrado"]):::error
   n13 -->|"sí"| n14
-  n15["Llama a DiagnosticStudyOfferingsRepository.create"]:::llamada
+  n15{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
   n13 -->|"no"| n15
-  n16[("CREA diagnostic_units.diagnostic_study_offerings")]:::efecto
-  n15 --> n16
-  n17["Repite: por cada const c de components"]:::bucle
-  n16 --> n17
-  n18{"c.componentOfferingId === offering.id"}:::decision
-  n17 -->|"cada elemento"| n18
-  n19(["422 PRECONDITION_FAILED Un panel no puede referenciarse a sí mismo como componente"]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a DiagnosticStudyComponentsRepository.create"]:::llamada
-  n18 -->|"no"| n20
-  n21[("CREA diagnostic_units.diagnostic_study_components")]:::efecto
-  n20 --> n21
-  n22(("201 Responde con éxito")):::ok
-  n21 --> n22
-  n17 -->|"al terminar"| n22
+  n8 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a DiagnosticStudyOfferingsRepository.findByStudyCode"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n17 --> n18
+  n19{"clash"}:::decision
+  n18 --> n19
+  n20(["409 CONFLICT El código de estudio ya existe en la unidad"]):::error
+  n19 -->|"sí"| n20
+  n21["Repite: por cada const c de dto.components ?? []"]:::bucle
+  n19 -->|"no"| n21
+  n22["Llama a DiagnosticUnitScopeService.offering"]:::llamada
+  n21 -->|"cada elemento"| n22
+  n23["Llama a DiagnosticStudyOfferingsRepository.findById"]:::llamada
+  n22 --> n23
+  n24[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n23 --> n24
+  n25["Llama a DiagnosticUnitScopeService.viaUnit"]:::llamada
+  n24 --> n25
+  n26["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n25 --> n26
+  n27[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n26 --> n27
+  n28["Llama a DiagnosticStudyOfferingsRepository.create"]:::llamada
+  n27 --> n28
+  n21 -->|"al terminar"| n28
+  n29[("CREA diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n28 --> n29
+  n30["Repite: por cada const c de components"]:::bucle
+  n29 --> n30
+  n31{"c.componentOfferingId === offering.id"}:::decision
+  n30 -->|"cada elemento"| n31
+  n32(["422 PRECONDITION_FAILED Un panel no puede referenciarse a sí mismo como componente"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a DiagnosticStudyComponentsRepository.create"]:::llamada
+  n31 -->|"no"| n33
+  n34[("CREA diagnostic_units.diagnostic_study_components")]:::efecto
+  n33 --> n34
+  n35(("201 Responde con éxito")):::ok
+  n34 --> n35
+  n30 -->|"al terminar"| n35
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1172,7 +1190,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /diagnostic-units/{id}/verify-and-publish
+#### 14. POST /diagnostic-units/{id}/verify-and-publish
 
 Verificar la unidad y publicar su perfil público
 
@@ -1182,7 +1200,6 @@ Verificar la unidad y publicar su perfil público
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Unidad no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La unidad no está activa; PreconditionFailedException: La unidad no tiene ningún sitio activo para publicar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1197,61 +1214,59 @@ flowchart TD
   n3 --> n4
   n5["Llama a DiagnosticUnitsService.loadActiveUnit"]:::llamada
   n4 --> n5
-  n6["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n6["Llama a DiagnosticUnitScopeService.unit"]:::llamada
   n5 --> n6
-  n7[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n7["Llama a DiagnosticUnitsRepository.findById"]:::llamada
   n6 --> n7
-  n8{"!unit"}:::decision
+  n8[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n7 --> n8
-  n9(["404 NOT_FOUND Unidad no encontrada"]):::error
-  n8 -->|"sí"| n9
-  n10{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a DiagnosticUnitSitesRepository.countActiveForUnit"]:::llamada
-  n10 -->|"no"| n12
-  n13[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n9{"unit.statusConceptId !== DUNIT.UNIT_ACTIVE"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED La unidad no está activa"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a DiagnosticUnitSitesRepository.countActiveForUnit"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n11 --> n12
+  n13{"activeSites ‹ 1"}:::decision
   n12 --> n13
-  n14{"activeSites ‹ 1"}:::decision
-  n13 --> n14
-  n15(["422 PRECONDITION_FAILED La unidad no tiene ningún sitio activo para publicar"]):::error
-  n14 -->|"sí"| n15
-  n16[("ACTUALIZA diagnostic_units.diagnostic_units")]:::efecto
-  n14 -->|"no"| n16
-  n17{"!unit.publicProfileId"}:::decision
-  n16 --> n17
-  n18["Llama a PublicProfileProjectionService.projectOrganization"]:::llamada
-  n17 -->|"sí"| n18
-  n19["Llama a PublicProfilesRepository.findByTarget"]:::llamada
+  n14(["422 PRECONDITION_FAILED La unidad no tiene ningún sitio activo para publicar"]):::error
+  n13 -->|"sí"| n14
+  n15[("ACTUALIZA diagnostic_units.diagnostic_units")]:::efecto
+  n13 -->|"no"| n15
+  n16{"!unit.publicProfileId"}:::decision
+  n15 --> n16
+  n17["Llama a PublicProfileProjectionService.projectOrganization"]:::llamada
+  n16 -->|"sí"| n17
+  n18["Llama a PublicProfilesRepository.findByTarget"]:::llamada
+  n17 --> n18
+  n19[("LEE community.public_profiles")]:::efecto
   n18 --> n19
-  n20[("LEE community.public_profiles")]:::efecto
+  n20{"existing"}:::decision
   n19 --> n20
-  n21{"existing"}:::decision
-  n20 --> n21
-  n22{"existing.visibilityConceptId == null && existing.statusConceptId === CONCEPTS.STATE_PENDING"}:::decision
+  n21{"existing.visibilityConceptId == null && existing.statusConceptId === CONCEPTS.STATE_PENDING"}:::decision
+  n20 -->|"sí"| n21
+  n22[("ACTUALIZA community.public_profiles · ACTUALIZA community.public_profiles · ACTUALIZA community.public_profil…")]:::efecto
   n21 -->|"sí"| n22
-  n23[("ACTUALIZA community.public_profiles · ACTUALIZA community.public_profiles · ACTUALIZA community.public_profil…")]:::efecto
-  n22 -->|"sí"| n23
-  n24["Llama a PublicProfilesRepository.create"]:::llamada
+  n23["Llama a PublicProfilesRepository.create"]:::llamada
+  n22 --> n23
+  n21 -->|"no"| n23
+  n20 -->|"no"| n23
+  n24[("CREA community.public_profiles")]:::efecto
   n23 --> n24
-  n22 -->|"no"| n24
-  n21 -->|"no"| n24
-  n25[("CREA community.public_profiles")]:::efecto
+  n25[("ACTUALIZA diagnostic_units.diagnostic_units")]:::efecto
   n24 --> n25
-  n26[("ACTUALIZA diagnostic_units.diagnostic_units")]:::efecto
+  n26["Llama a DiagnosticUnitSpecialtiesRepository.verifyOpenForUnit"]:::llamada
   n25 --> n26
-  n27["Llama a DiagnosticUnitSpecialtiesRepository.verifyOpenForUnit"]:::llamada
+  n16 -->|"no"| n26
+  n27[("ACTUALIZA diagnostic_units.diagnostic_unit_specialties")]:::efecto
   n26 --> n27
-  n17 -->|"no"| n27
-  n28[("ACTUALIZA diagnostic_units.diagnostic_unit_specialties")]:::efecto
+  n28["Llama a DiagnosticUnitAccreditationsRepository.verifyOpenForUnit"]:::llamada
   n27 --> n28
-  n29["Llama a DiagnosticUnitAccreditationsRepository.verifyOpenForUnit"]:::llamada
+  n29[("ACTUALIZA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
   n28 --> n29
-  n30[("ACTUALIZA diagnostic_units.diagnostic_unit_accreditations")]:::efecto
+  n30(("200 Responde con éxito")):::ok
   n29 --> n30
-  n31(("200 Responde con éxito")):::ok
-  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1260,7 +1275,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. GET /diagnostic-units/search
+#### 15. GET /diagnostic-units/search
 
 Buscar centros de diagnóstico, laboratorio e imagen
 
@@ -1276,76 +1291,149 @@ flowchart TD
   n1(("Solicitud")):::inicio
   n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
   n1 --> n2
-  n3["Llama a DiagnosticUnitsSearchService.search"]:::llamada
+  n3{"query.studyConceptIds !== undefined"}:::decision
   n2 --> n3
-  n4{"query.studyCode !== undefined && query.studyCode !== ''"}:::decision
-  n3 --> n4
-  n5["Llama a DiagnosticUnitsReadRepository.findUnitIdsOfferingStudy"]:::llamada
-  n4 -->|"sí"| n5
+  n4["Llama a DiagnosticUnitsSearchService.searchCoverage"]:::llamada
+  n3 -->|"sí"| n4
+  n5["Llama a DiagnosticUnitsReadRepository.findOfferedConcepts"]:::llamada
+  n4 --> n5
   n6[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
   n5 --> n6
-  n7{"query.insurerTenantId !== undefined"}:::decision
+  n7["Llama a DiagnosticUnitsSearchService.restrictions"]:::llamada
   n6 --> n7
-  n4 -->|"no"| n7
-  n8["Llama a DiagnosticUnitsReadRepository.findUnitIdsWithInsurerAgreement"]:::llamada
-  n7 -->|"sí"| n8
-  n9[("LEE diagnostic_units.diagnostic_price_schedules")]:::efecto
-  n8 --> n9
-  n10["Llama a DiagnosticUnitsReadRepository.searchVisible"]:::llamada
+  n8{"query.studyCode !== undefined && query.studyCode !== ''"}:::decision
+  n7 --> n8
+  n9["Llama a DiagnosticUnitsReadRepository.findUnitIdsOfferingStudy"]:::llamada
+  n8 -->|"sí"| n9
+  n10[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
   n9 --> n10
-  n7 -->|"no"| n10
-  n11[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n11{"query.insurerTenantId !== undefined"}:::decision
   n10 --> n11
-  n12["Llama a DiagnosticUnitsReadRepository.countVisible"]:::llamada
-  n11 --> n12
-  n13[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n8 -->|"no"| n11
+  n12["Llama a DiagnosticUnitsReadRepository.findUnitIdsWithInsurerAgreement"]:::llamada
+  n11 -->|"sí"| n12
+  n13[("LEE diagnostic_units.diagnostic_price_schedules")]:::efecto
   n12 --> n13
-  n14["Llama a DiagnosticUnitsSearchService.project"]:::llamada
+  n14["Llama a DiagnosticUnitsReadRepository.countVisible"]:::llamada
   n13 --> n14
-  n15["Llama a DiagnosticUnitsReadRepository.findActiveSites"]:::llamada
+  n11 -->|"no"| n14
+  n15[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n14 --> n15
-  n16[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n16["Llama a DiagnosticUnitsReadRepository.searchVisible"]:::llamada
   n15 --> n16
-  n17["Llama a DiagnosticUnitsReadRepository.findActiveOfferings"]:::llamada
+  n17[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n16 --> n17
-  n18[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n18["Llama a DiagnosticUnitsSearchService.project"]:::llamada
   n17 --> n18
-  n19["Llama a DiagnosticUnitsReadRepository.findConcepts"]:::llamada
+  n19["Llama a DiagnosticUnitsReadRepository.findActiveSites"]:::llamada
   n18 --> n19
-  n20[("LEE terminology.catalog_concepts")]:::efecto
+  n20[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
   n19 --> n20
-  n21["Llama a DiagnosticUnitsReadRepository.findCurrentPublicSchedulesFor"]:::llamada
+  n21["Llama a DiagnosticUnitsReadRepository.findActiveOfferings"]:::llamada
   n20 --> n21
-  n22[("LEE diagnostic_units.diagnostic_price_schedules")]:::efecto
+  n22[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
   n21 --> n22
-  n23["Llama a CommunityRatingsService.ratingsByProfiles"]:::llamada
+  n23["Llama a DiagnosticUnitsReadRepository.findConcepts"]:::llamada
   n22 --> n23
-  n24["Llama a ReviewsRepository.averageByTargets"]:::llamada
+  n24[("LEE terminology.catalog_concepts")]:::efecto
   n23 --> n24
-  n25[("LEE community.service_reviews")]:::efecto
+  n25["Llama a DiagnosticUnitsReadRepository.findCurrentPublicSchedulesFor"]:::llamada
   n24 --> n25
-  n26["Llama a DiagnosticUnitsReadRepository.findEquipment"]:::llamada
+  n26[("LEE diagnostic_units.diagnostic_price_schedules")]:::efecto
   n25 --> n26
-  n27[("LEE diagnostic_units.diagnostic_equipment")]:::efecto
+  n27["Llama a CommunityRatingsService.ratingsByProfiles"]:::llamada
   n26 --> n27
-  n28["Llama a DiagnosticUnitsReadRepository.findCurrentPricesForSchedules"]:::llamada
+  n28["Llama a ReviewsRepository.averageByTargets"]:::llamada
   n27 --> n28
-  n29[("LEE diagnostic_units.diagnostic_study_prices")]:::efecto
+  n29[("LEE community.service_reviews")]:::efecto
   n28 --> n29
-  n30["Llama a DiagnosticUnitsReadRepository.findPracticeSites"]:::llamada
+  n30["Llama a DiagnosticUnitsReadRepository.findEquipment"]:::llamada
   n29 --> n30
-  n31[("LEE practice.practice_sites")]:::efecto
+  n31[("LEE diagnostic_units.diagnostic_equipment")]:::efecto
   n30 --> n31
-  n32["Llama a DiagnosticUnitsReadRepository.findAddresses"]:::llamada
+  n32["Llama a DiagnosticUnitsReadRepository.findCurrentPricesForSchedules"]:::llamada
   n31 --> n32
-  n33[("LEE common.addresses")]:::efecto
+  n33[("LEE diagnostic_units.diagnostic_study_prices")]:::efecto
   n32 --> n33
-  n34["Llama a DiagnosticUnitsReadRepository.findConcepts"]:::llamada
+  n34["Llama a DiagnosticUnitsReadRepository.findPracticeSites"]:::llamada
   n33 --> n34
-  n35[("LEE terminology.catalog_concepts")]:::efecto
+  n35[("LEE practice.practice_sites")]:::efecto
   n34 --> n35
-  n36(("200 Responde con éxito")):::ok
+  n36["Llama a DiagnosticUnitsReadRepository.findAddresses"]:::llamada
   n35 --> n36
+  n37[("LEE common.addresses")]:::efecto
+  n36 --> n37
+  n38["Llama a DiagnosticUnitsReadRepository.findConcepts"]:::llamada
+  n37 --> n38
+  n39[("LEE terminology.catalog_concepts")]:::efecto
+  n38 --> n39
+  n40["Llama a DiagnosticUnitsSearchService.mainSitePlaces"]:::llamada
+  n39 --> n40
+  n41["Llama a DiagnosticUnitsReadRepository.findActiveSites"]:::llamada
+  n40 --> n41
+  n42[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n41 --> n42
+  n43["Llama a DiagnosticUnitsReadRepository.findPracticeSites"]:::llamada
+  n42 --> n43
+  n44[("LEE practice.practice_sites")]:::efecto
+  n43 --> n44
+  n45["Llama a DiagnosticUnitsReadRepository.findAddresses"]:::llamada
+  n44 --> n45
+  n46[("LEE common.addresses")]:::efecto
+  n45 --> n46
+  n47["Llama a DiagnosticUnitsSearchService.search"]:::llamada
+  n46 --> n47
+  n3 -->|"no"| n47
+  n48["Llama a DiagnosticUnitsSearchService.restrictions"]:::llamada
+  n47 --> n48
+  n49{"query.studyCode !== undefined && query.studyCode !== ''"}:::decision
+  n48 --> n49
+  n50["Llama a DiagnosticUnitsReadRepository.findUnitIdsOfferingStudy"]:::llamada
+  n49 -->|"sí"| n50
+  n51[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n50 --> n51
+  n52{"query.insurerTenantId !== undefined"}:::decision
+  n51 --> n52
+  n49 -->|"no"| n52
+  n53["Llama a DiagnosticUnitsReadRepository.findUnitIdsWithInsurerAgreement"]:::llamada
+  n52 -->|"sí"| n53
+  n54[("LEE diagnostic_units.diagnostic_price_schedules")]:::efecto
+  n53 --> n54
+  n55["Llama a DiagnosticUnitsReadRepository.searchVisible"]:::llamada
+  n54 --> n55
+  n52 -->|"no"| n55
+  n56[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n55 --> n56
+  n57["Llama a DiagnosticUnitsReadRepository.countVisible"]:::llamada
+  n56 --> n57
+  n58[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n57 --> n58
+  n59["Llama a DiagnosticUnitsSearchService.project"]:::llamada
+  n58 --> n59
+  n60["Llama a DiagnosticUnitsReadRepository.findActiveSites"]:::llamada
+  n59 --> n60
+  n61[("LEE diagnostic_units.diagnostic_unit_sites")]:::efecto
+  n60 --> n61
+  n62["Llama a DiagnosticUnitsReadRepository.findActiveOfferings"]:::llamada
+  n61 --> n62
+  n63[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n62 --> n63
+  n64["Llama a DiagnosticUnitsReadRepository.findConcepts"]:::llamada
+  n63 --> n64
+  n65[("LEE terminology.catalog_concepts")]:::efecto
+  n64 --> n65
+  n66["Llama a DiagnosticUnitsReadRepository.findCurrentPublicSchedulesFor"]:::llamada
+  n65 --> n66
+  n67[("LEE diagnostic_units.diagnostic_price_schedules")]:::efecto
+  n66 --> n67
+  n68["Llama a CommunityRatingsService.ratingsByProfiles"]:::llamada
+  n67 --> n68
+  n69["Llama a ReviewsRepository.averageByTargets"]:::llamada
+  n68 --> n69
+  n70[("LEE community.service_reviews")]:::efecto
+  n69 --> n70
+  n71["… el resto del árbol (10 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1354,7 +1442,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /price-schedules/{scheduleId}/study-prices
+#### 16. POST /price-schedules/{scheduleId}/study-prices
 
 Fijar/versionar el precio de un estudio (append-only)
 
@@ -1364,7 +1452,6 @@ Fijar/versionar el precio de un estudio (append-only)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cronograma no encontrado; ResourceNotFoundException: Oferta de estudio no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El cronograma no está activo; PreconditionFailedException: La oferta no pertenece a la misma unidad que el cronograma |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1377,49 +1464,57 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a DiagnosticPriceSchedulesRepository.findById"]:::llamada
+  n5["Llama a DiagnosticUnitScopeService.schedule"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostic_units.diagnostic_price_schedules")]:::efecto
+  n6["Llama a DiagnosticPriceSchedulesRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!schedule"}:::decision
+  n7[("LEE diagnostic_units.diagnostic_price_schedules")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Cronograma no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"schedule.statusConceptId !== DUNIT.SCHEDULE_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El cronograma no está activo"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a DiagnosticStudyOfferingsRepository.findById"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
-  n11 --> n12
-  n13{"!offering"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Oferta de estudio no encontrada"]):::error
-  n13 -->|"sí"| n14
-  n15{"offering.diagnosticUnitId !== schedule.diagnosticUnitId"}:::decision
-  n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED La oferta no pertenece a la misma unidad que el cronograma"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a DiagnosticStudyPricesRepository.findActive"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE diagnostic_units.diagnostic_study_prices")]:::efecto
+  n8["Llama a DiagnosticUnitScopeService.viaUnit"]:::llamada
+  n7 --> n8
+  n9["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE diagnostic_units.diagnostic_units")]:::efecto
+  n9 --> n10
+  n11{"schedule.statusConceptId !== DUNIT.SCHEDULE_ACTIVE"}:::decision
+  n10 --> n11
+  n12(["422 PRECONDITION_FAILED El cronograma no está activo"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a DiagnosticUnitScopeService.offering"]:::llamada
+  n11 -->|"no"| n13
+  n14["Llama a DiagnosticStudyOfferingsRepository.findById"]:::llamada
+  n13 --> n14
+  n15[("LEE diagnostic_units.diagnostic_study_offerings")]:::efecto
+  n14 --> n15
+  n16["Llama a DiagnosticUnitScopeService.viaUnit"]:::llamada
+  n15 --> n16
+  n17["Llama a DiagnosticUnitsRepository.findById"]:::llamada
+  n16 --> n17
+  n18[("LEE diagnostic_units.diagnostic_units")]:::efecto
   n17 --> n18
-  n19{"current"}:::decision
+  n19{"offering.diagnosticUnitId !== schedule.diagnosticUnitId"}:::decision
   n18 --> n19
-  n20[("ACTUALIZA diagnostic_units.diagnostic_study_prices · ACTUALIZA diagnostic_units.diagnostic_study_prices")]:::efecto
+  n20(["422 PRECONDITION_FAILED La oferta no pertenece a la misma unidad que el cronograma"]):::error
   n19 -->|"sí"| n20
-  n21["Llama a DiagnosticStudyPricesRepository.maxVersion"]:::llamada
-  n20 --> n21
+  n21["Llama a DiagnosticStudyPricesRepository.findActive"]:::llamada
   n19 -->|"no"| n21
   n22[("LEE diagnostic_units.diagnostic_study_prices")]:::efecto
   n21 --> n22
-  n23["Llama a DiagnosticStudyPricesRepository.create"]:::llamada
+  n23{"current"}:::decision
   n22 --> n23
-  n24[("CREA diagnostic_units.diagnostic_study_prices")]:::efecto
-  n23 --> n24
-  n25(("201 Responde con éxito")):::ok
+  n24[("ACTUALIZA diagnostic_units.diagnostic_study_prices · ACTUALIZA diagnostic_units.diagnostic_study_prices")]:::efecto
+  n23 -->|"sí"| n24
+  n25["Llama a DiagnosticStudyPricesRepository.maxVersion"]:::llamada
   n24 --> n25
+  n23 -->|"no"| n25
+  n26[("LEE diagnostic_units.diagnostic_study_prices")]:::efecto
+  n25 --> n26
+  n27["Llama a DiagnosticStudyPricesRepository.create"]:::llamada
+  n26 --> n27
+  n28[("CREA diagnostic_units.diagnostic_study_prices")]:::efecto
+  n27 --> n28
+  n29(("201 Responde con éxito")):::ok
+  n28 --> n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1428,7 +1523,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /study-prices/{priceId}/close
+#### 17. POST /study-prices/{priceId}/close
 
 Cerrar una versión de precio vigente
 
@@ -1438,7 +1533,7 @@ Cerrar una versión de precio vigente
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Precio no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Solo se puede cerrar una versión de precio activa y aún abierta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1451,22 +1546,38 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a DiagnosticStudyPricesRepository.findById"]:::llamada
+  n5["Llama a DiagnosticUnitScopeService.price"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostic_units.diagnostic_study_prices")]:::efecto
+  n6["Llama a DiagnosticStudyPricesRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!price"}:::decision
+  n7[("LEE diagnostic_units.diagnostic_study_prices")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Precio no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"price.statusConceptId !== DUNIT.PRICE_ACTIVE || price.effectiveTo"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED Solo se puede cerrar una versión de precio activa y aún abierta"]):::error
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA diagnostic_units.diagnostic_study_prices · ACTUALIZA diagnostic_units.diagnostic_study_prices · ACT…")]:::efecto
-  n9 -->|"no"| n11
-  n12(("200 Responde con éxito")):::ok
+  n8["Llama a DiagnosticUnitScopeService.notFound"]:::llamada
+  n7 --> n8
+  n9(["404 NOT_FOUND {message}"]):::error
+  n8 --> n9
+  n10{"!price"}:::decision
+  n11["Llama a DiagnosticUnitScopeService.notFound"]:::llamada
+  n10 -->|"sí"| n11
+  n12(["404 NOT_FOUND {message}"]):::error
   n11 --> n12
+  n13["Llama a DiagnosticUnitScopeService.schedule"]:::llamada
+  n10 -->|"no"| n13
+  n14["Llama a DiagnosticPriceSchedulesRepository.findById"]:::llamada
+  n13 --> n14
+  n15[("LEE diagnostic_units.diagnostic_price_schedules")]:::efecto
+  n14 --> n15
+  n16["Llama a DiagnosticUnitScopeService.notFound"]:::llamada
+  n15 --> n16
+  n17(["404 NOT_FOUND {message}"]):::error
+  n16 --> n17
+  n18{"price.statusConceptId !== DUNIT.PRICE_ACTIVE || price.effectiveTo"}:::decision
+  n19(["422 PRECONDITION_FAILED Solo se puede cerrar una versión de precio activa y aún abierta"]):::error
+  n18 -->|"sí"| n19
+  n20[("ACTUALIZA diagnostic_units.diagnostic_study_prices · ACTUALIZA diagnostic_units.diagnostic_study_prices · ACT…")]:::efecto
+  n18 -->|"no"| n20
+  n21(("200 Responde con éxito")):::ok
+  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1481,5 +1592,7 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
+| POST /diagnostic-unit-accreditations/{id}/renew | 201, 400, 401, 403, 429 | 4 |
 | GET /diagnostic-units | 200, 401, 403, 429 | 5 |
+| POST /diagnostic-units/{id}/reproject | 200, 400, 401, 403, 429 | 1 |
 | GET /diagnostic-units/administration | 200, 401, 403, 429 | 5 |

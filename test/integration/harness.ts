@@ -27,6 +27,11 @@ import {
 import { SpecialtyChartTemplates } from '../../src/modules/chart/entities';
 import { SeedBootstrapService } from '../../src/common/seed/seed-bootstrap.service';
 import { boDepartmentConceptId } from '../../src/common/seed/bo-geography.catalog';
+import {
+  assertDisposableResetTarget,
+  assertServerIdentity,
+  resolveResetTarget,
+} from './disposable-database';
 
 /**
  * Identidad ficticia obligatoria para altas profesionales en integración.
@@ -54,18 +59,30 @@ export function identidadProfesional(email: string): {
  * admin se rematerializan en el arranque, así que truncar es seguro.
  *
  * Trunca toda tabla de los esquemas de negocio (no del sistema) con CASCADE para
- * respetar las FK. Solo debe usarse contra la base de pruebas del `.env`.
+ * respetar las FK. Antes de conectar exige la bandera de destrucción, un host
+ * local (o declarado) y un nombre de base descartable, y tras conectar confirma
+ * la base con `current_database()` (ver `disposable-database.ts`): si algo no
+ * cuadra, lanza sin enviar un solo `TRUNCATE`.
+ *
+ * @throws UnsafeResetTargetError si el destino no se prueba descartable.
  */
 export async function resetBusinessData(): Promise<void> {
+  const target = resolveResetTarget(process.env);
+  assertDisposableResetTarget(target, process.env);
   const client = new pg.Client({
-    host: process.env.DB_HOST ?? 'localhost',
-    port: Number(process.env.DB_PORT ?? 5434),
+    host: target.host,
+    port: target.port,
     user: process.env.DB_USER ?? 'mantra',
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME ?? 'mantra_redesa_health',
+    database: target.database,
   });
   await client.connect();
   try {
+    const identity = await client.query<{
+      /** Base a la que quedó conectada la sesión según el servidor. */
+      db: string;
+    }>('select current_database() as db');
+    assertServerIdentity(identity.rows[0]?.db ?? '', target);
     const { rows } = await client.query<{
       /**
        * Valor de qualified mantenido por la instancia.

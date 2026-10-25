@@ -17,6 +17,21 @@ import {
   CHANNEL_CONCEPT,
   MEMBER_TYPE_CONCEPT,
 } from './marketing-campaigns.service';
+import { persistWithCodeConflict } from '../marketing.conflicts';
+import { MarketingErrorReason } from '../marketing.error-reasons';
+import {
+  DEFAULT_LINK_TOKEN_TTL_SECONDS,
+  issueLinkToken,
+  verifyLinkToken,
+} from '../marketing.link-token';
+import {
+  activeMarketingTenant,
+  assertCampaignInTenant,
+  assertEnrollmentInTenant,
+  assertJourneyInTenant,
+  assertSegmentInTenant,
+  assertTemplateInTenant,
+} from '../marketing.tenant-scope';
 import {
   CreateJourneyDto,
   JourneyResponseDto,
@@ -29,6 +44,8 @@ import {
   ExitEnrollmentDto,
   ExitEnrollmentResponseDto,
   CreateTrackedLinkDto,
+  IssueTrackedLinkTokenDto,
+  TrackedLinkTokenResponseDto,
   TrackedLinkResponseDto,
   TrackedLinkClickResponseDto,
   RecordTouchpointDto,
@@ -127,10 +144,11 @@ export class MarketingJourneysService {
     dto: CreateJourneyDto,
     actor: AuthenticatedUser,
   ): Promise<JourneyResponseDto> {
+    const tenantId = activeMarketingTenant(dto.tenantId);
     this.logger.info(
       {
         operation: 'marketing.journey.create',
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
       },
       'Creating journey',
@@ -138,14 +156,15 @@ export class MarketingJourneysService {
 
     const duplicate = await this.journeysRepo.findJourneyByCode(
       this.em,
-      dto.tenantId,
+      tenantId,
       dto.code,
     );
     if (duplicate) {
-      throw new ConflictException('Ya existe un journey con ese código', {
-        tenantId: dto.tenantId,
-        code: dto.code,
-      });
+      throw new ConflictException(
+        'Ya existe un journey con ese código',
+        { code: dto.code },
+        MarketingErrorReason.CODE_ALREADY_EXISTS,
+      );
     }
     if (dto.entryTrigger === 'SEGMENT' && !dto.entrySegmentId) {
       throw new PreconditionFailedException(
@@ -154,24 +173,34 @@ export class MarketingJourneysService {
       );
     }
 
+    return persistWithCodeConflict(
+      () => this.persistJourney(dto, tenantId, actor),
+      'Ya existe un journey con ese código',
+      dto.code,
+    );
+  }
+
+  /** Alta del journey dentro de su transacción. */
+  private persistJourney(
+    dto: CreateJourneyDto,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<JourneyResponseDto> {
     return this.em.transactional(async (tx) => {
       if (dto.entrySegmentId) {
-        const segment = await this.campaignsRepo.findSegmentById(
-          tx,
-          dto.entrySegmentId,
+        // Un segmento de otro tenant responde igual que uno inexistente.
+        assertSegmentInTenant(
+          await this.campaignsRepo.findSegmentById(
+            tx,
+            tenantId,
+            dto.entrySegmentId,
+          ),
+          tenantId,
         );
-        if (!segment) {
-          throw new ResourceNotFoundException(
-            'Segmento de entrada no encontrado',
-            {
-              segmentId: dto.entrySegmentId,
-            },
-          );
-        }
       }
 
       const journey = this.journeysRepo.createJourney(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         entryTriggerConceptId: TRIGGER_CONCEPT[dto.entryTrigger],
@@ -200,6 +229,7 @@ export class MarketingJourneysService {
     dto: AddJourneyStepsDto,
     actor: AuthenticatedUser,
   ): Promise<JourneyStepsResponseDto> {
+    const tenantId = activeMarketingTenant();
     this.logger.info(
       {
         operation: 'marketing.journey.add-steps',
@@ -210,15 +240,10 @@ export class MarketingJourneysService {
     );
 
     return this.em.transactional(async (tx) => {
-      const journey = await this.journeysRepo.findJourneyForUpdate(
-        tx,
-        journeyId,
+      const journey = assertJourneyInTenant(
+        await this.journeysRepo.findJourneyForUpdate(tx, tenantId, journeyId),
+        tenantId,
       );
-      if (!journey) {
-        throw new ResourceNotFoundException('Journey no encontrado', {
-          journeyId,
-        });
-      }
       // Cambiar el grafo de un journey activo desincronizaría a las inscripciones
       // que ya lo están recorriendo.
       if (journey.stateConceptId !== CONCEPTS.JOURNEY_DRAFT) {
@@ -243,10 +268,12 @@ export class MarketingJourneysService {
           }
           const template = await this.campaignsRepo.findPublishedTemplate(
             tx,
+            tenantId,
             step.contentTemplateId,
             CONCEPTS.CONTENT_TEMPLATE_PUBLISHED,
           );
-          if (!template) {
+          // Una plantilla de otro tenant responde igual que una inexistente.
+          if (!template || template.tenantId !== tenantId) {
             throw new PreconditionFailedException(
               'La plantilla del paso SEND no existe o no está publicada',
               {
@@ -312,6 +339,7 @@ export class MarketingJourneysService {
     dto: ActivateJourneyDto,
     actor: AuthenticatedUser,
   ): Promise<ActivateJourneyResponseDto> {
+    const tenantId = activeMarketingTenant();
     this.logger.info(
       {
         operation: 'marketing.journey.activate',
@@ -322,15 +350,10 @@ export class MarketingJourneysService {
     );
 
     return this.em.transactional(async (tx) => {
-      const journey = await this.journeysRepo.findJourneyForUpdate(
-        tx,
-        journeyId,
+      const journey = assertJourneyInTenant(
+        await this.journeysRepo.findJourneyForUpdate(tx, tenantId, journeyId),
+        tenantId,
       );
-      if (!journey) {
-        throw new ResourceNotFoundException('Journey no encontrado', {
-          journeyId,
-        });
-      }
       if (journey.stateConceptId !== CONCEPTS.JOURNEY_DRAFT) {
         throw new ConflictException('El journey ya no está en borrador', {
           journeyId,
@@ -401,25 +424,30 @@ export class MarketingJourneysService {
     dto: AdvanceEnrollmentDto,
     actor: AuthenticatedUser,
   ): Promise<AdvanceEnrollmentResponseDto> {
+    const tenantId = activeMarketingTenant();
     this.logger.info(
       { operation: 'marketing.enrollment.advance', enrollmentId },
       'Advancing journey enrollment',
     );
 
     return this.em.transactional(async (tx) => {
-      const enrollment =
-        await this.journeysRepo.findEnrollmentForUpdateSkipLocked(
-          tx,
-          enrollmentId,
-        );
-      if (!enrollment) {
-        throw new ResourceNotFoundException(
-          'Inscripción no encontrada o en curso',
-          {
-            enrollmentId,
-          },
-        );
-      }
+      const found = await this.journeysRepo.findEnrollmentForUpdateSkipLocked(
+        tx,
+        enrollmentId,
+      );
+      // La inscripción no tiene tenant: el de su journey. Una inscripción
+      // ajena, inexistente o en curso por otro proceso responden igual.
+      const enrollment = assertEnrollmentInTenant(
+        found,
+        found
+          ? await this.journeysRepo.findJourneyById(
+              tx,
+              tenantId,
+              found.journeyId,
+            )
+          : null,
+        tenantId,
+      );
       if (enrollment.statusConceptId !== CONCEPTS.ENROLLMENT_ACTIVE) {
         throw new ConflictException('La inscripción ya no está activa', {
           enrollmentId,
@@ -513,6 +541,7 @@ export class MarketingJourneysService {
     dto: ExitEnrollmentDto,
     actor: AuthenticatedUser,
   ): Promise<ExitEnrollmentResponseDto> {
+    const tenantId = activeMarketingTenant();
     this.logger.info(
       {
         operation: 'marketing.enrollment.exit',
@@ -523,14 +552,31 @@ export class MarketingJourneysService {
     );
 
     return this.em.transactional(async (tx) => {
-      const enrollment = await this.journeysRepo.findEnrollmentForUpdate(
+      const found = await this.journeysRepo.findEnrollmentForUpdate(
         tx,
         enrollmentId,
       );
-      if (!enrollment) {
-        throw new ResourceNotFoundException('Inscripción no encontrada', {
-          enrollmentId,
-        });
+      const enrollment = assertEnrollmentInTenant(
+        found,
+        found
+          ? await this.journeysRepo.findJourneyById(
+              tx,
+              tenantId,
+              found.journeyId,
+            )
+          : null,
+        tenantId,
+      );
+      if (dto.campaignId) {
+        // La campaña cuyo miembro se actualiza también debe ser del tenant.
+        assertCampaignInTenant(
+          await this.campaignsRepo.findCampaignByIdOrAdRef(
+            tx,
+            tenantId,
+            dto.campaignId,
+          ),
+          tenantId,
+        );
       }
       if (enrollment.statusConceptId !== CONCEPTS.ENROLLMENT_ACTIVE) {
         throw new ConflictException('La inscripción ya no está activa', {
@@ -577,6 +623,7 @@ export class MarketingJourneysService {
     dto: CreateTrackedLinkDto,
     actor: AuthenticatedUser,
   ): Promise<TrackedLinkResponseDto> {
+    const tenantId = activeMarketingTenant();
     this.logger.info(
       { operation: 'marketing.tracked-link.create', code: dto.code },
       'Creating tracked link',
@@ -593,6 +640,17 @@ export class MarketingJourneysService {
     }
 
     return this.em.transactional(async (tx) => {
+      if (dto.campaignId) {
+        // El enlace hereda el tenant de su campaña: debe ser una campaña propia.
+        assertCampaignInTenant(
+          await this.campaignsRepo.findCampaignByIdOrAdRef(
+            tx,
+            tenantId,
+            dto.campaignId,
+          ),
+          tenantId,
+        );
+      }
       const link = this.journeysRepo.createTrackedLink(tx, {
         campaignId: dto.campaignId,
         code: dto.code,
@@ -611,13 +669,15 @@ export class MarketingJourneysService {
 
   /**
    * UC-50-10: resolver el enlace y contar el click. El contador se incrementa
-   * bajo bloqueo para no perder clicks simultáneos; el touchpoint sólo se
-   * registra si la petición identifica al miembro.
+   * bajo bloqueo para no perder clicks simultáneos. La ruta es pública, así que
+   * el llamador nunca declara quién es: el touchpoint sólo se registra si
+   * presenta un token firmado, con vencimiento y ligado a este enlace
+   * ({@link issueTrackedLinkToken}). Un token inválido rechaza la petición sin
+   * contar el click.
    */
   async registerClick(
     code: string,
-    memberType: string | undefined,
-    memberRefId: string | undefined,
+    token: string | undefined,
   ): Promise<TrackedLinkClickResponseDto> {
     this.logger.info(
       { operation: 'marketing.tracked-link.click', code },
@@ -638,20 +698,29 @@ export class MarketingJourneysService {
         });
       }
 
+      const recipient =
+        token === undefined || token === ''
+          ? undefined
+          : verifyLinkToken(link.id, token);
+      if (token !== undefined && token !== '' && recipient === null) {
+        throw new PreconditionFailedException(
+          'El token del enlace no es válido',
+          undefined,
+          MarketingErrorReason.TRACKED_LINK_TOKEN_INVALID,
+        );
+      }
+
       const clickCount = String(BigInt(link.clickCount ?? '0') + 1n);
       link.clickCount = clickCount;
       touch(link, undefined);
 
       let touchpointId: string | undefined;
-      if (memberRefId) {
+      if (recipient) {
         const touchpoint = this.journeysRepo.createTouchpoint(tx, {
           campaignId: link.campaignId,
           trackedLinkId: link.id,
-          memberTypeConceptId:
-            memberType === 'PATIENT'
-              ? CONCEPTS.MEMBER_PATIENT
-              : CONCEPTS.MEMBER_CONTACT,
-          memberRefId,
+          memberTypeConceptId: MEMBER_TYPE_CONCEPT[recipient.memberType],
+          memberRefId: recipient.memberRefId,
           touchTypeConceptId: CONCEPTS.TOUCH_CLICK,
           channelConceptId: CONCEPTS.CH_EMAIL,
         });
@@ -660,6 +729,60 @@ export class MarketingJourneysService {
 
       return { targetUrl: link.targetUrl, clickCount, touchpointId };
     });
+  }
+
+  /**
+   * MKT-03: emitir el token que identifica a un destinatario en el enlace
+   * público. El miembro debe pertenecer a la campaña del enlace y ésta al
+   * tenant activo; el token queda ligado a ese enlace y a ese destinatario.
+   */
+  async issueTrackedLinkToken(
+    linkId: string,
+    dto: IssueTrackedLinkTokenDto,
+  ): Promise<TrackedLinkTokenResponseDto> {
+    const tenantId = activeMarketingTenant();
+    this.logger.info(
+      { operation: 'marketing.tracked-link.issue-token', linkId },
+      'Issuing tracked link recipient token',
+    );
+
+    const em = this.em.fork();
+    const link = await this.journeysRepo.findTrackedLinkById(em, linkId);
+    const campaign = link?.campaignId
+      ? await this.campaignsRepo.findCampaignByIdOrAdRef(
+          em,
+          tenantId,
+          link.campaignId,
+        )
+      : null;
+    // Un enlace ajeno, inexistente o sin campaña (sin dueño) responden igual.
+    if (!link || !campaign || campaign.tenantId !== tenantId) {
+      throw new ResourceNotFoundException(
+        'Enlace no encontrado',
+        undefined,
+        MarketingErrorReason.TRACKED_LINK_NOT_AVAILABLE,
+      );
+    }
+
+    const member = await this.campaignsRepo.findCampaignMemberByRef(
+      em,
+      campaign.id,
+      MEMBER_TYPE_CONCEPT[dto.memberType],
+      dto.memberRefId,
+    );
+    if (!member) {
+      throw new ResourceNotFoundException(
+        'Destinatario no encontrado',
+        undefined,
+        MarketingErrorReason.RECIPIENT_NOT_AVAILABLE,
+      );
+    }
+
+    return issueLinkToken(
+      link.id,
+      { memberType: dto.memberType, memberRefId: dto.memberRefId },
+      dto.ttlSeconds ?? DEFAULT_LINK_TOKEN_TTL_SECONDS,
+    );
   }
 
   /**
@@ -682,7 +805,10 @@ export class MarketingJourneysService {
       );
     }
 
+    const tenantId = activeMarketingTenant();
+
     return this.em.transactional(async (tx) => {
+      await this.assertTouchpointOriginsInTenant(tx, tenantId, dto);
       const memberTypeConceptId = MEMBER_TYPE_CONCEPT[dto.memberType];
       const touchpoint = this.journeysRepo.createTouchpoint(tx, {
         campaignId: dto.campaignId,
@@ -756,14 +882,21 @@ export class MarketingJourneysService {
     }
 
     const modelConceptId = ATTRIBUTION_MODEL_CONCEPT[dto.model];
+    const tenantId = activeMarketingTenant();
 
     return this.em.transactional(async (tx) => {
-      const touchpoints = await this.journeysRepo.findTouchpointsInWindow(
+      // Sólo cuentan los touchpoints de campañas o journeys del tenant: el
+      // mismo miembro puede haber sido contactado por otras organizaciones.
+      const touchpoints = await this.journeysRepo.keepTouchpointsOfTenant(
         tx,
-        MEMBER_TYPE_CONCEPT[dto.memberType],
-        dto.memberRefId,
-        windowFrom,
-        windowTo,
+        tenantId,
+        await this.journeysRepo.findTouchpointsInWindow(
+          tx,
+          MEMBER_TYPE_CONCEPT[dto.memberType],
+          dto.memberRefId,
+          windowFrom,
+          windowTo,
+        ),
       );
       if (touchpoints.length === 0) {
         throw new PreconditionFailedException(
@@ -772,11 +905,28 @@ export class MarketingJourneysService {
         );
       }
 
-      const previous = await this.journeysRepo.findAttributionTouches(
+      // Recalcular reemplaza sólo el reparto del propio tenant: la conversión
+      // se identifica por (tipo, id) y otro tenant puede haber usado los mismos.
+      const existing = await this.journeysRepo.findAttributionTouches(
         tx,
         dto.conversionRefType,
         dto.conversionRefId,
         modelConceptId,
+      );
+      const ownTouchpointIds = new Set(
+        (
+          await this.journeysRepo.keepTouchpointsOfTenant(
+            tx,
+            tenantId,
+            await this.journeysRepo.findTouchpointsByIds(
+              tx,
+              existing.map((touch) => touch.marketingTouchpointId),
+            ),
+          )
+        ).map((touchpoint) => touchpoint.id),
+      );
+      const previous = existing.filter((touch) =>
+        ownTouchpointIds.has(touch.marketingTouchpointId),
       );
       if (previous.length > 0) {
         this.journeysRepo.removeAttributionTouches(tx, previous);
@@ -822,6 +972,63 @@ export class MarketingJourneysService {
         touches,
       };
     });
+  }
+
+  /**
+   * Cada origen que nombra un touchpoint (campaña, journey, enlace, plantilla)
+   * debe ser del tenant activo; uno ajeno responde igual que uno inexistente.
+   */
+  private async assertTouchpointOriginsInTenant(
+    tx: EntityManager,
+    tenantId: string,
+    dto: RecordTouchpointDto,
+  ): Promise<void> {
+    if (dto.campaignId) {
+      assertCampaignInTenant(
+        await this.campaignsRepo.findCampaignByIdOrAdRef(
+          tx,
+          tenantId,
+          dto.campaignId,
+        ),
+        tenantId,
+      );
+    }
+    if (dto.journeyId) {
+      assertJourneyInTenant(
+        await this.journeysRepo.findJourneyById(tx, tenantId, dto.journeyId),
+        tenantId,
+      );
+    }
+    if (dto.trackedLinkId) {
+      const link = await this.journeysRepo.findTrackedLinkById(
+        tx,
+        dto.trackedLinkId,
+      );
+      const owner = link?.campaignId
+        ? await this.campaignsRepo.findCampaignByIdOrAdRef(
+            tx,
+            tenantId,
+            link.campaignId,
+          )
+        : null;
+      if (!link || !owner || owner.tenantId !== tenantId) {
+        throw new ResourceNotFoundException(
+          'Enlace no encontrado',
+          undefined,
+          MarketingErrorReason.TRACKED_LINK_NOT_AVAILABLE,
+        );
+      }
+    }
+    if (dto.contentTemplateId) {
+      assertTemplateInTenant(
+        await this.campaignsRepo.findTemplateById(
+          tx,
+          tenantId,
+          dto.contentTemplateId,
+        ),
+        tenantId,
+      );
+    }
   }
 
   /**

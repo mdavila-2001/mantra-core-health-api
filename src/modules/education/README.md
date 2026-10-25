@@ -122,8 +122,20 @@ inscripción (active, 0%) ── lesson-progress (append-only) ──> % recalcu
 emite certificados y acredita CME — son pasos que dispara un worker tras la finalización.
 
 El tenant de la petición se valida globalmente y los roles con alcance se evalúan
-contra él. En el código actual, las mutaciones que reciben UUID no acotan el
-recurso al tenant ni anclan las operaciones `LEARNER` al perfil del sujeto.
+contra él. Además, `EducationScopeService` resuelve cada UUID de la ruta o del cuerpo
+dentro del tenant activo: solo `courses` guarda `tenant_id`, y cohortes, evaluaciones,
+inscripciones, intentos y certificados lo heredan del curso. El alcance se comprueba
+antes de bloquear o escribir, y lo ajeno responde igual que lo inexistente
+(`404`, `reason` `EDUCATION_RESOURCE_OUT_OF_SCOPE`, sin `details`). Un curso sin
+`tenant_id` no es mutable desde ningún tenant. El curso nuevo nace en el tenant del
+contexto; un `tenantId` del cuerpo solo se acepta si coincide.
+
+Un actor sin `EDUCATION_ADMIN` ni `SYSTEM` autorizados en el tenant (un `LEARNER`) queda anclado
+a su identidad: el `learnerRefId` de `POST /enrollments` se deriva del servidor según el
+`learnerType` (perfil de paciente `pid`, perfil profesional `hpid` o el propio usuario) y uno
+ajeno responde `403` `LEARNER_ENROLLMENT_OWNER_REQUIRED`; el progreso, los intentos y la
+finalización de la inscripción o el intento de otra persona responden `404`. El administrador
+debe indicar a quién inscribe.
 
 ## Concurrencia
 
@@ -140,7 +152,7 @@ respuestas de evaluación ni datos del aprendiz más allá del identificador.
 
 `corepack yarn test src/modules/education --runInBand --silent` — 3 suites y 84
 pruebas aprobadas durante la revisión. Son pruebas unitarias con repositorios
-simulados; no hay integración HTTP con dos tenants, RLS ni dos aprendices.
+simulados con dos tenants y dos aprendices; no hay integración HTTP ni RLS.
 
 ## Fuera de este módulo
 

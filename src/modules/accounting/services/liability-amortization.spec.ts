@@ -1,4 +1,7 @@
-import { buildAmortizationSchedule } from './liability-amortization';
+import {
+  addMonthsUtc,
+  buildAmortizationSchedule,
+} from './liability-amortization';
 
 describe('buildAmortizationSchedule', () => {
   it('reparte el principal en partes iguales, ajustando el resto en la última cuota', () => {
@@ -44,21 +47,40 @@ describe('buildAmortizationSchedule', () => {
     expect(rows[0]?.principalDue).toBe('500.00');
   });
 
-  it('la cuota N vence N meses después del alta', () => {
-    // Un 15, no un fin de mes: así el resultado no depende de cómo cada motor
-    // de JavaScript normaliza un "31 de febrero" — lo que se fija acá es la
-    // relación (mes = alta + N), no la aritmética de calendario del runtime.
-    const registration = new Date(2026, 0, 15); // 15 de enero de 2026, hora local.
+  it('la cuota N vence N meses después del alta, el mismo día del mes', () => {
     const rows = buildAmortizationSchedule({
       principalAmount: '300.00',
       installments: 3,
-      startDate: registration,
+      startDate: new Date('2026-10-01'), // como llega del DTO: medianoche UTC
     });
+    // Antes se sumaba en hora local: con TZ=America/La_Paz salían
+    // 2026-10-31, 2026-12-01 y 2026-12-31 (observado contra la API viva).
+    expect(rows.map((row) => row.dueDate.toISOString().slice(0, 10))).toEqual([
+      '2026-11-01',
+      '2026-12-01',
+      '2027-01-01',
+    ]);
+  });
 
-    rows.forEach((row, index) => {
-      const expected = new Date(registration);
-      expected.setMonth(expected.getMonth() + index + 1);
-      expect(row.dueDate.getTime()).toBe(expected.getTime());
+  it('un alta de fin de mes vence el último día de cada mes, sin saltar al siguiente', () => {
+    const rows = buildAmortizationSchedule({
+      principalAmount: '400.00',
+      installments: 4,
+      startDate: new Date('2026-01-31'),
+    });
+    expect(rows.map((row) => row.dueDate.toISOString().slice(0, 10))).toEqual([
+      '2026-02-28',
+      '2026-03-31',
+      '2026-04-30',
+      '2026-05-31',
+    ]);
+  });
+
+  describe('addMonthsUtc', () => {
+    it('respeta el 29 de febrero de un año bisiesto', () => {
+      expect(
+        addMonthsUtc(new Date('2027-12-31'), 2).toISOString().slice(0, 10),
+      ).toBe('2028-02-29');
     });
   });
 

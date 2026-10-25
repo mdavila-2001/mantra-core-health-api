@@ -14,7 +14,8 @@ export class CreateClientContextDto {
    * Identificador asociado a session journey.
    */
   @ApiPropertyOptional({
-    description: 'Journey de sesión existente a enlazar',
+    description:
+      'Journey de sesión existente a enlazar; debe ser de una sesión del usuario autenticado. Si falta, se usa el journey abierto de la sesión autenticada',
     format: 'uuid',
   })
   @IsOptional()
@@ -22,20 +23,12 @@ export class CreateClientContextDto {
   sessionJourneyId?: string;
 
   /**
-   * Identificador asociado a session.
-   */
-  @ApiPropertyOptional({
-    description: 'Sesión (se usa para crear el journey si no existe)',
-    format: 'uuid',
-  })
-  @IsOptional()
-  @IsUUID()
-  sessionId?: string;
-
-  /**
    * Identificador asociado a analytics subject.
    */
-  @ApiPropertyOptional({ description: 'Sujeto de analítica', format: 'uuid' })
+  @ApiPropertyOptional({
+    description: 'Sujeto de analítica; debe ser del usuario autenticado',
+    format: 'uuid',
+  })
   @IsOptional()
   @IsUUID()
   analyticsSubjectId?: string;

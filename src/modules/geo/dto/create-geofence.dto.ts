@@ -25,9 +25,15 @@ export class CreateGeofenceDto {
   /**
    * Identificador asociado a tenant.
    */
-  @ApiProperty({ description: 'Tenant propietario (RLS)', format: 'uuid' })
+  @ApiPropertyOptional({
+    description:
+      'Obsoleto: el tenant se deriva de la sesión (X-Tenant-Id). Si llega, debe coincidir con él; el servidor nunca lo toma como fuente de verdad.',
+    format: 'uuid',
+    deprecated: true,
+  })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de name mantenido por la instancia.

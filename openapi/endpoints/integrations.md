@@ -96,6 +96,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<PauseConnectionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PauseConnectionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PauseConnectionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PauseConnectionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PauseConnectionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -124,7 +125,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Conexión no encontrada | Excepción explícita en src/modules/integrations/services/integrations-connections.service.ts |
 | 422 | `PRECONDITION_FAILED` | La conexión no está activa | Excepción explícita en src/modules/integrations/services/integrations-connections.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -228,6 +228,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CredentialRotationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CredentialRotationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CredentialRotationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CredentialRotationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CredentialRotationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -256,7 +257,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Conexión no encontrada | Excepción explícita en src/modules/integrations/services/integrations-connections.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La conexión no está activa | Excepción explícita en src/modules/integrations/services/integrations-connections.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -369,6 +369,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OutboundMessageResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OutboundMessageResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OutboundMessageResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OutboundMessageResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OutboundMessageResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -399,7 +400,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Conexión no encontrada | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
+| 409 | `CONFLICT` | La clave de idempotencia ya está en uso | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La conexión no está activa | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -487,6 +488,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<CorrelateResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CorrelateResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CorrelateResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CorrelateResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CorrelateResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -515,7 +517,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Mensaje entrante no encontrado | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 404 | `NOT_FOUND` | No hay mensaje saliente correlacionado | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | El mensaje entrante no está en estado recibido | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | El mensaje entrante no tiene correlación | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
@@ -604,6 +605,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<DeadLetterResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeadLetterResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeadLetterResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeadLetterResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeadLetterResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -632,7 +634,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Mensaje no encontrado | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | El mensaje no está en estado fallido | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -727,6 +728,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DispatchResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DispatchResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DispatchResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DispatchResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DispatchResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -757,11 +759,10 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Mensaje no encontrado | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
-| 404 | `NOT_FOUND` | Conexión no encontrada | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El mensaje no está en cola | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | El proveedor no tiene base_url configurada para el despacho | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | La conexión no tiene un secreto activo disponible | Excepción explícita en src/modules/integrations/services/integrations-secrets.service.ts |
 | 422 | `PRECONDITION_FAILED` | El cuerpo del despacho excede el tamaño permitido | Excepción explícita en src/common/http/http-dispatcher.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -848,6 +849,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RetryResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetryResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetryResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetryResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetryResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -878,7 +880,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Mensaje no encontrado | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | El mensaje no está en estado fallido | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | Se agotaron los reintentos (usar dead-letter) | Excepción explícita en src/modules/integrations/services/integrations-messaging.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -919,16 +920,14 @@ NestJS resuelve `GET /integrations/messages/pending-correlation` en `Integration
 
 ### Parámetros
 
-| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
-|---|---|:---:|---|---|---|---|
-| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /integrations/messages/pending-correlation?limit=1 HTTP/1.1
+GET /integrations/messages/pending-correlation HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -947,7 +946,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /integrations/messages/pending-correlation?limit=1 HTTP/1.1
+GET /integrations/messages/pending-correlation HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -962,6 +961,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PendingCorrelationResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PendingCorrelationResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PendingCorrelationResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PendingCorrelationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PendingCorrelationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -988,7 +988,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
-| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -998,8 +997,8 @@ Ejemplo de error normalizado:
 
 ```json
 {
-  "code": "VALIDATION_FAILED",
-  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/integrations/messages/pending-correlation"
@@ -1029,16 +1028,14 @@ NestJS resuelve `GET /integrations/messages/pending-dispatch` en `IntegrationsMe
 
 ### Parámetros
 
-| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
-|---|---|:---:|---|---|---|---|
-| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /integrations/messages/pending-dispatch?limit=1 HTTP/1.1
+GET /integrations/messages/pending-dispatch HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -1057,7 +1054,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /integrations/messages/pending-dispatch?limit=1 HTTP/1.1
+GET /integrations/messages/pending-dispatch HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -1072,6 +1069,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PendingDispatchResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PendingDispatchResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PendingDispatchResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PendingDispatchResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PendingDispatchResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1098,7 +1096,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
-| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1108,8 +1105,8 @@ Ejemplo de error normalizado:
 
 ```json
 {
-  "code": "VALIDATION_FAILED",
-  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/integrations/messages/pending-dispatch"
@@ -1139,16 +1136,14 @@ NestJS resuelve `GET /integrations/messages/pending-retry` en `IntegrationsMessa
 
 ### Parámetros
 
-| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
-|---|---|:---:|---|---|---|---|
-| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /integrations/messages/pending-retry?limit=1 HTTP/1.1
+GET /integrations/messages/pending-retry HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -1167,7 +1162,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /integrations/messages/pending-retry?limit=1 HTTP/1.1
+GET /integrations/messages/pending-retry HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -1182,6 +1177,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PendingRetryResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PendingRetryResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PendingRetryResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PendingRetryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PendingRetryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1212,7 +1208,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
-| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1222,8 +1217,8 @@ Ejemplo de error normalizado:
 
 ```json
 {
-  "code": "VALIDATION_FAILED",
-  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/integrations/messages/pending-retry"
@@ -1321,6 +1316,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProviderResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProviderResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProviderResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProviderResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProviderResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1407,7 +1403,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "secretType": "API_KEY",
   "secretRef": "valor-ejemplo"
 }
@@ -1424,7 +1419,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Tenant propietario de la conexión | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Opcional: el tenant propietario sale del contexto autenticado; si se envía debe coincidir con él | `00000000-0000-4000-8000-000000000001` |
 | `environment` | No | `string` | valores: `SANDBOX`, `PRODUCTION` | Entorno | `SANDBOX` |
 | `configJson` | No | `object` | Sin restricción adicional declarada | Configuración específica de la conexión | `{}` |
 | `secretType` | Sí | `string` | valores: `API_KEY`, `OAUTH_TOKEN`, `HMAC` | Tipo del secreto inicial | `API_KEY` |
@@ -1465,6 +1460,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConnectionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConnectionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConnectionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConnectionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConnectionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1629,6 +1625,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EndpointResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EndpointResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EndpointResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EndpointResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EndpointResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1735,7 +1732,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | No | `string` | formato `uuid` | Tenant al que aplica la suscripción | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Opcional: la suscripción pertenece al tenant del contexto autenticado; si se envía debe coincidir con él | `00000000-0000-4000-8000-000000000001` |
 | `eventType` | Sí | `string` | longitud máxima 150 | Tipo de evento suscrito | `valor-ejemplo` |
 | `callbackUrl` | Sí | `string` | Sin restricción adicional declarada | URL de callback (HTTPS obligatoria) | `valor-ejemplo` |
 | `secretRef` | No | `string` | longitud máxima 200 | Referencia al secreto de verificación de firma | `valor-ejemplo` |
@@ -1772,14 +1769,17 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<WebhookSubscriptionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<WebhookSubscriptionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<WebhookSubscriptionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<WebhookSubscriptionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WebhookSubscriptionResponseDto`. Ejemplo completo derivado de ese DTO:
 
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
-  "integrationContractId": "00000000-0000-4000-8000-000000000001",
-  "status": "00000000-0000-4000-8000-000000000001"
+  "providerId": "00000000-0000-4000-8000-000000000001",
+  "eventType": "valor-ejemplo",
+  "state": "00000000-0000-4000-8000-000000000001",
+  "updated": true
 }
 ```
 
@@ -1788,8 +1788,10 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
-| `integrationContractId` | Sí | `string` | formato `uuid` | Identificador asociado a integration contract. | `00000000-0000-4000-8000-000000000001` |
-| `status` | Sí | `string` | formato `uuid` | Concepto de estado de la suscripción | `00000000-0000-4000-8000-000000000001` |
+| `providerId` | Sí | `string` | formato `uuid` | Identificador asociado a provider. | `00000000-0000-4000-8000-000000000001` |
+| `eventType` | Sí | `string` | Sin restricción adicional declarada | Valor de event type mantenido por la instancia. | `valor-ejemplo` |
+| `state` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
+| `updated` | Sí | `boolean` | Sin restricción adicional declarada | true si se actualizó una suscripción existente | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1901,6 +1903,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<InboundMessageResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<InboundMessageResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<InboundMessageResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<InboundMessageResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InboundMessageResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1930,6 +1933,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | Firma del webhook inválida | Excepción explícita en src/modules/integrations/services/integrations-webhooks.service.ts |
 | 404 | `NOT_FOUND` | Conexión no encontrada | Excepción explícita en src/modules/integrations/services/integrations-webhooks.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La conexión no tiene un secreto activo disponible | Excepción explícita en src/modules/integrations/services/integrations-secrets.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

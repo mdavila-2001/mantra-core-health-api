@@ -41,7 +41,36 @@ export const IVD_RISK_CLASS = /^(eu-ivdr|eu-ivdd):|^au:.*\bIVD\b/;
 export const DIAGNOSTIC_SCOPE_SOURCES = Object.freeze({
   'cdc-livd-sars-cov-2':
     'https://www.cdc.gov/locs/2020/new_livd_test_code_mappings_for_sars-cov-2_test_results.html',
+  // OMS: lista de IVD precalificados («Prequalified in vitro diagnostics»).
+  'who-pq-ivd':
+    'https://extranet.who.int/prequal/vitro-diagnostics/prequalified/in-vitro-diagnostics',
+  // SAHPRA: listas de kits de prueba de COVID-19 autorizados.
+  'sahpra-covid-ivd':
+    'https://www.sahpra.org.za/medical-devices/medical-devices-and-in-vitro-diagnostics-test-kits/',
 });
+
+/**
+ * Campos del registro con que el regulador separa IVD de los demás
+ * dispositivos (verbatim en `extra`, ver el SOURCES.md de `row/`):
+ *  - CDSCO publica dos listas, «Medical Device» e «In Vitro Diagnostic»
+ *    (`categval` 1/2 de List of Approved Devices) → `extra.cdscoCategory`.
+ *  - NMPA, base UDI: `qxlb` (器械类别) = 体外诊断试剂, el término del
+ *    体外诊断试剂注册与备案管理办法.
+ */
+export const IVD_RECORD_FLAGS = Object.freeze([
+  {
+    sources: ['cdsco-approved-devices'],
+    field: 'cdscoCategory',
+    values: ['ivd'],
+    url: 'https://cdscomdonline.gov.in/NewMedDev/ListOfApprovedDevices',
+  },
+  {
+    sources: ['nmpa-udi'],
+    field: 'qxlb',
+    values: ['体外诊断试剂'],
+    url: 'https://udi.nmpa.gov.cn/download.html',
+  },
+]);
 
 /**
  * Tipos de licencia de un registro que el regulador define solo para IVD.
@@ -92,6 +121,13 @@ const familyOf = (system) => NOMENCLATURE_FAMILY[system] ?? system;
  * directiva IVD 98/79/CE.
  */
 export const IVD_CATEGORY = Object.freeze({
+  // INVIMA: el grupo del registro sanitario (sin código publicado) separa los
+  // reactivos de diagnóstico in vitro de los médico-quirúrgicos y odontológicos.
+  'co:invima-grupo': {
+    names: ['REACTIVO DIAGNOSTICO', 'REACTIVOS  IN VITRO'],
+    basis: 'invima-grupo-ivd',
+    url: 'https://www.datos.gov.co/d/y4qt-w6tk',
+  },
   cnd: {
     prefix: 'W',
     basis: 'cnd-category-w',
@@ -198,10 +234,12 @@ export class Taxonomy {
       } else if (t.system === 'emdn' && t.code) {
         this.addEmdn(t.code, t.name, prov);
       } else if (!existing) {
+        const cat = IVD_CATEGORY[t.system];
         const ivd =
-          IVD_CATEGORY[t.system] &&
-          t.code?.startsWith(IVD_CATEGORY[t.system].prefix)
-            ? IVD_CATEGORY[t.system]
+          cat &&
+          ((cat.prefix && t.code?.startsWith(cat.prefix)) ||
+            (cat.names && cat.names.includes(t.name?.trim())))
+            ? cat
             : null;
         this.addNode({
           system: t.system,
@@ -372,6 +410,19 @@ export class Taxonomy {
       return {
         diagnostic: true,
         types: [...nodes.map((n) => n.key), `ivd-interest-area|${row.source}`],
+      };
+    const flag = IVD_RECORD_FLAGS.find(
+      (f) =>
+        f.sources.includes(row.source) &&
+        f.values.includes(row.extra?.[f.field]),
+    );
+    if (flag)
+      return {
+        diagnostic: true,
+        types: [
+          ...nodes.map((n) => n.key),
+          `ivd-record-flag|${row.source}:${flag.field}`,
+        ],
       };
     if (DIAGNOSTIC_SCOPE_SOURCES[row.source])
       return {

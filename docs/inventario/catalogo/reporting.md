@@ -14,9 +14,9 @@
 | [dashboards](#dashboards) | Representa tableros que reúnen visualizaciones operativas y de gestión basadas en fuentes autorizadas. | 13 | 8 | 2 | COINCIDE |
 | [report_columns](#report_columns) | Describe columnas presentadas por reportes para documentar selección, orden y formato de datos. | 15 | 5 | 1 | COINCIDE |
 | [report_data_sources](#report_data_sources) | Registra fuentes de datos autorizadas para construir reportes del sistema médico. | 15 | 9 | 3 | COINCIDE |
-| [report_definitions](#report_definitions) | Define reportes disponibles, su propósito y configuración de ejecución. | 18 | 11 | 11 | COINCIDE |
+| [report_definitions](#report_definitions) | Define reportes disponibles, su propósito y configuración de ejecución. | 18 | 11 | 9 | COINCIDE |
 | [report_distributions](#report_distributions) | Define destinos y reglas de distribución de reportes para compartir información autorizada. | 14 | 8 | 4 | COINCIDE |
-| [report_executions](#report_executions) | Registra ejecuciones de reportes para consultar parámetros, estado y resultado producido. | 20 | 12 | 7 | COINCIDE |
+| [report_executions](#report_executions) | Registra ejecuciones de reportes para consultar parámetros, estado y resultado producido. | 20 | 12 | 5 | COINCIDE |
 | [report_parameters](#report_parameters) | Define parámetros que permiten filtrar o personalizar la ejecución de reportes. | 14 | 5 | 4 | COINCIDE |
 | [report_schedules](#report_schedules) | Programa ejecuciones recurrentes de reportes para entregar información operativa o de gestión. | 17 | 8 | 6 | COINCIDE |
 | [report_snapshots](#report_snapshots) | Preserva resultados de reportes en un momento determinado para comparación y reproducibilidad. | 12 | 3 | 2 | COINCIDE |
@@ -466,7 +466,7 @@ Define reportes disponibles, su propósito y configuración de ejecución.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_39_reporting.puml: report_definitions`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_39_reporting.puml` · **DDL:** `SQL/39_reporting/02_tables.sql`
 - **Entidad del ORM:** `ReportDefinitions` — `src/modules/reporting/entities/report_definitions.entity.ts`
-- **Resumen:** 18 columnas · 11 índices · 8 FK salientes · 7 entrantes · 11 operaciones
+- **Resumen:** 18 columnas · 11 índices · 8 FK salientes · 7 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -540,11 +540,9 @@ Define reportes disponibles, su propósito y configuración de ejecución.
 | POST /reporting/dashboards | LEE | DIRECTA |
 | POST /reporting/definitions | CREA | DIRECTA |
 | POST /reporting/definitions | LEE | DIRECTA |
-| POST /reporting/definitions/{id}/deprecate | ACTUALIZA | POR_TIPO |
 | POST /reporting/definitions/{id}/deprecate | LEE | DIRECTA |
 | POST /reporting/definitions/{id}/executions | LEE | DIRECTA |
 | POST /reporting/definitions/{id}/schedules | LEE | DIRECTA |
-| POST /reporting/definitions/{id}/versions/publish | ACTUALIZA | POR_TIPO |
 | POST /reporting/definitions/{id}/versions/publish | LEE | DIRECTA |
 | POST /reporting/executions/{id}/retry | LEE | DIRECTA |
 | POST /reporting/scheduler/tick | LEE | DIRECTA |
@@ -651,7 +649,7 @@ Registra ejecuciones de reportes para consultar parámetros, estado y resultado 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_39_reporting.puml: report_executions`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_39_reporting.puml` · **DDL:** `SQL/39_reporting/02_tables.sql`
 - **Entidad del ORM:** `ReportExecutions` — `src/modules/reporting/entities/report_executions.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 2 entrantes · 7 operaciones
+- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 2 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -719,9 +717,7 @@ Registra ejecuciones de reportes para consultar parámetros, estado y resultado 
 |---|---|---|
 | POST /reporting/definitions/{id}/executions | CREA | DIRECTA |
 | POST /reporting/executions/{id}/distributions | LEE | DIRECTA |
-| POST /reporting/executions/{id}/retry | ACTUALIZA | POR_TIPO |
 | POST /reporting/executions/{id}/retry | LEE | DIRECTA |
-| POST /reporting/executions/{id}/snapshot | ACTUALIZA | POR_TIPO |
 | POST /reporting/executions/{id}/snapshot | LEE | DIRECTA |
 | POST /reporting/scheduler/tick | CREA | DIRECTA |
 

@@ -7,11 +7,15 @@
 
 import { createHash } from 'node:crypto';
 import {
+  closeSync,
   createReadStream,
   existsSync,
   mkdirSync,
+  openSync,
   readFileSync,
+  readSync,
   writeFileSync,
+  writeSync,
 } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { createInterface } from 'node:readline';
@@ -65,26 +69,56 @@ export function writeJson(path, value) {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-/** NDJSON determinista: filas ordenadas por `id` para que dos corridas den el mismo archivo. */
+/**
+ * NDJSON determinista: filas ordenadas por `id` para que dos corridas den el mismo archivo.
+ * Se escribe por tramos: con los ensayos y revisiones de MEDLINE, `assertions.ndjson`
+ * supera el largo máximo de un string de V8 y no se puede armar de una vez.
+ */
 export function writeNdjson(path, rows) {
   ensureDir(dirname(path));
   const sorted = [...rows].sort((a, b) =>
     a.id < b.id ? -1 : a.id > b.id ? 1 : 0,
   );
-  writeFileSync(
-    path,
-    sorted.map((r) => JSON.stringify(r)).join('\n') +
-      (sorted.length ? '\n' : ''),
-  );
+  const fd = openSync(path, 'w');
+  try {
+    for (let i = 0; i < sorted.length; i += 5000) {
+      let chunk = '';
+      for (const r of sorted.slice(i, i + 5000))
+        chunk += `${JSON.stringify(r)}\n`;
+      writeSync(fd, chunk);
+    }
+  } finally {
+    closeSync(fd);
+  }
   return sorted.length;
 }
 
+/** Lee un NDJSON por tramos (el archivo puede pasar el largo máximo de un string de V8). */
 export function readNdjson(path) {
   if (!existsSync(path)) return [];
-  return readFileSync(path, 'utf8')
-    .split('\n')
-    .filter(Boolean)
-    .map((l) => JSON.parse(l));
+  const rows = [];
+  const buf = Buffer.allocUnsafe(32 * 1024 * 1024);
+  let carry = Buffer.alloc(0);
+  const fd = openSync(path, 'r');
+  try {
+    for (;;) {
+      const n = readSync(fd, buf, 0, buf.length, null);
+      if (n === 0) break;
+      const data = Buffer.concat([carry, buf.subarray(0, n)]);
+      const cut = data.lastIndexOf(10);
+      if (cut < 0) {
+        carry = data;
+        continue;
+      }
+      for (const l of data.subarray(0, cut).toString('utf8').split('\n'))
+        if (l) rows.push(JSON.parse(l));
+      carry = Buffer.from(data.subarray(cut + 1));
+    }
+    if (carry.length) rows.push(JSON.parse(carry.toString('utf8')));
+  } finally {
+    closeSync(fd);
+  }
+  return rows;
 }
 
 export async function* readLines(path) {

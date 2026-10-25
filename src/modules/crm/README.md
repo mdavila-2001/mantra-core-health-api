@@ -2,7 +2,7 @@
 
 Gestiona cuentas, contactos, equipos, leads, oportunidades, actividades, alianzas, casos y preferencias de contacto mediante `CrmController` bajo `/crm`.
 
-Los roles `CRM_ADMIN` y `CRM_AGENT` habilitan las operaciones según la ruta. El módulo no resuelve por completo el tenant ni cada relación comercial en el servidor.
+Los roles `CRM_ADMIN` y `CRM_AGENT` habilitan las operaciones según la ruta. El tenant sale de `requireTenantId()`: el `tenantId` del cuerpo sólo se contrasta (403 `CRM_TENANT_SCOPE_REQUIRED` si difiere). Toda mutación o lectura por UUID carga la fila por `(id, tenantId)` y un recurso de otro tenant responde igual que uno inexistente (404, mismo mensaje y `reason`, sin `details`). Las referencias comerciales (cuenta, contacto, pipeline, etapa, sujeto de la actividad) se resuelven dentro del tenant antes de persistir, y la etapa tiene que ser del pipeline de la oportunidad (422 `CRM_STAGE_PIPELINE_MISMATCH`). `parentAccountId` apunta a `accounting.accounts` en el DDL y no se resuelve contra `crm_accounts`.
 
 ## Rutas HTTP y alcance (medido)
 
@@ -78,4 +78,4 @@ Entidades (`tableName`, 32 de 32 archivos `*.entity.ts`): `account_contact_relat
 
 ## Pruebas
 
-`corepack yarn test src/modules/crm --runInBand --silent` aprobó 3 suites y 46 pruebas durante la revisión. No cubren dos tenants ni pipeline/etapa cruzados.
+`node --experimental-vm-modules node_modules/jest-cli/bin/jest.js src/modules/crm` cubre dos tenants para cada cadena de UUID (lead, oportunidad, caso, cuenta, contacto, canal) y el cruce de pipeline/etapa.

@@ -19,5 +19,6 @@ export * from './observations.entity';
 export * from './patient_reported_health_statements.entity';
 export * from './prescription_signature_policies.entity';
 export * from './procedures.entity';
+export * from './received_services.entity';
 export * from './service_requests.entity';
 export * from './social_history.entity';

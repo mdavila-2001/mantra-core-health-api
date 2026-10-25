@@ -24,23 +24,23 @@ _Fuente: `src/modules/telemetry/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `ctrl:TelemetryAnalyticsController` | Operaciones de TelemetryAnalyticsController que el README no asigna a un caso de uso | GET /admin/analytics/funnels | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 3 |
-|  |  | GET /admin/analytics/funnels/{funnelId}/report | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 5 |
+|  |  | GET /admin/analytics/funnels/{funnelId}/report | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 6 |
 |  |  | GET /admin/analytics/overview | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 1 |
 |  |  | GET /admin/analytics/pipeline-health | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 2 |
-|  |  | GET /admin/analytics/sessions | PLATFORM_ADMIN · SECURITY_ADMIN · DPO | BAJO | 1 |
+|  |  | GET /admin/analytics/sessions | PLATFORM_ADMIN · SECURITY_ADMIN · DPO | BAJO | 2 |
 |  |  | GET /admin/analytics/sessions/{id} | PLATFORM_ADMIN · SECURITY_ADMIN · DPO | BAJO | 3 |
 |  |  | GET /admin/analytics/timeseries | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 1 |
-|  |  | GET /admin/analytics/web-vitals | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 1 |
+|  |  | GET /admin/analytics/web-vitals | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | BAJO | 3 |
 | `ctrl:TelemetryConsentController` | Operaciones de TelemetryConsentController que el README no asigna a un caso de uso | POST /telemetry/analytics-subjects | SECURITY_ADMIN | MEDIO | 2 |
 |  |  | POST /telemetry/disclosure-acceptances | Cualquier sesión válida | ALTO | 3 |
 |  |  | POST /telemetry/tracking-consents | Cualquier sesión válida | ALTO | 2 |
 |  |  | POST /telemetry/tracking-consents/{id}/withdraw | Cualquier sesión válida | ALTO | 4 |
 |  |  | GET /telemetry/tracking-consents/me | Cualquier sesión válida | BAJO | 1 |
-| `ctrl:TelemetryEventsController` | Operaciones de TelemetryEventsController que el README no asigna a un caso de uso | POST /telemetry/activity-events | Cualquier sesión válida | ALTO | 8 |
-|  |  | POST /telemetry/client-contexts | Cualquier sesión válida | ALTO | 4 |
-|  |  | POST /telemetry/conversion-events | Cualquier sesión válida | ALTO | 6 |
-|  |  | POST /telemetry/session-journeys/{id}/close | Cualquier sesión válida | ALTO | 2 |
-|  |  | POST /telemetry/web-vitals | Cualquier sesión válida | ALTO | 2 |
+| `ctrl:TelemetryEventsController` | Operaciones de TelemetryEventsController que el README no asigna a un caso de uso | POST /telemetry/activity-events | Cualquier sesión válida | ALTO | 10 |
+|  |  | POST /telemetry/client-contexts | Cualquier sesión válida | ALTO | 5 |
+|  |  | POST /telemetry/conversion-events | Cualquier sesión válida | ALTO | 7 |
+|  |  | POST /telemetry/session-journeys/{id}/close | Cualquier sesión válida | ALTO | 4 |
+|  |  | POST /telemetry/web-vitals | Cualquier sesión válida | ALTO | 6 |
 | `ctrl:TelemetryGovernanceController` | Operaciones de TelemetryGovernanceController que el README no asigna a un caso de uso | POST /telemetry/disclosure-versions | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /telemetry/event-schemas | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /telemetry/funnels | SECURITY_ADMIN | MEDIO | 5 |
@@ -51,16 +51,16 @@ _Fuente: `src/modules/telemetry/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MAR…"]):::actor
-  a13(["PLATFORM_ADMIN · SECURITY_ADMIN · DPO"]):::actor
+  a14(["PLATFORM_ADMIN · SECURITY_ADMIN · DPO"]):::actor
   a21(["SECURITY_ADMIN"]):::actor
   a24(["Cualquier sesión válida"]):::actor
   t3[("telemetry.activity_event_schema_definitions")]:::tabla
   t4[("telemetry.funnel_definitions")]:::tabla
   t5[("telemetry.funnel_steps")]:::tabla
   t7[("telemetry.conversion_events")]:::tabla
-  t8[("telemetry.user_activity_events")]:::tabla
-  t11[("telemetry.client_contexts")]:::tabla
-  t14[("telemetry.session_journeys")]:::tabla
+  t8[("telemetry.session_journeys")]:::tabla
+  t9[("telemetry.user_activity_events")]:::tabla
+  t12[("telemetry.client_contexts")]:::tabla
   t16[("telemetry.user_activity_event_properties")]:::tabla
   t19[("telemetry.web_vitals")]:::tabla
   t22[("telemetry.analytics_subjects")]:::tabla
@@ -68,12 +68,13 @@ flowchart LR
   t26[("telemetry.tracking_disclosure_versions")]:::tabla
   t28[("telemetry.tracking_consents")]:::tabla
   t29[("telemetry.tracking_purpose_definitions")]:::tabla
+  t33[("iam.sessions")]:::tabla
   subgraph s0["ctrl:TelemetryAnalyticsController · Operaciones de TelemetryAnalyticsController…"]
     o1["GET /admin/analytics/funnels"]:::op
     o6["GET /admin/analytics/funnels/{funnelId}/report"]:::op
-    o9["GET /admin/analytics/overview"]:::op
-    o10["GET /admin/analytics/pipeline-health"]:::op
-    o12["GET /admin/analytics/sessions"]:::op
+    o10["GET /admin/analytics/overview"]:::op
+    o11["GET /admin/analytics/pipeline-health"]:::op
+    o13["GET /admin/analytics/sessions"]:::op
     o15["GET /admin/analytics/sessions/{id}"]:::op
     o17["GET /admin/analytics/timeseries"]:::op
     o18["GET /admin/analytics/web-vitals"]:::op
@@ -85,19 +86,20 @@ flowchart LR
     o30["POST /telemetry/tracking-consents/{id}/withdraw"]:::op
     o31["GET /telemetry/tracking-consents/me"]:::op
   end
-  t33[("+2 tablas más")]
+  t34[("+4 tablas más")]
+  t37[("+1 tablas más")]
   subgraph s2["ctrl:TelemetryEventsController · Operaciones de TelemetryEventsController que e…"]
     o32["POST /telemetry/activity-events"]:::op
-    o34["POST /telemetry/client-contexts"]:::op
-    o35["POST /telemetry/conversion-events"]:::op
-    o36["POST /telemetry/session-journeys/{id}/close"]:::op
-    o37["POST /telemetry/web-vitals"]:::op
+    o35["POST /telemetry/client-contexts"]:::op
+    o36["POST /telemetry/conversion-events"]:::op
+    o38["POST /telemetry/session-journeys/{id}/close"]:::op
+    o39["POST /telemetry/web-vitals"]:::op
   end
   subgraph s3["ctrl:TelemetryGovernanceController · Operaciones de TelemetryGovernanceControll…"]
-    o38["POST /telemetry/disclosure-versions"]:::op
-    o39["POST /telemetry/event-schemas"]:::op
-    o40["POST /telemetry/funnels"]:::op
-    o41["POST /telemetry/tracking-purposes"]:::op
+    o40["POST /telemetry/disclosure-versions"]:::op
+    o41["POST /telemetry/event-schemas"]:::op
+    o42["POST /telemetry/funnels"]:::op
+    o43["POST /telemetry/tracking-purposes"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -109,20 +111,24 @@ flowchart LR
   o6 -->|"LEE"| t4
   o6 -->|"LEE"| t5
   o6 -->|"LEE"| t8
-  a2 --> o9
-  o9 -->|"LEE"| t8
+  o6 -->|"LEE"| t9
   a2 --> o10
-  o10 -->|"LEE"| t11
-  o10 -->|"LEE"| t8
-  a13 --> o12
-  o12 -->|"LEE"| t14
-  a13 --> o15
-  o15 -->|"LEE"| t14
-  o15 -->|"LEE"| t16
+  o10 -->|"LEE"| t9
+  a2 --> o11
+  o11 -->|"LEE"| t12
+  o11 -->|"LEE"| t9
+  a14 --> o13
+  o13 -->|"LEE"| t8
+  o13 -->|"LEE"| t9
+  a14 --> o15
   o15 -->|"LEE"| t8
+  o15 -->|"LEE"| t16
+  o15 -->|"LEE"| t9
   a2 --> o17
-  o17 -->|"LEE"| t8
+  o17 -->|"LEE"| t9
   a2 --> o18
+  o18 -->|"LEE"| t8
+  o18 -->|"LEE"| t9
   o18 -->|"LEE"| t19
   a21 --> o20
   o20 -->|"CREA"| t22
@@ -142,48 +148,56 @@ flowchart LR
   a24 --> o31
   o31 -->|"LEE"| t28
   a24 --> o32
+  o32 -->|"LEE"| t33
   o32 -->|"LEE"| t3
-  o32 -->|"ACTUALIZA"| t14
-  o32 -->|"CREA"| t14
-  o32 -->|"LEE"| t14
-  o32 -->|"LEE"| t28
-  o32 -->|"CREA"| t16
-  o32 -.-> t33
-  a24 --> o34
-  o34 -->|"CREA"| t11
-  o34 -->|"ACTUALIZA"| t14
-  o34 -->|"CREA"| t14
-  o34 -->|"LEE"| t14
+  o32 -->|"LEE"| t22
+  o32 -->|"ACTUALIZA"| t8
+  o32 -->|"CREA"| t8
+  o32 -->|"LEE"| t8
+  o32 -.-> t34
   a24 --> o35
+  o35 -->|"LEE"| t33
   o35 -->|"LEE"| t22
-  o35 -->|"CREA"| t7
-  o35 -->|"LEE"| t7
-  o35 -->|"LEE"| t4
-  o35 -->|"ACTUALIZA"| t14
-  o35 -->|"LEE"| t14
+  o35 -->|"CREA"| t12
+  o35 -->|"CREA"| t8
+  o35 -->|"LEE"| t8
   a24 --> o36
-  o36 -->|"ACTUALIZA"| t14
-  o36 -->|"LEE"| t14
-  a24 --> o37
-  o37 -->|"LEE"| t14
-  o37 -->|"CREA"| t19
-  a21 --> o38
-  o38 -->|"ACTUALIZA"| t26
-  o38 -->|"CREA"| t26
-  o38 -->|"LEE"| t26
-  a21 --> o39
-  o39 -->|"CREA"| t3
-  o39 -->|"LEE"| t3
-  o39 -->|"LEE"| t29
+  o36 -->|"LEE"| t33
+  o36 -->|"LEE"| t22
+  o36 -->|"CREA"| t7
+  o36 -->|"LEE"| t7
+  o36 -->|"LEE"| t4
+  o36 -->|"LEE"| t8
+  o36 -.-> t37
+  a24 --> o38
+  o38 -->|"LEE"| t33
+  o38 -->|"ACTUALIZA"| t8
+  o38 -->|"LEE"| t8
+  o38 -->|"LEE"| t9
+  a24 --> o39
+  o39 -->|"LEE"| t33
+  o39 -->|"LEE"| t22
+  o39 -->|"LEE"| t12
+  o39 -->|"LEE"| t8
+  o39 -->|"LEE"| t9
+  o39 -->|"CREA"| t19
   a21 --> o40
-  o40 -->|"LEE"| t3
-  o40 -->|"CREA"| t4
-  o40 -->|"LEE"| t4
-  o40 -->|"CREA"| t5
-  o40 -->|"LEE"| t29
+  o40 -->|"ACTUALIZA"| t26
+  o40 -->|"CREA"| t26
+  o40 -->|"LEE"| t26
   a21 --> o41
-  o41 -->|"CREA"| t29
+  o41 -->|"CREA"| t3
+  o41 -->|"LEE"| t3
   o41 -->|"LEE"| t29
+  a21 --> o42
+  o42 -->|"LEE"| t3
+  o42 -->|"CREA"| t4
+  o42 -->|"LEE"| t4
+  o42 -->|"CREA"| t5
+  o42 -->|"LEE"| t29
+  a21 --> o43
+  o43 -->|"CREA"| t29
+  o43 -->|"LEE"| t29
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -251,10 +265,18 @@ flowchart TD
   n17 --> n19
   n18 --> n19
   n15 -->|"al terminar"| n19
-  n20[("LEE telemetry.conversion_events")]:::efecto
+  n20["Llama a TelemetryAnalyticsRepository.rowInTenant"]:::llamada
   n19 --> n20
-  n21(("200 Responde con éxito")):::ok
+  n21["Llama a TelemetryAnalyticsRepository.sessionInTenant"]:::llamada
   n20 --> n21
+  n22[("LEE telemetry.user_activity_events")]:::efecto
+  n21 --> n22
+  n23[("LEE telemetry.user_activity_events · LEE telemetry.session_journeys")]:::efecto
+  n22 --> n23
+  n24[("LEE telemetry.conversion_events")]:::efecto
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n24 --> n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -337,10 +359,16 @@ flowchart TD
   n6 -->|"no"| n8
   n9["Llama a TelemetryAnalyticsRepository.pipelineHealth"]:::llamada
   n5 --> n9
-  n10[("LEE telemetry.user_activity_events · LEE telemetry.client_contexts")]:::efecto
+  n10[("LEE telemetry.user_activity_events")]:::efecto
   n9 --> n10
-  n11(("200 Responde con éxito")):::ok
+  n11["Llama a TelemetryAnalyticsRepository.sessionInTenant"]:::llamada
   n10 --> n11
+  n12[("LEE telemetry.user_activity_events")]:::efecto
+  n11 --> n12
+  n13[("LEE telemetry.client_contexts")]:::efecto
+  n12 --> n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -380,10 +408,14 @@ flowchart TD
   n6 -->|"no"| n8
   n9["Llama a TelemetryAnalyticsRepository.listSessions"]:::llamada
   n5 --> n9
-  n10[("LEE telemetry.session_journeys")]:::efecto
+  n10["Llama a TelemetryAnalyticsRepository.sessionInTenant"]:::llamada
   n9 --> n10
-  n11(("200 Responde con éxito")):::ok
+  n11[("LEE telemetry.user_activity_events")]:::efecto
   n10 --> n11
+  n12[("LEE telemetry.session_journeys")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -414,18 +446,22 @@ flowchart TD
   n2 --> n3
   n4["Llama a TelemetryAnalyticsRepository.findSession"]:::llamada
   n3 --> n4
-  n5[("LEE telemetry.session_journeys")]:::efecto
+  n5["Llama a TelemetryAnalyticsRepository.sessionInTenant"]:::llamada
   n4 --> n5
-  n6{"!session"}:::decision
+  n6[("LEE telemetry.user_activity_events")]:::efecto
   n5 --> n6
-  n7(["404 NOT_FOUND Sesión no encontrada"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a TelemetryAnalyticsRepository.sessionTimeline"]:::llamada
-  n6 -->|"no"| n8
-  n9[("LEE telemetry.user_activity_event_properties · LEE telemetry.user_activity_events")]:::efecto
-  n8 --> n9
-  n10(("200 Responde con éxito")):::ok
-  n9 --> n10
+  n7[("LEE telemetry.session_journeys")]:::efecto
+  n6 --> n7
+  n8{"!session"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Sesión no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a TelemetryAnalyticsRepository.sessionTimeline"]:::llamada
+  n8 -->|"no"| n10
+  n11[("LEE telemetry.user_activity_event_properties · LEE telemetry.user_activity_events")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
+  n11 --> n12
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -508,14 +544,30 @@ flowchart TD
   n6 -->|"no"| n8
   n9["Llama a TelemetryAnalyticsRepository.webVitals"]:::llamada
   n5 --> n9
-  n10[("LEE telemetry.web_vitals · LEE telemetry.web_vitals")]:::efecto
+  n10["Llama a TelemetryAnalyticsRepository.rowInTenant"]:::llamada
   n9 --> n10
-  n11["Llama a TelemetryAnalyticsRepository.webVitalsByRoute"]:::llamada
+  n11["Llama a TelemetryAnalyticsRepository.sessionInTenant"]:::llamada
   n10 --> n11
-  n12[("LEE telemetry.web_vitals")]:::efecto
+  n12[("LEE telemetry.user_activity_events")]:::efecto
   n11 --> n12
-  n13(("200 Responde con éxito")):::ok
+  n13[("LEE telemetry.user_activity_events · LEE telemetry.session_journeys")]:::efecto
   n12 --> n13
+  n14[("LEE telemetry.web_vitals · LEE telemetry.web_vitals")]:::efecto
+  n13 --> n14
+  n15["Llama a TelemetryAnalyticsRepository.webVitalsByRoute"]:::llamada
+  n14 --> n15
+  n16["Llama a TelemetryAnalyticsRepository.rowInTenant"]:::llamada
+  n15 --> n16
+  n17["Llama a TelemetryAnalyticsRepository.sessionInTenant"]:::llamada
+  n16 --> n17
+  n18[("LEE telemetry.user_activity_events")]:::efecto
+  n17 --> n18
+  n19[("LEE telemetry.user_activity_events · LEE telemetry.session_journeys")]:::efecto
+  n18 --> n19
+  n20[("LEE telemetry.web_vitals")]:::efecto
+  n19 --> n20
+  n21(("200 Responde con éxito")):::ok
+  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -534,8 +586,10 @@ Capturar evento(s) de actividad consent-aware (batch)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Esquema de evento no encontrado; ResourceNotFoundException: Journey de sesión no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Esquema de evento no encontrado; ResourceNotFoundException: Sujeto de analítica no encontrado; ResourceNotFoundException: Journey de sesión no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión autenticada no está registrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
 
 ```mermaid
 flowchart TD
@@ -546,79 +600,112 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Repite: por cada const item de dto.events"]:::bucle
+  n5["Llama a TelemetryEventsService.actorSessionId"]:::llamada
   n4 --> n5
-  n6["Llama a ActivityEventSchemaDefinitionsRepository.findById"]:::llamada
-  n5 -->|"cada elemento"| n6
-  n7[("LEE telemetry.activity_event_schema_definitions")]:::efecto
+  n6["Llama a ActorSessionsRepository.findIdByToken"]:::llamada
+  n5 --> n6
+  n7[("LEE iam.sessions")]:::efecto
   n6 --> n7
-  n8{"!schema"}:::decision
+  n8{"!id"}:::decision
   n7 --> n8
-  n9(["404 NOT_FOUND Esquema de evento no encontrado"]):::error
+  n9(["422 PRECONDITION_FAILED La sesión autenticada no está registrada"]):::error
   n8 -->|"sí"| n9
-  n10["Llama a TelemetryEventsService.consentAllows"]:::llamada
+  n10["Repite: por cada const item de dto.events"]:::bucle
   n8 -->|"no"| n10
-  n11["Llama a TrackingConsentsRepository.findLatest"]:::llamada
-  n10 --> n11
-  n12[("LEE telemetry.tracking_consents")]:::efecto
+  n11["Llama a ActivityEventSchemaDefinitionsRepository.findById"]:::llamada
+  n10 -->|"cada elemento"| n11
+  n12[("LEE telemetry.activity_event_schema_definitions")]:::efecto
   n11 --> n12
-  n13{"item.eventIdempotencyKey"}:::decision
+  n13{"!schema"}:::decision
   n12 --> n13
-  n14["Llama a UserActivityEventsRepository.findByIdempotencyKey"]:::llamada
+  n14(["404 NOT_FOUND Esquema de evento no encontrado"]):::error
   n13 -->|"sí"| n14
-  n15[("LEE telemetry.user_activity_events")]:::efecto
-  n14 --> n15
-  n16["Llama a TelemetryEventsService.resolveJourney"]:::llamada
-  n15 --> n16
-  n13 -->|"no"| n16
-  n17{"opts.sessionJourneyId"}:::decision
+  n15{"item.analyticsSubjectId"}:::decision
+  n13 -->|"no"| n15
+  n16["Llama a TelemetryEventsService.assertOwnedSubject"]:::llamada
+  n15 -->|"sí"| n16
+  n17["Llama a AnalyticsSubjectsRepository.findById"]:::llamada
   n16 --> n17
-  n18["Llama a SessionJourneysRepository.findById"]:::llamada
-  n17 -->|"sí"| n18
-  n19[("LEE telemetry.session_journeys")]:::efecto
+  n18[("LEE telemetry.analytics_subjects")]:::efecto
+  n17 --> n18
+  n19{"!subject || subject.userId !== actor.id"}:::decision
   n18 --> n19
-  n20{"!found"}:::decision
-  n19 --> n20
-  n21(["404 NOT_FOUND Journey de sesión no encontrado"]):::error
-  n20 -->|"sí"| n21
-  n22{"opts.sessionId"}:::decision
-  n20 -->|"no"| n22
-  n17 -->|"no"| n22
-  n23["Llama a SessionJourneysRepository.findOpenBySession"]:::llamada
-  n22 -->|"sí"| n23
-  n24[("LEE telemetry.session_journeys")]:::efecto
+  n20(["404 NOT_FOUND Sujeto de analítica no encontrado"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a TelemetryEventsService.assertOwnedJourney"]:::llamada
+  n19 -->|"no"| n21
+  n15 -->|"no"| n21
+  n22["Llama a SessionJourneysRepository.findById"]:::llamada
+  n21 --> n22
+  n23[("LEE telemetry.session_journeys")]:::efecto
+  n22 --> n23
+  n24["Llama a ActorSessionsRepository.belongsToUser"]:::llamada
   n23 --> n24
-  n25["Llama a SessionJourneysRepository.create"]:::llamada
+  n25[("LEE iam.sessions")]:::efecto
   n24 --> n25
-  n22 -->|"no"| n25
-  n26[("CREA telemetry.session_journeys")]:::efecto
+  n26{"!journey || !(await this.sessionsRepo.belongsToUser(tx, journey.sessionId, actor.id))"}:::decision
   n25 --> n26
-  n27["Llama a UserActivityEventsRepository.create"]:::llamada
-  n26 --> n27
-  n28[("CREA telemetry.user_activity_events")]:::efecto
-  n27 --> n28
-  n29["Repite: por cada const prop de item.properties ?? []"]:::bucle
+  n27(["404 NOT_FOUND Journey de sesión no encontrado"]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a TelemetryEventsService.consentAllows"]:::llamada
+  n26 -->|"no"| n28
+  n29["Llama a TrackingConsentsRepository.findLatest"]:::llamada
   n28 --> n29
-  n30["Llama a UserActivityEventPropertiesRepository.create"]:::llamada
-  n29 -->|"cada elemento"| n30
-  n31[("CREA telemetry.user_activity_event_properties")]:::efecto
+  n30[("LEE telemetry.tracking_consents")]:::efecto
+  n29 --> n30
+  n31{"item.eventIdempotencyKey"}:::decision
   n30 --> n31
-  n32{"journey"}:::decision
-  n31 --> n32
-  n29 -->|"al terminar"| n32
-  n33[("ACTUALIZA telemetry.session_journeys")]:::efecto
-  n32 -->|"sí"| n33
-  n34{"!journey.entryEventId"}:::decision
+  n32["Llama a UserActivityEventsRepository.findByIdempotencyKey"]:::llamada
+  n31 -->|"sí"| n32
+  n33[("LEE telemetry.user_activity_events")]:::efecto
+  n32 --> n33
+  n34["Llama a TelemetryEventsService.validateProperties"]:::llamada
   n33 --> n34
-  n35[("ACTUALIZA telemetry.session_journeys")]:::efecto
-  n34 -->|"sí"| n35
-  n36[("ACTUALIZA telemetry.session_journeys · ACTUALIZA telemetry.session_journeys · ACTUALIZA telemetry.session_jou…")]:::efecto
-  n35 --> n36
-  n34 -->|"no"| n36
-  n37(("201 Responde con éxito")):::ok
-  n36 --> n37
-  n32 -->|"no"| n37
-  n5 -->|"al terminar"| n37
+  n31 -->|"no"| n34
+  n35["Intenta"]:::intento
+  n34 --> n35
+  n36{"!(error instanceof EventPropertyRejection)"}:::decision
+  n35 -->|"si falla"| n36
+  n37(["↩ (relanza el error capturado)"]):::error
+  n36 -->|"sí"| n37
+  n38(["500 INTERNAL {HttpStatus.UNPROCESSABLE_ENTITY}"]):::error
+  n36 -->|"no"| n38
+  n39["Llama a TelemetryEventsService.openJourney"]:::llamada
+  n35 --> n39
+  n40["Llama a SessionJourneysRepository.findOpenBySession"]:::llamada
+  n39 --> n40
+  n41[("LEE telemetry.session_journeys")]:::efecto
+  n40 --> n41
+  n42["Llama a SessionJourneysRepository.create"]:::llamada
+  n41 --> n42
+  n43[("CREA telemetry.session_journeys")]:::efecto
+  n42 --> n43
+  n44["Llama a UserActivityEventsRepository.create"]:::llamada
+  n43 --> n44
+  n45[("CREA telemetry.user_activity_events")]:::efecto
+  n44 --> n45
+  n46["Repite: por cada const prop de properties"]:::bucle
+  n45 --> n46
+  n47["Llama a UserActivityEventPropertiesRepository.create"]:::llamada
+  n46 -->|"cada elemento"| n47
+  n48[("CREA telemetry.user_activity_event_properties")]:::efecto
+  n47 --> n48
+  n49{"journey"}:::decision
+  n48 --> n49
+  n46 -->|"al terminar"| n49
+  n50[("ACTUALIZA telemetry.session_journeys")]:::efecto
+  n49 -->|"sí"| n50
+  n51{"!journey.entryEventId"}:::decision
+  n50 --> n51
+  n52[("ACTUALIZA telemetry.session_journeys")]:::efecto
+  n51 -->|"sí"| n52
+  n53[("ACTUALIZA telemetry.session_journeys · ACTUALIZA telemetry.session_journeys · ACTUALIZA telemetry.session_jou…")]:::efecto
+  n52 --> n53
+  n51 -->|"no"| n53
+  n54(("201 Responde con éxito")):::ok
+  n53 --> n54
+  n49 -->|"no"| n54
+  n10 -->|"al terminar"| n54
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -637,7 +724,8 @@ Registrar contexto de cliente/dispositivo + journey
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto de analítica no encontrado; ResourceNotFoundException: Journey de sesión no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión autenticada no está registrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -649,48 +737,59 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a TelemetryEventsService.resolveJourney"]:::llamada
+  n5["Llama a TelemetryEventsService.actorSessionId"]:::llamada
   n4 --> n5
-  n6{"opts.sessionJourneyId"}:::decision
+  n6["Llama a ActorSessionsRepository.findIdByToken"]:::llamada
   n5 --> n6
-  n7["Llama a SessionJourneysRepository.findById"]:::llamada
-  n6 -->|"sí"| n7
-  n8[("LEE telemetry.session_journeys")]:::efecto
+  n7[("LEE iam.sessions")]:::efecto
+  n6 --> n7
+  n8{"!id"}:::decision
   n7 --> n8
-  n9{"!found"}:::decision
-  n8 --> n9
-  n10(["404 NOT_FOUND Journey de sesión no encontrado"]):::error
-  n9 -->|"sí"| n10
-  n11{"opts.sessionId"}:::decision
-  n9 -->|"no"| n11
-  n6 -->|"no"| n11
-  n12["Llama a SessionJourneysRepository.findOpenBySession"]:::llamada
-  n11 -->|"sí"| n12
-  n13[("LEE telemetry.session_journeys")]:::efecto
+  n9(["422 PRECONDITION_FAILED La sesión autenticada no está registrada"]):::error
+  n8 -->|"sí"| n9
+  n10{"dto.analyticsSubjectId"}:::decision
+  n8 -->|"no"| n10
+  n11["Llama a TelemetryEventsService.assertOwnedSubject"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a AnalyticsSubjectsRepository.findById"]:::llamada
+  n11 --> n12
+  n13[("LEE telemetry.analytics_subjects")]:::efecto
   n12 --> n13
-  n14["Llama a SessionJourneysRepository.create"]:::llamada
+  n14{"!subject || subject.userId !== actor.id"}:::decision
   n13 --> n14
-  n11 -->|"no"| n14
-  n15[("CREA telemetry.session_journeys")]:::efecto
-  n14 --> n15
-  n16["Llama a ClientContextsRepository.create"]:::llamada
-  n15 --> n16
-  n17[("CREA telemetry.client_contexts")]:::efecto
+  n15(["404 NOT_FOUND Sujeto de analítica no encontrado"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a TelemetryEventsService.assertOwnedJourney"]:::llamada
+  n14 -->|"no"| n16
+  n10 -->|"no"| n16
+  n17["Llama a SessionJourneysRepository.findById"]:::llamada
   n16 --> n17
-  n18{"journey"}:::decision
+  n18[("LEE telemetry.session_journeys")]:::efecto
   n17 --> n18
-  n19[("ACTUALIZA telemetry.session_journeys")]:::efecto
-  n18 -->|"sí"| n19
-  n20{"!journey.startedAt"}:::decision
+  n19["Llama a ActorSessionsRepository.belongsToUser"]:::llamada
+  n18 --> n19
+  n20[("LEE iam.sessions")]:::efecto
   n19 --> n20
-  n21[("ACTUALIZA telemetry.session_journeys")]:::efecto
-  n20 -->|"sí"| n21
-  n22[("ACTUALIZA telemetry.session_journeys")]:::efecto
-  n21 --> n22
-  n20 -->|"no"| n22
-  n23(("201 Responde con éxito")):::ok
-  n22 --> n23
-  n18 -->|"no"| n23
+  n21{"!journey || !(await this.sessionsRepo.belongsToUser(tx, journey.sessionId, actor.id))"}:::decision
+  n20 --> n21
+  n22(["404 NOT_FOUND Journey de sesión no encontrado"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a TelemetryEventsService.openJourney"]:::llamada
+  n21 -->|"no"| n23
+  n24["Llama a SessionJourneysRepository.findOpenBySession"]:::llamada
+  n23 --> n24
+  n25[("LEE telemetry.session_journeys")]:::efecto
+  n24 --> n25
+  n26["Llama a SessionJourneysRepository.create"]:::llamada
+  n25 --> n26
+  n27[("CREA telemetry.session_journeys")]:::efecto
+  n26 --> n27
+  n28["Llama a ClientContextsRepository.create"]:::llamada
+  n27 --> n28
+  n29[("CREA telemetry.client_contexts")]:::efecto
+  n28 --> n29
+  n30(("201 Responde con éxito")):::ok
+  n29 --> n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -709,7 +808,7 @@ Registrar evento de conversión con atribución
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Funnel no encontrado; ResourceNotFoundException: Sujeto de analítica no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Funnel no encontrado; ResourceNotFoundException: Sujeto de analítica no encontrado; ResourceNotFoundException: Journey de sesión no encontrado; ResourceNotFoundException: Evento de actividad no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -729,36 +828,53 @@ flowchart TD
   n6 --> n7
   n8(["404 NOT_FOUND Funnel no encontrado"]):::error
   n7 -->|"sí"| n8
-  n9["Llama a AnalyticsSubjectsRepository.findById"]:::llamada
+  n9["Llama a TelemetryEventsService.assertOwnedSubject"]:::llamada
   n7 -->|"no"| n9
-  n10[("LEE telemetry.analytics_subjects")]:::efecto
+  n10["Llama a AnalyticsSubjectsRepository.findById"]:::llamada
   n9 --> n10
-  n11{"!subject"}:::decision
+  n11[("LEE telemetry.analytics_subjects")]:::efecto
   n10 --> n11
-  n12(["404 NOT_FOUND Sujeto de analítica no encontrado"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a ConversionEventsRepository.findExisting"]:::llamada
-  n11 -->|"no"| n13
-  n14[("LEE telemetry.conversion_events")]:::efecto
-  n13 --> n14
-  n15["Llama a ConversionEventsRepository.create"]:::llamada
+  n12{"!subject || subject.userId !== actor.id"}:::decision
+  n11 --> n12
+  n13(["404 NOT_FOUND Sujeto de analítica no encontrado"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a TelemetryEventsService.assertOwnedJourney"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a SessionJourneysRepository.findById"]:::llamada
   n14 --> n15
-  n16[("CREA telemetry.conversion_events")]:::efecto
+  n16[("LEE telemetry.session_journeys")]:::efecto
   n15 --> n16
-  n17{"dto.sessionJourneyId"}:::decision
+  n17["Llama a ActorSessionsRepository.belongsToUser"]:::llamada
   n16 --> n17
-  n18["Llama a SessionJourneysRepository.findById"]:::llamada
-  n17 -->|"sí"| n18
-  n19[("LEE telemetry.session_journeys")]:::efecto
+  n18[("LEE iam.sessions")]:::efecto
+  n17 --> n18
+  n19{"!journey || !(await this.sessionsRepo.belongsToUser(tx, journey.sessionId, actor.id))"}:::decision
   n18 --> n19
-  n20{"journey"}:::decision
-  n19 --> n20
-  n21[("ACTUALIZA telemetry.session_journeys · ACTUALIZA telemetry.session_journeys")]:::efecto
-  n20 -->|"sí"| n21
-  n22(("201 Responde con éxito")):::ok
-  n21 --> n22
-  n20 -->|"no"| n22
-  n17 -->|"no"| n22
+  n20(["404 NOT_FOUND Journey de sesión no encontrado"]):::error
+  n19 -->|"sí"| n20
+  n21{"dto.completionEventId"}:::decision
+  n19 -->|"no"| n21
+  n22["Llama a TelemetryEventsService.assertOwnedEvent"]:::llamada
+  n21 -->|"sí"| n22
+  n23["Llama a UserActivityEventsRepository.findById"]:::llamada
+  n22 --> n23
+  n24[("LEE telemetry.user_activity_events")]:::efecto
+  n23 --> n24
+  n25{"!event || event.userId !== actor.id"}:::decision
+  n24 --> n25
+  n26(["404 NOT_FOUND Evento de actividad no encontrado"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a ConversionEventsRepository.findExisting"]:::llamada
+  n25 -->|"no"| n27
+  n21 -->|"no"| n27
+  n28[("LEE telemetry.conversion_events")]:::efecto
+  n27 --> n28
+  n29["Llama a ConversionEventsRepository.create"]:::llamada
+  n28 --> n29
+  n30[("CREA telemetry.conversion_events")]:::efecto
+  n29 --> n30
+  n31(("201 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1008,7 +1124,7 @@ Cerrar journey de sesión y consolidar métricas
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado; ResourceNotFoundException: Evento de actividad no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El journey ya está cerrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1021,36 +1137,55 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a SessionJourneysRepository.findById"]:::llamada
+  n5["Llama a TelemetryEventsService.assertOwnedJourney"]:::llamada
   n4 --> n5
-  n6[("LEE telemetry.session_journeys")]:::efecto
+  n6["Llama a SessionJourneysRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!journey"}:::decision
+  n7[("LEE telemetry.session_journeys")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Journey de sesión no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"journey.journeyStatusConceptId === TELE.JOURNEY_CLOSED"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El journey ya está cerrado"]):::error
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA telemetry.session_journeys · ACTUALIZA telemetry.session_journeys")]:::efecto
-  n9 -->|"no"| n11
+  n8["Llama a ActorSessionsRepository.belongsToUser"]:::llamada
+  n7 --> n8
+  n9[("LEE iam.sessions")]:::efecto
+  n8 --> n9
+  n10{"!journey || !(await this.sessionsRepo.belongsToUser(tx, journey.sessionId, actor.id))"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Journey de sesión no encontrado"]):::error
+  n10 -->|"sí"| n11
   n12{"dto.exitEventId"}:::decision
-  n11 --> n12
-  n13[("ACTUALIZA telemetry.session_journeys")]:::efecto
+  n10 -->|"no"| n12
+  n13["Llama a TelemetryEventsService.assertOwnedEvent"]:::llamada
   n12 -->|"sí"| n13
-  n14[("ACTUALIZA telemetry.session_journeys")]:::efecto
+  n14["Llama a UserActivityEventsRepository.findById"]:::llamada
   n13 --> n14
-  n12 -->|"no"| n14
-  n15{"dto.eventCount !== undefined"}:::decision
+  n15[("LEE telemetry.user_activity_events")]:::efecto
   n14 --> n15
-  n16[("ACTUALIZA telemetry.session_journeys")]:::efecto
-  n15 -->|"sí"| n16
-  n17[("ACTUALIZA telemetry.session_journeys · ACTUALIZA telemetry.session_journeys")]:::efecto
-  n16 --> n17
-  n15 -->|"no"| n17
-  n18(("200 Responde con éxito")):::ok
-  n17 --> n18
+  n16{"!event || event.userId !== actor.id"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Evento de actividad no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18{"journey.journeyStatusConceptId === TELE.JOURNEY_CLOSED"}:::decision
+  n16 -->|"no"| n18
+  n12 -->|"no"| n18
+  n19(["422 PRECONDITION_FAILED El journey ya está cerrado"]):::error
+  n18 -->|"sí"| n19
+  n20[("ACTUALIZA telemetry.session_journeys · ACTUALIZA telemetry.session_journeys")]:::efecto
+  n18 -->|"no"| n20
+  n21{"dto.exitEventId"}:::decision
+  n20 --> n21
+  n22[("ACTUALIZA telemetry.session_journeys")]:::efecto
+  n21 -->|"sí"| n22
+  n23[("ACTUALIZA telemetry.session_journeys")]:::efecto
+  n22 --> n23
+  n21 -->|"no"| n23
+  n24{"dto.eventCount !== undefined"}:::decision
+  n23 --> n24
+  n25[("ACTUALIZA telemetry.session_journeys")]:::efecto
+  n24 -->|"sí"| n25
+  n26[("ACTUALIZA telemetry.session_journeys · ACTUALIZA telemetry.session_journeys")]:::efecto
+  n25 --> n26
+  n24 -->|"no"| n26
+  n27(("200 Responde con éxito")):::ok
+  n26 --> n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1135,7 +1270,7 @@ flowchart TD
   n4 --> n5
   n6[("LEE telemetry.tracking_consents")]:::efecto
   n5 --> n6
-  n7{"!consent"}:::decision
+  n7{"!consent || consent.userId !== actor.id"}:::decision
   n6 --> n7
   n8(["404 NOT_FOUND Consentimiento no encontrado"]):::error
   n7 -->|"sí"| n8
@@ -1224,7 +1359,7 @@ Registrar métricas Core Web Vitals por ruta (batch)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado; ResourceNotFoundException: Sujeto de analítica no encontrado; ResourceNotFoundException: Evento de actividad no encontrado; ResourceNotFoundException: Contexto de cliente no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1238,24 +1373,61 @@ flowchart TD
   n3 --> n4
   n5["Repite: por cada const m de dto.metrics"]:::bucle
   n4 --> n5
-  n6{"m.sessionJourneyId"}:::decision
+  n6["Llama a TelemetryEventsService.assertOwnedJourney"]:::llamada
   n5 -->|"cada elemento"| n6
   n7["Llama a SessionJourneysRepository.findById"]:::llamada
-  n6 -->|"sí"| n7
+  n6 --> n7
   n8[("LEE telemetry.session_journeys")]:::efecto
   n7 --> n8
-  n9{"!j"}:::decision
+  n9["Llama a ActorSessionsRepository.belongsToUser"]:::llamada
   n8 --> n9
-  n10(["404 NOT_FOUND Journey de sesión no encontrado"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a WebVitalsRepository.create"]:::llamada
-  n9 -->|"no"| n11
-  n6 -->|"no"| n11
-  n12[("CREA telemetry.web_vitals")]:::efecto
-  n11 --> n12
-  n13(("201 Responde con éxito")):::ok
-  n12 --> n13
-  n5 -->|"al terminar"| n13
+  n10[("LEE iam.sessions")]:::efecto
+  n9 --> n10
+  n11{"!journey || !(await this.sessionsRepo.belongsToUser(tx, journey.sessionId, actor.id))"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Journey de sesión no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a TelemetryEventsService.assertOwnedSubject"]:::llamada
+  n11 -->|"no"| n13
+  n14["Llama a AnalyticsSubjectsRepository.findById"]:::llamada
+  n13 --> n14
+  n15[("LEE telemetry.analytics_subjects")]:::efecto
+  n14 --> n15
+  n16{"!subject || subject.userId !== actor.id"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Sujeto de analítica no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a TelemetryEventsService.assertOwnedEvent"]:::llamada
+  n16 -->|"no"| n18
+  n19["Llama a UserActivityEventsRepository.findById"]:::llamada
+  n18 --> n19
+  n20[("LEE telemetry.user_activity_events")]:::efecto
+  n19 --> n20
+  n21{"!event || event.userId !== actor.id"}:::decision
+  n20 --> n21
+  n22(["404 NOT_FOUND Evento de actividad no encontrado"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a TelemetryEventsService.assertOwnedContext"]:::llamada
+  n21 -->|"no"| n23
+  n24["Llama a ClientContextsRepository.findById"]:::llamada
+  n23 --> n24
+  n25[("LEE telemetry.client_contexts")]:::efecto
+  n24 --> n25
+  n26["Llama a ActorSessionsRepository.belongsToUser"]:::llamada
+  n25 --> n26
+  n27[("LEE iam.sessions")]:::efecto
+  n26 --> n27
+  n28{"!context || !context.sessionId || !(await this.sessionsRepo.belongsToUser(tx, context.sessionId, actor.id))"}:::decision
+  n27 --> n28
+  n29(["404 NOT_FOUND Contexto de cliente no encontrado"]):::error
+  n28 -->|"sí"| n29
+  n30["Llama a WebVitalsRepository.create"]:::llamada
+  n28 -->|"no"| n30
+  n31[("CREA telemetry.web_vitals")]:::efecto
+  n30 --> n31
+  n32(("201 Responde con éxito")):::ok
+  n31 --> n32
+  n5 -->|"al terminar"| n32
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

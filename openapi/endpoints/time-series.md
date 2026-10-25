@@ -116,6 +116,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CompressionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CompressionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CompressionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CompressionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CompressionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -248,6 +249,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<HypertableResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<HypertableResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<HypertableResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<HypertableResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HypertableResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -376,6 +378,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<HypertableResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<HypertableResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<HypertableResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<HypertableResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HypertableResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -513,6 +516,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RetentionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetentionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetentionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetentionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetentionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -650,6 +654,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RefreshRollupResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RefreshRollupResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RefreshRollupResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RefreshRollupResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RefreshRollupResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -786,6 +791,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RefreshRollupResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RefreshRollupResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RefreshRollupResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RefreshRollupResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RefreshRollupResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -951,6 +957,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BatchIngestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1113,6 +1120,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BatchIngestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1278,6 +1286,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BatchIngestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1426,6 +1435,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BatchIngestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1575,6 +1585,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NormalizeReadingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NormalizeReadingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NormalizeReadingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NormalizeReadingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NormalizeReadingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1738,6 +1749,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GovernedBackfillResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GovernedBackfillResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GovernedBackfillResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GovernedBackfillResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GovernedBackfillResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1889,6 +1901,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BatchIngestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BatchIngestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2009,6 +2022,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<QuerySeriesRangeResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<QuerySeriesRangeResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<QuerySeriesRangeResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<QuerySeriesRangeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QuerySeriesRangeResponseDto`. Ejemplo completo derivado de ese DTO:
 

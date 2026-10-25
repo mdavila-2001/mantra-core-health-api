@@ -4,13 +4,17 @@ import {
   ArrayMinSize,
   IsArray,
   IsDateString,
-  IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { MONEY_PATTERN } from '../money.util';
+
+const MONEY_MESSAGE =
+  'debe ser un importe decimal no negativo con hasta 2 decimales';
 
 /** Asignación de un pago recibido a una factura (UC-17-02). */
 export class ReceivableAllocationInputDto {
@@ -28,7 +32,7 @@ export class ReceivableAllocationInputDto {
    * Valor de allocated amount mantenido por la instancia.
    */
   @ApiProperty({ description: 'Monto asignado a la factura', example: '50.00' })
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   allocatedAmount!: string;
 
   /**
@@ -39,7 +43,7 @@ export class ReceivableAllocationInputDto {
     example: '0.00',
   })
   @IsOptional()
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   discountAmount?: string;
 
   /**
@@ -78,7 +82,7 @@ export class ApplyPaymentReceivedDto {
    * Valor de amount mantenido por la instancia.
    */
   @ApiProperty({ description: 'Monto total recibido', example: '50.00' })
-  @IsNumberString()
+  @Matches(MONEY_PATTERN, { message: MONEY_MESSAGE })
   amount!: string;
 
   /**

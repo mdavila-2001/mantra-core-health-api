@@ -5,7 +5,7 @@
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 - **Operaciones:** 45 (45 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 27 · BAJO 18
-- **Tablas distintas que tocan:** 44
+- **Tablas distintas que tocan:** 46
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/accounting.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -13,48 +13,48 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | GET | `/accounting/accounts` | Plan de cuentas de una práctica | BAJO | 2 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 2 | POST | `/accounting/accounts` | Crear una cuenta del plan contable | MEDIO | 2 | SECURITY_ADMIN |
+| 2 | POST | `/accounting/accounts` | Crear una cuenta del plan contable | MEDIO | 3 | SECURITY_ADMIN |
 | 3 | GET | `/accounting/accrual-objects` | Registro de devengos de una práctica | BAJO | 6 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 4 | POST | `/accounting/accrual-objects` | Crear objeto de devengo y su cronograma | MEDIO | 3 | SECURITY_ADMIN |
-| 5 | POST | `/accounting/accruals/run` | Postear devengo periódico (accrual run) | MEDIO | 7 | SECURITY_ADMIN |
+| 4 | POST | `/accounting/accrual-objects` | Crear objeto de devengo y su cronograma | MEDIO | 9 | SECURITY_ADMIN |
+| 5 | POST | `/accounting/accruals/run` | Postear devengo periódico (accrual run) | MEDIO | 13 | SECURITY_ADMIN |
 | 6 | GET | `/accounting/assets` | Registro de activos fijos de una práctica | BAJO | 3 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 7 | POST | `/accounting/assets/capitalize` | Capitalizar activo (alta y asignación) | MEDIO | 8 | SECURITY_ADMIN |
+| 7 | POST | `/accounting/assets/capitalize` | Capitalizar activo (alta y asignación) | MEDIO | 15 | SECURITY_ADMIN |
 | 8 | GET | `/accounting/balance-sheet` | Balance general de una práctica a una fecha de corte | BAJO | 5 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 9 | POST | `/accounting/clearing-documents` | Compensar/clearing de partidas abiertas | MEDIO | 9 | SECURITY_ADMIN |
-| 10 | POST | `/accounting/depreciation/run` | Ejecutar depreciación de activos (batch) | MEDIO | 8 | SECURITY_ADMIN |
+| 9 | POST | `/accounting/clearing-documents` | Compensar/clearing de partidas abiertas | MEDIO | 15 | SECURITY_ADMIN |
+| 10 | POST | `/accounting/depreciation/run` | Ejecutar depreciación de activos (batch) | MEDIO | 14 | SECURITY_ADMIN |
 | 11 | GET | `/accounting/dimensions` | Dimensiones analíticas de una práctica | BAJO | 8 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 12 | POST | `/accounting/exchange-rates` | Registrar tipo de cambio para conversión | MEDIO | 3 | SECURITY_ADMIN |
-| 13 | POST | `/accounting/fiscal-periods/{id}/lock` | Cerrar/bloquear un periodo fiscal | MEDIO | 2 | SECURITY_ADMIN |
+| 12 | POST | `/accounting/exchange-rates` | Registrar tipo de cambio para conversión | MEDIO | 3 | SYSTEM |
+| 13 | POST | `/accounting/fiscal-periods/{id}/lock` | Cerrar/bloquear un periodo fiscal | MEDIO | 4 | SECURITY_ADMIN |
 | 14 | GET | `/accounting/fiscal-years` | Ejercicio fiscal vigente de una práctica | BAJO | 4 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 15 | POST | `/accounting/fiscal-years` | Abrir un ejercicio fiscal y sus periodos | MEDIO | 3 | SECURITY_ADMIN |
+| 15 | POST | `/accounting/fiscal-years` | Abrir un ejercicio fiscal y sus periodos | MEDIO | 4 | SECURITY_ADMIN |
 | 16 | GET | `/accounting/general-ledger` | Libro mayor de una cuenta (movimientos posteados, con saldo corrido) | BAJO | 5 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
 | 17 | GET | `/accounting/income-statement` | Estado de resultados de una práctica | BAJO | 5 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
 | 18 | GET | `/accounting/journal-transactions` | Libro diario de una práctica | BAJO | 2 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 19 | POST | `/accounting/journal-transactions` | Registrar y postear un asiento balanceado (partida doble) | MEDIO | 8 | SECURITY_ADMIN |
+| 19 | POST | `/accounting/journal-transactions` | Registrar y postear un asiento balanceado (partida doble) | MEDIO | 13 | SECURITY_ADMIN |
 | 20 | GET | `/accounting/journal-transactions/{id}` | Un asiento con sus líneas | BAJO | 3 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 21 | POST | `/accounting/journal-transactions/{id}/approve` | Aprobar el asiento (rol de aprobación) | MEDIO | 3 | SECURITY_ADMIN, ACCOUNTING_APPROVER |
-| 22 | POST | `/accounting/journal-transactions/{id}/classify` | Clasificar automáticamente el asiento | MEDIO | 6 | SECURITY_ADMIN, PRACTITIONER |
+| 21 | POST | `/accounting/journal-transactions/{id}/approve` | Aprobar el asiento (rol de aprobación) | MEDIO | 4 | SECURITY_ADMIN, ACCOUNTING_APPROVER |
+| 22 | POST | `/accounting/journal-transactions/{id}/classify` | Clasificar automáticamente el asiento | MEDIO | 7 | SECURITY_ADMIN, PRACTITIONER |
 | 23 | GET | `/accounting/journal-transactions/{id}/document-flow` | Flujo del documento de un asiento | BAJO | 3 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 24 | POST | `/accounting/journal-transactions/{id}/files` | Adjuntar un documento soporte al asiento | MEDIO | 3 | SECURITY_ADMIN, PRACTITIONER |
-| 25 | POST | `/accounting/journal-transactions/{id}/post` | Postear el asiento aprobado (efecto en el mayor) | MEDIO | 7 | SECURITY_ADMIN |
-| 26 | POST | `/accounting/journal-transactions/{id}/reverse` | Reversar un asiento posteado (líneas espejo) | MEDIO | 12 | SECURITY_ADMIN |
-| 27 | POST | `/accounting/journal-transactions/{id}/submit-review` | Enviar el asiento a revisión | MEDIO | 3 | SECURITY_ADMIN, PRACTITIONER |
-| 28 | POST | `/accounting/journal-transactions/drafts` | Crear un asiento en borrador (DRAFT, sin postear) | MEDIO | 5 | SECURITY_ADMIN, PRACTITIONER |
-| 29 | POST | `/accounting/liabilities/{id}/payments` | Liquidar cuota de pasivo (principal + interés) | MEDIO | 8 | SECURITY_ADMIN |
+| 24 | POST | `/accounting/journal-transactions/{id}/files` | Adjuntar un documento soporte al asiento | MEDIO | 4 | SECURITY_ADMIN, PRACTITIONER |
+| 25 | POST | `/accounting/journal-transactions/{id}/post` | Postear el asiento aprobado (efecto en el mayor) | MEDIO | 9 | SECURITY_ADMIN |
+| 26 | POST | `/accounting/journal-transactions/{id}/reverse` | Reversar un asiento posteado (líneas espejo) | MEDIO | 15 | SECURITY_ADMIN |
+| 27 | POST | `/accounting/journal-transactions/{id}/submit-review` | Enviar el asiento a revisión | MEDIO | 4 | SECURITY_ADMIN, PRACTITIONER |
+| 28 | POST | `/accounting/journal-transactions/drafts` | Crear un asiento en borrador (DRAFT, sin postear) | MEDIO | 11 | SECURITY_ADMIN, PRACTITIONER |
+| 29 | POST | `/accounting/liabilities/{id}/payments` | Liquidar cuota de pasivo (principal + interés) | MEDIO | 14 | SECURITY_ADMIN |
 | 30 | GET | `/accounting/open-items` | Cartera abierta de una práctica | BAJO | 6 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 31 | POST | `/accounting/open-items` | Generar partida abierta en subledger | MEDIO | 2 | SECURITY_ADMIN |
+| 31 | POST | `/accounting/open-items` | Generar partida abierta en subledger | MEDIO | 5 | SECURITY_ADMIN |
 | 32 | POST | `/accounting/postings/determine-accounts` | Determinar la cuenta objetivo por reglas vigentes | BAJO | 1 | SECURITY_ADMIN |
 | 33 | GET | `/accounting/practitioner/assets` | Listar los activos propios de una práctica | BAJO | 3 | PRACTITIONER |
-| 34 | POST | `/accounting/practitioner/assets` | Dar de alta un activo propio | MEDIO | 9 | PRACTITIONER |
-| 35 | PATCH | `/accounting/practitioner/assets/{id}/automation` | Prender o apagar la automatización de un activo | MEDIO | 6 | PRACTITIONER |
-| 36 | POST | `/accounting/practitioner/assets/{id}/progress` | Registrar el avance (depreciación) de un activo | MEDIO | 11 | PRACTITIONER |
-| 37 | POST | `/accounting/practitioner/consultation-income` | Registrar ingreso por consulta pagada | MEDIO | 17 | PRACTITIONER |
-| 38 | POST | `/accounting/practitioner/entries` | Registrar un gasto u otro ingreso | MEDIO | 11 | PRACTITIONER |
+| 34 | POST | `/accounting/practitioner/assets` | Dar de alta un activo propio | MEDIO | 16 | PRACTITIONER |
+| 35 | PATCH | `/accounting/practitioner/assets/{id}/automation` | Prender o apagar la automatización de un activo | MEDIO | 7 | PRACTITIONER |
+| 36 | POST | `/accounting/practitioner/assets/{id}/progress` | Registrar el avance (depreciación) de un activo | MEDIO | 15 | PRACTITIONER |
+| 37 | POST | `/accounting/practitioner/consultation-income` | Registrar ingreso por consulta pagada | MEDIO | 23 | PRACTITIONER |
+| 38 | POST | `/accounting/practitioner/entries` | Registrar un gasto u otro ingreso | MEDIO | 17 | PRACTITIONER |
 | 39 | GET | `/accounting/practitioner/liabilities` | Listar los pasivos propios de una práctica | BAJO | 3 | PRACTITIONER |
-| 40 | POST | `/accounting/practitioner/liabilities` | Dar de alta un pasivo propio (préstamo) | MEDIO | 4 | PRACTITIONER |
-| 41 | PATCH | `/accounting/practitioner/liabilities/{id}/automation` | Prender o apagar la automatización de un pasivo | MEDIO | 6 | PRACTITIONER |
-| 42 | POST | `/accounting/practitioner/liabilities/{id}/progress` | Registrar el avance (pago de cuota) de un pasivo | MEDIO | 9 | PRACTITIONER |
-| 43 | GET | `/accounting/practitioner/liabilities/{id}/schedule` | Cronograma de cuotas de un pasivo propio | BAJO | 4 | PRACTITIONER |
+| 40 | POST | `/accounting/practitioner/liabilities` | Dar de alta un pasivo propio (préstamo) | MEDIO | 6 | PRACTITIONER |
+| 41 | PATCH | `/accounting/practitioner/liabilities/{id}/automation` | Prender o apagar la automatización de un pasivo | MEDIO | 7 | PRACTITIONER |
+| 42 | POST | `/accounting/practitioner/liabilities/{id}/progress` | Registrar el avance (pago de cuota) de un pasivo | MEDIO | 15 | PRACTITIONER |
+| 43 | GET | `/accounting/practitioner/liabilities/{id}/schedule` | Cronograma de cuotas de un pasivo propio | BAJO | 5 | PRACTITIONER |
 | 44 | GET | `/accounting/practitioner/paid-consultations` | Consultas pagadas sin registrar contablemente | BAJO | 4 | PRACTITIONER |
 | 45 | GET | `/accounting/trial-balance` | Balance de sumas y saldos | BAJO | 4 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
 
@@ -95,7 +95,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.chartOfAccounts → LedgerReadService.chartOfAccounts → AccountsRepository.findByPractice | `src/modules/accounting/repositories/accounts.repository.ts:116` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.chartOfAccounts → LedgerReadService.chartOfAccounts → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:149` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.chartOfAccounts → LedgerReadService.chartOfAccounts → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:152` |
 
 ### Parámetros
 
@@ -163,7 +163,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/accounts` la atiende `AccountingLedgerController.createAccount` (src/modules/accounting/controllers/accounting-ledger.controller.ts:168). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AccountingCreateAccountDto` (7 campos, 5 obligatorios). Delega en `LedgerService.createAccount`. Crea filas en accounting.accounts. Lee accounting.accounts.
+`POST /accounting/accounts` la atiende `AccountingLedgerController.createAccount` (src/modules/accounting/controllers/accounting-ledger.controller.ts:168). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AccountingCreateAccountDto` (7 campos, 5 obligatorios). Delega en `LedgerService.createAccount`. Crea filas en accounting.accounts. Lee accounting.accounts, practice.practices.
 
 ### Requerimientos
 
@@ -182,6 +182,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `accounting.accounts` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.createAccount → LedgerService.createAccount → AccountsRepository.create | `src/modules/accounting/repositories/accounts.repository.ts:124` |
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.createAccount → LedgerService.createAccount → AccountsRepository.findByCode | `src/modules/accounting/repositories/accounts.repository.ts:89` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.createAccount → LedgerService.createAccount → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Cuerpo — DTO `AccountingCreateAccountDto` · `application/json`
 
@@ -296,7 +297,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.accrual_objects` | LEE | LEE | DIRECTA | AccountingCockpitController.accrualObjects → AccountingReadService.accrualObjects → AccrualRepository.findObjectsByPractice | `src/modules/accounting/repositories/accrual.repository.ts:204` |
 | `accounting.accrual_schedule_lines` | LEE | LEE | DIRECTA | AccountingCockpitController.accrualObjects → AccountingReadService.accrualObjects → AccrualRepository.findScheduleLinesByObjectIds | `src/modules/accounting/repositories/accrual.repository.ts:226` |
 | `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingCockpitController.accrualObjects → AccountingReadService.accrualObjects → FiscalRepository.findPeriodsByIds | `src/modules/accounting/repositories/fiscal.repository.ts:226` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.accrualObjects → AccountingReadService.accrualObjects → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:150` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.accrualObjects → AccountingReadService.accrualObjects → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:153` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingCockpitController.accrualObjects → AccountingReadService.accrualObjects → AccountingReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -375,7 +376,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/accrual-objects` la atiende `AccountingAccrualController.createAccrualObject` (src/modules/accounting/controllers/accounting-accrual.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAccrualObjectDto` (13 campos, 8 obligatorios). Delega en `AccrualService.createAccrualObject`. Crea filas en accounting.accrual_objects, accounting.accrual_schedule_lines. Lee accounting.accrual_objects.
+`POST /accounting/accrual-objects` la atiende `AccountingAccrualController.createAccrualObject` (src/modules/accounting/controllers/accounting-accrual.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAccrualObjectDto` (13 campos, 8 obligatorios). Delega en `AccrualService.createAccrualObject`. Crea filas en accounting.accrual_objects, accounting.accrual_schedule_lines. Lee accounting.accounts, accounting.accrual_objects, accounting.cost_centers, accounting.fiscal_periods, accounting.fiscal_years, accounting.profit_centers, practice.practices.
 
 ### Requerimientos
 
@@ -392,9 +393,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingAccrualController.createAccrualObject → AccrualService.createAccrualObject → AccountingScopeService.accountsInTenant → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
 | `accounting.accrual_objects` | ESCRIBE | CREA | DIRECTA | AccountingAccrualController.createAccrualObject → AccrualService.createAccrualObject → AccrualRepository.createObject | `src/modules/accounting/repositories/accrual.repository.ts:111` |
 | `accounting.accrual_objects` | LEE | LEE | DIRECTA | AccountingAccrualController.createAccrualObject → AccrualService.createAccrualObject → AccrualRepository.findObjectByNumber | `src/modules/accounting/repositories/accrual.repository.ts:40` |
 | `accounting.accrual_schedule_lines` | ESCRIBE | CREA | DIRECTA | AccountingAccrualController.createAccrualObject → AccrualService.createAccrualObject → AccrualRepository.createScheduleLine | `src/modules/accounting/repositories/accrual.repository.ts:173` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingAccrualController.createAccrualObject → AccrualService.createAccrualObject → AccountingScopeService.costCentersInTenant → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingAccrualController.createAccrualObject → AccrualService.createAccrualObject → AccountingScopeService.periodInTenant → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingAccrualController.createAccrualObject → AccrualService.createAccrualObject → AccountingScopeService.periodInTenant → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingAccrualController.createAccrualObject → AccrualService.createAccrualObject → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingAccrualController.createAccrualObject → AccrualService.createAccrualObject → AccountingScopeService.accountsInTenant → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Cuerpo — DTO `CreateAccrualObjectDto` · `application/json`
 
@@ -509,7 +516,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/accruals/run` la atiende `AccountingAccrualController.runAccruals` (src/modules/accounting/controllers/accounting-accrual.controller.ts:47). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RunAccrualsDto` (4 campos, 4 obligatorios). Delega en `AccrualService.runAccruals`. Crea filas en accounting.accrual_postings, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Actualiza accounting.accrual_schedule_lines. Lee accounting.accrual_objects, accounting.accrual_schedule_lines.
+`POST /accounting/accruals/run` la atiende `AccountingAccrualController.runAccruals` (src/modules/accounting/controllers/accounting-accrual.controller.ts:47). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RunAccrualsDto` (4 campos, 4 obligatorios). Delega en `AccrualService.runAccruals`. Crea filas en accounting.accrual_postings, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Actualiza accounting.accrual_schedule_lines. Lee accounting.accounts, accounting.accrual_objects, accounting.accrual_schedule_lines, accounting.cost_centers, accounting.fiscal_periods, accounting.fiscal_years, accounting.profit_centers, practice.practices.
 
 ### Requerimientos
 
@@ -526,13 +533,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.accrual_objects` | LEE | LEE | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → AccrualRepository.findObjectById | `src/modules/accounting/repositories/accrual.repository.ts:24` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.accrual_objects` | LEE | LEE | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → AccountingScopeService.accrualObject → AccrualRepository.findObjectById | `src/modules/accounting/repositories/accrual.repository.ts:24` |
 | `accounting.accrual_postings` | ESCRIBE | CREA | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → AccrualRepository.createPosting | `src/modules/accounting/repositories/accrual.repository.ts:281` |
-| `accounting.accrual_schedule_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingAccrualController.runAccruals → AccrualService.runAccruals | `src/modules/accounting/services/accrual.service.ts:215` |
+| `accounting.accrual_schedule_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingAccrualController.runAccruals → AccrualService.runAccruals | `src/modules/accounting/services/accrual.service.ts:236` |
 | `accounting.accrual_schedule_lines` | LEE | LEE | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → AccrualRepository.pendingLinesForPeriod | `src/modules/accounting/repositories/accrual.repository.ts:238` |
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingAccrualController.runAccruals → AccrualService.runAccruals → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Cuerpo — DTO `RunAccrualsDto` · `application/json`
 
@@ -582,7 +595,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Objeto de devengo no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El objeto de devengo no define cuentas; PreconditionFailedException: No hay líneas de devengo pendientes en el periodo; PreconditionFailedException: El asiento generado no balancea (debe != haber) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -631,8 +643,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.assets` | LEE | LEE | DIRECTA | AccountingCockpitController.fixedAssets → AccountingReadService.fixedAssets → AssetRepository.listByPractice | `src/modules/accounting/repositories/asset.repository.ts:84` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.fixedAssets → AccountingReadService.fixedAssets → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:150` |
+| `accounting.assets` | LEE | LEE | DIRECTA | AccountingCockpitController.fixedAssets → AccountingReadService.fixedAssets → AssetRepository.listByPractice | `src/modules/accounting/repositories/asset.repository.ts:99` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.fixedAssets → AccountingReadService.fixedAssets → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:153` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingCockpitController.fixedAssets → AccountingReadService.fixedAssets → AccountingReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -712,7 +724,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/assets/capitalize` la atiende `AccountingAssetController.capitalize` (src/modules/accounting/controllers/accounting-asset.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CapitalizeAssetDto` (13 campos, 7 obligatorios). Delega en `AssetService.capitalize`. Crea filas en accounting.asset_assignments, accounting.asset_postings, accounting.asset_valuations, accounting.assets, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Lee accounting.assets.
+`POST /accounting/assets/capitalize` la atiende `AccountingAssetController.capitalize` (src/modules/accounting/controllers/accounting-asset.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CapitalizeAssetDto` (13 campos, 7 obligatorios). Delega en `AssetService.capitalize`. Crea filas en accounting.asset_assignments, accounting.asset_postings, accounting.asset_valuations, accounting.assets, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Lee accounting.accounts, accounting.assets, accounting.cost_centers, accounting.depreciation_areas, accounting.fiscal_periods, accounting.fiscal_years, accounting.profit_centers, practice.practices.
 
 ### Requerimientos
 
@@ -729,14 +741,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.asset_assignments` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AssetRepository.createAssignment | `src/modules/accounting/repositories/asset.repository.ts:361` |
-| `accounting.asset_postings` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AssetRepository.createPosting | `src/modules/accounting/repositories/asset.repository.ts:416` |
-| `accounting.asset_valuations` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AssetRepository.createValuation | `src/modules/accounting/repositories/asset.repository.ts:305` |
-| `accounting.assets` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AssetRepository.createAsset | `src/modules/accounting/repositories/asset.repository.ts:179` |
-| `accounting.assets` | LEE | LEE | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AssetRepository.findByCode | `src/modules/accounting/repositories/asset.repository.ts:41` |
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.asset_assignments` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AssetRepository.createAssignment | `src/modules/accounting/repositories/asset.repository.ts:376` |
+| `accounting.asset_postings` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AssetRepository.createPosting | `src/modules/accounting/repositories/asset.repository.ts:431` |
+| `accounting.asset_valuations` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AssetRepository.createValuation | `src/modules/accounting/repositories/asset.repository.ts:320` |
+| `accounting.assets` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AssetRepository.createAsset | `src/modules/accounting/repositories/asset.repository.ts:194` |
+| `accounting.assets` | LEE | LEE | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AssetRepository.findByCode | `src/modules/accounting/repositories/asset.repository.ts:42` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.depreciation_areas` | LEE | LEE | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AccountingScopeService.depreciationArea → AssetRepository.findDepreciationAreaById | `src/modules/accounting/repositories/asset.repository.ts:56` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingAssetController.capitalize → AssetService.capitalize → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Cuerpo — DTO `CapitalizeAssetDto` · `application/json`
 
@@ -862,9 +881,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.aggregatePostedByAccount → AccountsRepository.findByPractice | `src/modules/accounting/repositories/accounts.repository.ts:116` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.aggregatePostedByAccount → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:269` |
-| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.aggregatePostedByAccount → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:314` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:149` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.aggregatePostedByAccount → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:284` |
+| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.aggregatePostedByAccount → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:329` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:152` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.balanceSheet → LedgerReadService.balanceSheet → LedgerReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -956,7 +975,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/clearing-documents` la atiende `AccountingSubledgerController.clearOpenItems` (src/modules/accounting/controllers/accounting-subledger.controller.ts:47). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateClearingDto` (11 campos, 6 obligatorios). Delega en `SubledgerService.clearOpenItems`. Crea filas en accounting.clearing_documents, accounting.clearing_items, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Lee accounting.clearing_documents, accounting.open_items, accounting.subledger_accounts, practice.practices.
+`POST /accounting/clearing-documents` la atiende `AccountingSubledgerController.clearOpenItems` (src/modules/accounting/controllers/accounting-subledger.controller.ts:47). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateClearingDto` (11 campos, 6 obligatorios). Delega en `SubledgerService.clearOpenItems`. Crea filas en accounting.clearing_documents, accounting.clearing_items, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Lee accounting.accounts, accounting.clearing_documents, accounting.company_bank_accounts, accounting.cost_centers, accounting.fiscal_periods, accounting.fiscal_years, accounting.open_items, accounting.profit_centers y 2 más.
 
 ### Requerimientos
 
@@ -973,15 +992,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.clearing_documents` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → SubledgerRepository.createClearingDocument | `src/modules/accounting/repositories/subledger.repository.ts:247` |
-| `accounting.clearing_documents` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → SubledgerRepository.findClearingByNumber | `src/modules/accounting/repositories/subledger.repository.ts:200` |
-| `accounting.clearing_items` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → SubledgerRepository.createClearingItem | `src/modules/accounting/repositories/subledger.repository.ts:308` |
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
-| `accounting.open_items` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → SubledgerRepository.findOpenItemById | `src/modules/accounting/repositories/subledger.repository.ts:44` |
-| `accounting.subledger_accounts` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → SubledgerRepository.findSubledgerById | `src/modules/accounting/repositories/subledger.repository.ts:33` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → SubledgerService.resolveClearingTenant | `src/modules/accounting/services/subledger.service.ts:260` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.clearing_documents` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → SubledgerRepository.createClearingDocument | `src/modules/accounting/repositories/subledger.repository.ts:263` |
+| `accounting.clearing_documents` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → SubledgerRepository.findClearingByNumber | `src/modules/accounting/repositories/subledger.repository.ts:216` |
+| `accounting.clearing_items` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → SubledgerRepository.createClearingItem | `src/modules/accounting/repositories/subledger.repository.ts:324` |
+| `accounting.company_bank_accounts` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → AccountingScopeService.companyBankAccount → SubledgerRepository.findCompanyBankAccountById | `src/modules/accounting/repositories/subledger.repository.ts:49` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.open_items` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → AccountingScopeService.openItem → SubledgerRepository.findOpenItemById | `src/modules/accounting/repositories/subledger.repository.ts:60` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `accounting.subledger_accounts` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → AccountingScopeService.subledger → SubledgerRepository.findSubledgerById | `src/modules/accounting/repositories/subledger.repository.ts:34` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingSubledgerController.clearOpenItems → SubledgerService.clearOpenItems → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Cuerpo — DTO `CreateClearingDto` · `application/json`
 
@@ -1054,8 +1079,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La práctica de la compensación pertenece a otra organización |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada; ResourceNotFoundException: Partida abierta no encontrada; ResourceNotFoundException: Subledger no encontrado |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: La partida ya está compensada; ConflictException: El número de clearing ya existe en el tenant |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Importe compensado inválido; PreconditionFailedException: Las partidas no comparten subledger; PreconditionFailedException: El asiento generado no balancea (debe != haber) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1089,7 +1113,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/depreciation/run` la atiende `AccountingAssetController.runDepreciation` (src/modules/accounting/controllers/accounting-asset.controller.ts:47). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RunDepreciationDto` (6 campos, 5 obligatorios). Delega en `AssetService.runDepreciation`. Crea filas en accounting.asset_depreciations, accounting.asset_postings, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Actualiza accounting.assets. Lee accounting.asset_depreciations, accounting.assets.
+`POST /accounting/depreciation/run` la atiende `AccountingAssetController.runDepreciation` (src/modules/accounting/controllers/accounting-asset.controller.ts:47). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RunDepreciationDto` (6 campos, 5 obligatorios). Delega en `AssetService.runDepreciation`. Crea filas en accounting.asset_depreciations, accounting.asset_postings, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Actualiza accounting.assets. Lee accounting.accounts, accounting.asset_depreciations, accounting.assets, accounting.cost_centers, accounting.fiscal_periods, accounting.fiscal_years, accounting.profit_centers, practice.practices.
 
 ### Requerimientos
 
@@ -1106,14 +1130,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.asset_depreciations` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → AssetRepository.createDepreciation | `src/modules/accounting/repositories/asset.repository.ts:484` |
-| `accounting.asset_depreciations` | LEE | LEE | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → AssetRepository.findDepreciation | `src/modules/accounting/repositories/asset.repository.ts:445` |
-| `accounting.asset_postings` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → AssetRepository.createPosting | `src/modules/accounting/repositories/asset.repository.ts:416` |
-| `accounting.assets` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingAssetController.runDepreciation → AssetService.runDepreciation | `src/modules/accounting/services/asset.service.ts:248` |
-| `accounting.assets` | LEE | LEE | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → AssetRepository.activeAssets | `src/modules/accounting/repositories/asset.repository.ts:64` |
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.asset_depreciations` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → AssetRepository.createDepreciation | `src/modules/accounting/repositories/asset.repository.ts:499` |
+| `accounting.asset_depreciations` | LEE | LEE | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → AssetRepository.findDepreciation | `src/modules/accounting/repositories/asset.repository.ts:460` |
+| `accounting.asset_postings` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → AssetRepository.createPosting | `src/modules/accounting/repositories/asset.repository.ts:431` |
+| `accounting.assets` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingAssetController.runDepreciation → AssetService.runDepreciation | `src/modules/accounting/services/asset.service.ts:283` |
+| `accounting.assets` | LEE | LEE | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → AssetRepository.activeAssets | `src/modules/accounting/repositories/asset.repository.ts:79` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingAssetController.runDepreciation → AssetService.runDepreciation → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Cuerpo — DTO `RunDepreciationDto` · `application/json`
 
@@ -1216,13 +1246,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → AccountingControllingRepository.listCostCentersByPractice | `src/modules/accounting/repositories/accounting-controlling.repository.ts:52` |
-| `accounting.journal_entry_assignments` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → JournalRepository.findPostedEntriesWithAssignments | `src/modules/accounting/repositories/journal.repository.ts:564` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → JournalRepository.findPostedEntriesWithAssignments | `src/modules/accounting/repositories/journal.repository.ts:552` |
-| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → JournalRepository.findPostedEntriesWithAssignments | `src/modules/accounting/repositories/journal.repository.ts:559` |
-| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → AccountingControllingRepository.listProfitCentersByTenant | `src/modules/accounting/repositories/accounting-controlling.repository.ts:63` |
-| `accounting.segments` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → AccountingControllingRepository.listSegmentsByTenant | `src/modules/accounting/repositories/accounting-controlling.repository.ts:74` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:150` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → AccountingControllingRepository.listCostCentersByPractice | `src/modules/accounting/repositories/accounting-controlling.repository.ts:84` |
+| `accounting.journal_entry_assignments` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → JournalRepository.findPostedEntriesWithAssignments | `src/modules/accounting/repositories/journal.repository.ts:579` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → JournalRepository.findPostedEntriesWithAssignments | `src/modules/accounting/repositories/journal.repository.ts:567` |
+| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → JournalRepository.findPostedEntriesWithAssignments | `src/modules/accounting/repositories/journal.repository.ts:574` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → AccountingControllingRepository.listProfitCentersByTenant | `src/modules/accounting/repositories/accounting-controlling.repository.ts:95` |
+| `accounting.segments` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → AccountingControllingRepository.listSegmentsByTenant | `src/modules/accounting/repositories/accounting-controlling.repository.ts:106` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:153` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingCockpitController.dimensions → AccountingReadService.dimensions → AccountingReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -1293,14 +1323,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/exchange-rates` la atiende `AccountingExchangeRateController.register` (src/modules/accounting/controllers/accounting-exchange-rate.controller.ts:25). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RegisterExchangeRateDto` (5 campos, 4 obligatorios). Delega en `ExchangeRateService.registerRate`. Crea filas en accounting.exchange_rates. Actualiza accounting.exchange_rates. Lee accounting.exchange_rates.
+`POST /accounting/exchange-rates` la atiende `AccountingExchangeRateController.register` (src/modules/accounting/controllers/accounting-exchange-rate.controller.ts:25). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `RegisterExchangeRateDto` (5 campos, 4 obligatorios). Delega en `ExchangeRateService.registerRate`. Crea filas en accounting.exchange_rates. Actualiza accounting.exchange_rates. Lee accounting.exchange_rates.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-exchange-rate.controller.ts:25` |
+| ROL | Alguno de: SYSTEM | `src/modules/accounting/controllers/accounting-exchange-rate.controller.ts:25` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1310,7 +1340,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.exchange_rates` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingExchangeRateController.register → ExchangeRateService.registerRate | `src/modules/accounting/services/exchange-rate.service.ts:60` |
+| `accounting.exchange_rates` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingExchangeRateController.register → ExchangeRateService.registerRate | `src/modules/accounting/services/exchange-rate.service.ts:73` |
 | `accounting.exchange_rates` | ESCRIBE | CREA | DIRECTA | AccountingExchangeRateController.register → ExchangeRateService.registerRate → ExchangeRateRepository.create | `src/modules/accounting/repositories/exchange-rate.repository.ts:59` |
 | `accounting.exchange_rates` | LEE | LEE | DIRECTA | AccountingExchangeRateController.register → ExchangeRateService.registerRate → ExchangeRateRepository.findForPair | `src/modules/accounting/repositories/exchange-rate.repository.ts:16` |
 
@@ -1365,7 +1395,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: El tipo de cambio es un dato de plataforma |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/accounting.md).
@@ -1397,7 +1427,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/fiscal-periods/{id}/lock` la atiende `AccountingFiscalController.lockPeriod` (src/modules/accounting/controllers/accounting-fiscal.controller.ts:55). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LockPeriodDto` (1 campo, 0 obligatorios). Delega en `FiscalService.lockPeriod`. Actualiza accounting.fiscal_periods. Lee accounting.fiscal_periods.
+`POST /accounting/fiscal-periods/{id}/lock` la atiende `AccountingFiscalController.lockPeriod` (src/modules/accounting/controllers/accounting-fiscal.controller.ts:55). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LockPeriodDto` (1 campo, 0 obligatorios). Delega en `FiscalService.lockPeriod`. Actualiza accounting.fiscal_periods. Lee accounting.fiscal_periods, accounting.fiscal_years, practice.practices.
 
 ### Requerimientos
 
@@ -1415,8 +1445,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.fiscal_periods` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod | `src/modules/accounting/services/fiscal.service.ts:128` |
-| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_periods` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod | `src/modules/accounting/services/fiscal.service.ts:136` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod → AccountingScopeService.periodInTenant → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod → AccountingScopeService.periodInTenant → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod → AccountingScopeService.periodInTenant → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Parámetros
 
@@ -1461,7 +1493,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Periodo fiscal no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El periodo no está ABIERTO |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1512,7 +1543,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingCockpitController.fiscalYear → AccountingReadService.fiscalYear → FiscalRepository.findPeriodsByYear | `src/modules/accounting/repositories/fiscal.repository.ts:207` |
 | `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingCockpitController.fiscalYear → AccountingReadService.fiscalYear → FiscalRepository.findYearsByPractice | `src/modules/accounting/repositories/fiscal.repository.ts:189` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.fiscalYear → AccountingReadService.fiscalYear → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:150` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.fiscalYear → AccountingReadService.fiscalYear → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:153` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingCockpitController.fiscalYear → AccountingReadService.fiscalYear → AccountingReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -1587,7 +1618,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/fiscal-years` la atiende `AccountingFiscalController.openFiscalYear` (src/modules/accounting/controllers/accounting-fiscal.controller.ts:38). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateFiscalYearDto` (8 campos, 8 obligatorios). Delega en `FiscalService.openFiscalYear`. Crea filas en accounting.fiscal_periods, accounting.fiscal_years. Lee accounting.fiscal_years.
+`POST /accounting/fiscal-years` la atiende `AccountingFiscalController.openFiscalYear` (src/modules/accounting/controllers/accounting-fiscal.controller.ts:38). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateFiscalYearDto` (8 campos, 8 obligatorios). Delega en `FiscalService.openFiscalYear`. Crea filas en accounting.fiscal_periods, accounting.fiscal_years. Lee accounting.fiscal_years, practice.practices.
 
 ### Requerimientos
 
@@ -1607,6 +1638,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.fiscal_periods` | ESCRIBE | CREA | DIRECTA | AccountingFiscalController.openFiscalYear → FiscalService.openFiscalYear → FiscalRepository.createPeriod | `src/modules/accounting/repositories/fiscal.repository.ts:153` |
 | `accounting.fiscal_years` | ESCRIBE | CREA | DIRECTA | AccountingFiscalController.openFiscalYear → FiscalService.openFiscalYear → FiscalRepository.createYear | `src/modules/accounting/repositories/fiscal.repository.ts:103` |
 | `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingFiscalController.openFiscalYear → FiscalService.openFiscalYear → FiscalRepository.findYearByCode | `src/modules/accounting/repositories/fiscal.repository.ts:64` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingFiscalController.openFiscalYear → FiscalService.openFiscalYear → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Cuerpo — DTO `CreateFiscalYearDto` · `application/json`
 
@@ -1728,9 +1760,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → AccountsRepository.findById | `src/modules/accounting/repositories/accounts.repository.ts:73` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:269` |
-| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:314` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:149` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:284` |
+| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:329` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:152` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.generalLedger → LedgerReadService.generalLedger → LedgerReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -1830,9 +1862,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.aggregatePostedByAccount → AccountsRepository.findByPractice | `src/modules/accounting/repositories/accounts.repository.ts:116` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.aggregatePostedByAccount → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:269` |
-| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.aggregatePostedByAccount → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:314` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:149` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.aggregatePostedByAccount → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:284` |
+| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.aggregatePostedByAccount → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:329` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:152` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.incomeStatement → LedgerReadService.incomeStatement → LedgerReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -1931,8 +1963,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.listJournal → LedgerReadService.listJournal → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:269` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.listJournal → LedgerReadService.listJournal → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:149` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.listJournal → LedgerReadService.listJournal → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:284` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.listJournal → LedgerReadService.listJournal → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:152` |
 
 ### Parámetros
 
@@ -2006,7 +2038,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/journal-transactions` la atiende `AccountingLedgerController.postJournal` (src/modules/accounting/controllers/accounting-ledger.controller.ts:185). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PostJournalDto` (19 campos, 6 obligatorios). Delega en `LedgerService.postJournal`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, audit.audit_log. Lee accounting.fiscal_periods, accounting.journal_transactions, audit.audit_log, iam.sessions.
+`POST /accounting/journal-transactions` la atiende `AccountingLedgerController.postJournal` (src/modules/accounting/controllers/accounting-ledger.controller.ts:185). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PostJournalDto` (19 campos, 6 obligatorios). Delega en `LedgerService.postJournal`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, audit.audit_log. Lee accounting.accounts, accounting.cost_centers, accounting.fiscal_periods, accounting.fiscal_years, accounting.journal_transactions, accounting.profit_centers, audit.audit_log, iam.sessions y 1 más.
 
 ### Requerimientos
 
@@ -2023,14 +2055,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → LedgerService.writeLines → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → JournalRepository.findByTransactionNumber | `src/modules/accounting/repositories/journal.repository.ts:231` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → LedgerService.writeLines → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → AccountingScopeService.assertPostingScope → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → AccountingScopeService.assertPostingScope → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → LedgerService.writeLines → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → JournalRepository.findByTransactionNumber | `src/modules/accounting/repositories/journal.repository.ts:246` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → LedgerService.writeLines → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `iam.sessions` | LEE | LEE | POR_SQL | AccountingLedgerController.postJournal → LedgerService.postJournal → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.postJournal → LedgerService.postJournal → AccountingScopeService.assertPostingScope → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Cuerpo — DTO `PostJournalDto` · `application/json`
 
@@ -2144,7 +2181,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Periodo fiscal no encontrado |
 | 409 | `CONFLICT` | ConflictException: El número de asiento ya existe en la práctica |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El asiento no tiene importe; PreconditionFailedException: El asiento no balancea (debe != haber); PreconditionFailedException: El periodo fiscal no está ABIERTO |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2198,8 +2234,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.getJournalTransaction → LedgerReadService.getJournalTransaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
-| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.getJournalTransaction → LedgerReadService.getJournalTransaction → JournalRepository.findEntriesByTransaction | `src/modules/accounting/repositories/journal.repository.ts:289` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.getJournalTransaction → LedgerReadService.getJournalTransaction → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:149` |
+| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.getJournalTransaction → LedgerReadService.getJournalTransaction → JournalRepository.findEntriesByTransaction | `src/modules/accounting/repositories/journal.repository.ts:304` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.getJournalTransaction → LedgerReadService.getJournalTransaction → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:152` |
 
 ### Parámetros
 
@@ -2273,7 +2309,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/journal-transactions/{id}/approve` la atiende `AccountingLedgerController.approve` (src/modules/accounting/controllers/accounting-ledger.controller.ts:264). Exige sesión con alguno de los roles SECURITY_ADMIN, ACCOUNTING_APPROVER. Valida el cuerpo como `JournalTransitionDto` (2 campos, 0 obligatorios). Delega en `LedgerService.approve`. Actualiza accounting.journal_transactions. Lee accounting.journal_transactions, practice.practitioner_role_assignments.
+`POST /accounting/journal-transactions/{id}/approve` la atiende `AccountingLedgerController.approve` (src/modules/accounting/controllers/accounting-ledger.controller.ts:264). Exige sesión con alguno de los roles SECURITY_ADMIN, ACCOUNTING_APPROVER. Valida el cuerpo como `JournalTransitionDto` (2 campos, 0 obligatorios). Delega en `LedgerService.approve`. Actualiza accounting.journal_transactions. Lee accounting.journal_transactions, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -2291,8 +2327,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.approve → LedgerService.approve → LedgerService.transition | `src/modules/accounting/services/ledger.service.ts:896` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.approve → LedgerService.approve → LedgerService.transition → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
+| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.approve → LedgerService.approve → LedgerService.transition | `src/modules/accounting/services/ledger.service.ts:887` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.approve → LedgerService.approve → LedgerService.transition → AccountingScopeService.transaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.approve → LedgerService.approve → LedgerService.transition → AccountingScopeService.transaction → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.approve → LedgerService.approve → LedgerService.transition → LedgerService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -2384,7 +2421,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/journal-transactions/{id}/classify` la atiende `AccountingLedgerController.classify` (src/modules/accounting/controllers/accounting-ledger.controller.ts:228). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER. Valida el cuerpo como `JournalTransitionDto` (2 campos, 0 obligatorios). Delega en `LedgerService.classify`. Crea filas en audit.audit_log. Actualiza accounting.journal_transactions. Lee accounting.journal_transactions, audit.audit_log, iam.sessions, practice.practitioner_role_assignments.
+`POST /accounting/journal-transactions/{id}/classify` la atiende `AccountingLedgerController.classify` (src/modules/accounting/controllers/accounting-ledger.controller.ts:228). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER. Valida el cuerpo como `JournalTransitionDto` (2 campos, 0 obligatorios). Delega en `LedgerService.classify`. Crea filas en audit.audit_log. Actualiza accounting.journal_transactions. Lee accounting.journal_transactions, audit.audit_log, iam.sessions, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -2402,11 +2439,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.classify → LedgerService.classify | `src/modules/accounting/services/ledger.service.ts:392` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.classify → LedgerService.classify → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
+| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.classify → LedgerService.classify | `src/modules/accounting/services/ledger.service.ts:399` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.classify → LedgerService.classify → AccountingScopeService.transaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.classify → LedgerService.classify → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | AccountingLedgerController.classify → LedgerService.classify → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `iam.sessions` | LEE | LEE | POR_SQL | AccountingLedgerController.classify → LedgerService.classify → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.classify → LedgerService.classify → AccountingScopeService.transaction → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.classify → LedgerService.classify → LedgerService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -2464,7 +2502,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: Transición de estado inválida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2516,9 +2553,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.accounting_document_links` | LEE | LEE | DIRECTA | AccountingCockpitController.documentFlow → AccountingReadService.documentFlow → JournalRepository.findReversalLinksForTransaction | `src/modules/accounting/repositories/journal.repository.ts:516` |
+| `accounting.accounting_document_links` | LEE | LEE | DIRECTA | AccountingCockpitController.documentFlow → AccountingReadService.documentFlow → JournalRepository.findReversalLinksForTransaction | `src/modules/accounting/repositories/journal.repository.ts:531` |
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingCockpitController.documentFlow → AccountingReadService.documentFlow → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.documentFlow → AccountingReadService.documentFlow → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:150` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.documentFlow → AccountingReadService.documentFlow → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:153` |
 
 ### Parámetros
 
@@ -2585,7 +2622,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/journal-transactions/{id}/files` la atiende `AccountingLedgerController.attachFile` (src/modules/accounting/controllers/accounting-ledger.controller.ts:338). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER. Valida el cuerpo como `AttachFileDto` (2 campos, 1 obligatorio). Delega en `LedgerService.attachFile`. Crea filas en accounting.transaction_files. Lee accounting.journal_transactions, practice.practitioner_role_assignments.
+`POST /accounting/journal-transactions/{id}/files` la atiende `AccountingLedgerController.attachFile` (src/modules/accounting/controllers/accounting-ledger.controller.ts:338). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER. Valida el cuerpo como `AttachFileDto` (2 campos, 1 obligatorio). Delega en `LedgerService.attachFile`. Crea filas en accounting.transaction_files. Lee accounting.journal_transactions, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -2603,8 +2640,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.attachFile → LedgerService.attachFile → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
-| `accounting.transaction_files` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.attachFile → LedgerService.attachFile → JournalRepository.createFile | `src/modules/accounting/repositories/journal.repository.ts:644` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.attachFile → LedgerService.attachFile → AccountingScopeService.transaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
+| `accounting.transaction_files` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.attachFile → LedgerService.attachFile → JournalRepository.createFile | `src/modules/accounting/repositories/journal.repository.ts:659` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.attachFile → LedgerService.attachFile → AccountingScopeService.transaction → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.attachFile → LedgerService.attachFile → LedgerService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -2654,7 +2692,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2689,7 +2726,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/journal-transactions/{id}/post` la atiende `AccountingLedgerController.post` (src/modules/accounting/controllers/accounting-ledger.controller.ts:282). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `JournalTransitionDto` (2 campos, 0 obligatorios). Delega en `LedgerService.post`. Crea filas en audit.audit_log. Actualiza accounting.journal_transactions. Lee accounting.fiscal_periods, accounting.journal_transactions, accounting.ledger_entries, audit.audit_log, iam.sessions.
+`POST /accounting/journal-transactions/{id}/post` la atiende `AccountingLedgerController.post` (src/modules/accounting/controllers/accounting-ledger.controller.ts:282). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `JournalTransitionDto` (2 campos, 0 obligatorios). Delega en `LedgerService.post`. Crea filas en audit.audit_log. Actualiza accounting.journal_transactions. Lee accounting.fiscal_periods, accounting.fiscal_years, accounting.journal_transactions, accounting.ledger_entries, audit.audit_log, iam.sessions, practice.practices.
 
 ### Requerimientos
 
@@ -2707,13 +2744,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
-| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.post → LedgerService.post | `src/modules/accounting/services/ledger.service.ts:490` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
-| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → JournalRepository.ledgerEntriesForTransaction | `src/modules/accounting/repositories/journal.repository.ts:595` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.post → LedgerService.post | `src/modules/accounting/services/ledger.service.ts:511` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → AccountingScopeService.transaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
+| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → JournalRepository.ledgerEntriesForTransaction | `src/modules/accounting/repositories/journal.repository.ts:610` |
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.post → LedgerService.post → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `iam.sessions` | LEE | LEE | POR_SQL | AccountingLedgerController.post → LedgerService.post → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.post → LedgerService.post → AccountingScopeService.transaction → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Parámetros
 
@@ -2770,7 +2809,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado; ResourceNotFoundException: Periodo fiscal no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado inválida; PreconditionFailedException: El periodo fiscal no está ABIERTO; PreconditionFailedException: El asiento no balancea (debe != haber) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2805,7 +2843,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/journal-transactions/{id}/reverse` la atiende `AccountingLedgerController.reverse` (src/modules/accounting/controllers/accounting-ledger.controller.ts:320). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReverseJournalDto` (2 campos, 0 obligatorios). Delega en `LedgerService.reverseJournal`. Crea filas en accounting.accounting_document_links, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, audit.audit_log. Actualiza accounting.journal_transactions. Lee accounting.accounting_document_links, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, audit.audit_log, iam.sessions.
+`POST /accounting/journal-transactions/{id}/reverse` la atiende `AccountingLedgerController.reverse` (src/modules/accounting/controllers/accounting-ledger.controller.ts:320). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ReverseJournalDto` (2 campos, 0 obligatorios). Delega en `LedgerService.reverseJournal`. Crea filas en accounting.accounting_document_links, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, audit.audit_log. Actualiza accounting.journal_transactions. Lee accounting.accounting_document_links, accounting.fiscal_periods, accounting.fiscal_years, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, audit.audit_log, iam.sessions y 1 más.
 
 ### Requerimientos
 
@@ -2823,18 +2861,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.accounting_document_links` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.createLink | `src/modules/accounting/repositories/journal.repository.ts:471` |
-| `accounting.accounting_document_links` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.findLink | `src/modules/accounting/repositories/journal.repository.ts:433` |
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_entry_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.assignmentForEntry | `src/modules/accounting/repositories/journal.repository.ts:613` |
-| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.reverse → LedgerService.reverseJournal | `src/modules/accounting/services/ledger.service.ts:652` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
-| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.ledgerEntriesForTransaction | `src/modules/accounting/repositories/journal.repository.ts:595` |
+| `accounting.accounting_document_links` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.createLink | `src/modules/accounting/repositories/journal.repository.ts:486` |
+| `accounting.accounting_document_links` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.findLink | `src/modules/accounting/repositories/journal.repository.ts:448` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_entry_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.assignmentForEntry | `src/modules/accounting/repositories/journal.repository.ts:628` |
+| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.reverse → LedgerService.reverseJournal | `src/modules/accounting/services/ledger.service.ts:655` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → AccountingScopeService.transaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → JournalRepository.ledgerEntriesForTransaction | `src/modules/accounting/repositories/journal.repository.ts:610` |
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `iam.sessions` | LEE | LEE | POR_SQL | AccountingLedgerController.reverse → LedgerService.reverseJournal → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.reverse → LedgerService.reverseJournal → AccountingScopeService.transaction → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Parámetros
 
@@ -2891,7 +2932,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado |
 | 409 | `CONFLICT` | ConflictException: El asiento ya fue reversado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Transición de estado inválida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2928,7 +2968,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/journal-transactions/{id}/submit-review` la atiende `AccountingLedgerController.submitReview` (src/modules/accounting/controllers/accounting-ledger.controller.ts:246). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER. Valida el cuerpo como `JournalTransitionDto` (2 campos, 0 obligatorios). Delega en `LedgerService.submitForReview`. Actualiza accounting.journal_transactions. Lee accounting.journal_transactions, practice.practitioner_role_assignments.
+`POST /accounting/journal-transactions/{id}/submit-review` la atiende `AccountingLedgerController.submitReview` (src/modules/accounting/controllers/accounting-ledger.controller.ts:246). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER. Valida el cuerpo como `JournalTransitionDto` (2 campos, 0 obligatorios). Delega en `LedgerService.submitForReview`. Actualiza accounting.journal_transactions. Lee accounting.journal_transactions, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -2946,8 +2986,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.submitReview → LedgerService.submitForReview → LedgerService.transition | `src/modules/accounting/services/ledger.service.ts:896` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.submitReview → LedgerService.submitForReview → LedgerService.transition → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
+| `accounting.journal_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLedgerController.submitReview → LedgerService.submitForReview → LedgerService.transition | `src/modules/accounting/services/ledger.service.ts:887` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.submitReview → LedgerService.submitForReview → LedgerService.transition → AccountingScopeService.transaction → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.submitReview → LedgerService.submitForReview → LedgerService.transition → AccountingScopeService.transaction → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.submitReview → LedgerService.submitForReview → LedgerService.transition → LedgerService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -3005,7 +3046,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: Transición de estado inválida; PreconditionFailedException: El asiento debe clasificarse antes de enviarse a revisión |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -3041,7 +3081,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/journal-transactions/drafts` la atiende `AccountingLedgerController.createDraft` (src/modules/accounting/controllers/accounting-ledger.controller.ts:207). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER. Valida el cuerpo como `PostJournalDto` (19 campos, 6 obligatorios). Delega en `LedgerService.createDraft`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Lee accounting.journal_transactions, practice.practitioner_role_assignments.
+`POST /accounting/journal-transactions/drafts` la atiende `AccountingLedgerController.createDraft` (src/modules/accounting/controllers/accounting-ledger.controller.ts:207). Exige sesión con alguno de los roles SECURITY_ADMIN, PRACTITIONER. Valida el cuerpo como `PostJournalDto` (19 campos, 6 obligatorios). Delega en `LedgerService.createDraft`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Lee accounting.accounts, accounting.cost_centers, accounting.fiscal_periods, accounting.fiscal_years, accounting.journal_transactions, accounting.profit_centers, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -3058,10 +3098,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → JournalRepository.findByTransactionNumber | `src/modules/accounting/repositories/journal.repository.ts:231` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → JournalRepository.findByTransactionNumber | `src/modules/accounting/repositories/journal.repository.ts:246` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingLedgerController.createDraft → LedgerService.createDraft → LedgerService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Cuerpo — DTO `PostJournalDto` · `application/json`
@@ -3212,7 +3258,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/liabilities/{id}/payments` la atiende `AccountingLiabilityController.pay` (src/modules/accounting/controllers/accounting-liability.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PayLiabilityDto` (8 campos, 6 obligatorios). Delega en `LiabilityService.payLiability`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, accounting.liability_payments, accounting.liability_postings. Actualiza accounting.liabilities. Lee accounting.liabilities, accounting.liability_schedules.
+`POST /accounting/liabilities/{id}/payments` la atiende `AccountingLiabilityController.pay` (src/modules/accounting/controllers/accounting-liability.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PayLiabilityDto` (8 campos, 6 obligatorios). Delega en `LiabilityService.payLiability`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, accounting.liability_payments, accounting.liability_postings. Actualiza accounting.liabilities. Lee accounting.accounts, accounting.cost_centers, accounting.fiscal_periods, accounting.fiscal_years, accounting.liabilities, accounting.liability_schedules, accounting.profit_centers, practice.practices.
 
 ### Requerimientos
 
@@ -3230,14 +3276,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
-| `accounting.liabilities` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLiabilityController.pay → LiabilityService.payLiability | `src/modules/accounting/services/liability.service.ts:198` |
-| `accounting.liabilities` | LEE | LEE | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → LiabilityRepository.findById | `src/modules/accounting/repositories/liability.repository.ts:23` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.liabilities` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingLiabilityController.pay → LiabilityService.payLiability | `src/modules/accounting/services/liability.service.ts:216` |
+| `accounting.liabilities` | LEE | LEE | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → AccountingScopeService.liabilityInPractice → LiabilityRepository.findById | `src/modules/accounting/repositories/liability.repository.ts:23` |
 | `accounting.liability_payments` | ESCRIBE | CREA | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → LiabilityRepository.createPayment | `src/modules/accounting/repositories/liability.repository.ts:257` |
 | `accounting.liability_postings` | ESCRIBE | CREA | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → LiabilityRepository.createPosting | `src/modules/accounting/repositories/liability.repository.ts:312` |
 | `accounting.liability_schedules` | LEE | LEE | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → LiabilityRepository.findScheduleById | `src/modules/accounting/repositories/liability.repository.ts:46` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLiabilityController.pay → LiabilityService.payLiability → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Parámetros
 
@@ -3305,7 +3357,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Pasivo no encontrado; ResourceNotFoundException: Cuota no encontrada para el pasivo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuota no encontrada para el pasivo |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: principal + interés no iguala el importe; PreconditionFailedException: El pago debe ser positivo; PreconditionFailedException: El pasivo no está ACTIVO; PreconditionFailedException: El pasivo no tiene cuenta contable; PreconditionFailedException: La cuota ya está pagada; PreconditionFailedException: El asiento generado no balancea (debe != haber) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -3355,10 +3407,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → AccountsRepository.findByPractice | `src/modules/accounting/repositories/accounts.repository.ts:116` |
-| `accounting.open_items` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → SubledgerRepository.findOpenItemsByReconciliationAccounts | `src/modules/accounting/repositories/subledger.repository.ts:170` |
-| `accounting.subledger_accounts` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → SubledgerRepository.findOpenItemsByReconciliationAccounts | `src/modules/accounting/repositories/subledger.repository.ts:163` |
+| `accounting.open_items` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → SubledgerRepository.findOpenItemsByReconciliationAccounts | `src/modules/accounting/repositories/subledger.repository.ts:186` |
+| `accounting.subledger_accounts` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → SubledgerRepository.findOpenItemsByReconciliationAccounts | `src/modules/accounting/repositories/subledger.repository.ts:179` |
 | `erp.business_partners` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems | `src/modules/accounting/services/accounting-read.service.ts:333` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:150` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → AccountingReadService.resolverPracticeTenant | `src/modules/accounting/services/accounting-read.service.ts:153` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingCockpitController.openItems → AccountingReadService.openItems → AccountingReadService.assertPractitionerOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -3444,7 +3496,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/open-items` la atiende `AccountingSubledgerController.createOpenItem` (src/modules/accounting/controllers/accounting-subledger.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateOpenItemDto` (8 campos, 5 obligatorios). Delega en `SubledgerService.createOpenItem`. Crea filas en accounting.open_items. Lee accounting.subledger_accounts.
+`POST /accounting/open-items` la atiende `AccountingSubledgerController.createOpenItem` (src/modules/accounting/controllers/accounting-subledger.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateOpenItemDto` (8 campos, 5 obligatorios). Delega en `SubledgerService.createOpenItem`. Crea filas en accounting.open_items. Lee accounting.journal_transactions, accounting.ledger_entries, accounting.subledger_accounts, practice.practices.
 
 ### Requerimientos
 
@@ -3461,8 +3513,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.open_items` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.createOpenItem → SubledgerService.createOpenItem → SubledgerRepository.createOpenItem | `src/modules/accounting/repositories/subledger.repository.ts:119` |
-| `accounting.subledger_accounts` | LEE | LEE | DIRECTA | AccountingSubledgerController.createOpenItem → SubledgerService.createOpenItem → SubledgerRepository.findSubledgerById | `src/modules/accounting/repositories/subledger.repository.ts:33` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingSubledgerController.createOpenItem → SubledgerService.createOpenItem → AccountingScopeService.ledgerEntry → JournalRepository.findTransactionById | `src/modules/accounting/repositories/journal.repository.ts:215` |
+| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingSubledgerController.createOpenItem → SubledgerService.createOpenItem → AccountingScopeService.ledgerEntry → JournalRepository.findLedgerEntryById | `src/modules/accounting/repositories/journal.repository.ts:230` |
+| `accounting.open_items` | ESCRIBE | CREA | DIRECTA | AccountingSubledgerController.createOpenItem → SubledgerService.createOpenItem → SubledgerRepository.createOpenItem | `src/modules/accounting/repositories/subledger.repository.ts:135` |
+| `accounting.subledger_accounts` | LEE | LEE | DIRECTA | AccountingSubledgerController.createOpenItem → SubledgerService.createOpenItem → AccountingScopeService.subledger → SubledgerRepository.findSubledgerById | `src/modules/accounting/repositories/subledger.repository.ts:34` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingSubledgerController.createOpenItem → SubledgerService.createOpenItem → AccountingScopeService.ledgerEntry → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Cuerpo — DTO `CreateOpenItemDto` · `application/json`
 
@@ -3522,7 +3577,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Subledger no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/accounting.md).
@@ -3671,7 +3725,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingPractitionerController.listAssets → PractitionerAccountingService.listAssets → PractitionerAccountingService.currencyByAccount → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
-| `accounting.assets` | LEE | LEE | DIRECTA | AccountingPractitionerController.listAssets → PractitionerAccountingService.listAssets → AssetRepository.listByPractice | `src/modules/accounting/repositories/asset.repository.ts:84` |
+| `accounting.assets` | LEE | LEE | DIRECTA | AccountingPractitionerController.listAssets → PractitionerAccountingService.listAssets → AssetRepository.listByPractice | `src/modules/accounting/repositories/asset.repository.ts:99` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerController.listAssets → PractitionerAccountingService.listAssets → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -3744,7 +3798,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/practitioner/assets` la atiende `AccountingPractitionerController.capitalizeAsset` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:129). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `CapitalizeAssetDto` (13 campos, 7 obligatorios). Delega en `PractitionerAccountingService.capitalizeOwnAsset`. Crea filas en accounting.asset_assignments, accounting.asset_postings, accounting.asset_valuations, accounting.assets, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Lee accounting.assets, practice.practitioner_role_assignments.
+`POST /accounting/practitioner/assets` la atiende `AccountingPractitionerController.capitalizeAsset` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:129). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `CapitalizeAssetDto` (13 campos, 7 obligatorios). Delega en `PractitionerAccountingService.capitalizeOwnAsset`. Crea filas en accounting.asset_assignments, accounting.asset_postings, accounting.asset_valuations, accounting.assets, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Lee accounting.accounts, accounting.assets, accounting.cost_centers, accounting.depreciation_areas, accounting.fiscal_periods, accounting.fiscal_years, accounting.profit_centers, practice.practices y 1 más.
 
 ### Requerimientos
 
@@ -3761,14 +3815,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.asset_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AssetRepository.createAssignment | `src/modules/accounting/repositories/asset.repository.ts:361` |
-| `accounting.asset_postings` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AssetRepository.createPosting | `src/modules/accounting/repositories/asset.repository.ts:416` |
-| `accounting.asset_valuations` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AssetRepository.createValuation | `src/modules/accounting/repositories/asset.repository.ts:305` |
-| `accounting.assets` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AssetRepository.createAsset | `src/modules/accounting/repositories/asset.repository.ts:179` |
-| `accounting.assets` | LEE | LEE | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AssetRepository.findByCode | `src/modules/accounting/repositories/asset.repository.ts:41` |
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.asset_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AssetRepository.createAssignment | `src/modules/accounting/repositories/asset.repository.ts:376` |
+| `accounting.asset_postings` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AssetRepository.createPosting | `src/modules/accounting/repositories/asset.repository.ts:431` |
+| `accounting.asset_valuations` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AssetRepository.createValuation | `src/modules/accounting/repositories/asset.repository.ts:320` |
+| `accounting.assets` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AssetRepository.createAsset | `src/modules/accounting/repositories/asset.repository.ts:194` |
+| `accounting.assets` | LEE | LEE | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AssetRepository.findByCode | `src/modules/accounting/repositories/asset.repository.ts:42` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.depreciation_areas` | LEE | LEE | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AccountingScopeService.depreciationArea → AssetRepository.findDepreciationAreaById | `src/modules/accounting/repositories/asset.repository.ts:56` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → AssetService.capitalize → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerController.capitalizeAsset → PractitionerAccountingService.capitalizeOwnAsset → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Cuerpo — DTO `CapitalizeAssetDto` · `application/json`
@@ -3876,7 +3937,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /accounting/practitioner/assets/{id}/automation` la atiende `AccountingPractitionerController.setAssetAutomation` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:146). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `SetAutomationDto` (1 campo, 1 obligatorio). Delega en `PractitionerAccountingService.setAssetAutomation`. Crea filas en audit.audit_log. Actualiza accounting.assets. Lee accounting.assets, audit.audit_log, iam.sessions, practice.practitioner_role_assignments.
+`PATCH /accounting/practitioner/assets/{id}/automation` la atiende `AccountingPractitionerController.setAssetAutomation` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:146). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `SetAutomationDto` (1 campo, 1 obligatorio). Delega en `PractitionerAccountingService.setAssetAutomation`. Crea filas en audit.audit_log. Actualiza accounting.assets. Lee accounting.assets, audit.audit_log, iam.sessions, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -3894,11 +3955,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.assets` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerController.setAssetAutomation → PractitionerAccountingService.setAssetAutomation → AssetRepository.setAutomated | `src/modules/accounting/repositories/asset.repository.ts:105` |
-| `accounting.assets` | LEE | LEE | DIRECTA | AccountingPractitionerController.setAssetAutomation → PractitionerAccountingService.setAssetAutomation → AssetRepository.setAutomated | `src/modules/accounting/repositories/asset.repository.ts:103` |
+| `accounting.assets` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerController.setAssetAutomation → PractitionerAccountingService.setAssetAutomation → AssetRepository.setAutomated | `src/modules/accounting/repositories/asset.repository.ts:120` |
+| `accounting.assets` | LEE | LEE | DIRECTA | AccountingPractitionerController.setAssetAutomation → PractitionerAccountingService.setAssetAutomation → AssetRepository.setAutomated | `src/modules/accounting/repositories/asset.repository.ts:118` |
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.setAssetAutomation → PractitionerAccountingService.setAssetAutomation → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | AccountingPractitionerController.setAssetAutomation → PractitionerAccountingService.setAssetAutomation → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `iam.sessions` | LEE | LEE | POR_SQL | AccountingPractitionerController.setAssetAutomation → PractitionerAccountingService.setAssetAutomation → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerController.setAssetAutomation → PractitionerAccountingService.setAssetAutomation → PractitionerAccountingService.assertOwnsAsset → AccountingScopeService.asset → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerController.setAssetAutomation → PractitionerAccountingService.setAssetAutomation → PractitionerAccountingService.assertOwnsAsset → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -3976,7 +4038,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/practitioner/assets/{id}/progress` la atiende `AccountingPractitionerController.registerAssetProgress` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:163). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `RegisterAssetProgressDto` (3 campos, 2 obligatorios). Delega en `PractitionerAccountingService.registerAssetProgress`. Crea filas en accounting.asset_depreciations, accounting.asset_postings, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Actualiza accounting.assets. Lee accounting.asset_depreciations, accounting.assets, accounting.fiscal_periods, accounting.fiscal_years, practice.practitioner_role_assignments.
+`POST /accounting/practitioner/assets/{id}/progress` la atiende `AccountingPractitionerController.registerAssetProgress` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:163). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `RegisterAssetProgressDto` (3 campos, 2 obligatorios). Delega en `PractitionerAccountingService.registerAssetProgress`. Crea filas en accounting.asset_depreciations, accounting.asset_postings, accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries. Actualiza accounting.assets. Lee accounting.accounts, accounting.asset_depreciations, accounting.assets, accounting.cost_centers, accounting.fiscal_periods, accounting.fiscal_years, accounting.profit_centers, practice.practices y 1 más.
 
 ### Requerimientos
 
@@ -3994,16 +4056,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.asset_depreciations` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → AssetRepository.createDepreciation | `src/modules/accounting/repositories/asset.repository.ts:484` |
-| `accounting.asset_depreciations` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetRepository.findDepreciation | `src/modules/accounting/repositories/asset.repository.ts:445` |
-| `accounting.asset_postings` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → AssetRepository.createPosting | `src/modules/accounting/repositories/asset.repository.ts:416` |
-| `accounting.assets` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation | `src/modules/accounting/services/asset.service.ts:248` |
-| `accounting.assets` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → PractitionerAccountingService.assertOwnsAsset → AssetRepository.findById | `src/modules/accounting/repositories/asset.repository.ts:25` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.asset_depreciations` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → AssetRepository.createDepreciation | `src/modules/accounting/repositories/asset.repository.ts:499` |
+| `accounting.asset_depreciations` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetRepository.findDepreciation | `src/modules/accounting/repositories/asset.repository.ts:460` |
+| `accounting.asset_postings` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → AssetRepository.createPosting | `src/modules/accounting/repositories/asset.repository.ts:431` |
+| `accounting.assets` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation | `src/modules/accounting/services/asset.service.ts:283` |
+| `accounting.assets` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → PractitionerAccountingService.assertOwnsAsset → AssetRepository.findById | `src/modules/accounting/repositories/asset.repository.ts:26` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
 | `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → FiscalRepository.findOpenPeriodForPractice | `src/modules/accounting/repositories/fiscal.repository.ts:43` |
 | `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → FiscalRepository.findOpenPeriodForPractice | `src/modules/accounting/repositories/fiscal.repository.ts:41` |
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → AssetService.runDepreciation → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerAssetProgress → PractitionerAccountingService.registerAssetProgress → PractitionerAccountingService.assertOwnsAsset → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -4057,7 +4123,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Activo no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: No hay un período fiscal abierto para esa fecha; PreconditionFailedException: El asiento generado no balancea (debe != haber); PreconditionFailedException: No hay activos elegibles para depreciar en el periodo; PreconditionFailedException: Este activo no tiene depreciación pendiente para el período abierto |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -4090,7 +4155,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/practitioner/consultation-income` la atiende `AccountingPractitionerController.registerConsultationIncome` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:72). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `RegisterConsultationIncomeDto` (7 campos, 5 obligatorios). Delega en `PractitionerAccountingService.registerConsultationIncome`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, accounting.transaction_files, messaging.notification_requests. Lee accounting.journal_transactions, billing.bills, billing.invoices, billing.payments_made, billing.payments_received, clinical.appointments, clinical.encounters, messaging.message_channels y 4 más.
+`POST /accounting/practitioner/consultation-income` la atiende `AccountingPractitionerController.registerConsultationIncome` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:72). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `RegisterConsultationIncomeDto` (7 campos, 5 obligatorios). Delega en `PractitionerAccountingService.registerConsultationIncome`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, accounting.transaction_files, messaging.notification_requests. Lee accounting.accounts, accounting.cost_centers, accounting.fiscal_periods, accounting.fiscal_years, accounting.journal_transactions, accounting.profit_centers, billing.bills, billing.invoices y 10 más.
 
 ### Requerimientos
 
@@ -4107,22 +4172,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → JournalRepository.findByTransactionNumber | `src/modules/accounting/repositories/journal.repository.ts:231` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
-| `accounting.transaction_files` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.attachFile → JournalRepository.createFile | `src/modules/accounting/repositories/journal.repository.ts:644` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → JournalRepository.findByTransactionNumber | `src/modules/accounting/repositories/journal.repository.ts:246` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `accounting.transaction_files` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.attachFile → JournalRepository.createFile | `src/modules/accounting/repositories/journal.repository.ts:659` |
 | `billing.bills` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.postToLedger → LedgerService.loadDocument → BillsRepository.findById | `src/modules/billing/repositories/bills.repository.ts:137` |
-| `billing.invoices` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome | `src/modules/accounting/services/practitioner-accounting.service.ts:192` |
+| `billing.invoices` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome | `src/modules/accounting/services/practitioner-accounting.service.ts:200` |
 | `billing.payments_made` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.postToLedger → LedgerService.loadDocument → PaymentsMadeRepository.findById | `src/modules/billing/repositories/payments-made.repository.ts:93` |
 | `billing.payments_received` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → LedgerService.postToLedger → LedgerService.loadDocument → PaymentsReceivedRepository.findById | `src/modules/billing/repositories/payments-received.repository.ts:97` |
-| `clinical.appointments` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome | `src/modules/accounting/services/practitioner-accounting.service.ts:226` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome | `src/modules/accounting/services/practitioner-accounting.service.ts:222` |
+| `clinical.appointments` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome | `src/modules/accounting/services/practitioner-accounting.service.ts:234` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome | `src/modules/accounting/services/practitioner-accounting.service.ts:230` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → PractitionerAccountingService.notifyAccounting → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → PractitionerAccountingService.notifyAccounting → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → PractitionerAccountingService.notifyAccounting → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → PractitionerAccountingService.notifyAccounting → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → PractitionerAccountingService.notifyAccounting → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → AccountingScopeService.invoice → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerConsultationIncome → PractitionerAccountingService.registerConsultationIncome → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Cuerpo — DTO `RegisterConsultationIncomeDto` · `application/json`
@@ -4184,9 +4255,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura no encontrada; ResourceNotFoundException: Documento no encontrado; ResourceNotFoundException: Asiento no encontrado; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: La factura ya tiene un asiento contable asociado; ConflictException: El número de asiento ya existe en la práctica; ConflictException: El documento ya fue contabilizado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: La factura no pertenece a esa práctica; PreconditionFailedException: La factura todavía no está pagada; PreconditionFailedException: La factura no está ligada a un encuentro clínico: no se puede confirmar que sea de este profesional; PreconditionFailedException: La consulta de esa factura no es de este profesional; PreconditionFailedException: La factura no registra un importe pagado; PreconditionFailedException: El asiento no tiene importe; PreconditionFailedException: El asiento no balancea (debe != haber); PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: La factura no pertenece a esa práctica; PreconditionFailedException: La factura todavía no está pagada; PreconditionFailedException: La factura no está ligada a un encuentro clínico: no se puede confirmar que sea de este profesional; PreconditionFailedException: La consulta de esa factura no es de este profesional; PreconditionFailedException: La factura no registra un importe pagado; PreconditionFailedException: El asiento no tiene importe; PreconditionFailedException: El asiento no balancea (debe != haber); PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/accounting.md).
@@ -4218,7 +4289,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/practitioner/entries` la atiende `AccountingPractitionerController.registerSimpleEntry` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:93). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `RegisterSimpleEntryDto` (8 campos, 7 obligatorios). Delega en `PractitionerAccountingService.registerSimpleEntry`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, accounting.transaction_files, messaging.notification_requests. Lee accounting.journal_transactions, messaging.message_channels, messaging.message_templates, messaging.notification_requests, messaging.recipient_preferences, practice.practitioner_role_assignments.
+`POST /accounting/practitioner/entries` la atiende `AccountingPractitionerController.registerSimpleEntry` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:93). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `RegisterSimpleEntryDto` (8 campos, 7 obligatorios). Delega en `PractitionerAccountingService.registerSimpleEntry`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, accounting.transaction_files, messaging.notification_requests. Lee accounting.accounts, accounting.cost_centers, accounting.fiscal_periods, accounting.fiscal_years, accounting.journal_transactions, accounting.profit_centers, messaging.message_channels, messaging.message_templates y 4 más.
 
 ### Requerimientos
 
@@ -4235,16 +4306,22 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → JournalRepository.findByTransactionNumber | `src/modules/accounting/repositories/journal.repository.ts:231` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
-| `accounting.transaction_files` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.attachFile → JournalRepository.createFile | `src/modules/accounting/repositories/journal.repository.ts:644` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → JournalRepository.findByTransactionNumber | `src/modules/accounting/repositories/journal.repository.ts:246` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → LedgerService.writeLines → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `accounting.transaction_files` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.attachFile → JournalRepository.createFile | `src/modules/accounting/repositories/journal.repository.ts:659` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → PractitionerAccountingService.notifyAccounting → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
 | `messaging.message_templates` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → PractitionerAccountingService.notifyAccounting → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → PractitionerAccountingService.notifyAccounting → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → PractitionerAccountingService.notifyAccounting → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → PractitionerAccountingService.notifyAccounting → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → LedgerService.createDraft → AccountingScopeService.assertPostingScope → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerSimpleEntry → PractitionerAccountingService.registerSimpleEntry → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Cuerpo — DTO `RegisterSimpleEntryDto` · `application/json`
@@ -4310,9 +4387,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: El número de asiento ya existe en la práctica |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: El asiento no tiene importe; PreconditionFailedException: El asiento no balancea (debe != haber); PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: El asiento no tiene importe; PreconditionFailedException: El asiento no balancea (debe != haber); PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/accounting.md).
@@ -4433,7 +4510,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/practitioner/liabilities` la atiende `AccountingPractitionerController.createLiability` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:192). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `CreateOwnLiabilityDto` (10 campos, 7 obligatorios). Delega en `PractitionerAccountingService.createOwnLiability`. Crea filas en accounting.liabilities, accounting.liability_schedules. Lee accounting.liabilities, practice.practitioner_role_assignments.
+`POST /accounting/practitioner/liabilities` la atiende `AccountingPractitionerController.createLiability` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:192). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `CreateOwnLiabilityDto` (10 campos, 7 obligatorios). Delega en `PractitionerAccountingService.createOwnLiability`. Crea filas en accounting.liabilities, accounting.liability_schedules. Lee accounting.accounts, accounting.liabilities, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -4450,9 +4527,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingPractitionerController.createLiability → PractitionerAccountingService.createOwnLiability → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
 | `accounting.liabilities` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.createLiability → PractitionerAccountingService.createOwnLiability → LiabilityRepository.createLiability | `src/modules/accounting/repositories/liability.repository.ts:120` |
-| `accounting.liabilities` | LEE | LEE | DIRECTA | AccountingPractitionerController.createLiability → PractitionerAccountingService.createOwnLiability | `src/modules/accounting/services/practitioner-accounting.service.ts:640` |
+| `accounting.liabilities` | LEE | LEE | DIRECTA | AccountingPractitionerController.createLiability → PractitionerAccountingService.createOwnLiability | `src/modules/accounting/services/practitioner-accounting.service.ts:652` |
 | `accounting.liability_schedules` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.createLiability → PractitionerAccountingService.createOwnLiability → LiabilityRepository.createSchedule | `src/modules/accounting/repositories/liability.repository.ts:162` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerController.createLiability → PractitionerAccountingService.createOwnLiability → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerController.createLiability → PractitionerAccountingService.createOwnLiability → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Cuerpo — DTO `CreateOwnLiabilityDto` · `application/json`
@@ -4552,7 +4631,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /accounting/practitioner/liabilities/{id}/automation` la atiende `AccountingPractitionerController.setLiabilityAutomation` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:224). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `SetAutomationDto` (1 campo, 1 obligatorio). Delega en `PractitionerAccountingService.setLiabilityAutomation`. Crea filas en audit.audit_log. Actualiza accounting.liabilities. Lee accounting.liabilities, audit.audit_log, iam.sessions, practice.practitioner_role_assignments.
+`PATCH /accounting/practitioner/liabilities/{id}/automation` la atiende `AccountingPractitionerController.setLiabilityAutomation` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:224). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `SetAutomationDto` (1 campo, 1 obligatorio). Delega en `PractitionerAccountingService.setLiabilityAutomation`. Crea filas en audit.audit_log. Actualiza accounting.liabilities. Lee accounting.liabilities, audit.audit_log, iam.sessions, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -4575,6 +4654,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.setLiabilityAutomation → PractitionerAccountingService.setLiabilityAutomation → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | AccountingPractitionerController.setLiabilityAutomation → PractitionerAccountingService.setLiabilityAutomation → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
 | `iam.sessions` | LEE | LEE | POR_SQL | AccountingPractitionerController.setLiabilityAutomation → PractitionerAccountingService.setLiabilityAutomation → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerController.setLiabilityAutomation → PractitionerAccountingService.setLiabilityAutomation → PractitionerAccountingService.assertOwnsLiability → AccountingScopeService.liability → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerController.setLiabilityAutomation → PractitionerAccountingService.setLiabilityAutomation → PractitionerAccountingService.assertOwnsLiability → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -4652,7 +4732,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/practitioner/liabilities/{id}/progress` la atiende `AccountingPractitionerController.registerLiabilityProgress` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:241). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `RegisterLiabilityProgressDto` (2 campos, 2 obligatorios). Delega en `PractitionerAccountingService.registerLiabilityProgress`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, accounting.liability_payments, accounting.liability_postings. Actualiza accounting.liabilities. Lee accounting.liabilities, accounting.liability_schedules, practice.practitioner_role_assignments.
+`POST /accounting/practitioner/liabilities/{id}/progress` la atiende `AccountingPractitionerController.registerLiabilityProgress` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:241). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `RegisterLiabilityProgressDto` (2 campos, 2 obligatorios). Delega en `PractitionerAccountingService.registerLiabilityProgress`. Crea filas en accounting.journal_entry_assignments, accounting.journal_transactions, accounting.ledger_entries, accounting.liability_payments, accounting.liability_postings. Actualiza accounting.liabilities. Lee accounting.accounts, accounting.cost_centers, accounting.fiscal_periods, accounting.fiscal_years, accounting.liabilities, accounting.liability_schedules, accounting.profit_centers, practice.practices y 1 más.
 
 ### Requerimientos
 
@@ -4670,14 +4750,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:394` |
-| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:330` |
-| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:364` |
-| `accounting.liabilities` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability | `src/modules/accounting/services/liability.service.ts:198` |
+| `accounting.accounts` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.accountsInPractice → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
+| `accounting.cost_centers` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.costCentersInPractice → AccountingControllingRepository.findCostCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:60` |
+| `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
+| `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.periodInPractice → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
+| `accounting.journal_entry_assignments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createAssignment | `src/modules/accounting/repositories/journal.repository.ts:409` |
+| `accounting.journal_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createTransaction | `src/modules/accounting/repositories/journal.repository.ts:345` |
+| `accounting.ledger_entries` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → PostingHelper.post → JournalRepository.createLedgerEntry | `src/modules/accounting/repositories/journal.repository.ts:379` |
+| `accounting.liabilities` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability | `src/modules/accounting/services/liability.service.ts:216` |
 | `accounting.liabilities` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → PractitionerAccountingService.assertOwnsLiability → LiabilityRepository.findById | `src/modules/accounting/repositories/liability.repository.ts:23` |
 | `accounting.liability_payments` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → LiabilityRepository.createPayment | `src/modules/accounting/repositories/liability.repository.ts:257` |
 | `accounting.liability_postings` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → LiabilityRepository.createPosting | `src/modules/accounting/repositories/liability.repository.ts:312` |
 | `accounting.liability_schedules` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityRepository.findNextDueSchedule | `src/modules/accounting/repositories/liability.repository.ts:210` |
+| `accounting.profit_centers` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → PostingHelper.post → AccountingScopeService.assertPostingScope → AccountingScopeService.profitCentersInTenant → AccountingControllingRepository.findProfitCentersByIds | `src/modules/accounting/repositories/accounting-controlling.repository.ts:76` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → LiabilityService.payLiability → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerController.registerLiabilityProgress → PractitionerAccountingService.registerLiabilityProgress → PractitionerAccountingService.assertOwnsLiability → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -4729,7 +4815,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Pasivo no encontrado; ResourceNotFoundException: Cuota no encontrada para el pasivo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cuota no encontrada para el pasivo |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: Este pasivo no tiene cuotas pendientes; PreconditionFailedException: principal + interés no iguala el importe; PreconditionFailedException: El pago debe ser positivo; PreconditionFailedException: El pasivo no está ACTIVO; PreconditionFailedException: El pasivo no tiene cuenta contable; PreconditionFailedException: La cuota ya está pagada; PreconditionFailedException: El asiento generado no balancea (debe != haber) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -4762,7 +4848,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /accounting/practitioner/liabilities/{id}/schedule` la atiende `AccountingPractitionerController.readLiabilitySchedule` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:209). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PractitionerAccountingService.readLiabilitySchedule`. Lee accounting.accounts, accounting.liabilities, accounting.liability_schedules, practice.practitioner_role_assignments.
+`GET /accounting/practitioner/liabilities/{id}/schedule` la atiende `AccountingPractitionerController.readLiabilitySchedule` (src/modules/accounting/controllers/accounting-practitioner.controller.ts:209). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PractitionerAccountingService.readLiabilitySchedule`. Lee accounting.accounts, accounting.liabilities, accounting.liability_schedules, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -4781,6 +4867,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingPractitionerController.readLiabilitySchedule → PractitionerAccountingService.readLiabilitySchedule → PractitionerAccountingService.currencyByAccount → AccountsRepository.findByIds | `src/modules/accounting/repositories/accounts.repository.ts:153` |
 | `accounting.liabilities` | LEE | LEE | DIRECTA | AccountingPractitionerController.readLiabilitySchedule → PractitionerAccountingService.readLiabilitySchedule → LiabilityRepository.findById | `src/modules/accounting/repositories/liability.repository.ts:23` |
 | `accounting.liability_schedules` | LEE | LEE | DIRECTA | AccountingPractitionerController.readLiabilitySchedule → PractitionerAccountingService.readLiabilitySchedule → LiabilityRepository.listSchedules | `src/modules/accounting/repositories/liability.repository.ts:189` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerController.readLiabilitySchedule → PractitionerAccountingService.readLiabilitySchedule → PractitionerAccountingService.assertOwnsLiability → AccountingScopeService.liability → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerController.readLiabilitySchedule → PractitionerAccountingService.readLiabilitySchedule → PractitionerAccountingService.assertOwnsLiability → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -4861,9 +4948,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.invoices` | LEE | LEE | DIRECTA | AccountingPractitionerController.listPaidConsultations → PractitionerAccountingService.listPaidConsultations | `src/modules/accounting/services/practitioner-accounting.service.ts:146` |
-| `clinical.appointments` | LEE | LEE | DIRECTA | AccountingPractitionerController.listPaidConsultations → PractitionerAccountingService.listPaidConsultations | `src/modules/accounting/services/practitioner-accounting.service.ts:128` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | AccountingPractitionerController.listPaidConsultations → PractitionerAccountingService.listPaidConsultations | `src/modules/accounting/services/practitioner-accounting.service.ts:137` |
+| `billing.invoices` | LEE | LEE | DIRECTA | AccountingPractitionerController.listPaidConsultations → PractitionerAccountingService.listPaidConsultations | `src/modules/accounting/services/practitioner-accounting.service.ts:151` |
+| `clinical.appointments` | LEE | LEE | DIRECTA | AccountingPractitionerController.listPaidConsultations → PractitionerAccountingService.listPaidConsultations | `src/modules/accounting/services/practitioner-accounting.service.ts:133` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | AccountingPractitionerController.listPaidConsultations → PractitionerAccountingService.listPaidConsultations | `src/modules/accounting/services/practitioner-accounting.service.ts:142` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerController.listPaidConsultations → PractitionerAccountingService.listPaidConsultations → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
@@ -4948,9 +5035,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.accounts` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → AccountsRepository.findByPractice | `src/modules/accounting/repositories/accounts.repository.ts:116` |
-| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:269` |
-| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:314` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:149` |
+| `accounting.journal_transactions` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → JournalRepository.findTransactions | `src/modules/accounting/repositories/journal.repository.ts:284` |
+| `accounting.ledger_entries` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → JournalRepository.findEntriesByTransactions | `src/modules/accounting/repositories/journal.repository.ts:329` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingLedgerController.trialBalance → LedgerReadService.trialBalance → LedgerReadService.verifyPracticeTenant | `src/modules/accounting/services/ledger-read.service.ts:152` |
 
 ### Parámetros
 

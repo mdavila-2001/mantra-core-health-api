@@ -2,9 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { randomUUID } from 'node:crypto';
+import { HttpStatus } from '@nestjs/common';
 import {
+  DomainException,
+  ErrorCode,
   PreconditionFailedException,
   ResourceNotFoundException,
+  getCurrentTenantId,
+  type AuthenticatedUser,
 } from '../../../common';
 import {
   TELE,
@@ -23,8 +28,22 @@ import {
   ConversionEventsRepository,
   AnalyticsSubjectsRepository,
   TrackingConsentsRepository,
+  ActorSessionsRepository,
 } from '../repositories';
-import type { SessionJourneys } from '../entities';
+import type {
+  AnalyticsSubjects,
+  ClientContexts,
+  SessionJourneys,
+  UserActivityEvents,
+} from '../entities';
+import { TelemetryErrorReason } from '../telemetry.error-reasons';
+import {
+  EventPropertyRejection,
+  validateEventProperties,
+  type EventSchemaPolicy,
+  type RawEventProperty,
+  type ValidatedEventProperty,
+} from '../domain/event-property-policy';
 import {
   TelemetryWebAnalyticsService,
   type ForwardedActivityEvent,
@@ -73,6 +92,7 @@ export class TelemetryEventsService {
    * @param conversionsRepo - Valor de conversions repo requerido por la operación.
    * @param subjectsRepo - Valor de subjects repo requerido por la operación.
    * @param consentsRepo - Valor de consents repo requerido por la operación.
+   * @param sessionsRepo - Traduce el `sid` del token a la sesión y comprueba de quién es.
    * @param webAnalytics - Reenvío de mejor esfuerzo a la analítica web externa.
    * @param logger - Valor de logger requerido por la operación.
    */
@@ -88,26 +108,36 @@ export class TelemetryEventsService {
     private readonly conversionsRepo: ConversionEventsRepository,
     private readonly subjectsRepo: AnalyticsSubjectsRepository,
     private readonly consentsRepo: TrackingConsentsRepository,
+    private readonly sessionsRepo: ActorSessionsRepository,
     private readonly webAnalytics: TelemetryWebAnalyticsService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(TelemetryEventsService.name);
   }
 
-  /** UC-28-07: captura un batch de eventos aplicando el gate de consentimiento. */
+  /**
+   * UC-28-07: captura un batch de eventos aplicando el gate de consentimiento.
+   *
+   * La identidad (`userId`, sesión y tenant) sale del actor autenticado y del
+   * contexto de tenant, nunca del cuerpo. Las referencias que sí vienen del
+   * cuerpo (sujeto, journey) deben ser del mismo actor; una ajena responde 404
+   * igual que una inexistente y revierte el lote entero.
+   */
   async captureActivityEvents(
     dto: CaptureActivityEventsDto,
+    actor: AuthenticatedUser,
   ): Promise<ActivityEventsResponseDto> {
     this.logger.info(
       { operation: 'telemetry.activity.capture', count: dto.events.length },
       'Capturing activity events',
     );
     const forwarded: ForwardedActivityEvent[] = [];
-    let tenantId: string | undefined;
+    const tenantId = getCurrentTenantId();
     const response = await this.em.transactional(async (tx) => {
       const eventIds: string[] = [];
       let skipped = 0;
       let journey: SessionJourneys | null = null;
+      const sessionId = await this.actorSessionId(tx, actor);
 
       for (const item of dto.events) {
         const schema = await this.schemasRepo.findById(
@@ -123,36 +153,49 @@ export class TelemetryEventsService {
           );
         }
 
-        // Gate de consentimiento: si hay usuario y el propósito lo requiere, exige
-        // una decisión efectiva GRANTED; si la última es WITHDRAWN se descarta.
+        // Referencias del cuerpo: se comprueban antes del gate y antes de
+        // crear nada, para que una ajena no pase por «descartada».
+        if (item.analyticsSubjectId) {
+          await this.assertOwnedSubject(tx, item.analyticsSubjectId, actor);
+        }
+        const explicitJourney = item.sessionJourneyId
+          ? await this.assertOwnedJourney(tx, item.sessionJourneyId, actor)
+          : null;
+
+        // Gate de consentimiento: el evento es siempre del actor y el propósito
+        // exige una decisión efectiva GRANTED; si la última es WITHDRAWN se descarta.
         if (
-          item.userId &&
-          !(await this.consentAllows(
-            tx,
-            item.userId,
-            schema.purposeDefinitionId,
-          ))
+          !(await this.consentAllows(tx, actor.id, schema.purposeDefinitionId))
         ) {
           skipped += 1;
           continue;
         }
 
-        // Idempotencia por clave: descarta reenvíos.
+        // Idempotencia por clave **del mismo usuario**: descarta reenvíos.
         const idemKey = item.eventIdempotencyKey ?? randomUUID();
         if (item.eventIdempotencyKey) {
-          const dup = await this.eventsRepo.findByIdempotencyKey(tx, idemKey);
+          const dup = await this.eventsRepo.findByIdempotencyKey(
+            tx,
+            idemKey,
+            actor.id,
+          );
           if (dup) {
             skipped += 1;
             continue;
           }
         }
 
-        journey = await this.resolveJourney(tx, {
-          sessionJourneyId: item.sessionJourneyId,
-          sessionId: item.sessionId,
-          analyticsSubjectId: item.analyticsSubjectId,
-          portalTypeConceptId: item.portalTypeConceptId,
-        });
+        // Gobernanza de propiedades (TEL-03): antes de crear nada. Lo que no
+        // pasa la política ni se persiste ni se reenvía.
+        const properties = this.validateProperties(schema, item.properties);
+
+        journey =
+          explicitJourney ??
+          (await this.openJourney(tx, {
+            sessionId,
+            analyticsSubjectId: item.analyticsSubjectId,
+            portalTypeConceptId: item.portalTypeConceptId,
+          }));
 
         const occurredAt = item.occurredAt
           ? new Date(item.occurredAt)
@@ -160,9 +203,9 @@ export class TelemetryEventsService {
         const event = this.eventsRepo.create(tx, {
           eventSchemaDefinitionId: item.eventSchemaDefinitionId,
           analyticsSubjectId: item.analyticsSubjectId,
-          userId: item.userId,
-          sessionId: item.sessionId,
-          tenantId: item.tenantId,
+          userId: actor.id,
+          sessionId,
+          tenantId,
           portalTypeConceptId:
             item.portalTypeConceptId ??
             schema.portalTypeConceptId ??
@@ -177,19 +220,22 @@ export class TelemetryEventsService {
         await tx.flush();
         eventIds.push(event.id);
 
-        for (const prop of item.properties ?? []) {
+        for (const prop of properties) {
           this.propertiesRepo.create(tx, {
             userActivityEventId: event.id,
             propertyName: prop.propertyName,
-            valueTypeConceptId: this.valueType(prop),
+            valueTypeConceptId: VALUE_TYPE_CONCEPT_BY_CODE[prop.valueType],
             valueString: prop.valueString,
             valueNumber:
               prop.valueNumber !== undefined
                 ? String(prop.valueNumber)
                 : undefined,
             valueBoolean: prop.valueBoolean,
+            // La clasificación la fija el servidor desde el esquema: la que
+            // declare el cliente no participa.
             dataClassificationConceptId:
-              prop.dataClassificationConceptId ?? TELE.DATA_CLASS_INTERNAL,
+              (prop.sensitive ? schema.piiClassificationConceptId : null) ??
+              TELE.DATA_CLASS_INTERNAL,
           });
         }
 
@@ -207,12 +253,11 @@ export class TelemetryEventsService {
           sessionJourneyId: journey?.id,
           routeTemplate: item.routeTemplate,
           occurredAt,
-          // Sólo llega aquí lo que pasó el gate: un evento con usuario
-          // identificado implica una decisión GRANTED vigente.
-          consentGranted: Boolean(item.userId),
-          properties: this.forwardableProperties(item.properties),
+          // Sólo llega aquí lo que pasó el gate: el evento es de un usuario
+          // identificado con una decisión GRANTED vigente.
+          consentGranted: true,
+          properties: this.forwardableProperties(properties),
         });
-        tenantId ??= item.tenantId;
       }
 
       return {
@@ -230,24 +275,29 @@ export class TelemetryEventsService {
   /** UC-28-08: registra el contexto de cliente y crea/enlaza el journey de sesión. */
   async captureClientContext(
     dto: CreateClientContextDto,
+    actor: AuthenticatedUser,
   ): Promise<ClientContextResponseDto> {
     this.logger.info(
       { operation: 'telemetry.context.capture' },
       'Capturing client context',
     );
     return this.em.transactional(async (tx) => {
-      const journey = await this.resolveJourney(tx, {
-        sessionJourneyId: dto.sessionJourneyId,
-        sessionId: dto.sessionId,
-        analyticsSubjectId: dto.analyticsSubjectId,
-        portalTypeConceptId: dto.portalTypeConceptId,
-        mustExist: dto.sessionJourneyId !== undefined,
-      });
+      const sessionId = await this.actorSessionId(tx, actor);
+      if (dto.analyticsSubjectId) {
+        await this.assertOwnedSubject(tx, dto.analyticsSubjectId, actor);
+      }
+      const journey = dto.sessionJourneyId
+        ? await this.assertOwnedJourney(tx, dto.sessionJourneyId, actor)
+        : await this.openJourney(tx, {
+            sessionId,
+            analyticsSubjectId: dto.analyticsSubjectId,
+            portalTypeConceptId: dto.portalTypeConceptId,
+          });
 
       const context = this.contextsRepo.create(tx, {
-        sessionJourneyId: journey?.id,
+        sessionJourneyId: journey.id,
         analyticsSubjectId: dto.analyticsSubjectId,
-        sessionId: dto.sessionId,
+        sessionId,
         portalTypeConceptId: dto.portalTypeConceptId ?? TELE.PORTAL_WEB,
         deviceTypeConceptId: dto.deviceTypeConceptId,
         osFamilyConceptId: dto.osFamilyConceptId,
@@ -266,10 +316,8 @@ export class TelemetryEventsService {
           dto.dataClassificationConceptId ?? TELE.DATA_CLASS_INTERNAL,
       });
 
-      if (journey) {
-        if (!journey.startedAt) journey.startedAt = new Date();
-        journey.updatedAt = new Date();
-      }
+      if (!journey.startedAt) journey.startedAt = new Date();
+      journey.updatedAt = new Date();
       await tx.flush();
 
       return {
@@ -283,6 +331,7 @@ export class TelemetryEventsService {
   /** UC-28-09: registra un batch de métricas Core Web Vitals por ruta. */
   async recordWebVitals(
     dto: RecordWebVitalsDto,
+    actor: AuthenticatedUser,
   ): Promise<WebVitalsResponseDto> {
     this.logger.info(
       { operation: 'telemetry.webvitals.record', count: dto.metrics.length },
@@ -291,18 +340,30 @@ export class TelemetryEventsService {
     const forwarded: ForwardedWebVital[] = [];
     const response = await this.em.transactional(async (tx) => {
       const ids: string[] = [];
+      // Referencias ya comprobadas en este lote: un batch repite journey y sujeto.
+      const verified = new Set<string>();
+      const once = async (
+        kind: string,
+        id: string | undefined,
+        check: (id: string) => Promise<unknown>,
+      ) => {
+        if (!id || verified.has(`${kind}:${id}`)) return;
+        await check(id);
+        verified.add(`${kind}:${id}`);
+      };
       for (const m of dto.metrics) {
-        if (m.sessionJourneyId) {
-          const j = await this.journeysRepo.findById(tx, m.sessionJourneyId);
-          if (!j) {
-            throw new ResourceNotFoundException(
-              'Journey de sesión no encontrado',
-              {
-                sessionJourneyId: m.sessionJourneyId,
-              },
-            );
-          }
-        }
+        await once('journey', m.sessionJourneyId, (id) =>
+          this.assertOwnedJourney(tx, id, actor),
+        );
+        await once('subject', m.analyticsSubjectId, (id) =>
+          this.assertOwnedSubject(tx, id, actor),
+        );
+        await once('event', m.userActivityEventId, (id) =>
+          this.assertOwnedEvent(tx, id, actor),
+        );
+        await once('context', m.clientContextId, (id) =>
+          this.assertOwnedContext(tx, id, actor),
+        );
         const measuredAt = new Date();
         const vital = this.webVitalsRepo.create(tx, {
           userActivityEventId: m.userActivityEventId,
@@ -341,6 +402,7 @@ export class TelemetryEventsService {
   /** UC-28-11: registra una conversión con atribución y marca el journey. */
   async recordConversion(
     dto: CreateConversionEventDto,
+    actor: AuthenticatedUser,
   ): Promise<ConversionEventResponseDto> {
     this.logger.info(
       {
@@ -359,17 +421,13 @@ export class TelemetryEventsService {
           funnelDefinitionId: dto.funnelDefinitionId,
         });
       }
-      const subject = await this.subjectsRepo.findById(
-        tx,
-        dto.analyticsSubjectId,
-      );
-      if (!subject) {
-        throw new ResourceNotFoundException(
-          'Sujeto de analítica no encontrado',
-          {
-            analyticsSubjectId: dto.analyticsSubjectId,
-          },
-        );
+      // Sujeto, journey y evento de cierre: del mismo actor, antes de escribir.
+      await this.assertOwnedSubject(tx, dto.analyticsSubjectId, actor);
+      const journey = dto.sessionJourneyId
+        ? await this.assertOwnedJourney(tx, dto.sessionJourneyId, actor)
+        : null;
+      if (dto.completionEventId) {
+        await this.assertOwnedEvent(tx, dto.completionEventId, actor);
       }
 
       const existing = await this.conversionsRepo.findExisting(
@@ -404,16 +462,10 @@ export class TelemetryEventsService {
       });
       await tx.flush();
 
-      if (dto.sessionJourneyId) {
-        const journey = await this.journeysRepo.findById(
-          tx,
-          dto.sessionJourneyId,
-        );
-        if (journey) {
-          journey.journeyStatusConceptId = TELE.JOURNEY_CONVERTED;
-          journey.updatedAt = now;
-          await tx.flush();
-        }
+      if (journey) {
+        journey.journeyStatusConceptId = TELE.JOURNEY_CONVERTED;
+        journey.updatedAt = now;
+        await tx.flush();
       }
 
       return {
@@ -441,17 +493,17 @@ export class TelemetryEventsService {
   async closeJourney(
     journeyId: string,
     dto: CloseJourneyDto,
+    actor: AuthenticatedUser,
   ): Promise<JourneyResponseDto> {
     this.logger.info(
       { operation: 'telemetry.journey.close', journeyId },
       'Closing session journey',
     );
     return this.em.transactional(async (tx) => {
-      const journey = await this.journeysRepo.findById(tx, journeyId);
-      if (!journey) {
-        throw new ResourceNotFoundException('Journey de sesión no encontrado', {
-          journeyId,
-        });
+      // Un journey ajeno responde igual que uno inexistente (404 uniforme).
+      const journey = await this.assertOwnedJourney(tx, journeyId, actor);
+      if (dto.exitEventId) {
+        await this.assertOwnedEvent(tx, dto.exitEventId, actor);
       }
       if (journey.journeyStatusConceptId === TELE.JOURNEY_CLOSED) {
         throw new PreconditionFailedException('El journey ya está cerrado', {
@@ -476,53 +528,126 @@ export class TelemetryEventsService {
     });
   }
 
-  /** Resuelve el journey por id o por sesión; lo crea si procede. */
-  private async resolveJourney(
+  /**
+   * `iam.sessions.id` de la sesión que respalda el token del actor.
+   *
+   * La sesión de telemetría es la autenticada: el cliente no la elige.
+   */
+  private async actorSessionId(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+  ): Promise<string> {
+    const id = actor.sessionId
+      ? await this.sessionsRepo.findIdByToken(tx, actor.id, actor.sessionId)
+      : null;
+    if (!id) {
+      throw new PreconditionFailedException(
+        'La sesión autenticada no está registrada',
+        undefined,
+        TelemetryErrorReason.SESSION_NOT_RESOLVED,
+      );
+    }
+    return id;
+  }
+
+  /** Journey del actor (su sesión); cualquier otro responde como inexistente. */
+  private async assertOwnedJourney(
+    tx: EntityManager,
+    journeyId: string,
+    actor: AuthenticatedUser,
+  ): Promise<SessionJourneys> {
+    const journey = await this.journeysRepo.findById(tx, journeyId);
+    if (
+      !journey ||
+      !(await this.sessionsRepo.belongsToUser(tx, journey.sessionId, actor.id))
+    ) {
+      throw new ResourceNotFoundException(
+        'Journey de sesión no encontrado',
+        undefined,
+        TelemetryErrorReason.JOURNEY_OUT_OF_SCOPE,
+      );
+    }
+    return journey;
+  }
+
+  /** Sujeto de analítica del actor; cualquier otro responde como inexistente. */
+  private async assertOwnedSubject(
+    tx: EntityManager,
+    subjectId: string,
+    actor: AuthenticatedUser,
+  ): Promise<AnalyticsSubjects> {
+    const subject = await this.subjectsRepo.findById(tx, subjectId);
+    if (!subject || subject.userId !== actor.id) {
+      throw new ResourceNotFoundException(
+        'Sujeto de analítica no encontrado',
+        undefined,
+        TelemetryErrorReason.SUBJECT_OUT_OF_SCOPE,
+      );
+    }
+    return subject;
+  }
+
+  /** Evento del actor; cualquier otro responde como inexistente. */
+  private async assertOwnedEvent(
+    tx: EntityManager,
+    eventId: string,
+    actor: AuthenticatedUser,
+  ): Promise<UserActivityEvents> {
+    const event = await this.eventsRepo.findById(tx, eventId);
+    if (!event || event.userId !== actor.id) {
+      throw new ResourceNotFoundException(
+        'Evento de actividad no encontrado',
+        undefined,
+        TelemetryErrorReason.EVENT_OUT_OF_SCOPE,
+      );
+    }
+    return event;
+  }
+
+  /** Contexto de cliente de una sesión del actor; otro responde como inexistente. */
+  private async assertOwnedContext(
+    tx: EntityManager,
+    contextId: string,
+    actor: AuthenticatedUser,
+  ): Promise<ClientContexts> {
+    const context = await this.contextsRepo.findById(tx, contextId);
+    if (
+      !context ||
+      !context.sessionId ||
+      !(await this.sessionsRepo.belongsToUser(tx, context.sessionId, actor.id))
+    ) {
+      throw new ResourceNotFoundException(
+        'Contexto de cliente no encontrado',
+        undefined,
+        TelemetryErrorReason.CONTEXT_OUT_OF_SCOPE,
+      );
+    }
+    return context;
+  }
+
+  /** Journey abierto de la sesión autenticada; lo crea si no hay. */
+  private async openJourney(
     tx: EntityManager,
     opts: {
       /**
-       * Identificador asociado a session journey.
+       * `iam.sessions.id` de la sesión autenticada.
        */
-      sessionJourneyId?: string;
+      sessionId: string;
       /**
-       * Identificador asociado a session.
-       */
-      sessionId?: string;
-      /**
-       * Identificador asociado a analytics subject.
+       * Sujeto de analítica ya comprobado como del actor.
        */
       analyticsSubjectId?: string;
       /**
-       * Identificador asociado a portal type concept.
+       * Tipo de portal del journey.
        */
       portalTypeConceptId?: string;
-      /**
-       * Valor de must exist mantenido por la instancia.
-       */
-      mustExist?: boolean;
     },
   ): Promise<SessionJourneys> {
-    if (opts.sessionJourneyId) {
-      const found = await this.journeysRepo.findById(tx, opts.sessionJourneyId);
-      if (!found) {
-        throw new ResourceNotFoundException('Journey de sesión no encontrado', {
-          sessionJourneyId: opts.sessionJourneyId,
-        });
-      }
-      return found;
-    }
-
-    const sessionId = opts.sessionId ?? randomUUID();
-    if (opts.sessionId) {
-      const open = await this.journeysRepo.findOpenBySession(
-        tx,
-        opts.sessionId,
-      );
-      if (open) return open;
-    }
+    const open = await this.journeysRepo.findOpenBySession(tx, opts.sessionId);
+    if (open) return open;
 
     const journey = this.journeysRepo.create(tx, {
-      sessionId,
+      sessionId: opts.sessionId,
       analyticsSubjectId: opts.analyticsSubjectId,
       portalTypeConceptId: opts.portalTypeConceptId ?? TELE.PORTAL_WEB,
       journeyStatusConceptId: TELE.JOURNEY_OPEN,
@@ -530,6 +655,38 @@ export class TelemetryEventsService {
     });
     await tx.flush();
     return journey;
+  }
+
+  /**
+   * Aplica la política del esquema a las propiedades recibidas (TEL-03).
+   *
+   * El rechazo es un 422 con el nombre del esquema y la regla incumplida; ni el
+   * nombre ni el valor de la propiedad salen en la respuesta ni en el log.
+   */
+  private validateProperties(
+    schema: EventSchemaPolicy,
+    properties: readonly RawEventProperty[] | undefined,
+  ): ValidatedEventProperty[] {
+    try {
+      return validateEventProperties(schema, properties);
+    } catch (error) {
+      if (!(error instanceof EventPropertyRejection)) throw error;
+      this.logger.warn(
+        {
+          operation: 'telemetry.activity.property_rejected',
+          eventName: schema.eventName,
+          rule: error.rule,
+        },
+        'Event property rejected by schema',
+      );
+      throw new DomainException(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        ErrorCode.VALIDATION_FAILED,
+        'Una propiedad del evento no está permitida por su esquema',
+        { eventName: schema.eventName, rule: error.rule },
+        TelemetryErrorReason.EVENT_PROPERTY_NOT_ALLOWED,
+      );
+    }
   }
 
   /** Gate de consentimiento efectivo para (user, purpose). */
@@ -547,60 +704,21 @@ export class TelemetryEventsService {
   }
 
   /**
-   * Aplana las propiedades del evento al par nombre/valor que entiende la
-   * analítica externa. No se reenvía la clasificación del dato ni ninguna
-   * propiedad sin valor: lo que no aporta medida, no sale del sistema.
+   * Arma el par nombre/valor que entiende la analítica externa **desde el
+   * resultado validado**, no desde el DTO original. Sólo viajan las propiedades
+   * que el esquema permite reenviar: lo sensible o marcado `forward: false` se
+   * queda en el sistema. No se reenvía la clasificación del dato.
    */
   private forwardableProperties(
-    properties:
-      | {
-          /**
-           * Nombre de la propiedad.
-           */
-          propertyName: string;
-          /**
-           * Valor string, si lo trae.
-           */
-          valueString?: string;
-          /**
-           * Valor numérico, si lo trae.
-           */
-          valueNumber?: number;
-          /**
-           * Valor booleano, si lo trae.
-           */
-          valueBoolean?: boolean;
-        }[]
-      | undefined,
+    properties: readonly ValidatedEventProperty[],
   ): Record<string, string | number | boolean> | undefined {
-    if (!properties?.length) return undefined;
     const out: Record<string, string | number | boolean> = {};
     for (const property of properties) {
+      if (!property.forwardable) continue;
       const value =
         property.valueString ?? property.valueNumber ?? property.valueBoolean;
       if (value !== undefined) out[property.propertyName] = value;
     }
     return Object.keys(out).length ? out : undefined;
-  }
-
-  /** Determina el concepto de tipo de valor de una propiedad. */
-  private valueType(prop: {
-    /**
-     * Valor de value type mantenido por la instancia.
-     */
-    valueType?: 'STRING' | 'NUMBER' | 'BOOLEAN';
-    /**
-     * Valor de value number mantenido por la instancia.
-     */
-    valueNumber?: number;
-    /**
-     * Valor de value boolean mantenido por la instancia.
-     */
-    valueBoolean?: boolean;
-  }): string {
-    if (prop.valueType) return VALUE_TYPE_CONCEPT_BY_CODE[prop.valueType];
-    if (prop.valueNumber !== undefined) return TELE.VALUE_TYPE_NUMBER;
-    if (prop.valueBoolean !== undefined) return TELE.VALUE_TYPE_BOOLEAN;
-    return TELE.VALUE_TYPE_STRING;
   }
 }

@@ -58,7 +58,7 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/users/{id}/mfa-factors | Cualquier sesión válida | ALTO | 6 |
 |  |  | GET /iam/users/{id}/sessions | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users/assisted-practitioner-registration | SECURITY_ADMIN | MEDIO | 45 |
-|  |  | POST /iam/users/assisted-registration | CLINICIAN · SECURITY_ADMIN | MEDIO | 6 |
+|  |  | POST /iam/users/assisted-registration | CLINICIAN · SECURITY_ADMIN | MEDIO | 10 |
 
 ### Diagrama 1 de 2 — etapas `ctrl:IamAccountSecurityController`, `ctrl:IamAuthController`
 
@@ -275,6 +275,7 @@ flowchart LR
   t23[("+2 tablas más")]
   t26[("+1 tablas más")]
   t36[("+39 tablas más")]
+  t40[("+4 tablas más")]
   subgraph s0["ctrl:IamUsersController · Operaciones de IamUsersController que el README no as…"]
     o1["GET /iam/users"]:::op
     o5["POST /iam/users"]:::op
@@ -380,6 +381,7 @@ flowchart LR
   o37 -->|"CREA"| t7
   o37 -->|"CREA"| t8
   o37 -->|"CREA"| t4
+  o37 -.-> t40
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -583,7 +585,7 @@ Solicitar el restablecimiento de la contraseña
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -629,9 +631,9 @@ flowchart TD
   n19 --> n20
   n21["Llama a NotificationsService.createRequest"]:::llamada
   n20 --> n21
-  n22{"!dto.recipientUserId && !dto.recipientAddress"}:::decision
+  n22{"!recipientUserId"}:::decision
   n21 --> n22
-  n23(["422 PRECONDITION_FAILED La notificación necesita destinatario interno o dirección de destino"]):::error
+  n23(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
   n22 -->|"sí"| n23
   n24["Transacción: transactional(…)"]:::transaccion
   n22 -->|"no"| n24
@@ -863,7 +865,7 @@ Registrar una organización con su cuenta owner
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: El código de organización ya existe; ConflictException: Ya existe una cuenta con ese correo |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología; PreconditionFailedException: Un mismo archivo no puede respaldar dos documentos distintos; PreconditionFailedException: El documento {label} ya está vinculado a una organización; PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un tenant de tipo PAYER exige el bloque `payer`; PreconditionFailedException: Un tenant de tipo BROKER exige el bloque `broker`; PreconditionFailedException: Un tenant de tipo {tenantType} exige país y jurisdicción; PreconditionFailedException: El tipo societario pertenece al derecho de {entry!.countryIso} y no coincide con el país declarado; PreconditionFailedException: El bloque `payer` sólo corresponde a un tenant de tipo PAYER; PreconditionFailedException: El bloque `broker` sólo corresponde a un tenant de tipo BROKER; PreconditionFailedException: El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo DIAGNOSTIC_CENTER; PreconditionFailedException: El tipo de unidad diagnóstica declarado no es válido; PreconditionFailedException: Las sucursales sólo se declaran en una unidad de laboratorio clínico; PreconditionFailedException: Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas; PreconditionFailedException: Los conceptos declarados no existen en el catálogo de terminología; PreconditionFailedException: Un mismo archivo no puede respaldar dos documentos distintos; PreconditionFailedException: El documento {label} ya está vinculado a una organización; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -935,86 +937,86 @@ flowchart TD
   n31 -->|"sí"| n32
   n33(["422 PRECONDITION_FAILED El tipo de unidad diagnóstica declarado no es válido"]):::error
   n32 -->|"sí"| n33
-  n34{"invalidModalities.length › 0"}:::decision
+  n34{"(input.diagnosticUnit.branches?.length ?? 0) › 0 && unitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY"}:::decision
   n32 -->|"no"| n34
-  n35(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
+  n35(["422 PRECONDITION_FAILED Las sucursales sólo se declaran en una unidad de laboratorio clínico"]):::error
   n34 -->|"sí"| n35
-  n36["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
+  n36{"invalidModalities.length › 0"}:::decision
   n34 -->|"no"| n36
-  n31 -->|"no"| n36
-  n37["Llama a CatalogConceptsRepository.findByIds"]:::llamada
-  n36 --> n37
-  n38[("LEE terminology.catalog_concepts")]:::efecto
-  n37 --> n38
-  n39{"unknown.length › 0"}:::decision
+  n37(["422 PRECONDITION_FAILED Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas"]):::error
+  n36 -->|"sí"| n37
+  n38["Llama a TenantTypeProfileService.assertConceptsExist"]:::llamada
+  n36 -->|"no"| n38
+  n31 -->|"no"| n38
+  n39["Llama a CatalogConceptsRepository.findByIds"]:::llamada
   n38 --> n39
-  n40(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
-  n39 -->|"sí"| n40
-  n41["Llama a UsersRepository.create"]:::llamada
-  n39 -->|"no"| n41
-  n42[("CREA iam.users")]:::efecto
-  n41 --> n42
-  n43["Llama a CredentialsRepository.createPassword"]:::llamada
-  n42 --> n43
-  n44[("CREA iam.authentication_credentials")]:::efecto
+  n40[("LEE terminology.catalog_concepts")]:::efecto
+  n39 --> n40
+  n41{"unknown.length › 0"}:::decision
+  n40 --> n41
+  n42(["422 PRECONDITION_FAILED Los conceptos declarados no existen en el catálogo de terminología"]):::error
+  n41 -->|"sí"| n42
+  n43["Llama a UsersRepository.create"]:::llamada
+  n41 -->|"no"| n43
+  n44[("CREA iam.users")]:::efecto
   n43 --> n44
-  n45["Llama a UserGlobalRolesRepository.create"]:::llamada
+  n45["Llama a CredentialsRepository.createPassword"]:::llamada
   n44 --> n45
-  n46[("CREA iam.user_global_roles")]:::efecto
+  n46[("CREA iam.authentication_credentials")]:::efecto
   n45 --> n46
-  n47["Llama a TenantsRepository.create"]:::llamada
+  n47["Llama a UserGlobalRolesRepository.create"]:::llamada
   n46 --> n47
-  n48[("CREA directory.tenants")]:::efecto
+  n48[("CREA iam.user_global_roles")]:::efecto
   n47 --> n48
-  n49["Llama a TenantTypeProfileService.materializeProfile"]:::llamada
+  n49["Llama a TenantsRepository.create"]:::llamada
   n48 --> n49
-  n50{"input.tenantType === 'PAYER' && input.payer"}:::decision
+  n50[("CREA directory.tenants")]:::efecto
   n49 --> n50
-  n51["Llama a CatalogRepository.createCarrier"]:::llamada
-  n50 -->|"sí"| n51
-  n52[("CREA insurance.insurance_carriers")]:::efecto
+  n51["Llama a TenantTypeProfileService.materializeProfile"]:::llamada
+  n50 --> n51
+  n52{"input.tenantType === 'PAYER' && input.payer"}:::decision
   n51 --> n52
-  n53{"input.tenantType === 'BROKER' && input.broker"}:::decision
-  n52 --> n53
-  n50 -->|"no"| n53
-  n54["Llama a CatalogRepository.createBroker"]:::llamada
-  n53 -->|"sí"| n54
-  n55[("CREA insurance.insurance_brokers")]:::efecto
+  n53["Llama a CatalogRepository.createCarrier"]:::llamada
+  n52 -->|"sí"| n53
+  n54[("CREA insurance.insurance_carriers")]:::efecto
+  n53 --> n54
+  n55{"input.tenantType === 'BROKER' && input.broker"}:::decision
   n54 --> n55
-  n56{"dto.organization.tenantType === 'PHARMACY'"}:::decision
-  n55 --> n56
-  n53 -->|"no"| n56
-  n57["Llama a IamOrganizationSelfRegistrationService.createPharmacyBranches"]:::llamada
-  n56 -->|"sí"| n57
-  n58["Llama a BranchesRepository.create"]:::llamada
+  n52 -->|"no"| n55
+  n56["Llama a CatalogRepository.createBroker"]:::llamada
+  n55 -->|"sí"| n56
+  n57[("CREA insurance.insurance_brokers")]:::efecto
+  n56 --> n57
+  n58{"dto.organization.tenantType === 'PHARMACY'"}:::decision
   n57 --> n58
-  n59[("CREA directory.branches")]:::efecto
-  n58 --> n59
-  n60[("CREA pharmacy.pharmacies")]:::efecto
+  n55 -->|"no"| n58
+  n59["Llama a IamOrganizationSelfRegistrationService.createPharmacyBranches"]:::llamada
+  n58 -->|"sí"| n59
+  n60["Llama a BranchesRepository.create"]:::llamada
   n59 --> n60
-  n61["Llama a TenantMembershipsRepository.create"]:::llamada
+  n61[("CREA directory.branches")]:::efecto
   n60 --> n61
-  n56 -->|"no"| n61
-  n62[("CREA directory.tenant_memberships")]:::efecto
+  n62[("CREA pharmacy.pharmacies")]:::efecto
   n61 --> n62
-  n63["Llama a TenantAffiliationDocumentsService.attachRegistrationDocuments"]:::llamada
+  n63["Llama a TenantMembershipsRepository.create"]:::llamada
   n62 --> n63
-  n64["Llama a TenantAffiliationDocumentsService.assertNoRepeatedFile"]:::llamada
+  n58 -->|"no"| n63
+  n64[("CREA directory.tenant_memberships")]:::efecto
   n63 --> n64
-  n65["Repite: por cada const [fileId, roles] de seen"]:::bucle
+  n65["Llama a TenantAffiliationDocumentsService.attachRegistrationDocuments"]:::llamada
   n64 --> n65
-  n66{"roles.length › 1"}:::decision
-  n65 -->|"cada elemento"| n66
-  n67(["422 PRECONDITION_FAILED Un mismo archivo no puede respaldar dos documentos distintos"]):::error
-  n66 -->|"sí"| n67
-  n68["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
-  n66 -->|"no"| n68
-  n65 -->|"al terminar"| n68
-  n69{"!this.cache"}:::decision
-  n68 --> n69
-  n70["Transacción: catch(…)"]:::transaccion
-  n69 -->|"sí"| n70
-  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n66["Llama a TenantAffiliationDocumentsService.assertNoRepeatedFile"]:::llamada
+  n65 --> n66
+  n67["Repite: por cada const [fileId, roles] de seen"]:::bucle
+  n66 --> n67
+  n68{"roles.length › 1"}:::decision
+  n67 -->|"cada elemento"| n68
+  n69(["422 PRECONDITION_FAILED Un mismo archivo no puede respaldar dos documentos distintos"]):::error
+  n68 -->|"sí"| n69
+  n70["Llama a AffiliationDocumentConceptsService.resolve"]:::llamada
+  n68 -->|"no"| n70
+  n67 -->|"al terminar"| n70
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -1035,7 +1037,7 @@ Registrarse como paciente con documento de identidad
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese documento de identidad |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de departamentos no está disponible; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia; PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El catálogo de departamentos no está disponible; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1116,15 +1118,15 @@ flowchart TD
   n34 -->|"no"| n37
   n38[("CREA directory.tenant_memberships")]:::efecto
   n37 --> n38
-  n39{"dto.phone"}:::decision
+  n39["Repite: forEach(…)"]:::bucle
   n38 --> n39
   n40["Llama a ContactPointsRepository.create"]:::llamada
-  n39 -->|"sí"| n40
+  n39 -->|"cada elemento"| n40
   n41[("CREA common.contact_points")]:::efecto
   n40 --> n41
   n42{"dto.email"}:::decision
   n41 --> n42
-  n39 -->|"no"| n42
+  n39 -->|"al terminar"| n42
   n43["Llama a ContactPointsRepository.create"]:::llamada
   n42 -->|"sí"| n43
   n44[("CREA common.contact_points")]:::efecto
@@ -1146,9 +1148,9 @@ flowchart TD
   n50 --> n51
   n52["Llama a NotificationsService.createRequest"]:::llamada
   n51 --> n52
-  n53{"!dto.recipientUserId && !dto.recipientAddress"}:::decision
+  n53{"!recipientUserId"}:::decision
   n52 --> n53
-  n54(["422 PRECONDITION_FAILED La notificación necesita destinatario interno o dirección de destino"]):::error
+  n54(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
   n53 -->|"sí"| n54
   n55["Transacción: transactional(…)"]:::transaccion
   n53 -->|"no"| n55
@@ -1197,7 +1199,7 @@ Registrarse como profesional de salud con su matrícula
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: Solo se admiten documentos PDF; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable; PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: Solo se admiten documentos PDF; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
@@ -1364,7 +1366,7 @@ Reenviar el enlace de verificación del correo
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1400,9 +1402,9 @@ flowchart TD
   n14 --> n15
   n16["Llama a NotificationsService.createRequest"]:::llamada
   n15 --> n16
-  n17{"!dto.recipientUserId && !dto.recipientAddress"}:::decision
+  n17{"!recipientUserId"}:::decision
   n16 --> n17
-  n18(["422 PRECONDITION_FAILED La notificación necesita destinatario interno o dirección de destino"]):::error
+  n18(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
   n17 -->|"sí"| n18
   n19["Transacción: transactional(…)"]:::transaccion
   n17 -->|"no"| n19
@@ -1671,7 +1673,7 @@ Pre-cargar un PDF para un registro de organización o profesional
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: Solo se admiten documentos PDF |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
 
 ```mermaid
 flowchart TD
@@ -1747,7 +1749,7 @@ flowchart TD
   n33 --> n34
   n35{"!this.env.s3.bucket"}:::decision
   n34 --> n35
-  n36(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
+  n36(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
   n35 -->|"sí"| n36
   n37{"this.env.lifecycleBinding"}:::decision
   n35 -->|"no"| n37
@@ -1803,7 +1805,7 @@ Pre-cargar una imagen de firma o sello para el registro
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La imagen supera el límite de 2 MB; PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: Solo se admiten documentos PDF |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
+| 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
 
 ```mermaid
 flowchart TD
@@ -1883,7 +1885,7 @@ flowchart TD
   n35 --> n36
   n37{"!this.env.s3.bucket"}:::decision
   n36 --> n37
-  n38(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
+  n38(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
   n37 -->|"sí"| n38
   n39{"this.env.lifecycleBinding"}:::decision
   n37 -->|"no"| n39
@@ -2837,7 +2839,7 @@ Alta administrativa de un profesional (devuelve token de activación)
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: Solo se admiten documentos PDF; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable; PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: Solo se admiten documentos PDF; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: El catálogo de especialidades médicas no está disponible; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: FILE_NOT_LIVE; StorageLifecycleDenied: VERSION_UNKNOWN; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN |
 
@@ -3036,16 +3038,32 @@ flowchart TD
   n12 --> n13
   n14[("CREA iam.user_global_roles")]:::efecto
   n13 --> n14
-  n15["Llama a AccountActivationsRepository.create"]:::llamada
+  n15["Llama a PersonsRepository.create"]:::llamada
   n14 --> n15
-  n16[("CREA iam.account_activations")]:::efecto
+  n16[("CREA profiles.persons")]:::efecto
   n15 --> n16
-  n17["Llama a SecurityEventsRepository.record"]:::llamada
+  n17["Llama a PersonProfilesRepository.create"]:::llamada
   n16 --> n17
-  n18[("CREA iam.security_events")]:::efecto
+  n18[("CREA profiles.person_profiles")]:::efecto
   n17 --> n18
-  n19(("201 Responde con éxito")):::ok
+  n19["Llama a PatientProfilesRepository.create"]:::llamada
   n18 --> n19
+  n20[("CREA profiles.patient_profiles")]:::efecto
+  n19 --> n20
+  n21["Llama a PersonAccountLinksRepository.create"]:::llamada
+  n20 --> n21
+  n22[("CREA profiles.person_account_links")]:::efecto
+  n21 --> n22
+  n23["Llama a AccountActivationsRepository.create"]:::llamada
+  n22 --> n23
+  n24[("CREA iam.account_activations")]:::efecto
+  n23 --> n24
+  n25["Llama a SecurityEventsRepository.record"]:::llamada
+  n24 --> n25
+  n26[("CREA iam.security_events")]:::efecto
+  n25 --> n26
+  n27(("201 Responde con éxito")):::ok
+  n26 --> n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
