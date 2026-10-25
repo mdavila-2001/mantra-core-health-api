@@ -209,9 +209,11 @@ export class LedgerReadService {
    */
   async chartOfAccounts(
     practiceId: string,
+    actor: AuthenticatedUser,
     limit = LEDGER_DEFAULT_LIMIT,
   ): Promise<ChartOfAccountsResponseDto> {
     await this.verifyPracticeTenant(practiceId);
+    await this.assertPractitionerOwnsPractice(actor, practiceId);
 
     const em = this.em.fork();
     const accounts = await this.accountsRepo.findByPractice(
@@ -243,8 +245,10 @@ export class LedgerReadService {
    */
   async listJournal(
     query: ListJournalQueryDto,
+    actor: AuthenticatedUser,
   ): Promise<ListJournalResponseDto> {
     await this.verifyPracticeTenant(query.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, query.practiceId);
 
     const limit = query.limit ?? LEDGER_DEFAULT_LIMIT;
     const em = this.em.fork();
@@ -292,6 +296,7 @@ export class LedgerReadService {
    */
   async getJournalTransaction(
     transactionId: string,
+    actor: AuthenticatedUser,
   ): Promise<JournalTransactionDetailDto> {
     const em = this.em.fork();
     const entry = await this.journalRepo.findTransactionById(em, transactionId);
@@ -307,6 +312,7 @@ export class LedgerReadService {
     // Acá la práctica se conoce recién al cargar el asiento, así que la
     // comprobación va después de la carga y antes de devolver nada.
     await this.verifyPracticeTenant(entry.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, entry.practiceId);
 
     const lines = await this.journalRepo.findEntriesByTransaction(
       em,
@@ -363,8 +369,10 @@ export class LedgerReadService {
    */
   async trialBalance(
     query: TrialBalanceQueryDto,
+    actor: AuthenticatedUser,
   ): Promise<TrialBalanceResponseDto> {
     await this.verifyPracticeTenant(query.practiceId);
+    await this.assertPractitionerOwnsPractice(actor, query.practiceId);
 
     const em = this.em.fork();
 

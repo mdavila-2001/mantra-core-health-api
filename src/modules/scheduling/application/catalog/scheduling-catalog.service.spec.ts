@@ -791,6 +791,15 @@ describe('SchedulingCatalogService', () => {
         ).rejects.toBeInstanceOf(PreconditionFailedException);
       });
 
+      it('sin ventana (fechas inválidas) es 422, no un 500', async () => {
+        const d = buildCatalog();
+        const invalida = new Date('no-es-fecha');
+
+        await expect(
+          d.service.listExceptions(RESOURCE, invalida, invalida, actor),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
       it('otro profesional pidiéndolas recibe 403', async () => {
         const d = buildCatalog();
         d.catalogRepo.findResourceById.mockResolvedValue({
