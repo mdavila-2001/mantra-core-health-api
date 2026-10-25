@@ -97,7 +97,7 @@ describe('PracticesController', () => {
 
   it('delegates publishHealthcareService (UC-14-06)', async () => {
     const d = build();
-    const dto = {};
+    const dto = {} as any;
     await d.controller.publishHealthcareService('p1', dto, actor);
     expect(d.structureService.publishHealthcareService).toHaveBeenCalledWith(
       'p1',
