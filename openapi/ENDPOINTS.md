@@ -6,7 +6,7 @@ Se documentan **1542 de 1542 endpoints** en **72 módulos**. La referencia compl
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
-| `accounting` | 45 | [Abrir referencia](endpoints/accounting.md) |
+| `accounting` | 46 | [Abrir referencia](endpoints/accounting.md) |
 | `ads` | 18 | [Abrir referencia](endpoints/ads.md) |
 | `app` | 6 | [Abrir referencia](endpoints/app.md) |
 | `audio_assets` | 10 | [Abrir referencia](endpoints/audio-assets.md) |

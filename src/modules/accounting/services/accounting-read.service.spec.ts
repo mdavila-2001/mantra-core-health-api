@@ -119,6 +119,7 @@ function build(
     createAssignment: mockFn(),
     createPosting: mockFn(),
     findDepreciation: mockFn(),
+    listDepreciations: mockFn(),
     createDepreciation: mockFn(),
     findDepreciationAreaById: mockFn(),
   };
