@@ -174,8 +174,12 @@ describe('AuthzPdpService', () => {
       d.rolesRepo.findById.mockImplementation((_em: any, id: string) =>
         Promise.resolve(
           id === 'child'
-            ? { id: 'child', parentRoleId: 'parent' }
-            : { id: 'parent' },
+            ? {
+                id: 'child',
+                parentRoleId: 'parent',
+                stateConceptId: CONCEPTS.STATE_ACTIVE,
+              }
+            : { id: 'parent', stateConceptId: CONCEPTS.STATE_ACTIVE },
         ),
       );
       d.rolePermsRepo.findActiveForRoles.mockResolvedValue([
@@ -188,6 +192,80 @@ describe('AuthzPdpService', () => {
       expect(d.rolePermsRepo.findActiveForRoles).toHaveBeenCalledWith(
         {},
         expect.arrayContaining(['child', 'parent']),
+      );
+    });
+
+    it('no hereda de un rol padre inactivo ni de uno de otro tenant', async () => {
+      const d = build();
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.assignmentsRepo.findActiveForUser.mockResolvedValue([
+        { roleId: 'child', validFrom: null, validTo: null },
+      ]);
+      const roles: Record<string, any> = {
+        child: {
+          id: 'child',
+          parentRoleId: 'inactive',
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+        },
+        inactive: {
+          id: 'inactive',
+          parentRoleId: 'foreign',
+          stateConceptId: CONCEPTS.STATE_REVOKED,
+        },
+        foreign: {
+          id: 'foreign',
+          tenantId: 't2',
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+        },
+      };
+      d.rolesRepo.findById.mockImplementation((_em: any, id: string) =>
+        Promise.resolve(roles[id]),
+      );
+      const res = await d.service.evaluate(baseDto, actor);
+      expect(res.effectiveRoleIds).toEqual(['child']);
+
+      // Un padre activo de otro tenant tampoco entra aunque se llegue directo.
+      roles['child'].parentRoleId = 'foreign';
+      const direct = await d.service.evaluate(baseDto, actor);
+      expect(direct.effectiveRoleIds).toEqual(['child']);
+    });
+
+    it('ignora una asignación de rol y una excepción de usuario concedidas en otro tenant', async () => {
+      const d = build();
+      d.permissionsRepo.findByResourceAction.mockResolvedValue({
+        id: 'perm-1',
+      });
+      d.assignmentsRepo.findActiveForUser.mockResolvedValue([
+        { roleId: 'role-t2', tenantId: 't2', validFrom: null, validTo: null },
+        { roleId: 'role-t1', tenantId: 't1', validFrom: null, validTo: null },
+      ]);
+      d.permGrantsRepo.findActiveForUser.mockResolvedValue([
+        {
+          permissionId: 'perm-1',
+          tenantId: 't2',
+          effectConceptId: AUTHZ.EFFECT_ALLOW,
+          validFrom: null,
+          validTo: null,
+        },
+      ]);
+      const res = await d.service.evaluate(baseDto, actor);
+      expect(res.effectiveRoleIds).toEqual(['role-t1']);
+      // El allow de la excepción de t2 no cuenta en t1.
+      expect(res.decision).toBe('DENY');
+
+      d.permGrantsRepo.findActiveForUser.mockResolvedValue([
+        {
+          permissionId: 'perm-1',
+          tenantId: 't1',
+          effectConceptId: AUTHZ.EFFECT_ALLOW,
+          validFrom: null,
+          validTo: null,
+        },
+      ]);
+      expect((await d.service.evaluate(baseDto, actor)).decision).toBe(
+        'PERMIT',
       );
     });
 

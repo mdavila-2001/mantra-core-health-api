@@ -10,6 +10,7 @@ import {
   encodeKeysetCursor,
   PreconditionFailedException,
   requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -582,6 +583,14 @@ export class PromotionsLoyaltyService {
         scope,
       );
 
+      // Dentro del mismo tenant, un `MEMBER` sólo canjea su propia membresía:
+      // el rol no dice de quién es el saldo. Quien administra el programa sí
+      // puede canjear en nombre de un miembro. Una membresía ajena responde
+      // como inexistente.
+      if (!this.mayActOnAnyMembership(actor, scope)) {
+        this.assertOwnMembership(membership, actor);
+      }
+
       const previous = await this.loyaltyRepo.findLedgerEntryByKey(
         tx,
         dto.idempotencyKey,
@@ -1043,6 +1052,42 @@ export class PromotionsLoyaltyService {
       throw promotionsOutOfScope(message);
     }
     return { membership, program };
+  }
+
+  /**
+   * Si el actor puede operar sobre la membresía de cualquier miembro del
+   * tenant: administra el programa, es el worker `SYSTEM` global o `SUPERADMIN`.
+   */
+  private mayActOnAnyMembership(
+    actor: AuthenticatedUser,
+    scope: string | undefined,
+  ): boolean {
+    return (
+      roleAuthorizesInTenant(actor, 'PROMOTIONS_ADMIN', scope) ||
+      roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined) ||
+      roleAuthorizesInTenant(actor, 'SYSTEM', undefined)
+    );
+  }
+
+  /**
+   * Exige que la membresía sea del actor: la de su usuario (`memberType`
+   * `USER`) o la de su perfil de paciente (`PATIENT`, claim `pid`).
+   *
+   * @throws ResourceNotFoundException uniforme si es de otro miembro.
+   */
+  private assertOwnMembership(
+    membership: LoyaltyMemberships,
+    actor: AuthenticatedUser,
+  ): void {
+    const owner =
+      (membership.memberTypeConceptId === CONCEPTS.REWARD_MEMBER_USER &&
+        membership.memberRefId === actor.id) ||
+      (membership.memberTypeConceptId === CONCEPTS.REWARD_MEMBER_PATIENT &&
+        actor.patientProfileId !== undefined &&
+        membership.memberRefId === actor.patientProfileId);
+    if (!owner) {
+      throw promotionsOutOfScope('Membresía no encontrada');
+    }
   }
 
   /**

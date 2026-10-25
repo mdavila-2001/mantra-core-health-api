@@ -6,10 +6,12 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
+  requireTenantId,
   ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import {
   EducationCatalogRepository,
   EducationLearningRepository,
@@ -140,6 +142,17 @@ export class EducationLearningService {
         });
       }
 
+      // Una inscripción comprada exige un pago real: el intento tiene que ser
+      // del tenant, estar confirmado y no respaldar ya otra inscripción. Sin
+      // esto, un aprendiz declaraba `PURCHASED` con cualquier UUID.
+      if (dto.source === 'PURCHASED') {
+        await this.assertPurchaseConfirmed(
+          tx,
+          dto.courseId,
+          dto.paymentIntentId as string,
+        );
+      }
+
       const learnerTypeConceptId = LEARNER_TYPE_CONCEPT[dto.learnerType];
       const live = await this.learningRepo.findLiveEnrollment(
         tx,
@@ -214,6 +227,51 @@ export class EducationLearningService {
         cohortEnrolledCount,
       };
     });
+  }
+
+  /**
+   * Comprueba que el intento de pago de una inscripción comprada sea del tenant
+   * activo, esté confirmado y no respalde ya otra inscripción.
+   *
+   * Un intento ajeno o inexistente responde como «no encontrado», igual que el
+   * resto de recursos del módulo. El intento no registra de qué curso es ni
+   * quién pagó, así que esos dos vínculos no se comprueban acá.
+   *
+   * @param tx - Transacción activa.
+   * @param courseId - Curso de la inscripción (sólo para el detalle del error).
+   * @param paymentIntentId - Intento de pago citado.
+   */
+  private async assertPurchaseConfirmed(
+    tx: EntityManager,
+    courseId: string,
+    paymentIntentId: string,
+  ): Promise<void> {
+    const intent = await this.learningRepo.findPaymentIntent(
+      tx,
+      paymentIntentId,
+    );
+    assertResourceInTenant(intent, intent?.tenantId, requireTenantId(), {
+      message: 'Intento de pago no encontrado',
+      reason: EducationErrorReason.EDUCATION_RESOURCE_OUT_OF_SCOPE,
+    });
+    if (intent?.statusConceptId !== CONCEPTS.PI_SUCCEEDED) {
+      throw new PreconditionFailedException(
+        'El pago de la inscripción no está confirmado',
+        { courseId },
+        EducationErrorReason.ENROLLMENT_PAYMENT_NOT_CONFIRMED,
+      );
+    }
+    const used = await this.learningRepo.findEnrollmentByPaymentIntent(
+      tx,
+      paymentIntentId,
+    );
+    if (used) {
+      throw new ConflictException(
+        'El pago ya respalda otra inscripción',
+        { courseId },
+        EducationErrorReason.ENROLLMENT_PAYMENT_ALREADY_USED,
+      );
+    }
   }
 
   /**

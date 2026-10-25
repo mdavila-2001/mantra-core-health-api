@@ -43,6 +43,8 @@ function build() {
     findEnrollmentById: mockFn(),
     findEnrollmentForUpdate: mockFn(),
     findLiveEnrollment: mockFn(),
+    findPaymentIntent: mockFn(),
+    findEnrollmentByPaymentIntent: mockFn(),
     createLessonProgress: mockFn(),
     findProgressByEnrollment: mockFn(),
     createAttempt: mockFn(),
@@ -151,6 +153,16 @@ function activeEnrollment(overrides: Record<string, unknown> = {}): any {
   };
 }
 
+/** Intento de pago confirmado del tenant T1. */
+function paidIntent(overrides: Record<string, unknown> = {}): any {
+  return {
+    id: INTENT,
+    tenantId: T1,
+    statusConceptId: CONCEPTS.PI_SUCCEEDED,
+    ...overrides,
+  };
+}
+
 describe('EducationLearningService', () => {
   describe('enrollLearner (UC-47-05)', () => {
     /**
@@ -249,6 +261,8 @@ describe('EducationLearningService', () => {
       const d = build();
       d.catalogRepo.findCourseById.mockResolvedValue(publishedCourse());
       d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+      d.learningRepo.findPaymentIntent.mockResolvedValue(paidIntent());
+      d.learningRepo.findEnrollmentByPaymentIntent.mockResolvedValue(null);
       d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
 
       const res = await d.service.enrollLearner(
@@ -257,6 +271,58 @@ describe('EducationLearningService', () => {
       );
 
       expect(res.id).toBe(ENROLLMENT);
+    });
+
+    describe('verificación del pago de una inscripción comprada', () => {
+      const purchased = () =>
+        dto({ source: 'PURCHASED' as const, paymentIntentId: INTENT });
+
+      it('un intento de pago de otro tenant responde como inexistente y no inscribe', async () => {
+        const d = build();
+        d.learningRepo.findPaymentIntent.mockResolvedValue(
+          paidIntent({ tenantId: T2 }),
+        );
+
+        await expectOutOfScope(d.service.enrollLearner(purchased(), actor));
+        expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+      });
+
+      it('un intento de pago inexistente responde igual que uno ajeno', async () => {
+        const d = build();
+        d.learningRepo.findPaymentIntent.mockResolvedValue(null);
+
+        await expectOutOfScope(d.service.enrollLearner(purchased(), actor));
+        expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+      });
+
+      it('un pago sin confirmar (pendiente, fallido) no habilita la inscripción', async () => {
+        const d = build();
+        d.learningRepo.findPaymentIntent.mockResolvedValue(
+          paidIntent({ statusConceptId: CONCEPTS.PI_PENDING }),
+        );
+
+        await expect(
+          d.service.enrollLearner(purchased(), actor),
+        ).rejects.toMatchObject({
+          reason: EducationErrorReason.ENROLLMENT_PAYMENT_NOT_CONFIRMED,
+        });
+        expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+      });
+
+      it('un pago que ya respalda otra inscripción no se reutiliza', async () => {
+        const d = build();
+        d.learningRepo.findPaymentIntent.mockResolvedValue(paidIntent());
+        d.learningRepo.findEnrollmentByPaymentIntent.mockResolvedValue({
+          id: 'enr-prev',
+        });
+
+        await expect(
+          d.service.enrollLearner(purchased(), actor),
+        ).rejects.toMatchObject({
+          reason: EducationErrorReason.ENROLLMENT_PAYMENT_ALREADY_USED,
+        });
+        expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+      });
     });
 
     it('refuses a cohort that belongs to another course', async () => {

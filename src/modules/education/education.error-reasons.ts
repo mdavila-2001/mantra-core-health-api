@@ -17,4 +17,8 @@ export enum EducationErrorReason {
    * inscribe a sí mismo; inscribir a terceros es una vía administrativa.
    */
   LEARNER_ENROLLMENT_OWNER_REQUIRED = 'LEARNER_ENROLLMENT_OWNER_REQUIRED',
+  /** El intento de pago de una inscripción comprada no está confirmado (`PI_SUCCEEDED`). */
+  ENROLLMENT_PAYMENT_NOT_CONFIRMED = 'ENROLLMENT_PAYMENT_NOT_CONFIRMED',
+  /** El intento de pago ya respalda otra inscripción. */
+  ENROLLMENT_PAYMENT_ALREADY_USED = 'ENROLLMENT_PAYMENT_ALREADY_USED',
 }

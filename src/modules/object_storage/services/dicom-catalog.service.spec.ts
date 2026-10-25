@@ -57,6 +57,7 @@ function build() {
     findStudyByUid: mockFn(),
     patientProfileExists: mockFn(() => Promise.resolve(true)),
     imagingStudyInScope: mockFn(() => Promise.resolve(true)),
+    imagingStudyPatientId: mockFn(() => Promise.resolve(undefined)),
     createSeries: mockFn(() => ({ id: SERIES })),
     findSeriesByUidForUpdate: mockFn(() => Promise.resolve(null)),
     findSeriesByUid: mockFn(),
@@ -441,6 +442,47 @@ describe('DicomCatalogService', () => {
 
       expect(missingPatient.reason).toBe(OUT_OF_SCOPE);
       expect(foreignImaging.reason).toBe(OUT_OF_SCOPE);
+    });
+
+    it('si el cuerpo omite el paciente pero cita el estudio de imagen, el paciente se deriva del estudio', async () => {
+      const d = build();
+      d.dicomRepo.imagingStudyPatientId.mockResolvedValue(PATIENT);
+
+      await inTenant(() =>
+        d.service.catalogStudy({ ...CATALOG, imagingStudyId: 'img-1' }, actor),
+      );
+
+      expect(d.dicomRepo.imagingStudyPatientId).toHaveBeenCalledWith(
+        d.tx,
+        'img-1',
+        T1,
+      );
+      expect(d.dicomRepo.createStudy).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          patientProfileId: PATIENT,
+          imagingStudyId: 'img-1',
+        }),
+      );
+    });
+
+    it('un estudio de imagen de otro tenant sin paciente en el cuerpo no deriva paciente ni crea el estudio', async () => {
+      const d = build();
+      d.dicomRepo.imagingStudyInScope.mockResolvedValue(false);
+      d.dicomRepo.imagingStudyPatientId.mockResolvedValue(PATIENT);
+
+      const error = await rejection(
+        inTenant(() =>
+          d.service.catalogStudy(
+            { ...CATALOG, imagingStudyId: 'img-t2' },
+            actor,
+          ),
+        ),
+      );
+
+      expect(error.reason).toBe(OUT_OF_SCOPE);
+      expect(d.dicomRepo.imagingStudyPatientId).not.toHaveBeenCalled();
+      expect(d.dicomRepo.createStudy).not.toHaveBeenCalled();
     });
 
     it('un paciente sin estudio de imagen que lo respalde no se ata al estudio DICOM', async () => {
