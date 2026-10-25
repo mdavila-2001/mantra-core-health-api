@@ -18,6 +18,10 @@ import {
 import { ProfessionalCredentialsRepository } from '../../profiles/infrastructure/repositories';
 import { AuditTrailService } from '../../audit/services';
 import { OutboxService } from '../../messaging/services';
+import {
+  PeriopReacceptanceService,
+  type RelevantChange,
+} from './periop-reacceptance.service';
 // La historia clínica sigue siendo de `clinical`: el caso quirúrgico pide que
 // registre la condición, no la escribe por su cuenta.
 import {
@@ -199,6 +203,7 @@ export class PeriopCasesService {
    * @param intraopRepo - Lectura de la fase intraoperatoria (detalle del caso).
    * @param conditions - Alta de condiciones en la historia clínica (`clinical`).
    * @param clinicalRead - Política de acceso al paciente (detalle del caso).
+   * @param reacceptance - Invalidación de las aceptaciones del equipo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -214,6 +219,7 @@ export class PeriopCasesService {
     private readonly conditions: ConditionsService,
     // Política de acceso al paciente: ver `assertCanReadCaseDetail`.
     private readonly clinicalRead: ClinicalReadService,
+    private readonly reacceptance: PeriopReacceptanceService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PeriopCasesService.name);
@@ -397,7 +403,7 @@ export class PeriopCasesService {
       // prioridad y el texto de urgencia no alteran las responsabilidades ni
       // las condiciones de participación de nadie, así que no invalidan nada.
       // Se calcula **antes** de escribir: después ya no habría con qué comparar.
-      const relevantChanges: string[] = [];
+      const relevantChanges: RelevantChange[] = [];
       if (
         dto.scheduledStartAt &&
         new Date(dto.scheduledStartAt).getTime() !==
@@ -474,49 +480,18 @@ export class PeriopCasesService {
       // vuelve a estar pendiente de aceptación del equipo. Sin esto, mover la
       // fecha de un caso ya confirmado lo dejaba confirmado con aceptaciones
       // que ya no correspondían a lo que se iba a hacer.
-      let acceptancesInvalidated = 0;
-      if (relevantChanges.length > 0) {
-        const team = await this.casesRepo.findTeamByCase(tx, caseId);
-        for (const member of team) {
-          if (member.statusConceptId !== CONCEPTS.TEAM_ACCEPTED) continue;
-          member.statusConceptId = CONCEPTS.TEAM_ASSIGNED;
-          // La aceptación deja de constar: `accepted_at` respalda el estado, y
-          // conservarla afirmaría que el integrante aceptó esta versión.
-          member.acceptedAt = undefined;
-          touch(member, actor.id);
-          acceptancesInvalidated += 1;
-        }
-
-        // Spec 229: el caso vuelve a "pendiente de aceptación del equipo". El
-        // modelo no tiene ese estado propio —ver `CASE_DRAFT_STATE`—: su
-        // equivalente es `CASE_SCHEDULED`, el estado previo a la confirmación.
-        if (surgicalCase.statusConceptId === CONCEPTS.CASE_READY_FOR_SURGERY) {
-          this.casesRepo.createStatusHistory(tx, {
-            procedureCaseId: caseId,
-            fromStatusConceptId: surgicalCase.statusConceptId,
-            toStatusConceptId: CONCEPTS.CASE_SCHEDULED,
-            changedByUserId: actor.id,
-            reasonText: `Modificación relevante (${relevantChanges.join(', ')}): el equipo debe volver a aceptar`,
-          });
-          surgicalCase.statusConceptId = CONCEPTS.CASE_SCHEDULED;
-        }
-
-        // Spec 225: la modificación relevante se comunica al equipo. Va por el
-        // outbox y no por una llamada directa para que el aviso se confirme
-        // con la misma transacción que hizo el cambio.
-        await this.outbox.publishDomainEvent(tx, {
-          tenantId: surgicalCase.custodianTenantId,
-          eventType: 'periop.case.reacceptance_required',
-          aggregateType: 'procedure_case',
-          aggregateId: caseId,
-          payloadJson: {
-            changedFields: relevantChanges,
-            acceptancesInvalidated,
-            responsibleProfileId: surgicalCase.primarySurgeonProfileId,
-          },
-          actorUserId: actor.id,
-        });
-      }
+      //
+      // La invalidación vive en `PeriopReacceptanceService`: el equipo, la
+      // valoración preoperatoria y esta modificación comparten la misma regla.
+      const acceptancesInvalidated =
+        relevantChanges.length > 0
+          ? await this.reacceptance.invalidate(
+              tx,
+              surgicalCase,
+              relevantChanges,
+              actor,
+            )
+          : 0;
 
       touch(surgicalCase, actor.id);
 
@@ -865,7 +840,13 @@ export class PeriopCasesService {
     }
   }
 
-  /** UC-53-02: asignar un miembro al equipo quirúrgico. */
+  /**
+   * UC-53-02: asignar un miembro al equipo quirúrgico.
+   *
+   * Si el caso todavía no se ejecutó y alguien del equipo ya había aceptado,
+   * la nueva composición invalida esas aceptaciones y el caso vuelve a quedar
+   * pendiente de aceptación del equipo (DOC-MOD-005, API#840).
+   */
   async assignTeamMember(
     caseId: string,
     dto: AssignTeamMemberDto,
@@ -908,6 +889,22 @@ export class PeriopCasesService {
           ProceduresPerioperativeErrorReason.TEAM_MEMBER_ROLE_ALREADY_ASSIGNED,
         );
       }
+
+      // DOC-MOD-005 (API#840): sumar a alguien al equipo, o darle otro rol a
+      // quien ya estaba, cambia lo que los demás aceptaron. Va antes de crear
+      // al integrante nuevo: la invalidación sólo mira a quienes ya estaban.
+      const teamChanges: RelevantChange[] = ['teamComposition'];
+      if (
+        team.some((m) => m.practitionerProfileId === dto.practitionerProfileId)
+      ) {
+        teamChanges.push('teamRole');
+      }
+      await this.reacceptance.invalidateBeforeExecution(
+        tx,
+        surgicalCase,
+        teamChanges,
+        actor,
+      );
 
       const member = this.casesRepo.createTeamMember(tx, {
         procedureCaseId: caseId,

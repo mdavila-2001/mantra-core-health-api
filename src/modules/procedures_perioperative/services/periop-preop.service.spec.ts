@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PeriopPreopService } from './periop-preop.service';
+import { PeriopReacceptanceService } from './periop-reacceptance.service';
 import {
   CONCEPTS,
   ConflictException,
@@ -102,6 +103,11 @@ function build() {
     findMilestone: mockFn(),
     createStatusHistory: mockFn(),
     createUtilizationEvent: mockFn(),
+    // API#840: la valoración revisa las aceptaciones del equipo.
+    findTeamByCase: mockFn().mockResolvedValue([]),
+  };
+  const outbox = {
+    publishDomainEvent: mockFn().mockResolvedValue({ duplicate: false }),
   };
   // Por defecto el caso existe y es del tenant activo; los tests que prueban su
   // ausencia o un caso ajeno lo sobreescriben.
@@ -116,12 +122,14 @@ function build() {
     preopRepo,
     casesRepo as any,
     serviceRequests as any,
+    new PeriopReacceptanceService(casesRepo as any, outbox as any),
     logger as any,
   );
   return {
     service: inTenant(service, TENANT_A),
     raw: service,
     serviceRequests,
+    outbox,
     tx,
     preopRepo,
     casesRepo,
@@ -183,6 +191,58 @@ describe('PeriopPreopService', () => {
         fitnessStatusConceptId: CONCEPTS.FITNESS_FIT,
         milestoneId: 'milestone-1',
       });
+    });
+
+    it('registrar los riesgos tras la aceptación del equipo la invalida (API#840)', async () => {
+      const d = build();
+      wire(d);
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(
+        scheduledCase({
+          statusConceptId: CONCEPTS.CASE_READY_FOR_SURGERY,
+          custodianTenantId: TENANT_A,
+        }),
+      );
+      const member: any = {
+        id: 'm-1',
+        statusConceptId: CONCEPTS.TEAM_ACCEPTED,
+        acceptedAt: new Date('2026-08-20T09:00:00Z'),
+      };
+      d.casesRepo.findTeamByCase.mockResolvedValue([member]);
+
+      await d.service.createAssessment(CASE, dto(), actor);
+
+      expect(member.statusConceptId).toBe(CONCEPTS.TEAM_ASSIGNED);
+      expect(member.acceptedAt).toBeUndefined();
+      expect(d.casesRepo.createStatusHistory).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          toStatusConceptId: CONCEPTS.CASE_SCHEDULED,
+          reasonText: expect.stringContaining('identifiedRisks'),
+        }),
+      );
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          eventType: 'periop.case.reacceptance_required',
+          payloadJson: expect.objectContaining({
+            changedFields: ['identifiedRisks'],
+            acceptancesInvalidated: 1,
+          }),
+        }),
+      );
+    });
+
+    it('sin aceptaciones previas la valoración no genera aviso (API#840)', async () => {
+      const d = build();
+      wire(d);
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        { id: 'm-1', statusConceptId: CONCEPTS.TEAM_ASSIGNED },
+      ]);
+
+      await d.service.createAssessment(CASE, dto(), actor);
+
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.casesRepo.createStatusHistory).not.toHaveBeenCalled();
     });
 
     it('stores the risk scores with their model and version', async () => {

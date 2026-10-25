@@ -189,17 +189,22 @@ export class CommunityGroupsController {
   @ApiOperation({ summary: 'Grupos de una organización' })
   listGroups(
     @Query('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('topicId') topicId?: string,
     @Query('q') query?: string,
     @Query('cursor') cursor?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<GroupPageDto> {
-    return this.readService.listGroups(tenantId, {
-      cursor,
-      limit: limit ?? DEFAULT_PAGE_LIMIT,
-      topicId,
-      query,
-    });
+    return this.readService.listGroups(
+      tenantId,
+      {
+        cursor,
+        limit: limit ?? DEFAULT_PAGE_LIMIT,
+        topicId,
+        query,
+      },
+      actor,
+    );
   }
 
   /** P7: ficha del grupo con la posición del lector frente a él. */

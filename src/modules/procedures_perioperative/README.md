@@ -150,6 +150,20 @@ facturar (sólo completed) ──> cargos + duración real y desviación frente 
 - **La valoración exige revisar alergias y medicación**: es lo que más veces está detrás de un
   incidente en quirófano. Las puntuaciones de riesgo son **inmutables**, con su modelo y versión,
   para que años después se sepa con qué se decidió.
+- **Una aceptación vale para lo que se aceptó** (DOC-MOD-005, DOC-DOC-010). Cambiar la fecha o el
+  paciente (`PATCH /procedure-cases/:id`), sumar un integrante o darle otro rol a quien ya estaba
+  (`POST .../team-members`) o registrar la valoración preoperatoria, que es donde constan los
+  riesgos identificados (`POST .../preoperative-assessments`), devuelve a `TEAM_ASSIGNED` a cada
+  integrante que había aceptado y borra su `accepted_at`; el caso listo para operar vuelve a
+  `CASE_SCHEDULED` con el motivo en la historia y el equipo recibe
+  `periop.case.reacceptance_required` por el outbox, con los campos cambiados
+  (`scheduledStartAt`, `scheduledEndAt`, `patientProfileId`, `teamComposition`, `teamRole`,
+  `identifiedRisks`). Las rutas de equipo y valoración sólo actúan antes de la ejecución y sólo si
+  había algo aceptado o el caso estaba listo: armar el equipo de un caso nuevo no avisa a nadie. La
+  regla vive en `PeriopReacceptanceService`. El módulo no guarda qué versión del caso aceptó cada
+  integrante: ese dato es del modelo (`mantra-core-health-model#57`). El procedimiento y la sala
+  no cambian después de programar el caso porque ningún endpoint los modifica; la documentación
+  que altera responsabilidades es de `chart`.
 - **Sólo un paciente apto alcanza el hito de clearance**; declarar despejado a uno que no lo está
   sería lo contrario de lo que el hito significa.
 - **El caso pasa a listo cuando no queda ninguna orden pendiente**: operar con una pendiente es el

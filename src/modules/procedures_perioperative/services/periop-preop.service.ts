@@ -10,6 +10,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { PeriopCasesRepository, PeriopPreopRepository } from '../repositories';
+import { PeriopReacceptanceService } from './periop-reacceptance.service';
 import {
   isCaseInScope,
   loadCaseForUpdateInScope,
@@ -141,6 +142,8 @@ export class PeriopPreopService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param preopRepo - Valor de preop repo requerido por la operación.
    * @param casesRepo - Valor de cases repo requerido por la operación.
+   * @param serviceRequests - Órdenes clínicas que referencian las preoperatorias.
+   * @param reacceptance - Invalidación de las aceptaciones del equipo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -148,6 +151,7 @@ export class PeriopPreopService {
     private readonly preopRepo: PeriopPreopRepository,
     private readonly casesRepo: PeriopCasesRepository,
     private readonly serviceRequests: ServiceRequestsService,
+    private readonly reacceptance: PeriopReacceptanceService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PeriopPreopService.name);
@@ -351,6 +355,16 @@ export class PeriopPreopService {
           'Patient assessed as unfit for surgery',
         );
       }
+
+      // DOC-INT-008 / DOC-MOD-005 (API#840): los riesgos identificados forman
+      // parte de lo que el equipo aceptó. Registrarlos tras la aceptación la
+      // deja sin efecto: nadie aceptó operar con un riesgo que aún no constaba.
+      await this.reacceptance.invalidateBeforeExecution(
+        tx,
+        surgicalCase,
+        ['identifiedRisks'],
+        actor,
+      );
 
       touch(surgicalCase, actor.id);
 

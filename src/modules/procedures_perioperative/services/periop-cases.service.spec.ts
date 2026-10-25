@@ -10,6 +10,7 @@ import { ForbiddenException } from '@nestjs/common';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PeriopCasesService } from './periop-cases.service';
+import { PeriopReacceptanceService } from './periop-reacceptance.service';
 import {
   CONCEPTS,
   ConflictException,
@@ -146,6 +147,7 @@ function build() {
     outbox as any,
     conditions as any,
     clinicalRead as any,
+    new PeriopReacceptanceService(casesRepo as any, outbox as any),
     logger as any,
   );
   return {
@@ -462,6 +464,128 @@ describe('PeriopCasesService', () => {
       await expect(
         d.service.assignTeamMember(CASE, dto, actor as any),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    /* -- API#840 · DOC-MOD-005: el equipo cambia, la aceptación se invalida -- */
+
+    /** Un integrante que ya había aceptado. */
+    function acceptedMember(over: Record<string, unknown> = {}): any {
+      return {
+        id: 'm-ok',
+        practitionerProfileId: 'otro-profesional',
+        teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+        statusConceptId: CONCEPTS.TEAM_ACCEPTED,
+        acceptedAt: new Date('2026-08-20T09:00:00Z'),
+        ...over,
+      };
+    }
+
+    it('sumar a alguien al equipo invalida las aceptaciones y devuelve el caso a pendiente', async () => {
+      const d = build();
+      const surgicalCase = wire(d);
+      surgicalCase.statusConceptId = CONCEPTS.CASE_READY_FOR_SURGERY;
+      surgicalCase.custodianTenantId = TENANT_A;
+      const accepted = acceptedMember();
+      d.casesRepo.findTeamByCase.mockResolvedValue([accepted]);
+
+      await d.service.assignTeamMember(CASE, dto, actor);
+
+      expect(accepted.statusConceptId).toBe(CONCEPTS.TEAM_ASSIGNED);
+      expect(accepted.acceptedAt).toBeUndefined();
+      expect(surgicalCase.statusConceptId).toBe(CONCEPTS.CASE_SCHEDULED);
+      expect(d.casesRepo.createStatusHistory).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          fromStatusConceptId: CONCEPTS.CASE_READY_FOR_SURGERY,
+          toStatusConceptId: CONCEPTS.CASE_SCHEDULED,
+          reasonText: expect.stringContaining('teamComposition'),
+        }),
+      );
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          eventType: 'periop.case.reacceptance_required',
+          payloadJson: expect.objectContaining({
+            changedFields: ['teamComposition'],
+            acceptancesInvalidated: 1,
+          }),
+        }),
+      );
+      // El integrante nuevo nace sin aceptar, como siempre.
+      expect(d.casesRepo.createTeamMember).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ statusConceptId: CONCEPTS.TEAM_ASSIGNED }),
+      );
+    });
+
+    it('darle otro rol a quien ya estaba declara también el cambio de rol', async () => {
+      const d = build();
+      wire(d);
+      d.casesRepo.findTeamByCase.mockResolvedValue([
+        acceptedMember({
+          practitionerProfileId: SURGEON,
+          teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+        }),
+      ]);
+
+      await d.service.assignTeamMember(CASE, dto, actor);
+
+      expect(d.outbox.publishDomainEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          payloadJson: expect.objectContaining({
+            changedFields: ['teamComposition', 'teamRole'],
+          }),
+        }),
+      );
+    });
+
+    it('armar el equipo de un caso sin aceptaciones no avisa a nadie', async () => {
+      const d = build();
+      wire(d, [
+        {
+          practitionerProfileId: 'otro',
+          teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
+          statusConceptId: CONCEPTS.TEAM_ASSIGNED,
+        },
+      ]);
+
+      await d.service.assignTeamMember(CASE, dto, actor);
+
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      expect(d.casesRepo.createStatusHistory).not.toHaveBeenCalled();
+    });
+
+    it.each([CONCEPTS.SURGICAL_CASE_IN_PROGRESS, CONCEPTS.CASE_COMPLETED])(
+      'con el caso ya en ejecución (%s) sumar un integrante no revoca lo aceptado',
+      async (status) => {
+        const d = build();
+        const surgicalCase = wire(d);
+        surgicalCase.statusConceptId = status;
+        const accepted = acceptedMember();
+        d.casesRepo.findTeamByCase.mockResolvedValue([accepted]);
+
+        await d.service.assignTeamMember(CASE, dto, actor);
+
+        expect(accepted.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+        expect(surgicalCase.statusConceptId).toBe(status);
+        expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+      },
+    );
+
+    it('un integrante repetido se rechaza antes de tocar las aceptaciones', async () => {
+      const d = build();
+      const accepted = acceptedMember({
+        practitionerProfileId: SURGEON,
+        teamRoleConceptId: CONCEPTS.TEAM_ROLE_ASSISTANT,
+      });
+      wire(d, [accepted]);
+
+      await expect(
+        d.service.assignTeamMember(CASE, dto, actor as any),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(accepted.statusConceptId).toBe(CONCEPTS.TEAM_ACCEPTED);
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
     });
 
     it('fails when the case does not exist', async () => {
