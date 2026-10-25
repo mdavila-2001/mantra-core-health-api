@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1550,
+    "total": 1552,
     "porOrigen": {
-      "CONTRATO": 1541,
+      "CONTRATO": 1543,
       "CONTRATO_AUSENTE": 9
     },
     "porRiesgo": {
-      "BAJO": 489,
-      "MEDIO": 875,
-      "ALTO": 186
+      "BAJO": 491,
+      "MEDIO": 879,
+      "ALTO": 182
     },
-    "conTablas": 1488,
+    "conTablas": 1491,
     "sinTablasSinDeterminar": 0,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 888,
-    "conRequerimientos": 1550
+    "conPruebas": 889,
+    "conRequerimientos": 1552
   },
   "endpoints": [
     {
@@ -677,6 +677,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AccountingPractitionerController_readAssetDepreciations",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/accounting/practitioner/assets/{id}/depreciations",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Histórico de depreciación de un activo propio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "AccountingPractitionerController_registerAssetProgress",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -1244,7 +1262,11 @@
       "nombre": "Estado y enrutado de las fuentes de datos (requiere autenticación)",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN"
+      ],
       "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
@@ -1260,7 +1282,11 @@
       "nombre": "Contadores de operaciones por conexión y por ruta read/write",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN"
+      ],
       "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
@@ -1293,7 +1319,7 @@
       "riesgo": "BAJO",
       "publica": true,
       "roles": [],
-      "tablas": 0,
+      "tablas": 1,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3183,7 +3209,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 10,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3206,6 +3232,22 @@
       "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingServiceCatalogController_getImage",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/billing/service-catalog/{id}/image",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Descargar la imagen de un servicio que el actor puede ver",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -5157,9 +5199,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Registrar una dirección (UC-02-04)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 1,
       "eventos": 0,
       "pruebas": 3,
@@ -5173,9 +5217,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Registrar un punto de contacto (UC-02-02)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 1,
       "eventos": 0,
       "pruebas": 2,
@@ -5189,9 +5235,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Verificar un punto de contacto (UC-02-03)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 2,
       "eventos": 0,
       "pruebas": 2,
@@ -5349,9 +5397,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Registrar un identificador oficial (UC-02-01)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 2,
       "eventos": 0,
       "pruebas": 2,
@@ -6240,7 +6290,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6288,7 +6338,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -10878,7 +10928,7 @@
         "EDUCATION_ADMIN",
         "LEARNER"
       ],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -12490,7 +12540,7 @@
         "PRIVACY_OFFICER",
         "HEALTH_DATA_ADMIN"
       ],
-      "tablas": 12,
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -27590,7 +27640,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27648,7 +27698,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27668,7 +27718,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27688,7 +27738,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"

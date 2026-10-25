@@ -3,12 +3,12 @@
 # Flujos del módulo `billing`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 34 (32 con decisiones propias, 2 sin ellas)
+- **Operaciones:** 35 (33 con decisiones propias, 2 sin ellas)
 - Inventario de endpoints del módulo: [billing](../endpoints/billing.md)
 
 ## Proceso: Módulo Billing (17)
 
-- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 34
+- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 35
 - **Actores:** CLINICIAN · Cualquier sesión válida · PRACTITIONER · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/billing/README.md`
@@ -40,8 +40,9 @@ _Fuente: `src/modules/billing/README.md:3`_
 |  |  | GET /billing/invoices/{id} | SECURITY_ADMIN | BAJO | 3 |
 |  |  | GET /billing/patient-statements | SECURITY_ADMIN | BAJO | 2 |
 | `ctrl:BillingServiceCatalogController` | Operaciones de BillingServiceCatalogController que el README no asigna a un caso de uso | GET /billing/service-catalog | Cualquier sesión válida | BAJO | 1 |
-|  |  | POST /billing/service-catalog | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 10 |
+|  |  | POST /billing/service-catalog | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 12 |
 |  |  | PATCH /billing/service-catalog/{id} | PRACTITIONER · CLINICIAN · SECURITY_ADMIN | MEDIO | 4 |
+|  |  | GET /billing/service-catalog/{id}/image | Cualquier sesión válida | BAJO | 4 |
 |  |  | GET /billing/service-catalog/procedure-specialties | Cualquier sesión válida | BAJO | 1 |
 |  |  | GET /billing/service-catalog/procedures | Cualquier sesión válida | BAJO | 2 |
 | `ctrl:BillingSimulatedController` | Operaciones de BillingSimulatedController que el README no asigna a un caso de uso | GET /billing/simulated/catalogs | Cualquier sesión válida | BAJO | 0 |
@@ -224,51 +225,52 @@ flowchart LR
   a5(["SECURITY_ADMIN · PRACTITIONER · CLINICIAN"]):::actor
   a12(["PRACTITIONER · CLINICIAN · SECURITY_ADMIN"]):::actor
   t3[("billing.service_catalog")]:::tabla
-  t6[("practice.practices")]:::tabla
-  t7[("practice.practitioner_role_assignments")]:::tabla
-  t8[("surveys.survey_assignments")]:::tabla
-  t9[("surveys.survey_questions")]:::tabla
-  t14[("terminology.concept_properties")]:::tabla
-  t16[("terminology.catalog_concepts")]:::tabla
-  t19[("billing.invoice_lines")]:::tabla
-  t20[("billing.invoices")]:::tabla
-  t21[("billing.payments_received")]:::tabla
-  t22[("billing.receivable_payment_allocations")]:::tabla
-  t23[("billing.siat_simulated_invoices")]:::tabla
-  t30[("billing.billing_document_links")]:::tabla
-  t41[("clinical.encounters")]:::tabla
-  t42[("profiles.persons")]:::tabla
-  t45[("billing.siat_simulated_outbox")]:::tabla
-  t10[("+4 tablas más")]
+  t6[("common.file_versions")]:::tabla
+  t7[("common.files")]:::tabla
+  t8[("practice.practices")]:::tabla
+  t9[("practice.practitioner_role_assignments")]:::tabla
+  t15[("terminology.concept_properties")]:::tabla
+  t17[("terminology.catalog_concepts")]:::tabla
+  t20[("billing.invoice_lines")]:::tabla
+  t21[("billing.invoices")]:::tabla
+  t22[("billing.payments_received")]:::tabla
+  t23[("billing.receivable_payment_allocations")]:::tabla
+  t24[("billing.siat_simulated_invoices")]:::tabla
+  t31[("billing.billing_document_links")]:::tabla
+  t42[("clinical.encounters")]:::tabla
+  t43[("profiles.persons")]:::tabla
+  t46[("billing.siat_simulated_outbox")]:::tabla
+  t10[("+6 tablas más")]
   subgraph s0["ctrl:BillingServiceCatalogController · Operaciones de BillingServiceCatalogCont…"]
     o1["GET /billing/service-catalog"]:::op
     o4["POST /billing/service-catalog"]:::op
     o11["PATCH /billing/service-catalog/{id}"]:::op
-    o13["GET /billing/service-catalog/procedure-specialties"]:::op
-    o15["GET /billing/service-catalog/procedures"]:::op
+    o13["GET /billing/service-catalog/{id}/image"]:::op
+    o14["GET /billing/service-catalog/procedure-specialties"]:::op
+    o16["GET /billing/service-catalog/procedures"]:::op
   end
-  t24[("+5 tablas más")]
-  t26[("+5 tablas más")]
-  t28[("+6 tablas más")]
-  t31[("+12 tablas más")]
-  t33[("+5 tablas más")]
-  t35[("+6 tablas más")]
-  t37[("+6 tablas más")]
-  t39[("+7 tablas más")]
+  t25[("+5 tablas más")]
+  t27[("+5 tablas más")]
+  t29[("+6 tablas más")]
+  t32[("+12 tablas más")]
+  t34[("+5 tablas más")]
+  t36[("+6 tablas más")]
+  t38[("+6 tablas más")]
+  t40[("+7 tablas más")]
   subgraph s1["ctrl:BillingSimulatedController · Operaciones de BillingSimulatedController que…"]
-    o17["GET /billing/simulated/catalogs"]:::op
-    o18["GET /billing/simulated/charges"]:::op
-    o25["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
-    o27["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
-    o29["POST /billing/simulated/charges/{chargeId}/payment"]:::op
-    o32["GET /billing/simulated/invoices/{invoiceId}"]:::op
-    o34["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
-    o36["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
-    o38["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
-    o40["GET /billing/simulated/my-invoices"]:::op
-    o43["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
-    o44["GET /billing/simulated/outbox"]:::op
-    o46["GET /billing/simulated/status"]:::op
+    o18["GET /billing/simulated/catalogs"]:::op
+    o19["GET /billing/simulated/charges"]:::op
+    o26["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
+    o28["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
+    o30["POST /billing/simulated/charges/{chargeId}/payment"]:::op
+    o33["GET /billing/simulated/invoices/{invoiceId}"]:::op
+    o35["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
+    o37["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
+    o39["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
+    o41["GET /billing/simulated/my-invoices"]:::op
+    o44["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
+    o45["GET /billing/simulated/outbox"]:::op
+    o47["GET /billing/simulated/status"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -277,101 +279,106 @@ flowchart LR
   o4 -->|"LEE"| t3
   o4 -->|"LEE"| t6
   o4 -->|"LEE"| t7
-  o4 -->|"CREA"| t8
-  o4 -->|"CREA"| t9
+  o4 -->|"LEE"| t8
+  o4 -->|"LEE"| t9
   o4 -.-> t10
   a12 --> o11
   o11 -->|"ACTUALIZA"| t3
   o11 -->|"LEE"| t3
-  o11 -->|"LEE"| t6
-  o11 -->|"LEE"| t7
+  o11 -->|"LEE"| t8
+  o11 -->|"LEE"| t9
   a2 --> o13
-  o13 -->|"LEE"| t14
-  a2 --> o15
-  o15 -->|"LEE"| t16
-  o15 -->|"LEE"| t14
-  a2 --> o17
+  o13 -->|"LEE"| t3
+  o13 -->|"LEE"| t6
+  o13 -->|"LEE"| t7
+  o13 -->|"LEE"| t8
+  a2 --> o14
+  o14 -->|"LEE"| t15
+  a2 --> o16
+  o16 -->|"LEE"| t17
+  o16 -->|"LEE"| t15
   a2 --> o18
-  o18 -->|"LEE"| t19
-  o18 -->|"LEE"| t20
-  o18 -->|"LEE"| t21
-  o18 -->|"LEE"| t22
-  o18 -->|"LEE"| t3
-  o18 -->|"LEE"| t23
-  o18 -.-> t24
-  a2 --> o25
-  o25 -->|"LEE"| t19
-  o25 -->|"LEE"| t20
-  o25 -->|"LEE"| t21
-  o25 -->|"LEE"| t22
-  o25 -->|"LEE"| t3
-  o25 -->|"LEE"| t23
-  o25 -.-> t26
-  a2 --> o27
-  o27 -->|"LEE"| t19
-  o27 -->|"LEE"| t20
-  o27 -->|"LEE"| t21
-  o27 -->|"LEE"| t22
-  o27 -->|"LEE"| t3
-  o27 -->|"CREA"| t23
-  o27 -.-> t28
-  a2 --> o29
-  o29 -->|"CREA"| t30
-  o29 -->|"CREA"| t19
-  o29 -->|"LEE"| t19
-  o29 -->|"CREA"| t20
-  o29 -->|"LEE"| t20
-  o29 -->|"CREA"| t21
-  o29 -.-> t31
-  a2 --> o32
-  o32 -->|"LEE"| t19
-  o32 -->|"LEE"| t20
-  o32 -->|"LEE"| t21
-  o32 -->|"LEE"| t22
-  o32 -->|"LEE"| t3
-  o32 -->|"LEE"| t23
-  o32 -.-> t33
-  a2 --> o34
-  o34 -->|"LEE"| t19
-  o34 -->|"LEE"| t20
-  o34 -->|"LEE"| t21
-  o34 -->|"LEE"| t22
-  o34 -->|"LEE"| t3
-  o34 -->|"ACTUALIZA"| t23
-  o34 -.-> t35
-  a2 --> o36
-  o36 -->|"LEE"| t19
-  o36 -->|"LEE"| t20
-  o36 -->|"LEE"| t21
-  o36 -->|"LEE"| t22
-  o36 -->|"LEE"| t3
-  o36 -->|"ACTUALIZA"| t23
-  o36 -.-> t37
-  a2 --> o38
-  o38 -->|"LEE"| t19
-  o38 -->|"LEE"| t20
-  o38 -->|"LEE"| t21
-  o38 -->|"LEE"| t22
-  o38 -->|"LEE"| t3
-  o38 -->|"ACTUALIZA"| t23
-  o38 -.-> t39
-  a2 --> o40
-  o40 -->|"LEE"| t23
-  o40 -->|"LEE"| t41
-  o40 -->|"LEE"| t6
-  o40 -->|"LEE"| t42
-  a2 --> o43
-  o43 -->|"LEE"| t23
-  o43 -->|"LEE"| t41
-  o43 -->|"LEE"| t6
-  o43 -->|"LEE"| t42
+  a2 --> o19
+  o19 -->|"LEE"| t20
+  o19 -->|"LEE"| t21
+  o19 -->|"LEE"| t22
+  o19 -->|"LEE"| t23
+  o19 -->|"LEE"| t3
+  o19 -->|"LEE"| t24
+  o19 -.-> t25
+  a2 --> o26
+  o26 -->|"LEE"| t20
+  o26 -->|"LEE"| t21
+  o26 -->|"LEE"| t22
+  o26 -->|"LEE"| t23
+  o26 -->|"LEE"| t3
+  o26 -->|"LEE"| t24
+  o26 -.-> t27
+  a2 --> o28
+  o28 -->|"LEE"| t20
+  o28 -->|"LEE"| t21
+  o28 -->|"LEE"| t22
+  o28 -->|"LEE"| t23
+  o28 -->|"LEE"| t3
+  o28 -->|"CREA"| t24
+  o28 -.-> t29
+  a2 --> o30
+  o30 -->|"CREA"| t31
+  o30 -->|"CREA"| t20
+  o30 -->|"LEE"| t20
+  o30 -->|"CREA"| t21
+  o30 -->|"LEE"| t21
+  o30 -->|"CREA"| t22
+  o30 -.-> t32
+  a2 --> o33
+  o33 -->|"LEE"| t20
+  o33 -->|"LEE"| t21
+  o33 -->|"LEE"| t22
+  o33 -->|"LEE"| t23
+  o33 -->|"LEE"| t3
+  o33 -->|"LEE"| t24
+  o33 -.-> t34
+  a2 --> o35
+  o35 -->|"LEE"| t20
+  o35 -->|"LEE"| t21
+  o35 -->|"LEE"| t22
+  o35 -->|"LEE"| t23
+  o35 -->|"LEE"| t3
+  o35 -->|"ACTUALIZA"| t24
+  o35 -.-> t36
+  a2 --> o37
+  o37 -->|"LEE"| t20
+  o37 -->|"LEE"| t21
+  o37 -->|"LEE"| t22
+  o37 -->|"LEE"| t23
+  o37 -->|"LEE"| t3
+  o37 -->|"ACTUALIZA"| t24
+  o37 -.-> t38
+  a2 --> o39
+  o39 -->|"LEE"| t20
+  o39 -->|"LEE"| t21
+  o39 -->|"LEE"| t22
+  o39 -->|"LEE"| t23
+  o39 -->|"LEE"| t3
+  o39 -->|"ACTUALIZA"| t24
+  o39 -.-> t40
+  a2 --> o41
+  o41 -->|"LEE"| t24
+  o41 -->|"LEE"| t42
+  o41 -->|"LEE"| t8
+  o41 -->|"LEE"| t43
   a2 --> o44
-  o44 -->|"LEE"| t23
-  o44 -->|"LEE"| t45
-  o44 -->|"LEE"| t41
-  a2 --> o46
-  o46 -->|"LEE"| t41
-  o46 -->|"LEE"| t6
+  o44 -->|"LEE"| t24
+  o44 -->|"LEE"| t42
+  o44 -->|"LEE"| t8
+  o44 -->|"LEE"| t43
+  a2 --> o45
+  o45 -->|"LEE"| t24
+  o45 -->|"LEE"| t46
+  o45 -->|"LEE"| t42
+  a2 --> o47
+  o47 -->|"LEE"| t42
+  o47 -->|"LEE"| t8
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1399,9 +1406,10 @@ Dar de alta un servicio en el catálogo maestro
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Imagen no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe un servicio con ese código en el catálogo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1421,45 +1429,97 @@ flowchart TD
   n6 --> n7
   n8(["404 NOT_FOUND Práctica no encontrada"]):::error
   n7 --> n8
-  n9["Transacción: transactional(…)"]:::transaccion
-  n10["Llama a ServiceCatalogRepository.findByCode"]:::llamada
-  n9 --> n10
-  n11[("LEE billing.service_catalog")]:::efecto
+  n9{"dto.imageFileId !== undefined"}:::decision
+  n10["Llama a BillingServiceCatalogService.assertImageUsable"]:::llamada
+  n9 -->|"sí"| n10
+  n11["Intenta"]:::intento
   n10 --> n11
-  n12{"clash"}:::decision
+  n12["Llama a AttachableFileService.assertUsableBy"]:::llamada
   n11 --> n12
-  n13(["409 CONFLICT Ya existe un servicio con ese código en el catálogo"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a ServiceCatalogRepository.create"]:::llamada
-  n12 -->|"no"| n14
-  n15[("CREA billing.service_catalog")]:::efecto
+  n13["Llama a FilesRepository.findById"]:::llamada
+  n12 --> n13
+  n14[("LEE common.files")]:::efecto
+  n13 --> n14
+  n15{"!file"}:::decision
   n14 --> n15
-  n16["Llama a BillingServiceCatalogService.attachDefaultSatisfactionSurvey"]:::llamada
-  n15 --> n16
-  n17["Llama a BillingServiceCatalogService.findDefaultSurveyOwner"]:::llamada
-  n16 --> n17
-  n18[("LEE practice.practitioner_role_assignments")]:::efecto
-  n17 --> n18
-  n19["Llama a TemplatesRepository.createTemplate"]:::llamada
-  n18 --> n19
-  n20[("CREA surveys.survey_templates")]:::efecto
-  n19 --> n20
-  n21["Llama a TemplatesRepository.createVersion"]:::llamada
-  n20 --> n21
-  n22[("CREA surveys.survey_versions")]:::efecto
-  n21 --> n22
-  n23["Llama a TemplatesRepository.createQuestion"]:::llamada
-  n22 --> n23
-  n24[("CREA surveys.survey_questions")]:::efecto
+  n16(["404 NOT_FOUND {labels.notFound}"]):::error
+  n15 -->|"sí"| n16
+  n17{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
+  n15 -->|"no"| n17
+  n18(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
+  n17 -->|"sí"| n18
+  n19{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n17 -->|"no"| n19
+  n20(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n19 -->|"sí"| n20
+  n21{"!file.currentVersionId"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a AttachableFileService.assertVersionUsable"]:::llamada
+  n21 -->|"no"| n23
+  n24{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
   n23 --> n24
-  n25[("ACTUALIZA surveys.survey_versions · ACTUALIZA surveys.survey_versions · ACTUALIZA surveys.survey_versions · A…")]:::efecto
-  n24 --> n25
-  n26["Llama a AssignmentsRepository.create"]:::llamada
-  n25 --> n26
-  n27[("CREA surveys.survey_assignments")]:::efecto
-  n26 --> n27
-  n28(("201 Responde con éxito")):::ok
-  n27 --> n28
+  n25(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n24 -->|"sí"| n25
+  n26{"!file.currentVersionId"}:::decision
+  n24 -->|"no"| n26
+  n27(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n26 -->|"sí"| n27
+  n28{"!version"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n28 -->|"sí"| n29
+  n30{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n28 -->|"no"| n30
+  n31(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n30 -->|"sí"| n31
+  n32{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n30 -->|"no"| n32
+  n33(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n32 -->|"sí"| n33
+  n34(["404 NOT_FOUND Imagen no encontrada"]):::error
+  n32 -->|"no"| n34
+  n35["Transacción: transactional(…)"]:::transaccion
+  n9 -->|"no"| n35
+  n36["Llama a ServiceCatalogRepository.findByCode"]:::llamada
+  n35 --> n36
+  n37[("LEE billing.service_catalog")]:::efecto
+  n36 --> n37
+  n38{"clash"}:::decision
+  n37 --> n38
+  n39(["409 CONFLICT Ya existe un servicio con ese código en el catálogo"]):::error
+  n38 -->|"sí"| n39
+  n40["Llama a ServiceCatalogRepository.create"]:::llamada
+  n38 -->|"no"| n40
+  n41[("CREA billing.service_catalog")]:::efecto
+  n40 --> n41
+  n42["Llama a BillingServiceCatalogService.attachDefaultSatisfactionSurvey"]:::llamada
+  n41 --> n42
+  n43["Llama a BillingServiceCatalogService.findDefaultSurveyOwner"]:::llamada
+  n42 --> n43
+  n44[("LEE practice.practitioner_role_assignments")]:::efecto
+  n43 --> n44
+  n45["Llama a TemplatesRepository.createTemplate"]:::llamada
+  n44 --> n45
+  n46[("CREA surveys.survey_templates")]:::efecto
+  n45 --> n46
+  n47["Llama a TemplatesRepository.createVersion"]:::llamada
+  n46 --> n47
+  n48[("CREA surveys.survey_versions")]:::efecto
+  n47 --> n48
+  n49["Llama a TemplatesRepository.createQuestion"]:::llamada
+  n48 --> n49
+  n50[("CREA surveys.survey_questions")]:::efecto
+  n49 --> n50
+  n51[("ACTUALIZA surveys.survey_versions · ACTUALIZA surveys.survey_versions · ACTUALIZA surveys.survey_versions · A…")]:::efecto
+  n50 --> n51
+  n52["Llama a AssignmentsRepository.create"]:::llamada
+  n51 --> n52
+  n53[("CREA surveys.survey_assignments")]:::efecto
+  n52 --> n53
+  n54(("201 Responde con éxito")):::ok
+  n53 --> n54
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1553,7 +1613,137 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. GET /billing/service-catalog/procedures
+#### 19. GET /billing/service-catalog/{id}/image
+
+Descargar la imagen de un servicio que el actor puede ver
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {notVisible.message}; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Archivo no encontrado; ResourceNotFoundException: El contenido no está disponible en el almacenamiento local; ResourceNotFoundException: El contenido no está disponible en el almacenamiento configurado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: S3 object body is empty |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a BillingServiceCatalogService.getImageContent"]:::llamada
+  n2 --> n3
+  n4["Llama a ServiceCatalogRepository.findById"]:::llamada
+  n3 --> n4
+  n5[("LEE billing.service_catalog")]:::efecto
+  n4 --> n5
+  n6["Llama a PracticeTenantLookupService.findTenantOfPractice"]:::llamada
+  n5 --> n6
+  n7["Llama a PracticesRepository.findById"]:::llamada
+  n6 --> n7
+  n8[("LEE practice.practices")]:::efecto
+  n7 --> n8
+  n9{"!imageFileId"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND {notVisible.message}"]):::error
+  n9 -->|"sí"| n10
+  n11["Intenta"]:::intento
+  n9 -->|"no"| n11
+  n12["Llama a AttachableFileService.assertUsableForAuthorizedContext"]:::llamada
+  n11 --> n12
+  n13["Llama a FilesRepository.findById"]:::llamada
+  n12 --> n13
+  n14[("LEE common.files")]:::efecto
+  n13 --> n14
+  n15{"!file"}:::decision
+  n14 --> n15
+  n16(["404 NOT_FOUND {labels.notFound}"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a AttachableFileService.assertVersionUsable"]:::llamada
+  n15 -->|"no"| n17
+  n18{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n17 --> n18
+  n19(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n18 -->|"sí"| n19
+  n20{"!file.currentVersionId"}:::decision
+  n18 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a FileVersionsRepository.findById"]:::llamada
+  n20 -->|"no"| n22
+  n23[("LEE common.file_versions")]:::efecto
+  n22 --> n23
+  n24{"!version"}:::decision
+  n23 --> n24
+  n25(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n24 -->|"sí"| n25
+  n26{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n24 -->|"no"| n26
+  n27(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n26 -->|"sí"| n27
+  n28{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n28 -->|"sí"| n29
+  n30{"file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL && file.tenantId === tenantId"}:::decision
+  n28 -->|"no"| n30
+  n31["Llama a FileUploadService.downloadForAuthorizedContext"]:::llamada
+  n30 -->|"sí"| n31
+  n32["Llama a FilesRepository.findById"]:::llamada
+  n31 --> n32
+  n33[("LEE common.files")]:::efecto
+  n32 --> n33
+  n34{"!file"}:::decision
+  n33 --> n34
+  n35(["404 NOT_FOUND Archivo no encontrado"]):::error
+  n34 -->|"sí"| n35
+  n36["Llama a FileUploadService.serveCurrentVersion"]:::llamada
+  n34 -->|"no"| n36
+  n37["Llama a AttachableFileService.assertUsableForAuthorizedContext"]:::llamada
+  n36 --> n37
+  n38{"!file"}:::decision
+  n37 --> n38
+  n39(["404 NOT_FOUND {labels.notFound}"]):::error
+  n38 -->|"sí"| n39
+  n40["Llama a LocalDiskFileStorageAdapter.retrieve"]:::llamada
+  n38 -->|"no"| n40
+  n41["Intenta"]:::intento
+  n40 --> n41
+  n42{"isMissingFile(error)"}:::decision
+  n41 -->|"si falla"| n42
+  n43(["404 NOT_FOUND El contenido no está disponible en el almacenamiento local"]):::error
+  n42 -->|"sí"| n43
+  n44(["↩ (relanza el error capturado)"]):::error
+  n42 -->|"no"| n44
+  n45["Llama a S3FileStorageAdapter.retrieve"]:::llamada
+  n41 --> n45
+  n46["Intenta"]:::intento
+  n45 --> n46
+  n47{"!result.Body"}:::decision
+  n46 --> n47
+  n48(["500 INTERNAL S3 object body is empty"]):::error
+  n47 -->|"sí"| n48
+  n49{"isNotFound(error)"}:::decision
+  n46 -->|"si falla"| n49
+  n50(["404 NOT_FOUND El contenido no está disponible en el almacenamiento configurado"]):::error
+  n49 -->|"sí"| n50
+  n51(["↩ (relanza el error capturado)"]):::error
+  n49 -->|"no"| n51
+  n52(["404 NOT_FOUND {notVisible.message}"]):::error
+  n47 -->|"no"| n52
+  n30 -->|"no"| n52
+  n53(("200 Responde con éxito")):::ok
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 20. GET /billing/service-catalog/procedures
 
 Listar el nomenclador de procedimientos (arancel de referencia)
 
@@ -1592,7 +1782,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. GET /billing/simulated/catalogs
+#### 21. GET /billing/simulated/catalogs
 
 Catálogos paramétricos del SIAT simulado
 
@@ -1627,7 +1817,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /billing/simulated/charges
+#### 22. GET /billing/simulated/charges
 
 Cobros de consultas (opcionalmente de una persona)
 
@@ -1673,7 +1863,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+#### 23. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
 
 Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
 
@@ -1731,7 +1921,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /billing/simulated/charges/{chargeId}/invoices
+#### 24. POST /billing/simulated/charges/{chargeId}/invoices
 
 Emitir la factura SIAT simulada de un cobro pagado
 
@@ -1819,7 +2009,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /billing/simulated/charges/{chargeId}/payment
+#### 25. POST /billing/simulated/charges/{chargeId}/payment
 
 Registrar el pago real de un cobro
 
@@ -1991,7 +2181,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. GET /billing/simulated/invoices/{invoiceId}
+#### 26. GET /billing/simulated/invoices/{invoiceId}
 
 Una factura simulada, dentro del alcance de quien la pide
 
@@ -2076,7 +2266,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /billing/simulated/invoices/{invoiceId}/annulment
+#### 27. POST /billing/simulated/invoices/{invoiceId}/annulment
 
 Anular la factura (sólo administración)
 
@@ -2162,7 +2352,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+#### 28. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
 
 Revertir la anulación (sólo administración)
 
@@ -2263,7 +2453,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /billing/simulated/invoices/{invoiceId}/email
+#### 29. POST /billing/simulated/invoices/{invoiceId}/email
 
 Encolar el envío (simulado, no se envía) de la factura
 
@@ -2359,7 +2549,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. GET /billing/simulated/my-invoices
+#### 30. GET /billing/simulated/my-invoices
 
 Mis facturas: recibidas (paciente) o emitidas (quien factura)
 
@@ -2398,7 +2588,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. GET /billing/simulated/my-invoices/{invoiceId}
+#### 31. GET /billing/simulated/my-invoices/{invoiceId}
 
 Una de mis facturas
 
@@ -2445,7 +2635,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. GET /billing/simulated/outbox
+#### 32. GET /billing/simulated/outbox
 
 Bandeja de correo simulada (sólo administración)
 
@@ -2494,7 +2684,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. GET /billing/simulated/status
+#### 33. GET /billing/simulated/status
 
 Estado fiscal simulado: emisores y credenciales sintéticas
 

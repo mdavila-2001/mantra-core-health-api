@@ -1325,10 +1325,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/integrations/dto/responses.dto.ts:238` |
-| `providerId` | `string` | Sí | formato uuid | — | Identificador asociado a provider. | `src/modules/integrations/dto/responses.dto.ts:242` |
-| `eventType` | `string` | Sí | — | — | Valor de event type mantenido por la instancia. | `src/modules/integrations/dto/responses.dto.ts:246` |
-| `state` | `string` | Sí | formato uuid | — | Concept id del estado | `src/modules/integrations/dto/responses.dto.ts:251` |
-| `updated` | `boolean` | Sí | — | — | true si se actualizó una suscripción existente | `src/modules/integrations/dto/responses.dto.ts:258` |
+| `integrationContractId` | `string` | Sí | formato uuid | — | Identificador asociado a integration contract. | sin fuente |
+| `status` | `string` | Sí | formato uuid | — | Concepto de estado de la suscripción | sin fuente |
 
 ### Respuestas posibles
 

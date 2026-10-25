@@ -2539,7 +2539,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamOnboardingDraftsController.deleteDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:55`
+- **Implementación:** `IamOnboardingDraftsController.deleteDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:103`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2549,14 +2549,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.deleteDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:55). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.deleteDraft`. No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres..
+`DELETE /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.deleteDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:103). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.deleteDraft`. No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:55` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:103` |
+| CABECERA | x-onboarding-draft-secret (opcional) | `contrato (parameters)` |
+| RATE_LIMIT | Límite propio: Throttle({ default: { limit: 60, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:103` |
 
 ### Tablas que afecta
 
@@ -2568,6 +2569,7 @@ No toca tablas relacionales: El borrador de alta vive sólo en la memoria del pr
 |---|---|---|---|---|
 | `formType` | path | Sí | `string` | — |
 | `draftId` | path | Sí | `string` | — |
+| `x-onboarding-draft-secret` | header | No | `string` | Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea. |
 
 ### Cuerpo
 
@@ -2591,7 +2593,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:46` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:118` |
 
 ### Flujos
 
@@ -2606,7 +2608,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamOnboardingDraftsController.getDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:23`
+- **Implementación:** `IamOnboardingDraftsController.getDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:47`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2616,14 +2618,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.getDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:23). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.getDraft`. No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres..
+`GET /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.getDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:47). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.getDraft`. No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:23` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:47` |
+| CABECERA | x-onboarding-draft-secret (opcional) | `contrato (parameters)` |
+| RATE_LIMIT | Límite propio: Throttle({ default: { limit: 120, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:47` |
 
 ### Tablas que afecta
 
@@ -2635,12 +2638,13 @@ No toca tablas relacionales: El borrador de alta vive sólo en la memoria del pr
 |---|---|---|---|---|
 | `formType` | path | Sí | `string` | — |
 | `draftId` | path | Sí | `string` | — |
+| `x-onboarding-draft-secret` | header | No | `string` | Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea. |
 
 ### Cuerpo
 
 La operación no recibe cuerpo.
 
-### Respuesta — `OnboardingDraftPayload | null`
+### Respuesta — `OnboardingDraftPayload`
 
 _No se identificó un DTO de respuesta con campos._
 
@@ -2658,7 +2662,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:36` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:78` |
 
 ### Flujos
 
@@ -2673,7 +2677,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamOnboardingDraftsController.saveDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:37`
+- **Implementación:** `IamOnboardingDraftsController.saveDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2683,14 +2687,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.saveDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:37). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.saveDraft`. No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres..
+`PUT /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.saveDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.saveDraft`. No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:37` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66` |
+| CABECERA | x-onboarding-draft-secret (opcional) | `contrato (parameters)` |
+| RATE_LIMIT | Límite propio: Throttle({ default: { limit: 60, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66` |
 
 ### Tablas que afecta
 
@@ -2702,12 +2707,13 @@ No toca tablas relacionales: El borrador de alta vive sólo en la memoria del pr
 |---|---|---|---|---|
 | `formType` | path | Sí | `string` | — |
 | `draftId` | path | Sí | `string` | — |
+| `x-onboarding-draft-secret` | header | No | `string` | Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea. |
 
 ### Cuerpo
 
 La operación no recibe cuerpo.
 
-### Respuesta — `{ ok: boolean; savedAt: string }` · HTTP `HttpStatus.OK`
+### Respuesta — `SaveOnboardingDraftResult` · HTTP `HttpStatus.OK`
 
 _No se identificó un DTO de respuesta con campos._
 
@@ -2718,6 +2724,7 @@ _No se identificó un DTO de respuesta con campos._
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.BAD_REQUEST}; DomainException: {HttpStatus.PAYLOAD_TOO_LARGE}; DomainException: {HttpStatus.TOO_MANY_REQUESTS}; DraftStoreFullError: {retryAfterSeconds} |
 
 El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
@@ -2725,7 +2732,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:29` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:61` |
 
 ### Flujos
 
@@ -3545,7 +3552,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No tiene acceso a los dispositivos de esta cuenta |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 

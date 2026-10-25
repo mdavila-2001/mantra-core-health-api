@@ -1,4 +1,8 @@
-import { Injectable, type OnApplicationBootstrap } from '@nestjs/common';
+import {
+  Injectable,
+  Optional,
+  type OnApplicationBootstrap,
+} from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { AuthzClinicalRolesSeedService } from './authz-clinical-roles-seed.service';
 import { AuthzPlatformPermissionsSeedService } from './authz-platform-permissions-seed.service';
@@ -29,6 +33,7 @@ import { PracticeDefaultServicesSeedService } from './practice-default-services-
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
 import { isCoreSeedFailureFatal, loadSeedBootEnv } from './seed-boot.env';
+import { SeedCoreState } from './seed-core.state';
 
 /** Resultado de un paso de la cadena, ya medido. */
 export interface SeedStepResult {
@@ -169,6 +174,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param qaFlows - Suites de `qa_lab` generadas desde el catálogo de flujos,
    *   opt-in por `SEED_QA_FLOWS`.
    * @param logger - Logger estructurado del arranque.
+   * @param coreState - Dónde queda registrado qué paso núcleo falló, para que
+   *   `/readiness` lo vea (SEED-01); opcional para quien arma el orquestador a mano.
    */
   constructor(
     private readonly terminology: TerminologySeedService,
@@ -200,6 +207,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly directoryNetworks: DirectoryNetworksSeedService,
     private readonly qaFlows: QaFlowsSeedService,
     private readonly logger: PinoLogger,
+    @Optional() private readonly coreState?: SeedCoreState,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
     const environment = loadSeedBootEnv();
@@ -605,6 +613,9 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     coreFailed: readonly string[] = [],
   ): SeedRunSummary {
     const failed = steps.filter((step) => step.failed).length;
+    // SEED-01: la readiness lee esto; un fallo núcleo tolerado fuera de producción
+    // no puede quedar invisible para ella.
+    this.coreState?.record(coreFailed);
     const summary: SeedRunSummary = {
       ok: steps.length - failed,
       failed,

@@ -2,17 +2,17 @@
 
 # Inventario de endpoints
 
-Se inventarían **1550 operaciones HTTP** en **71 módulos**: 1541 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
+Se inventarían **1552 operaciones HTTP** en **71 módulos**: 1543 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1488
-- Riesgo ALTO 186 · MEDIO 875 · BAJO 489
-- Mencionadas por al menos una prueba: 888
+- Con al menos una tabla identificada: 1491
+- Riesgo ALTO 182 · MEDIO 879 · BAJO 491
+- Mencionadas por al menos una prueba: 889
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
 | Módulo | Operaciones | Riesgo alto | Documento |
 |---|---|---|---|
-| `accounting` | 45 | 0 | [accounting.md](accounting.md) |
+| `accounting` | 46 | 0 | [accounting.md](accounting.md) |
 | `ads` | 18 | 0 | [ads.md](ads.md) |
 | `app` | 6 | 0 | [app.md](app.md) |
 | `audio_assets` | 10 | 2 | [audio_assets.md](audio_assets.md) |
@@ -20,11 +20,11 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `auth_providers` | 12 | 1 | [auth_providers.md](auth_providers.md) |
 | `authz` | 32 | 0 | [authz.md](authz.md) |
 | `automation` | 17 | 0 | [automation.md](automation.md) |
-| `billing` | 34 | 5 | [billing.md](billing.md) |
+| `billing` | 35 | 5 | [billing.md](billing.md) |
 | `chart` | 23 | 3 | [chart.md](chart.md) |
 | `clinical` | 41 | 1 | [clinical.md](clinical.md) |
 | `clinical_ext` | 27 | 2 | [clinical_ext.md](clinical_ext.md) |
-| `common` | 19 | 10 | [common.md](common.md) |
+| `common` | 19 | 6 | [common.md](common.md) |
 | `community` | 102 | 29 | [community.md](community.md) |
 | `consent` | 22 | 0 | [consent.md](consent.md) |
 | `content_packs` | 2 | 1 | [content_packs.md](content_packs.md) |

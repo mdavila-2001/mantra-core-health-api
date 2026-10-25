@@ -2,9 +2,9 @@
 
 # Inventario de flujos
 
-**73 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 71 de módulo), **12 máquinas de estado** y **1550 árboles de decisión**.
+**73 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 71 de módulo), **12 máquinas de estado** y **1552 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1392 · sin ellas: 158
+- Operaciones con decisiones propias: 1397 · sin ellas: 155
 - Operaciones sin proceso asignado: 0
 - Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 31 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
 
@@ -12,7 +12,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 
 | Módulo | Procesos | Operaciones | Máquinas | Documento |
 |---|---|---|---|---|
-| `accounting` | 1 | 45 | 1 | [accounting.md](accounting.md) |
+| `accounting` | 1 | 46 | 1 | [accounting.md](accounting.md) |
 | `ads` | 1 | 18 | 0 | [ads.md](ads.md) |
 | `app` | 1 | 6 | 0 | [app.md](app.md) |
 | `audio_assets` | 1 | 10 | 0 | [audio_assets.md](audio_assets.md) |
@@ -20,7 +20,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `auth_providers` | 1 | 12 | 0 | [auth_providers.md](auth_providers.md) |
 | `authz` | 2 | 32 | 0 | [authz.md](authz.md) |
 | `automation` | 1 | 17 | 0 | [automation.md](automation.md) |
-| `billing` | 1 | 34 | 0 | [billing.md](billing.md) |
+| `billing` | 1 | 35 | 0 | [billing.md](billing.md) |
 | `chart` | 1 | 23 | 0 | [chart.md](chart.md) |
 | `clinical` | 1 | 41 | 1 | [clinical.md](clinical.md) |
 | `clinical_ext` | 1 | 27 | 0 | [clinical_ext.md](clinical_ext.md) |

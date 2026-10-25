@@ -485,8 +485,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `procedures_perioperative.pacu_stays` | LEE | LEE | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopIntraopService.loadPacuStayInScope → PeriopIntraopRepository.findPacuStayById | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:867` |
 | `procedures_perioperative.postoperative_followups` | ESCRIBE | CREA | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopIntraopRepository.createFollowup | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:1056` |
 | `procedures_perioperative.postoperative_orders` | ESCRIBE | CREA | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopIntraopRepository.createPostoperativeOrder | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:1002` |
-| `procedures_perioperative.procedure_case_locations` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu | `src/modules/procedures_perioperative/services/periop-intraop.service.ts:857` |
-| `procedures_perioperative.procedure_case_locations` | LEE | LEE | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopCasesRepository.findOpenLocation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:672` |
+| `procedures_perioperative.procedure_case_locations` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu | `src/modules/procedures_perioperative/services/periop-intraop.service.ts:869` |
+| `procedures_perioperative.procedure_case_locations` | LEE | LEE | DIRECTA | PeriopController.dischargeFromPacu → PeriopIntraopService.dischargeFromPacu → PeriopCasesRepository.findOpenLocation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:699` |
 
 ### Parámetros
 
@@ -609,7 +609,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.listCases → PeriopCasesService.listCases → PeriopCasesRepository.findCases | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:280` |
+| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.listCases → PeriopCasesService.listCases → PeriopCasesRepository.findCases | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:307` |
 
 ### Parámetros
 
@@ -698,12 +698,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:725` |
-| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:468` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
-| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createTeamMember | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:601` |
-| `procedures_perioperative.procedure_cases` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:153` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.findOverlappingCases | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:372` |
+| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:752` |
+| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:495` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
+| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createTeamMember | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:628` |
+| `procedures_perioperative.procedure_cases` | ESCRIBE | CREA | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.createCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:180` |
+| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.scheduleCase → PeriopCasesService.scheduleCase → PeriopCasesRepository.findOverlappingCases | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:399` |
 
 ### Cuerpo — DTO `ScheduleCaseDto` · `application/json`
 
@@ -851,10 +851,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `procedures_perioperative.operative_steps` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopIntraopRepository.findStepsByCase | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:239` |
 | `procedures_perioperative.preoperative_assessments` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopPreopRepository.findAssessmentByCase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:178` |
 | `procedures_perioperative.preoperative_orders` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopPreopRepository.findOrdersByCase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:295` |
-| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:562` |
-| `procedures_perioperative.procedure_case_milestones` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findMilestonesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:343` |
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findCaseById | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:191` |
+| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:589` |
+| `procedures_perioperative.procedure_case_milestones` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findMilestonesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:370` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
+| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesRepository.findCaseById | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:218` |
 | `procedures_perioperative.procedure_implants` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopIntraopRepository.findImplantsByCase | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:724` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | PeriopController.getCase → PeriopCasesService.getCaseDetail → PeriopCasesService.assertCanReadCaseDetail → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
@@ -1021,10 +1021,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
-| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopCasesService.caseHasBlockingDependencies → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:562` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopCasesService.caseHasBlockingDependencies → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:589` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
 | `procedures_perioperative.procedure_case_team_members` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:97` |
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopCasesService.caseHasBlockingDependencies → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopCasesService.caseHasBlockingDependencies → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
 | `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.updateCase → PeriopCasesService.updateCase → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:115` |
 
 ### Eventos y trabajos
@@ -1142,10 +1142,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|---|---|---|
 | `procedures_perioperative.anesthesia_events` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopPreopRepository.createAnesthesiaEvent | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:651` |
 | `procedures_perioperative.anesthesia_plans` | LEE | LEE | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopPreopRepository.findAnesthesiaPlanByCase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:551` |
-| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:725` |
-| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:468` |
-| `procedures_perioperative.procedure_case_milestones` | LEE | LEE | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.findMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:497` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:752` |
+| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:495` |
+| `procedures_perioperative.procedure_case_milestones` | LEE | LEE | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.findMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:524` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.recordAnesthesiaEvent → PeriopPreopService.recordAnesthesiaEvent → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
 
 ### Parámetros
 
@@ -1476,9 +1476,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:725` |
-| `procedures_perioperative.procedure_cancellations` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createCancellation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:789` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:752` |
+| `procedures_perioperative.procedure_cancellations` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createCancellation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:816` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.cancelCase → PeriopCasesService.cancelCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
 
 ### Parámetros
 
@@ -1590,9 +1590,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:725` |
-| `procedures_perioperative.procedure_charge_items` | ESCRIBE | CREA | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.createChargeItem | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:820` |
-| `procedures_perioperative.procedure_charge_items` | LEE | LEE | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.findChargeItemsForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:856` |
+| `procedures_perioperative.operating_room_utilization_events` | ESCRIBE | CREA | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.createUtilizationEvent | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:752` |
+| `procedures_perioperative.procedure_charge_items` | ESCRIBE | CREA | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.createChargeItem | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:847` |
+| `procedures_perioperative.procedure_charge_items` | LEE | LEE | DIRECTA | PeriopController.postCharges → PeriopCasesService.postCharges → PeriopCasesRepository.findChargeItemsForUpdate | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:883` |
 
 ### Parámetros
 
@@ -1722,15 +1722,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | PeriopController.confirmCase → PeriopCasesService.confirmCase → ProfessionalCredentialsRepository.hasCurrentCredential | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:155` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `periop.case.confirmation_blocked` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:596` |
+| Evento de dominio | `periop.case.confirmation_blocked` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:607` |
 
 ### Parámetros
 
@@ -1819,8 +1819,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `clinical.conditions` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → ConditionsRepository.findActiveByCode | `src/modules/clinical/repositories/conditions.repository.ts:137` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → ConditionsService.assertEncounterBelongsToPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
 | `iam.sessions` | LEE | LEE | POR_SQL | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesService.ensureCondition → ConditionsService.create → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
-| `procedures_perioperative.procedure_case_diagnoses` | ESCRIBE | CREA | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesRepository.createDiagnosis | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:537` |
-| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:562` |
+| `procedures_perioperative.procedure_case_diagnoses` | ESCRIBE | CREA | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesRepository.createDiagnosis | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:564` |
+| `procedures_perioperative.procedure_case_diagnoses` | LEE | LEE | DIRECTA | PeriopController.addDiagnoses → PeriopCasesService.addDiagnoses → PeriopCasesRepository.findDiagnosesByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:589` |
 
 ### Parámetros
 
@@ -2452,10 +2452,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.procedures` | LEE | LEE | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → ReceivedServicesProjector.projectCompletedCase → ReceivedServicesRepository.isProcedureOf | `src/modules/clinical/repositories/received-services.repository.ts:177` |
 | `clinical.received_services` | ESCRIBE | CREA | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → ReceivedServicesProjector.projectCompletedCase → ReceivedServicesRepository.upsert | `src/modules/clinical/repositories/received-services.repository.ts:146` |
 | `clinical.received_services` | LEE | LEE | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → ReceivedServicesProjector.projectCompletedCase → ReceivedServicesRepository.upsert → ReceivedServicesRepository.findBySourceProcedure | `src/modules/clinical/repositories/received-services.repository.ts:54` |
-| `procedures_perioperative.operative_reports` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.signReport → PeriopIntraopService.signReport | `src/modules/procedures_perioperative/services/periop-intraop.service.ts:636` |
+| `procedures_perioperative.operative_reports` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.signReport → PeriopIntraopService.signReport | `src/modules/procedures_perioperative/services/periop-intraop.service.ts:648` |
 | `procedures_perioperative.operative_reports` | LEE | LEE | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → PeriopIntraopRepository.findReportForUpdate | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:655` |
-| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:468` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:495` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.signReport → PeriopIntraopService.signReport → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
 
 ### Parámetros
 
@@ -2674,7 +2674,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 |---|---|---|---|---|---|
 | `procedures_perioperative.pacu_stays` | ESCRIBE | CREA | DIRECTA | PeriopController.admitToPacu → PeriopIntraopService.admitToPacu → PeriopIntraopRepository.createPacuStay | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:844` |
 | `procedures_perioperative.pacu_stays` | LEE | LEE | DIRECTA | PeriopController.admitToPacu → PeriopIntraopService.admitToPacu → PeriopIntraopRepository.findPacuStayByCase | `src/modules/procedures_perioperative/repositories/periop-intraop.repository.ts:899` |
-| `procedures_perioperative.procedure_case_locations` | ESCRIBE | CREA | DIRECTA | PeriopController.admitToPacu → PeriopIntraopService.admitToPacu → PeriopCasesRepository.createLocation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:653` |
+| `procedures_perioperative.procedure_case_locations` | ESCRIBE | CREA | DIRECTA | PeriopController.admitToPacu → PeriopIntraopService.admitToPacu → PeriopCasesRepository.createLocation | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:680` |
 
 ### Parámetros
 
@@ -2783,10 +2783,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | `procedures_perioperative.preoperative_assessments` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopPreopRepository.createAssessment | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:144` |
 | `procedures_perioperative.preoperative_assessments` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopPreopRepository.findAssessmentByCase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:178` |
 | `procedures_perioperative.preoperative_risk_scores` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopPreopRepository.createRiskScore | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:215` |
-| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:468` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:495` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
 | `procedures_perioperative.procedure_case_team_members` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:97` |
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
 | `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.createAssessment → PeriopPreopService.createAssessment → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:115` |
 
 ### Eventos y trabajos
@@ -3065,7 +3065,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `procedures_perioperative.preoperative_orders` | LEE | LEE | DIRECTA | PeriopController.verifyOrders → PeriopPreopService.verifyOrders → PeriopPreopRepository.findOrdersByCaseForUpdate | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:310` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.verifyOrders → PeriopPreopService.verifyOrders → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.verifyOrders → PeriopPreopService.verifyOrders → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
 
 ### Parámetros
 
@@ -3174,7 +3174,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/procedu
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:468` |
+| `procedures_perioperative.procedure_case_milestones` | ESCRIBE | CREA | DIRECTA | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase → PeriopCasesRepository.createMilestone | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:495` |
 | `procedures_perioperative.surgical_safety_checklists` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase | `src/modules/procedures_perioperative/services/periop-preop.service.ts:609` |
 | `procedures_perioperative.surgical_safety_checklists` | LEE | LEE | DIRECTA | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase → PeriopPreopRepository.findChecklistForUpdate | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:377` |
 | `procedures_perioperative.surgical_safety_items` | LEE | LEE | DIRECTA | PeriopController.submitChecklistPhase → PeriopPreopService.submitChecklistPhase → PeriopPreopRepository.findItemsByPhase | `src/modules/procedures_perioperative/repositories/periop-preop.repository.ts:406` |
@@ -3420,8 +3420,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.listTeamMembers → PeriopCasesService.listTeamMembers → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
-| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.listTeamMembers → PeriopCasesService.listTeamMembers → PeriopCasesRepository.findCaseById | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:191` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.listTeamMembers → PeriopCasesService.listTeamMembers → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
+| `procedures_perioperative.procedure_cases` | LEE | LEE | DIRECTA | PeriopController.listTeamMembers → PeriopCasesService.listTeamMembers → PeriopCasesRepository.findCaseById | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:218` |
 
 ### Parámetros
 
@@ -3502,10 +3502,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
-| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:410` |
+| `procedures_perioperative.procedure_case_status_history` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate → PeriopCasesRepository.createStatusHistory | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:437` |
 | `procedures_perioperative.procedure_case_team_members` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:97` |
-| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopCasesRepository.createTeamMember | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:601` |
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
+| `procedures_perioperative.procedure_case_team_members` | ESCRIBE | CREA | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopCasesRepository.createTeamMember | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:628` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
 | `procedures_perioperative.procedure_cases` | ESCRIBE | ACTUALIZA | POR_TIPO | PeriopController.assignTeamMember → PeriopCasesService.assignTeamMember → PeriopReacceptanceService.invalidateBeforeExecution → PeriopReacceptanceService.invalidate | `src/modules/procedures_perioperative/services/periop-reacceptance.service.ts:115` |
 
 ### Eventos y trabajos
@@ -3615,7 +3615,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.acceptTeamMember → PeriopCasesService.acceptTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.acceptTeamMember → PeriopCasesService.acceptTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | PeriopController.acceptTeamMember → PeriopCasesService.acceptTeamMember → ProfessionalCredentialsRepository.hasCurrentCredential | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:155` |
 
 ### Parámetros
@@ -3703,13 +3703,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
-| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:620` |
+| `procedures_perioperative.procedure_case_team_members` | LEE | LEE | DIRECTA | PeriopController.respondTeamMember → PeriopCasesService.respondTeamMember → PeriopCasesRepository.findTeamByCase | `src/modules/procedures_perioperative/repositories/periop-cases.repository.ts:647` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `periop.case.team_participation_declined` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:1442` |
+| Evento de dominio | `periop.case.team_participation_declined` | `src/modules/procedures_perioperative/services/periop-cases.service.ts:1453` |
 
 ### Parámetros
 

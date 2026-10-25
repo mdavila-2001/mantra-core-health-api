@@ -1454,7 +1454,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | POR_SQL | AdminCatalogController.permissionDrift → PermissionDriftService.report → PermissionDriftService.databaseRoleCodes | `src/modules/data_catalog/services/permission-drift.service.ts:80` |
+| `authz.roles` | LEE | LEE | POR_SQL | AdminCatalogController.permissionDrift → PermissionDriftService.report → PermissionDriftService.databaseRoleCodes | `src/modules/data_catalog/services/permission-drift.service.ts:92` |
 
 ### Cuerpo
 

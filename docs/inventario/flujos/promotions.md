@@ -737,39 +737,48 @@ flowchart TD
   n30 --> n31
   n32(["↩ (relanza el error capturado)"]):::error
   n31 -->|"sí"| n32
-  n33["Llama a PromotionsLoyaltyRepository.findLedgerEntryByKey"]:::llamada
+  n33{"!this.mayActOnAnyMembership(actor, scope)"}:::decision
   n31 -->|"no"| n33
-  n34[("LEE promotions.points_ledger_entries")]:::efecto
-  n33 --> n34
-  n35{"previous"}:::decision
+  n34["Llama a PromotionsLoyaltyService.assertOwnMembership"]:::llamada
+  n33 -->|"sí"| n34
+  n35{"!owner"}:::decision
   n34 --> n35
-  n36["Llama a PromotionsLoyaltyService.replayLedgerEntry"]:::llamada
+  n36(["↩ (relanza el error capturado)"]):::error
   n35 -->|"sí"| n36
-  n37{"previous.loyaltyMembershipId !== membership.id"}:::decision
-  n36 --> n37
-  n38(["409 CONFLICT La clave de idempotencia pertenece a otro movimiento"]):::error
-  n37 -->|"sí"| n38
-  n39{"membership.statusConceptId !== CONCEPTS.MEMBERSHIP_ACTIVE"}:::decision
-  n37 -->|"no"| n39
-  n35 -->|"no"| n39
-  n40(["422 PRECONDITION_FAILED La membresía no está activa"]):::error
+  n37["Llama a PromotionsLoyaltyRepository.findLedgerEntryByKey"]:::llamada
+  n35 -->|"no"| n37
+  n33 -->|"no"| n37
+  n38[("LEE promotions.points_ledger_entries")]:::efecto
+  n37 --> n38
+  n39{"previous"}:::decision
+  n38 --> n39
+  n40["Llama a PromotionsLoyaltyService.replayLedgerEntry"]:::llamada
   n39 -->|"sí"| n40
-  n41{"balance ‹ Number(dto.points)"}:::decision
-  n39 -->|"no"| n41
-  n42(["422 PRECONDITION_FAILED Saldo de puntos insuficiente"]):::error
+  n41{"previous.loyaltyMembershipId !== membership.id"}:::decision
+  n40 --> n41
+  n42(["409 CONFLICT La clave de idempotencia pertenece a otro movimiento"]):::error
   n41 -->|"sí"| n42
-  n43["Llama a PromotionsLoyaltyRepository.createLedgerEntry"]:::llamada
+  n43{"membership.statusConceptId !== CONCEPTS.MEMBERSHIP_ACTIVE"}:::decision
   n41 -->|"no"| n43
-  n44[("CREA promotions.points_ledger_entries")]:::efecto
-  n43 --> n44
-  n45["Llama a LoyaltyController.requireTenant"]:::llamada
-  n44 --> n45
-  n46{"!tenantId"}:::decision
-  n45 --> n46
-  n47(["422 PRECONDITION_FAILED Se requiere X-Tenant-Id para operar sobre la membresía de lealtad"]):::error
-  n46 -->|"sí"| n47
-  n48(("201 Responde con éxito")):::ok
-  n46 -->|"no"| n48
+  n39 -->|"no"| n43
+  n44(["422 PRECONDITION_FAILED La membresía no está activa"]):::error
+  n43 -->|"sí"| n44
+  n45{"balance ‹ Number(dto.points)"}:::decision
+  n43 -->|"no"| n45
+  n46(["422 PRECONDITION_FAILED Saldo de puntos insuficiente"]):::error
+  n45 -->|"sí"| n46
+  n47["Llama a PromotionsLoyaltyRepository.createLedgerEntry"]:::llamada
+  n45 -->|"no"| n47
+  n48[("CREA promotions.points_ledger_entries")]:::efecto
+  n47 --> n48
+  n49["Llama a LoyaltyController.requireTenant"]:::llamada
+  n48 --> n49
+  n50{"!tenantId"}:::decision
+  n49 --> n50
+  n51(["422 PRECONDITION_FAILED Se requiere X-Tenant-Id para operar sobre la membresía de lealtad"]):::error
+  n50 -->|"sí"| n51
+  n52(("201 Responde con éxito")):::ok
+  n50 -->|"no"| n52
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -947,33 +956,42 @@ flowchart TD
   n15 --> n16
   n17(["↩ (relanza el error capturado)"]):::error
   n16 -->|"sí"| n17
-  n18["Llama a PromotionsLoyaltyRepository.findLedgerEntryByKey"]:::llamada
+  n18{"!this.mayActOnAnyMembership(actor, scope)"}:::decision
   n16 -->|"no"| n18
-  n19[("LEE promotions.points_ledger_entries")]:::efecto
-  n18 --> n19
-  n20{"previous"}:::decision
+  n19["Llama a PromotionsLoyaltyService.assertOwnMembership"]:::llamada
+  n18 -->|"sí"| n19
+  n20{"!owner"}:::decision
   n19 --> n20
-  n21["Llama a PromotionsLoyaltyService.replayLedgerEntry"]:::llamada
+  n21(["↩ (relanza el error capturado)"]):::error
   n20 -->|"sí"| n21
-  n22{"previous.loyaltyMembershipId !== membership.id"}:::decision
-  n21 --> n22
-  n23(["409 CONFLICT La clave de idempotencia pertenece a otro movimiento"]):::error
-  n22 -->|"sí"| n23
-  n24{"membership.statusConceptId !== CONCEPTS.MEMBERSHIP_ACTIVE"}:::decision
-  n22 -->|"no"| n24
-  n20 -->|"no"| n24
-  n25(["422 PRECONDITION_FAILED La membresía no está activa"]):::error
+  n22["Llama a PromotionsLoyaltyRepository.findLedgerEntryByKey"]:::llamada
+  n20 -->|"no"| n22
+  n18 -->|"no"| n22
+  n23[("LEE promotions.points_ledger_entries")]:::efecto
+  n22 --> n23
+  n24{"previous"}:::decision
+  n23 --> n24
+  n25["Llama a PromotionsLoyaltyService.replayLedgerEntry"]:::llamada
   n24 -->|"sí"| n25
-  n26{"balance ‹ Number(dto.points)"}:::decision
-  n24 -->|"no"| n26
-  n27(["422 PRECONDITION_FAILED Saldo de puntos insuficiente"]):::error
+  n26{"previous.loyaltyMembershipId !== membership.id"}:::decision
+  n25 --> n26
+  n27(["409 CONFLICT La clave de idempotencia pertenece a otro movimiento"]):::error
   n26 -->|"sí"| n27
-  n28["Llama a PromotionsLoyaltyRepository.createLedgerEntry"]:::llamada
+  n28{"membership.statusConceptId !== CONCEPTS.MEMBERSHIP_ACTIVE"}:::decision
   n26 -->|"no"| n28
-  n29[("CREA promotions.points_ledger_entries")]:::efecto
-  n28 --> n29
-  n30(("201 Responde con éxito")):::ok
-  n29 --> n30
+  n24 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED La membresía no está activa"]):::error
+  n28 -->|"sí"| n29
+  n30{"balance ‹ Number(dto.points)"}:::decision
+  n28 -->|"no"| n30
+  n31(["422 PRECONDITION_FAILED Saldo de puntos insuficiente"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a PromotionsLoyaltyRepository.createLedgerEntry"]:::llamada
+  n30 -->|"no"| n32
+  n33[("CREA promotions.points_ledger_entries")]:::efecto
+  n32 --> n33
+  n34(("201 Responde con éxito")):::ok
+  n33 --> n34
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1187,37 +1205,52 @@ flowchart TD
   n5 --> n6
   n7[("LEE promotions.loyalty_programs")]:::efecto
   n6 --> n7
-  n8{"program.stateConceptId !== CONCEPTS.LOYALTY_ACTIVE"}:::decision
+  n8["Llama a PromotionsLoyaltyService.assertOwnMemberRef"]:::llamada
   n7 --> n8
-  n9(["422 PRECONDITION_FAILED El programa no está activo"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a PromotionsLoyaltyRepository.findMembershipByMember"]:::llamada
-  n8 -->|"no"| n10
-  n11[("LEE promotions.loyalty_memberships")]:::efecto
-  n10 --> n11
-  n12["Llama a PromotionsLoyaltyRepository.findTiersByProgram"]:::llamada
-  n11 --> n12
-  n13[("LEE promotions.loyalty_tiers")]:::efecto
+  n9{"!owner"}:::decision
+  n8 --> n9
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11{"!staff"}:::decision
+  n9 -->|"no"| n11
+  n12["Llama a PromotionsLoyaltyService.assertOwnMemberRef"]:::llamada
+  n11 -->|"sí"| n12
+  n13{"!owner"}:::decision
   n12 --> n13
-  n14{"tiers.length === 0"}:::decision
-  n13 --> n14
-  n15(["422 PRECONDITION_FAILED El programa no tiene niveles definidos"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a PromotionsLoyaltyRepository.createMembership"]:::llamada
-  n14 -->|"no"| n16
-  n17[("CREA promotions.loyalty_memberships")]:::efecto
-  n16 --> n17
-  n18{"dto.signupBonusPoints && Number(dto.signupBonusPoints) › 0"}:::decision
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15{"program.stateConceptId !== CONCEPTS.LOYALTY_ACTIVE"}:::decision
+  n13 -->|"no"| n15
+  n11 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED El programa no está activo"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PromotionsLoyaltyRepository.findMembershipByMember"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE promotions.loyalty_memberships")]:::efecto
   n17 --> n18
-  n19["Llama a PromotionsLoyaltyRepository.createLedgerEntry"]:::llamada
-  n18 -->|"sí"| n19
-  n20[("CREA promotions.points_ledger_entries")]:::efecto
+  n19["Llama a PromotionsLoyaltyRepository.findTiersByProgram"]:::llamada
+  n18 --> n19
+  n20[("LEE promotions.loyalty_tiers")]:::efecto
   n19 --> n20
-  n21[("ACTUALIZA promotions.loyalty_memberships · ACTUALIZA promotions.loyalty_memberships · ACTUALIZA promotions.lo…")]:::efecto
+  n21{"tiers.length === 0"}:::decision
   n20 --> n21
-  n22(("201 Responde con éxito")):::ok
-  n21 --> n22
-  n18 -->|"no"| n22
+  n22(["422 PRECONDITION_FAILED El programa no tiene niveles definidos"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a PromotionsLoyaltyRepository.createMembership"]:::llamada
+  n21 -->|"no"| n23
+  n24[("CREA promotions.loyalty_memberships")]:::efecto
+  n23 --> n24
+  n25{"signupBonusPoints && Number(signupBonusPoints) › 0"}:::decision
+  n24 --> n25
+  n26["Llama a PromotionsLoyaltyRepository.createLedgerEntry"]:::llamada
+  n25 -->|"sí"| n26
+  n27[("CREA promotions.points_ledger_entries")]:::efecto
+  n26 --> n27
+  n28[("ACTUALIZA promotions.loyalty_memberships · ACTUALIZA promotions.loyalty_memberships · ACTUALIZA promotions.lo…")]:::efecto
+  n27 --> n28
+  n29(("201 Responde con éxito")):::ok
+  n28 --> n29
+  n25 -->|"no"| n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

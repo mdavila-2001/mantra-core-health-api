@@ -7,15 +7,15 @@ Cada hallazgo sale de cruzar los datos del inventario. Ninguno corrige código: 
 | ID | Severidad | Hallazgo | Cuenta |
 |---|---|---|---|
 | [FLU-01](#flu-01) | ALTA | Operaciones sin proceso asignado | 0 |
-| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 146 |
+| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 142 |
 | [FLU-03](#flu-03) | ALTA | Ruta pública que escribe en la base | 17 |
 | [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 123 |
 | [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 13 |
-| [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 4 |
-| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1054 |
 | [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 9 |
 | [FLU-09](#flu-09) | BAJA | Máquinas de estado sin ninguna operación que las ejerza | 0 |
-| [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 107 |
+| [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 109 |
+
+_FLU-06 y FLU-07 no se calcularon: el repo del frontend no estaba disponible (defina FRONT_ROOT)._
 
 ## FLU-01
 
@@ -27,7 +27,7 @@ _Ninguno._
 
 ## FLU-02
 
-**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 146 caso(s).
+**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 142 caso(s).
 
 **Qué hacer:** Confirmar que la regla de acceso vive en el servicio o declarar los roles en el controlador. Hoy la API no las distingue de una sesión cualquiera.
 
@@ -46,16 +46,12 @@ _Ninguno._
 | PUT /clinical/me/medical-aspects | clinical | escribe y el controlador no declara roles | `src/modules/clinical/controllers/clinical-medical-aspects.controller.ts:53` |
 | POST /prescription-favorites | clinical_ext | escribe y el controlador no declara roles | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:57` |
 | DELETE /prescription-favorites/{id} | clinical_ext | escribe y el controlador no declara roles | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:73` |
-| POST /common/addresses | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-addresses.controller.ts:21` |
-| POST /common/contact-points | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-contact-points.controller.ts:33` |
-| POST /common/contact-points/{id}/verify | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-contact-points.controller.ts:49` |
 | POST /common/files | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-files.controller.ts:151` |
 | DELETE /common/files/{id} | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-files.controller.ts:228` |
 | POST /common/files/{id}/links | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-files.controller.ts:210` |
 | POST /common/files/{id}/versions | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-files.controller.ts:169` |
 | POST /common/files/{id}/versions/{vid}/derivatives | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-files.controller.ts:186` |
 | POST /common/files/upload | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-files.controller.ts:73` |
-| POST /common/identifiers | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-identifiers.controller.ts:21` |
 | DELETE /community/blocks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:301` |
 | POST /community/blocks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:248` |
 | DELETE /community/bookmarks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:286` |
@@ -360,230 +356,6 @@ _Ninguno._
 | tracking | — | 1 operaciones de riesgo ALTO, 0 pruebas de integración en el proceso | `src/modules/tracking/README.md` |
 | vector_rag | — | 1 operaciones de riesgo ALTO, 0 pruebas de integración en el proceso | `src/modules/vector_rag/README.md` |
 
-## FLU-06
-
-**Operaciones que el frontend llama y la API no tiene** — severidad ALTA — 4 caso(s).
-
-**Qué hacer:** Cada fila es una pantalla que hoy falla (404) o depende de un mock. Decidir: implementar en la API, o retirar del cliente. No se corrige aquí.
-
-| Dónde | Módulo | Detalle | Fuente |
-|---|---|---|---|
-| POST /accounting/journal-transactions/:transactionId/:action | — | cliente AccountingClient | `src/app/core/data-access/accounting/accounting.client.ts` |
-| GET /community/conversations/:conversationId | — | cliente CommunityClient | `src/app/core/data-access/community/community.client.ts` |
-| GET /public/profiles/f/:slug/branch-availability | — | cliente PublicCatalogClient | `src/app/core/data-access/public-catalog/public-catalog.client.ts` |
-| POST /scheduling/bookings/:bookingId/:accion | — | cliente SchedulingClient | `src/app/core/data-access/scheduling/scheduling.client.ts` |
-
-## FLU-07
-
-**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1054 caso(s).
-
-**Qué hacer:** Informativo: pueden ser internas (workers), de otros consumidores (móvil, integraciones) o deuda. Confirmar con el responsable antes de retirar nada.
-
-| Dónde | Módulo | Detalle | Fuente |
-|---|---|---|---|
-| POST /accounting/accounts | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/accrual-objects | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/assets/capitalize | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/exchange-rates | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/fiscal-years | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/journal-transactions/{id}/approve | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/journal-transactions/{id}/classify | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/journal-transactions/{id}/files | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/journal-transactions/{id}/post | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/journal-transactions/{id}/reverse | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/journal-transactions/{id}/submit-review | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/liabilities/{id}/payments | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/open-items | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/postings/determine-accounts | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/practitioner/liabilities/{id}/schedule | accounting | ningún cliente del frontend la declara | — |
-| POST /ads/ad-accounts/{id}/campaigns/launch | ads | ningún cliente del frontend la declara | — |
-| POST /ads/ad-accounts/{id}/experiments | ads | ningún cliente del frontend la declara | — |
-| POST /ads/ad-accounts/{id}/invoices/issue | ads | ningún cliente del frontend la declara | — |
-| POST /ads/ad-accounts/{id}/targeting | ads | ningún cliente del frontend la declara | — |
-| POST /ads/ad-sets/{id}/budget-schedules | ads | ningún cliente del frontend la declara | — |
-| POST /ads/ad-sets/{id}/identity | ads | ningún cliente del frontend la declara | — |
-| POST /ads/ads/{id}/review-events | ads | ningún cliente del frontend la declara | — |
-| POST /ads/automated-rules/{id}/evaluate | ads | ningún cliente del frontend la declara | — |
-| POST /ads/business-managers/{bmId}/ad-accounts | ads | ningún cliente del frontend la declara | — |
-| POST /ads/business-managers/{bmId}/partners | ads | ningún cliente del frontend la declara | — |
-| POST /ads/catalogs/{id}/feeds/{feedId}/run | ads | ningún cliente del frontend la declara | — |
-| POST /ads/datasets/{id}/events | ads | ningún cliente del frontend la declara | — |
-| POST /ads/event-data-policies | ads | ningún cliente del frontend la declara | — |
-| POST /ads/ingest/insights | ads | ningún cliente del frontend la declara | — |
-| POST /ads/lead-forms/{id}/submissions | ads | ningún cliente del frontend la declara | — |
-| POST /ads/offline-conversion-sets/upload | ads | ningún cliente del frontend la declara | — |
-| POST /ads/platform-connections | ads | ningún cliente del frontend la declara | — |
-| POST /ads/policy-violations/{id}/appeals | ads | ningún cliente del frontend la declara | — |
-| GET / | app | ningún cliente del frontend la declara | — |
-| GET /health | app | ningún cliente del frontend la declara | — |
-| GET /health/data-sources | app | ningún cliente del frontend la declara | — |
-| GET /health/data-sources/metrics | app | ningún cliente del frontend la declara | — |
-| GET /liveness | app | ningún cliente del frontend la declara | — |
-| GET /readiness | app | ningún cliente del frontend la declara | — |
-| GET /audio-assets/{assetId}/content | audio_assets | ningún cliente del frontend la declara | — |
-| POST /audio-assets/resolve | audio_assets | ningún cliente del frontend la declara | — |
-| POST /internal/audio-assets/{assetId}/deprecate | audio_assets | ningún cliente del frontend la declara | — |
-| POST /internal/audio-assets/{assetId}/generated | audio_assets | ningún cliente del frontend la declara | — |
-| POST /internal/audio-assets/{assetId}/generation-failed | audio_assets | ningún cliente del frontend la declara | — |
-| POST /internal/audio-assets/{assetId}/prepare-generation | audio_assets | ningún cliente del frontend la declara | — |
-| POST /internal/audio-assets/garbage-collect | audio_assets | ningún cliente del frontend la declara | — |
-| POST /internal/audio-assets/pregenerate | audio_assets | ningún cliente del frontend la declara | — |
-| GET /internal/audio-assets/status | audio_assets | ningún cliente del frontend la declara | — |
-| POST /internal/audio-assets/verify | audio_assets | ningún cliente del frontend la declara | — |
-| POST /audit/anomaly/scan | audit | ningún cliente del frontend la declara | — |
-| GET /audit/data-access | audit | ningún cliente del frontend la declara | — |
-| POST /audit/data-access | audit | ningún cliente del frontend la declara | — |
-| POST /audit/events | audit | ningún cliente del frontend la declara | — |
-| GET /audit/history/{entity}/{id} | audit | ningún cliente del frontend la declara | — |
-| POST /audit/integrity/verify | audit | ningún cliente del frontend la declara | — |
-| GET /audit/log | audit | ningún cliente del frontend la declara | — |
-| GET /audit/me/data-access | audit | ningún cliente del frontend la declara | — |
-| POST /audit/retention/apply | audit | ningún cliente del frontend la declara | — |
-| POST /audit/third-party-access | audit | ningún cliente del frontend la declara | — |
-| POST /compliance/audit-export | audit | ningún cliente del frontend la declara | — |
-| POST /moderation/decisions | audit | ningún cliente del frontend la declara | — |
-| POST /privacy/dsar | audit | ningún cliente del frontend la declara | — |
-| PATCH /privacy/dsar/{id} | audit | ningún cliente del frontend la declara | — |
-| POST /authz/care-relationships | authz | ningún cliente del frontend la declara | — |
-| POST /authz/care-relationships/{id}/revoke | authz | ningún cliente del frontend la declara | — |
-| DELETE /authz/clinical-access-grants/{grantId} | authz | ningún cliente del frontend la declara | — |
-| POST /authz/decisions/evaluate | authz | ningún cliente del frontend la declara | — |
-| GET /authz/internal-users | authz | ningún cliente del frontend la declara | — |
-| POST /authz/legal-representations | authz | ningún cliente del frontend la declara | — |
-| POST /authz/legal-representations/{id}/revoke | authz | ningún cliente del frontend la declara | — |
-| GET /authz/me/access | authz | ningún cliente del frontend la declara | — |
-| POST /authz/me/care-relationships/{id}/revoke | authz | ningún cliente del frontend la declara | — |
-| POST /authz/me/clinical-access-grants/{grantId}/revoke | authz | ningún cliente del frontend la declara | — |
-| POST /authz/patients/{patientProfileId}/break-the-glass | authz | ningún cliente del frontend la declara | — |
-| POST /authz/patients/{patientProfileId}/clinical-access-grants | authz | ningún cliente del frontend la declara | — |
-| POST /authz/pdp/cache/invalidate | authz | ningún cliente del frontend la declara | — |
-| POST /authz/permission-categories | authz | ningún cliente del frontend la declara | — |
-| GET /authz/permissions | authz | ningún cliente del frontend la declara | — |
-| POST /authz/permissions | authz | ningún cliente del frontend la declara | — |
-| POST /authz/resource-scope-grants | authz | ningún cliente del frontend la declara | — |
-| GET /authz/roles | authz | ningún cliente del frontend la declara | — |
-| POST /authz/roles | authz | ningún cliente del frontend la declara | — |
-| PUT /authz/roles/{roleId}/field-permissions | authz | ningún cliente del frontend la declara | — |
-| GET /authz/roles/{roleId}/permissions | authz | ningún cliente del frontend la declara | — |
-| PUT /authz/roles/{roleId}/permissions | authz | ningún cliente del frontend la declara | — |
-| POST /authz/tenants/{tenantId}/access-policies | authz | ningún cliente del frontend la declara | — |
-| POST /authz/users/{userId}/permission-grants | authz | ningún cliente del frontend la declara | — |
-| GET /authz/users/{userId}/role-assignments | authz | ningún cliente del frontend la declara | — |
-| POST /authz/users/{userId}/role-assignments | authz | ningún cliente del frontend la declara | — |
-| DELETE /authz/users/{userId}/role-assignments/{assignmentId} | authz | ningún cliente del frontend la declara | — |
-| POST /automation/agent-runs/{id}/approvals | automation | ningún cliente del frontend la declara | — |
-| POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute | automation | ningún cliente del frontend la declara | — |
-| POST /automation/agent-runs/{id}/steps | automation | ningún cliente del frontend la declara | — |
-| POST /automation/agents | automation | ningún cliente del frontend la declara | — |
-| POST /automation/agents/{id}/guardrails | automation | ningún cliente del frontend la declara | — |
-| POST /automation/agents/{id}/memory | automation | ningún cliente del frontend la declara | — |
-| POST /automation/agents/{id}/versions/{versionId}/tool-bindings | automation | ningún cliente del frontend la declara | — |
-| POST /automation/agents/{id}/versions/publish | automation | ningún cliente del frontend la declara | — |
-| POST /automation/approvals/{id}/decide | automation | ningún cliente del frontend la declara | — |
-| POST /automation/guardrails | automation | ningún cliente del frontend la declara | — |
-| POST /automation/runs/{workflowRunId}/agent-runs | automation | ningún cliente del frontend la declara | — |
-| POST /automation/runs/{workflowRunId}/finalize | automation | ningún cliente del frontend la declara | — |
-| POST /automation/tools | automation | ningún cliente del frontend la declara | — |
-| POST /automation/triggers | automation | ningún cliente del frontend la declara | — |
-| POST /automation/triggers/calendar/tick | automation | ningún cliente del frontend la declara | — |
-| POST /automation/workflows | automation | ningún cliente del frontend la declara | — |
-| POST /automation/workflows/{id}/runs | automation | ningún cliente del frontend la declara | — |
-| POST /billing/bills | billing | ningún cliente del frontend la declara | — |
-| POST /billing/documents/{id}:post-to-ledger | billing | ningún cliente del frontend la declara | — |
-| POST /billing/dunning-runs:execute | billing | ningún cliente del frontend la declara | — |
-| POST /billing/internal/dunning-runs/run-due | billing | ningún cliente del frontend la declara | — |
-| GET /billing/invoices | billing | ningún cliente del frontend la declara | — |
-| POST /billing/invoices:issue-from-encounter | billing | ningún cliente del frontend la declara | — |
-| GET /billing/invoices/{id} | billing | ningún cliente del frontend la declara | — |
-| POST /billing/invoices/{id}:credit-note | billing | ningún cliente del frontend la declara | — |
-| POST /billing/kpi-snapshots:compute | billing | ningún cliente del frontend la declara | — |
-| GET /billing/patient-statements | billing | ningún cliente del frontend la declara | — |
-| POST /billing/patient-statements:generate | billing | ningún cliente del frontend la declara | — |
-| POST /billing/payment-plans | billing | ningún cliente del frontend la declara | — |
-| POST /billing/payments-made:execute | billing | ningún cliente del frontend la declara | — |
-| POST /billing/payments-received:apply | billing | ningún cliente del frontend la declara | — |
-| POST /billing/reconciliation:clear | billing | ningún cliente del frontend la declara | — |
-| POST /billing/reimbursements:link | billing | ningún cliente del frontend la declara | — |
-| GET /billing/simulated/catalogs | billing | ningún cliente del frontend la declara | — |
-| GET /billing/simulated/charges | billing | ningún cliente del frontend la declara | — |
-| POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | billing | ningún cliente del frontend la declara | — |
-| POST /billing/simulated/charges/{chargeId}/invoices | billing | ningún cliente del frontend la declara | — |
-| POST /billing/simulated/charges/{chargeId}/payment | billing | ningún cliente del frontend la declara | — |
-| GET /billing/simulated/invoices/{invoiceId} | billing | ningún cliente del frontend la declara | — |
-| POST /billing/simulated/invoices/{invoiceId}/annulment | billing | ningún cliente del frontend la declara | — |
-| POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | billing | ningún cliente del frontend la declara | — |
-| POST /billing/simulated/invoices/{invoiceId}/email | billing | ningún cliente del frontend la declara | — |
-| GET /billing/simulated/my-invoices | billing | ningún cliente del frontend la declara | — |
-| GET /billing/simulated/my-invoices/{invoiceId} | billing | ningún cliente del frontend la declara | — |
-| GET /billing/simulated/outbox | billing | ningún cliente del frontend la declara | — |
-| GET /billing/simulated/status | billing | ningún cliente del frontend la declara | — |
-| PATCH /charts/care-plans/{planId}/activities/{activityId} | chart | ningún cliente del frontend la declara | — |
-| GET /charts/documents/{documentId}/files/{fileId}/content | chart | ningún cliente del frontend la declara | — |
-| GET /charts/encounters/{id}/pdf | chart | ningún cliente del frontend la declara | — |
-| GET /charts/me/documents | chart | ningún cliente del frontend la declara | — |
-| GET /charts/me/documents/{documentId}/files/{fileId}/content | chart | ningún cliente del frontend la declara | — |
-| GET /charts/me/encounters/{id}/pdf | chart | ningún cliente del frontend la declara | — |
-| GET /charts/me/notes | chart | ningún cliente del frontend la declara | — |
-| GET /charts/notes | chart | ningún cliente del frontend la declara | — |
-| POST /charts/notes/{noteId}/amendments | chart | ningún cliente del frontend la declara | — |
-| POST /charts/notes/{noteId}/versions/{versionId}/cosign | chart | ningún cliente del frontend la declara | — |
-| POST /charts/notes/{noteId}/versions/{versionId}/sign | chart | ningún cliente del frontend la declara | — |
-| POST /charts/notes/versions/{versionId}/exam-findings | chart | ningún cliente del frontend la declara | — |
-| POST /charts/notes/versions/{versionId}/release | chart | ningún cliente del frontend la declara | — |
-| POST /charts/notes/versions/{versionId}/withhold | chart | ningún cliente del frontend la declara | — |
-| GET /clinical/allergy-intolerances/{id}/attachments | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/conditions/{id}/verification | clinical | ningún cliente del frontend la declara | — |
-| GET /clinical/encounters/{id}/attachments | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/encounters/{id}/attachments | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/immunizations | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/internal/prescription-expiry-notices | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/medication-records | clinical | ningún cliente del frontend la declara | — |
-| GET /clinical/medication-requests/{id}/attachments | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/medication-requests/{id}/invalidate | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/medication-requests/{id}/renew | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/medication-requests/{id}/replace | clinical | ningún cliente del frontend la declara | — |
-| PATCH /clinical/observations/{id}/amend | clinical | ningún cliente del frontend la declara | — |
-| GET /clinical/patients/{patientProfileId}/received-services | clinical | ningún cliente del frontend la declara | — |
-| GET /clinical/prescription-signature-policies | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/prescription-signature-policies | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/prescription-signature-policies/{id}/deactivate | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/procedures | clinical | ningún cliente del frontend la declara | — |
-| GET /public/prescriptions/{id}/verify | clinical | ningún cliente del frontend la declara | — |
-| PATCH /care-gaps/{id}/close | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /care-gaps/recompute | clinical_ext | ningún cliente del frontend la declara | — |
-| GET /care-teams | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /care-teams | clinical_ext | ningún cliente del frontend la declara | — |
-| PATCH /care-teams/{id}/members/{memberId}/set-responsible | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /cds-rules | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /cds-rules/{id}/versions/publish | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /cds-rules/{id}/versions/rollback | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /cds/evaluate | clinical_ext | ningún cliente del frontend la declara | — |
-| PATCH /clinical-alerts/{id}/acknowledge | clinical_ext | ningún cliente del frontend la declara | — |
-| PATCH /clinical-alerts/{id}/override | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /drug-interactions | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /immunization-schedules | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /order-sets | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /order-sets/{id}/apply | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /patients/{id}/immunization-plan/project | clinical_ext | ningún cliente del frontend la declara | — |
-| GET /prescription-favorites | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /prescription-favorites | clinical_ext | ningún cliente del frontend la declara | — |
-| DELETE /prescription-favorites/{id} | clinical_ext | ningún cliente del frontend la declara | — |
-| GET /referrals | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /referrals | clinical_ext | ningún cliente del frontend la declara | — |
-| PATCH /referrals/{id}/respond | clinical_ext | ningún cliente del frontend la declara | — |
-| GET /referrals/me | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /virtual-encounters | clinical_ext | ningún cliente del frontend la declara | — |
-| PATCH /virtual-encounters/{id}/end | clinical_ext | ningún cliente del frontend la declara | — |
-| PATCH /virtual-encounters/{id}/join | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /common/contact-points | common | ningún cliente del frontend la declara | — |
-| POST /common/contact-points/{id}/verify | common | ningún cliente del frontend la declara | — |
-| POST /common/files | common | ningún cliente del frontend la declara | — |
-| POST /common/files/{id}/versions | common | ningún cliente del frontend la declara | — |
-| POST /common/files/{id}/versions/{vid}/derivatives | common | ningún cliente del frontend la declara | — |
-| POST /common/identifiers | common | ningún cliente del frontend la declara | — |
-
-_Se muestran 200 de 1054; la lista completa está en `inventario/flujos/hallazgos.json`._
-
 ## FLU-08
 
 **Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 9 caso(s).
@@ -612,14 +384,14 @@ _Ninguno._
 
 ## FLU-10
 
-**Operaciones que pueden terminar en un 500 por una excepción sin tipar** — severidad BAJA — 107 caso(s).
+**Operaciones que pueden terminar en un 500 por una excepción sin tipar** — severidad BAJA — 109 caso(s).
 
 **Qué hacer:** Cambiar el `new Error(...)` por una excepción del proyecto con estado y código estables (regla 96.4.4). El cliente hoy recibe INTERNAL sin poder distinguir la causa.
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
-| GET /health/data-sources | app | DataSourceConfigurationError: No hay ninguna conexión registrada como «{name}». Registradas: {known}. (src/persistence/registry/connection.registry.ts:59) \| DataSourceConfigurationError: No hay ninguna conexión registrada como «{name}». Registradas: {known}. (src/persistence/registry/connection.registry.ts:59) | `src/persistence/health/data-sources.controller.ts:25` |
-| GET /readiness | app | Error: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar (src/app-readiness.service.ts:135) \| Error: MongoDB no confirmó el ping (src/modules/document_store/repositories/mongo-connection.provider.ts:60) \| Error: Redis no respondió PONG (src/modules/redis_runtime/services/redis-runtime.service.ts:63) | `src/app.controller.ts:63` |
+| GET /health/data-sources | app | DataSourceConfigurationError: No hay ninguna conexión registrada como «{name}». Registradas: {known}. (src/persistence/registry/connection.registry.ts:59) \| DataSourceConfigurationError: No hay ninguna conexión registrada como «{name}». Registradas: {known}. (src/persistence/registry/connection.registry.ts:59) | `src/persistence/health/data-sources.controller.ts:30` |
+| GET /readiness | app | SchemaIntegrityIncompleteError: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar (src/app-readiness.service.ts:178) \| SeedCoreIncompleteError: Seeds núcleo fallidos: {failed.join(', ')} (src/app-readiness.service.ts:202) \| SeedCoreIncompleteError: Catálogo de conceptos sin materializar: faltan {ids.length - present} de {ids.length} (src/app-readiness.service.ts:219) | `src/app.controller.ts:63` |
 | GET /audio-assets/{assetId}/content | audio_assets | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) \| Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/audio_assets/controllers/audio-assets.controller.ts:44` |
 | POST /audio-assets/resolve | audio_assets | Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/repositories/audio-assets.repository.ts:118) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/repositories/audio-assets.repository.ts:127) \| Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/repositories/audio-assets.repository.ts:118) | `src/modules/audio_assets/controllers/audio-assets.controller.ts:28` |
 | POST /internal/audio-assets/{assetId}/generated | audio_assets | StorageLifecycleDenied: PUBLICATION_PROOF_REQUIRED (src/modules/audio_assets/application/audio-generation.use-case.ts:122) \| StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/repositories/audio-assets.repository.ts:235) \| StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/repositories/audio-assets.repository.ts:235) | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:108` |
@@ -634,6 +406,7 @@ _Ninguno._
 | POST /authz/patients/{patientProfileId}/break-the-glass | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-clinical.controller.ts:61` |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-clinical.controller.ts:40` |
 | POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute | automation | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/automation/services/record-automation.service.ts:276) | `src/modules/automation/controllers/automation-orchestration.controller.ts:235` |
+| GET /billing/service-catalog/{id}/image | billing | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:131` |
 | GET /charts/documents/{documentId}/files/{fileId}/content | chart | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/chart/controllers/chart-documents.controller.ts:79` |
 | GET /charts/me/documents/{documentId}/files/{fileId}/content | chart | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/chart/controllers/chart-me.controller.ts:87` |
 | POST /clinical/allergy-intolerances/{id}/attachments | clinical | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/files.service.ts:609) \| StorageLifecycleDenied: {identity.reasonCode} (src/common/storage/storage-publication.service.ts:142) \| StorageLifecycleDenied: FILE_NOT_LIVE (src/common/storage/storage-publication.service.ts:189) | `src/modules/clinical/controllers/clinical-records.controller.ts:192` |
@@ -691,6 +464,7 @@ _Ninguno._
 | POST /iam/auth/register-practitioner | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:234` |
 | POST /iam/auth/upload-registration-document | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:76) \| StorageLifecycleDenied: REMOTE_STATE_UNKNOWN (src/common/storage/storage-publication.service.ts:90) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:199` |
 | POST /iam/auth/upload-registration-signature-image | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:76) \| StorageLifecycleDenied: REMOTE_STATE_UNKNOWN (src/common/storage/storage-publication.service.ts:90) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:154` |
+| PUT /iam/onboarding-drafts/{formType}/{draftId} | iam | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:372) \| DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:379) \| DomainException: {HttpStatus.TOO_MANY_REQUESTS} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:333) | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66` |
 | POST /iam/users/assisted-practitioner-registration | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | `src/modules/iam/presentation/controllers/iam-users.controller.ts:254` |
 | POST /identity/me/identity-verification | identity_assurance | StorageLifecycleDenied: FILE_NOT_LIVE (src/common/storage/storage-publication.service.ts:189) \| StorageLifecycleDenied: VERSION_UNKNOWN (src/common/storage/storage-publication.service.ts:192) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:199) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:42` |
 | POST /identity/me/practitioner/identity-verification | identity_assurance | StorageLifecycleDenied: FILE_NOT_LIVE (src/common/storage/storage-publication.service.ts:189) \| StorageLifecycleDenied: VERSION_UNKNOWN (src/common/storage/storage-publication.service.ts:192) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:199) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:60` |

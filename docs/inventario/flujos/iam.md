@@ -3,7 +3,7 @@
 # Flujos del módulo `iam`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 39 (30 con decisiones propias, 9 sin ellas)
+- **Operaciones:** 39 (33 con decisiones propias, 6 sin ellas)
 - Inventario de endpoints del módulo: [iam](../endpoints/iam.md)
 
 ## Proceso: IAM
@@ -2054,7 +2054,143 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /iam/users
+#### 15. DELETE /iam/onboarding-drafts/{formType}/{draftId}
+
+Elimina el borrador al completar el alta exitosamente o por descarte del usuario
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a IamOnboardingDraftsService.deleteDraft"]:::llamada
+  n2 --> n3
+  n4["Llama a IamOnboardingDraftsService.authorize"]:::llamada
+  n3 --> n4
+  n5{"!entry || !matches || secret === undefined || secret === ''"}:::decision
+  n4 --> n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7(("200 Responde con éxito")):::ok
+  n5 -->|"no"| n7
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 16. GET /iam/onboarding-drafts/{formType}/{draftId}
+
+Recupera un borrador de alta guardado por identificador y tipo de formulario
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a IamOnboardingDraftsService.getDraft"]:::llamada
+  n2 --> n3
+  n4["Llama a IamOnboardingDraftsService.authorize"]:::llamada
+  n3 --> n4
+  n5{"!entry || !matches || secret === undefined || secret === ''"}:::decision
+  n4 --> n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7(("200 Responde con éxito")):::ok
+  n5 -->|"no"| n7
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 17. PUT /iam/onboarding-drafts/{formType}/{draftId}
+
+Guarda o actualiza el avance del formulario de alta en borrador
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.BAD_REQUEST}; DomainException: {HttpStatus.PAYLOAD_TOO_LARGE}; DomainException: {HttpStatus.TOO_MANY_REQUESTS}; DraftStoreFullError: {retryAfterSeconds} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Intenta"]:::intento
+  n2 --> n3
+  n4["Llama a IamOnboardingDraftsService.saveDraft"]:::llamada
+  n3 --> n4
+  n5{"!this.validKey(formType, draftId)"}:::decision
+  n4 --> n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a IamOnboardingDraftsService.assertPayloadShape"]:::llamada
+  n5 -->|"no"| n7
+  n8{"!isRecord(payload) || !isRecord(payload.data) || (payload.extraData !== undefined && !isRecord(payload.extraD…"}:::decision
+  n7 --> n8
+  n9(["500 INTERNAL {HttpStatus.BAD_REQUEST}"]):::error
+  n8 -->|"sí"| n9
+  n10{"Buffer.byteLength(JSON.stringify(payload), 'utf8') › MAX_DRAFT_BYTES"}:::decision
+  n8 -->|"no"| n10
+  n11(["500 INTERNAL {HttpStatus.PAYLOAD_TOO_LARGE}"]):::error
+  n10 -->|"sí"| n11
+  n12{"secret === undefined || secret === ''"}:::decision
+  n10 -->|"no"| n12
+  n13{"existing"}:::decision
+  n12 -->|"sí"| n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a IamOnboardingDraftsService.assertCapacity"]:::llamada
+  n13 -->|"no"| n15
+  n16{"(this.perOrigin.get(origin) ?? 0) ›= MAX_DRAFTS_PER_ORIGIN"}:::decision
+  n15 --> n16
+  n17(["500 INTERNAL {HttpStatus.TOO_MANY_REQUESTS}"]):::error
+  n16 -->|"sí"| n17
+  n18{"(this.perAggregate.get(aggregate) ?? 0) ›= MAX_DRAFTS_PER_AGGREGATE"}:::decision
+  n16 -->|"no"| n18
+  n19(["500 INTERNAL {HttpStatus.TOO_MANY_REQUESTS}"]):::error
+  n18 -->|"sí"| n19
+  n20(["500 INTERNAL {retryAfterSeconds}"]):::error
+  n18 -->|"no"| n20
+  n21["Llama a IamOnboardingDraftsService.authorize"]:::llamada
+  n12 -->|"no"| n21
+  n22{"!entry || !matches || secret === undefined || secret === ''"}:::decision
+  n21 --> n22
+  n23(["↩ (relanza el error capturado)"]):::error
+  n22 -->|"sí"| n23
+  n24(["↩ (relanza el error capturado)"]):::error
+  n3 -->|"si falla"| n24
+  n25(("200 Responde con éxito")):::ok
+  n22 -->|"no"| n25
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 18. POST /iam/users
 
 Crear un usuario con credencial de contraseña y rol inicial
 
@@ -2117,7 +2253,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. GET /iam/users/{id}
+#### 19. GET /iam/users/{id}
 
 Ficha de un usuario
 
@@ -2155,7 +2291,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /iam/users/{id}/anonymize
+#### 20. POST /iam/users/{id}/anonymize
 
 Anonimizar (DSAR) la cuenta
 
@@ -2221,7 +2357,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. GET /iam/users/{id}/credentials
+#### 21. GET /iam/users/{id}/credentials
 
 Credenciales del usuario
 
@@ -2265,7 +2401,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /iam/users/{id}/credentials/{cid}/revoke
+#### 22. POST /iam/users/{id}/credentials/{cid}/revoke
 
 Revocar una credencial del usuario
 
@@ -2311,7 +2447,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /iam/users/{id}/credentials/federated
+#### 23. POST /iam/users/{id}/credentials/federated
 
 Enlazar una credencial de identidad federada
 
@@ -2368,7 +2504,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /iam/users/{id}/devices
+#### 24. GET /iam/users/{id}/devices
 
 Dispositivos del usuario
 
@@ -2412,7 +2548,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /iam/users/{id}/devices
+#### 25. POST /iam/users/{id}/devices
 
 Registrar un dispositivo del usuario
 
@@ -2421,7 +2557,7 @@ Registrar un dispositivo del usuario
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No tiene acceso a los dispositivos de esta cuenta |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2432,29 +2568,33 @@ flowchart TD
   n1 --> n2
   n3["Llama a IamDevicesService.register"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4{"actor.id !== userId && !actor.roles.some((role) =› ROLES_THAT_MANAGE_DEVICES.includes(role))"}:::decision
   n3 --> n4
-  n5["Llama a UsersRepository.findById"]:::llamada
-  n4 --> n5
-  n6[("LEE iam.users")]:::efecto
-  n5 --> n6
-  n7{"!user"}:::decision
+  n5(["403 FORBIDDEN No tiene acceso a los dispositivos de esta cuenta"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a UsersRepository.findById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Usuario no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a DevicesRepository.create"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA iam.devices")]:::efecto
-  n9 --> n10
-  n11{"trusted"}:::decision
-  n10 --> n11
-  n12["Llama a SecurityEventsRepository.record"]:::llamada
-  n11 -->|"sí"| n12
-  n13[("CREA iam.security_events")]:::efecto
+  n8[("LEE iam.users")]:::efecto
+  n7 --> n8
+  n9{"!user"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Usuario no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a DevicesRepository.create"]:::llamada
+  n9 -->|"no"| n11
+  n12[("CREA iam.devices")]:::efecto
+  n11 --> n12
+  n13{"trusted"}:::decision
   n12 --> n13
-  n14(("201 Responde con éxito")):::ok
-  n13 --> n14
-  n11 -->|"no"| n14
+  n14["Llama a SecurityEventsRepository.record"]:::llamada
+  n13 -->|"sí"| n14
+  n15[("CREA iam.security_events")]:::efecto
+  n14 --> n15
+  n16(("201 Responde con éxito")):::ok
+  n15 --> n16
+  n13 -->|"no"| n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2463,7 +2603,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. GET /iam/users/{id}/global-roles
+#### 26. GET /iam/users/{id}/global-roles
 
 Roles globales del usuario
 
@@ -2507,7 +2647,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /iam/users/{id}/global-roles
+#### 27. POST /iam/users/{id}/global-roles
 
 Conceder o revocar un rol global
 
@@ -2589,7 +2729,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /iam/users/{id}/lock
+#### 28. POST /iam/users/{id}/lock
 
 Bloquear la cuenta y revocar sus sesiones
 
@@ -2651,7 +2791,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. GET /iam/users/{id}/mfa-factors
+#### 29. GET /iam/users/{id}/mfa-factors
 
 Factores de MFA del usuario
 
@@ -2695,7 +2835,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /iam/users/{id}/mfa-factors
+#### 30. POST /iam/users/{id}/mfa-factors
 
 Enrolar o verificar un factor MFA
 
@@ -2794,7 +2934,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. GET /iam/users/{id}/sessions
+#### 31. GET /iam/users/{id}/sessions
 
 Sesiones del usuario
 
@@ -2838,7 +2978,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /iam/users/assisted-practitioner-registration
+#### 32. POST /iam/users/assisted-practitioner-registration
 
 Alta administrativa de un profesional (devuelve token de activación)
 
@@ -3007,7 +3147,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /iam/users/assisted-registration
+#### 33. POST /iam/users/assisted-registration
 
 Registro asistido de un paciente (devuelve token de activación)
 
@@ -3094,7 +3234,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | POST /iam/auth/logout-all | 200, 401, 403, 429 | 4 |
 | POST /iam/auth/sessions/purge | 200, 401, 403, 429 | 3 |
 | GET /iam/me/sessions | 200, 401, 403, 429 | 1 |
-| DELETE /iam/onboarding-drafts/{formType}/{draftId} | 200, 401, 429 | 0 |
-| GET /iam/onboarding-drafts/{formType}/{draftId} | 200, 401, 429 | 0 |
-| PUT /iam/onboarding-drafts/{formType}/{draftId} | 200, 401, 429 | 0 |
 | GET /iam/users | 200, 401, 403, 429 | 2 |

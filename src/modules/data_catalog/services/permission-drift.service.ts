@@ -20,10 +20,22 @@ export const DRIFT_ROUTES_LIST_CAP = 200;
  */
 const SYSTEM_ROLE = 'SYSTEM';
 
-/** Roles que existen sin sembrarse en `authz.roles`: los globales de `iam` y la cuenta de servicio. */
+/**
+ * Roles que el login deriva de una membresía y que por eso no se asignan ni se siembran:
+ * `PHARMACY_STAFF` se agrega al token de quien tiene una membresía activa en un tenant de tipo
+ * `PHARMACY` (`withPharmacyStaffRole` en `iam-auth.service.ts`). Sembrarlo permitiría asignarlo a
+ * mano a alguien sin esa membresía.
+ */
+const DERIVED_RUNTIME_ROLES: readonly string[] = ['PHARMACY_STAFF'];
+
+/**
+ * Roles que existen sin sembrarse en `authz.roles`: los globales de `iam`, la cuenta de servicio y
+ * los que el login deriva de una membresía.
+ */
 export const PLATFORM_ROLE_CODES: readonly string[] = [
   ...Object.keys(ROLE_CONCEPT_BY_CODE),
   SYSTEM_ROLE,
+  ...DERIVED_RUNTIME_ROLES,
 ];
 
 export interface PermissionDriftView extends PermissionDriftReport {
