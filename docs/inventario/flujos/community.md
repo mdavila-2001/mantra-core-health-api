@@ -34,7 +34,7 @@ _Fuente: `src/modules/community/README.md:3`_
 | `UC-19-09` | Resuelve moderación (decisión + strike) | POST /community/moderation/queue/{queueId}/decision | SECURITY_ADMIN | MEDIO | 6 |
 | `UC-19-10` | Apela una decisión | POST /community/moderation/decisions/{decisionId}/appeal | Cualquier sesión válida | ALTO | 7 |
 | `UC-19-11` | Publica review verificada de servicio | POST /community/profiles/{profileId}/reviews | Cualquier sesión válida | ALTO | 6 |
-| `UC-19-12` | Vota en encuesta | POST /community/polls/{pollId}/votes | Cualquier sesión válida | ALTO | 6 |
+| `UC-19-12` | Vota en encuesta | POST /community/polls/{pollId}/votes | Cualquier sesión válida | ALTO | 10 |
 | `UC-19-13` | Se une a grupo/comunidad | POST /community/groups/{groupId}/members | Cualquier sesión válida | ALTO | 9 |
 | `UC-19-14` | Bloquea a un usuario | POST /community/blocks | Cualquier sesión válida | ALTO | 6 |
 | `UC-19-15` | Lote de posts publicados sin repartir, con sus seguidores | GET /internal/community/feed/pending | SYSTEM · SECURITY_ADMIN | BAJO | 3 |
@@ -66,7 +66,7 @@ _Fuente: `src/modules/community/README.md:3`_
 |  |  | GET /community/moderation/decisions/mine | Cualquier sesión válida | BAJO | 4 |
 |  |  | GET /community/moderation/queue | SECURITY_ADMIN | BAJO | 2 |
 | `ctrl:CommunityPollsController` | Operaciones de CommunityPollsController que el README no asigna a un caso de uso | GET /community/polls/{pollId} | Cualquier sesión válida | BAJO | 7 |
-|  |  | POST /community/posts/{postId}/polls | Cualquier sesión válida | ALTO | 3 |
+|  |  | POST /community/posts/{postId}/polls | Cualquier sesión válida | ALTO | 4 |
 | `ctrl:CommunityPublicController` | Operaciones de CommunityPublicController que el README no asigna a un caso de uso | DESCONOCIDO / | Cualquier sesión válida | BAJO | 0 |
 |  |  | DESCONOCIDO / | Cualquier sesión válida | BAJO | 0 |
 |  |  | DESCONOCIDO / | Cualquier sesión válida | BAJO | 0 |
@@ -132,7 +132,7 @@ _Fuente: `src/modules/community/README.md:3`_
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a31(["SECURITY_ADMIN"]):::actor
-  a53(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a54(["SYSTEM · SECURITY_ADMIN"]):::actor
   t3[("common.file_versions")]:::tabla
   t4[("common.files")]:::tabla
   t5[("community.content_hashtags")]:::tabla
@@ -160,11 +160,11 @@ flowchart LR
   t43[("community.poll_options")]:::tabla
   t44[("community.poll_votes")]:::tabla
   t45[("community.polls")]:::tabla
-  t47[("community.group_members")]:::tabla
-  t48[("community.groups")]:::tabla
-  t51[("community.user_blocks")]:::tabla
-  t54[("community.feed_items")]:::tabla
-  t55[("community.social_posts")]:::tabla
+  t48[("community.group_members")]:::tabla
+  t49[("community.groups")]:::tabla
+  t52[("community.user_blocks")]:::tabla
+  t55[("community.feed_items")]:::tabla
+  t56[("community.social_posts")]:::tabla
   t7[("+4 tablas más")]
   subgraph s0["UC-19-01 · Publica post con hashtags, media y menciones"]
     o1["POST /community/profiles/{profileId}/posts"]:::op
@@ -202,23 +202,24 @@ flowchart LR
   subgraph s10["UC-19-11 · Publica review verificada de servicio"]
     o37["POST /community/profiles/{profileId}/reviews"]:::op
   end
+  t46[("+4 tablas más")]
   subgraph s11["UC-19-12 · Vota en encuesta"]
     o42["POST /community/polls/{pollId}/votes"]:::op
   end
-  t49[("+3 tablas más")]
+  t50[("+3 tablas más")]
   subgraph s12["UC-19-13 · Se une a grupo/comunidad"]
-    o46["POST /community/groups/{groupId}/members"]:::op
+    o47["POST /community/groups/{groupId}/members"]:::op
   end
   subgraph s13["UC-19-14 · Bloquea a un usuario"]
-    o50["POST /community/blocks"]:::op
+    o51["POST /community/blocks"]:::op
   end
   subgraph s14["UC-19-15 · Lote de posts publicados sin repartir, con sus seguidores"]
-    o52["GET /internal/community/feed/pending"]:::op
-    o56["POST /internal/community/feed/rebuild"]:::op
+    o53["GET /internal/community/feed/pending"]:::op
+    o57["POST /internal/community/feed/rebuild"]:::op
   end
   subgraph s15["ctrl:CommunityFeedController · Operaciones de CommunityFeedController que el RE…"]
-    o57["POST /internal/community/feed/ranking/apply"]:::op
-    o58["GET /internal/community/feed/ranking/pending"]:::op
+    o58["POST /internal/community/feed/ranking/apply"]:::op
+    o59["GET /internal/community/feed/ranking/pending"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -298,35 +299,36 @@ flowchart LR
   o42 -->|"LEE"| t44
   o42 -->|"ACTUALIZA"| t45
   o42 -->|"LEE"| t45
-  a2 --> o46
-  o46 -->|"LEE"| t39
-  o46 -->|"ACTUALIZA"| t47
-  o46 -->|"CREA"| t47
-  o46 -->|"LEE"| t47
-  o46 -->|"ACTUALIZA"| t48
-  o46 -->|"LEE"| t48
-  o46 -.-> t49
-  a2 --> o50
-  o50 -->|"LEE"| t13
-  o50 -->|"ACTUALIZA"| t18
-  o50 -->|"LEE"| t18
-  o50 -->|"ACTUALIZA"| t51
-  o50 -->|"CREA"| t51
-  o50 -->|"LEE"| t51
-  a53 --> o52
-  o52 -->|"LEE"| t54
-  o52 -->|"LEE"| t18
-  o52 -->|"LEE"| t55
-  a53 --> o56
-  o56 -->|"CREA"| t54
-  o56 -->|"LEE"| t54
-  a53 --> o57
-  o57 -->|"ACTUALIZA"| t54
-  a53 --> o58
-  o58 -->|"LEE"| t10
-  o58 -->|"LEE"| t54
-  o58 -->|"LEE"| t14
-  o58 -->|"LEE"| t55
+  o42 -.-> t46
+  a2 --> o47
+  o47 -->|"LEE"| t39
+  o47 -->|"ACTUALIZA"| t48
+  o47 -->|"CREA"| t48
+  o47 -->|"LEE"| t48
+  o47 -->|"ACTUALIZA"| t49
+  o47 -->|"LEE"| t49
+  o47 -.-> t50
+  a2 --> o51
+  o51 -->|"LEE"| t13
+  o51 -->|"ACTUALIZA"| t18
+  o51 -->|"LEE"| t18
+  o51 -->|"ACTUALIZA"| t52
+  o51 -->|"CREA"| t52
+  o51 -->|"LEE"| t52
+  a54 --> o53
+  o53 -->|"LEE"| t55
+  o53 -->|"LEE"| t18
+  o53 -->|"LEE"| t56
+  a54 --> o57
+  o57 -->|"CREA"| t55
+  o57 -->|"LEE"| t55
+  a54 --> o58
+  o58 -->|"ACTUALIZA"| t55
+  a54 --> o59
+  o59 -->|"LEE"| t10
+  o59 -->|"LEE"| t55
+  o59 -->|"LEE"| t14
+  o59 -->|"LEE"| t56
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -550,6 +552,7 @@ flowchart LR
   a2 --> o58
   o58 -->|"CREA"| t52
   o58 -->|"CREA"| t54
+  o58 -->|"LEE"| t5
   o58 -->|"LEE"| t56
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
@@ -4301,7 +4304,7 @@ Votar en una encuesta
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Encuesta no encontrada; ResourceNotFoundException: La opción no pertenece a la encuesta |
 | 409 | `CONFLICT` | ConflictException: Ya votó por esta opción; ConflictException: La encuesta admite un único voto por votante |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La encuesta está cerrada |
@@ -4316,53 +4319,85 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PollsRepository.findPollById"]:::llamada
+  n5["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
   n4 --> n5
-  n6[("LEE community.polls")]:::efecto
+  n6["Llama a PublicProfilesRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!poll"}:::decision
+  n7[("LEE community.public_profiles")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Encuesta no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"poll.statusConceptId !== COMM.POLL_OPEN || (poll.closesAt && poll.closesAt.getTime() ‹= Date.now())"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La encuesta está cerrada"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a PollsRepository.findOptionById"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE community.poll_options")]:::efecto
-  n11 --> n12
-  n13{"!option || option.pollId !== pollId"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND La opción no pertenece a la encuesta"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a PollsRepository.findVote"]:::llamada
-  n13 -->|"no"| n15
-  n16[("LEE community.poll_votes")]:::efecto
+  n8(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n7 --> n8
+  n9["Llama a PollsRepository.findPollById"]:::llamada
+  n10[("LEE community.polls")]:::efecto
+  n9 --> n10
+  n11{"!poll"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Encuesta no encontrada"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PostsRepository.findById"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE community.social_posts")]:::efecto
+  n13 --> n14
+  n15["Llama a CommunityVisibilityService.canViewPost"]:::llamada
+  n14 --> n15
+  n16["Llama a CommunityVisibilityService.isBlockedBetween"]:::llamada
   n15 --> n16
-  n17{"dupOption"}:::decision
+  n17["Llama a BlocksRepository.existsBetween"]:::llamada
   n16 --> n17
-  n18(["409 CONFLICT Ya votó por esta opción"]):::error
-  n17 -->|"sí"| n18
-  n19{"!poll.allowsMultiple"}:::decision
-  n17 -->|"no"| n19
-  n20["Llama a PollsRepository.countVotesByVoter"]:::llamada
-  n19 -->|"sí"| n20
-  n21[("LEE community.poll_votes")]:::efecto
+  n18[("LEE community.user_blocks")]:::efecto
+  n17 --> n18
+  n19{"según post.visibilityConceptId"}:::decision
+  n18 --> n19
+  n20["Llama a CommunityVisibilityService.followsProfile"]:::llamada
+  n19 -->|"COMM.POST_VISIBILITY_FOLLOWERS"| n20
+  n21["Llama a FollowsRepository.findByFollowerTarget"]:::llamada
   n20 --> n21
-  n22{"already › 0"}:::decision
+  n22[("LEE community.social_follows")]:::efecto
   n21 --> n22
-  n23(["409 CONFLICT La encuesta admite un único voto por votante"]):::error
-  n22 -->|"sí"| n23
-  n24["Llama a PollsRepository.createVote"]:::llamada
-  n22 -->|"no"| n24
-  n19 -->|"no"| n24
-  n25[("CREA community.poll_votes")]:::efecto
-  n24 --> n25
-  n26[("ACTUALIZA community.poll_options · ACTUALIZA community.polls")]:::efecto
-  n25 --> n26
-  n27(("201 Responde con éxito")):::ok
-  n26 --> n27
+  n23{"!post || !(await this.visibility.canViewPost(tx, post, dto.voterProfileId))"}:::decision
+  n22 --> n23
+  n19 -->|"otro"| n23
+  n24(["404 NOT_FOUND Encuesta no encontrada"]):::error
+  n23 -->|"sí"| n24
+  n25{"poll.statusConceptId !== COMM.POLL_OPEN || (poll.closesAt && poll.closesAt.getTime() ‹= Date.now())"}:::decision
+  n23 -->|"no"| n25
+  n26(["422 PRECONDITION_FAILED La encuesta está cerrada"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a PollsRepository.findOptionById"]:::llamada
+  n25 -->|"no"| n27
+  n28[("LEE community.poll_options")]:::efecto
+  n27 --> n28
+  n29{"!option || option.pollId !== pollId"}:::decision
+  n28 --> n29
+  n30(["404 NOT_FOUND La opción no pertenece a la encuesta"]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a PollsRepository.findVote"]:::llamada
+  n29 -->|"no"| n31
+  n32[("LEE community.poll_votes")]:::efecto
+  n31 --> n32
+  n33{"dupOption"}:::decision
+  n32 --> n33
+  n34(["409 CONFLICT Ya votó por esta opción"]):::error
+  n33 -->|"sí"| n34
+  n35{"!poll.allowsMultiple"}:::decision
+  n33 -->|"no"| n35
+  n36["Llama a PollsRepository.countVotesByVoter"]:::llamada
+  n35 -->|"sí"| n36
+  n37[("LEE community.poll_votes")]:::efecto
+  n36 --> n37
+  n38{"already › 0"}:::decision
+  n37 --> n38
+  n39(["409 CONFLICT La encuesta admite un único voto por votante"]):::error
+  n38 -->|"sí"| n39
+  n40["Llama a PollsRepository.createVote"]:::llamada
+  n38 -->|"no"| n40
+  n35 -->|"no"| n40
+  n41[("CREA community.poll_votes")]:::efecto
+  n40 --> n41
+  n42[("ACTUALIZA community.poll_options · ACTUALIZA community.polls")]:::efecto
+  n41 --> n42
+  n43(("201 Responde con éxito")):::ok
+  n42 --> n43
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4557,7 +4592,7 @@ Crear una encuesta con opciones sobre un post
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Post no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -4578,19 +4613,26 @@ flowchart TD
   n6 --> n7
   n8(["404 NOT_FOUND Post no encontrado"]):::error
   n7 -->|"sí"| n8
-  n9["Llama a PollsRepository.createPoll"]:::llamada
+  n9["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
   n7 -->|"no"| n9
-  n10[("CREA community.polls")]:::efecto
+  n10["Llama a PublicProfilesRepository.findById"]:::llamada
   n9 --> n10
-  n11["Repite: por cada const [i, label] de dto.options.entries()"]:::bucle
+  n11[("LEE community.public_profiles")]:::efecto
   n10 --> n11
-  n12["Llama a PollsRepository.createOption"]:::llamada
-  n11 -->|"cada elemento"| n12
-  n13[("CREA community.poll_options")]:::efecto
-  n12 --> n13
-  n14(("201 Responde con éxito")):::ok
+  n12(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n11 --> n12
+  n13["Llama a PollsRepository.createPoll"]:::llamada
+  n14[("CREA community.polls")]:::efecto
   n13 --> n14
-  n11 -->|"al terminar"| n14
+  n15["Repite: por cada const [i, label] de dto.options.entries()"]:::bucle
+  n14 --> n15
+  n16["Llama a PollsRepository.createOption"]:::llamada
+  n15 -->|"cada elemento"| n16
+  n17[("CREA community.poll_options")]:::efecto
+  n16 --> n17
+  n18(("201 Responde con éxito")):::ok
+  n17 --> n18
+  n15 -->|"al terminar"| n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

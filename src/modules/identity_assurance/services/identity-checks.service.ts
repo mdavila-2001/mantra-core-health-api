@@ -6,6 +6,7 @@ import {
   PreconditionFailedException,
   requireTenantId,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -67,6 +68,8 @@ const APPROVABLE_CASE_STATES = [
 
 /** Tamaño del lote que el worker atiende por tick. */
 const DEFAULT_DISPATCH_BATCH = 50;
+/** Páginas de la cola que `listDispatchable` recorre buscando checks del tenant. */
+const MAX_DISPATCH_SCAN_PAGES = 20;
 
 /**
  * Qué necesita el worker para despachar cada tipo de check: el código que
@@ -164,13 +167,33 @@ export class IdentityChecksService {
   ): Promise<DispatchableChecksResponseDto> {
     const tenantId = this.activeTenantFor(actor);
     const em = this.em.fork();
-    let checks = await this.checksRepo.findDispatchable(
-      em,
-      [IDA.CHECK_PENDING, IDA.CHECK_IN_PROGRESS],
-      limit ?? DEFAULT_DISPATCH_BATCH,
-    );
-    if (tenantId)
-      checks = await this.filterChecksToTenant(em, checks, tenantId);
+    const batch = limit ?? DEFAULT_DISPATCH_BATCH;
+    const statuses = [IDA.CHECK_PENDING, IDA.CHECK_IN_PROGRESS];
+    let checks: IdentityChecks[];
+    if (!tenantId) {
+      checks = await this.checksRepo.findDispatchable(em, statuses, batch);
+    } else {
+      // `identity_checks` no tiene `tenant_id`: el filtro por tenant va después
+      // de leer. Si se leyera sólo el primer lote, los checks de otros tenants
+      // más antiguos lo llenarían y el actor recibiría menos de los que tiene.
+      // Se recorre la cola por páginas hasta reunir un lote propio o agotarla.
+      checks = [];
+      for (
+        let page = 0;
+        page < MAX_DISPATCH_SCAN_PAGES && checks.length < batch;
+        page += 1
+      ) {
+        const rows = await this.checksRepo.findDispatchable(
+          em,
+          statuses,
+          batch,
+          page * batch,
+        );
+        checks.push(...(await this.filterChecksToTenant(em, rows, tenantId)));
+        if (rows.length < batch) break;
+      }
+      checks = checks.slice(0, batch);
+    }
 
     const dispatchable: DispatchableCheckDto[] = [];
     for (const check of checks) {
@@ -584,7 +607,9 @@ export class IdentityChecksService {
    * @throws PreconditionFailedException si un actor no `SYSTEM` no tiene tenant.
    */
   private activeTenantFor(actor: AuthenticatedUser): string | undefined {
-    return actor.roles.includes('SYSTEM') ? undefined : requireTenantId();
+    return roleAuthorizesInTenant(actor, 'SYSTEM', undefined)
+      ? undefined
+      : requireTenantId();
   }
 
   /**

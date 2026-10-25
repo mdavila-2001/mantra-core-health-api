@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1559,
+    "total": 1574,
     "porOrigen": {
-      "CONTRATO": 1542,
-      "CONTRATO_AUSENTE": 17
+      "CONTRATO": 1565,
+      "CONTRATO_AUSENTE": 9
     },
     "porRiesgo": {
-      "BAJO": 505,
-      "MEDIO": 875,
-      "ALTO": 179
+      "BAJO": 498,
+      "MEDIO": 887,
+      "ALTO": 189
     },
-    "conTablas": 1481,
-    "sinTablasSinDeterminar": 25,
+    "conTablas": 1513,
+    "sinTablasSinDeterminar": 0,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 888,
-    "conRequerimientos": 1559
+    "conPruebas": 916,
+    "conRequerimientos": 1574
   },
   "endpoints": [
     {
@@ -32,7 +32,7 @@
         "ACCOUNTING_APPROVER",
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -106,7 +106,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -182,7 +182,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 15,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -354,7 +354,7 @@
         "ACCOUNTING_APPROVER",
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -372,7 +372,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -392,7 +392,7 @@
         "ACCOUNTING_APPROVER",
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -543,7 +543,7 @@
         "SECURITY_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 11,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -561,7 +561,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 14,
+      "tablas": 15,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -725,7 +725,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 23,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -743,7 +743,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 17,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -815,7 +815,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 15,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -857,6 +857,240 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "AccountingPractitionerSimpleController_listAccounts",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/accounting/practitioner/simple/accounts",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Cuentas de la contabilidad simple de una práctica",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_createAccount",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/accounting/practitioner/simple/accounts",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Crear una cuenta (o un tipo de gasto, activo o deuda)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_deleteAccount",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/accounting/practitioner/simple/accounts/{id}",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Borrar una cuenta propia",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_updateAccount",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/accounting/practitioner/simple/accounts/{id}",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Renombrar una cuenta",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_listRecords",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/accounting/practitioner/simple/records",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Gastos, activos y deudas de una práctica",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_createRecord",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/accounting/practitioner/simple/records",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Registrar un gasto, un activo o una deuda",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_deleteRecord",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/accounting/practitioner/simple/records/{id}",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Borrar un gasto, un activo o una deuda",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_updateRecord",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/accounting/practitioner/simple/records/{id}",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Editar un gasto, un activo o una deuda",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_summary",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/accounting/practitioner/simple/summary",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Pacientes atendidos, cobrado y esperado de las aseguradoras",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_listTransactions",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/accounting/practitioner/simple/transactions",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Transacciones debe/haber de una práctica",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_createTransaction",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/accounting/practitioner/simple/transactions",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Registrar una transacción debe/haber",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_deleteTransaction",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/accounting/practitioner/simple/transactions/{id}",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Borrar una transacción debe/haber",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerSimpleController_updateTransaction",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/accounting/practitioner/simple/transactions/{id}",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Editar una transacción debe/haber",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "AccountingLedgerController_trialBalance",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -871,7 +1105,7 @@
         "ACCOUNTING_APPROVER",
         "PRACTITIONER"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -1262,7 +1496,11 @@
       "nombre": "Estado y enrutado de las fuentes de datos (requiere autenticación)",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN"
+      ],
       "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
@@ -1278,7 +1516,11 @@
       "nombre": "Contadores de operaciones por conexión y por ruta read/write",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN"
+      ],
       "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
@@ -1311,7 +1553,7 @@
       "riesgo": "BAJO",
       "publica": true,
       "roles": [],
-      "tablas": 0,
+      "tablas": 1,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3201,7 +3443,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 10,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3224,6 +3466,22 @@
       "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingServiceCatalogController_getImage",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/billing/service-catalog/{id}/image",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Descargar la imagen de un servicio que el actor puede ver",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -4230,6 +4488,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "ClinicalProcedureCentersController_findOwn",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/clinical/me/procedure-centers",
+      "modulo": "clinical",
+      "bloque": "Clínico y Diagnóstico",
+      "nombre": "Dónde hacerme los procedimientos que me pidieron",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ClinicalRecordsController_administerMedication",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -4627,9 +4903,9 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 23,
+      "tablas": 27,
       "eventos": 1,
-      "pruebas": 4,
+      "pruebas": 5,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -5175,9 +5451,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Registrar una dirección (UC-02-04)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 1,
       "eventos": 0,
       "pruebas": 3,
@@ -5191,9 +5469,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Registrar un punto de contacto (UC-02-02)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 1,
       "eventos": 0,
       "pruebas": 2,
@@ -5207,9 +5487,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Verificar un punto de contacto (UC-02-03)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 2,
       "eventos": 0,
       "pruebas": 2,
@@ -5367,9 +5649,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Registrar un identificador oficial (UC-02-01)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 2,
       "eventos": 0,
       "pruebas": 2,
@@ -6258,7 +6542,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6306,7 +6590,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -9796,9 +10080,9 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 26,
+      "tablas": 27,
       "eventos": 0,
-      "pruebas": 4,
+      "pruebas": 5,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10028,7 +10312,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -10307,7 +10591,7 @@
       ],
       "tablas": 7,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10896,7 +11180,7 @@
         "EDUCATION_ADMIN",
         "LEARNER"
       ],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -12508,7 +12792,7 @@
         "PRIVACY_OFFICER",
         "HEALTH_DATA_ADMIN"
       ],
-      "tablas": 12,
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -12880,7 +13164,7 @@
       "roles": [],
       "tablas": 23,
       "eventos": 0,
-      "pruebas": 52,
+      "pruebas": 53,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12928,7 +13212,7 @@
       "roles": [],
       "tablas": 36,
       "eventos": 0,
-      "pruebas": 15,
+      "pruebas": 17,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12944,7 +13228,7 @@
       "roles": [],
       "tablas": 21,
       "eventos": 0,
-      "pruebas": 30,
+      "pruebas": 31,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -12960,7 +13244,7 @@
       "roles": [],
       "tablas": 45,
       "eventos": 0,
-      "pruebas": 30,
+      "pruebas": 31,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13436,7 +13720,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 45,
+      "tablas": 42,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -13955,134 +14239,6 @@
       "revision": "AUTO_DETECTADA"
     },
     {
-      "id": "InsuranceCampaignsController_list",
-      "origen": "CONTRATO_AUSENTE",
-      "metodo": "GET",
-      "ruta": "/['insurance/campaigns', 'insurance-campaigns']",
-      "modulo": "insurance",
-      "bloque": "Financiero y ERP",
-      "nombre": null,
-      "riesgo": "ALTO",
-      "publica": false,
-      "roles": [],
-      "tablas": 8,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_create",
-      "origen": "CONTRATO_AUSENTE",
-      "metodo": "POST",
-      "ruta": "/['insurance/campaigns', 'insurance-campaigns']",
-      "modulo": "insurance",
-      "bloque": "Financiero y ERP",
-      "nombre": null,
-      "riesgo": "ALTO",
-      "publica": false,
-      "roles": [],
-      "tablas": 14,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_getById",
-      "origen": "CONTRATO_AUSENTE",
-      "metodo": "GET",
-      "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}",
-      "modulo": "insurance",
-      "bloque": "Financiero y ERP",
-      "nombre": null,
-      "riesgo": "ALTO",
-      "publica": false,
-      "roles": [],
-      "tablas": 8,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_update",
-      "origen": "CONTRATO_AUSENTE",
-      "metodo": "PATCH",
-      "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}",
-      "modulo": "insurance",
-      "bloque": "Financiero y ERP",
-      "nombre": null,
-      "riesgo": "ALTO",
-      "publica": false,
-      "roles": [],
-      "tablas": 15,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_changeStatus",
-      "origen": "CONTRATO_AUSENTE",
-      "metodo": "PATCH",
-      "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}/status",
-      "modulo": "insurance",
-      "bloque": "Financiero y ERP",
-      "nombre": null,
-      "riesgo": "ALTO",
-      "publica": false,
-      "roles": [],
-      "tablas": 9,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_listActive",
-      "origen": "CONTRATO_AUSENTE",
-      "metodo": "GET",
-      "ruta": "/['insurance/campaigns', 'insurance-campaigns']/active",
-      "modulo": "insurance",
-      "bloque": "Financiero y ERP",
-      "nombre": "Pública, sin token: rutas fijas van ANTES que `:id` para que Nest no las lea como un identificador.",
-      "riesgo": "BAJO",
-      "publica": true,
-      "roles": [],
-      "tablas": 4,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_myBenefits",
-      "origen": "CONTRATO_AUSENTE",
-      "metodo": "GET",
-      "ruta": "/['insurance/campaigns', 'insurance-campaigns']/my-benefits",
-      "modulo": "insurance",
-      "bloque": "Financiero y ERP",
-      "nombre": "El perfil sale del JWT (`pid`): el paciente nunca lo pone en la URL.",
-      "riesgo": "ALTO",
-      "publica": false,
-      "roles": [],
-      "tablas": 12,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_listForPatient",
-      "origen": "CONTRATO_AUSENTE",
-      "metodo": "GET",
-      "ruta": "/['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId}",
-      "modulo": "insurance",
-      "bloque": "Financiero y ERP",
-      "nombre": "Debe declararse ANTES de `GET :id`: si no, `patient` se leería como un id. El perfil viaja en la URL para que un intento sobre el de otro afiliado sea verificable y auditable. Se conserva junto a `my-benefits` para el caso de IDOR con un perfil ajeno explícito.",
-      "riesgo": "ALTO",
-      "publica": false,
-      "roles": [],
-      "tablas": 12,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
       "id": "BrokerCommissionController_generate",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -14256,6 +14412,134 @@
       "publica": false,
       "roles": [],
       "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_list[1]",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/insurance-campaigns",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Listar las campañas de la aseguradora activa",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_create[1]",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/insurance-campaigns",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Crear una campaña preventiva de la aseguradora",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_getById[1]",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/insurance-campaigns/{id}",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Consultar una campaña de la aseguradora activa",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_update[1]",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/insurance-campaigns/{id}",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Editar una campaña en borrador o pausada (422 si está activa o vencida)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 15,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_changeStatus[1]",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/insurance-campaigns/{id}/status",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Activar, pausar o finalizar una campaña (transiciones cerradas)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 9,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_listActive[1]",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/insurance-campaigns/active",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`)",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_myBenefits[1]",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/insurance-campaigns/my-benefits",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Campañas vigentes de mi aseguradora, para el afiliado autenticado",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_listForPatient[1]",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/insurance-campaigns/patient/{patientProfileId}",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Campañas vigentes de la aseguradora del afiliado (sólo el titular)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -14626,6 +14910,134 @@
       "publica": false,
       "roles": [],
       "tablas": 19,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_list[0]",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/insurance/campaigns",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Listar las campañas de la aseguradora activa",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_create[0]",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/insurance/campaigns",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Crear una campaña preventiva de la aseguradora",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_getById[0]",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/insurance/campaigns/{id}",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Consultar una campaña de la aseguradora activa",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_update[0]",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/insurance/campaigns/{id}",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Editar una campaña en borrador o pausada (422 si está activa o vencida)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 15,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_changeStatus[0]",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/insurance/campaigns/{id}/status",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Activar, pausar o finalizar una campaña (transiciones cerradas)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 9,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_listActive[0]",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/insurance/campaigns/active",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`)",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_myBenefits[0]",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/insurance/campaigns/my-benefits",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Campañas vigentes de mi aseguradora, para el afiliado autenticado",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "InsuranceCampaignsController_listForPatient[0]",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/insurance/campaigns/patient/{patientProfileId}",
+      "modulo": "insurance",
+      "bloque": "Financiero y ERP",
+      "nombre": "Campañas vigentes de la aseguradora del afiliado (sólo el titular)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15044,262 +15456,6 @@
         "SECURITY_ADMIN"
       ],
       "tablas": 6,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_list[1]",
-      "origen": "CONTRATO",
-      "metodo": "GET",
-      "ruta": "/insurance-campaigns",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Listar las campañas de la aseguradora activa",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_create[1]",
-      "origen": "CONTRATO",
-      "metodo": "POST",
-      "ruta": "/insurance-campaigns",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Crear una campaña preventiva de la aseguradora",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_getById[1]",
-      "origen": "CONTRATO",
-      "metodo": "GET",
-      "ruta": "/insurance-campaigns/{id}",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Consultar una campaña de la aseguradora activa",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_update[1]",
-      "origen": "CONTRATO",
-      "metodo": "PATCH",
-      "ruta": "/insurance-campaigns/{id}",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Editar una campaña en borrador o pausada (422 si está activa o vencida)",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_changeStatus[1]",
-      "origen": "CONTRATO",
-      "metodo": "PATCH",
-      "ruta": "/insurance-campaigns/{id}/status",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Activar, pausar o finalizar una campaña (transiciones cerradas)",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_listActive[1]",
-      "origen": "CONTRATO",
-      "metodo": "GET",
-      "ruta": "/insurance-campaigns/active",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`)",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_myBenefits[1]",
-      "origen": "CONTRATO",
-      "metodo": "GET",
-      "ruta": "/insurance-campaigns/my-benefits",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Campañas vigentes de mi aseguradora, para el afiliado autenticado",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_listForPatient[1]",
-      "origen": "CONTRATO",
-      "metodo": "GET",
-      "ruta": "/insurance-campaigns/patient/{patientProfileId}",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Campañas vigentes de la aseguradora del afiliado (sólo el titular)",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_list[0]",
-      "origen": "CONTRATO",
-      "metodo": "GET",
-      "ruta": "/insurance/campaigns",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Listar las campañas de la aseguradora activa",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 1,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_create[0]",
-      "origen": "CONTRATO",
-      "metodo": "POST",
-      "ruta": "/insurance/campaigns",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Crear una campaña preventiva de la aseguradora",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 1,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_getById[0]",
-      "origen": "CONTRATO",
-      "metodo": "GET",
-      "ruta": "/insurance/campaigns/{id}",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Consultar una campaña de la aseguradora activa",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 1,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_update[0]",
-      "origen": "CONTRATO",
-      "metodo": "PATCH",
-      "ruta": "/insurance/campaigns/{id}",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Editar una campaña en borrador o pausada (422 si está activa o vencida)",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 1,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_changeStatus[0]",
-      "origen": "CONTRATO",
-      "metodo": "PATCH",
-      "ruta": "/insurance/campaigns/{id}/status",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Activar, pausar o finalizar una campaña (transiciones cerradas)",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 1,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_listActive[0]",
-      "origen": "CONTRATO",
-      "metodo": "GET",
-      "ruta": "/insurance/campaigns/active",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`)",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 1,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_myBenefits[0]",
-      "origen": "CONTRATO",
-      "metodo": "GET",
-      "ruta": "/insurance/campaigns/my-benefits",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Campañas vigentes de mi aseguradora, para el afiliado autenticado",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
-      "eventos": 0,
-      "pruebas": 0,
-      "revision": "AUTO_DETECTADA"
-    },
-    {
-      "id": "InsuranceCampaignsController_listForPatient[0]",
-      "origen": "CONTRATO",
-      "metodo": "GET",
-      "ruta": "/insurance/campaigns/patient/{patientProfileId}",
-      "modulo": "insurance-campaigns",
-      "bloque": null,
-      "nombre": "Campañas vigentes de la aseguradora del afiliado (sólo el titular)",
-      "riesgo": "BAJO",
-      "publica": false,
-      "roles": [],
-      "tablas": 0,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16325,6 +16481,40 @@
       "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MedicalCentersController_search",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/medical-centers/search",
+      "modulo": "medical_centers",
+      "bloque": null,
+      "nombre": "Buscar centros médicos por procedimientos",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MedicalCentersController_searchForMyOrders",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/medical-centers/search/for-my-orders",
+      "modulo": "medical_centers",
+      "bloque": null,
+      "nombre": "Buscar centros médicos para mis órdenes",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -20896,21 +21086,51 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PracticesController_listHealthcareServices",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/practices/{practiceId}/healthcare-services",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Listar los procedimientos que ofrecen las sedes de la práctica",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PracticesController_publishHealthcareService",
       "origen": "CONTRATO",
       "metodo": "POST",
       "ruta": "/practices/{practiceId}/healthcare-services",
       "modulo": "practice",
       "bloque": "Práctica y Agenda",
-      "nombre": "Publicar un servicio de salud",
-      "riesgo": "MEDIO",
+      "nombre": "Publicar un procedimiento del nomenclador en una sede",
+      "riesgo": "ALTO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN"
-      ],
-      "tablas": 3,
+      "roles": [],
+      "tablas": 7,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PracticesController_updateHealthcareService",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/practices/{practiceId}/healthcare-services/{id}",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Actualizar el precio o el estado de un procedimiento de la sede",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -20965,12 +21185,10 @@
       "nombre": "Listar las vinculaciones profesional-organización de la práctica",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN"
-      ],
-      "tablas": 2,
+      "roles": [],
+      "tablas": 3,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -20992,6 +21210,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PracticeInvitationsController_invite",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/practices/{practiceId}/role-assignments/invitations",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Invitar a un profesional a procedimientos de una sede",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PracticesController_selfRequestRoleAssignment",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -21004,9 +21238,9 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 5,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -21048,7 +21282,7 @@
       ],
       "tablas": 2,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -21124,6 +21358,42 @@
         "PRACTITIONER"
       ],
       "tablas": 3,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerInvitationsController_accept",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/practitioners/me/role-assignments/{roleId}/accept",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Aceptar una invitación de un centro",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerInvitationsController_decline",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/practitioners/me/role-assignments/{roleId}/decline",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Declinar una invitación de un centro",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 2,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -21233,12 +21503,10 @@
       "nombre": "Aprobar una vinculación pendiente",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN"
-      ],
-      "tablas": 2,
+      "roles": [],
+      "tablas": 3,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -21254,7 +21522,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -21269,12 +21537,10 @@
       "nombre": "Rechazar una vinculación pendiente",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN"
-      ],
-      "tablas": 2,
+      "roles": [],
+      "tablas": 3,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -21308,7 +21574,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -21371,6 +21637,22 @@
       "tablas": 2,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "OrganizationPracticesController_create",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/tenants/{tenantId}/practices",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Crear la práctica y la primera sede de una organización",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -21861,7 +22143,7 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 24,
+      "tablas": 28,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27736,7 +28018,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27794,7 +28076,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27814,7 +28096,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27834,7 +28116,7 @@
         "DATA_PLATFORM_ADMIN",
         "PLATFORM_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"

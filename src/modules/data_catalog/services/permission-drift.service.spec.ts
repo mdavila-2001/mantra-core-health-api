@@ -52,21 +52,30 @@ describe('PermissionDriftService', () => {
     const { service, execute } = armar(
       [
         ruta('GET', '/a', ['DPO']),
-        ruta('GET', '/b', ['QA_ADMIN']),
-        ruta('GET', '/c', ['IDENTITY_ADMIN']),
+        ruta('GET', '/b', ['ROL_CREADO_A_MANO']),
+        ruta('GET', '/c', ['ROL_NUNCA_CREADO']),
         ruta('POST', '/w', ['SYSTEM']),
+        ruta('GET', '/seeded', ['QA_ADMIN', 'IDENTITY_ADMIN']),
+        ruta('GET', '/pharmacy', ['PHARMACY_STAFF']),
       ],
-      ['QA_ADMIN'],
+      ['ROL_CREADO_A_MANO'],
     );
     const r = await service.report(new Date('2026-10-24T12:00:00.000Z'));
     expect(r.generatedAt).toBe('2026-10-24T12:00:00.000Z');
     expect(r.usedNotSeeded.map((u) => [u.role, u.inDatabase])).toEqual([
-      ['IDENTITY_ADMIN', false],
-      ['QA_ADMIN', true],
+      ['ROL_CREADO_A_MANO', true],
+      ['ROL_NUNCA_CREADO', false],
     ]);
-    // DPO ya está sembrado por el propio módulo; SYSTEM es la cuenta de servicio
-    expect(r.usedNotSeeded.map((u) => u.role)).not.toContain('DPO');
-    expect(r.usedNotSeeded.map((u) => u.role)).not.toContain('SYSTEM');
+    // DPO, QA_ADMIN e IDENTITY_ADMIN ya los siembra la API; SYSTEM es la cuenta de servicio y
+    // PHARMACY_STAFF lo deriva el login de la membresía (no se siembra)
+    for (const sembrado of [
+      'DPO',
+      'SYSTEM',
+      'QA_ADMIN',
+      'IDENTITY_ADMIN',
+      'PHARMACY_STAFF',
+    ])
+      expect(r.usedNotSeeded.map((u) => u.role)).not.toContain(sembrado);
     expect(execute.mock.calls[0][1]).toEqual([CONCEPTS.STATE_ACTIVE]);
   });
 

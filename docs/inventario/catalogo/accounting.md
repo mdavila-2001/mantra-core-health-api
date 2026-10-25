@@ -23,7 +23,7 @@
 | [asset_depreciations](#asset_depreciations) | Registra depreciaciones calculadas para distribuir el valor de activos a lo largo de su vida contable. | 11 | 5 | 5 | COINCIDE |
 | [asset_postings](#asset_postings) | Conserva asientos generados por altas, bajas y depreciaciones de activos. | 11 | 9 | 4 | COINCIDE |
 | [asset_valuations](#asset_valuations) | Registra valores contables de activos en fechas y áreas de valoración determinadas. | 17 | 7 | 2 | COINCIDE |
-| [assets](#assets) | Cataloga activos institucionales para administrar su valor, ubicación y ciclo contable. | 20 | 8 | 13 | COINCIDE |
+| [assets](#assets) | Cataloga activos institucionales para administrar su valor, ubicación y ciclo contable. | 20 | 8 | 21 | COINCIDE |
 | [clearing_documents](#clearing_documents) | Representa documentos que compensan partidas abiertas dentro de procesos contables. | 10 | 8 | 2 | COINCIDE |
 | [clearing_items](#clearing_items) | Detalla partidas incluidas en una compensación para verificar qué saldos quedaron conciliados. | 10 | 6 | 1 | COINCIDE |
 | [company_bank_accounts](#company_bank_accounts) | Registra cuentas bancarias institucionales usadas para cobros y pagos de la organización sanitaria. | 18 | 10 | 1 | COINCIDE |
@@ -38,7 +38,7 @@
 | [functional_areas](#functional_areas) | Define áreas funcionales para clasificar gastos y resultados según actividad institucional. | 11 | 7 | 0 | COINCIDE |
 | [infrastructure_items](#infrastructure_items) | Cataloga infraestructura física o tecnológica que representa recursos y activos del prestador. | 14 | 7 | 0 | COINCIDE |
 | [internal_orders](#internal_orders) | Agrupa costos y compromisos de iniciativas internas para facilitar seguimiento presupuestario. | 20 | 14 | 0 | COINCIDE |
-| [journal_entry_assignments](#journal_entry_assignments) | Asocia asientos con dimensiones contables para clasificar movimientos por unidad y propósito. | 30 | 32 | 15 | COINCIDE |
+| [journal_entry_assignments](#journal_entry_assignments) | Asocia asientos con dimensiones contables para clasificar movimientos por unidad y propósito. | 30 | 32 | 16 | COINCIDE |
 | [journal_transactions](#journal_transactions) | Agrupa asientos contables de una operación para conservar su registro financiero balanceado. | 22 | 9 | 38 | COINCIDE |
 | [ledger_entries](#ledger_entries) | Registra líneas de débito y crédito en cuentas para reflejar operaciones del libro mayor. | 16 | 7 | 22 | COINCIDE |
 | [liabilities](#liabilities) | Representa obligaciones financieras de la organización para controlar vencimientos, pagos y saldos. | 19 | 7 | 10 | COINCIDE |
@@ -1663,7 +1663,7 @@ Cataloga activos institucionales para administrar su valor, ubicación y ciclo c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: assets`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `Assets` — `src/modules/accounting/entities/assets.entity.ts`
-- **Resumen:** 20 columnas · 8 índices · 7 FK salientes · 14 entrantes · 13 operaciones
+- **Resumen:** 20 columnas · 8 índices · 7 FK salientes · 14 entrantes · 21 operaciones
 
 #### Columnas
 
@@ -1733,11 +1733,16 @@ Cataloga activos institucionales para administrar su valor, ubicación y ciclo c
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /accounting/accruals/run | LEE | DIRECTA |
 | GET /accounting/assets | LEE | DIRECTA |
 | POST /accounting/assets/capitalize | CREA | DIRECTA |
 | POST /accounting/assets/capitalize | LEE | DIRECTA |
+| POST /accounting/clearing-documents | LEE | DIRECTA |
 | POST /accounting/depreciation/run | ACTUALIZA | POR_TIPO |
 | POST /accounting/depreciation/run | LEE | DIRECTA |
+| POST /accounting/journal-transactions | LEE | DIRECTA |
+| POST /accounting/journal-transactions/drafts | LEE | DIRECTA |
+| POST /accounting/liabilities/{id}/payments | LEE | DIRECTA |
 | GET /accounting/practitioner/assets | LEE | DIRECTA |
 | POST /accounting/practitioner/assets | CREA | DIRECTA |
 | POST /accounting/practitioner/assets | LEE | DIRECTA |
@@ -1746,6 +1751,9 @@ Cataloga activos institucionales para administrar su valor, ubicación y ciclo c
 | GET /accounting/practitioner/assets/{id}/depreciations | LEE | DIRECTA |
 | POST /accounting/practitioner/assets/{id}/progress | ACTUALIZA | POR_TIPO |
 | POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
+| POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
+| POST /accounting/practitioner/entries | LEE | DIRECTA |
+| POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -2903,7 +2911,7 @@ Asocia asientos con dimensiones contables para clasificar movimientos por unidad
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_16_accounting.puml: journal_entry_assignments`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_16_accounting.puml` · **DDL:** `SQL/16_accounting/02_tables.sql`
 - **Entidad del ORM:** `JournalEntryAssignments` — `src/modules/accounting/entities/journal_entry_assignments.entity.ts`
-- **Resumen:** 30 columnas · 32 índices · 27 FK salientes · 0 entrantes · 15 operaciones
+- **Resumen:** 30 columnas · 32 índices · 27 FK salientes · 0 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -2976,8 +2984,8 @@ Asocia asientos con dimensiones contables para clasificar movimientos por unidad
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_journal_entry_assignments_ledger_entry_id` | sí | ledger_entry_id | Garantiza que no se repita la combinación (ledger_entry_id) _(DOCUMENTO)_; Soporta la clave foránea fk_journal_entry_assignments_ledger_entry_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «ledger_entry_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_journal_entry_assignments_ledger_entry_id` | no | ledger_entry_id | Soporta la clave foránea fk_journal_entry_assignments_ledger_entry_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «ledger_entry_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_journal_entry_assignments_ledger_entry_id` | sí | ledger_entry_id | Garantiza que no se repita la combinación (ledger_entry_id) _(DOCUMENTO)_; Soporta la clave foránea fk_journal_entry_assignments_ledger_entry_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «ledger_entry_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_journal_entry_assignments_ledger_entry_id` | no | ledger_entry_id | Soporta la clave foránea fk_journal_entry_assignments_ledger_entry_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «ledger_entry_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_journal_entry_assignments_branch_id` | no | branch_id | Soporta la clave foránea fk_journal_entry_assignments_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_journal_entry_assignments_department_id` | no | department_id | Soporta la clave foránea fk_journal_entry_assignments_department_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_journal_entry_assignments_cost_center_id` | no | cost_center_id | Soporta la clave foránea fk_journal_entry_assignments_cost_center_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3025,6 +3033,7 @@ Asocia asientos con dimensiones contables para clasificar movimientos por unidad
 | POST /accounting/depreciation/run | CREA | DIRECTA |
 | GET /accounting/dimensions | LEE | DIRECTA |
 | POST /accounting/journal-transactions | CREA | DIRECTA |
+| GET /accounting/journal-transactions/{id} | LEE | DIRECTA |
 | POST /accounting/journal-transactions/{id}/reverse | CREA | DIRECTA |
 | POST /accounting/journal-transactions/{id}/reverse | LEE | DIRECTA |
 | POST /accounting/journal-transactions/drafts | CREA | DIRECTA |

@@ -102,6 +102,9 @@ export enum BillingErrorReason {
   /** El servicio del catálogo no existe o no es visible para el tenant/práctica del actor. */
   SERVICE_CATALOG_ITEM_NOT_VISIBLE = 'SERVICE_CATALOG_ITEM_NOT_VISIBLE',
 
+  /** El archivo propuesto como imagen del servicio no existe o el actor no puede usarlo (mismo 404 en todos los casos). */
+  SERVICE_CATALOG_IMAGE_NOT_USABLE = 'SERVICE_CATALOG_IMAGE_NOT_USABLE',
+
   /** El monto del pago recibido debe ser positivo. */
   PAYMENT_RECEIVED_AMOUNT_NOT_POSITIVE = 'PAYMENT_RECEIVED_AMOUNT_NOT_POSITIVE',
 

@@ -221,8 +221,9 @@ stateDiagram-v2
 
 | Operación | Estados de destino que nombra | A través de |
 |---|---|---|
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | sin destino nombrado | InsuranceCampaignsService.changeStatus |
-| POST /payments/callbacks/{callbackPath} | sin destino nombrado | PaymentsTransactionsService.applyCallback |
+| PATCH /insurance-campaigns/{id}/status | sin destino nombrado | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus |
+| PATCH /insurance/campaigns/{id}/status | sin destino nombrado | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus |
+| POST /payments/callbacks/{callbackPath} | sin destino nombrado | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback |
 
 ## Árbol de decisión por operación
 

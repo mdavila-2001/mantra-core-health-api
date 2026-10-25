@@ -22,7 +22,7 @@
 | [analytics_governance_log](#analytics_governance_log) | Registra cambios de gobierno analítico para conservar trazabilidad de decisiones que afectan el uso secundario de datos de salud. | 9 | 5 | 4 | COINCIDE |
 | [appointment_bookings_history](#appointment_bookings_history) | Preserva versiones o estados históricos de appointment bookings para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 53 | COINCIDE |
 | [assets_history](#assets_history) | Preserva versiones o estados históricos de assets para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [audit_log](#audit_log) | Conserva eventos de auditoría de acciones del sistema para reconstruir quién realizó operaciones y cuándo. | 14 | 8 | 187 | COINCIDE |
+| [audit_log](#audit_log) | Conserva eventos de auditoría de acciones del sistema para reconstruir quién realizó operaciones y cuándo. | 14 | 8 | 201 | COINCIDE |
 | [automated_rules_history](#automated_rules_history) | Preserva versiones o estados históricos de automated rules para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [bills_history](#bills_history) | Preserva versiones o estados históricos de bills para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [booking_policies_history](#booking_policies_history) | Preserva versiones o estados históricos de booking policies para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -972,7 +972,7 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: audit_log`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `AuditLog` — `src/modules/audit/entities/audit_log.entity.ts`
-- **Resumen:** 14 columnas · 8 índices · 6 FK salientes · 0 entrantes · 187 operaciones
+- **Resumen:** 14 columnas · 8 índices · 6 FK salientes · 0 entrantes · 201 operaciones
 
 #### Columnas
 
@@ -1092,20 +1092,34 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns'] | CREA | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns'] | LEE | DIRECTA |
-| POST /['insurance/campaigns', 'insurance-campaigns'] | CREA | DIRECTA |
-| POST /['insurance/campaigns', 'insurance-campaigns'] | LEE | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | CREA | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | DIRECTA |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | CREA | DIRECTA |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | DIRECTA |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | CREA | DIRECTA |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | LEE | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | CREA | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | LEE | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | CREA | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | LEE | DIRECTA |
+| GET /insurance-campaigns | CREA | DIRECTA |
+| GET /insurance-campaigns | LEE | DIRECTA |
+| POST /insurance-campaigns | CREA | DIRECTA |
+| POST /insurance-campaigns | LEE | DIRECTA |
+| GET /insurance-campaigns/{id} | CREA | DIRECTA |
+| GET /insurance-campaigns/{id} | LEE | DIRECTA |
+| PATCH /insurance-campaigns/{id} | CREA | DIRECTA |
+| PATCH /insurance-campaigns/{id} | LEE | DIRECTA |
+| PATCH /insurance-campaigns/{id}/status | CREA | DIRECTA |
+| PATCH /insurance-campaigns/{id}/status | LEE | DIRECTA |
+| GET /insurance-campaigns/my-benefits | CREA | DIRECTA |
+| GET /insurance-campaigns/my-benefits | LEE | DIRECTA |
+| GET /insurance-campaigns/patient/{patientProfileId} | CREA | DIRECTA |
+| GET /insurance-campaigns/patient/{patientProfileId} | LEE | DIRECTA |
+| GET /insurance/campaigns | CREA | DIRECTA |
+| GET /insurance/campaigns | LEE | DIRECTA |
+| POST /insurance/campaigns | CREA | DIRECTA |
+| POST /insurance/campaigns | LEE | DIRECTA |
+| GET /insurance/campaigns/{id} | CREA | DIRECTA |
+| GET /insurance/campaigns/{id} | LEE | DIRECTA |
+| PATCH /insurance/campaigns/{id} | CREA | DIRECTA |
+| PATCH /insurance/campaigns/{id} | LEE | DIRECTA |
+| PATCH /insurance/campaigns/{id}/status | CREA | DIRECTA |
+| PATCH /insurance/campaigns/{id}/status | LEE | DIRECTA |
+| GET /insurance/campaigns/my-benefits | CREA | DIRECTA |
+| GET /insurance/campaigns/my-benefits | LEE | DIRECTA |
+| GET /insurance/campaigns/patient/{patientProfileId} | CREA | DIRECTA |
+| GET /insurance/campaigns/patient/{patientProfileId} | LEE | DIRECTA |
 | GET /insurance/portability/certificates/{certificateId}/json | CREA | DIRECTA |
 | GET /insurance/portability/certificates/{certificateId}/json | LEE | DIRECTA |
 | GET /insurance/portability/certificates/{certificateId}/pdf | CREA | DIRECTA |

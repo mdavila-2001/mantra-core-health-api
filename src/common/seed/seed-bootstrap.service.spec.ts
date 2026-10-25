@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { SeedBootstrapService } from './seed-bootstrap.service';
+import { SeedCoreState } from './seed-core.state';
 
 /** Los seeds de la cadena, en el orden en que el orquestador los corre. */
 /**
@@ -58,7 +59,7 @@ function loggerFake() {
  *
  * @param fail - Nombres de los seeds que deben lanzar en esta corrida.
  */
-function build(fail: Step[] = []) {
+function build(fail: Step[] = [], coreState?: SeedCoreState) {
   const logger = loggerFake();
   const double = Object.fromEntries(
     STEPS.map((name) => [
@@ -105,6 +106,7 @@ function build(fail: Step[] = []) {
     double.directoryNetworks as never,
     double.qaFlows as never,
     logger as never,
+    coreState,
   );
 
   return { service, dobles: double, logger };
@@ -128,6 +130,47 @@ const CONTENT: readonly Step[] = [
 
 /** Los pasos de núcleo, que corren siempre que la cadena corra. */
 const CORE: readonly Step[] = STEPS.filter((name) => !CONTENT.includes(name));
+
+describe('SeedBootstrapService · estado de los seeds núcleo para /readiness (SEED-01)', () => {
+  it('un paso núcleo fallido queda registrado aunque el entorno no lo haga fatal', async () => {
+    const state = new SeedCoreState();
+    const { service } = build(['clinicalRoles'], state);
+
+    const summary = await service.run();
+
+    expect(summary.coreFailed).toEqual(['roles asistenciales']);
+    expect(state.failedSteps()).toEqual(summary.coreFailed);
+    expect(state.isComplete()).toBe(false);
+  });
+
+  it('un paso de contenido fallido no vuelve incompleto al núcleo', async () => {
+    const state = new SeedCoreState();
+    const { service } = build(['glossary'], state);
+
+    await service.run();
+
+    expect(state.isComplete()).toBe(true);
+  });
+
+  it('una corrida limpia borra el fallo de la anterior', async () => {
+    const state = new SeedCoreState();
+    state.record(['catálogo de conceptos']);
+    const { service } = build([], state);
+
+    await service.run();
+
+    expect(state.isComplete()).toBe(true);
+  });
+
+  it('si el catálogo de conceptos no queda disponible, el aborto también se registra', async () => {
+    const state = new SeedCoreState();
+    const { service } = build(['terminology'], state);
+
+    await service.run();
+
+    expect(state.failedSteps()).toEqual(['catálogo de conceptos']);
+  });
+});
 
 describe('SeedBootstrapService', () => {
   const environmentOriginal = process.env.SEED_ON_BOOT;

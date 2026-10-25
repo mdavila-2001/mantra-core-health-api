@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -9,7 +10,9 @@ import {
   Patch,
   Post,
   Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -114,6 +117,32 @@ export class BillingServiceCatalogController {
       cursor,
       limit: limit ?? DEFAULT_PAGE_SIZE,
     });
+  }
+
+  /**
+   * Imagen de un servicio del catálogo (decisión P-22-8, opción 1).
+   *
+   * Sesión autenticada y nada más: la autorización es por contexto, en el
+   * servicio (servicio activo de una práctica del tenant activo). Un servicio
+   * ajeno, inactivo, sin imagen o inexistente responde el mismo 404.
+   *
+   * `no-store` y `nosniff`, como en el resto de descargas autenticadas.
+   */
+  @Get(':id/image')
+  @Header('Cache-Control', 'private, no-store')
+  @ApiOperation({
+    summary: 'Descargar la imagen de un servicio que el actor puede ver',
+    description:
+      'Autoriza por contexto: servicio activo de una práctica del tenant activo. 404 uniforme en cualquier otro caso.',
+  })
+  async getImage(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    const content = await this.serviceCatalogService.getImageContent(id);
+    res.setHeader('Content-Type', content.mimeType);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.send(content.buffer);
   }
 
   /**
