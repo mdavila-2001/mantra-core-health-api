@@ -41,14 +41,14 @@ _Fuente: `src/modules/diagnostics/README.md:3`_
 |  |  | GET /diagnostics/patients/{patientProfileId}/imaging-studies | CLINICIAN · PRACTITIONER | BAJO | 4 |
 | `ctrl:DiagnosticsLabController` | Operaciones de DiagnosticsLabController que el README no asigna a un caso de uso | POST /diagnostics/analyzer-runs | Cualquier sesión válida | ALTO | 1 |
 |  |  | GET /diagnostics/work-orders | Cualquier sesión válida | BAJO | 1 |
-| `ctrl:DiagnosticsOrdersController` | Operaciones de DiagnosticsOrdersController que el README no asigna a un caso de uso | GET /diagnostics/patients/{patientProfileId}/orders | CLINICIAN · PRACTITIONER | BAJO | 2 |
+| `ctrl:DiagnosticsOrdersController` | Operaciones de DiagnosticsOrdersController que el README no asigna a un caso de uso | GET /diagnostics/patients/{patientProfileId}/orders | CLINICIAN · PRACTITIONER | BAJO | 3 |
 | `ctrl:DiagnosticsPatientResultsController` | Operaciones de DiagnosticsPatientResultsController que el README no asigna a un caso de uso | GET /diagnostic-results/me | PATIENT | BAJO | 7 |
 |  |  | GET /diagnostic-results/me/{reportId} | PATIENT | BAJO | 7 |
 |  |  | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | PATIENT | BAJO | 9 |
 |  |  | GET /diagnostic-results/me/{reportId}/shares | PATIENT | BAJO | 4 |
 |  |  | POST /diagnostic-results/me/{reportId}/shares | PATIENT | MEDIO | 11 |
 |  |  | POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke | PATIENT | MEDIO | 5 |
-|  |  | GET /diagnostic-results/me/orders | PATIENT | BAJO | 26 |
+|  |  | GET /diagnostic-results/me/orders | PATIENT | BAJO | 27 |
 | `ctrl:DiagnosticsReceptionController` | Operaciones de DiagnosticsReceptionController que el README no asigna a un caso de uso | POST /diagnostics/service-requests/inbox | Cualquier sesión válida | BAJO | 10 |
 | `ctrl:DiagnosticsSpecimensController` | Operaciones de DiagnosticsSpecimensController que el README no asigna a un caso de uso | GET /diagnostics/accessions/{id} | Cualquier sesión válida | BAJO | 5 |
 |  |  | POST /diagnostics/specimens | Cualquier sesión válida | ALTO | 3 |
@@ -256,136 +256,138 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["CLINICIAN · PRACTITIONER"]):::actor
-  a6(["PATIENT"]):::actor
-  a31(["Cualquier sesión válida"]):::actor
+  a7(["PATIENT"]):::actor
+  a32(["Cualquier sesión válida"]):::actor
   t3[("clinical.diagnostic_reports")]:::tabla
   t4[("clinical.service_requests")]:::tabla
-  t7[("diagnostics.diagnostic_release_events")]:::tabla
-  t8[("diagnostics.diagnostic_report_files")]:::tabla
-  t9[("diagnostics.diagnostic_report_results")]:::tabla
-  t10[("diagnostics.diagnostic_report_versions")]:::tabla
-  t11[("profiles.patient_profiles")]:::tabla
-  t16[("common.file_versions")]:::tabla
-  t17[("common.files")]:::tabla
-  t20[("authz.resource_scope_grants")]:::tabla
-  t21[("profiles.person_account_links")]:::tabla
-  t23[("authz.care_relationships")]:::tabla
-  t27[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t28[("diagnostic_units.diagnostic_units")]:::tabla
-  t32[("diagnostics.laboratory_accessions")]:::tabla
-  t33[("diagnostics.specimen_chain_of_custody_events")]:::tabla
-  t34[("diagnostics.specimen_containers")]:::tabla
-  t35[("diagnostics.specimens")]:::tabla
-  t36[("directory.tenants")]:::tabla
-  t39[("diagnostics.accession_specimens")]:::tabla
-  t41[("clinical.encounters")]:::tabla
+  t5[("practice.practice_sites")]:::tabla
+  t8[("diagnostics.diagnostic_release_events")]:::tabla
+  t9[("diagnostics.diagnostic_report_files")]:::tabla
+  t10[("diagnostics.diagnostic_report_results")]:::tabla
+  t11[("diagnostics.diagnostic_report_versions")]:::tabla
+  t12[("profiles.patient_profiles")]:::tabla
+  t17[("common.file_versions")]:::tabla
+  t18[("common.files")]:::tabla
+  t21[("authz.resource_scope_grants")]:::tabla
+  t22[("profiles.person_account_links")]:::tabla
+  t24[("authz.care_relationships")]:::tabla
+  t28[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t29[("diagnostic_units.diagnostic_units")]:::tabla
+  t33[("diagnostics.laboratory_accessions")]:::tabla
+  t34[("diagnostics.specimen_chain_of_custody_events")]:::tabla
+  t35[("diagnostics.specimen_containers")]:::tabla
+  t36[("diagnostics.specimens")]:::tabla
+  t37[("directory.tenants")]:::tabla
+  t40[("diagnostics.accession_specimens")]:::tabla
+  t42[("clinical.encounters")]:::tabla
   subgraph s0["ctrl:DiagnosticsOrdersController · Operaciones de DiagnosticsOrdersController q…"]
     o1["GET /diagnostics/patients/{patientProfileId}/orders"]:::op
   end
-  t12[("+1 tablas más")]
-  t14[("+1 tablas más")]
-  t18[("+3 tablas más")]
-  t24[("+5 tablas más")]
-  t29[("+20 tablas más")]
+  t13[("+1 tablas más")]
+  t15[("+1 tablas más")]
+  t19[("+3 tablas más")]
+  t25[("+5 tablas más")]
+  t30[("+21 tablas más")]
   subgraph s1["ctrl:DiagnosticsPatientResultsController · Operaciones de DiagnosticsPatientRes…"]
-    o5["GET /diagnostic-results/me"]:::op
-    o13["GET /diagnostic-results/me/{reportId}"]:::op
-    o15["GET /diagnostic-results/me/{reportId}/files/{fileId}/content"]:::op
-    o19["GET /diagnostic-results/me/{reportId}/shares"]:::op
-    o22["POST /diagnostic-results/me/{reportId}/shares"]:::op
-    o25["POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke"]:::op
-    o26["GET /diagnostic-results/me/orders"]:::op
+    o6["GET /diagnostic-results/me"]:::op
+    o14["GET /diagnostic-results/me/{reportId}"]:::op
+    o16["GET /diagnostic-results/me/{reportId}/files/{fileId}/content"]:::op
+    o20["GET /diagnostic-results/me/{reportId}/shares"]:::op
+    o23["POST /diagnostic-results/me/{reportId}/shares"]:::op
+    o26["POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke"]:::op
+    o27["GET /diagnostic-results/me/orders"]:::op
   end
-  t37[("+4 tablas más")]
+  t38[("+4 tablas más")]
   subgraph s2["ctrl:DiagnosticsReceptionController · Operaciones de DiagnosticsReceptionContro…"]
-    o30["POST /diagnostics/service-requests/inbox"]:::op
+    o31["POST /diagnostics/service-requests/inbox"]:::op
   end
   subgraph s3["ctrl:DiagnosticsSpecimensController · Operaciones de DiagnosticsSpecimensContro…"]
-    o38["GET /diagnostics/accessions/{id}"]:::op
-    o40["POST /diagnostics/specimens"]:::op
-    o42["GET /diagnostics/specimens/{id}"]:::op
-    o43["POST /diagnostics/specimens/{id}/containers"]:::op
+    o39["GET /diagnostics/accessions/{id}"]:::op
+    o41["POST /diagnostics/specimens"]:::op
+    o43["GET /diagnostics/specimens/{id}"]:::op
+    o44["POST /diagnostics/specimens/{id}/containers"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
-  a6 --> o5
-  o5 -->|"LEE"| t3
-  o5 -->|"LEE"| t7
-  o5 -->|"LEE"| t8
-  o5 -->|"LEE"| t9
-  o5 -->|"LEE"| t10
-  o5 -->|"LEE"| t11
-  o5 -.-> t12
-  a6 --> o13
-  o13 -->|"LEE"| t3
-  o13 -->|"LEE"| t7
-  o13 -->|"LEE"| t8
-  o13 -->|"LEE"| t9
-  o13 -->|"LEE"| t10
-  o13 -->|"LEE"| t11
-  o13 -.-> t14
-  a6 --> o15
-  o15 -->|"LEE"| t3
-  o15 -->|"LEE"| t16
-  o15 -->|"LEE"| t17
-  o15 -->|"LEE"| t7
-  o15 -->|"LEE"| t8
-  o15 -->|"LEE"| t9
-  o15 -.-> t18
-  a6 --> o19
-  o19 -->|"LEE"| t20
-  o19 -->|"LEE"| t3
-  o19 -->|"LEE"| t11
-  o19 -->|"LEE"| t21
-  a6 --> o22
-  o22 -->|"LEE"| t23
-  o22 -->|"ACTUALIZA"| t20
-  o22 -->|"CREA"| t20
-  o22 -->|"LEE"| t20
-  o22 -->|"LEE"| t3
-  o22 -->|"LEE"| t7
-  o22 -.-> t24
-  a6 --> o25
-  o25 -->|"ACTUALIZA"| t20
-  o25 -->|"LEE"| t20
-  o25 -->|"LEE"| t3
-  o25 -->|"LEE"| t11
-  o25 -->|"LEE"| t21
-  a6 --> o26
+  o1 -->|"LEE"| t5
+  a7 --> o6
+  o6 -->|"LEE"| t3
+  o6 -->|"LEE"| t8
+  o6 -->|"LEE"| t9
+  o6 -->|"LEE"| t10
+  o6 -->|"LEE"| t11
+  o6 -->|"LEE"| t12
+  o6 -.-> t13
+  a7 --> o14
+  o14 -->|"LEE"| t3
+  o14 -->|"LEE"| t8
+  o14 -->|"LEE"| t9
+  o14 -->|"LEE"| t10
+  o14 -->|"LEE"| t11
+  o14 -->|"LEE"| t12
+  o14 -.-> t15
+  a7 --> o16
+  o16 -->|"LEE"| t3
+  o16 -->|"LEE"| t17
+  o16 -->|"LEE"| t18
+  o16 -->|"LEE"| t8
+  o16 -->|"LEE"| t9
+  o16 -->|"LEE"| t10
+  o16 -.-> t19
+  a7 --> o20
+  o20 -->|"LEE"| t21
+  o20 -->|"LEE"| t3
+  o20 -->|"LEE"| t12
+  o20 -->|"LEE"| t22
+  a7 --> o23
+  o23 -->|"LEE"| t24
+  o23 -->|"ACTUALIZA"| t21
+  o23 -->|"CREA"| t21
+  o23 -->|"LEE"| t21
+  o23 -->|"LEE"| t3
+  o23 -->|"LEE"| t8
+  o23 -.-> t25
+  a7 --> o26
+  o26 -->|"ACTUALIZA"| t21
+  o26 -->|"LEE"| t21
   o26 -->|"LEE"| t3
-  o26 -->|"LEE"| t4
-  o26 -->|"LEE"| t27
-  o26 -->|"LEE"| t28
-  o26 -->|"LEE"| t7
-  o26 -->|"LEE"| t8
-  o26 -.-> t29
-  a31 --> o30
-  o30 -->|"LEE"| t4
-  o30 -->|"LEE"| t32
-  o30 -->|"LEE"| t33
-  o30 -->|"LEE"| t34
-  o30 -->|"LEE"| t35
-  o30 -->|"LEE"| t36
-  o30 -.-> t37
-  a31 --> o38
-  o38 -->|"LEE"| t39
-  o38 -->|"LEE"| t32
-  o38 -->|"LEE"| t33
-  o38 -->|"LEE"| t34
-  o38 -->|"LEE"| t35
-  a31 --> o40
-  o40 -->|"LEE"| t41
-  o40 -->|"LEE"| t4
-  o40 -->|"CREA"| t35
-  a31 --> o42
-  o42 -->|"LEE"| t33
-  o42 -->|"LEE"| t34
-  o42 -->|"LEE"| t35
-  a31 --> o43
-  o43 -->|"CREA"| t34
+  o26 -->|"LEE"| t12
+  o26 -->|"LEE"| t22
+  a7 --> o27
+  o27 -->|"LEE"| t3
+  o27 -->|"LEE"| t4
+  o27 -->|"LEE"| t28
+  o27 -->|"LEE"| t29
+  o27 -->|"LEE"| t8
+  o27 -->|"LEE"| t9
+  o27 -.-> t30
+  a32 --> o31
+  o31 -->|"LEE"| t4
+  o31 -->|"LEE"| t33
+  o31 -->|"LEE"| t34
+  o31 -->|"LEE"| t35
+  o31 -->|"LEE"| t36
+  o31 -->|"LEE"| t37
+  o31 -.-> t38
+  a32 --> o39
+  o39 -->|"LEE"| t40
+  o39 -->|"LEE"| t33
+  o39 -->|"LEE"| t34
+  o39 -->|"LEE"| t35
+  o39 -->|"LEE"| t36
+  a32 --> o41
+  o41 -->|"LEE"| t42
+  o41 -->|"LEE"| t4
+  o41 -->|"CREA"| t36
+  a32 --> o43
   o43 -->|"LEE"| t34
   o43 -->|"LEE"| t35
+  o43 -->|"LEE"| t36
+  a32 --> o44
+  o44 -->|"CREA"| t35
+  o44 -->|"LEE"| t35
+  o44 -->|"LEE"| t36
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1067,8 +1069,12 @@ flowchart TD
   n41 --> n42
   n43[("LEE diagnostics.diagnostic_report_results")]:::efecto
   n42 --> n43
-  n44(("200 Responde con éxito")):::ok
+  n44["Llama a SuggestedSiteNamesReader.namesFor"]:::llamada
   n43 --> n44
+  n45[("LEE practice.practice_sites")]:::efecto
+  n44 --> n45
+  n46(("200 Responde con éxito")):::ok
+  n45 --> n46
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2720,5 +2726,5 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
-| GET /diagnostics/patients/{patientProfileId}/orders | 200, 400, 401, 403, 429 | 2 |
+| GET /diagnostics/patients/{patientProfileId}/orders | 200, 400, 401, 403, 429 | 3 |
 | GET /diagnostics/work-orders | 200, 401, 403, 429 | 1 |

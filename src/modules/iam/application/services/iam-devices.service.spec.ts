@@ -8,6 +8,7 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ForbiddenException } from '@nestjs/common';
 import { IamDevicesService } from './iam-devices.service';
 import { CONCEPTS, ResourceNotFoundException } from '../../../../common';
 
@@ -77,5 +78,37 @@ describe('IamDevicesService (UC-01-05)', () => {
     await expect(
       d.service.register('u1', { deviceFingerprint: 'fp' }, actor as any),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
+  });
+
+  describe('titularidad de la cuenta', () => {
+    it('rechaza con 403 que otra sesión registre un dispositivo de confianza en la cuenta ajena', async () => {
+      const d = build();
+      d.usersRepo.findById.mockResolvedValue({ id: 'u2' });
+      await expect(
+        d.service.register(
+          'u2',
+          { deviceFingerprint: 'fp', trust: true },
+          actor as any,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.usersRepo.findById).not.toHaveBeenCalled();
+      expect(d.devicesRepo.create).not.toHaveBeenCalled();
+      expect(d.eventsRepo.record).not.toHaveBeenCalled();
+    });
+
+    it.each(['SECURITY_ADMIN', 'SUPERADMIN'])(
+      'deja que %s registre un dispositivo en una cuenta ajena',
+      async (role) => {
+        const d = build();
+        d.usersRepo.findById.mockResolvedValue({ id: 'u2' });
+        d.devicesRepo.create.mockReturnValue({ id: 'dev2' });
+        const res = await d.service.register(
+          'u2',
+          { deviceFingerprint: 'fp' },
+          { id: 'admin', roles: [role] } as any,
+        );
+        expect(res).toEqual({ id: 'dev2', userId: 'u2', trusted: false });
+      },
+    );
   });
 });

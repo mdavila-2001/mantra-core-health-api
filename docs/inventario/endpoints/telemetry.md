@@ -3,8 +3,8 @@
 # Endpoints del módulo `telemetry`
 
 - **Bloque:** Operaciones de Plataforma (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
-- **Operaciones:** 22 (22 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 8 · MEDIO 5 · BAJO 9
+- **Operaciones:** 25 (25 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 8 · MEDIO 5 · BAJO 12
 - **Tablas distintas que tocan:** 15
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/telemetry.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -14,26 +14,29 @@
 |---|---|---|---|---|---|---|
 | 1 | GET | `/admin/analytics/funnels` | Embudos definidos con sus pasos | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
 | 2 | GET | `/admin/analytics/funnels/{funnelId}/report` | Embudo por sesión: denominador, conversión por paso y conversiones confirmadas por servidor | BAJO | 6 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 3 | GET | `/admin/analytics/overview` | Totales, rutas y eventos principales de la ventana | BAJO | 1 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 4 | GET | `/admin/analytics/pipeline-health` | Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara | BAJO | 2 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 5 | GET | `/admin/analytics/sessions` | Sesiones de la ventana (sin identificadores de sesión ni sujeto) | BAJO | 2 | PLATFORM_ADMIN, SECURITY_ADMIN, DPO |
-| 6 | GET | `/admin/analytics/sessions/{id}` | Timeline de una sesión: eventos y nombres de propiedad, sin valores | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DPO |
-| 7 | GET | `/admin/analytics/timeseries` | Eventos y sesiones por hora o día (UTC), cubos vacíos en 0 | BAJO | 1 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 8 | GET | `/admin/analytics/web-vitals` | p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 9 | POST | `/telemetry/activity-events` | Capturar evento(s) de actividad consent-aware (batch) | ALTO | 10 | sesión (sin roles) |
-| 10 | POST | `/telemetry/analytics-subjects` | Provisionar sujeto de analítica pseudónimo | MEDIO | 2 | SECURITY_ADMIN |
-| 11 | POST | `/telemetry/client-contexts` | Registrar contexto de cliente/dispositivo + journey | ALTO | 5 | sesión (sin roles) |
-| 12 | POST | `/telemetry/conversion-events` | Registrar evento de conversión con atribución | ALTO | 7 | sesión (sin roles) |
-| 13 | POST | `/telemetry/disclosure-acceptances` | Registrar aceptación de disclosure por usuario/sesión | ALTO | 3 | sesión (sin roles) |
-| 14 | POST | `/telemetry/disclosure-versions` | Publicar versión de disclosure de tracking | MEDIO | 3 | SECURITY_ADMIN |
-| 15 | POST | `/telemetry/event-schemas` | Registrar esquema de evento de actividad (versionado) | MEDIO | 3 | SECURITY_ADMIN |
-| 16 | POST | `/telemetry/funnels` | Definir funnel y sus pasos | MEDIO | 5 | SECURITY_ADMIN |
-| 17 | POST | `/telemetry/session-journeys/{id}/close` | Cerrar journey de sesión y consolidar métricas | ALTO | 4 | sesión (sin roles) |
-| 18 | POST | `/telemetry/tracking-consents` | Otorgar consentimiento de tracking por propósito | ALTO | 2 | sesión (sin roles) |
-| 19 | POST | `/telemetry/tracking-consents/{id}/withdraw` | Retirar consentimiento y desactivar sujeto (cascada) | ALTO | 4 | sesión (sin roles) |
-| 20 | GET | `/telemetry/tracking-consents/me` | Estado vigente de mi consentimiento de tracking | BAJO | 1 | sesión (sin roles) |
-| 21 | POST | `/telemetry/tracking-purposes` | Definir propósito de tracking y base legal | MEDIO | 2 | SECURITY_ADMIN |
-| 22 | POST | `/telemetry/web-vitals` | Registrar métricas Core Web Vitals por ruta (batch) | ALTO | 6 | sesión (sin roles) |
+| 3 | GET | `/admin/analytics/onboarding/funnel` | Reporte de embudo y deserción paso a paso para formularios de alta | BAJO | 0 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 4 | GET | `/admin/analytics/onboarding/heatmap` | Mapa de calor por campo y nivel de fricción para formularios de alta | BAJO | 0 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 5 | GET | `/admin/analytics/overview` | Totales, rutas y eventos principales de la ventana | BAJO | 1 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 6 | GET | `/admin/analytics/pipeline-health` | Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara | BAJO | 2 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 7 | GET | `/admin/analytics/sessions` | Sesiones de la ventana (sin identificadores de sesión ni sujeto) | BAJO | 2 | PLATFORM_ADMIN, SECURITY_ADMIN, DPO |
+| 8 | GET | `/admin/analytics/sessions/{id}` | Timeline de una sesión: eventos y nombres de propiedad, sin valores | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DPO |
+| 9 | GET | `/admin/analytics/timeseries` | Eventos y sesiones por hora o día (UTC), cubos vacíos en 0 | BAJO | 1 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 10 | GET | `/admin/analytics/web-vitals` | p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 11 | POST | `/telemetry/activity-events` | Capturar evento(s) de actividad consent-aware (batch) | ALTO | 10 | sesión (sin roles) |
+| 12 | POST | `/telemetry/analytics-subjects` | Provisionar sujeto de analítica pseudónimo | MEDIO | 2 | SECURITY_ADMIN |
+| 13 | POST | `/telemetry/client-contexts` | Registrar contexto de cliente/dispositivo + journey | ALTO | 5 | sesión (sin roles) |
+| 14 | POST | `/telemetry/conversion-events` | Registrar evento de conversión con atribución | ALTO | 7 | sesión (sin roles) |
+| 15 | POST | `/telemetry/disclosure-acceptances` | Registrar aceptación de disclosure por usuario/sesión | ALTO | 3 | sesión (sin roles) |
+| 16 | POST | `/telemetry/disclosure-versions` | Publicar versión de disclosure de tracking | MEDIO | 3 | SECURITY_ADMIN |
+| 17 | POST | `/telemetry/event-schemas` | Registrar esquema de evento de actividad (versionado) | MEDIO | 3 | SECURITY_ADMIN |
+| 18 | POST | `/telemetry/funnels` | Definir funnel y sus pasos | MEDIO | 5 | SECURITY_ADMIN |
+| 19 | POST | `/telemetry/onboarding-events` | Captura eventos de telemetría de alta y avance en formularios de registro | BAJO | 0 | pública |
+| 20 | POST | `/telemetry/session-journeys/{id}/close` | Cerrar journey de sesión y consolidar métricas | ALTO | 4 | sesión (sin roles) |
+| 21 | POST | `/telemetry/tracking-consents` | Otorgar consentimiento de tracking por propósito | ALTO | 2 | sesión (sin roles) |
+| 22 | POST | `/telemetry/tracking-consents/{id}/withdraw` | Retirar consentimiento y desactivar sujeto (cascada) | ALTO | 4 | sesión (sin roles) |
+| 23 | GET | `/telemetry/tracking-consents/me` | Estado vigente de mi consentimiento de tracking | BAJO | 1 | sesión (sin roles) |
+| 24 | POST | `/telemetry/tracking-purposes` | Definir propósito de tracking y base legal | MEDIO | 2 | SECURITY_ADMIN |
+| 25 | POST | `/telemetry/web-vitals` | Registrar métricas Core Web Vitals por ruta (batch) | ALTO | 6 | sesión (sin roles) |
 
 ---
 
@@ -62,8 +65,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:149` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -127,9 +130,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:156` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: funnelId | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:156` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -186,7 +189,141 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 3. GET /admin/analytics/overview
+## 3. GET /admin/analytics/onboarding/funnel
+
+- **Origen:** CONTRATO
+- **Nombre:** Reporte de embudo y deserción paso a paso para formularios de alta
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — No toca tablas relacionales
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `TelemetryOnboardingAnalyticsController.getFunnelReport` — `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:42`
+
+### Qué es y para qué sirve (negocio)
+
+Reporte de embudo y deserción paso a paso para formularios de alta. Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/analytics/onboarding/funnel` la atiende `TelemetryOnboardingAnalyticsController.getFunnelReport` (src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:42). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryOnboardingAnalyticsService.getFunnelReport`. No toca tablas relacionales: Calcula el embudo sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos..
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:42` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+No toca tablas relacionales: Calcula el embudo sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos.. _(manual, 2026-10-25; fuente: `src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19`)_
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.spec.ts:30` |
+
+### Flujos
+
+- Módulo Telemetry (28) — etapa `ctrl:TelemetryOnboardingAnalyticsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 4. GET /admin/analytics/onboarding/heatmap
+
+- **Origen:** CONTRATO
+- **Nombre:** Mapa de calor por campo y nivel de fricción para formularios de alta
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — No toca tablas relacionales
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `TelemetryOnboardingAnalyticsController.getHeatmapReport` — `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:56`
+
+### Qué es y para qué sirve (negocio)
+
+Mapa de calor por campo y nivel de fricción para formularios de alta. Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/analytics/onboarding/heatmap` la atiende `TelemetryOnboardingAnalyticsController.getHeatmapReport` (src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:56). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryOnboardingAnalyticsService.getHeatmapReport`. No toca tablas relacionales: Calcula el mapa de calor sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos..
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:56` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_QUERY | metric (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+No toca tablas relacionales: Calcula el mapa de calor sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos.. _(manual, 2026-10-25; fuente: `src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19`)_
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `metric` | query | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.spec.ts:39` |
+
+### Flujos
+
+- Módulo Telemetry (28) — etapa `ctrl:TelemetryOnboardingAnalyticsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. GET /admin/analytics/overview
 
 - **Origen:** CONTRATO
 - **Nombre:** Totales, rutas y eventos principales de la ventana
@@ -211,8 +348,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:121` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -261,7 +398,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 4. GET /admin/analytics/pipeline-health
+## 6. GET /admin/analytics/pipeline-health
 
 - **Origen:** CONTRATO
 - **Nombre:** Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara
@@ -286,8 +423,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:169` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -337,7 +474,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 5. GET /admin/analytics/sessions
+## 7. GET /admin/analytics/sessions
 
 - **Origen:** CONTRATO
 - **Nombre:** Sesiones de la ventana (sin identificadores de sesión ni sujeto)
@@ -362,8 +499,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:179` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -415,7 +552,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 6. GET /admin/analytics/sessions/{id}
+## 8. GET /admin/analytics/sessions/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Timeline de una sesión: eventos y nombres de propiedad, sin valores
@@ -440,9 +577,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:188` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:188` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -491,7 +628,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 7. GET /admin/analytics/timeseries
+## 9. GET /admin/analytics/timeseries
 
 - **Origen:** CONTRATO
 - **Nombre:** Eventos y sesiones por hora o día (UTC), cubos vacíos en 0
@@ -516,8 +653,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:130` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -566,7 +703,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 8. GET /admin/analytics/web-vitals
+## 10. GET /admin/analytics/web-vitals
 
 - **Origen:** CONTRATO
 - **Nombre:** p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra
@@ -591,8 +728,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -645,7 +782,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 9. POST /telemetry/activity-events
+## 11. POST /telemetry/activity-events
 
 - **Origen:** CONTRATO
 - **Nombre:** Capturar evento(s) de actividad consent-aware (batch)
@@ -670,10 +807,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:45` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -790,7 +927,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 10. POST /telemetry/analytics-subjects
+## 12. POST /telemetry/analytics-subjects
 
 - **Origen:** CONTRATO
 - **Nombre:** Provisionar sujeto de analítica pseudónimo
@@ -815,10 +952,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -891,7 +1028,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 11. POST /telemetry/client-contexts
+## 13. POST /telemetry/client-contexts
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar contexto de cliente/dispositivo + journey
@@ -916,10 +1053,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1017,7 +1154,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. POST /telemetry/conversion-events
+## 14. POST /telemetry/conversion-events
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar evento de conversión con atribución
@@ -1042,10 +1179,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1124,7 +1261,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. POST /telemetry/disclosure-acceptances
+## 15. POST /telemetry/disclosure-acceptances
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar aceptación de disclosure por usuario/sesión
@@ -1149,10 +1286,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:46` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1226,7 +1363,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 14. POST /telemetry/disclosure-versions
+## 16. POST /telemetry/disclosure-versions
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar versión de disclosure de tracking
@@ -1251,10 +1388,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1331,7 +1468,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 15. POST /telemetry/event-schemas
+## 17. POST /telemetry/event-schemas
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar esquema de evento de actividad (versionado)
@@ -1356,10 +1493,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:55` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1446,7 +1583,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 16. POST /telemetry/funnels
+## 18. POST /telemetry/funnels
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir funnel y sus pasos
@@ -1471,10 +1608,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1574,7 +1711,76 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 17. POST /telemetry/session-journeys/{id}/close
+## 19. POST /telemetry/onboarding-events
+
+- **Origen:** CONTRATO
+- **Nombre:** Captura eventos de telemetría de alta y avance en formularios de registro
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — No toca tablas relacionales
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `TelemetryOnboardingAnalyticsController.recordEvents` — `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:27`
+
+### Qué es y para qué sirve (negocio)
+
+Captura eventos de telemetría de alta y avance en formularios de registro. Dentro del módulo (descripción del modelo, en inglés): «Tracks application journeys for security, product and commercial analysis while separating mandatory security audit from optional/regulated analytics.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_28_telemetry.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`POST /telemetry/onboarding-events` la atiende `TelemetryOnboardingAnalyticsController.recordEvents` (src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:27). Es una ruta pública: no exige token. Valida el cuerpo como `IngestOnboardingEventsDto` (0 campos, 0 obligatorios). Delega en `TelemetryOnboardingAnalyticsService.recordEvents`. No toca tablas relacionales: Los eventos del embudo de alta se acumulan sólo en la memoria del proceso (`events`); no hay fila en Postgres..
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.ts:27` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+No toca tablas relacionales: Los eventos del embudo de alta se acumulan sólo en la memoria del proceso (`events`); no hay fila en Postgres.. _(manual, 2026-10-25; fuente: `src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19`)_
+
+### Cuerpo — DTO `IngestOnboardingEventsDto` · `application/json`
+
+_El DTO no declara campos documentables, o no se pudo leer._
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+### Respuesta — `{ ok: boolean }` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-onboarding-analytics.controller.spec.ts:14` |
+
+### Flujos
+
+- Módulo Telemetry (28) — etapa `ctrl:TelemetryOnboardingAnalyticsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 20. POST /telemetry/session-journeys/{id}/close
 
 - **Origen:** CONTRATO
 - **Nombre:** Cerrar journey de sesión y consolidar métricas
@@ -1599,11 +1805,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:113` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/telemetry/controllers/telemetry-events.controller.ts:113` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1677,7 +1883,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 18. POST /telemetry/tracking-consents
+## 21. POST /telemetry/tracking-consents
 
 - **Origen:** CONTRATO
 - **Nombre:** Otorgar consentimiento de tracking por propósito
@@ -1702,10 +1908,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1781,7 +1987,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 19. POST /telemetry/tracking-consents/{id}/withdraw
+## 22. POST /telemetry/tracking-consents/{id}/withdraw
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar consentimiento y desactivar sujeto (cascada)
@@ -1806,9 +2012,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:106` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:106` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1866,7 +2072,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 20. GET /telemetry/tracking-consents/me
+## 23. GET /telemetry/tracking-consents/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Estado vigente de mi consentimiento de tracking
@@ -1891,9 +2097,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:80` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_QUERY | purposeDefinitionId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1941,7 +2147,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 21. POST /telemetry/tracking-purposes
+## 24. POST /telemetry/tracking-purposes
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir propósito de tracking y base legal
@@ -1966,10 +2172,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2053,7 +2259,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ---
 
-## 22. POST /telemetry/web-vitals
+## 25. POST /telemetry/web-vitals
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar métricas Core Web Vitals por ruta (batch)
@@ -2078,10 +2284,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:80` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 

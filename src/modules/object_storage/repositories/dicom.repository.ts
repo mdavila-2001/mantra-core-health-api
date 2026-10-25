@@ -141,6 +141,24 @@ export class DicomRepository {
     return count > 0;
   }
 
+  /**
+   * Paciente de un estudio de imagen de la custodia del tenant.
+   *
+   * @returns El perfil del paciente, o `undefined` si el estudio no existe, no
+   *   es del tenant o no tiene paciente.
+   */
+  async imagingStudyPatientId(
+    em: EntityManager,
+    imagingStudyId: string,
+    tenantId: string,
+  ): Promise<string | undefined> {
+    const study = await em.findOne(ImagingStudies, {
+      id: imagingStudyId,
+      custodianTenantId: tenantId,
+    });
+    return study?.patientProfileId ?? undefined;
+  }
+
   // --- Series (UC-60-04, 05) ---
 
   /**

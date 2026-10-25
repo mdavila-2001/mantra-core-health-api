@@ -88,10 +88,12 @@ export class DicomCatalogService {
         dto.studyInstanceUid,
       );
       const studyCreated = study === null;
-      if (studyCreated) await this.assertClinicalReferences(tx, dto, tenantId);
+      const patientProfileId = studyCreated
+        ? await this.assertClinicalReferences(tx, dto, tenantId)
+        : undefined;
       study ??= this.dicomRepo.createStudy(tx, {
         tenantId,
-        patientProfileId: dto.patientProfileId,
+        patientProfileId,
         imagingStudyId: dto.imagingStudyId,
         studyInstanceUid: dto.studyInstanceUid,
         accessionNumber: dto.accessionNumber,
@@ -404,12 +406,18 @@ export class DicomCatalogService {
    * (en custodia del tenant y de ese mismo paciente) es la única prueba de que
    * la organización tiene relación con él. Con sólo `patientProfileId` un
    * gateway ataría imágenes al expediente de cualquier persona.
+   *
+   * Si el cuerpo cita el estudio de imagen pero no el paciente, el paciente se
+   * deriva del estudio: omitirlo no deja el estudio DICOM sin paciente, y con
+   * eso fuera de la política de acceso que se apoya en él.
+   *
+   * @returns El paciente al que queda atado el estudio DICOM, si lo hay.
    */
   private async assertClinicalReferences(
     tx: EntityManager,
     dto: CatalogDicomStudyDto,
     tenantId: string,
-  ): Promise<void> {
+  ): Promise<string | undefined> {
     if (
       dto.patientProfileId &&
       (!dto.imagingStudyId ||
@@ -428,6 +436,13 @@ export class DicomCatalogService {
     ) {
       throw this.catalogOutOfScope();
     }
+    if (dto.patientProfileId || !dto.imagingStudyId)
+      return dto.patientProfileId;
+    return this.dicomRepo.imagingStudyPatientId(
+      tx,
+      dto.imagingStudyId,
+      tenantId,
+    );
   }
 
   /** Modalidades distintas presentes en el estudio, en orden estable. */

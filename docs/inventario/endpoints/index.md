@@ -2,17 +2,17 @@
 
 # Inventario de endpoints
 
-Se inventarían **1553 operaciones HTTP** en **72 módulos**: 1536 publicadas en el contrato OpenAPI y 17 que existen sólo en el código.
+Se inventarían **1574 operaciones HTTP** en **72 módulos**: 1565 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1481
-- Riesgo ALTO 179 · MEDIO 875 · BAJO 499
-- Mencionadas por al menos una prueba: 882
+- Con al menos una tabla identificada: 1513
+- Riesgo ALTO 189 · MEDIO 887 · BAJO 498
+- Mencionadas por al menos una prueba: 916
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
 | Módulo | Operaciones | Riesgo alto | Documento |
 |---|---|---|---|
-| `accounting` | 46 | 0 | [accounting.md](accounting.md) |
+| `accounting` | 59 | 3 | [accounting.md](accounting.md) |
 | `ads` | 18 | 0 | [ads.md](ads.md) |
 | `app` | 6 | 0 | [app.md](app.md) |
 | `audio_assets` | 10 | 2 | [audio_assets.md](audio_assets.md) |
@@ -20,11 +20,11 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `auth_providers` | 12 | 1 | [auth_providers.md](auth_providers.md) |
 | `authz` | 32 | 0 | [authz.md](authz.md) |
 | `automation` | 17 | 0 | [automation.md](automation.md) |
-| `billing` | 34 | 5 | [billing.md](billing.md) |
+| `billing` | 35 | 5 | [billing.md](billing.md) |
 | `chart` | 23 | 3 | [chart.md](chart.md) |
-| `clinical` | 41 | 1 | [clinical.md](clinical.md) |
+| `clinical` | 42 | 1 | [clinical.md](clinical.md) |
 | `clinical_ext` | 27 | 2 | [clinical_ext.md](clinical_ext.md) |
-| `common` | 19 | 10 | [common.md](common.md) |
+| `common` | 19 | 6 | [common.md](common.md) |
 | `community` | 102 | 29 | [community.md](community.md) |
 | `consent` | 22 | 0 | [consent.md](consent.md) |
 | `content_packs` | 2 | 1 | [content_packs.md](content_packs.md) |
@@ -43,14 +43,14 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `graph_intelligence` | 15 | 4 | [graph_intelligence.md](graph_intelligence.md) |
 | `health_context` | 13 | 0 | [health_context.md](health_context.md) |
 | `health_data` | 16 | 0 | [health_data.md](health_data.md) |
-| `iam` | 36 | 18 | [iam.md](iam.md) |
+| `iam` | 39 | 18 | [iam.md](iam.md) |
 | `identity_assurance` | 28 | 5 | [identity_assurance.md](identity_assurance.md) |
-| `insurance` | 63 | 20 | [insurance.md](insurance.md) |
-| `insurance-campaigns` | 16 | 0 | [insurance-campaigns.md](insurance-campaigns.md) |
+| `insurance` | 71 | 27 | [insurance.md](insurance.md) |
 | `integration_contracts` | 12 | 0 | [integration_contracts.md](integration_contracts.md) |
 | `integrations` | 15 | 2 | [integrations.md](integrations.md) |
 | `lakehouse` | 13 | 0 | [lakehouse.md](lakehouse.md) |
 | `marketing` | 15 | 2 | [marketing.md](marketing.md) |
+| `medical_centers` | 2 | 0 | [medical_centers.md](medical_centers.md) |
 | `medical_groups` | 9 | 0 | [medical_groups.md](medical_groups.md) |
 | `messaging` | 21 | 1 | [messaging.md](messaging.md) |
 | `object_storage` | 14 | 0 | [object_storage.md](object_storage.md) |
@@ -62,7 +62,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `pharmacy_inventory` | 29 | 1 | [pharmacy_inventory.md](pharmacy_inventory.md) |
 | `platform_ops` | 15 | 0 | [platform_ops.md](platform_ops.md) |
 | `polyglot_storage` | 15 | 0 | [polyglot_storage.md](polyglot_storage.md) |
-| `practice` | 30 | 0 | [practice.md](practice.md) |
+| `practice` | 36 | 4 | [practice.md](practice.md) |
 | `procedures_perioperative` | 32 | 0 | [procedures_perioperative.md](procedures_perioperative.md) |
 | `profiles` | 57 | 25 | [profiles.md](profiles.md) |
 | `promotions` | 20 | 0 | [promotions.md](promotions.md) |
@@ -78,7 +78,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `surveys` | 17 | 2 | [surveys.md](surveys.md) |
 | `system_context` | 13 | 0 | [system_context.md](system_context.md) |
 | `system_ops` | 24 | 1 | [system_ops.md](system_ops.md) |
-| `telemetry` | 22 | 8 | [telemetry.md](telemetry.md) |
+| `telemetry` | 25 | 8 | [telemetry.md](telemetry.md) |
 | `terminology` | 25 | 2 | [terminology.md](terminology.md) |
 | `time_series` | 14 | 0 | [time_series.md](time_series.md) |
 | `tracking` | 11 | 1 | [tracking.md](tracking.md) |

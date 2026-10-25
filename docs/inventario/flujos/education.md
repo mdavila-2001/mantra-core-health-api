@@ -49,7 +49,7 @@ _Fuente: `src/modules/education/README.md:65`_
 | `UC-47-02` | Publicar versión del curso | POST /education/courses/{id}/versions/publish | EDUCATION_ADMIN · COURSE_AUTHOR | MEDIO | 4 |
 | `UC-47-03` | Asignar instructor | POST /education/courses/{id}/instructors | EDUCATION_ADMIN | MEDIO | 5 |
 | `UC-47-04` | Abrir cohorte | POST /education/courses/{id}/cohorts | EDUCATION_ADMIN | MEDIO | 3 |
-| `UC-47-05` | Inscribir aprendiz | POST /education/enrollments | EDUCATION_ADMIN · LEARNER | MEDIO | 5 |
+| `UC-47-05` | Inscribir aprendiz | POST /education/enrollments | EDUCATION_ADMIN · LEARNER | MEDIO | 6 |
 | `UC-47-06` | Registrar progreso | POST /education/enrollments/{id}/lesson-progress | LEARNER · EDUCATION_ADMIN · SYSTEM | MEDIO | 7 |
 | `UC-47-07` | Diseñar evaluación | POST /education/courses/{id}/assessments | EDUCATION_ADMIN · COURSE_AUTHOR | MEDIO | 4 |
 | `UC-47-08` | Iniciar intento | POST /education/assessments/{id}/attempts | LEARNER · EDUCATION_ADMIN | MEDIO | 5 |
@@ -67,10 +67,10 @@ flowchart LR
   a2(["EDUCATION_ADMIN · COURSE_AUTHOR"]):::actor
   a9(["EDUCATION_ADMIN"]):::actor
   a15(["EDUCATION_ADMIN · LEARNER"]):::actor
-  a18(["LEARNER · EDUCATION_ADMIN · SYSTEM"]):::actor
-  a25(["LEARNER · EDUCATION_ADMIN"]):::actor
-  a29(["SYSTEM · EDUCATION_ADMIN · LEARNER"]):::actor
-  a32(["SYSTEM · EDUCATION_ADMIN"]):::actor
+  a19(["LEARNER · EDUCATION_ADMIN · SYSTEM"]):::actor
+  a26(["LEARNER · EDUCATION_ADMIN"]):::actor
+  a30(["SYSTEM · EDUCATION_ADMIN · LEARNER"]):::actor
+  a33(["SYSTEM · EDUCATION_ADMIN"]):::actor
   t3[("education.course_modules")]:::tabla
   t4[("education.course_versions")]:::tabla
   t5[("education.courses")]:::tabla
@@ -79,13 +79,14 @@ flowchart LR
   t11[("education.instructors")]:::tabla
   t13[("education.course_cohorts")]:::tabla
   t16[("education.enrollments")]:::tabla
-  t19[("education.lesson_progress")]:::tabla
-  t22[("education.assessment_questions")]:::tabla
-  t23[("education.assessments")]:::tabla
-  t26[("education.assessment_attempts")]:::tabla
-  t33[("education.certificates")]:::tabla
-  t35[("education.cme_credit_records")]:::tabla
-  t37[("education.course_reviews")]:::tabla
+  t17[("payments.payment_intents")]:::tabla
+  t20[("education.lesson_progress")]:::tabla
+  t23[("education.assessment_questions")]:::tabla
+  t24[("education.assessments")]:::tabla
+  t27[("education.assessment_attempts")]:::tabla
+  t34[("education.certificates")]:::tabla
+  t36[("education.cme_credit_records")]:::tabla
+  t38[("education.course_reviews")]:::tabla
   subgraph s0["UC-47-01 · Publicar curso con módulos y lecciones"]
     o1["POST /education/courses/publish"]:::op
   end
@@ -101,34 +102,34 @@ flowchart LR
   subgraph s4["UC-47-05 · Inscribir aprendiz"]
     o14["POST /education/enrollments"]:::op
   end
-  t20[("+1 tablas más")]
+  t21[("+1 tablas más")]
   subgraph s5["UC-47-06 · Registrar progreso"]
-    o17["POST /education/enrollments/{id}/lesson-progress"]:::op
+    o18["POST /education/enrollments/{id}/lesson-progress"]:::op
   end
   subgraph s6["UC-47-07 · Diseñar evaluación"]
-    o21["POST /education/courses/{id}/assessments"]:::op
+    o22["POST /education/courses/{id}/assessments"]:::op
   end
   subgraph s7["UC-47-08 · Iniciar intento"]
-    o24["POST /education/assessments/{id}/attempts"]:::op
+    o25["POST /education/assessments/{id}/attempts"]:::op
   end
   subgraph s8["UC-47-09 · Enviar y calificar"]
-    o27["POST /education/attempts/{id}/submit"]:::op
+    o28["POST /education/attempts/{id}/submit"]:::op
   end
-  t30[("+2 tablas más")]
+  t31[("+2 tablas más")]
   subgraph s9["UC-47-10 · Completar curso"]
-    o28["POST /education/enrollments/{id}/complete"]:::op
+    o29["POST /education/enrollments/{id}/complete"]:::op
   end
   subgraph s10["UC-47-11 · Emitir certificado"]
-    o31["POST /education/enrollments/{id}/certificate"]:::op
+    o32["POST /education/enrollments/{id}/certificate"]:::op
   end
   subgraph s11["UC-47-12 · Acreditar CME"]
-    o34["POST /education/certificates/{id}/cme-credits"]:::op
+    o35["POST /education/certificates/{id}/cme-credits"]:::op
   end
   subgraph s12["UC-47-13 · Publicar reseña"]
-    o36["POST /education/courses/{id}/reviews"]:::op
+    o37["POST /education/courses/{id}/reviews"]:::op
   end
   subgraph s13["UC-47-14 · Revocar y revertir CME"]
-    o38["POST /education/certificates/{id}/revoke"]:::op
+    o39["POST /education/certificates/{id}/revoke"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -157,60 +158,61 @@ flowchart LR
   o14 -->|"LEE"| t5
   o14 -->|"CREA"| t16
   o14 -->|"LEE"| t16
-  a18 --> o17
-  o17 -->|"LEE"| t3
-  o17 -->|"LEE"| t5
-  o17 -->|"ACTUALIZA"| t16
-  o17 -->|"LEE"| t16
-  o17 -->|"CREA"| t19
-  o17 -->|"LEE"| t19
-  o17 -.-> t20
-  a2 --> o21
-  o21 -->|"CREA"| t22
-  o21 -->|"CREA"| t23
-  o21 -->|"LEE"| t3
-  o21 -->|"LEE"| t5
-  a25 --> o24
-  o24 -->|"CREA"| t26
-  o24 -->|"LEE"| t26
-  o24 -->|"LEE"| t23
-  o24 -->|"LEE"| t5
-  o24 -->|"LEE"| t16
-  a25 --> o27
-  o27 -->|"ACTUALIZA"| t26
-  o27 -->|"LEE"| t26
-  o27 -->|"LEE"| t22
-  o27 -->|"LEE"| t23
-  o27 -->|"LEE"| t5
-  o27 -->|"LEE"| t16
-  a29 --> o28
-  o28 -->|"LEE"| t26
+  o14 -->|"LEE"| t17
+  a19 --> o18
+  o18 -->|"LEE"| t3
+  o18 -->|"LEE"| t5
+  o18 -->|"ACTUALIZA"| t16
+  o18 -->|"LEE"| t16
+  o18 -->|"CREA"| t20
+  o18 -->|"LEE"| t20
+  o18 -.-> t21
+  a2 --> o22
+  o22 -->|"CREA"| t23
+  o22 -->|"CREA"| t24
+  o22 -->|"LEE"| t3
+  o22 -->|"LEE"| t5
+  a26 --> o25
+  o25 -->|"CREA"| t27
+  o25 -->|"LEE"| t27
+  o25 -->|"LEE"| t24
+  o25 -->|"LEE"| t5
+  o25 -->|"LEE"| t16
+  a26 --> o28
+  o28 -->|"ACTUALIZA"| t27
+  o28 -->|"LEE"| t27
   o28 -->|"LEE"| t23
-  o28 -->|"LEE"| t3
+  o28 -->|"LEE"| t24
   o28 -->|"LEE"| t5
-  o28 -->|"ACTUALIZA"| t16
   o28 -->|"LEE"| t16
-  o28 -.-> t30
-  a32 --> o31
-  o31 -->|"CREA"| t33
-  o31 -->|"LEE"| t33
-  o31 -->|"LEE"| t5
-  o31 -->|"LEE"| t16
-  a32 --> o34
-  o34 -->|"LEE"| t33
-  o34 -->|"CREA"| t35
-  o34 -->|"LEE"| t35
-  o34 -->|"LEE"| t5
-  a25 --> o36
-  o36 -->|"CREA"| t37
-  o36 -->|"LEE"| t37
-  o36 -->|"LEE"| t5
-  a9 --> o38
-  o38 -->|"ACTUALIZA"| t33
-  o38 -->|"LEE"| t33
-  o38 -->|"ACTUALIZA"| t35
-  o38 -->|"LEE"| t35
-  o38 -->|"LEE"| t5
+  a30 --> o29
+  o29 -->|"LEE"| t27
+  o29 -->|"LEE"| t24
+  o29 -->|"LEE"| t3
+  o29 -->|"LEE"| t5
+  o29 -->|"ACTUALIZA"| t16
+  o29 -->|"LEE"| t16
+  o29 -.-> t31
+  a33 --> o32
+  o32 -->|"CREA"| t34
+  o32 -->|"LEE"| t34
+  o32 -->|"LEE"| t5
+  o32 -->|"LEE"| t16
+  a33 --> o35
+  o35 -->|"LEE"| t34
+  o35 -->|"CREA"| t36
+  o35 -->|"LEE"| t36
+  o35 -->|"LEE"| t5
+  a26 --> o37
+  o37 -->|"CREA"| t38
+  o37 -->|"LEE"| t38
+  o37 -->|"LEE"| t5
+  a9 --> o39
+  o39 -->|"ACTUALIZA"| t34
+  o39 -->|"LEE"| t34
+  o39 -->|"ACTUALIZA"| t36
+  o39 -->|"LEE"| t36
+  o39 -->|"LEE"| t5
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -992,10 +994,10 @@ Inscribir a un aprendiz
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Esta forma de inscripción es administrativa |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
-| 409 | `CONFLICT` | ConflictException: El aprendiz ya está inscrito en el curso; ConflictException: La cohorte no tiene plazas disponibles |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una inscripción comprada necesita su intento de pago; PreconditionFailedException: Indique el aprendiz que se inscribe; PreconditionFailedException: El curso no está publicado; PreconditionFailedException: La cohorte pertenece a otro curso; PreconditionFailedException: La cohorte no está abierta |
+| 409 | `CONFLICT` | ConflictException: El pago ya respalda otra inscripción; ConflictException: El aprendiz ya está inscrito en el curso; ConflictException: La cohorte no tiene plazas disponibles |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una inscripción comprada necesita su intento de pago; PreconditionFailedException: El intento de pago sólo aplica a una inscripción comprada; PreconditionFailedException: Indique el aprendiz que se inscribe; PreconditionFailedException: El curso no está publicado; PreconditionFailedException: El curso es de pago: la inscripción requiere una compra confirmada; PreconditionFailedException: El pago de la inscripción no está confirmado; PreconditionFailedException: El curso tiene precio pero no moneda: no se puede verificar el pago; PreconditionFailedException: El pago no corresponde a esta compra; PreconditionFailedException: La cohorte pertenece a otro curso; PreconditionFailedException: La cohorte no está abierta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1009,95 +1011,140 @@ flowchart TD
   n3 --> n4
   n5(["422 PRECONDITION_FAILED Una inscripción comprada necesita su intento de pago"]):::error
   n4 -->|"sí"| n5
-  n6["Llama a EducationScopeService.resolveLearnerRef"]:::llamada
+  n6{"dto.source !== 'PURCHASED' && dto.paymentIntentId"}:::decision
   n4 -->|"no"| n6
-  n7{"!own || (declaredRefId !== undefined && declaredRefId !== own)"}:::decision
-  n6 --> n7
-  n8(["↩ (relanza el error capturado)"]):::error
-  n7 -->|"sí"| n8
-  n9{"!learnerRefId"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED Indique el aprendiz que se inscribe"]):::error
-  n9 -->|"sí"| n10
-  n11["Transacción: transactional(…)"]:::transaccion
-  n9 -->|"no"| n11
-  n12["Llama a EducationScopeService.course"]:::llamada
-  n11 --> n12
-  n13["Llama a EducationCatalogRepository.findCourseById"]:::llamada
-  n12 --> n13
-  n14[("LEE education.courses")]:::efecto
-  n13 --> n14
-  n15["Llama a EducationCatalogRepository.findCourseForUpdate"]:::llamada
-  n14 --> n15
-  n16[("LEE education.courses")]:::efecto
+  n7(["422 PRECONDITION_FAILED El intento de pago sólo aplica a una inscripción comprada"]):::error
+  n6 -->|"sí"| n7
+  n8{"learnerOnly && (dto.source === 'ASSIGNED' || dto.source === 'PARTNER')"}:::decision
+  n6 -->|"no"| n8
+  n9(["403 FORBIDDEN Esta forma de inscripción es administrativa"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a EducationScopeService.resolveLearnerRef"]:::llamada
+  n8 -->|"no"| n10
+  n11{"!own || (declaredRefId !== undefined && declaredRefId !== own)"}:::decision
+  n10 --> n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"!learnerRefId"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED Indique el aprendiz que se inscribe"]):::error
+  n13 -->|"sí"| n14
+  n15["Transacción: transactional(…)"]:::transaccion
+  n13 -->|"no"| n15
+  n16["Llama a EducationScopeService.course"]:::llamada
   n15 --> n16
-  n17{"course.statusConceptId !== CONCEPTS.COURSE_PUBLISHED"}:::decision
+  n17["Llama a EducationCatalogRepository.findCourseById"]:::llamada
   n16 --> n17
-  n18(["422 PRECONDITION_FAILED El curso no está publicado"]):::error
-  n17 -->|"sí"| n18
-  n19["Llama a EducationLearningRepository.findLiveEnrollment"]:::llamada
-  n17 -->|"no"| n19
-  n20[("LEE education.enrollments")]:::efecto
+  n18[("LEE education.courses")]:::efecto
+  n17 --> n18
+  n19["Llama a EducationCatalogRepository.findCourseForUpdate"]:::llamada
+  n18 --> n19
+  n20[("LEE education.courses")]:::efecto
   n19 --> n20
-  n21{"live"}:::decision
+  n21{"course.statusConceptId !== CONCEPTS.COURSE_PUBLISHED"}:::decision
   n20 --> n21
-  n22(["409 CONFLICT El aprendiz ya está inscrito en el curso"]):::error
+  n22(["422 PRECONDITION_FAILED El curso no está publicado"]):::error
   n21 -->|"sí"| n22
-  n23{"dto.cohortId"}:::decision
+  n23{"learnerOnly && dto.source !== 'PURCHASED' && Number(course.price ?? '0') › 0"}:::decision
   n21 -->|"no"| n23
-  n24["Llama a EducationScopeService.cohort"]:::llamada
+  n24(["422 PRECONDITION_FAILED El curso es de pago: la inscripción requiere una compra confirmada"]):::error
   n23 -->|"sí"| n24
-  n25["Llama a EducationCatalogRepository.findCohortById"]:::llamada
-  n24 --> n25
-  n26[("LEE education.course_cohorts")]:::efecto
-  n25 --> n26
-  n27["Llama a EducationScopeService.assertCourseInScope"]:::llamada
+  n25{"dto.source === 'PURCHASED'"}:::decision
+  n23 -->|"no"| n25
+  n26["Llama a EducationLearningService.assertPurchaseConfirmed"]:::llamada
+  n25 -->|"sí"| n26
+  n27["Llama a EducationLearningRepository.findPaymentIntent"]:::llamada
   n26 --> n27
-  n28["Llama a EducationCatalogRepository.findCourseById"]:::llamada
+  n28[("LEE payments.payment_intents")]:::efecto
   n27 --> n28
-  n29[("LEE education.courses")]:::efecto
+  n29["Llama a EducationLearningRepository.findPaymentIntentForUpdate"]:::llamada
   n28 --> n29
-  n30["Llama a EducationCatalogRepository.findCohortForUpdate"]:::llamada
+  n30[("LEE payments.payment_intents")]:::efecto
   n29 --> n30
-  n31[("LEE education.course_cohorts")]:::efecto
+  n31{"intent?.statusConceptId !== CONCEPTS.PI_SUCCEEDED"}:::decision
   n30 --> n31
-  n32["Llama a EducationScopeService.orGone"]:::llamada
-  n31 --> n32
-  n33["Llama a EducationScopeService.notFound"]:::llamada
-  n32 --> n33
-  n34(["404 NOT_FOUND {message}"]):::error
+  n32(["422 PRECONDITION_FAILED El pago de la inscripción no está confirmado"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a EducationLearningService.assertPaymentMatchesPurchase"]:::llamada
+  n31 -->|"no"| n33
+  n34{"price › 0 && !course.currencyConceptId"}:::decision
   n33 --> n34
-  n35{"!row"}:::decision
-  n36["Llama a EducationScopeService.notFound"]:::llamada
-  n35 -->|"sí"| n36
-  n37(["404 NOT_FOUND {message}"]):::error
-  n36 --> n37
-  n38{"cohort.courseId !== dto.courseId"}:::decision
-  n35 -->|"no"| n38
-  n39(["422 PRECONDITION_FAILED La cohorte pertenece a otro curso"]):::error
-  n38 -->|"sí"| n39
-  n40{"cohort.statusConceptId !== CONCEPTS.COHORT_OPEN"}:::decision
-  n38 -->|"no"| n40
-  n41(["422 PRECONDITION_FAILED La cohorte no está abierta"]):::error
+  n35(["422 PRECONDITION_FAILED El curso tiene precio pero no moneda: no se puede verificar el pago"]):::error
+  n34 -->|"sí"| n35
+  n36{"(references && !sameCourse) || !payerOk || !amountOk || !currencyOk"}:::decision
+  n34 -->|"no"| n36
+  n37(["422 PRECONDITION_FAILED El pago no corresponde a esta compra"]):::error
+  n36 -->|"sí"| n37
+  n38["Llama a EducationLearningRepository.findEnrollmentByPaymentIntent"]:::llamada
+  n36 -->|"no"| n38
+  n39[("LEE education.enrollments")]:::efecto
+  n38 --> n39
+  n40{"used"}:::decision
+  n39 --> n40
+  n41(["409 CONFLICT El pago ya respalda otra inscripción"]):::error
   n40 -->|"sí"| n41
-  n42{"cohort.capacity && enrolled ›= cohort.capacity"}:::decision
+  n42["Llama a EducationLearningRepository.findLiveEnrollment"]:::llamada
   n40 -->|"no"| n42
-  n43(["409 CONFLICT La cohorte no tiene plazas disponibles"]):::error
-  n42 -->|"sí"| n43
-  n44[("ACTUALIZA education.course_cohorts")]:::efecto
-  n42 -->|"no"| n44
-  n45{"cohort.capacity && cohortEnrolledCount ›= cohort.capacity"}:::decision
-  n44 --> n45
-  n46[("ACTUALIZA education.course_cohorts")]:::efecto
-  n45 -->|"sí"| n46
-  n47["Llama a EducationLearningRepository.createEnrollment"]:::llamada
-  n46 --> n47
-  n45 -->|"no"| n47
-  n23 -->|"no"| n47
-  n48[("CREA education.enrollments")]:::efecto
+  n25 -->|"no"| n42
+  n43[("LEE education.enrollments")]:::efecto
+  n42 --> n43
+  n44{"live"}:::decision
+  n43 --> n44
+  n45(["409 CONFLICT El aprendiz ya está inscrito en el curso"]):::error
+  n44 -->|"sí"| n45
+  n46{"dto.cohortId"}:::decision
+  n44 -->|"no"| n46
+  n47["Llama a EducationScopeService.cohort"]:::llamada
+  n46 -->|"sí"| n47
+  n48["Llama a EducationCatalogRepository.findCohortById"]:::llamada
   n47 --> n48
-  n49(("201 Responde con éxito")):::ok
+  n49[("LEE education.course_cohorts")]:::efecto
   n48 --> n49
+  n50["Llama a EducationScopeService.assertCourseInScope"]:::llamada
+  n49 --> n50
+  n51["Llama a EducationCatalogRepository.findCourseById"]:::llamada
+  n50 --> n51
+  n52[("LEE education.courses")]:::efecto
+  n51 --> n52
+  n53["Llama a EducationCatalogRepository.findCohortForUpdate"]:::llamada
+  n52 --> n53
+  n54[("LEE education.course_cohorts")]:::efecto
+  n53 --> n54
+  n55["Llama a EducationScopeService.orGone"]:::llamada
+  n54 --> n55
+  n56["Llama a EducationScopeService.notFound"]:::llamada
+  n55 --> n56
+  n57(["404 NOT_FOUND {message}"]):::error
+  n56 --> n57
+  n58{"!row"}:::decision
+  n59["Llama a EducationScopeService.notFound"]:::llamada
+  n58 -->|"sí"| n59
+  n60(["404 NOT_FOUND {message}"]):::error
+  n59 --> n60
+  n61{"cohort.courseId !== dto.courseId"}:::decision
+  n58 -->|"no"| n61
+  n62(["422 PRECONDITION_FAILED La cohorte pertenece a otro curso"]):::error
+  n61 -->|"sí"| n62
+  n63{"cohort.statusConceptId !== CONCEPTS.COHORT_OPEN"}:::decision
+  n61 -->|"no"| n63
+  n64(["422 PRECONDITION_FAILED La cohorte no está abierta"]):::error
+  n63 -->|"sí"| n64
+  n65{"cohort.capacity && enrolled ›= cohort.capacity"}:::decision
+  n63 -->|"no"| n65
+  n66(["409 CONFLICT La cohorte no tiene plazas disponibles"]):::error
+  n65 -->|"sí"| n66
+  n67[("ACTUALIZA education.course_cohorts")]:::efecto
+  n65 -->|"no"| n67
+  n68{"cohort.capacity && cohortEnrolledCount ›= cohort.capacity"}:::decision
+  n67 --> n68
+  n69[("ACTUALIZA education.course_cohorts")]:::efecto
+  n68 -->|"sí"| n69
+  n70["Llama a EducationLearningRepository.createEnrollment"]:::llamada
+  n69 --> n70
+  n68 -->|"no"| n70
+  n46 -->|"no"| n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

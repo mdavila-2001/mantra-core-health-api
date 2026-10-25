@@ -3088,6 +3088,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | El rol padre no existe | Excepción explícita en src/modules/authz/services/authz-roles.service.ts |
+| 409 | `CONFLICT` | El código de rol está reservado por la plataforma | Excepción explícita en src/modules/authz/services/authz-roles.service.ts |
 | 409 | `CONFLICT` | Ya existe un rol con ese código | Excepción explícita en src/modules/authz/services/authz-roles.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |

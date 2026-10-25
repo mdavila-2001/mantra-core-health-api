@@ -179,3 +179,32 @@ export const HUERFANAS_DOCUMENTADAS = new Map([
     'Propuesta v4.0.9 que cierra la FK colgante de `system_ops.assessment_control_results`; la tabla no está en ninguna fuente de DDL del modelo. Ningún servicio de `system_ops` la usa.',
   ],
 ]);
+
+/**
+ * Importes de entidades de otro módulo desde un repositorio que no son un cruce
+ * de dominio, con el porqué. Clave: `ruta del repositorio#Entidad`.
+ *
+ * Una entrada afirma algo que se puede comprobar en el código; si deja de ser
+ * cierto, la arista vuelve a contarse.
+ */
+const CRUCE_DOMINIO_DOCUMENTADO = new Map([
+  [
+    'src/modules/quotations/repositories/quotations.repository.ts#Quotations',
+    'Mismo schema, otro módulo Nest: `billing.quotations` es de `billing` en la base y `QuotationsModule` es la parte separada que la opera (decisión de FT-24, ver `quotations.module.ts`). No cruza un dominio de datos.',
+  ],
+  [
+    'src/modules/quotations/repositories/quotation-installments.repository.ts#QuotationInstallments',
+    'Mismo schema, otro módulo Nest: `billing.quotation_installments` es de `billing` en la base y `QuotationsModule` la opera (decisión de FT-24, ver `quotations.module.ts`). No cruza un dominio de datos.',
+  ],
+]);
+
+/**
+ * ¿Está documentado que importar esta entidad ajena no es un cruce de dominio?
+ *
+ * @param file - Repositorio relativo a la raíz, con `/`.
+ * @param entity - Nombre de la clase importada.
+ * @returns El porqué documentado, o `undefined`.
+ */
+export function cruceDominioDocumentado(file, entity) {
+  return CRUCE_DOMINIO_DOCUMENTADO.get(`${file}#${entity}`);
+}

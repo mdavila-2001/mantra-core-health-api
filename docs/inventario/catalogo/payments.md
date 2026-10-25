@@ -30,7 +30,7 @@
 | [payment_debts](#payment_debts) | Representa obligaciones pendientes de pago relacionadas con facturas, servicios o acuerdos de financiación. | 22 | 14 | 2 | COINCIDE |
 | [payment_disputes](#payment_disputes) | Gestiona disputas iniciadas sobre pagos para reunir estado, evidencia y resolución. | 16 | 8 | 0 | COINCIDE |
 | [payment_gateways](#payment_gateways) | Cataloga pasarelas de pago que procesan cargos y reembolsos asociados a servicios de salud. | 13 | 6 | 0 | COINCIDE |
-| [payment_intents](#payment_intents) | Representa la intención de cobrar un monto antes de completar su procesamiento en una pasarela. | 22 | 13 | 12 | COINCIDE |
+| [payment_intents](#payment_intents) | Representa la intención de cobrar un monto antes de completar su procesamiento en una pasarela. | 22 | 13 | 13 | COINCIDE |
 | [payment_mandates](#payment_mandates) | Registra autorizaciones permanentes para iniciar pagos bajo condiciones acordadas por el titular. | 16 | 10 | 0 | COINCIDE |
 | [payment_methods](#payment_methods) | Registra medios de pago que pacientes, prestadores o comercios pueden utilizar en transacciones. | 20 | 9 | 0 | COINCIDE |
 | [payment_receipts](#payment_receipts) | Cataloga recibos emitidos por pagos para ofrecer comprobantes trazables a pacientes u organizaciones. | 18 | 10 | 0 | COINCIDE |
@@ -2261,7 +2261,7 @@ Representa la intención de cobrar un monto antes de completar su procesamiento 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_42_payments.puml: payment_intents`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_42_payments.puml` · **DDL:** `SQL/42_payments/02_tables.sql`
 - **Entidad del ORM:** `PaymentIntents` — `src/modules/payments/entities/payment_intents.entity.ts`
-- **Resumen:** 22 columnas · 13 índices · 11 FK salientes · 13 entrantes · 12 operaciones
+- **Resumen:** 22 columnas · 13 índices · 11 FK salientes · 13 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -2347,6 +2347,7 @@ Representa la intención de cobrar un monto antes de completar su procesamiento 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /education/enrollments | LEE | DIRECTA |
 | POST /payments/callbacks/{callbackPath} | ACTUALIZA | POR_TIPO |
 | POST /payments/callbacks/{callbackPath} | LEE | DIRECTA |
 | POST /payments/checkout-sessions | LEE | DIRECTA |
