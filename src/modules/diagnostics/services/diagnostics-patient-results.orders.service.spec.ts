@@ -8,7 +8,7 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticsPatientResultsService } from './diagnostics-patient-results.service';
-import { DIAG } from '../diagnostics.concepts';
+import { DIAG, DIAGNOSTIC_CATEGORIES } from '../diagnostics.concepts';
 import { CLIN } from '../../clinical/clinical.concepts';
 
 /**
@@ -63,6 +63,10 @@ function build() {
   const grantsRepo = {};
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
+  const settlements = {
+    forOrders: mockFn(async () => new Map()),
+    activeClaimForDispensation: mockFn(async () => undefined),
+  };
   const service = new DiagnosticsPatientResultsService(
     em as any,
     ordersRepo as any,
@@ -72,12 +76,16 @@ function build() {
     grantsRepo as any,
     {} as any,
     logger as any,
-    {
-      forOrders: mockFn(async () => new Map()),
-      activeClaimForDispensation: mockFn(async () => undefined),
-    } as any,
+    settlements as any,
   );
-  return { service, ordersRepo, reportsRepo, accountLinksRepo, fork };
+  return {
+    service,
+    ordersRepo,
+    reportsRepo,
+    accountLinksRepo,
+    fork,
+    settlements,
+  };
 }
 
 /**
@@ -115,7 +123,7 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
     expect(ordersRepo.findOrdersForPatientPortal.mock.calls[0]).toHaveLength(4);
   });
 
-  it('pide sólo laboratorio e imagenología, no toda orden de servicio', async () => {
+  it('pide laboratorio, imagenología y procedimientos, no toda orden de servicio', async () => {
     const { service, ordersRepo } = build();
 
     await service.listOwnOrders(USER, 50);
@@ -125,8 +133,50 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
       [
         CLIN.SERVICE_REQUEST_CATEGORY_LAB,
         DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+        CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
       ].sort(),
     );
+  });
+
+  it('el mostrador sigue siendo de laboratorio e imagenología: los procedimientos no entran', () => {
+    expect([...DIAGNOSTIC_CATEGORIES].sort()).toEqual(
+      [
+        CLIN.SERVICE_REQUEST_CATEGORY_LAB,
+        DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+      ].sort(),
+    );
+    expect(DIAGNOSTIC_CATEGORIES).not.toContain(
+      CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+    );
+  });
+
+  it('una orden de procedimiento aparece en el portal sin liquidación inventada y sin pedirla', async () => {
+    const { service, ordersRepo, settlements } = build();
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([
+      order('lab-1'),
+      {
+        ...order('proc-1'),
+        categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+      },
+    ]);
+
+    const res = await service.listOwnOrders(USER, 50);
+
+    expect(res.items.map((item) => item.id)).toEqual(['lab-1', 'proc-1']);
+    // `forOrders` solo recibe la orden diagnóstica.
+    expect(settlements.forOrders).toHaveBeenCalledWith(
+      expect.anything(),
+      USER.id,
+      'DIAGNOSTIC',
+      ['lab-1'],
+    );
+    // La de procedimiento sale con la liquidación «no disponible» de siempre.
+    const proc = res.items.find((item) => item.id === 'proc-1')!;
+    const lab = res.items.find((item) => item.id === 'lab-1')!;
+    expect(proc.categoryConceptId).toBe(
+      CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+    );
+    expect(Object.keys(proc).sort()).toEqual(Object.keys(lab).sort());
   });
 
   it('pide una fila de más y avisa que la lista quedó recortada', async () => {

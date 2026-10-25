@@ -168,6 +168,24 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       display: 'Cardiac study category',
     },
 
+    /* --- quién ejecuta la orden -------------------------------------------------
+       El médico recomienda, no impone: el paciente siempre puede elegir otro
+       centro. `SR_PERF_PATIENT_CHOICE` es el valor de toda orden que no declara
+       modo. Ninguno concede acceso a la orden: la custodia sigue en
+       `performer_tenant_id`, que la recomendación no llena. */
+    SERVICE_REQUEST_PERFORMER_SELF: {
+      code: 'SR_PERF_SELF',
+      display: 'Performed by the ordering practitioner',
+    },
+    SERVICE_REQUEST_PERFORMER_ORGANIZATION: {
+      code: 'SR_PERF_ORGANIZATION',
+      display: 'Performed at a recommended medical center',
+    },
+    SERVICE_REQUEST_PERFORMER_PATIENT_CHOICE: {
+      code: 'SR_PERF_PATIENT_CHOICE',
+      display: 'Performer chosen by the patient',
+    },
+
     /* --- qué se pide: el catálogo de estudios ---------------------------------
        `service_requests.code_concept_id` es NOT NULL y no tenía ni un concepto
        que ponerle: la pantalla de órdenes respondía «El catálogo de estudios no
