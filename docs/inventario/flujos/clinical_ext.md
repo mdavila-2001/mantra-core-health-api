@@ -3,7 +3,7 @@
 # Flujos del módulo `clinical_ext`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 27 (22 con decisiones propias, 5 sin ellas)
+- **Operaciones:** 27 (24 con decisiones propias, 3 sin ellas)
 - Inventario de endpoints del módulo: [clinical_ext](../endpoints/clinical_ext.md)
 
 ## Proceso: `clinical_ext` — coordinación y soporte clínico
@@ -23,12 +23,12 @@ _Fuente: `src/modules/clinical_ext/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `ctrl:CareGapsController` | Operaciones de CareGapsController que el README no asigna a un caso de uso | PATCH /care-gaps/{id}/close | Cualquier sesión válida | ALTO | 2 |
-|  |  | POST /care-gaps/recompute | Cualquier sesión válida | ALTO | 2 |
+| `ctrl:CareGapsController` | Operaciones de CareGapsController que el README no asigna a un caso de uso | PATCH /care-gaps/{id}/close | CLINICIAN · PRACTITIONER | MEDIO | 2 |
+|  |  | POST /care-gaps/recompute | CLINICIAN · PRACTITIONER | MEDIO | 18 |
 |  |  | POST /immunization-schedules | SECURITY_ADMIN | MEDIO | 1 |
-|  |  | POST /patients/{id}/immunization-plan/project | Cualquier sesión válida | ALTO | 3 |
-| `ctrl:CareTeamsController` | Operaciones de CareTeamsController que el README no asigna a un caso de uso | GET /care-teams | CLINICIAN · PRACTITIONER | BAJO | 1 |
-|  |  | POST /care-teams | CLINICIAN · PRACTITIONER | MEDIO | 2 |
+|  |  | POST /patients/{id}/immunization-plan/project | CLINICIAN · PRACTITIONER | MEDIO | 20 |
+| `ctrl:CareTeamsController` | Operaciones de CareTeamsController que el README no asigna a un caso de uso | GET /care-teams | CLINICIAN · PRACTITIONER | BAJO | 19 |
+|  |  | POST /care-teams | CLINICIAN · PRACTITIONER | MEDIO | 18 |
 |  |  | PATCH /care-teams/{id}/members/{memberId}/set-responsible | CLINICIAN · PRACTITIONER | MEDIO | 3 |
 | `ctrl:CdsController` | Operaciones de CdsController que el README no asigna a un caso de uso | POST /cds-rules | SECURITY_ADMIN | MEDIO | 2 |
 |  |  | POST /cds-rules/{id}/versions/publish | SECURITY_ADMIN | MEDIO | 2 |
@@ -39,12 +39,12 @@ _Fuente: `src/modules/clinical_ext/README.md:3`_
 | `ctrl:ClinicalAlertsController` | Operaciones de ClinicalAlertsController que el README no asigna a un caso de uso | PATCH /clinical-alerts/{id}/acknowledge | CLINICIAN · PRACTITIONER | BAJO | 1 |
 |  |  | PATCH /clinical-alerts/{id}/override | CLINICIAN · PRACTITIONER | BAJO | 1 |
 | `ctrl:OrderSetsController` | Operaciones de OrderSetsController que el README no asigna a un caso de uso | POST /order-sets | SECURITY_ADMIN | MEDIO | 3 |
-|  |  | POST /order-sets/{id}/apply | Cualquier sesión válida | ALTO | 3 |
+|  |  | POST /order-sets/{id}/apply | CLINICIAN · PRACTITIONER | MEDIO | 20 |
 | `ctrl:PrescriptionFavoritesController` | Operaciones de PrescriptionFavoritesController que el README no asigna a un caso de uso | GET /prescription-favorites | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /prescription-favorites | Cualquier sesión válida | ALTO | 4 |
 |  |  | DELETE /prescription-favorites/{id} | Cualquier sesión válida | ALTO | 4 |
-| `ctrl:ReferralsController` | Operaciones de ReferralsController que el README no asigna a un caso de uso | GET /referrals | CLINICIAN · PRACTITIONER | BAJO | 1 |
-|  |  | POST /referrals | CLINICIAN · PRACTITIONER | MEDIO | 2 |
+| `ctrl:ReferralsController` | Operaciones de ReferralsController que el README no asigna a un caso de uso | GET /referrals | CLINICIAN · PRACTITIONER | BAJO | 19 |
+|  |  | POST /referrals | CLINICIAN · PRACTITIONER | MEDIO | 34 |
 |  |  | PATCH /referrals/{id}/respond | CLINICIAN · PRACTITIONER | MEDIO | 2 |
 |  |  | GET /referrals/me | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 3 |
 | `ctrl:VirtualEncountersController` | Operaciones de VirtualEncountersController que el README no asigna a un caso de uso | POST /virtual-encounters | CLINICIAN · PRACTITIONER | MEDIO | 4 |
@@ -55,138 +55,185 @@ _Fuente: `src/modules/clinical_ext/README.md:3`_
 
 ```mermaid
 flowchart LR
-  a2(["Cualquier sesión válida"]):::actor
-  a6(["SECURITY_ADMIN"]):::actor
-  a10(["CLINICIAN · PRACTITIONER"]):::actor
-  a42(["CLINICIAN · PRACTITIONER · PATIENT"]):::actor
+  a2(["CLINICIAN · PRACTITIONER"]):::actor
+  a13(["SECURITY_ADMIN"]):::actor
+  a41(["Cualquier sesión válida"]):::actor
+  a54(["CLINICIAN · PRACTITIONER · PATIENT"]):::actor
   t3[("clinical_ext.care_gaps")]:::tabla
-  t7[("clinical_ext.immunization_schedules")]:::tabla
-  t11[("clinical_ext.care_teams")]:::tabla
-  t13[("clinical_ext.care_team_members")]:::tabla
-  t16[("clinical_ext.cds_rules")]:::tabla
-  t20[("clinical_ext.drug_interactions")]:::tabla
-  t22[("clinical_ext.clinical_alerts")]:::tabla
-  t27[("clinical_ext.order_set_items")]:::tabla
-  t28[("clinical_ext.order_sets")]:::tabla
-  t30[("clinical.service_requests")]:::tabla
-  t32[("clinical_ext.prescription_favorites")]:::tabla
-  t33[("profiles.health_practitioner_profiles")]:::tabla
-  t34[("profiles.person_account_links")]:::tabla
-  t38[("clinical_ext.referrals")]:::tabla
-  t43[("profiles.patient_profiles")]:::tabla
+  t5[("authz.access_policies")]:::tabla
+  t6[("authz.care_relationships")]:::tabla
+  t7[("authz.clinical_access_grants")]:::tabla
+  t8[("authz.field_permissions")]:::tabla
+  t9[("authz.patient_legal_representations")]:::tabla
+  t10[("authz.permissions")]:::tabla
+  t14[("clinical_ext.immunization_schedules")]:::tabla
+  t22[("clinical_ext.care_team_members")]:::tabla
+  t23[("clinical_ext.care_teams")]:::tabla
+  t25[("clinical_ext.cds_rules")]:::tabla
+  t29[("clinical_ext.drug_interactions")]:::tabla
+  t31[("clinical_ext.clinical_alerts")]:::tabla
+  t36[("clinical_ext.order_set_items")]:::tabla
+  t37[("clinical_ext.order_sets")]:::tabla
+  t42[("clinical_ext.prescription_favorites")]:::tabla
+  t43[("profiles.health_practitioner_profiles")]:::tabla
+  t44[("profiles.person_account_links")]:::tabla
+  t52[("clinical_ext.referrals")]:::tabla
+  t55[("profiles.patient_profiles")]:::tabla
+  t11[("+12 tablas más")]
+  t16[("+14 tablas más")]
   subgraph s0["ctrl:CareGapsController · Operaciones de CareGapsController que el README no as…"]
     o1["PATCH /care-gaps/{id}/close"]:::op
     o4["POST /care-gaps/recompute"]:::op
-    o5["POST /immunization-schedules"]:::op
-    o8["POST /patients/{id}/immunization-plan/project"]:::op
+    o12["POST /immunization-schedules"]:::op
+    o15["POST /patients/{id}/immunization-plan/project"]:::op
   end
+  t18[("+13 tablas más")]
+  t20[("+12 tablas más")]
   subgraph s1["ctrl:CareTeamsController · Operaciones de CareTeamsController que el README no…"]
-    o9["GET /care-teams"]:::op
-    o12["POST /care-teams"]:::op
-    o14["PATCH /care-teams/{id}/members/{memberId}/set-responsible"]:::op
+    o17["GET /care-teams"]:::op
+    o19["POST /care-teams"]:::op
+    o21["PATCH /care-teams/{id}/members/{memberId}/set-responsible"]:::op
   end
   subgraph s2["ctrl:CdsController · Operaciones de CdsController que el README no asigna a un…"]
-    o15["POST /cds-rules"]:::op
-    o17["POST /cds-rules/{id}/versions/publish"]:::op
-    o18["POST /cds-rules/{id}/versions/rollback"]:::op
-    o19["POST /cds/check-interactions"]:::op
-    o21["POST /cds/evaluate"]:::op
-    o23["POST /drug-interactions"]:::op
+    o24["POST /cds-rules"]:::op
+    o26["POST /cds-rules/{id}/versions/publish"]:::op
+    o27["POST /cds-rules/{id}/versions/rollback"]:::op
+    o28["POST /cds/check-interactions"]:::op
+    o30["POST /cds/evaluate"]:::op
+    o32["POST /drug-interactions"]:::op
   end
   subgraph s3["ctrl:ClinicalAlertsController · Operaciones de ClinicalAlertsController que el…"]
-    o24["PATCH /clinical-alerts/{id}/acknowledge"]:::op
-    o25["PATCH /clinical-alerts/{id}/override"]:::op
+    o33["PATCH /clinical-alerts/{id}/acknowledge"]:::op
+    o34["PATCH /clinical-alerts/{id}/override"]:::op
   end
+  t39[("+14 tablas más")]
   subgraph s4["ctrl:OrderSetsController · Operaciones de OrderSetsController que el README no…"]
-    o26["POST /order-sets"]:::op
-    o29["POST /order-sets/{id}/apply"]:::op
+    o35["POST /order-sets"]:::op
+    o38["POST /order-sets/{id}/apply"]:::op
   end
   subgraph s5["ctrl:PrescriptionFavoritesController · Operaciones de PrescriptionFavoritesCont…"]
-    o31["GET /prescription-favorites"]:::op
-    o35["POST /prescription-favorites"]:::op
-    o36["DELETE /prescription-favorites/{id}"]:::op
+    o40["GET /prescription-favorites"]:::op
+    o45["POST /prescription-favorites"]:::op
+    o46["DELETE /prescription-favorites/{id}"]:::op
   end
+  t48[("+13 tablas más")]
+  t50[("+28 tablas más")]
   subgraph s6["ctrl:ReferralsController · Operaciones de ReferralsController que el README no…"]
-    o37["GET /referrals"]:::op
-    o39["POST /referrals"]:::op
-    o40["PATCH /referrals/{id}/respond"]:::op
-    o41["GET /referrals/me"]:::op
+    o47["GET /referrals"]:::op
+    o49["POST /referrals"]:::op
+    o51["PATCH /referrals/{id}/respond"]:::op
+    o53["GET /referrals/me"]:::op
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
   o1 -->|"LEE"| t3
   a2 --> o4
-  o4 -->|"CREA"| t3
-  o4 -->|"LEE"| t3
-  a6 --> o5
-  o5 -->|"CREA"| t7
-  a2 --> o8
-  o8 -->|"CREA"| t3
-  o8 -->|"LEE"| t3
-  o8 -->|"LEE"| t7
-  a10 --> o9
-  o9 -->|"LEE"| t11
-  a10 --> o12
-  o12 -->|"CREA"| t13
-  o12 -->|"CREA"| t11
-  a10 --> o14
-  o14 -->|"ACTUALIZA"| t13
-  o14 -->|"LEE"| t13
-  o14 -->|"LEE"| t11
-  a6 --> o15
-  o15 -->|"CREA"| t16
-  o15 -->|"LEE"| t16
-  a6 --> o17
-  o17 -->|"ACTUALIZA"| t16
-  o17 -->|"LEE"| t16
-  a6 --> o18
-  o18 -->|"ACTUALIZA"| t16
-  o18 -->|"LEE"| t16
-  a10 --> o19
-  o19 -->|"LEE"| t20
-  a10 --> o21
-  o21 -->|"LEE"| t16
-  o21 -->|"CREA"| t22
-  a6 --> o23
-  o23 -->|"CREA"| t20
-  a10 --> o24
-  o24 -->|"LEE"| t22
-  a10 --> o25
-  o25 -->|"LEE"| t22
-  a6 --> o26
-  o26 -->|"CREA"| t27
-  o26 -->|"CREA"| t28
-  o26 -->|"LEE"| t28
-  a2 --> o29
-  o29 -->|"LEE"| t27
-  o29 -->|"LEE"| t28
-  o29 -->|"CREA"| t30
-  a2 --> o31
-  o31 -->|"LEE"| t32
-  o31 -->|"LEE"| t33
-  o31 -->|"LEE"| t34
-  a2 --> o35
-  o35 -->|"CREA"| t32
-  o35 -->|"LEE"| t32
-  o35 -->|"LEE"| t33
-  o35 -->|"LEE"| t34
-  a2 --> o36
-  o36 -->|"BORRA"| t32
-  o36 -->|"LEE"| t32
-  o36 -->|"LEE"| t33
-  o36 -->|"LEE"| t34
-  a10 --> o37
-  o37 -->|"LEE"| t38
-  a10 --> o39
-  o39 -->|"CREA"| t38
-  o39 -->|"LEE"| t38
-  a10 --> o40
-  o40 -->|"ACTUALIZA"| t38
-  o40 -->|"LEE"| t38
-  a42 --> o41
-  o41 -->|"LEE"| t38
-  o41 -->|"LEE"| t43
-  o41 -->|"LEE"| t34
+  o4 -->|"LEE"| t5
+  o4 -->|"LEE"| t6
+  o4 -->|"LEE"| t7
+  o4 -->|"LEE"| t8
+  o4 -->|"LEE"| t9
+  o4 -->|"LEE"| t10
+  o4 -.-> t11
+  a13 --> o12
+  o12 -->|"CREA"| t14
+  a2 --> o15
+  o15 -->|"LEE"| t5
+  o15 -->|"LEE"| t6
+  o15 -->|"LEE"| t7
+  o15 -->|"LEE"| t8
+  o15 -->|"LEE"| t9
+  o15 -->|"LEE"| t10
+  o15 -.-> t16
+  a2 --> o17
+  o17 -->|"LEE"| t5
+  o17 -->|"LEE"| t6
+  o17 -->|"LEE"| t7
+  o17 -->|"LEE"| t8
+  o17 -->|"LEE"| t9
+  o17 -->|"LEE"| t10
+  o17 -.-> t18
+  a2 --> o19
+  o19 -->|"LEE"| t5
+  o19 -->|"LEE"| t6
+  o19 -->|"LEE"| t7
+  o19 -->|"LEE"| t8
+  o19 -->|"LEE"| t9
+  o19 -->|"LEE"| t10
+  o19 -.-> t20
+  a2 --> o21
+  o21 -->|"ACTUALIZA"| t22
+  o21 -->|"LEE"| t22
+  o21 -->|"LEE"| t23
+  a13 --> o24
+  o24 -->|"CREA"| t25
+  o24 -->|"LEE"| t25
+  a13 --> o26
+  o26 -->|"ACTUALIZA"| t25
+  o26 -->|"LEE"| t25
+  a13 --> o27
+  o27 -->|"ACTUALIZA"| t25
+  o27 -->|"LEE"| t25
+  a2 --> o28
+  o28 -->|"LEE"| t29
+  a2 --> o30
+  o30 -->|"LEE"| t25
+  o30 -->|"CREA"| t31
+  a13 --> o32
+  o32 -->|"CREA"| t29
+  a2 --> o33
+  o33 -->|"LEE"| t31
+  a2 --> o34
+  o34 -->|"LEE"| t31
+  a13 --> o35
+  o35 -->|"CREA"| t36
+  o35 -->|"CREA"| t37
+  o35 -->|"LEE"| t37
+  a2 --> o38
+  o38 -->|"LEE"| t5
+  o38 -->|"LEE"| t6
+  o38 -->|"LEE"| t7
+  o38 -->|"LEE"| t8
+  o38 -->|"LEE"| t9
+  o38 -->|"LEE"| t10
+  o38 -.-> t39
+  a41 --> o40
+  o40 -->|"LEE"| t42
+  o40 -->|"LEE"| t43
+  o40 -->|"LEE"| t44
+  a41 --> o45
+  o45 -->|"CREA"| t42
+  o45 -->|"LEE"| t42
+  o45 -->|"LEE"| t43
+  o45 -->|"LEE"| t44
+  a41 --> o46
+  o46 -->|"BORRA"| t42
+  o46 -->|"LEE"| t42
+  o46 -->|"LEE"| t43
+  o46 -->|"LEE"| t44
+  a2 --> o47
+  o47 -->|"LEE"| t5
+  o47 -->|"LEE"| t6
+  o47 -->|"LEE"| t7
+  o47 -->|"LEE"| t8
+  o47 -->|"LEE"| t9
+  o47 -->|"LEE"| t10
+  o47 -.-> t48
+  a2 --> o49
+  o49 -->|"LEE"| t5
+  o49 -->|"LEE"| t6
+  o49 -->|"LEE"| t7
+  o49 -->|"LEE"| t8
+  o49 -->|"LEE"| t9
+  o49 -->|"LEE"| t10
+  o49 -.-> t50
+  a2 --> o51
+  o51 -->|"ACTUALIZA"| t52
+  o51 -->|"LEE"| t52
+  a54 --> o53
+  o53 -->|"LEE"| t52
+  o53 -->|"LEE"| t55
+  o53 -->|"LEE"| t44
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -244,7 +291,7 @@ Cerrar una brecha de cuidado por evento clínico
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Brecha de cuidado no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {notFound.message} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La brecha no está abierta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -263,7 +310,7 @@ flowchart TD
   n5 --> n6
   n7{"!gap"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Brecha de cuidado no encontrada"]):::error
+  n8(["404 NOT_FOUND {notFound.message}"]):::error
   n7 -->|"sí"| n8
   n9{"gap.statusConceptId !== CEXT.CARE_GAP_OPEN"}:::decision
   n7 -->|"no"| n9
@@ -290,7 +337,7 @@ Detectar y abrir brechas de cuidado (batch)
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -300,21 +347,41 @@ flowchart TD
   n1 --> n2
   n3["Llama a CareGapsService.recompute"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a ClinicalReadService.assertCanWriteHistory"]:::llamada
   n3 --> n4
-  n5["Repite: por cada const gap de dto.gaps"]:::bucle
+  n5{"actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
   n4 --> n5
-  n6["Llama a CareGapsRepository.findOpen"]:::llamada
-  n5 -->|"cada elemento"| n6
-  n7[("LEE clinical_ext.care_gaps")]:::efecto
+  n6["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n5 -->|"sí"| n6
+  n7[("LEE profiles.person_account_links")]:::efecto
   n6 --> n7
-  n8["Llama a CareGapsRepository.create"]:::llamada
+  n8["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
   n7 --> n8
-  n9[("CREA clinical_ext.care_gaps")]:::efecto
+  n9[("LEE profiles.health_practitioner_profiles")]:::efecto
   n8 --> n9
-  n10(("201 Responde con éxito")):::ok
+  n10["Llama a ClinicalReadService.isAttending"]:::llamada
   n9 --> n10
-  n5 -->|"al terminar"| n10
+  n11["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n10 --> n11
+  n12[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n11 --> n12
+  n13(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n12 --> n13
+  n5 -->|"no"| n13
+  n14["Transacción: transactional(…)"]:::transaccion
+  n15["Repite: por cada const gap de dto.gaps"]:::bucle
+  n14 --> n15
+  n16["Llama a CareGapsRepository.findOpen"]:::llamada
+  n15 -->|"cada elemento"| n16
+  n17[("LEE clinical_ext.care_gaps")]:::efecto
+  n16 --> n17
+  n18["Llama a CareGapsRepository.create"]:::llamada
+  n17 --> n18
+  n19[("CREA clinical_ext.care_gaps")]:::efecto
+  n18 --> n19
+  n20(("201 Responde con éxito")):::ok
+  n19 --> n20
+  n15 -->|"al terminar"| n20
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -323,7 +390,87 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /care-teams
+#### 3. GET /care-teams
+
+Listar equipos de cuidado de un paciente
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CareTeamsService.listByPatient"]:::llamada
+  n2 --> n3
+  n4["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
+  n3 --> n4
+  n5{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n4 --> n5
+  n6["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n5 -->|"sí"| n6
+  n7["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n6 --> n7
+  n8[("LEE profiles.person_account_links")]:::efecto
+  n7 --> n8
+  n9["Llama a PatientProfilesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE profiles.patient_profiles")]:::efecto
+  n9 --> n10
+  n11{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n10 --> n11
+  n12(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n11 -->|"no"| n13
+  n5 -->|"no"| n13
+  n14[("LEE profiles.person_account_links")]:::efecto
+  n13 --> n14
+  n15["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n15 --> n16
+  n17["Llama a ClinicalReadService.isAttending"]:::llamada
+  n16 --> n17
+  n18["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n17 --> n18
+  n19[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n18 --> n19
+  n20["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n19 --> n20
+  n21["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n20 --> n21
+  n22[("LEE profiles.person_account_links")]:::efecto
+  n21 --> n22
+  n23["Llama a PatientProfilesRepository.findById"]:::llamada
+  n22 --> n23
+  n24[("LEE profiles.patient_profiles")]:::efecto
+  n23 --> n24
+  n25{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n24 --> n25
+  n26(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a CareTeamsRepository.findByPatient"]:::llamada
+  n25 -->|"no"| n27
+  n28[("LEE clinical_ext.care_teams")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. POST /care-teams
 
 Crear un equipo de cuidado con sus miembros
 
@@ -332,7 +479,7 @@ Crear un equipo de cuidado con sus miembros
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 409 | `CONFLICT` | ConflictException: A lo sumo un miembro puede ser responsable |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -347,18 +494,38 @@ flowchart TD
   n3 --> n4
   n5(["409 CONFLICT A lo sumo un miembro puede ser responsable"]):::error
   n4 -->|"sí"| n5
-  n6["Transacción: transactional(…)"]:::transaccion
+  n6["Llama a ClinicalReadService.assertCanWriteHistory"]:::llamada
   n4 -->|"no"| n6
-  n7["Llama a CareTeamsRepository.create"]:::llamada
+  n7{"actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
   n6 --> n7
-  n8[("CREA clinical_ext.care_teams")]:::efecto
-  n7 --> n8
-  n9["Llama a CareTeamMembersRepository.create"]:::llamada
+  n8["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n7 -->|"sí"| n8
+  n9[("LEE profiles.person_account_links")]:::efecto
   n8 --> n9
-  n10[("CREA clinical_ext.care_team_members")]:::efecto
+  n10["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
   n9 --> n10
-  n11(("201 Responde con éxito")):::ok
+  n11[("LEE profiles.health_practitioner_profiles")]:::efecto
   n10 --> n11
+  n12["Llama a ClinicalReadService.isAttending"]:::llamada
+  n11 --> n12
+  n13["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n12 --> n13
+  n14[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n13 --> n14
+  n15(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n14 --> n15
+  n7 -->|"no"| n15
+  n16["Transacción: transactional(…)"]:::transaccion
+  n17["Llama a CareTeamsRepository.create"]:::llamada
+  n16 --> n17
+  n18[("CREA clinical_ext.care_teams")]:::efecto
+  n17 --> n18
+  n19["Llama a CareTeamMembersRepository.create"]:::llamada
+  n18 --> n19
+  n20[("CREA clinical_ext.care_team_members")]:::efecto
+  n19 --> n20
+  n21(("201 Responde con éxito")):::ok
+  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -367,7 +534,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. PATCH /care-teams/{id}/members/{memberId}/set-responsible
+#### 5. PATCH /care-teams/{id}/members/{memberId}/set-responsible
 
 Designar miembro responsable (transferir liderazgo)
 
@@ -377,7 +544,7 @@ Designar miembro responsable (transferir liderazgo)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Equipo de cuidado no encontrado; ResourceNotFoundException: Miembro no encontrado en el equipo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Miembro no encontrado en el equipo |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El equipo no está activo; PreconditionFailedException: El miembro destino no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -394,39 +561,35 @@ flowchart TD
   n4 --> n5
   n6[("LEE clinical_ext.care_teams")]:::efecto
   n5 --> n6
-  n7{"!team"}:::decision
+  n7{"team.statusConceptId !== CEXT.CARE_TEAM_ACTIVE"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Equipo de cuidado no encontrado"]):::error
+  n8(["422 PRECONDITION_FAILED El equipo no está activo"]):::error
   n7 -->|"sí"| n8
-  n9{"team.statusConceptId !== CEXT.CARE_TEAM_ACTIVE"}:::decision
+  n9["Llama a CareTeamMembersRepository.findById"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El equipo no está activo"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a CareTeamMembersRepository.findById"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE clinical_ext.care_team_members")]:::efecto
-  n11 --> n12
-  n13{"!target || target.careTeamId !== careTeamId"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Miembro no encontrado en el equipo"]):::error
+  n10[("LEE clinical_ext.care_team_members")]:::efecto
+  n9 --> n10
+  n11{"!target || target.careTeamId !== careTeamId"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Miembro no encontrado en el equipo"]):::error
+  n11 -->|"sí"| n12
+  n13{"target.statusConceptId !== CEXT.MEMBER_ACTIVE"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED El miembro destino no está activo"]):::error
   n13 -->|"sí"| n14
-  n15{"target.statusConceptId !== CEXT.MEMBER_ACTIVE"}:::decision
+  n15["Llama a CareTeamMembersRepository.findResponsible"]:::llamada
   n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED El miembro destino no está activo"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a CareTeamMembersRepository.findResponsible"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE clinical_ext.care_team_members")]:::efecto
-  n17 --> n18
-  n19{"current && current.id !== target.id"}:::decision
+  n16[("LEE clinical_ext.care_team_members")]:::efecto
+  n15 --> n16
+  n17{"current && current.id !== target.id"}:::decision
+  n16 --> n17
+  n18[("ACTUALIZA clinical_ext.care_team_members")]:::efecto
+  n17 -->|"sí"| n18
+  n19[("ACTUALIZA clinical_ext.care_team_members")]:::efecto
   n18 --> n19
-  n20[("ACTUALIZA clinical_ext.care_team_members")]:::efecto
-  n19 -->|"sí"| n20
-  n21[("ACTUALIZA clinical_ext.care_team_members")]:::efecto
-  n20 --> n21
-  n19 -->|"no"| n21
-  n22(("200 Responde con éxito")):::ok
-  n21 --> n22
+  n17 -->|"no"| n19
+  n20(("200 Responde con éxito")):::ok
+  n19 --> n20
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -435,7 +598,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /cds-rules
+#### 6. POST /cds-rules
 
 Crear una regla CDS en borrador
 
@@ -554,7 +717,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /cds-rules/{id}/versions/publish
+#### 7. POST /cds-rules/{id}/versions/publish
 
 Publicar una versión de la regla CDS
 
@@ -650,7 +813,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /cds-rules/{id}/versions/rollback
+#### 8. POST /cds-rules/{id}/versions/rollback
 
 Rollback de la versión activa de la regla CDS
 
@@ -697,7 +860,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /cds/check-interactions
+#### 9. POST /cds/check-interactions
 
 Detectar interacciones medicamentosas al prescribir
 
@@ -736,7 +899,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /cds/evaluate
+#### 10. POST /cds/evaluate
 
 Evaluar reglas CDS y generar alertas
 
@@ -810,7 +973,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. PATCH /clinical-alerts/{id}/acknowledge
+#### 11. PATCH /clinical-alerts/{id}/acknowledge
 
 Reconocer una alerta clínica
 
@@ -820,7 +983,7 @@ Reconocer una alerta clínica
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Alerta clínica no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {notFound.message} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La alerta no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -841,7 +1004,7 @@ flowchart TD
   n6 --> n7
   n8{"!alert"}:::decision
   n7 --> n8
-  n9(["404 NOT_FOUND Alerta clínica no encontrada"]):::error
+  n9(["404 NOT_FOUND {notFound.message}"]):::error
   n8 -->|"sí"| n9
   n10{"alert.statusConceptId !== CEXT.ALERT_ACTIVE"}:::decision
   n8 -->|"no"| n10
@@ -857,7 +1020,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. PATCH /clinical-alerts/{id}/override
+#### 12. PATCH /clinical-alerts/{id}/override
 
 Override (sobreescribir) una alerta clínica
 
@@ -867,7 +1030,7 @@ Override (sobreescribir) una alerta clínica
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Alerta clínica no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {notFound.message} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La alerta no está activa; PreconditionFailedException: El override de una alerta de alta severidad requiere un motivo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -888,7 +1051,7 @@ flowchart TD
   n6 --> n7
   n8{"!alert"}:::decision
   n7 --> n8
-  n9(["404 NOT_FOUND Alerta clínica no encontrada"]):::error
+  n9(["404 NOT_FOUND {notFound.message}"]):::error
   n8 -->|"sí"| n9
   n10{"alert.statusConceptId !== CEXT.ALERT_ACTIVE"}:::decision
   n8 -->|"no"| n10
@@ -908,7 +1071,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /order-sets
+#### 13. POST /order-sets
 
 Crear una plantilla de órdenes (order set) con sus ítems
 
@@ -956,7 +1119,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /order-sets/{id}/apply
+#### 14. POST /order-sets/{id}/apply
 
 Aplicar un order set (fan-out de órdenes)
 
@@ -965,9 +1128,9 @@ Aplicar un order set (fan-out de órdenes)
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Order set no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El order set no está activo; PreconditionFailedException: No hay ítems seleccionados para aplicar; PreconditionFailedException: Se requiere tenant custodio para materializar las órdenes del order set |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Order set no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El order set no está activo; PreconditionFailedException: No hay ítems seleccionados para aplicar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -977,41 +1140,65 @@ flowchart TD
   n1 --> n2
   n3["Llama a OrderSetsService.apply"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a ClinicalReadService.assertCanWriteHistory"]:::llamada
   n3 --> n4
-  n5["Llama a OrderSetsRepository.findById"]:::llamada
+  n5{"actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
   n4 --> n5
-  n6[("LEE clinical_ext.order_sets")]:::efecto
-  n5 --> n6
-  n7{"!orderSet"}:::decision
+  n6["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n5 -->|"sí"| n6
+  n7[("LEE profiles.person_account_links")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Order set no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"orderSet.statusConceptId !== CEXT.ORDER_SET_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El order set no está activo"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a OrderSetsRepository.itemsBySet"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE clinical_ext.order_set_items")]:::efecto
+  n8["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n8 --> n9
+  n10["Llama a ClinicalReadService.isAttending"]:::llamada
+  n9 --> n10
+  n11["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n10 --> n11
+  n12[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
   n11 --> n12
-  n13{"selected.length === 0"}:::decision
+  n13(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
   n12 --> n13
-  n14(["422 PRECONDITION_FAILED No hay ítems seleccionados para aplicar"]):::error
-  n13 -->|"sí"| n14
-  n15{"!custodianTenantId"}:::decision
-  n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED Se requiere tenant custodio para materializar las órdenes del order set"]):::error
-  n15 -->|"sí"| n16
-  n17["Repite: map(…)"]:::bucle
-  n15 -->|"no"| n17
-  n18["Llama a ServiceRequestsRepository.create"]:::llamada
-  n17 -->|"cada elemento"| n18
-  n19[("CREA clinical.service_requests")]:::efecto
-  n18 --> n19
-  n20(("201 Responde con éxito")):::ok
+  n5 -->|"no"| n13
+  n14["Transacción: transactional(…)"]:::transaccion
+  n15["Llama a EncountersRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE clinical.encounters")]:::efecto
+  n15 --> n16
+  n17{"!encounter || encounter.patientProfileId !== dto.patientProfileId || encounter.tenantId !== activeTenantId"}:::decision
+  n16 --> n17
+  n18(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a OrderSetsRepository.findById"]:::llamada
+  n17 -->|"no"| n19
+  n20[("LEE clinical_ext.order_sets")]:::efecto
   n19 --> n20
-  n17 -->|"al terminar"| n20
+  n21{"!orderSet || (orderSet.tenantId && orderSet.tenantId !== activeTenantId)"}:::decision
+  n20 --> n21
+  n22(["404 NOT_FOUND Order set no encontrado"]):::error
+  n21 -->|"sí"| n22
+  n23{"orderSet.statusConceptId !== CEXT.ORDER_SET_ACTIVE"}:::decision
+  n21 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED El order set no está activo"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a OrderSetsRepository.itemsBySet"]:::llamada
+  n23 -->|"no"| n25
+  n26[("LEE clinical_ext.order_set_items")]:::efecto
+  n25 --> n26
+  n27{"selected.length === 0"}:::decision
+  n26 --> n27
+  n28(["422 PRECONDITION_FAILED No hay ítems seleccionados para aplicar"]):::error
+  n27 -->|"sí"| n28
+  n29["Repite: map(…)"]:::bucle
+  n27 -->|"no"| n29
+  n30["Llama a ServiceRequestsRepository.create"]:::llamada
+  n29 -->|"cada elemento"| n30
+  n31[("CREA clinical.service_requests")]:::efecto
+  n30 --> n31
+  n32(("201 Responde con éxito")):::ok
+  n31 --> n32
+  n29 -->|"al terminar"| n32
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1020,7 +1207,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /patients/{id}/immunization-plan/project
+#### 15. POST /patients/{id}/immunization-plan/project
 
 Proyectar el plan de inmunización y abrir brechas
 
@@ -1029,7 +1216,8 @@ Proyectar el plan de inmunización y abrir brechas
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El perfil del paciente no tiene una fecha de nacimiento válida; PreconditionFailedException: La fecha de nacimiento enviada no coincide con la del perfil del paciente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1039,25 +1227,59 @@ flowchart TD
   n1 --> n2
   n3["Llama a CareGapsService.projectImmunizationPlan"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a ClinicalReadService.assertCanWriteHistory"]:::llamada
   n3 --> n4
-  n5["Llama a ImmunizationSchedulesRepository.findActive"]:::llamada
+  n5{"actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
   n4 --> n5
-  n6[("LEE clinical_ext.immunization_schedules")]:::efecto
-  n5 --> n6
-  n7["Repite: por cada const schedule de schedules"]:::bucle
+  n6["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n5 -->|"sí"| n6
+  n7[("LEE profiles.person_account_links")]:::efecto
   n6 --> n7
-  n8["Llama a CareGapsRepository.findOpen"]:::llamada
-  n7 -->|"cada elemento"| n8
-  n9[("LEE clinical_ext.care_gaps")]:::efecto
+  n8["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE profiles.health_practitioner_profiles")]:::efecto
   n8 --> n9
-  n10["Llama a CareGapsRepository.create"]:::llamada
+  n10["Llama a ClinicalReadService.isAttending"]:::llamada
   n9 --> n10
-  n11[("CREA clinical_ext.care_gaps")]:::efecto
+  n11["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
   n10 --> n11
-  n12(("201 Responde con éxito")):::ok
+  n12[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
   n11 --> n12
-  n7 -->|"al terminar"| n12
+  n13(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n12 --> n13
+  n5 -->|"no"| n13
+  n14["Transacción: transactional(…)"]:::transaccion
+  n15["Llama a CareGapsService.resolveBirthDate"]:::llamada
+  n14 --> n15
+  n16["Llama a PersonsRepository.findById"]:::llamada
+  n15 --> n16
+  n17[("LEE profiles.persons")]:::efecto
+  n16 --> n17
+  n18{"!civil"}:::decision
+  n17 --> n18
+  n19(["422 PRECONDITION_FAILED El perfil del paciente no tiene una fecha de nacimiento válida"]):::error
+  n18 -->|"sí"| n19
+  n20{"claimed !== undefined && toCivilDate(claimed) !== civil"}:::decision
+  n18 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED La fecha de nacimiento enviada no coincide con la del perfil del paciente"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a ImmunizationSchedulesRepository.findActive"]:::llamada
+  n20 -->|"no"| n22
+  n23[("LEE clinical_ext.immunization_schedules")]:::efecto
+  n22 --> n23
+  n24["Repite: por cada const schedule de schedules"]:::bucle
+  n23 --> n24
+  n25["Llama a CareGapsRepository.findOpen"]:::llamada
+  n24 -->|"cada elemento"| n25
+  n26[("LEE clinical_ext.care_gaps")]:::efecto
+  n25 --> n26
+  n27["Llama a CareGapsRepository.create"]:::llamada
+  n26 --> n27
+  n28[("CREA clinical_ext.care_gaps")]:::efecto
+  n27 --> n28
+  n29(("201 Responde con éxito")):::ok
+  n28 --> n29
+  n24 -->|"al terminar"| n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1066,7 +1288,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. GET /prescription-favorites
+#### 16. GET /prescription-favorites
 
 Listar mis favoritos de prescripción
 
@@ -1114,7 +1336,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /prescription-favorites
+#### 17. POST /prescription-favorites
 
 Guardar un favorito de prescripción
 
@@ -1183,7 +1405,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. DELETE /prescription-favorites/{id}
+#### 18. DELETE /prescription-favorites/{id}
 
 Borrar un favorito de prescripción propio
 
@@ -1241,7 +1463,87 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /referrals
+#### 19. GET /referrals
+
+Listar derivaciones de un paciente
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ReferralsService.listByPatient"]:::llamada
+  n2 --> n3
+  n4["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
+  n3 --> n4
+  n5{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n4 --> n5
+  n6["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n5 -->|"sí"| n6
+  n7["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n6 --> n7
+  n8[("LEE profiles.person_account_links")]:::efecto
+  n7 --> n8
+  n9["Llama a PatientProfilesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE profiles.patient_profiles")]:::efecto
+  n9 --> n10
+  n11{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n10 --> n11
+  n12(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n11 -->|"no"| n13
+  n5 -->|"no"| n13
+  n14[("LEE profiles.person_account_links")]:::efecto
+  n13 --> n14
+  n15["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n15 --> n16
+  n17["Llama a ClinicalReadService.isAttending"]:::llamada
+  n16 --> n17
+  n18["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n17 --> n18
+  n19[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n18 --> n19
+  n20["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n19 --> n20
+  n21["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n20 --> n21
+  n22[("LEE profiles.person_account_links")]:::efecto
+  n21 --> n22
+  n23["Llama a PatientProfilesRepository.findById"]:::llamada
+  n22 --> n23
+  n24[("LEE profiles.patient_profiles")]:::efecto
+  n23 --> n24
+  n25{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n24 --> n25
+  n26(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a ReferralsRepository.findByPatient"]:::llamada
+  n25 -->|"no"| n27
+  n28[("LEE clinical_ext.referrals")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 20. POST /referrals
 
 Emitir una referencia desde un encuentro
 
@@ -1250,8 +1552,10 @@ Emitir una referencia desde un encuentro
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado; ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Solicitud de notificación no encontrada; ResourceNotFoundException: El proveedor configurado para el canal no existe |
 | 409 | `CONFLICT` | ConflictException: Ya existe una referencia equivalente |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1261,25 +1565,146 @@ flowchart TD
   n1 --> n2
   n3["Llama a ReferralsService.create"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a ClinicalReadService.assertCanWriteHistory"]:::llamada
   n3 --> n4
-  n5{"dto.sourceEncounterId && dto.targetProfileId && dto.specialtyConceptId"}:::decision
+  n5{"actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
   n4 --> n5
-  n6["Llama a ReferralsRepository.findDuplicate"]:::llamada
+  n6["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
   n5 -->|"sí"| n6
-  n7[("LEE clinical_ext.referrals")]:::efecto
+  n7[("LEE profiles.person_account_links")]:::efecto
   n6 --> n7
-  n8{"dup"}:::decision
+  n8["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
   n7 --> n8
-  n9(["409 CONFLICT Ya existe una referencia equivalente"]):::error
-  n8 -->|"sí"| n9
-  n10["Llama a ReferralsRepository.create"]:::llamada
-  n8 -->|"no"| n10
-  n5 -->|"no"| n10
-  n11[("CREA clinical_ext.referrals")]:::efecto
+  n9[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n8 --> n9
+  n10["Llama a ClinicalReadService.isAttending"]:::llamada
+  n9 --> n10
+  n11["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
   n10 --> n11
-  n12(("201 Responde con éxito")):::ok
+  n12[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
   n11 --> n12
+  n13(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n12 --> n13
+  n5 -->|"no"| n13
+  n14["Transacción: transactional(…)"]:::transaccion
+  n15{"dto.targetProfileId"}:::decision
+  n14 --> n15
+  n16["Llama a ReferralsService.assertTargetIsPractitioner"]:::llamada
+  n15 -->|"sí"| n16
+  n17["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n16 --> n17
+  n18[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n17 --> n18
+  n19{"!target"}:::decision
+  n18 --> n19
+  n20(["404 NOT_FOUND Profesional no encontrado"]):::error
+  n19 -->|"sí"| n20
+  n21{"dto.sourceEncounterId"}:::decision
+  n19 -->|"no"| n21
+  n15 -->|"no"| n21
+  n22["Llama a ReferralsService.assertEncounterBelongsToPatient"]:::llamada
+  n21 -->|"sí"| n22
+  n23["Llama a EncountersRepository.findById"]:::llamada
+  n22 --> n23
+  n24[("LEE clinical.encounters")]:::efecto
+  n23 --> n24
+  n25{"!encounter || encounter.patientProfileId !== patientProfileId || actor.tenantIds?.includes(encounter.tenantId…"}:::decision
+  n24 --> n25
+  n26(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n25 -->|"sí"| n26
+  n27{"dto.sourceEncounterId && dto.targetProfileId && dto.specialtyConceptId"}:::decision
+  n25 -->|"no"| n27
+  n21 -->|"no"| n27
+  n28["Llama a ReferralsRepository.findDuplicate"]:::llamada
+  n27 -->|"sí"| n28
+  n29[("LEE clinical_ext.referrals")]:::efecto
+  n28 --> n29
+  n30{"dup"}:::decision
+  n29 --> n30
+  n31(["409 CONFLICT Ya existe una referencia equivalente"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a ReferralsRepository.create"]:::llamada
+  n30 -->|"no"| n32
+  n27 -->|"no"| n32
+  n33[("CREA clinical_ext.referrals")]:::efecto
+  n32 --> n33
+  n34{"dto.sourceEncounterId && dto.targetProfileId"}:::decision
+  n33 --> n34
+  n35["Llama a ReferralNotifier.notifyRecommended"]:::llamada
+  n34 -->|"sí"| n35
+  n36["Intenta"]:::intento
+  n35 --> n36
+  n37[("LEE clinical_ext.referrals")]:::efecto
+  n36 --> n37
+  n38["Llama a ReferralNotifier.accountOf"]:::llamada
+  n37 --> n38
+  n39["Llama a ReferralNotifier.personIdOf"]:::llamada
+  n38 --> n39
+  n40[("LEE profiles.persons · LEE profiles.person_profiles")]:::efecto
+  n39 --> n40
+  n41[("LEE profiles.person_account_links")]:::efecto
+  n40 --> n41
+  n42["Llama a ReferralNotifier.displayNameOf"]:::llamada
+  n41 --> n42
+  n43["Llama a ReferralNotifier.personIdOf"]:::llamada
+  n42 --> n43
+  n44[("LEE profiles.persons · LEE profiles.person_profiles")]:::efecto
+  n43 --> n44
+  n45[("LEE profiles.persons")]:::efecto
+  n44 --> n45
+  n46["Llama a ReferralNotifier.displayNameOf"]:::llamada
+  n45 --> n46
+  n47["Llama a ReferralNotifier.personIdOf"]:::llamada
+  n46 --> n47
+  n48[("LEE profiles.persons · LEE profiles.person_profiles")]:::efecto
+  n47 --> n48
+  n49[("LEE profiles.persons")]:::efecto
+  n48 --> n49
+  n50["Llama a NotificationsService.createRequest"]:::llamada
+  n49 --> n50
+  n51{"!recipientUserId"}:::decision
+  n50 --> n51
+  n52(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
+  n51 -->|"sí"| n52
+  n53["Transacción: transactional(…)"]:::transaccion
+  n51 -->|"no"| n53
+  n54["Llama a NotificationsRepository.findChannelById"]:::llamada
+  n53 --> n54
+  n55[("LEE messaging.message_channels")]:::efecto
+  n54 --> n55
+  n56{"!channel"}:::decision
+  n55 --> n56
+  n57(["404 NOT_FOUND Canal no encontrado"]):::error
+  n56 -->|"sí"| n57
+  n58{"channel.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n56 -->|"no"| n58
+  n59(["422 PRECONDITION_FAILED El canal no está activo"]):::error
+  n58 -->|"sí"| n59
+  n60{"dto.templateId"}:::decision
+  n58 -->|"no"| n60
+  n61["Llama a NotificationsRepository.findTemplateById"]:::llamada
+  n60 -->|"sí"| n61
+  n62[("LEE messaging.message_templates")]:::efecto
+  n61 --> n62
+  n63{"!template"}:::decision
+  n62 --> n63
+  n64(["404 NOT_FOUND Plantilla no encontrada"]):::error
+  n63 -->|"sí"| n64
+  n65{"template.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n63 -->|"no"| n65
+  n66(["422 PRECONDITION_FAILED La plantilla no está publicada"]):::error
+  n65 -->|"sí"| n66
+  n67{"template.channelId !== dto.channelId"}:::decision
+  n65 -->|"no"| n67
+  n68(["422 PRECONDITION_FAILED La plantilla es de otro canal"]):::error
+  n67 -->|"sí"| n68
+  n69{"dto.debounceKey"}:::decision
+  n67 -->|"no"| n69
+  n60 -->|"no"| n69
+  n70["Llama a NotificationsRepository.findLiveRequestByDebounceKey"]:::llamada
+  n69 -->|"sí"| n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1288,7 +1713,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. PATCH /referrals/{id}/respond
+#### 21. PATCH /referrals/{id}/respond
 
 Responder / aceptar una referencia inter-tenant
 
@@ -1315,7 +1740,7 @@ flowchart TD
   n4 --> n5
   n6[("LEE clinical_ext.referrals")]:::efecto
   n5 --> n6
-  n7{"!referral"}:::decision
+  n7{"!referral || !this.isDestination(referral, actor, activeTenantId)"}:::decision
   n6 --> n7
   n8(["404 NOT_FOUND Referencia no encontrada"]):::error
   n7 -->|"sí"| n8
@@ -1335,7 +1760,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /virtual-encounters
+#### 22. POST /virtual-encounters
 
 Iniciar una sesión de telesalud
 
@@ -1403,7 +1828,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. PATCH /virtual-encounters/{id}/end
+#### 23. PATCH /virtual-encounters/{id}/end
 
 Finalizar una sesión de telesalud
 
@@ -1473,7 +1898,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. PATCH /virtual-encounters/{id}/join
+#### 24. PATCH /virtual-encounters/{id}/join
 
 Unirse a una sesión de telesalud
 
@@ -1549,8 +1974,6 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
-| GET /care-teams | 200, 400, 401, 403, 429 | 1 |
 | POST /drug-interactions | 201, 400, 401, 403, 429 | 1 |
 | POST /immunization-schedules | 201, 400, 401, 403, 429 | 1 |
-| GET /referrals | 200, 400, 401, 403, 429 | 1 |
 | GET /referrals/me | 200, 401, 403, 429 | 3 |

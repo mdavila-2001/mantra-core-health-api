@@ -5,15 +5,15 @@
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 - **Operaciones:** 14 (14 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 1 · MEDIO 12 · BAJO 1
-- **Tablas distintas que tocan:** 19
+- **Tablas distintas que tocan:** 20
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/payments.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/payments/callbacks/{callbackPath}` | Recibir el callback/webhook del gateway (idempotente) | ALTO | 6 | pública |
-| 2 | POST | `/payments/checkout-sessions` | Abrir una sesión de checkout con contexto de cajero | MEDIO | 4 | PAYMENTS_ADMIN, CASHIER |
+| 1 | POST | `/payments/callbacks/{callbackPath}` | Recibir el callback/webhook del gateway (idempotente) | ALTO | 7 | pública |
+| 2 | POST | `/payments/checkout-sessions` | Abrir una sesión de checkout con contexto de cajero | MEDIO | 5 | PAYMENTS_ADMIN, CASHIER |
 | 3 | POST | `/payments/fee-schedules` | Publicar una versión del tarifario | MEDIO | 3 | PAYMENTS_ADMIN |
 | 4 | POST | `/payments/intents` | Crear una intención de pago idempotente | MEDIO | 2 | PAYMENTS_ADMIN, CASHIER |
 | 5 | POST | `/payments/intents/{id}/fx-lock` | Bloquear el tipo de cambio de la intención | MEDIO | 4 | PAYMENTS_ADMIN |
@@ -36,7 +36,7 @@
 - **Bloque:** Financiero y ERP
 - **Riesgo:** ALTO — Ruta pública que escribe en la base
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.applyCallback` — `src/modules/payments/controllers/payments-operations.controller.ts:94`
+- **Implementación:** `PaymentsOperationsController.applyCallback` — `src/modules/payments/controllers/payments-operations.controller.ts:95`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -46,13 +46,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/callbacks/{callbackPath}` la atiende `PaymentsOperationsController.applyCallback` (src/modules/payments/controllers/payments-operations.controller.ts:94). Es una ruta pública: no exige token. Valida el cuerpo como `GatewayCallbackDto` (4 campos, 2 obligatorios). Delega en `PaymentsTransactionsService.applyCallback`. Crea filas en payments.payment_webhook_events. Actualiza payments.payment_intents, payments.payment_transactions. Lee payments.payment_intents, payments.payment_transactions, payments.payment_webhook_events.
+`POST /payments/callbacks/{callbackPath}` la atiende `PaymentsOperationsController.applyCallback` (src/modules/payments/controllers/payments-operations.controller.ts:95). Es una ruta pública: no exige token. Valida el cuerpo como `GatewayCallbackDto` (5 campos, 2 obligatorios). Delega en `PaymentsTransactionsService.applyCallback`. Crea filas en payments.payment_webhook_events. Actualiza payments.payment_intents, payments.payment_transactions. Lee payments.payment_intents, payments.payment_transactions, payments.payment_webhook_events, payments.provider_callback_endpoints.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/payments/controllers/payments-operations.controller.ts:94` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/payments/controllers/payments-operations.controller.ts:95` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -61,12 +61,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:389` |
+| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:445` |
 | `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
-| `payments.payment_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:369` |
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.findByGatewayRef | `src/modules/payments/repositories/payment-transactions.repository.ts:246` |
-| `payments.payment_webhook_events` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.recordWebhookEvent | `src/modules/payments/repositories/payment-transactions.repository.ts:344` |
-| `payments.payment_webhook_events` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.findWebhookEventByRef | `src/modules/payments/repositories/payment-transactions.repository.ts:327` |
+| `payments.payment_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:425` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.findByGatewayRef | `src/modules/payments/repositories/payment-transactions.repository.ts:247` |
+| `payments.payment_webhook_events` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.recordWebhookEvent | `src/modules/payments/repositories/payment-transactions.repository.ts:360` |
+| `payments.payment_webhook_events` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.findWebhookEventByRef | `src/modules/payments/repositories/payment-transactions.repository.ts:343` |
+| `payments.provider_callback_endpoints` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.findCallbackEndpoints | `src/modules/payments/repositories/payment-transactions.repository.ts:326` |
 
 ### Parámetros
 
@@ -78,10 +79,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `gatewayTransactionRef` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Referencia de la transacción en el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:115` |
-| `outcome` | `string` | Sí | valores: CAPTURED, FAILED, AUTHORIZED | `@IsIn(['CAPTURED', 'FAILED', 'AUTHORIZED'])` | Resultado informado por el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:125` |
-| `authorizationCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Código de autorización | `src/modules/payments/dto/payment-transaction.dto.ts:134` |
-| `signature` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Firma del proveedor para verificar el origen | `src/modules/payments/dto/payment-transaction.dto.ts:145` |
+| `gatewayTransactionRef` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Referencia de la transacción en el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:116` |
+| `outcome` | `string` | Sí | valores: CAPTURED, FAILED, AUTHORIZED | `@IsIn(['CAPTURED', 'FAILED', 'AUTHORIZED'])` | Resultado informado por el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:126` |
+| `authorizationCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Código de autorización | `src/modules/payments/dto/payment-transaction.dto.ts:135` |
+| `signature` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Firma del proveedor para verificar el origen | `src/modules/payments/dto/payment-transaction.dto.ts:146` |
+| `timestamp` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Instante de emisión del evento (ISO-8601), firmado junto con el resto | `src/modules/payments/dto/payment-transaction.dto.ts:159` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -99,7 +101,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
   "gatewayTransactionRef": "valor-ejemplo",
   "outcome": "CAPTURED",
   "authorizationCode": "CODIGO_EJEMPLO",
-  "signature": "valor-ejemplo"
+  "signature": "valor-ejemplo",
+  "timestamp": "2026-07-31T12:00:00.000Z"
 }
 ```
 
@@ -109,12 +112,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `transactionId` | `string` | Sí | formato uuid | — | Transacción correlacionada | `src/modules/payments/dto/payment-transaction.dto.ts:156` |
-| `duplicate` | `boolean` | Sí | — | — | true si el callback ya se había aplicado antes | `src/modules/payments/dto/payment-transaction.dto.ts:164` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:170` |
-| `applied` | `boolean` | Sí | — | — | true si el evento cambió el estado local de la transacción | `src/modules/payments/dto/payment-transaction.dto.ts:179` |
-| `decision` | `string` | Sí | valores: aplicar, duplicado, obsoleto, contradiccion | — | Cómo se interpretó el evento frente al estado ya conocido | `src/modules/payments/dto/payment-transaction.dto.ts:188` |
-| `reconciliationRequired` | `boolean` | Sí | — | — | true si el proveedor afirmó algo incompatible con un estado terminal y hace falta conciliar | `src/modules/payments/dto/payment-transaction.dto.ts:197` |
+| `transactionId` | `string` | Sí | formato uuid | — | Transacción correlacionada | `src/modules/payments/dto/payment-transaction.dto.ts:170` |
+| `duplicate` | `boolean` | Sí | — | — | true si el callback ya se había aplicado antes | `src/modules/payments/dto/payment-transaction.dto.ts:178` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:184` |
+| `applied` | `boolean` | Sí | — | — | true si el evento cambió el estado local de la transacción | `src/modules/payments/dto/payment-transaction.dto.ts:193` |
+| `decision` | `string` | Sí | valores: aplicar, duplicado, obsoleto, contradiccion | — | Cómo se interpretó el evento frente al estado ya conocido | `src/modules/payments/dto/payment-transaction.dto.ts:202` |
+| `reconciliationRequired` | `boolean` | Sí | — | — | true si el proveedor afirmó algo incompatible con un estado terminal y hace falta conciliar | `src/modules/payments/dto/payment-transaction.dto.ts:211` |
 
 ### Respuestas posibles
 
@@ -122,7 +125,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: Firma del webhook inválida |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: Firma del webhook inválida; UnauthorizedException: Callback no autorizado para este endpoint |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: No hay transacción para la referencia informada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -148,7 +151,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.openCheckout` — `src/modules/payments/controllers/payments-operations.controller.ts:60`
+- **Implementación:** `PaymentsOperationsController.openCheckout` — `src/modules/payments/controllers/payments-operations.controller.ts:61`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -158,14 +161,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/checkout-sessions` la atiende `PaymentsOperationsController.openCheckout` (src/modules/payments/controllers/payments-operations.controller.ts:60). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `OpenCheckoutSessionDto` (12 campos, 5 obligatorios). Delega en `PaymentsCheckoutService.openSession`. Crea filas en payments.cashier_payment_contexts, payments.payment_checkout_sessions. Actualiza payments.payment_debts. Lee payments.payment_debts.
+`POST /payments/checkout-sessions` la atiende `PaymentsOperationsController.openCheckout` (src/modules/payments/controllers/payments-operations.controller.ts:61). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `OpenCheckoutSessionDto` (12 campos, 5 obligatorios). Delega en `PaymentsCheckoutService.openSession`. Crea filas en payments.cashier_payment_contexts, payments.payment_checkout_sessions. Actualiza payments.payment_debts. Lee payments.payment_debts, payments.payment_intents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-operations.controller.ts:60` |
+| ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-operations.controller.ts:61` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -175,27 +178,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.cashier_payment_contexts` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.createCashierContext | `src/modules/payments/repositories/payment-flow.repository.ts:399` |
-| `payments.payment_checkout_sessions` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.createCheckoutSession | `src/modules/payments/repositories/payment-flow.repository.ts:368` |
-| `payments.payment_debts` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession | `src/modules/payments/services/payments-checkout.service.ts:113` |
-| `payments.payment_debts` | LEE | LEE | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.findDebtForUpdate | `src/modules/payments/repositories/payment-flow.repository.ts:420` |
+| `payments.cashier_payment_contexts` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.createCashierContext | `src/modules/payments/repositories/payment-flow.repository.ts:400` |
+| `payments.payment_checkout_sessions` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.createCheckoutSession | `src/modules/payments/repositories/payment-flow.repository.ts:369` |
+| `payments.payment_debts` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession | `src/modules/payments/services/payments-checkout.service.ts:155` |
+| `payments.payment_debts` | LEE | LEE | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.findDebtForUpdate | `src/modules/payments/repositories/payment-flow.repository.ts:434` |
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.findIntentForCheckout | `src/modules/payments/repositories/payment-flow.repository.ts:454` |
 
 ### Cuerpo — DTO `OpenCheckoutSessionDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-flow.dto.ts:21` |
-| `gatewayConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión del gateway habilitada para el canal | `src/modules/payments/dto/payment-flow.dto.ts:31` |
-| `paymentDebtId` | `string` | Sí | formato uuid | `@IsUUID()` | Deuda que se va a cobrar | `src/modules/payments/dto/payment-flow.dto.ts:38` |
-| `redirectUrl` | `string` | Sí | formato uri | `@IsUrl({ require_tld: false })` | URL a la que se redirige al pagador | `src/modules/payments/dto/payment-flow.dto.ts:45` |
-| `expiresAt` | `string` | Sí | formato date-time | `@IsISO8601()` | Vencimiento de la sesión | `src/modules/payments/dto/payment-flow.dto.ts:52` |
-| `paymentIntentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Intent asociado, si ya existe | `src/modules/payments/dto/payment-flow.dto.ts:63` |
-| `cashierUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cajero que abre la sesión (contexto POS) | `src/modules/payments/dto/payment-flow.dto.ts:74` |
-| `cashRegisterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Caja registradora | `src/modules/payments/dto/payment-flow.dto.ts:82` |
-| `siteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede | `src/modules/payments/dto/payment-flow.dto.ts:90` |
-| `shiftReference` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Referencia del turno de caja | `src/modules/payments/dto/payment-flow.dto.ts:99` |
-| `successReturnUrl` | `string` | No | formato url | `@IsOptional()` `@IsUrl({ require_tld: false })` | — | `src/modules/payments/dto/payment-flow.dto.ts:107` |
-| `failureReturnUrl` | `string` | No | formato url | `@IsOptional()` `@IsUrl({ require_tld: false })` | — | `src/modules/payments/dto/payment-flow.dto.ts:115` |
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-flow.dto.ts:26` |
+| `gatewayConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión del gateway habilitada para el canal | `src/modules/payments/dto/payment-flow.dto.ts:36` |
+| `paymentDebtId` | `string` | Sí | formato uuid | `@IsUUID()` | Deuda que se va a cobrar | `src/modules/payments/dto/payment-flow.dto.ts:43` |
+| `redirectUrl` | `string` | Sí | formato uri | `@IsUrl({ require_tld: false })` | URL a la que se redirige al pagador | `src/modules/payments/dto/payment-flow.dto.ts:50` |
+| `expiresAt` | `string` | Sí | formato date-time | `@IsISO8601()` | Vencimiento de la sesión | `src/modules/payments/dto/payment-flow.dto.ts:57` |
+| `paymentIntentId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Intent asociado, si ya existe | `src/modules/payments/dto/payment-flow.dto.ts:68` |
+| `cashierUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cajero que abre la sesión (contexto POS) | `src/modules/payments/dto/payment-flow.dto.ts:79` |
+| `cashRegisterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Caja registradora | `src/modules/payments/dto/payment-flow.dto.ts:87` |
+| `siteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede | `src/modules/payments/dto/payment-flow.dto.ts:95` |
+| `shiftReference` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Referencia del turno de caja | `src/modules/payments/dto/payment-flow.dto.ts:104` |
+| `successReturnUrl` | `string` | No | formato url | `@IsOptional()` `@IsUrl({ require_tld: false })` | — | `src/modules/payments/dto/payment-flow.dto.ts:112` |
+| `failureReturnUrl` | `string` | No | formato url | `@IsOptional()` `@IsUrl({ require_tld: false })` | — | `src/modules/payments/dto/payment-flow.dto.ts:120` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -234,11 +238,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:126` |
-| `paymentDebtId` | `string` | Sí | formato uuid | — | Identificador asociado a payment debt. | `src/modules/payments/dto/payment-flow.dto.ts:132` |
-| `redirectUrl` | `string` | Sí | — | — | Valor de redirect url mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:138` |
-| `expiresAt` | `string` | Sí | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:144` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-flow.dto.ts:150` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:131` |
+| `paymentDebtId` | `string` | Sí | formato uuid | — | Identificador asociado a payment debt. | `src/modules/payments/dto/payment-flow.dto.ts:137` |
+| `redirectUrl` | `string` | Sí | — | — | Valor de redirect url mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:143` |
+| `expiresAt` | `string` | Sí | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:149` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-flow.dto.ts:155` |
 
 ### Respuestas posibles
 
@@ -248,8 +252,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Deuda no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La deuda ya tiene un checkout abierto; PreconditionFailedException: La deuda ya está saldada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Deuda no encontrada; ResourceNotFoundException: Intención de pago no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenantId del cuerpo no coincide con el tenant activo; PreconditionFailedException: La deuda ya tiene un checkout abierto; PreconditionFailedException: La deuda ya está saldada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/payments.md).
@@ -273,7 +277,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.createFeeSchedule` — `src/modules/payments/controllers/payments-operations.controller.ts:113`
+- **Implementación:** `PaymentsOperationsController.createFeeSchedule` — `src/modules/payments/controllers/payments-operations.controller.ts:115`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -283,14 +287,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/fee-schedules` la atiende `PaymentsOperationsController.createFeeSchedule` (src/modules/payments/controllers/payments-operations.controller.ts:113). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateFeeScheduleDto` (9 campos, 5 obligatorios). Delega en `PaymentsOperationsService.createFeeSchedule`. Crea filas en payments.fee_schedules. Actualiza payments.fee_schedules. Lee payments.fee_schedules.
+`POST /payments/fee-schedules` la atiende `PaymentsOperationsController.createFeeSchedule` (src/modules/payments/controllers/payments-operations.controller.ts:115). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateFeeScheduleDto` (9 campos, 5 obligatorios). Delega en `PaymentsOperationsService.createFeeSchedule`. Crea filas en payments.fee_schedules. Actualiza payments.fee_schedules. Lee payments.fee_schedules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:113` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:115` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -300,7 +304,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.fee_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.createFeeSchedule → PaymentsOperationsService.createFeeSchedule | `src/modules/payments/services/payments-operations.service.ts:98` |
+| `payments.fee_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.createFeeSchedule → PaymentsOperationsService.createFeeSchedule | `src/modules/payments/services/payments-operations.service.ts:109` |
 | `payments.fee_schedules` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.createFeeSchedule → PaymentsOperationsService.createFeeSchedule → PaymentOperationsRepository.createFeeSchedule | `src/modules/payments/repositories/payment-operations.repository.ts:332` |
 | `payments.fee_schedules` | LEE | LEE | DIRECTA | PaymentsOperationsController.createFeeSchedule → PaymentsOperationsService.createFeeSchedule → PaymentOperationsRepository.findFeeScheduleByCode | `src/modules/payments/repositories/payment-operations.repository.ts:361` |
 
@@ -308,15 +312,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:26` |
-| `code` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Código único de la tarifa dentro del tenant | `src/modules/payments/dto/payment-operations.dto.ts:37` |
-| `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | — | `src/modules/payments/dto/payment-operations.dto.ts:45` |
-| `feeType` | `string` | Sí | valores: GATEWAY, PLATFORM | `@IsIn(['GATEWAY', 'PLATFORM'])` | Quién cobra la tarifa | `src/modules/payments/dto/payment-operations.dto.ts:55` |
-| `method` | `string` | Sí | valores: PERCENTAGE, FIXED | `@IsIn(['PERCENTAGE', 'FIXED'])` | Modo de cálculo | `src/modules/payments/dto/payment-operations.dto.ts:65` |
-| `percentage` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Porcentaje cuando method=PERCENTAGE | `src/modules/payments/dto/payment-operations.dto.ts:76` |
-| `fixedAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Importe fijo cuando method=FIXED | `src/modules/payments/dto/payment-operations.dto.ts:87` |
-| `validFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:95` |
-| `validTo` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:103` |
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:31` |
+| `code` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Código único de la tarifa dentro del tenant | `src/modules/payments/dto/payment-operations.dto.ts:42` |
+| `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | — | `src/modules/payments/dto/payment-operations.dto.ts:50` |
+| `feeType` | `string` | Sí | valores: GATEWAY, PLATFORM | `@IsIn(['GATEWAY', 'PLATFORM'])` | Quién cobra la tarifa | `src/modules/payments/dto/payment-operations.dto.ts:60` |
+| `method` | `string` | Sí | valores: PERCENTAGE, FIXED | `@IsIn(['PERCENTAGE', 'FIXED'])` | Modo de cálculo | `src/modules/payments/dto/payment-operations.dto.ts:70` |
+| `percentage` | `string` | No | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsOptional()` `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | Porcentaje cuando method=PERCENTAGE | `src/modules/payments/dto/payment-operations.dto.ts:82` |
+| `fixedAmount` | `string` | No | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsOptional()` `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | Importe fijo cuando method=FIXED | `src/modules/payments/dto/payment-operations.dto.ts:94` |
+| `validFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:102` |
+| `validTo` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:110` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -352,10 +356,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:114` |
-| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:120` |
-| `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/payments/dto/payment-operations.dto.ts:126` |
-| `supersededId` | `string` | No | — | — | Id de la versión anterior que quedó superseded, si existía | `src/modules/payments/dto/payment-operations.dto.ts:135` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:121` |
+| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:127` |
+| `stateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a state concept. | `src/modules/payments/dto/payment-operations.dto.ts:133` |
+| `supersededId` | `string` | No | — | — | Id de la versión anterior que quedó superseded, si existía | `src/modules/payments/dto/payment-operations.dto.ts:142` |
 
 ### Respuestas posibles
 
@@ -374,7 +378,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:213` |
+| CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:214` |
 
 ### Flujos
 
@@ -423,18 +427,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant propietario del cobro | `src/modules/payments/dto/payment-intent.dto.ts:27` |
-| `gatewayId` | `string` | Sí | formato uuid | `@IsUUID()` | Gateway a través del cual se cobrará | `src/modules/payments/dto/payment-intent.dto.ts:37` |
-| `amount` | `string` | Sí | — | `@IsNumberString()` | Importe a cobrar, como cadena decimal para no perder precisión | `src/modules/payments/dto/payment-intent.dto.ts:48` |
-| `currency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | Moneda ISO-4217 del cobro | `src/modules/payments/dto/payment-intent.dto.ts:58` |
-| `purpose` | `string` | Sí | valores: INVOICE, DEBT, OTHER | `@IsIn(PAYMENT_PURPOSES as readonly string[])` | Propósito del cobro | `src/modules/payments/dto/payment-intent.dto.ts:65` |
-| `idempotencyKey` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Clave de idempotencia del cliente. Repetirla devuelve el intent existente en lugar de cobrar dos veces. | `src/modules/payments/dto/payment-intent.dto.ts:77` |
-| `gatewayConnectionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Conexión concreta del gateway | `src/modules/payments/dto/payment-intent.dto.ts:88` |
-| `practiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Práctica que origina el cobro | `src/modules/payments/dto/payment-intent.dto.ts:99` |
-| `invoiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Factura que se está cobrando | `src/modules/payments/dto/payment-intent.dto.ts:110` |
-| `sourceRefType` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Tipo del recurso de origen (referencia polimórfica) | `src/modules/payments/dto/payment-intent.dto.ts:121` |
-| `sourceRefId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Id del recurso de origen | `src/modules/payments/dto/payment-intent.dto.ts:132` |
-| `expiresAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Vencimiento del intent | `src/modules/payments/dto/payment-intent.dto.ts:143` |
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant propietario del cobro | `src/modules/payments/dto/payment-intent.dto.ts:32` |
+| `gatewayId` | `string` | Sí | formato uuid | `@IsUUID()` | Gateway a través del cual se cobrará | `src/modules/payments/dto/payment-intent.dto.ts:42` |
+| `amount` | `string` | Sí | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | Importe a cobrar, como cadena decimal para no perder precisión | `src/modules/payments/dto/payment-intent.dto.ts:54` |
+| `currency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | Moneda ISO-4217 del cobro | `src/modules/payments/dto/payment-intent.dto.ts:64` |
+| `purpose` | `string` | Sí | valores: INVOICE, DEBT, OTHER | `@IsIn(PAYMENT_PURPOSES as readonly string[])` | Propósito del cobro | `src/modules/payments/dto/payment-intent.dto.ts:71` |
+| `idempotencyKey` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Clave de idempotencia del cliente. Repetirla devuelve el intent existente en lugar de cobrar dos veces. | `src/modules/payments/dto/payment-intent.dto.ts:83` |
+| `gatewayConnectionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Conexión concreta del gateway | `src/modules/payments/dto/payment-intent.dto.ts:94` |
+| `practiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Práctica que origina el cobro | `src/modules/payments/dto/payment-intent.dto.ts:105` |
+| `invoiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Factura que se está cobrando | `src/modules/payments/dto/payment-intent.dto.ts:116` |
+| `sourceRefType` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Tipo del recurso de origen (referencia polimórfica) | `src/modules/payments/dto/payment-intent.dto.ts:127` |
+| `sourceRefId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Id del recurso de origen | `src/modules/payments/dto/payment-intent.dto.ts:138` |
+| `expiresAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Vencimiento del intent | `src/modules/payments/dto/payment-intent.dto.ts:149` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -474,12 +478,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-intent.dto.ts:152` |
-| `tenantId` | `string` | Sí | formato uuid | — | Identificador asociado a tenant. | `src/modules/payments/dto/payment-intent.dto.ts:158` |
-| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-intent.dto.ts:164` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Concepto de estado del intent | `src/modules/payments/dto/payment-intent.dto.ts:170` |
-| `idempotencyKey` | `string` | Sí | — | — | Clave de idempotencia con la que se creó | `src/modules/payments/dto/payment-intent.dto.ts:176` |
-| `reused` | `boolean` | Sí | — | — | true si la petición reutilizó un intent ya existente (reintento idempotente) | `src/modules/payments/dto/payment-intent.dto.ts:185` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-intent.dto.ts:158` |
+| `tenantId` | `string` | Sí | formato uuid | — | Identificador asociado a tenant. | `src/modules/payments/dto/payment-intent.dto.ts:164` |
+| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-intent.dto.ts:170` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Concepto de estado del intent | `src/modules/payments/dto/payment-intent.dto.ts:176` |
+| `idempotencyKey` | `string` | Sí | — | — | Clave de idempotencia con la que se creó | `src/modules/payments/dto/payment-intent.dto.ts:182` |
+| `reused` | `boolean` | Sí | — | — | true si la petición reutilizó un intent ya existente (reintento idempotente) | `src/modules/payments/dto/payment-intent.dto.ts:191` |
 
 ### Respuestas posibles
 
@@ -498,7 +502,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/hardening/mch-003.int-spec.ts:54` |
-| INTEGRACION | `test/integration/hardening/mch-019.int-spec.ts:65` |
+| INTEGRACION | `test/integration/hardening/mch-019.int-spec.ts:66` |
 | INTEGRACION | `test/integration/hardening/payments-fixture.ts:66` |
 | CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:49` |
 
@@ -543,9 +547,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.fx_rate_locks` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate → PaymentFlowRepository.createFxLock | `src/modules/payments/repositories/payment-flow.repository.ts:248` |
-| `payments.fx_rate_locks` | LEE | LEE | DIRECTA | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate → PaymentFlowRepository.findActiveFxLock | `src/modules/payments/repositories/payment-flow.repository.ts:271` |
-| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate | `src/modules/payments/services/payments-intents.service.ts:202` |
+| `payments.fx_rate_locks` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate → PaymentFlowRepository.createFxLock | `src/modules/payments/repositories/payment-flow.repository.ts:249` |
+| `payments.fx_rate_locks` | LEE | LEE | DIRECTA | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate → PaymentFlowRepository.findActiveFxLock | `src/modules/payments/repositories/payment-flow.repository.ts:272` |
+| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate | `src/modules/payments/services/payments-intents.service.ts:217` |
 | `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
 
 ### Parámetros
@@ -558,11 +562,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `fromCurrency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | Moneda de origen | `src/modules/payments/dto/payment-flow.dto.ts:160` |
-| `toCurrency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | Moneda destino | `src/modules/payments/dto/payment-flow.dto.ts:167` |
-| `lockedRate` | `string` | Sí | — | `@IsNumberString()` | Cotización bloqueada | `src/modules/payments/dto/payment-flow.dto.ts:174` |
-| `expiresAt` | `string` | Sí | formato date-time | `@IsISO8601()` | Vigencia del bloqueo | `src/modules/payments/dto/payment-flow.dto.ts:181` |
-| `providerRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del proveedor de FX | `src/modules/payments/dto/payment-flow.dto.ts:190` |
+| `fromCurrency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | Moneda de origen | `src/modules/payments/dto/payment-flow.dto.ts:165` |
+| `toCurrency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | Moneda destino | `src/modules/payments/dto/payment-flow.dto.ts:172` |
+| `lockedRate` | `string` | Sí | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | Cotización bloqueada | `src/modules/payments/dto/payment-flow.dto.ts:180` |
+| `expiresAt` | `string` | Sí | formato date-time | `@IsISO8601()` | Vigencia del bloqueo | `src/modules/payments/dto/payment-flow.dto.ts:187` |
+| `providerRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del proveedor de FX | `src/modules/payments/dto/payment-flow.dto.ts:196` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -593,10 +597,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:201` |
-| `paymentIntentId` | `string` | Sí | formato uuid | — | Identificador asociado a payment intent. | `src/modules/payments/dto/payment-flow.dto.ts:207` |
-| `lockedRate` | `string` | Sí | — | — | Valor de locked rate mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:213` |
-| `convertedAmount` | `string` | Sí | — | — | Importe del intent recalculado a la moneda destino | `src/modules/payments/dto/payment-flow.dto.ts:221` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:207` |
+| `paymentIntentId` | `string` | Sí | formato uuid | — | Identificador asociado a payment intent. | `src/modules/payments/dto/payment-flow.dto.ts:213` |
+| `lockedRate` | `string` | Sí | — | — | Valor de locked rate mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:219` |
+| `convertedAmount` | `string` | Sí | — | — | Importe del intent recalculado a la moneda destino | `src/modules/payments/dto/payment-flow.dto.ts:227` |
 
 ### Respuestas posibles
 
@@ -660,9 +664,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.assessRisk → PaymentsIntentsService.assessRisk | `src/modules/payments/services/payments-intents.service.ts:255` |
+| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.assessRisk → PaymentsIntentsService.assessRisk | `src/modules/payments/services/payments-intents.service.ts:274` |
 | `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.assessRisk → PaymentsIntentsService.assessRisk → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
-| `payments.risk_assessments` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.assessRisk → PaymentsIntentsService.assessRisk → PaymentFlowRepository.createRiskAssessment | `src/modules/payments/repositories/payment-flow.repository.ts:288` |
+| `payments.risk_assessments` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.assessRisk → PaymentsIntentsService.assessRisk → PaymentFlowRepository.createRiskAssessment | `src/modules/payments/repositories/payment-flow.repository.ts:289` |
 
 ### Parámetros
 
@@ -674,11 +678,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `riskScore` | `string` | Sí | — | `@IsNumberString()` | Score de riesgo (0-100) | `src/modules/payments/dto/payment-flow.dto.ts:239` |
-| `decision` | `string` | Sí | valores: APPROVE, REVIEW, DECLINE | `@IsIn(RISK_DECISIONS as readonly string[])` | Decisión del motor | `src/modules/payments/dto/payment-flow.dto.ts:246` |
-| `threeDsAuthenticated` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | true si el pagador completó 3-D Secure | `src/modules/payments/dto/payment-flow.dto.ts:256` |
-| `providerRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del proveedor antifraude | `src/modules/payments/dto/payment-flow.dto.ts:265` |
-| `signals` | `object` | No | — | `@IsOptional()` | Señales crudas del motor (se persisten como jsonb) | `src/modules/payments/dto/payment-flow.dto.ts:274` |
+| `riskScore` | `string` | Sí | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | Score de riesgo (0-100) | `src/modules/payments/dto/payment-flow.dto.ts:246` |
+| `decision` | `string` | Sí | valores: APPROVE, REVIEW, DECLINE | `@IsIn(RISK_DECISIONS as readonly string[])` | Decisión del motor | `src/modules/payments/dto/payment-flow.dto.ts:253` |
+| `threeDsAuthenticated` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | true si el pagador completó 3-D Secure | `src/modules/payments/dto/payment-flow.dto.ts:263` |
+| `providerRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del proveedor antifraude | `src/modules/payments/dto/payment-flow.dto.ts:272` |
+| `signals` | `object` | No | — | `@IsOptional()` | Señales crudas del motor (se persisten como jsonb) | `src/modules/payments/dto/payment-flow.dto.ts:281` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -707,10 +711,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:285` |
-| `paymentIntentId` | `string` | Sí | formato uuid | — | Identificador asociado a payment intent. | `src/modules/payments/dto/payment-flow.dto.ts:291` |
-| `decision` | `string` | Sí | valores: APPROVE, REVIEW, DECLINE | — | Valor de decision mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:297` |
-| `riskLevel` | `string` | Sí | valores: LOW, MEDIUM, HIGH | — | Nivel derivado del score | `src/modules/payments/dto/payment-flow.dto.ts:306` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:292` |
+| `paymentIntentId` | `string` | Sí | formato uuid | — | Identificador asociado a payment intent. | `src/modules/payments/dto/payment-flow.dto.ts:298` |
+| `decision` | `string` | Sí | valores: APPROVE, REVIEW, DECLINE | — | Valor de decision mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:304` |
+| `riskLevel` | `string` | Sí | valores: LOW, MEDIUM, HIGH | — | Nivel derivado del score | `src/modules/payments/dto/payment-flow.dto.ts:313` |
 
 ### Respuestas posibles
 
@@ -730,7 +734,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/hardening/mch-003.int-spec.ts:69` |
-| INTEGRACION | `test/integration/hardening/mch-019.int-spec.ts:80` |
+| INTEGRACION | `test/integration/hardening/mch-019.int-spec.ts:81` |
 | INTEGRACION | `test/integration/hardening/payments-fixture.ts:79` |
 | CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:74` |
 
@@ -776,8 +780,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.addSplit → PaymentsIntentsService.addSplit → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
-| `payments.payment_splits` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.addSplit → PaymentsIntentsService.addSplit → PaymentFlowRepository.createSplit | `src/modules/payments/repositories/payment-flow.repository.ts:325` |
-| `payments.payment_splits` | LEE | LEE | DIRECTA | PaymentsIntentsController.addSplit → PaymentsIntentsService.addSplit → PaymentFlowRepository.findSplitsByIntent | `src/modules/payments/repositories/payment-flow.repository.ts:354` |
+| `payments.payment_splits` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.addSplit → PaymentsIntentsService.addSplit → PaymentFlowRepository.createSplit | `src/modules/payments/repositories/payment-flow.repository.ts:326` |
+| `payments.payment_splits` | LEE | LEE | DIRECTA | PaymentsIntentsController.addSplit → PaymentsIntentsService.addSplit → PaymentFlowRepository.findSplitsByIntent | `src/modules/payments/repositories/payment-flow.repository.ts:355` |
 
 ### Parámetros
 
@@ -789,12 +793,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `payeeConnectedAccountId` | `string` | Sí | formato uuid | `@IsUUID()` | Cuenta conectada que recibe el reparto | `src/modules/payments/dto/payment-flow.dto.ts:322` |
-| `splitType` | `string` | Sí | valores: AMOUNT, PERCENTAGE | `@IsIn(['AMOUNT', 'PERCENTAGE'])` | Modo de reparto | `src/modules/payments/dto/payment-flow.dto.ts:332` |
-| `amount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Importe fijo cuando splitType=AMOUNT | `src/modules/payments/dto/payment-flow.dto.ts:340` |
-| `percentage` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Porcentaje cuando splitType=PERCENTAGE | `src/modules/payments/dto/payment-flow.dto.ts:351` |
-| `isPlatformFee` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | true si el reparto es la comisión de la plataforma | `src/modules/payments/dto/payment-flow.dto.ts:361` |
-| `destinationWalletId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Wallet destino | `src/modules/payments/dto/payment-flow.dto.ts:369` |
+| `payeeConnectedAccountId` | `string` | Sí | formato uuid | `@IsUUID()` | Cuenta conectada que recibe el reparto | `src/modules/payments/dto/payment-flow.dto.ts:329` |
+| `splitType` | `string` | Sí | valores: AMOUNT, PERCENTAGE | `@IsIn(['AMOUNT', 'PERCENTAGE'])` | Modo de reparto | `src/modules/payments/dto/payment-flow.dto.ts:339` |
+| `amount` | `string` | No | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsOptional()` `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | Importe fijo cuando splitType=AMOUNT | `src/modules/payments/dto/payment-flow.dto.ts:348` |
+| `percentage` | `string` | No | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsOptional()` `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | Porcentaje cuando splitType=PERCENTAGE | `src/modules/payments/dto/payment-flow.dto.ts:360` |
+| `isPlatformFee` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | true si el reparto es la comisión de la plataforma | `src/modules/payments/dto/payment-flow.dto.ts:370` |
+| `destinationWalletId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Wallet destino | `src/modules/payments/dto/payment-flow.dto.ts:378` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -824,10 +828,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:380` |
-| `paymentIntentId` | `string` | Sí | formato uuid | — | Identificador asociado a payment intent. | `src/modules/payments/dto/payment-flow.dto.ts:386` |
-| `amount` | `string` | Sí | — | — | Importe resuelto del reparto | `src/modules/payments/dto/payment-flow.dto.ts:392` |
-| `isPlatformFee` | `boolean` | Sí | — | — | Valor de is platform fee mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:398` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:389` |
+| `paymentIntentId` | `string` | Sí | formato uuid | — | Identificador asociado a payment intent. | `src/modules/payments/dto/payment-flow.dto.ts:395` |
+| `amount` | `string` | Sí | — | — | Importe resuelto del reparto | `src/modules/payments/dto/payment-flow.dto.ts:401` |
+| `isPlatformFee` | `boolean` | Sí | — | — | Valor de is platform fee mantenido por la instancia. | `src/modules/payments/dto/payment-flow.dto.ts:407` |
 
 ### Respuestas posibles
 
@@ -839,7 +843,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
 | 409 | `CONFLICT` | ConflictException: Los repartos superan el importe de la intención |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un reparto por importe exige `amount`; PreconditionFailedException: Un reparto por porcentaje exige `percentage` |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un reparto por importe exige `amount`; PreconditionFailedException: Un reparto por porcentaje exige `percentage`; PreconditionFailedException: El reparto debe ser un importe positivo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/payments.md).
@@ -891,11 +895,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction | `src/modules/payments/services/payments-transactions.service.ts:219` |
+| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction | `src/modules/payments/services/payments-transactions.service.ts:235` |
 | `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
-| `payments.payment_transactions` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentTransactionsRepository.create | `src/modules/payments/repositories/payment-transactions.repository.ts:196` |
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentTransactionsRepository.findPendingByIntent | `src/modules/payments/repositories/payment-transactions.repository.ts:300` |
-| `payments.risk_assessments` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentFlowRepository.findLatestRiskAssessment | `src/modules/payments/repositories/payment-flow.repository.ts:310` |
+| `payments.payment_transactions` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentTransactionsRepository.create | `src/modules/payments/repositories/payment-transactions.repository.ts:197` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentTransactionsRepository.findPendingByIntent | `src/modules/payments/repositories/payment-transactions.repository.ts:301` |
+| `payments.risk_assessments` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentFlowRepository.findLatestRiskAssessment | `src/modules/payments/repositories/payment-flow.repository.ts:311` |
 
 ### Parámetros
 
@@ -907,10 +911,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `operation` | `string` | Sí | valores: AUTHORIZE, CAPTURE, SALE | `@IsIn(TRANSACTION_OPERATIONS as readonly string[])` | Operación a ejecutar | `src/modules/payments/dto/payment-transaction.dto.ts:39` |
-| `amount` | `string` | No | patrón runtime POSITIVE_MONEY_REGEX | `@IsOptional()` `@IsNumberString()` `@Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })` | Importe a procesar. Si se omite se toma el del intent. | `src/modules/payments/dto/payment-transaction.dto.ts:51` |
-| `gatewayTransactionRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia devuelta por el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:60` |
-| `authorizationCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Código de autorización del emisor | `src/modules/payments/dto/payment-transaction.dto.ts:69` |
+| `operation` | `string` | Sí | valores: AUTHORIZE, CAPTURE, SALE | `@IsIn(TRANSACTION_OPERATIONS as readonly string[])` | Operación a ejecutar | `src/modules/payments/dto/payment-transaction.dto.ts:40` |
+| `amount` | `string` | No | patrón runtime POSITIVE_MONEY_REGEX | `@IsOptional()` `@IsNumberString()` `@Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })` | Importe a procesar. Si se omite se toma el del intent. | `src/modules/payments/dto/payment-transaction.dto.ts:52` |
+| `gatewayTransactionRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia devuelta por el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:61` |
+| `authorizationCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Código de autorización del emisor | `src/modules/payments/dto/payment-transaction.dto.ts:70` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -937,11 +941,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:80` |
-| `paymentIntentId` | `string` | Sí | formato uuid | — | Identificador asociado a payment intent. | `src/modules/payments/dto/payment-transaction.dto.ts:86` |
-| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:92` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:98` |
-| `gatewayTransactionRef` | `string` | No | — | — | Valor de gateway transaction ref mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:104` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:81` |
+| `paymentIntentId` | `string` | Sí | formato uuid | — | Identificador asociado a payment intent. | `src/modules/payments/dto/payment-transaction.dto.ts:87` |
+| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:93` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:99` |
+| `gatewayTransactionRef` | `string` | No | — | — | Valor de gateway transaction ref mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:105` |
 
 ### Respuestas posibles
 
@@ -963,7 +967,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/hardening/mch-003.int-spec.ts:78` |
-| INTEGRACION | `test/integration/hardening/mch-019.int-spec.ts:94` |
+| INTEGRACION | `test/integration/hardening/mch-019.int-spec.ts:95` |
 | INTEGRACION | `test/integration/hardening/payments-fixture.ts:93` |
 | CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:88` |
 
@@ -980,7 +984,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.executePayout` — `src/modules/payments/controllers/payments-operations.controller.ts:147`
+- **Implementación:** `PaymentsOperationsController.executePayout` — `src/modules/payments/controllers/payments-operations.controller.ts:149`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -990,14 +994,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/payouts` la atiende `PaymentsOperationsController.executePayout` (src/modules/payments/controllers/payments-operations.controller.ts:147). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreatePayoutDto` (12 campos, 9 obligatorios). Delega en `PaymentsOperationsService.executePayout`. Crea filas en payments.payout_items, payments.payouts.
+`POST /payments/payouts` la atiende `PaymentsOperationsController.executePayout` (src/modules/payments/controllers/payments-operations.controller.ts:149). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreatePayoutDto` (12 campos, 9 obligatorios). Delega en `PaymentsOperationsService.executePayout`. Crea filas en payments.payout_items, payments.payouts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:147` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:149` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1014,18 +1018,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:323` |
-| `payeeRefId` | `string` | Sí | formato uuid | `@IsUUID()` | Cuenta conectada destinataria | `src/modules/payments/dto/payment-operations.dto.ts:330` |
-| `gatewayId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:337` |
-| `currency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | — | `src/modules/payments/dto/payment-operations.dto.ts:344` |
-| `periodStart` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:351` |
-| `periodEnd` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:358` |
-| `items` | `array<PayoutItemDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => PayoutItemDto)` | Ítems a liquidar | `src/modules/payments/dto/payment-operations.dto.ts:368` |
-| `items[].sourceRefId` | `string` | Sí | formato uuid | `@IsUUID()` | Transacción que origina el ítem | `src/modules/payments/dto/payment-operations.dto.ts:289` |
-| `items[].amount` | `string` | Sí | — | `@IsNumberString()` | — | `src/modules/payments/dto/payment-operations.dto.ts:296` |
-| `items[].commissionAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | — | `src/modules/payments/dto/payment-operations.dto.ts:304` |
-| `items[].description` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/payments/dto/payment-operations.dto.ts:313` |
-| `gatewayPayoutRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del payout en el gateway | `src/modules/payments/dto/payment-operations.dto.ts:377` |
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:337` |
+| `payeeRefId` | `string` | Sí | formato uuid | `@IsUUID()` | Cuenta conectada destinataria | `src/modules/payments/dto/payment-operations.dto.ts:344` |
+| `gatewayId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:351` |
+| `currency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | — | `src/modules/payments/dto/payment-operations.dto.ts:358` |
+| `periodStart` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:365` |
+| `periodEnd` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:372` |
+| `items` | `array<PayoutItemDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => PayoutItemDto)` | Ítems a liquidar | `src/modules/payments/dto/payment-operations.dto.ts:382` |
+| `items[].sourceRefId` | `string` | Sí | formato uuid | `@IsUUID()` | Transacción que origina el ítem | `src/modules/payments/dto/payment-operations.dto.ts:301` |
+| `items[].amount` | `string` | Sí | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | — | `src/modules/payments/dto/payment-operations.dto.ts:309` |
+| `items[].commissionAmount` | `string` | No | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsOptional()` `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | — | `src/modules/payments/dto/payment-operations.dto.ts:318` |
+| `items[].description` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/payments/dto/payment-operations.dto.ts:327` |
+| `gatewayPayoutRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del payout en el gateway | `src/modules/payments/dto/payment-operations.dto.ts:391` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1074,10 +1078,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:388` |
-| `amount` | `string` | Sí | — | — | Suma de los ítems | `src/modules/payments/dto/payment-operations.dto.ts:394` |
-| `itemCount` | `number` | Sí | — | — | Valor de item count mantenido por la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:400` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-operations.dto.ts:406` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:402` |
+| `amount` | `string` | Sí | — | — | Suma de los ítems | `src/modules/payments/dto/payment-operations.dto.ts:408` |
+| `itemCount` | `number` | Sí | — | — | Valor de item count mantenido por la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:414` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-operations.dto.ts:420` |
 
 ### Respuestas posibles
 
@@ -1096,7 +1100,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:239` |
+| CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:240` |
 
 ### Flujos
 
@@ -1111,7 +1115,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.runReconciliation` — `src/modules/payments/controllers/payments-operations.controller.ts:164`
+- **Implementación:** `PaymentsOperationsController.runReconciliation` — `src/modules/payments/controllers/payments-operations.controller.ts:166`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1121,14 +1125,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/reconciliation-runs` la atiende `PaymentsOperationsController.runReconciliation` (src/modules/payments/controllers/payments-operations.controller.ts:164). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateReconciliationRunDto` (11 campos, 10 obligatorios). Delega en `PaymentsOperationsService.runReconciliation`. Crea filas en payments.provider_reconciliation_records, payments.reconciliation_exceptions, payments.reconciliation_runs. Actualiza payments.reconciliation_runs. Lee payments.payment_transactions.
+`POST /payments/reconciliation-runs` la atiende `PaymentsOperationsController.runReconciliation` (src/modules/payments/controllers/payments-operations.controller.ts:166). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CreateReconciliationRunDto` (11 campos, 10 obligatorios). Delega en `PaymentsOperationsService.runReconciliation`. Crea filas en payments.provider_reconciliation_records, payments.reconciliation_exceptions, payments.reconciliation_runs. Actualiza payments.reconciliation_runs. Lee payments.payment_transactions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:164` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:166` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1138,27 +1142,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation → PaymentTransactionsRepository.findByGatewayRef | `src/modules/payments/repositories/payment-transactions.repository.ts:246` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation → PaymentTransactionsRepository.findByGatewayRef | `src/modules/payments/repositories/payment-transactions.repository.ts:247` |
 | `payments.provider_reconciliation_records` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation → PaymentOperationsRepository.createReconciliationRecord | `src/modules/payments/repositories/payment-operations.repository.ts:615` |
 | `payments.reconciliation_exceptions` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation → PaymentOperationsRepository.createReconciliationException | `src/modules/payments/repositories/payment-operations.repository.ts:645` |
-| `payments.reconciliation_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation | `src/modules/payments/services/payments-operations.service.ts:372` |
+| `payments.reconciliation_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation | `src/modules/payments/services/payments-operations.service.ts:389` |
 | `payments.reconciliation_runs` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.runReconciliation → PaymentsOperationsService.runReconciliation → PaymentOperationsRepository.createReconciliationRun | `src/modules/payments/repositories/payment-operations.repository.ts:548` |
 
 ### Cuerpo — DTO `CreateReconciliationRunDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:457` |
-| `gatewayId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:464` |
-| `gatewayConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión de la que provienen los registros | `src/modules/payments/dto/payment-operations.dto.ts:474` |
-| `periodStart` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:481` |
-| `periodEnd` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:488` |
-| `providerRecords` | `array<ProviderRecordDto>` | Sí | — | `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ProviderRecordDto)` | Extracto del proveedor | `src/modules/payments/dto/payment-operations.dto.ts:500` |
-| `providerRecords[].externalTransactionId` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Id de la transacción en el proveedor | `src/modules/payments/dto/payment-operations.dto.ts:417` |
-| `providerRecords[].providerAmount` | `string` | Sí | — | `@IsNumberString()` | — | `src/modules/payments/dto/payment-operations.dto.ts:424` |
-| `providerRecords[].providerStatusCode` | `string` | Sí | longitud máxima 50 | `@IsString()` `@MaxLength(50)` | Código de estado informado por el proveedor | `src/modules/payments/dto/payment-operations.dto.ts:432` |
-| `providerRecords[].providerCurrencyCode` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | — | `src/modules/payments/dto/payment-operations.dto.ts:439` |
-| `providerRecords[].providerFeeAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | — | `src/modules/payments/dto/payment-operations.dto.ts:447` |
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:473` |
+| `gatewayId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:480` |
+| `gatewayConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión de la que provienen los registros | `src/modules/payments/dto/payment-operations.dto.ts:490` |
+| `periodStart` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:497` |
+| `periodEnd` | `string` | Sí | formato date-time | `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:504` |
+| `providerRecords` | `array<ProviderRecordDto>` | Sí | — | `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ProviderRecordDto)` | Extracto del proveedor | `src/modules/payments/dto/payment-operations.dto.ts:516` |
+| `providerRecords[].externalTransactionId` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Id de la transacción en el proveedor | `src/modules/payments/dto/payment-operations.dto.ts:431` |
+| `providerRecords[].providerAmount` | `string` | Sí | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | — | `src/modules/payments/dto/payment-operations.dto.ts:439` |
+| `providerRecords[].providerStatusCode` | `string` | Sí | longitud máxima 50 | `@IsString()` `@MaxLength(50)` | Código de estado informado por el proveedor | `src/modules/payments/dto/payment-operations.dto.ts:447` |
+| `providerRecords[].providerCurrencyCode` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | — | `src/modules/payments/dto/payment-operations.dto.ts:454` |
+| `providerRecords[].providerFeeAmount` | `string` | No | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsOptional()` `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | — | `src/modules/payments/dto/payment-operations.dto.ts:463` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1207,13 +1211,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:511` |
-| `matchedCount` | `number` | Sí | — | — | Registros que casaron con una transacción local | `src/modules/payments/dto/payment-operations.dto.ts:519` |
-| `unmatchedCount` | `number` | Sí | — | — | Registros sin contraparte local | `src/modules/payments/dto/payment-operations.dto.ts:525` |
-| `exceptionCount` | `number` | Sí | — | — | Excepciones abiertas por el descuadre | `src/modules/payments/dto/payment-operations.dto.ts:531` |
-| `totalGateway` | `string` | Sí | — | — | Total informado por el proveedor | `src/modules/payments/dto/payment-operations.dto.ts:540` |
-| `totalLedger` | `string` | Sí | — | — | Total según el ledger local | `src/modules/payments/dto/payment-operations.dto.ts:549` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-operations.dto.ts:555` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:527` |
+| `matchedCount` | `number` | Sí | — | — | Registros que casaron con una transacción local | `src/modules/payments/dto/payment-operations.dto.ts:535` |
+| `unmatchedCount` | `number` | Sí | — | — | Registros sin contraparte local | `src/modules/payments/dto/payment-operations.dto.ts:541` |
+| `exceptionCount` | `number` | Sí | — | — | Excepciones abiertas por el descuadre | `src/modules/payments/dto/payment-operations.dto.ts:547` |
+| `totalGateway` | `string` | Sí | — | — | Total informado por el proveedor | `src/modules/payments/dto/payment-operations.dto.ts:556` |
+| `totalLedger` | `string` | Sí | — | — | Total según el ledger local | `src/modules/payments/dto/payment-operations.dto.ts:565` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-operations.dto.ts:571` |
 
 ### Respuestas posibles
 
@@ -1231,7 +1235,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:249` |
+| CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:250` |
 
 ### Flujos
 
@@ -1246,7 +1250,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PaymentsOperationsController.importSettlement` — `src/modules/payments/controllers/payments-operations.controller.ts:130`
+- **Implementación:** `PaymentsOperationsController.importSettlement` — `src/modules/payments/controllers/payments-operations.controller.ts:132`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1256,14 +1260,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/settlements/import` la atiende `PaymentsOperationsController.importSettlement` (src/modules/payments/controllers/payments-operations.controller.ts:130). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `ImportSettlementDto` (12 campos, 8 obligatorios). Delega en `PaymentsOperationsService.importSettlement`. Crea filas en payments.gateway_settlements, payments.settlement_lines. Actualiza payments.payment_transactions. Lee payments.gateway_settlements, payments.payment_transactions.
+`POST /payments/settlements/import` la atiende `PaymentsOperationsController.importSettlement` (src/modules/payments/controllers/payments-operations.controller.ts:132). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `ImportSettlementDto` (12 campos, 8 obligatorios). Delega en `PaymentsOperationsService.importSettlement`. Crea filas en payments.gateway_settlements, payments.settlement_lines. Actualiza payments.payment_transactions. Lee payments.gateway_settlements, payments.payment_transactions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:130` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:132` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1275,26 +1279,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|---|---|---|
 | `payments.gateway_settlements` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement → PaymentOperationsRepository.createSettlement | `src/modules/payments/repositories/payment-operations.repository.ts:434` |
 | `payments.gateway_settlements` | LEE | LEE | DIRECTA | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement → PaymentOperationsRepository.findSettlementByRef | `src/modules/payments/repositories/payment-operations.repository.ts:456` |
-| `payments.payment_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement | `src/modules/payments/services/payments-operations.service.ts:195` |
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:230` |
+| `payments.payment_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement | `src/modules/payments/services/payments-operations.service.ts:206` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:231` |
 | `payments.settlement_lines` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.importSettlement → PaymentsOperationsService.importSettlement → PaymentOperationsRepository.createSettlementLine | `src/modules/payments/repositories/payment-operations.repository.ts:470` |
 
 ### Cuerpo — DTO `ImportSettlementDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `gatewayId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:179` |
-| `settlementRef` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Referencia del lote en el gateway (única) | `src/modules/payments/dto/payment-operations.dto.ts:190` |
-| `grossAmount` | `string` | Sí | — | `@IsNumberString()` | — | `src/modules/payments/dto/payment-operations.dto.ts:197` |
-| `feeAmount` | `string` | Sí | — | `@IsNumberString()` | — | `src/modules/payments/dto/payment-operations.dto.ts:204` |
-| `netAmount` | `string` | Sí | — | `@IsNumberString()` | — | `src/modules/payments/dto/payment-operations.dto.ts:211` |
-| `currency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | — | `src/modules/payments/dto/payment-operations.dto.ts:218` |
-| `settledAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:226` |
-| `lines` | `array<SettlementLineDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => SettlementLineDto)` | Detalle de la liquidación | `src/modules/payments/dto/payment-operations.dto.ts:239` |
-| `lines[].paymentTransactionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Transacción liquidada | `src/modules/payments/dto/payment-operations.dto.ts:146` |
-| `lines[].refundId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Reembolso liquidado | `src/modules/payments/dto/payment-operations.dto.ts:154` |
-| `lines[].amount` | `string` | Sí | — | `@IsNumberString()` | — | `src/modules/payments/dto/payment-operations.dto.ts:161` |
-| `lines[].feeAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | — | `src/modules/payments/dto/payment-operations.dto.ts:169` |
+| `gatewayId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-operations.dto.ts:188` |
+| `settlementRef` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Referencia del lote en el gateway (única) | `src/modules/payments/dto/payment-operations.dto.ts:199` |
+| `grossAmount` | `string` | Sí | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | — | `src/modules/payments/dto/payment-operations.dto.ts:207` |
+| `feeAmount` | `string` | Sí | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | — | `src/modules/payments/dto/payment-operations.dto.ts:215` |
+| `netAmount` | `string` | Sí | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | — | `src/modules/payments/dto/payment-operations.dto.ts:223` |
+| `currency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | — | `src/modules/payments/dto/payment-operations.dto.ts:230` |
+| `settledAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/payments/dto/payment-operations.dto.ts:238` |
+| `lines` | `array<SettlementLineDto>` | Sí | mínimo 1 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ValidateNested({ each: true })` `@Type(() => SettlementLineDto)` | Detalle de la liquidación | `src/modules/payments/dto/payment-operations.dto.ts:251` |
+| `lines[].paymentTransactionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Transacción liquidada | `src/modules/payments/dto/payment-operations.dto.ts:153` |
+| `lines[].refundId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Reembolso liquidado | `src/modules/payments/dto/payment-operations.dto.ts:161` |
+| `lines[].amount` | `string` | Sí | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | — | `src/modules/payments/dto/payment-operations.dto.ts:169` |
+| `lines[].feeAmount` | `string` | No | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsOptional()` `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | — | `src/modules/payments/dto/payment-operations.dto.ts:178` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1342,11 +1346,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:250` |
-| `settlementRef` | `string` | Sí | — | — | Valor de settlement ref mantenido por la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:256` |
-| `lineCount` | `number` | Sí | — | — | Líneas importadas | `src/modules/payments/dto/payment-operations.dto.ts:262` |
-| `settledTransactions` | `number` | Sí | — | — | Transacciones marcadas como liquidadas | `src/modules/payments/dto/payment-operations.dto.ts:268` |
-| `duplicate` | `boolean` | Sí | — | — | true si el lote ya estaba importado (reintento idempotente) | `src/modules/payments/dto/payment-operations.dto.ts:276` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:262` |
+| `settlementRef` | `string` | Sí | — | — | Valor de settlement ref mantenido por la instancia. | `src/modules/payments/dto/payment-operations.dto.ts:268` |
+| `lineCount` | `number` | Sí | — | — | Líneas importadas | `src/modules/payments/dto/payment-operations.dto.ts:274` |
+| `settledTransactions` | `number` | Sí | — | — | Transacciones marcadas como liquidadas | `src/modules/payments/dto/payment-operations.dto.ts:280` |
+| `duplicate` | `boolean` | Sí | — | — | true si el lote ya estaba importado (reintento idempotente) | `src/modules/payments/dto/payment-operations.dto.ts:288` |
 
 ### Respuestas posibles
 
@@ -1364,7 +1368,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:226` |
+| CONTROLADOR | `src/modules/payments/controllers/payments-intents.controller.spec.ts:227` |
 
 ### Flujos
 
@@ -1407,8 +1411,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_cancellation_requests` | ESCRIBE | CREA | DIRECTA | PaymentsTransactionsController.requestCancellation → PaymentsTransactionsService.requestCancellation → PaymentTransactionsRepository.createCancellation | `src/modules/payments/repositories/payment-transactions.repository.ts:381` |
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.requestCancellation → PaymentsTransactionsService.requestCancellation → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:230` |
+| `payments.payment_cancellation_requests` | ESCRIBE | CREA | DIRECTA | PaymentsTransactionsController.requestCancellation → PaymentsTransactionsService.requestCancellation → PaymentTransactionsRepository.createCancellation | `src/modules/payments/repositories/payment-transactions.repository.ts:397` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.requestCancellation → PaymentsTransactionsService.requestCancellation → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:231` |
 
 ### Parámetros
 
@@ -1420,10 +1424,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-transaction.dto.ts:270` |
-| `gatewayConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión del gateway sobre la que se pide la anulación | `src/modules/payments/dto/payment-transaction.dto.ts:280` |
-| `requestNumber` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Número de solicitud, único por tenant | `src/modules/payments/dto/payment-transaction.dto.ts:291` |
-| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Detalle del motivo | `src/modules/payments/dto/payment-transaction.dto.ts:300` |
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-transaction.dto.ts:284` |
+| `gatewayConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión del gateway sobre la que se pide la anulación | `src/modules/payments/dto/payment-transaction.dto.ts:294` |
+| `requestNumber` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Número de solicitud, único por tenant | `src/modules/payments/dto/payment-transaction.dto.ts:305` |
+| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Detalle del motivo | `src/modules/payments/dto/payment-transaction.dto.ts:314` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1452,9 +1456,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:311` |
-| `requestNumber` | `string` | Sí | — | — | Valor de request number mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:317` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:323` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:325` |
+| `requestNumber` | `string` | Sí | — | — | Valor de request number mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:331` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:337` |
 
 ### Respuestas posibles
 
@@ -1517,9 +1521,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:230` |
-| `payments.refunds` | ESCRIBE | CREA | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.createRefund | `src/modules/payments/repositories/payment-transactions.repository.ts:271` |
-| `payments.refunds` | LEE | LEE | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.findRefundsByTransaction | `src/modules/payments/repositories/payment-transactions.repository.ts:367` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:231` |
+| `payments.refunds` | ESCRIBE | CREA | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.createRefund | `src/modules/payments/repositories/payment-transactions.repository.ts:272` |
+| `payments.refunds` | LEE | LEE | DIRECTA | PaymentsTransactionsController.refund → PaymentsTransactionsService.refund → PaymentTransactionsRepository.findRefundsByTransaction | `src/modules/payments/repositories/payment-transactions.repository.ts:383` |
 
 ### Parámetros
 
@@ -1531,9 +1535,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `amount` | `string` | Sí | patrón runtime POSITIVE_MONEY_REGEX | `@IsNumberString()` `@Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })` | Importe a reembolsar (parcial o total) | `src/modules/payments/dto/payment-transaction.dto.ts:211` |
-| `gatewayRefundRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del reembolso en el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:222` |
-| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo libre del reembolso | `src/modules/payments/dto/payment-transaction.dto.ts:231` |
+| `amount` | `string` | Sí | patrón runtime POSITIVE_MONEY_REGEX | `@IsNumberString()` `@Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })` | Importe a reembolsar (parcial o total) | `src/modules/payments/dto/payment-transaction.dto.ts:225` |
+| `gatewayRefundRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del reembolso en el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:236` |
+| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo libre del reembolso | `src/modules/payments/dto/payment-transaction.dto.ts:245` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1559,10 +1563,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:242` |
-| `paymentTransactionId` | `string` | Sí | formato uuid | — | Identificador asociado a payment transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:248` |
-| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:254` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:260` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:256` |
+| `paymentTransactionId` | `string` | Sí | formato uuid | — | Identificador asociado a payment transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:262` |
+| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:268` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:274` |
 
 ### Respuestas posibles
 
@@ -1626,7 +1630,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.inquireStatus → PaymentsTransactionsService.inquireStatus → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:230` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsTransactionsController.inquireStatus → PaymentsTransactionsService.inquireStatus → PaymentTransactionsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-transactions.repository.ts:231` |
 
 ### Parámetros
 
@@ -1642,9 +1646,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `transactionId` | `string` | Sí | formato uuid | — | Identificador asociado a transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:332` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:338` |
-| `reconciled` | `boolean` | Sí | — | — | true si la consulta cambió el estado local | `src/modules/payments/dto/payment-transaction.dto.ts:344` |
+| `transactionId` | `string` | Sí | formato uuid | — | Identificador asociado a transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:346` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:352` |
+| `reconciled` | `boolean` | Sí | — | — | true si la consulta cambió el estado local | `src/modules/payments/dto/payment-transaction.dto.ts:358` |
 
 ### Respuestas posibles
 

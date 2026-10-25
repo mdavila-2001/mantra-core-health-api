@@ -2,11 +2,11 @@
 
 # Documentación de endpoints
 
-Se documentan **1547 de 1547 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1549 de 1549 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
-| `accounting` | 45 | [Abrir referencia](endpoints/accounting.md) |
+| `accounting` | 46 | [Abrir referencia](endpoints/accounting.md) |
 | `ads` | 18 | [Abrir referencia](endpoints/ads.md) |
 | `app` | 6 | [Abrir referencia](endpoints/app.md) |
 | `audio_assets` | 10 | [Abrir referencia](endpoints/audio-assets.md) |
@@ -16,7 +16,7 @@ Se documentan **1547 de 1547 endpoints** en **73 módulos**. La referencia compl
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
 | `billing` | 34 | [Abrir referencia](endpoints/billing.md) |
 | `chart` | 23 | [Abrir referencia](endpoints/chart.md) |
-| `clinical` | 40 | [Abrir referencia](endpoints/clinical.md) |
+| `clinical` | 41 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 27 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 19 | [Abrir referencia](endpoints/common.md) |
 | `community` | 98 | [Abrir referencia](endpoints/community.md) |

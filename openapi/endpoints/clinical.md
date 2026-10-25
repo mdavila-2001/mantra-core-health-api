@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `clinical`
 
-Referencia exhaustiva de 40 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 41 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-me`, `clinical-observations`, `clinical-orders`, `clinical-prescription-expiry`, `clinical-prescription-policies`, `clinical-prescriptions`, `clinical-prescriptions-public`, `clinical-read`, `clinical-records`
 - **Controladores:** `ClinicalEncountersController`, `ClinicalMedicalAspectsController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionExpiryController`, `ClinicalPrescriptionPoliciesController`, `ClinicalPrescriptionsController`, `ClinicalPrescriptionsPublicController`, `ClinicalReadController`, `ClinicalRecordsController`
@@ -41,16 +41,17 @@ Referencia exhaustiva de 40 operación(es) del módulo `clinical`, derivada del 
 28. [POST /clinical/medication-requests/{id}/sign](#28-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
 29. [POST /clinical/observations](#29-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
 30. [PATCH /clinical/observations/{id}/amend](#30-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
-31. [GET /clinical/patients/{patientProfileId}/summary](#31-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
-32. [GET /clinical/prescription-signature-policies](#32-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
-33. [POST /clinical/prescription-signature-policies](#33-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
-34. [POST /clinical/prescription-signature-policies/{id}/deactivate](#34-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
-35. [GET /clinical/prescriptions/{id}/pdf](#35-get-clinical-prescriptions-id-pdf) — Descargar el PDF oficial de una receta
-36. [POST /clinical/procedures](#36-post-clinical-procedures) — Registrar un procedimiento
-37. [POST /clinical/procedures/{id}/attachments](#37-post-clinical-procedures-id-attachments) — Adjuntar un archivo ya subido a un procedimiento
-38. [POST /clinical/service-requests](#38-post-clinical-service-requests) — Crear una orden de servicio
-39. [POST /clinical/service-requests/duplicate-check](#39-post-clinical-service-requests-duplicate-check) — Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
-40. [GET /public/prescriptions/{id}/verify](#40-get-public-prescriptions-id-verify) — Verificar la autenticidad de una receta por su sello
+31. [GET /clinical/patients/{patientProfileId}/received-services](#31-get-clinical-patients-patientprofileid-received-services) — Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas
+32. [GET /clinical/patients/{patientProfileId}/summary](#32-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
+33. [GET /clinical/prescription-signature-policies](#33-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
+34. [POST /clinical/prescription-signature-policies](#34-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
+35. [POST /clinical/prescription-signature-policies/{id}/deactivate](#35-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
+36. [GET /clinical/prescriptions/{id}/pdf](#36-get-clinical-prescriptions-id-pdf) — Descargar el PDF oficial de una receta
+37. [POST /clinical/procedures](#37-post-clinical-procedures) — Registrar un procedimiento
+38. [POST /clinical/procedures/{id}/attachments](#38-post-clinical-procedures-id-attachments) — Adjuntar un archivo ya subido a un procedimiento
+39. [POST /clinical/service-requests](#39-post-clinical-service-requests) — Crear una orden de servicio
+40. [POST /clinical/service-requests/duplicate-check](#40-post-clinical-service-requests-duplicate-check) — Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
+41. [GET /public/prescriptions/{id}/verify](#41-get-public-prescriptions-id-verify) — Verificar la autenticidad de una receta por su sello
 
 ---
 
@@ -4576,7 +4577,162 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /clinical/patients/{patientProfileId}/summary
+## 31. GET /clinical/patients/{patientProfileId}/received-services
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-read`
+- **Nombre:** Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas
+- **Operation ID:** `ClinicalReadController_getReceivedServices`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalReadController.getReceivedServices](../../src/modules/clinical/controllers/clinical-read.controller.ts)
+
+### Descripción de negocio
+
+Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Servicios que el paciente recibió: intervenciones médicas realizadas y vacunas. Es la pestaña «Servicios recibidos» de la historia. El estudio de laboratorio y la imagenología no entran: viven en «Resultados». La política de acceso es la del resumen (`ClinicalRecordAccessGuard`) y la lectura deja su asiento en `audit.data_access_log` antes de ejecutarse (`@AccessLogged`).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /clinical/patients/{patientProfileId}/received-services` en `ClinicalReadController_getReceivedServices`. El controlador delega en `ReceivedServicesReadService.list`. No recibe body. El tipo de retorno estático es `Promise<PatientReceivedServicesResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope de la lista (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /clinical/patients/00000000-0000-4000-8000-000000000001/received-services HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `PATIENT`.
+- Deben ser UUID válidos: `patientProfileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /clinical/patients/00000000-0000-4000-8000-000000000001/received-services?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientReceivedServicesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": {},
+      "typeConceptId": "00000000-0000-4000-8000-000000000001",
+      "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "performedAt": "2026-07-31T12:00:00.000Z",
+      "performerProfileId": "00000000-0000-4000-8000-000000000001",
+      "performerName": "Nombre de ejemplo",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+      "practiceSiteName": "Nombre de ejemplo",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "outcomeConceptId": "00000000-0000-4000-8000-000000000001",
+      "resultText": "valor-ejemplo",
+      "cost": {
+        "amount": 350,
+        "currencyCode": "BOB",
+        "source": "INVOICE_LINE"
+      }
+    }
+  ],
+  "limit": 1,
+  "truncated": true,
+  "costsVisible": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Paciente de quien se lee. | `00000000-0000-4000-8000-000000000001` |
+| `items` | Sí | `array<ReceivedServiceItemDto>` | Sin restricción adicional declarada | Servicios, el más reciente primero. | `[{"id":"00000000-0000-4000-8000-000000000001","type":{},"typeConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","performedAt":"2026-07-31T12:00:00.000Z","performerProfileId":"00000000-0000-4000-8000-000000000001","performerName":"Nombre de ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","practiceSiteName":"Nombre de ejemplo","encounterId":"00000000-0000-4000-8000-000000000001","outcomeConceptId":"00000000-0000-4000-8000-000000000001","resultText":"valor-ejemplo","cost":{"amount":350,"currencyCode":"BOB","source":"INVOICE_LINE"}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador del servicio recibido. | `00000000-0000-4000-8000-000000000001` |
+| `items[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo de servicio: intervención médica, vacunación u otro. | `{}` |
+| `items[].typeConceptId` | Sí | `string` | formato `uuid` | Concepto del tipo, para resolver su etiqueta en terminología. | `00000000-0000-4000-8000-000000000001` |
+| `items[].serviceConceptId` | Sí | `string` | formato `uuid` | Qué se hizo: el código del procedimiento, de la vacuna o del tipo de caso. | `00000000-0000-4000-8000-000000000001` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Estado del servicio. | `00000000-0000-4000-8000-000000000001` |
+| `items[].performedAt` | Sí | `string` | formato `date-time` | Cuándo se realizó. | `2026-07-31T12:00:00.000Z` |
+| `items[].performerProfileId` | No | `string` | formato `uuid` | Profesional que lo realizó. | `00000000-0000-4000-8000-000000000001` |
+| `items[].performerName` | No | `string` | Sin restricción adicional declarada | Nombre del profesional, ya resuelto: el paciente no puede leer el padrón de profesionales, así que no podría resolverlo desde `performerProfileId`. | `Nombre de ejemplo` |
+| `items[].practiceSiteId` | No | `string` | formato `uuid` | Sede donde se realizó. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practiceSiteName` | No | `string` | Sin restricción adicional declarada | Nombre de la sede, ya resuelto. | `Nombre de ejemplo` |
+| `items[].encounterId` | No | `string` | formato `uuid` | Atención en la que ocurrió. | `00000000-0000-4000-8000-000000000001` |
+| `items[].outcomeConceptId` | No | `string` | formato `uuid` | Resultado del servicio, como concepto. | `00000000-0000-4000-8000-000000000001` |
+| `items[].resultText` | No | `string` | Sin restricción adicional declarada | Nota o resultado en texto libre que dejó quien lo realizó. | `valor-ejemplo` |
+| `items[].cost` | Sí | `ReceivedServiceCostDto` | Sin restricción adicional declarada | Costo registrado. `null` si no hay cobro registrado o si quien pide no ve importes. | `{"amount":350,"currencyCode":"BOB","source":"INVOICE_LINE"}` |
+| `items[].cost.amount` | Sí | `string` | Sin restricción adicional declarada | Importe decimal exacto; nunca un número de coma flotante. | `350` |
+| `items[].cost.currencyCode` | Sí | `string` | admite null | Código de moneda (`BOB`, `USD`), o `null` si el cargo no lo declara. | `BOB` |
+| `items[].cost.source` | Sí | `string` | valores: `INVOICE_LINE`, `CHARGE_ITEMS` | De dónde sale el importe: la línea de factura enlazada o la suma de los cargos del caso. | `INVOICE_LINE` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la lista | `1` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | `true` si hay más servicios de los que el tope dejó pasar. | `true` |
+| `costsVisible` | Sí | `boolean` | Sin restricción adicional declarada | Si quien pide ve importes. Solo los ve el titular o quien lo representa: el personal clínico lee el servicio sin el dinero. Con `false`, todo `cost` es `null` y no significa «sin cobro». | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/patients/{patientProfileId}/received-services"
+}
+```
+
+---
+
+## 32. GET /clinical/patients/{patientProfileId}/summary
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-read`
@@ -4894,7 +5050,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /clinical/prescription-signature-policies
+## 33. GET /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -5007,7 +5163,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /clinical/prescription-signature-policies
+## 34. POST /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -5155,7 +5311,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /clinical/prescription-signature-policies/{id}/deactivate
+## 35. POST /clinical/prescription-signature-policies/{id}/deactivate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -5280,7 +5436,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. GET /clinical/prescriptions/{id}/pdf
+## 36. GET /clinical/prescriptions/{id}/pdf
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescriptions`
@@ -5378,7 +5534,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /clinical/procedures
+## 37. POST /clinical/procedures
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -5538,7 +5694,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /clinical/procedures/{id}/attachments
+## 38. POST /clinical/procedures/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -5674,7 +5830,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /clinical/service-requests
+## 39. POST /clinical/service-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -5858,7 +6014,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /clinical/service-requests/duplicate-check
+## 40. POST /clinical/service-requests/duplicate-check
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -6022,7 +6178,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /public/prescriptions/{id}/verify
+## 41. GET /public/prescriptions/{id}/verify
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescriptions-public`
