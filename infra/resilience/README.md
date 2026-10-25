@@ -58,6 +58,40 @@ sudo touch /var/lib/alovida-resilience/autodeploy/web-test.disabled
 sudo rm /data/coolify/proxy/dynamic/alovida-failover.yaml
 ```
 
+## Bases fuera del despliegue de la API (`data-stack/`)
+
+Coolify nombra los contenedores `<servicio>-<uuid>-<fecha>`, así que cada
+despliegue de la API recreaba también postgres, mongo, redis, opensearch y minio.
+En `docker-compose.coolify.yml` esos cinco servicios quedan detrás del perfil
+`embedded-data` (Coolify no lo activa; en local: `COMPOSE_PROFILES=embedded-data`)
+y las dependencias hacia ellos pasan a `required: false`. Las bases viven en el
+stack `alovida-data-<entorno>` del VPS, con los mismos nombres en la misma red.
+
+**Orden obligatorio** — dos postgres sobre los mismos datos los corrompen:
+
+1. Mergear este cambio del compose **sin** desplegar todavía (el autodeploy del
+   servidor espera 10 min de quietud; avisar a quien opere).
+2. En el VPS: `sudo alovida-data-switchover test`. Para las bases de Coolify y
+   les quita el reinicio automático, COPIA los volúmenes al stack (los viejos
+   quedan intactos como backup), lo levanta y compara conteos. Corte de la API:
+   ~1 min. Si algo no cuadra, vuelve atrás solo.
+3. Desplegar la API desde Coolify y reencender su autodeploy:
+   `sudo rm /var/lib/alovida-resilience/autodeploy/api-test.disabled`.
+
+Vuelta atrás: `sudo alovida-data-switchover test rollback`. Con el cambio hecho,
+el reconciliador para cualquier base de Coolify de esa API que vuelva a arrancar.
+
+## Rol definitivo de la base (`mantra_app` + RLS): BLOQUEADO
+
+Probado el 25/10/2026 con una copia aislada de la API de test: 11 de 12 rutas
+iguales, pero `/system-context/dynamic-enums?target=…` da **404** con RLS (200 sin
+él), y lo usa el alta de médico. La política es `tenant_id = <tenant actual> OR
+app.system_context = 'true'` y las 82 filas del catálogo tienen `tenant_id`
+NULL: con RLS el catálogo global queda invisible. **325 políticas** tienen esa
+forma. Hay que corregirlas en el modelo (`2026-08-05_tenant_rls.sql`) antes de
+activar `RLS_ENFORCE`. Mientras tanto la API corre con
+`DB_ALLOW_PRIVILEGED_RUNTIME_ROLE=true`.
+
 ## Pendiente
 
 - **La API se sigue cortando ~1 min por despliegue**: Coolify recrea también las
