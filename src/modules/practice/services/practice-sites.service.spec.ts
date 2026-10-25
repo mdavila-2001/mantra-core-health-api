@@ -76,6 +76,7 @@ function build(assignments: AssignmentRow[] = []) {
     findActive: mockFn(),
     findById: practiceLookupMock(),
     findOwnOffice: mockFn().mockResolvedValue(null),
+    findByTenantAndCode: mockFn().mockResolvedValue(null),
     create: mockFn(),
   };
   const sitesRepo = {
