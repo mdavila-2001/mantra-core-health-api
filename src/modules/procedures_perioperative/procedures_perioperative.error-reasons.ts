@@ -48,6 +48,13 @@ export enum ProceduresPerioperativeErrorReason {
   OPERATIVE_STEP_NOT_FOUND = 'OPERATIVE_STEP_NOT_FOUND',
   STEP_NOT_IN_CASE = 'STEP_NOT_IN_CASE',
   PROCEDURE_REFERENCE_REQUIRED = 'PROCEDURE_REFERENCE_REQUIRED',
+  /**
+   * El procedimiento que cita el cliente (`primaryProcedureId` al programar el
+   * caso, `procedureId` al redactar el informe) no existe, es de otro paciente o
+   * es de otro tenant. Los tres casos responden igual: distinguirlos le
+   * confirmaría a un tercero que el uuid existe en otra historia clínica.
+   */
+  PROCEDURE_NOT_FOUND = 'PROCEDURE_NOT_FOUND',
   REPORT_NOT_FOUND = 'REPORT_NOT_FOUND',
   REPORT_BELONGS_TO_ANOTHER_CASE = 'REPORT_BELONGS_TO_ANOTHER_CASE',
   REPORT_ALREADY_SIGNED = 'REPORT_ALREADY_SIGNED',
