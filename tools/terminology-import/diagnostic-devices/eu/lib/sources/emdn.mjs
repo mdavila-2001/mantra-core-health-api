@@ -143,8 +143,6 @@ export function discoverExcelLinks(html, pageUrl) {
 /** Lee la primera hoja de un .xlsx con la librería `xlsx` ya declarada en el repo. */
 export async function readFirstSheet(path) {
   const XLSX = (await import('xlsx')).default;
-  // En ESM (xlsx.mjs) la librería no trae `fs`: sin esto `readFile` lanza «Cannot access file».
-  XLSX.set_fs(await import('node:fs'));
   const wb = XLSX.readFile(path);
   const sheet = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });

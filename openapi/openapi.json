@@ -3827,6 +3827,161 @@
         "description": "Cerrar una de mis sesiones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/iam/onboarding-drafts/{formType}/{draftId}": {
+      "get": {
+        "operationId": "IamOnboardingDraftsController_getDraft",
+        "parameters": [
+          {
+            "name": "formType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "draftId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "summary": "Recupera un borrador de alta guardado por identificador y tipo de formulario",
+        "tags": [
+          "iam-onboarding-drafts"
+        ],
+        "security": [],
+        "description": "Recupera un borrador de alta guardado por identificador y tipo de formulario. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "put": {
+        "operationId": "IamOnboardingDraftsController_saveDraft",
+        "parameters": [
+          {
+            "name": "formType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "draftId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "summary": "Guarda o actualiza el avance del formulario de alta en borrador",
+        "tags": [
+          "iam-onboarding-drafts"
+        ],
+        "security": [],
+        "description": "Guarda o actualiza el avance del formulario de alta en borrador. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "delete": {
+        "operationId": "IamOnboardingDraftsController_deleteDraft",
+        "parameters": [
+          {
+            "name": "formType",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "draftId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "summary": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario",
+        "tags": [
+          "iam-onboarding-drafts"
+        ],
+        "security": [],
+        "description": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/profiles/practitioners/me/signature-assets": {
       "get": {
         "operationId": "PractitionerSignatureAssetsController_getOwn",
@@ -22654,6 +22809,66 @@
         "description": "UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/clinical/patients/{patientProfileId}/received-services": {
+      "get": {
+        "operationId": "ClinicalReadController_getReceivedServices",
+        "parameters": [
+          {
+            "name": "patientProfileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope de la lista (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas",
+        "tags": [
+          "clinical-read"
+        ],
+        "description": "Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/clinical/prescriptions/{id}/pdf": {
       "get": {
         "description": "Autoriza al prescriptor y a quien puede leer la historia del paciente dueño de la receta.",
@@ -28395,6 +28610,7 @@
     },
     "/practices/{practiceId}/healthcare-services": {
       "post": {
+        "description": "El concepto debe ser del nomenclador (`VS_BO_MEDICAL_PROCEDURE`) y coincidir con el del ítem de catálogo que fija el precio. Una sede no puede ofrecer dos veces el mismo procedimiento (409).",
         "operationId": "PracticesController_publishHealthcareService",
         "parameters": [
           {
@@ -28456,11 +28672,160 @@
             "bearer": []
           }
         ],
-        "summary": "Publicar un servicio de salud",
+        "summary": "Publicar un procedimiento del nomenclador en una sede",
+        "tags": [
+          "practice"
+        ]
+      },
+      "get": {
+        "operationId": "PracticesController_listHealthcareServices",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "practiceSiteId",
+            "required": false,
+            "in": "query",
+            "description": "Solo la oferta de esa sede",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthcareServiceOffersResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar los procedimientos que ofrecen las sedes de la práctica",
         "tags": [
           "practice"
         ],
-        "description": "Publicar un servicio de salud. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "description": "Listar los procedimientos que ofrecen las sedes de la práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practices/{practiceId}/healthcare-services/{id}": {
+      "patch": {
+        "operationId": "PracticesController_updateHealthcareService",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHealthcareServiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthcareServiceOfferDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar el precio o el estado de un procedimiento de la sede",
+        "tags": [
+          "practice"
+        ],
+        "description": "Actualizar el precio o el estado de un procedimiento de la sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/practices/{practiceId}/settings/{settingKey}": {
@@ -29771,6 +30136,190 @@
           "practice"
         ],
         "description": "Registrar un movimiento de inventario (ajuste de stock). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practices/{practiceId}/role-assignments/invitations": {
+      "post": {
+        "description": "Crea una vinculación INVITED por procedimiento. Ninguna llega a ACTIVE sin que el profesional la acepte.",
+        "operationId": "PracticeInvitationsController_invite",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitePractitionerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Invitar a un profesional a procedimientos de una sede",
+        "tags": [
+          "practice"
+        ]
+      }
+    },
+    "/practitioners/me/role-assignments/{roleId}/accept": {
+      "post": {
+        "operationId": "PractitionerInvitationsController_accept",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Aceptar una invitación de un centro",
+        "tags": [
+          "practice"
+        ],
+        "description": "Aceptar una invitación de un centro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/practitioners/me/role-assignments/{roleId}/decline": {
+      "post": {
+        "operationId": "PractitionerInvitationsController_decline",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Declinar una invitación de un centro",
+        "tags": [
+          "practice"
+        ],
+        "description": "Declinar una invitación de un centro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/diagnostic-units": {
@@ -34891,6 +35440,57 @@
         "description": "Prender o apagar la automatización de un activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/accounting/practitioner/assets/{id}/depreciations": {
+      "get": {
+        "description": "Una fila por período fiscal depreciado, en orden de registro, con el valor en libros que dejó. Sólo el profesional vinculado a la práctica del activo; un activo ajeno responde 422 y uno de otra organización, 404.",
+        "operationId": "AccountingPractitionerController_readAssetDepreciations",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Histórico de depreciación de un activo propio",
+        "tags": [
+          "accounting-practitioner"
+        ]
+      }
+    },
     "/accounting/practitioner/assets/{id}/progress": {
       "post": {
         "operationId": "AccountingPractitionerController_registerAssetProgress",
@@ -35254,6 +35854,733 @@
           "accounting-practitioner"
         ],
         "description": "Registrar el avance (pago de cuota) de un pasivo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/accounting/practitioner/simple/summary": {
+      "get": {
+        "description": "`patientsSeen`: personas distintas con consulta atendida en el período. `collected`: consultas pagadas del período. `expectedFromInsurers`: a hoy, solicitudes enviadas sin dictamen (por lo facturado) más aprobadas sin pagar (por lo aprobado).",
+        "operationId": "AccountingPractitionerSimpleController_summary",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "month",
+              "type": "string",
+              "enum": [
+                "month",
+                "year"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Pacientes atendidos, cobrado y esperado de las aseguradoras",
+        "tags": [
+          "accounting-practitioner"
+        ]
+      }
+    },
+    "/accounting/practitioner/simple/accounts": {
+      "get": {
+        "description": "Incluye las 26 generales (`seeded: true`), que se siembran por práctica al primer acceso, y las propias del doctor.",
+        "operationId": "AccountingPractitionerSimpleController_listAccounts",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cuentas de la contabilidad simple de una práctica",
+        "tags": [
+          "accounting-practitioner"
+        ]
+      },
+      "post": {
+        "description": "El código lo asigna el servidor. Nombre único por clase, sin distinguir tildes ni mayúsculas (409).",
+        "operationId": "AccountingPractitionerSimpleController_createAccount",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSimpleAccountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear una cuenta (o un tipo de gasto, activo o deuda)",
+        "tags": [
+          "accounting-practitioner"
+        ]
+      }
+    },
+    "/accounting/practitioner/simple/accounts/{id}": {
+      "put": {
+        "description": "Una cuenta general se renombra pero no cambia de clase; tampoco una que ya usa algún registro o transacción (409).",
+        "operationId": "AccountingPractitionerSimpleController_updateAccount",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimpleAccountInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Renombrar una cuenta",
+        "tags": [
+          "accounting-practitioner"
+        ]
+      },
+      "delete": {
+        "description": "409 si es una cuenta general o si la usa algún registro o transacción.",
+        "operationId": "AccountingPractitionerSimpleController_deleteAccount",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Borrar una cuenta propia",
+        "tags": [
+          "accounting-practitioner"
+        ]
+      }
+    },
+    "/accounting/practitioner/simple/records": {
+      "get": {
+        "description": "Con `kind` filtra por una de las tres; sin él, devuelve las tres. Más recientes primero.",
+        "operationId": "AccountingPractitionerSimpleController_listRecords",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "description": "Sin `kind` devuelve los tres.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "EXPENSE",
+                "ASSET",
+                "DEBT"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Gastos, activos y deudas de una práctica",
+        "tags": [
+          "accounting-practitioner"
+        ]
+      },
+      "post": {
+        "description": "El tipo es una cuenta de la clase que corresponde: gasto → EXPENSE, activo → ASSET, deuda → LIABILITY. No genera asiento.",
+        "operationId": "AccountingPractitionerSimpleController_createRecord",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSimpleRecordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar un gasto, un activo o una deuda",
+        "tags": [
+          "accounting-practitioner"
+        ]
+      }
+    },
+    "/accounting/practitioner/simple/records/{id}": {
+      "put": {
+        "operationId": "AccountingPractitionerSimpleController_updateRecord",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimpleRecordInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar un gasto, un activo o una deuda",
+        "tags": [
+          "accounting-practitioner"
+        ],
+        "description": "Editar un gasto, un activo o una deuda. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "delete": {
+        "operationId": "AccountingPractitionerSimpleController_deleteRecord",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Borrar un gasto, un activo o una deuda",
+        "tags": [
+          "accounting-practitioner"
+        ],
+        "description": "Borrar un gasto, un activo o una deuda. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/accounting/practitioner/simple/transactions": {
+      "get": {
+        "description": "Más recientes primero.",
+        "operationId": "AccountingPractitionerSimpleController_listTransactions",
+        "parameters": [
+          {
+            "name": "practiceId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Transacciones debe/haber de una práctica",
+        "tags": [
+          "accounting-practitioner"
+        ]
+      },
+      "post": {
+        "description": "Las cuentas del debe y del haber son distintas. No es un asiento del libro mayor.",
+        "operationId": "AccountingPractitionerSimpleController_createTransaction",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSimpleTransactionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar una transacción debe/haber",
+        "tags": [
+          "accounting-practitioner"
+        ]
+      }
+    },
+    "/accounting/practitioner/simple/transactions/{id}": {
+      "put": {
+        "operationId": "AccountingPractitionerSimpleController_updateTransaction",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimpleTransactionInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar una transacción debe/haber",
+        "tags": [
+          "accounting-practitioner"
+        ],
+        "description": "Editar una transacción debe/haber. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "delete": {
+        "operationId": "AccountingPractitionerSimpleController_deleteTransaction",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Borrar una transacción debe/haber",
+        "tags": [
+          "accounting-practitioner"
+        ],
+        "description": "Borrar una transacción debe/haber. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/accounting/dimensions": {
@@ -48019,6 +49346,217 @@
           "delegated-access-authz"
         ],
         "description": "Evaluar actor efectivo por propósito (step-up). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/medical-centers/search": {
+      "get": {
+        "description": "Cada sede dice si ofrece todo lo pedido (`complete`) y cuáles le faltan. Completos primero, después por distancia en línea recta desde `lat`/`lng`, después por precio total y por nombre. Solo aparecen los que publicaron precio.",
+        "operationId": "MedicalCentersController_search",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": -90,
+              "maximum": 90,
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": -180,
+              "maximum": 180,
+              "type": "number"
+            }
+          },
+          {
+            "name": "includePartial",
+            "required": false,
+            "in": "query",
+            "description": "Por defecto solo los centros que ofrecen todo lo pedido (`complete: true`).",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "procedureConceptIds",
+            "required": true,
+            "in": "query",
+            "description": "Conceptos de procedimiento separados por coma (uuid).",
+            "schema": {
+              "example": "1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c,2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+              "type": "string"
+            }
+          },
+          {
+            "name": "specialty",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 120,
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maxLength": 120,
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalCenterPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar centros médicos por procedimientos",
+        "tags": [
+          "medical-centers"
+        ]
+      }
+    },
+    "/medical-centers/search/for-my-orders": {
+      "get": {
+        "description": "Los procedimientos salen de las órdenes. Marca si el médico trabaja en la sede y si la sugirió, sin cambiar qué sedes aparecen ni su orden. Una orden ajena responde 404.",
+        "operationId": "MedicalCentersController_searchForMyOrders",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": -90,
+              "maximum": 90,
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": -180,
+              "maximum": 180,
+              "type": "number"
+            }
+          },
+          {
+            "name": "includePartial",
+            "required": false,
+            "in": "query",
+            "description": "Por defecto solo los centros que ofrecen todo lo pedido (`complete: true`).",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "serviceRequestIds",
+            "required": true,
+            "in": "query",
+            "description": "Ids de órdenes de servicio del titular, separados por coma.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MedicalCenterPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar centros médicos para mis órdenes",
+        "tags": [
+          "medical-centers"
+        ]
       }
     },
     "/diagnostics/specimens": {
@@ -62259,6 +63797,54 @@
           "medical-groups"
         ],
         "description": "Crear grupo médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/medical-groups/eligible-members": {
+      "get": {
+        "operationId": "MedicalGroupsController_listEligibleMembers",
+        "parameters": [
+          {
+            "name": "serviceCatalogId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Colegas que se pueden invitar a un grupo de este servicio",
+        "tags": [
+          "medical-groups"
+        ],
+        "description": "Colegas que se pueden invitar a un grupo de este servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/medical-groups/patients/{patientProfileId}/conditions": {
@@ -93181,6 +94767,141 @@
         "description": "Timeline de una sesión: eventos y nombres de propiedad, sin valores. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/telemetry/onboarding-events": {
+      "post": {
+        "operationId": "TelemetryOnboardingAnalyticsController_recordEvents",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestOnboardingEventsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "summary": "Captura eventos de telemetría de alta y avance en formularios de registro",
+        "tags": [
+          "telemetry-onboarding-analytics"
+        ],
+        "security": [],
+        "description": "Captura eventos de telemetría de alta y avance en formularios de registro. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/admin/analytics/onboarding/funnel": {
+      "get": {
+        "operationId": "TelemetryOnboardingAnalyticsController_getFunnelReport",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reporte de embudo y deserción paso a paso para formularios de alta",
+        "tags": [
+          "telemetry-onboarding-analytics"
+        ],
+        "description": "Reporte de embudo y deserción paso a paso para formularios de alta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/admin/analytics/onboarding/heatmap": {
+      "get": {
+        "operationId": "TelemetryOnboardingAnalyticsController_getHeatmapReport",
+        "parameters": [
+          {
+            "name": "metric",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mapa de calor por campo y nivel de fricción para formularios de alta",
+        "tags": [
+          "telemetry-onboarding-analytics"
+        ],
+        "description": "Mapa de calor por campo y nivel de fricción para formularios de alta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/tracking/trackable-subjects": {
       "post": {
         "description": "El número de seguimiento es opaco: no deja deducir qué se transporta.",
@@ -97670,6 +99391,10 @@
       "description": "Operaciones del dominio funcional iam auth. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "iam-onboarding-drafts",
+      "description": "Operaciones del dominio funcional iam onboarding drafts. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "iam-users",
       "description": "Operaciones del dominio funcional iam users. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -97820,6 +99545,10 @@
     {
       "name": "marketing",
       "description": "Operaciones del dominio funcional marketing. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
+      "name": "medical-centers",
+      "description": "Operaciones del dominio funcional medical centers. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
       "name": "medical-groups",
@@ -98132,6 +99861,10 @@
     {
       "name": "telemetry-governance",
       "description": "Operaciones del dominio funcional telemetry governance. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
+      "name": "telemetry-onboarding-analytics",
+      "description": "Operaciones del dominio funcional telemetry onboarding analytics. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
       "name": "terminology",
@@ -107794,6 +109527,21 @@
             "description": "Tenant ejecutante",
             "format": "uuid"
           },
+          "performerSelectionConceptId": {
+            "type": "string",
+            "description": "Quién ejecuta la orden (concept id del conjunto `service-request-performer-selection`: SR_PERF_SELF, SR_PERF_ORGANIZATION, SR_PERF_PATIENT_CHOICE). Es una recomendación, no un candado; omitido = que elija el paciente",
+            "format": "uuid"
+          },
+          "performerPractitionerProfileId": {
+            "type": "string",
+            "description": "Médico ejecutor. Obligatorio con SR_PERF_SELF (debe ser quien pide la orden); prohibido con los otros modos",
+            "format": "uuid"
+          },
+          "suggestedPracticeSiteId": {
+            "type": "string",
+            "description": "Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden",
+            "format": "uuid"
+          },
           "previousDiagnosticReportId": {
             "type": "string",
             "description": "Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason.",
@@ -113738,7 +115486,12 @@
           },
           "serviceConceptId": {
             "type": "string",
-            "description": "Concepto de servicio",
+            "description": "Procedimiento del nomenclador (`VS_BO_MEDICAL_PROCEDURE`) que se ofrece",
+            "format": "uuid"
+          },
+          "serviceCatalogId": {
+            "type": "string",
+            "description": "Ítem del catálogo de precios de la práctica; su concepto debe ser el mismo `serviceConceptId`",
             "format": "uuid"
           },
           "specialtyConceptId": {
@@ -113757,6 +115510,110 @@
           "telehealthAvailable": {
             "type": "boolean",
             "description": "¿Disponible por telesalud?"
+          }
+        },
+        "required": [
+          "practiceSiteId",
+          "serviceConceptId",
+          "serviceCatalogId"
+        ],
+        "additionalProperties": false
+      },
+      "HealthcareServiceOfferDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practiceSiteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceDisplay": {
+            "type": "string"
+          },
+          "serviceCatalogId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "nullable": true
+          },
+          "currencyConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "referencePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "referenceUnit": {
+            "type": "string",
+            "enum": [
+              "UMA",
+              "USD"
+            ],
+            "nullable": true
+          },
+          "overMargin": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "visibleInSearch": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "practiceSiteId",
+          "serviceConceptId",
+          "serviceDisplay",
+          "serviceCatalogId",
+          "price",
+          "currencyConceptId",
+          "referencePrice",
+          "referenceUnit",
+          "overMargin",
+          "visibleInSearch",
+          "active"
+        ]
+      },
+      "HealthcareServiceOffersResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HealthcareServiceOfferDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "UpdateHealthcareServiceDto": {
+        "type": "object",
+        "properties": {
+          "serviceCatalogId": {
+            "type": "string",
+            "description": "Nuevo ítem del catálogo de precios de la práctica; su concepto debe coincidir con el del servicio",
+            "format": "uuid"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "¿El procedimiento está activo?"
           }
         },
         "additionalProperties": false
@@ -113860,6 +115717,11 @@
           "validFrom": {
             "type": "string",
             "description": "Vigente desde (ISO date)"
+          },
+          "healthcareServiceId": {
+            "type": "string",
+            "description": "Servicio de salud (procedimiento) de la sede",
+            "format": "uuid"
           },
           "note": {
             "type": "string",
@@ -114122,6 +115984,34 @@
         "required": [
           "direction",
           "quantity"
+        ],
+        "additionalProperties": false
+      },
+      "InvitePractitionerDto": {
+        "type": "object",
+        "properties": {
+          "practitionerProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practiceSiteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "healthcareServiceIds": {
+            "minItems": 1,
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "practitionerProfileId",
+          "practiceSiteId",
+          "healthcareServiceIds"
         ],
         "additionalProperties": false
       },
@@ -116439,6 +118329,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "currencyConceptId": {
             "type": "string",
             "format": "uuid"
@@ -117330,6 +119224,213 @@
         "required": [
           "bankAccountId",
           "interestExpenseAccountId"
+        ],
+        "additionalProperties": false
+      },
+      "CreateSimpleAccountDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "accountClass": {
+            "type": "string",
+            "enum": [
+              "ASSET",
+              "LIABILITY",
+              "EQUITY",
+              "INCOME",
+              "EXPENSE"
+            ]
+          },
+          "practiceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "accountClass",
+          "practiceId"
+        ],
+        "additionalProperties": false
+      },
+      "SimpleAccountInputDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "accountClass": {
+            "type": "string",
+            "enum": [
+              "ASSET",
+              "LIABILITY",
+              "EQUITY",
+              "INCOME",
+              "EXPENSE"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "accountClass"
+        ],
+        "additionalProperties": false
+      },
+      "CreateSimpleRecordDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "EXPENSE",
+              "ASSET",
+              "DEBT"
+            ]
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "amount": {
+            "type": "string",
+            "description": "Cadena decimal > 0, hasta dos decimales."
+          },
+          "practiceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "kind",
+          "date",
+          "accountId",
+          "description",
+          "amount",
+          "practiceId"
+        ],
+        "additionalProperties": false
+      },
+      "SimpleRecordInputDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "EXPENSE",
+              "ASSET",
+              "DEBT"
+            ]
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "amount": {
+            "type": "string",
+            "description": "Cadena decimal > 0, hasta dos decimales."
+          }
+        },
+        "required": [
+          "kind",
+          "date",
+          "accountId",
+          "description",
+          "amount"
+        ],
+        "additionalProperties": false
+      },
+      "CreateSimpleTransactionDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "debitAccountId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Cuenta del debe."
+          },
+          "creditAccountId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Cuenta del haber; distinta de la del debe."
+          },
+          "amount": {
+            "type": "string",
+            "description": "Cadena decimal > 0, hasta dos decimales."
+          },
+          "practiceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "date",
+          "description",
+          "debitAccountId",
+          "creditAccountId",
+          "amount",
+          "practiceId"
+        ],
+        "additionalProperties": false
+      },
+      "SimpleTransactionInputDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "debitAccountId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Cuenta del debe."
+          },
+          "creditAccountId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Cuenta del haber; distinta de la del debe."
+          },
+          "amount": {
+            "type": "string",
+            "description": "Cadena decimal > 0, hasta dos decimales."
+          }
+        },
+        "required": [
+          "date",
+          "description",
+          "debitAccountId",
+          "creditAccountId",
+          "amount"
         ],
         "additionalProperties": false
       },
@@ -118596,7 +120697,8 @@
           },
           "code": {
             "type": "string",
-            "description": "Código interno del servicio"
+            "description": "Código interno del servicio",
+            "maxLength": 120
           },
           "name": {
             "type": "string",
@@ -118669,6 +120771,11 @@
           "isActive": {
             "type": "boolean",
             "description": "Si el servicio sigue disponible para cotizar"
+          },
+          "termsText": {
+            "type": "string",
+            "description": "Términos propios del servicio. null vuelve a los términos por defecto",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -124438,6 +126545,147 @@
         ],
         "additionalProperties": false
       },
+      "MedicalCenterOfferDto": {
+        "type": "object",
+        "properties": {
+          "procedureConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "procedureDisplay": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "currencyConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referencePrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "referenceUnit": {
+            "type": "string",
+            "enum": [
+              "UMA",
+              "USD"
+            ],
+            "nullable": true
+          },
+          "overMargin": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "required": [
+          "procedureConceptId",
+          "procedureDisplay",
+          "price",
+          "currencyConceptId",
+          "referencePrice",
+          "referenceUnit",
+          "overMargin"
+        ]
+      },
+      "MedicalCenterItemDto": {
+        "type": "object",
+        "properties": {
+          "practiceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "practiceSiteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "addressText": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "distanceKm": {
+            "type": "number",
+            "nullable": true
+          },
+          "complete": {
+            "type": "boolean"
+          },
+          "missingProcedureConceptIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "offers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedicalCenterOfferDto"
+            }
+          },
+          "totalPrice": {
+            "type": "number",
+            "nullable": true
+          },
+          "practitionerWorksHere": {
+            "type": "boolean"
+          },
+          "suggestedByPractitioner": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "practiceId",
+          "practiceSiteId",
+          "name",
+          "addressText",
+          "latitude",
+          "longitude",
+          "distanceKm",
+          "complete",
+          "missingProcedureConceptIds",
+          "offers",
+          "totalPrice"
+        ]
+      },
+      "MedicalCenterPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedicalCenterItemDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "offset": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ]
+      },
       "CreateSpecimenDto": {
         "type": "object",
         "properties": {
@@ -125508,6 +127756,25 @@
             "type": "string",
             "format": "uuid"
           },
+          "performerSelectionConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "performerPractitionerProfileId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "suggestedPracticeSiteId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "suggestedPracticeSiteName": {
+            "type": "string",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -125529,6 +127796,10 @@
           "id",
           "codeConceptId",
           "statusConceptId",
+          "performerSelectionConceptId",
+          "performerPractitionerProfileId",
+          "suggestedPracticeSiteId",
+          "suggestedPracticeSiteName",
           "createdAt",
           "hasReleasedResult"
         ]
@@ -149911,6 +152182,11 @@
             "description": "Conteo final de eventos (si el worker lo consolida)"
           }
         },
+        "additionalProperties": false
+      },
+      "IngestOnboardingEventsDto": {
+        "type": "object",
+        "properties": {},
         "additionalProperties": false
       },
       "OpenSubjectDto": {

@@ -28,11 +28,11 @@ _Fuente: `src/modules/geo/README.md:3`_
 | `ctrl:GeoTrackedSubjectsController` | Operaciones de GeoTrackedSubjectsController que el README no asigna a un caso de uso | POST /geo/tracked-subjects | SECURITY_ADMIN | MEDIO | 2 |
 |  |  | GET /geo/tracked-subjects/{id}/last-position | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /geo/tracked-subjects/{id}/pings | SECURITY_ADMIN | MEDIO | 3 |
-|  |  | POST /geo/tracked-subjects/{id}/revoke-consent | SECURITY_ADMIN | MEDIO | 4 |
+|  |  | POST /geo/tracked-subjects/{id}/revoke-consent | SECURITY_ADMIN | MEDIO | 3 |
 | `ctrl:GeoTrackingSessionsController` | Operaciones de GeoTrackingSessionsController que el README no asigna a un caso de uso | POST /geo/tracking-sessions | SECURITY_ADMIN | MEDIO | 3 |
-|  |  | POST /geo/tracking-sessions/{id}/close | SECURITY_ADMIN | MEDIO | 4 |
-| `ctrl:GeoTripsController` | Operaciones de GeoTripsController que el README no asigna a un caso de uso | POST /geo/trips | SECURITY_ADMIN | MEDIO | 3 |
-|  |  | POST /geo/trips/{id}/close | SECURITY_ADMIN | MEDIO | 2 |
+|  |  | POST /geo/tracking-sessions/{id}/close | SECURITY_ADMIN | BAJO | 3 |
+| `ctrl:GeoTripsController` | Operaciones de GeoTripsController que el README no asigna a un caso de uso | POST /geo/trips | SECURITY_ADMIN | MEDIO | 4 |
+|  |  | POST /geo/trips/{id}/close | SECURITY_ADMIN | BAJO | 3 |
 
 ### Diagrama — etapas `ctrl:GeoGeofencesController`, `ctrl:GeoTrackedSubjectsController`, `ctrl:GeoTrackingSessionsController`…
 
@@ -82,7 +82,6 @@ flowchart LR
   o10 -->|"LEE"| t5
   o10 -->|"LEE"| t11
   a2 --> o12
-  o12 -->|"ACTUALIZA"| t5
   o12 -->|"LEE"| t5
   o12 -->|"ACTUALIZA"| t11
   o12 -->|"LEE"| t11
@@ -92,15 +91,16 @@ flowchart LR
   o13 -->|"LEE"| t11
   a2 --> o14
   o14 -->|"LEE"| t5
-  o14 -->|"ACTUALIZA"| t11
   o14 -->|"LEE"| t11
   o14 -->|"LEE"| t15
   a2 --> o16
+  o16 -->|"LEE"| t5
   o16 -->|"LEE"| t11
   o16 -->|"CREA"| t15
   o16 -->|"LEE"| t15
   a2 --> o17
-  o17 -->|"ACTUALIZA"| t15
+  o17 -->|"LEE"| t5
+  o17 -->|"LEE"| t11
   o17 -->|"LEE"| t15
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
@@ -124,7 +124,6 @@ Registrar un evento de entrada/salida de geofence
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Geofence no encontrado; ResourceNotFoundException: Sujeto rastreado no encontrado |
 | 409 | `CONFLICT` | ConflictException: El sujeto ya está en ese estado respecto al geofence |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El geofence no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -142,36 +141,28 @@ flowchart TD
   n4 --> n5
   n6[("LEE geo.geofences")]:::efecto
   n5 --> n6
-  n7{"!geofence"}:::decision
+  n7["Llama a TrackedSubjectsRepository.findById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Geofence no encontrado"]):::error
-  n7 -->|"sí"| n8
+  n8[("LEE geo.tracked_subjects")]:::efecto
+  n7 --> n8
   n9{"geofence.stateConceptId !== GEO.GEOFENCE_ACTIVE"}:::decision
-  n7 -->|"no"| n9
+  n8 --> n9
   n10(["422 PRECONDITION_FAILED El geofence no está activo"]):::error
   n9 -->|"sí"| n10
-  n11["Llama a TrackedSubjectsRepository.findById"]:::llamada
+  n11["Llama a GeofenceEventsRepository.findLast"]:::llamada
   n9 -->|"no"| n11
-  n12[("LEE geo.tracked_subjects")]:::efecto
+  n12[("LEE geo.geofence_events")]:::efecto
   n11 --> n12
-  n13{"!subject"}:::decision
+  n13{"last && last.eventTypeConceptId === eventTypeConceptId"}:::decision
   n12 --> n13
-  n14(["404 NOT_FOUND Sujeto rastreado no encontrado"]):::error
+  n14(["409 CONFLICT El sujeto ya está en ese estado respecto al geofence"]):::error
   n13 -->|"sí"| n14
-  n15["Llama a GeofenceEventsRepository.findLast"]:::llamada
+  n15["Llama a GeofenceEventsRepository.record"]:::llamada
   n13 -->|"no"| n15
-  n16[("LEE geo.geofence_events")]:::efecto
+  n16[("CREA geo.geofence_events")]:::efecto
   n15 --> n16
-  n17{"last && last.eventTypeConceptId === eventTypeConceptId"}:::decision
+  n17(("201 Responde con éxito")):::ok
   n16 --> n17
-  n18(["409 CONFLICT El sujeto ya está en ese estado respecto al geofence"]):::error
-  n17 -->|"sí"| n18
-  n19["Llama a GeofenceEventsRepository.record"]:::llamada
-  n17 -->|"no"| n19
-  n20[("CREA geo.geofence_events")]:::efecto
-  n19 --> n20
-  n21(("201 Responde con éxito")):::ok
-  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -290,7 +281,7 @@ Consultar la última posición conocida del sujeto
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado; ResourceNotFoundException: El sujeto no tiene posiciones registradas |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: El sujeto no tiene posiciones registradas |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -304,20 +295,16 @@ flowchart TD
   n3 --> n4
   n5[("LEE geo.tracked_subjects")]:::efecto
   n4 --> n5
-  n6{"!subject"}:::decision
+  n6["Llama a LocationPingsRepository.findLastBySubject"]:::llamada
   n5 --> n6
-  n7(["404 NOT_FOUND Sujeto rastreado no encontrado"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a LocationPingsRepository.findLastBySubject"]:::llamada
-  n6 -->|"no"| n8
-  n9[("LEE geo.location_pings")]:::efecto
-  n8 --> n9
-  n10{"!ping"}:::decision
-  n9 --> n10
-  n11(["404 NOT_FOUND El sujeto no tiene posiciones registradas"]):::error
-  n10 -->|"sí"| n11
-  n12(("200 Responde con éxito")):::ok
-  n10 -->|"no"| n12
+  n7[("LEE geo.location_pings")]:::efecto
+  n6 --> n7
+  n8{"!ping"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND El sujeto no tiene posiciones registradas"]):::error
+  n8 -->|"sí"| n9
+  n10(("200 Responde con éxito")):::ok
+  n8 -->|"no"| n10
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -336,7 +323,6 @@ Ingerir un batch de pings de ubicación de alta frecuencia
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sujeto no está activo para rastreo; PreconditionFailedException: No hay una sesión de tracking abierta para el sujeto |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -353,31 +339,27 @@ flowchart TD
   n4 --> n5
   n6[("LEE geo.tracked_subjects")]:::efecto
   n5 --> n6
-  n7{"!subject"}:::decision
+  n7{"subject.stateConceptId !== GEO.SUBJECT_ACTIVE"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Sujeto rastreado no encontrado"]):::error
+  n8(["422 PRECONDITION_FAILED El sujeto no está activo para rastreo"]):::error
   n7 -->|"sí"| n8
-  n9{"subject.stateConceptId !== GEO.SUBJECT_ACTIVE"}:::decision
+  n9["Llama a TrackingSessionsRepository.findOpenBySubject"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El sujeto no está activo para rastreo"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a TrackingSessionsRepository.findOpenBySubject"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE geo.tracking_sessions")]:::efecto
-  n11 --> n12
-  n13{"!openSession"}:::decision
-  n12 --> n13
-  n14(["422 PRECONDITION_FAILED No hay una sesión de tracking abierta para el sujeto"]):::error
-  n13 -->|"sí"| n14
-  n15["Repite: por cada const p de dto.pings"]:::bucle
-  n13 -->|"no"| n15
-  n16["Llama a LocationPingsRepository.record"]:::llamada
-  n15 -->|"cada elemento"| n16
-  n17[("CREA geo.location_pings")]:::efecto
-  n16 --> n17
-  n18(("201 Responde con éxito")):::ok
-  n17 --> n18
-  n15 -->|"al terminar"| n18
+  n10[("LEE geo.tracking_sessions")]:::efecto
+  n9 --> n10
+  n11{"!openSession"}:::decision
+  n10 --> n11
+  n12(["422 PRECONDITION_FAILED No hay una sesión de tracking abierta para el sujeto"]):::error
+  n11 -->|"sí"| n12
+  n13["Repite: por cada const p de dto.pings"]:::bucle
+  n11 -->|"no"| n13
+  n14["Llama a LocationPingsRepository.record"]:::llamada
+  n13 -->|"cada elemento"| n14
+  n15[("CREA geo.location_pings")]:::efecto
+  n14 --> n15
+  n16(("201 Responde con éxito")):::ok
+  n15 --> n16
+  n13 -->|"al terminar"| n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -396,7 +378,6 @@ Revocar consentimiento de ubicación y pausar el rastreo
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El rastreo del sujeto ya está suspendido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -413,27 +394,21 @@ flowchart TD
   n4 --> n5
   n6[("LEE geo.tracked_subjects")]:::efecto
   n5 --> n6
-  n7{"!subject"}:::decision
+  n7{"subject.stateConceptId === GEO.SUBJECT_SUSPENDED"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Sujeto rastreado no encontrado"]):::error
+  n8(["422 PRECONDITION_FAILED El rastreo del sujeto ya está suspendido"]):::error
   n7 -->|"sí"| n8
-  n9{"subject.stateConceptId === GEO.SUBJECT_SUSPENDED"}:::decision
+  n9["Llama a TrackingSessionsRepository.findAllOpenBySubject"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El rastreo del sujeto ya está suspendido"]):::error
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA geo.tracked_subjects")]:::efecto
-  n9 -->|"no"| n11
-  n12["Llama a TrackingSessionsRepository.findAllOpenBySubject"]:::llamada
-  n11 --> n12
-  n13[("LEE geo.tracking_sessions")]:::efecto
+  n10[("LEE geo.tracking_sessions")]:::efecto
+  n9 --> n10
+  n11["Repite: por cada const session de openSessions"]:::bucle
+  n10 --> n11
+  n12[("ACTUALIZA geo.tracking_sessions · ACTUALIZA geo.tracking_sessions")]:::efecto
+  n11 -->|"cada elemento"| n12
+  n13(("200 Responde con éxito")):::ok
   n12 --> n13
-  n14["Repite: por cada const session de openSessions"]:::bucle
-  n13 --> n14
-  n15[("ACTUALIZA geo.tracking_sessions · ACTUALIZA geo.tracking_sessions")]:::efecto
-  n14 -->|"cada elemento"| n15
-  n16(("200 Responde con éxito")):::ok
-  n15 --> n16
-  n14 -->|"al terminar"| n16
+  n11 -->|"al terminar"| n13
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -452,7 +427,6 @@ Iniciar una sesión de tracking de un sujeto
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto rastreado no encontrado |
 | 409 | `CONFLICT` | ConflictException: El sujeto ya tiene una sesión de tracking abierta |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sujeto no está activo para rastreo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -470,28 +444,24 @@ flowchart TD
   n4 --> n5
   n6[("LEE geo.tracked_subjects")]:::efecto
   n5 --> n6
-  n7{"!subject"}:::decision
+  n7{"subject.stateConceptId !== GEO.SUBJECT_ACTIVE"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Sujeto rastreado no encontrado"]):::error
+  n8(["422 PRECONDITION_FAILED El sujeto no está activo para rastreo"]):::error
   n7 -->|"sí"| n8
-  n9{"subject.stateConceptId !== GEO.SUBJECT_ACTIVE"}:::decision
+  n9["Llama a TrackingSessionsRepository.findOpenBySubject"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El sujeto no está activo para rastreo"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a TrackingSessionsRepository.findOpenBySubject"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE geo.tracking_sessions")]:::efecto
-  n11 --> n12
-  n13{"open"}:::decision
-  n12 --> n13
-  n14(["409 CONFLICT El sujeto ya tiene una sesión de tracking abierta"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a TrackingSessionsRepository.create"]:::llamada
-  n13 -->|"no"| n15
-  n16[("CREA geo.tracking_sessions")]:::efecto
-  n15 --> n16
-  n17(("201 Responde con éxito")):::ok
-  n16 --> n17
+  n10[("LEE geo.tracking_sessions")]:::efecto
+  n9 --> n10
+  n11{"open"}:::decision
+  n10 --> n11
+  n12(["409 CONFLICT El sujeto ya tiene una sesión de tracking abierta"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a TrackingSessionsRepository.create"]:::llamada
+  n11 -->|"no"| n13
+  n14[("CREA geo.tracking_sessions")]:::efecto
+  n13 --> n14
+  n15(("201 Responde con éxito")):::ok
+  n14 --> n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -510,7 +480,6 @@ Cerrar una sesión de tracking
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de tracking no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión no está abierta; PreconditionFailedException: La sesión tiene viajes en progreso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -527,12 +496,12 @@ flowchart TD
   n4 --> n5
   n6[("LEE geo.tracking_sessions")]:::efecto
   n5 --> n6
-  n7{"!session"}:::decision
+  n7["Llama a TrackedSubjectsRepository.findById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Sesión de tracking no encontrada"]):::error
-  n7 -->|"sí"| n8
+  n8[("LEE geo.tracked_subjects")]:::efecto
+  n7 --> n8
   n9{"session.statusConceptId !== GEO.SESSION_OPEN"}:::decision
-  n7 -->|"no"| n9
+  n8 --> n9
   n10(["422 PRECONDITION_FAILED La sesión no está abierta"]):::error
   n9 -->|"sí"| n10
   n11["Llama a TripsRepository.countBySessionAndStatus"]:::llamada
@@ -543,14 +512,8 @@ flowchart TD
   n12 --> n13
   n14(["422 PRECONDITION_FAILED La sesión tiene viajes en progreso"]):::error
   n13 -->|"sí"| n14
-  n15[("ACTUALIZA geo.tracking_sessions · ACTUALIZA geo.tracking_sessions")]:::efecto
+  n15(("200 Responde con éxito")):::ok
   n13 -->|"no"| n15
-  n16["Llama a TrackedSubjectsRepository.findById"]:::llamada
-  n15 --> n16
-  n17[("LEE geo.tracked_subjects")]:::efecto
-  n16 --> n17
-  n18(("200 Responde con éxito")):::ok
-  n17 --> n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -569,7 +532,6 @@ Iniciar un viaje (trip)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sesión de tracking no encontrada |
 | 409 | `CONFLICT` | ConflictException: La sesión ya tiene un viaje en progreso |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión de tracking no está abierta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -583,32 +545,36 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a TrackingSessionsRepository.findById"]:::llamada
+  n5["Llama a GeoTripsService.loadSessionInTenant"]:::llamada
   n4 --> n5
-  n6[("LEE geo.tracking_sessions")]:::efecto
+  n6["Llama a TrackingSessionsRepository.findById"]:::llamada
   n5 --> n6
-  n7{"!session"}:::decision
+  n7[("LEE geo.tracking_sessions")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Sesión de tracking no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"session.statusConceptId !== GEO.SESSION_OPEN"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La sesión de tracking no está abierta"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a TripsRepository.findInProgressBySession"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE geo.trips")]:::efecto
-  n11 --> n12
-  n13{"active"}:::decision
-  n12 --> n13
-  n14(["409 CONFLICT La sesión ya tiene un viaje en progreso"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a TripsRepository.create"]:::llamada
-  n13 -->|"no"| n15
-  n16[("CREA geo.trips")]:::efecto
-  n15 --> n16
-  n17(("201 Responde con éxito")):::ok
-  n16 --> n17
+  n8["Llama a GeoTripsService.sessionTenant"]:::llamada
+  n7 --> n8
+  n9["Llama a TrackedSubjectsRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE geo.tracked_subjects")]:::efecto
+  n9 --> n10
+  n11{"session.statusConceptId !== GEO.SESSION_OPEN"}:::decision
+  n10 --> n11
+  n12(["422 PRECONDITION_FAILED La sesión de tracking no está abierta"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a TripsRepository.findInProgressBySession"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE geo.trips")]:::efecto
+  n13 --> n14
+  n15{"active"}:::decision
+  n14 --> n15
+  n16(["409 CONFLICT La sesión ya tiene un viaje en progreso"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a TripsRepository.create"]:::llamada
+  n15 -->|"no"| n17
+  n18[("CREA geo.trips")]:::efecto
+  n17 --> n18
+  n19(("201 Responde con éxito")):::ok
+  n18 --> n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -627,7 +593,6 @@ Cerrar un viaje con distancia/duración
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Viaje no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El viaje no está en progreso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -644,33 +609,22 @@ flowchart TD
   n4 --> n5
   n6[("LEE geo.trips")]:::efecto
   n5 --> n6
-  n7{"!trip"}:::decision
+  n7["Llama a TrackingSessionsRepository.findById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Viaje no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"trip.statusConceptId !== GEO.TRIP_IN_PROGRESS"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El viaje no está en progreso"]):::error
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA geo.trips · ACTUALIZA geo.trips · ACTUALIZA geo.trips")]:::efecto
-  n9 -->|"no"| n11
-  n12{"dto.distanceM !== undefined"}:::decision
+  n8[("LEE geo.tracking_sessions")]:::efecto
+  n7 --> n8
+  n9["Llama a GeoTripsService.sessionTenant"]:::llamada
+  n8 --> n9
+  n10["Llama a TrackedSubjectsRepository.findById"]:::llamada
+  n9 --> n10
+  n11[("LEE geo.tracked_subjects")]:::efecto
+  n10 --> n11
+  n12{"trip.statusConceptId !== GEO.TRIP_IN_PROGRESS"}:::decision
   n11 --> n12
-  n13[("ACTUALIZA geo.trips")]:::efecto
+  n13(["422 PRECONDITION_FAILED El viaje no está en progreso"]):::error
   n12 -->|"sí"| n13
-  n14{"dto.durationS !== undefined"}:::decision
-  n13 --> n14
+  n14(("200 Responde con éxito")):::ok
   n12 -->|"no"| n14
-  n15[("ACTUALIZA geo.trips")]:::efecto
-  n14 -->|"sí"| n15
-  n16{"trip.startedAt"}:::decision
-  n14 -->|"no"| n16
-  n17[("ACTUALIZA geo.trips")]:::efecto
-  n16 -->|"sí"| n17
-  n18(("200 Responde con éxito")):::ok
-  n15 --> n18
-  n17 --> n18
-  n16 -->|"no"| n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

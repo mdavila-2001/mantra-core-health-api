@@ -112,6 +112,9 @@ export class SubledgerService {
       // Cargar y validar cada partida; todas deben pertenecer al mismo subledger.
       const loaded = [];
       let subledgerAccountId: string | null = null;
+      // Un mismo `openItemId` puede venir repetido: cada línea se valida contra lo
+      // que la partida ya acumuló en esta petición, no solo contra su pendiente.
+      const clearedByItem = new Map<string, number>();
       for (const it of dto.items) {
         const openItem = await this.scope.openItem(tx, it.openItemId);
         if (openItem.statusConceptId === ACCT.OPEN_ITEM_CLEARED) {
@@ -125,7 +128,8 @@ export class SubledgerService {
         }
         const cleared = toCents(it.clearedAmount);
         const outstanding = toCents(openItem.outstandingAmount ?? '0');
-        if (cleared <= 0 || cleared > outstanding) {
+        const alreadyCleared = clearedByItem.get(it.openItemId) ?? 0;
+        if (cleared <= 0 || alreadyCleared + cleared > outstanding) {
           throw new PreconditionFailedException(
             'Importe compensado inválido',
             {
@@ -136,6 +140,7 @@ export class SubledgerService {
             AccountingErrorReason.OPEN_ITEM_INVALID_CLEARED_AMOUNT,
           );
         }
+        clearedByItem.set(it.openItemId, alreadyCleared + cleared);
         subledgerAccountId = subledgerAccountId ?? openItem.subledgerAccountId;
         if (openItem.subledgerAccountId !== subledgerAccountId) {
           throw new PreconditionFailedException(

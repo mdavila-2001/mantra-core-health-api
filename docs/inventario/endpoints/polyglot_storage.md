@@ -162,7 +162,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageGovernanceController.defineCollection` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:105`
+- **Implementación:** `StorageGovernanceController.defineCollection` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:125`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -172,14 +172,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /governance/collections` la atiende `StorageGovernanceController.defineCollection` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:105). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineCollectionDto` (13 campos, 6 obligatorios). Delega en `StorageGovernanceService.defineCollection`. Crea filas en polyglot_storage.collection_definitions, polyglot_storage.collection_schema_versions. Lee polyglot_storage.collection_definitions, polyglot_storage.dataset_definitions, polyglot_storage.dataset_versions, polyglot_storage.storage_backends.
+`POST /governance/collections` la atiende `StorageGovernanceController.defineCollection` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:125). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineCollectionDto` (13 campos, 6 obligatorios). Delega en `StorageGovernanceService.defineCollection`. Crea filas en polyglot_storage.collection_definitions, polyglot_storage.collection_schema_versions. Lee polyglot_storage.collection_definitions, polyglot_storage.dataset_definitions, polyglot_storage.dataset_versions, polyglot_storage.storage_backends.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:105` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:125` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -294,7 +294,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageGovernanceController.defineConsistencyPolicy` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:135`
+- **Implementación:** `StorageGovernanceController.defineConsistencyPolicy` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:165`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -304,14 +304,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /governance/consistency-policies` la atiende `StorageGovernanceController.defineConsistencyPolicy` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:135). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineConsistencyPolicyDto` (6 campos, 3 obligatorios). Delega en `StorageGovernanceService.defineConsistencyPolicy`. Crea filas en polyglot_storage.consistency_policies. Lee polyglot_storage.consistency_policies.
+`POST /governance/consistency-policies` la atiende `StorageGovernanceController.defineConsistencyPolicy` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:165). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineConsistencyPolicyDto` (6 campos, 3 obligatorios). Delega en `StorageGovernanceService.defineConsistencyPolicy`. Crea filas en polyglot_storage.consistency_policies. Lee polyglot_storage.consistency_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:135` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:165` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -401,7 +401,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageGovernanceController.defineDataset` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:76`
+- **Implementación:** `StorageGovernanceController.defineDataset` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:86`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -411,14 +411,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /governance/datasets` la atiende `StorageGovernanceController.defineDataset` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:76). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineDatasetDto` (8 campos, 6 obligatorios). Delega en `DatasetGovernanceService.defineDataset`. Crea filas en polyglot_storage.dataset_definitions, polyglot_storage.dataset_versions. Lee polyglot_storage.data_classifications, polyglot_storage.dataset_definitions.
+`POST /governance/datasets` la atiende `StorageGovernanceController.defineDataset` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:86). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineDatasetDto` (8 campos, 6 obligatorios). Delega en `DatasetGovernanceService.defineDataset`. Crea filas en polyglot_storage.dataset_definitions, polyglot_storage.dataset_versions. Lee polyglot_storage.data_classifications, polyglot_storage.dataset_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:76` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:86` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -519,7 +519,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageGovernanceController.defineAccessPolicy` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:150`
+- **Implementación:** `StorageGovernanceController.defineAccessPolicy` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:185`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -529,16 +529,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /governance/datasets/{id}/data-access-policies` la atiende `StorageGovernanceController.defineAccessPolicy` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:150). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineAccessPolicyDto` (5 campos, 2 obligatorios). Delega en `DatasetGovernanceService.defineAccessPolicy`. Crea filas en polyglot_storage.data_access_policies. Lee polyglot_storage.data_access_policies, polyglot_storage.dataset_definitions.
+`POST /governance/datasets/{id}/data-access-policies` la atiende `StorageGovernanceController.defineAccessPolicy` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:185). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineAccessPolicyDto` (5 campos, 2 obligatorios). Delega en `DatasetGovernanceService.defineAccessPolicy`. Crea filas en polyglot_storage.data_access_policies. Lee polyglot_storage.data_access_policies, polyglot_storage.dataset_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:150` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:185` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:150` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:185` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -632,7 +632,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageGovernanceController.publishDatasetVersion` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:89`
+- **Implementación:** `StorageGovernanceController.publishDatasetVersion` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:104`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -642,16 +642,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /governance/datasets/{id}/versions` la atiende `StorageGovernanceController.publishDatasetVersion` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:89). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `PublishDatasetVersionDto` (4 campos, 3 obligatorios). Delega en `DatasetGovernanceService.publishDatasetVersion`. Crea filas en polyglot_storage.dataset_versions. Actualiza polyglot_storage.dataset_definitions, polyglot_storage.dataset_versions. Lee polyglot_storage.dataset_definitions, polyglot_storage.dataset_versions.
+`POST /governance/datasets/{id}/versions` la atiende `StorageGovernanceController.publishDatasetVersion` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:104). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `PublishDatasetVersionDto` (4 campos, 3 obligatorios). Delega en `DatasetGovernanceService.publishDatasetVersion`. Crea filas en polyglot_storage.dataset_versions. Actualiza polyglot_storage.dataset_definitions, polyglot_storage.dataset_versions. Lee polyglot_storage.dataset_definitions, polyglot_storage.dataset_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:89` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:104` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:89` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:104` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -748,7 +748,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageGovernanceController.defineEncryptionProfile` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:180`
+- **Implementación:** `StorageGovernanceController.defineEncryptionProfile` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:225`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -758,14 +758,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /governance/encryption-profiles` la atiende `StorageGovernanceController.defineEncryptionProfile` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:180). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineEncryptionProfileDto` (13 campos, 4 obligatorios). Delega en `StorageGovernanceService.defineEncryptionProfile`. Crea filas en polyglot_storage.encryption_profiles, polyglot_storage.key_rotation_policies. Lee polyglot_storage.encryption_profiles, polyglot_storage.key_rotation_policies.
+`POST /governance/encryption-profiles` la atiende `StorageGovernanceController.defineEncryptionProfile` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:225). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineEncryptionProfileDto` (13 campos, 4 obligatorios). Delega en `StorageGovernanceService.defineEncryptionProfile`. Crea filas en polyglot_storage.encryption_profiles, polyglot_storage.key_rotation_policies. Lee polyglot_storage.encryption_profiles, polyglot_storage.key_rotation_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:180` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:225` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -873,7 +873,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageGovernanceController.failoverPlacement` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:209`
+- **Implementación:** `StorageGovernanceController.failoverPlacement` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:263`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -883,16 +883,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /governance/placements/{id}/failover` la atiende `StorageGovernanceController.failoverPlacement` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:209). Exige sesión con alguno de los roles PLATFORM_ADMIN. Valida el cuerpo como `FailoverPlacementDto` (1 campo, 1 obligatorio). Delega en `StorageOperationsService.failoverPlacement`. Actualiza polyglot_storage.dataset_placements, polyglot_storage.tenant_storage_bindings. Lee polyglot_storage.dataset_placements, polyglot_storage.tenant_storage_bindings.
+`POST /governance/placements/{id}/failover` la atiende `StorageGovernanceController.failoverPlacement` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:263). Exige sesión con alguno de los roles PLATFORM_ADMIN. Valida el cuerpo como `FailoverPlacementDto` (1 campo, 1 obligatorio). Delega en `StorageOperationsService.failoverPlacement`. Actualiza polyglot_storage.dataset_placements, polyglot_storage.tenant_storage_bindings. Lee polyglot_storage.dataset_placements, polyglot_storage.tenant_storage_bindings.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:209` |
+| ROL | Alguno de: PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:263` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:209` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:263` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -977,7 +977,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageGovernanceController.approvePlacement` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:120`
+- **Implementación:** `StorageGovernanceController.approvePlacement` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:145`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -987,14 +987,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /governance/placements/approve` la atiende `StorageGovernanceController.approvePlacement` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:120). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ApprovePlacementDto` (8 campos, 5 obligatorios). Delega en `DatasetGovernanceService.approvePlacement`. Crea filas en polyglot_storage.dataset_placements. Lee polyglot_storage.collection_definitions, polyglot_storage.data_classifications, polyglot_storage.dataset_definitions, polyglot_storage.dataset_placements, polyglot_storage.dataset_versions, polyglot_storage.encryption_profiles, polyglot_storage.residency_policies, polyglot_storage.storage_backend_regions.
+`POST /governance/placements/approve` la atiende `StorageGovernanceController.approvePlacement` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:145). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ApprovePlacementDto` (8 campos, 5 obligatorios). Delega en `DatasetGovernanceService.approvePlacement`. Crea filas en polyglot_storage.dataset_placements. Lee polyglot_storage.collection_definitions, polyglot_storage.data_classifications, polyglot_storage.dataset_definitions, polyglot_storage.dataset_placements, polyglot_storage.dataset_versions, polyglot_storage.encryption_profiles, polyglot_storage.residency_policies, polyglot_storage.storage_backend_regions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:120` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:145` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1098,7 +1098,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageGovernanceController.defineStoragePolicies` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:194`
+- **Implementación:** `StorageGovernanceController.defineStoragePolicies` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:244`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1108,14 +1108,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /governance/policies` la atiende `StorageGovernanceController.defineStoragePolicies` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:194). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineStoragePoliciesDto` (21 campos, 0 obligatorios). Delega en `StorageGovernanceService.defineStoragePolicies`. Crea filas en polyglot_storage.replication_policies, polyglot_storage.residency_policies, polyglot_storage.retention_policies. Lee polyglot_storage.replication_policies, polyglot_storage.residency_policies, polyglot_storage.retention_policies.
+`POST /governance/policies` la atiende `StorageGovernanceController.defineStoragePolicies` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:244). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineStoragePoliciesDto` (21 campos, 0 obligatorios). Delega en `StorageGovernanceService.defineStoragePolicies`. Crea filas en polyglot_storage.replication_policies, polyglot_storage.residency_policies, polyglot_storage.retention_policies. Lee polyglot_storage.replication_policies, polyglot_storage.residency_policies, polyglot_storage.retention_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:194` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:244` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1245,7 +1245,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageGovernanceController.registerBackend` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:61`
+- **Implementación:** `StorageGovernanceController.registerBackend` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:66`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1255,14 +1255,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /governance/storage-backends` la atiende `StorageGovernanceController.registerBackend` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:61). Exige sesión con alguno de los roles PLATFORM_ADMIN. Valida el cuerpo como `RegisterBackendDto` (22 campos, 7 obligatorios). Delega en `StorageGovernanceService.registerBackend`. Crea filas en polyglot_storage.storage_backend_regions, polyglot_storage.storage_backends, polyglot_storage.storage_capabilities. Lee polyglot_storage.storage_backends.
+`POST /governance/storage-backends` la atiende `StorageGovernanceController.registerBackend` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:66). Exige sesión con alguno de los roles PLATFORM_ADMIN. Valida el cuerpo como `RegisterBackendDto` (22 campos, 7 obligatorios). Delega en `StorageGovernanceService.registerBackend`. Crea filas en polyglot_storage.storage_backend_regions, polyglot_storage.storage_backends, polyglot_storage.storage_capabilities. Lee polyglot_storage.storage_backends.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:61` |
+| ROL | Alguno de: PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:66` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1401,7 +1401,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageGovernanceController.bindTenantStorage` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:164`
+- **Implementación:** `StorageGovernanceController.bindTenantStorage` — `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:204`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1411,16 +1411,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /governance/tenants/{tenantId}/storage-bindings` la atiende `StorageGovernanceController.bindTenantStorage` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:164). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `BindTenantStorageDto` (5 campos, 2 obligatorios). Delega en `DatasetGovernanceService.bindTenantStorage`. Crea filas en polyglot_storage.tenant_storage_bindings. Actualiza polyglot_storage.dataset_placements. Lee polyglot_storage.dataset_placements, polyglot_storage.tenant_storage_bindings.
+`POST /governance/tenants/{tenantId}/storage-bindings` la atiende `StorageGovernanceController.bindTenantStorage` (src/modules/polyglot_storage/controllers/storage-governance.controller.ts:204). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `BindTenantStorageDto` (5 campos, 2 obligatorios). Delega en `DatasetGovernanceService.bindTenantStorage`. Crea filas en polyglot_storage.tenant_storage_bindings. Actualiza polyglot_storage.dataset_placements. Lee polyglot_storage.dataset_placements, polyglot_storage.tenant_storage_bindings.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:164` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:204` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:164` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/polyglot_storage/controllers/storage-governance.controller.ts:204` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1516,7 +1516,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageOperationsController.defineIntegrityPolicy` — `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:53`
+- **Implementación:** `StorageOperationsController.defineIntegrityPolicy` — `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:58`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1526,14 +1526,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /ops/integrity-policies` la atiende `StorageOperationsController.defineIntegrityPolicy` (src/modules/polyglot_storage/controllers/storage-operations.controller.ts:53). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineIntegrityPolicyDto` (6 campos, 4 obligatorios). Delega en `StorageOperationsService.defineIntegrityPolicy`. Crea filas en polyglot_storage.storage_integrity_policies. Actualiza polyglot_storage.storage_integrity_policies. Lee polyglot_storage.dataset_definitions, polyglot_storage.storage_integrity_policies.
+`POST /ops/integrity-policies` la atiende `StorageOperationsController.defineIntegrityPolicy` (src/modules/polyglot_storage/controllers/storage-operations.controller.ts:58). Exige sesión con alguno de los roles GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineIntegrityPolicyDto` (6 campos, 4 obligatorios). Delega en `StorageOperationsService.defineIntegrityPolicy`. Crea filas en polyglot_storage.storage_integrity_policies. Actualiza polyglot_storage.storage_integrity_policies. Lee polyglot_storage.dataset_definitions, polyglot_storage.storage_integrity_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:53` |
+| ROL | Alguno de: GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:58` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1627,7 +1627,7 @@ El árbol de decisión completo está en [flujos](../flujos/polyglot_storage.md)
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `StorageOperationsController.verifyIntegrity` — `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:67`
+- **Implementación:** `StorageOperationsController.verifyIntegrity` — `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:77`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1637,16 +1637,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/polyglo
 
 ### Cómo se atiende (sistema)
 
-`POST /ops/integrity/{datasetId}/verify` la atiende `StorageOperationsController.verifyIntegrity` (src/modules/polyglot_storage/controllers/storage-operations.controller.ts:67). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `PolyglotStorageVerifyIntegrityDto` (3 campos, 3 obligatorios). Delega en `StorageOperationsService.verifyIntegrity`. Actualiza polyglot_storage.dataset_placements. Lee polyglot_storage.dataset_placements, polyglot_storage.storage_integrity_policies.
+`POST /ops/integrity/{datasetId}/verify` la atiende `StorageOperationsController.verifyIntegrity` (src/modules/polyglot_storage/controllers/storage-operations.controller.ts:77). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `PolyglotStorageVerifyIntegrityDto` (3 campos, 3 obligatorios). Delega en `StorageOperationsService.verifyIntegrity`. Actualiza polyglot_storage.dataset_placements. Lee polyglot_storage.dataset_placements, polyglot_storage.storage_integrity_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:67` |
+| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:77` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: datasetId | `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:67` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: datasetId | `src/modules/polyglot_storage/controllers/storage-operations.controller.ts:77` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |

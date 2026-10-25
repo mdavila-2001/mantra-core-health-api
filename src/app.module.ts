@@ -53,6 +53,7 @@ import { CrmModule } from './modules/crm/crm.module';
 import { CrossStoreConsistencyModule } from './modules/cross_store_consistency/cross_store_consistency.module';
 import { DelegatedAccessModule } from './modules/delegated_access/delegated_access.module';
 import { DiagnosticUnitsModule } from './modules/diagnostic_units/diagnostic_units.module';
+import { MedicalCentersModule } from './modules/medical_centers/medical_centers.module';
 import { DiagnosticsModule } from './modules/diagnostics/diagnostics.module';
 import { DataCatalogModule } from './modules/data_catalog/data_catalog.module';
 import { SurveysModule } from './modules/surveys/surveys.module';
@@ -203,6 +204,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     CrossStoreConsistencyModule,
     DelegatedAccessModule,
     DiagnosticUnitsModule,
+    MedicalCentersModule,
     DiagnosticsModule,
     EducationModule,
     ErpModule,

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
+import { Procedures } from '../../clinical/entities';
 import {
   ProcedureCases,
   ProcedureCaseStatusHistory,
@@ -210,6 +211,24 @@ export class PeriopCasesRepository {
       custodianTenantId === undefined ? { id } : { id, custodianTenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * Busca un procedimiento del historial **solo si es del paciente y del tenant
+   * custodio indicados**. El filtro va en la consulta: un id ajeno no se distingue
+   * de uno inexistente.
+   */
+  findProcedureOfPatient(
+    em: EntityManager,
+    procedureId: string,
+    patientProfileId: string,
+    custodianTenantId: string,
+  ): Promise<Procedures | null> {
+    return em.findOne(Procedures, {
+      id: procedureId,
+      patientProfileId,
+      custodianTenantId,
+    });
   }
 
   /**

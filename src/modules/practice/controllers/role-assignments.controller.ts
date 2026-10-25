@@ -60,14 +60,17 @@ export class RoleAssignmentsController {
     return this.workforceService.attachSupport(roleId, dto, actor);
   }
 
-  /** Carril 18: `PENDING → ACTIVE`. */
+  /**
+   * Carril 18: `PENDING → ACTIVE`, solo esa fila. Sin `@Roles`: lo aprueba
+   * quien administra esa organización (A-6) o un rol de plataforma, y eso lo
+   * decide el servicio por la membresía.
+   */
   @Audited({
     action: 'PRACTITIONER_ROLE_ASSIGNMENT_APPROVED',
     entity: 'practitioner_role_assignment',
     entityId: 'param:roleId',
   })
   @Post(':roleId/approve')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Aprobar una vinculación pendiente' })
   approve(
@@ -78,14 +81,13 @@ export class RoleAssignmentsController {
     return this.workforceService.approveAssignment(roleId, dto, actor);
   }
 
-  /** Carril 18: `PENDING → REJECTED`. */
+  /** Carril 18: `PENDING → REJECTED`, solo esa fila (A-6, ver `approve`). */
   @Audited({
     action: 'PRACTITIONER_ROLE_ASSIGNMENT_REJECTED',
     entity: 'practitioner_role_assignment',
     entityId: 'param:roleId',
   })
   @Post(':roleId/reject')
-  @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rechazar una vinculación pendiente' })
   reject(

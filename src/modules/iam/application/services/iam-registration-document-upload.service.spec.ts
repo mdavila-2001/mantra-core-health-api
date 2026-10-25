@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { IamRegistrationDocumentUploadService } from './iam-registration-document-upload.service';
 import { FileCategory, FileSensitivity } from '../../../common/dto';
+import { CommonRegistrationFilesAdapter } from '../../infrastructure/adapters/common-registration-files.adapter';
 
 function build() {
   const fileUploadService = {
@@ -14,7 +15,7 @@ function build() {
   };
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
   const service = new IamRegistrationDocumentUploadService(
-    fileUploadService as never,
+    new CommonRegistrationFilesAdapter(fileUploadService as never, {} as never),
     logger as never,
   );
   return { service, fileUploadService };

@@ -3825,6 +3825,14 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El informe previo indicado no coincide con el duplicado detectado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se detectó ningún estudio duplicado para justificar | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El modo de ejecutor no es válido | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | Si elige el paciente, la orden no lleva médico ni sede sugeridos | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | La orden necesita la sede sugerida | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | Si se recomienda un centro, la orden no lleva médico ejecutor | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | Si lo hace el médico, la orden necesita el médico ejecutor | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El médico ejecutor debe ser quien pide la orden | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | La sede sugerida no ofrece ese procedimiento con precio | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
+| 422 | `PRECONDITION_FAILED` | El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
 | 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |

@@ -5,3 +5,5 @@ export * from './practitioner-sites.controller';
 export * from './role-assignments.controller';
 export * from './inventory-items.controller';
 export * from './organization-practices.controller';
+export * from './practice-invitations.controller';
+export * from './practitioner-invitations.controller';

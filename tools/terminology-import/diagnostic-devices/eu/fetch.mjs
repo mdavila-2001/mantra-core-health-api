@@ -12,8 +12,7 @@
 // en alcance (en paralelo, páginas gzip) → EUDAMED /actors (fabricantes) →
 // Italia.
 //
-// Verificado en vivo (2026-10-24; la salida literal quedó en el historial de git,
-// 79a7e486:docs/trabajo/2026-10-24-seed-dx-devices-eu-oficial/evidencia/): el Data Lake
+// Verificado en vivo (2026-10-24, ver docs/trabajo/…/evidencia/): el Data Lake
 // guarda NOMENCLATURE_CODE con un espacio inicial (" Z11040101"); el filtro
 // exacto sin ese espacio devuelve 0 filas. Páginas de hasta 1000 filas con
 // nextLink `$after=…` que conserva los filtros.

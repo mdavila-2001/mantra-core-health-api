@@ -213,5 +213,45 @@
     "id": "new_required_request_field:POST /tracking/webhooks/carriers/{carrierCode}:parámetro header:x-carrier-timestamp",
     "reason": "Corrección de seguridad intencional: el webhook de transportistas ahora se autentica con firma HMAC y ventana anti-replay (cabeceras x-carrier-signature y x-carrier-timestamp; secreto WEBHOOK_SECRET_CARRIER_<CÓDIGO>). Sin ellas se rechaza la petición, de modo que nadie pueda inyectar eventos de seguimiento falsos.",
     "migrationNote": "El transportista debe firmar el cuerpo con HMAC usando el secreto WEBHOOK_SECRET_CARRIER_<CÓDIGO> y enviar x-carrier-signature y x-carrier-timestamp en cada llamada a POST /tracking/webhooks/carriers/{carrierCode}."
+  },
+  {
+    "id": "removed_response:GET /iam/onboarding-drafts/{formType}/{draftId}:401",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:GET /iam/onboarding-drafts/{formType}/{draftId}:403",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:PUT /iam/onboarding-drafts/{formType}/{draftId}:401",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:PUT /iam/onboarding-drafts/{formType}/{draftId}:403",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:DELETE /iam/onboarding-drafts/{formType}/{draftId}:401",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:DELETE /iam/onboarding-drafts/{formType}/{draftId}:403",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:POST /telemetry/onboarding-events:401",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
+  },
+  {
+    "id": "removed_response:POST /telemetry/onboarding-events:403",
+    "reason": "La ruta es @Public() en el código (no exige sesión ni roles): el contrato la declaraba con bearer y listaba 401/403 que nunca emite. Ahora figura con security: [].",
+    "migrationNote": "Ninguna: el comportamiento no cambia; el cliente puede llamarla sin Authorization, como ya podía."
   }
 ]
