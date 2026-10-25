@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { BO_FEE_PROPERTY_CODES } from '../../../common/seed/bolivia-fee-schedule.catalog';
+import {
+  BO_FEE_PROPERTY_CODES,
+  boFeeVersionId,
+} from '../../../common/seed/bolivia-fee-schedule.catalog';
+import { ValueSetMembers } from '../../terminology/entities';
 
 /** Unidades en que el arancel expresa el precio de referencia. */
 export type ProcedureReferenceUnit = 'UMA' | 'USD';
@@ -27,6 +31,27 @@ export interface ProcedureReference {
  */
 @Injectable()
 export class ProcedureReferenceReader {
+  /**
+   * ¿El concepto es un procedimiento del nomenclador (`VS_BO_MEDICAL_PROCEDURE`)?
+   *
+   * El vínculo columna → conjunto no se puede declarar en
+   * `dynamic-enum-catalog.ts` (sus entradas enumeran conceptos uno por uno y los
+   * 4408 del arancel los crea otro seed), así que se comprueba contra los miembros
+   * de la versión vigente del conjunto.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param conceptId - Concepto a comprobar.
+   * @returns `true` si es miembro incluido del conjunto.
+   */
+  async isProcedure(em: EntityManager, conceptId: string): Promise<boolean> {
+    const member = await em.findOne(
+      ValueSetMembers,
+      { valueSetVersionId: boFeeVersionId(), conceptId, included: true },
+      { fields: ['id'] },
+    );
+    return member !== null;
+  }
+
   /**
    * Resuelve la referencia de cada procedimiento pedido, en una sola consulta.
    *

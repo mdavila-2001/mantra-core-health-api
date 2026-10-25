@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { ValueSetMembers } from '../../terminology/entities';
 import { ProcedureReferenceReader } from './procedure-reference.reader';
 
 /**
@@ -107,5 +108,28 @@ describe('ProcedureReferenceReader', () => {
     expect(execute).toHaveBeenCalledTimes(1);
     const params = execute.mock.calls[0][1] as string[];
     expect(params.filter((p) => p === 'c1')).toHaveLength(1);
+  });
+
+  describe('isProcedure', () => {
+    it('es true si el concepto es miembro incluido de la versión vigente del conjunto', async () => {
+      const findOne = mockFn().mockResolvedValue({ id: 'm1' });
+
+      await expect(reader.isProcedure({ findOne } as any, 'c1')).resolves.toBe(
+        true,
+      );
+      expect(findOne).toHaveBeenCalledWith(
+        ValueSetMembers,
+        expect.objectContaining({ conceptId: 'c1', included: true }),
+        expect.anything(),
+      );
+    });
+
+    it('es false si no es miembro', async () => {
+      const findOne = mockFn().mockResolvedValue(null);
+
+      await expect(reader.isProcedure({ findOne } as any, 'c1')).resolves.toBe(
+        false,
+      );
+    });
   });
 });
