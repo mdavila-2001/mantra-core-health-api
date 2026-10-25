@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `medical_groups`
 
-Referencia exhaustiva de 8 operación(es) del módulo `medical_groups`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 9 operación(es) del módulo `medical_groups`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `medical-groups`
 - **Controladores:** `MedicalGroupsController`
@@ -18,7 +18,8 @@ Referencia exhaustiva de 8 operación(es) del módulo `medical_groups`, derivada
 5. [POST /medical-groups/{id}/members/{memberId}/respond](#5-post-medical-groups-id-members-memberid-respond) — Aceptar o rechazar la invitación a un cargo del grupo
 6. [POST /medical-groups/{id}/reschedule-requests](#6-post-medical-groups-id-reschedule-requests) — Solicitar cambio de horario
 7. [POST /medical-groups/{id}/reschedule-requests/respond](#7-post-medical-groups-id-reschedule-requests-respond) — Resolver la solicitud de cambio de horario
-8. [GET /medical-groups/patients/{patientProfileId}/conditions](#8-get-medical-groups-patients-patientprofileid-conditions) — Diagnósticos del paciente para el selector del formulario
+8. [GET /medical-groups/eligible-members](#8-get-medical-groups-eligible-members) — Colegas que se pueden invitar a un grupo de este servicio
+9. [GET /medical-groups/patients/{patientProfileId}/conditions](#9-get-medical-groups-patients-patientprofileid-conditions) — Diagnósticos del paciente para el selector del formulario
 
 ---
 
@@ -98,6 +99,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     {
       "id": "00000000-0000-4000-8000-000000000001",
       "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+      "serviceName": "Nombre de ejemplo",
       "scheduledAt": "2026-07-31T12:00:00.000Z",
       "locationText": "valor-ejemplo",
       "status": "PENDING_TEAM",
@@ -114,9 +116,10 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<MedicalGroupListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","serviceCatalogId":"00000000-0000-4000-8000-000000000001","scheduledAt":"2026-07-31T12:00:00.000Z","locationText":"valor-ejemplo","status":"PENDING_TEAM","isCreator":true,"patientProfileId":"00000000-0000-4000-8000-000000000001","pendingMembersCount":1}]` |
+| `items` | Sí | `array<MedicalGroupListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","serviceCatalogId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","scheduledAt":"2026-07-31T12:00:00.000Z","locationText":"valor-ejemplo","status":"PENDING_TEAM","isCreator":true,"patientProfileId":"00000000-0000-4000-8000-000000000001","pendingMembersCount":1}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].serviceName` | Sí | `string` | admite null | Nombre del servicio del catálogo; null si ya no existe | `Nombre de ejemplo` |
 | `items[].scheduledAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `items[].locationText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].status` | Sí | `string` | valores: `PENDING_TEAM`, `SCHEDULED`, `RESCHEDULE_PENDING`, `CLOSED` | Sin descripción específica en el contrato OpenAPI. | `PENDING_TEAM` |
@@ -274,8 +277,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceName": "Nombre de ejemplo",
   "requestingPractitionerId": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
   "conditionId": "00000000-0000-4000-8000-000000000001",
   "scheduledAt": "2026-07-31T12:00:00.000Z",
   "locationText": "valor-ejemplo",
@@ -294,6 +299,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     {
       "id": "00000000-0000-4000-8000-000000000001",
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
       "agreedPaymentAmount": "valor-ejemplo",
       "agreedPaymentCurrencyConceptId": "00000000-0000-4000-8000-000000000001",
@@ -312,8 +318,10 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceName` | Sí | `string` | admite null | Nombre del servicio del catálogo; null si ya no existe | `Nombre de ejemplo` |
 | `requestingPractitionerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | Sí | `string` | admite null | Nombre del paciente asociado; null si no hay paciente o no tiene nombre | `Nombre de ejemplo` |
 | `conditionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `scheduledAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `locationText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -328,9 +336,10 @@ Campos de la respuesta:
 | `canEditExerciseNotes` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: todavía se pueden subir notas del procedimiento. | `true` |
 | `isClosed` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: pasó la ventana de una semana — expediente inmutable (AC-21-19). | `true` |
 | `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
 | `members[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `members[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerName` | Sí | `string` | admite null | Nombre del profesional; null si su persona no tiene nombre cargado | `Nombre de ejemplo` |
 | `members[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentCurrencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -445,8 +454,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceName": "Nombre de ejemplo",
   "requestingPractitionerId": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
   "conditionId": "00000000-0000-4000-8000-000000000001",
   "scheduledAt": "2026-07-31T12:00:00.000Z",
   "locationText": "valor-ejemplo",
@@ -465,6 +476,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     {
       "id": "00000000-0000-4000-8000-000000000001",
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
       "agreedPaymentAmount": "valor-ejemplo",
       "agreedPaymentCurrencyConceptId": "00000000-0000-4000-8000-000000000001",
@@ -483,8 +495,10 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceName` | Sí | `string` | admite null | Nombre del servicio del catálogo; null si ya no existe | `Nombre de ejemplo` |
 | `requestingPractitionerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | Sí | `string` | admite null | Nombre del paciente asociado; null si no hay paciente o no tiene nombre | `Nombre de ejemplo` |
 | `conditionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `scheduledAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `locationText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -499,9 +513,10 @@ Campos de la respuesta:
 | `canEditExerciseNotes` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: todavía se pueden subir notas del procedimiento. | `true` |
 | `isClosed` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: pasó la ventana de una semana — expediente inmutable (AC-21-19). | `true` |
 | `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
 | `members[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `members[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerName` | Sí | `string` | admite null | Nombre del profesional; null si su persona no tiene nombre cargado | `Nombre de ejemplo` |
 | `members[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentCurrencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -627,8 +642,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceName": "Nombre de ejemplo",
   "requestingPractitionerId": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
   "conditionId": "00000000-0000-4000-8000-000000000001",
   "scheduledAt": "2026-07-31T12:00:00.000Z",
   "locationText": "valor-ejemplo",
@@ -647,6 +664,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     {
       "id": "00000000-0000-4000-8000-000000000001",
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
       "agreedPaymentAmount": "valor-ejemplo",
       "agreedPaymentCurrencyConceptId": "00000000-0000-4000-8000-000000000001",
@@ -665,8 +683,10 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceName` | Sí | `string` | admite null | Nombre del servicio del catálogo; null si ya no existe | `Nombre de ejemplo` |
 | `requestingPractitionerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | Sí | `string` | admite null | Nombre del paciente asociado; null si no hay paciente o no tiene nombre | `Nombre de ejemplo` |
 | `conditionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `scheduledAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `locationText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -681,9 +701,10 @@ Campos de la respuesta:
 | `canEditExerciseNotes` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: todavía se pueden subir notas del procedimiento. | `true` |
 | `isClosed` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: pasó la ventana de una semana — expediente inmutable (AC-21-19). | `true` |
 | `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
 | `members[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `members[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerName` | Sí | `string` | admite null | Nombre del profesional; null si su persona no tiene nombre cargado | `Nombre de ejemplo` |
 | `members[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentCurrencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -814,8 +835,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceName": "Nombre de ejemplo",
   "requestingPractitionerId": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
   "conditionId": "00000000-0000-4000-8000-000000000001",
   "scheduledAt": "2026-07-31T12:00:00.000Z",
   "locationText": "valor-ejemplo",
@@ -834,6 +857,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     {
       "id": "00000000-0000-4000-8000-000000000001",
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
       "agreedPaymentAmount": "valor-ejemplo",
       "agreedPaymentCurrencyConceptId": "00000000-0000-4000-8000-000000000001",
@@ -852,8 +876,10 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceName` | Sí | `string` | admite null | Nombre del servicio del catálogo; null si ya no existe | `Nombre de ejemplo` |
 | `requestingPractitionerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | Sí | `string` | admite null | Nombre del paciente asociado; null si no hay paciente o no tiene nombre | `Nombre de ejemplo` |
 | `conditionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `scheduledAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `locationText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -868,9 +894,10 @@ Campos de la respuesta:
 | `canEditExerciseNotes` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: todavía se pueden subir notas del procedimiento. | `true` |
 | `isClosed` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: pasó la ventana de una semana — expediente inmutable (AC-21-19). | `true` |
 | `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
 | `members[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `members[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerName` | Sí | `string` | admite null | Nombre del profesional; null si su persona no tiene nombre cargado | `Nombre de ejemplo` |
 | `members[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentCurrencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -1000,8 +1027,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceName": "Nombre de ejemplo",
   "requestingPractitionerId": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
   "conditionId": "00000000-0000-4000-8000-000000000001",
   "scheduledAt": "2026-07-31T12:00:00.000Z",
   "locationText": "valor-ejemplo",
@@ -1020,6 +1049,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     {
       "id": "00000000-0000-4000-8000-000000000001",
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
       "agreedPaymentAmount": "valor-ejemplo",
       "agreedPaymentCurrencyConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1038,8 +1068,10 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceName` | Sí | `string` | admite null | Nombre del servicio del catálogo; null si ya no existe | `Nombre de ejemplo` |
 | `requestingPractitionerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | Sí | `string` | admite null | Nombre del paciente asociado; null si no hay paciente o no tiene nombre | `Nombre de ejemplo` |
 | `conditionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `scheduledAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `locationText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1054,9 +1086,10 @@ Campos de la respuesta:
 | `canEditExerciseNotes` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: todavía se pueden subir notas del procedimiento. | `true` |
 | `isClosed` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: pasó la ventana de una semana — expediente inmutable (AC-21-19). | `true` |
 | `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
 | `members[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `members[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerName` | Sí | `string` | admite null | Nombre del profesional; null si su persona no tiene nombre cargado | `Nombre de ejemplo` |
 | `members[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentCurrencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -1187,8 +1220,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "serviceName": "Nombre de ejemplo",
   "requestingPractitionerId": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientName": "Nombre de ejemplo",
   "conditionId": "00000000-0000-4000-8000-000000000001",
   "scheduledAt": "2026-07-31T12:00:00.000Z",
   "locationText": "valor-ejemplo",
@@ -1207,6 +1242,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     {
       "id": "00000000-0000-4000-8000-000000000001",
       "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
       "roleTitle": "valor-ejemplo",
       "agreedPaymentAmount": "valor-ejemplo",
       "agreedPaymentCurrencyConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1225,8 +1261,10 @@ Campos de la respuesta:
 |---|:---:|---|---|---|---|
 | `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `serviceCatalogId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `serviceName` | Sí | `string` | admite null | Nombre del servicio del catálogo; null si ya no existe | `Nombre de ejemplo` |
 | `requestingPractitionerId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientName` | Sí | `string` | admite null | Nombre del paciente asociado; null si no hay paciente o no tiene nombre | `Nombre de ejemplo` |
 | `conditionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `scheduledAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `locationText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
@@ -1241,9 +1279,10 @@ Campos de la respuesta:
 | `canEditExerciseNotes` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: todavía se pueden subir notas del procedimiento. | `true` |
 | `isClosed` | Sí | `boolean` | Sin restricción adicional declarada | Derivado: pasó la ventana de una semana — expediente inmutable (AC-21-19). | `true` |
 | `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `members` | Sí | `array<MedicalGroupMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","roleTitle":"valor-ejemplo","agreedPaymentAmount":"valor-ejemplo","agreedPaymentCurrencyConceptId":"00000000-0000-4000-8000-000000000001","additionalTermsText":"valor-ejemplo","isCreator":true,"invitationStatus":"PENDING","respondedAt":"2026-07-31T12:00:00.000Z"}]` |
 | `members[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `members[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `members[].practitionerName` | Sí | `string` | admite null | Nombre del profesional; null si su persona no tiene nombre cargado | `Nombre de ejemplo` |
 | `members[].roleTitle` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `members[].agreedPaymentCurrencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -1283,7 +1322,116 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. GET /medical-groups/patients/{patientProfileId}/conditions
+## 8. GET /medical-groups/eligible-members
+
+- **Módulo:** `medical_groups`
+- **Etiqueta OpenAPI:** `medical-groups`
+- **Nombre:** Colegas que se pueden invitar a un grupo de este servicio
+- **Operation ID:** `MedicalGroupsController_listEligibleMembers`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MedicalGroupsController.listEligibleMembers](../../src/modules/medical_groups/controllers/medical-groups.controller.ts)
+
+### Descripción de negocio
+
+Colegas que se pueden invitar a un grupo de este servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Los colegas que se pueden invitar a un grupo del servicio elegido. Va antes de `:id` por el mismo motivo que `patients/...`: el router de Nest resuelve en orden de declaración.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /medical-groups/eligible-members` en `MedicalGroupsController_listEligibleMembers`. El controlador delega en `MedicalGroupsService.listEligibleMembers`. No recibe body. El tipo de retorno estático es `Promise<MedicalGroupEligibleMemberDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `serviceCatalogId` | query | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /medical-groups/eligible-members?serviceCatalogId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /medical-groups/eligible-members?serviceCatalogId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MedicalGroupEligibleMemberDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MedicalGroupEligibleMemberDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MedicalGroupEligibleMemberDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MedicalGroupEligibleMemberDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MedicalGroupEligibleMemberDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MedicalGroupEligibleMemberDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MedicalGroupEligibleMemberDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupEligibleMemberDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+    "name": "Nombre de ejemplo"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 401 | `UNAUTHENTICATED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Servicio médico no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/medical-groups/eligible-members"
+}
+```
+
+---
+
+## 9. GET /medical-groups/patients/{patientProfileId}/conditions
 
 - **Módulo:** `medical_groups`
 - **Etiqueta OpenAPI:** `medical-groups`
@@ -1296,7 +1444,6 @@ Ejemplo de error normalizado:
 
 Diagnósticos del paciente para el selector del formulario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: AC-21-06/07: diagnósticos del paciente, más reciente primero.
 
 ### Descripción del sistema
 

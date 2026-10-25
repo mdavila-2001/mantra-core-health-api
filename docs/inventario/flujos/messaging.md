@@ -3,13 +3,13 @@
 # Flujos del módulo `messaging`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 17 (16 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 21 (18 con decisiones propias, 3 sin ellas)
 - Inventario de endpoints del módulo: [messaging](../endpoints/messaging.md)
 
 ## Proceso: Módulo 35 — Mensajería (outbox, colas y notificación multicanal)
 
-- **Código:** `messaging` · **Agrupación:** MIXTO · **Operaciones:** 17
-- **Actores:** MESSAGING_ADMIN · Público (sin sesión) · SYSTEM · USER
+- **Código:** `messaging` · **Agrupación:** MIXTO · **Operaciones:** 21
+- **Actores:** Cualquier sesión válida · MESSAGING_ADMIN · Público (sin sesión) · SYSTEM · USER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/messaging/README.md`
 
@@ -49,7 +49,7 @@ transacción de negocio
             └─ /webhooks/providers/:code/receipts ──> delivered | bounced
 ```
 
-_Fuente: `src/modules/messaging/README.md:110`_
+_Fuente: `src/modules/messaging/README.md:109`_
 
 ### Etapas y operaciones
 
@@ -64,7 +64,7 @@ _Fuente: `src/modules/messaging/README.md:110`_
 | `UC-35-08` | Reintento con backoff o cola muerta | POST /internal/jobs/{id}/fail | SYSTEM · MESSAGING_ADMIN | MEDIO | 4 |
 | `UC-35-09` | Reencolar desde cola muerta | POST /queues/dead-letter/{deadLetterJobId}/redrive | MESSAGING_ADMIN | MEDIO | 4 |
 | `UC-35-10` | Solicitud consciente del consentimiento | POST /notifications/requests | SYSTEM · MESSAGING_ADMIN | MEDIO | 5 |
-| `UC-35-11` | Entrega multicanal | POST /internal/notifications/{requestId}/deliver | SYSTEM · MESSAGING_ADMIN | MEDIO | 8 |
+| `UC-35-11` | Entrega multicanal | POST /internal/notifications/{requestId}/deliver | SYSTEM · MESSAGING_ADMIN | MEDIO | 10 |
 | `UC-35-12` | Conciliar acuse del proveedor | POST /webhooks/providers/{providerCode}/receipts | Público (sin sesión) | ALTO | 7 |
 | `UC-35-13` | Marcar in-app como leída | POST /notifications/in-app/{id}/read | USER · MESSAGING_ADMIN | MEDIO | 2 |
 | `ctrl:MessagingController` | Operaciones de MessagingController que el README no asigna a un caso de uso | POST /notifications/in-app/read-all | USER · MESSAGING_ADMIN | MEDIO | 2 |
@@ -72,15 +72,19 @@ _Fuente: `src/modules/messaging/README.md:110`_
 |  |  | GET /notifications/preferences/me | USER · MESSAGING_ADMIN | BAJO | 2 |
 |  |  | PUT /notifications/preferences/me | USER · MESSAGING_ADMIN | MEDIO | 3 |
 | `ctrl:MessagingInternalController` | Operaciones de MessagingInternalController que el README no asigna a un caso de uso | GET /internal/notifications/pending | SYSTEM · MESSAGING_ADMIN | MEDIO | 3 |
+| `ctrl:WebPushController` | Operaciones de WebPushController que el README no asigna a un caso de uso | DESCONOCIDO /notifications/web-push | Cualquier sesión válida | BAJO | 0 |
+|  |  | GET /notifications/web-push/config | USER · MESSAGING_ADMIN | BAJO | 0 |
+|  |  | DELETE /notifications/web-push/subscription | USER · MESSAGING_ADMIN | MEDIO | 2 |
+|  |  | PUT /notifications/web-push/subscription | USER · MESSAGING_ADMIN | MEDIO | 3 |
 
-### Diagrama — etapas `UC-35-02`, `UC-35-03`, `UC-35-04`…
+### Diagrama 1 de 2 — etapas `UC-35-02`, `UC-35-03`, `UC-35-04`…
 
 ```mermaid
 flowchart LR
   a2(["SYSTEM · MESSAGING_ADMIN"]):::actor
   a18(["MESSAGING_ADMIN"]):::actor
-  a30(["Público (sin sesión)"]):::actor
-  a34(["USER · MESSAGING_ADMIN"]):::actor
+  a31(["Público (sin sesión)"]):::actor
+  a35(["USER · MESSAGING_ADMIN"]):::actor
   t3[("messaging.outbox_messages")]:::tabla
   t5[("messaging.domain_events")]:::tabla
   t6[("messaging.event_deliveries")]:::tabla
@@ -92,10 +96,11 @@ flowchart LR
   t21[("messaging.message_templates")]:::tabla
   t22[("messaging.notification_requests")]:::tabla
   t23[("messaging.recipient_preferences")]:::tabla
-  t25[("messaging.in_app_notifications")]:::tabla
-  t26[("messaging.messaging_providers")]:::tabla
-  t27[("messaging.notification_deliveries")]:::tabla
-  t31[("messaging.delivery_receipts")]:::tabla
+  t25[("iam.devices")]:::tabla
+  t26[("messaging.in_app_notifications")]:::tabla
+  t27[("messaging.messaging_providers")]:::tabla
+  t28[("messaging.notification_deliveries")]:::tabla
+  t32[("messaging.delivery_receipts")]:::tabla
   subgraph s0["UC-35-02 · Reclamar y publicar mensajes (relay)"]
     o1["POST /internal/outbox/relay/run"]:::op
   end
@@ -124,25 +129,25 @@ flowchart LR
   subgraph s8["UC-35-10 · Solicitud consciente del consentimiento"]
     o19["POST /notifications/requests"]:::op
   end
-  t28[("+2 tablas más")]
+  t29[("+4 tablas más")]
   subgraph s9["UC-35-11 · Entrega multicanal"]
     o24["POST /internal/notifications/{requestId}/deliver"]:::op
   end
-  t32[("+1 tablas más")]
+  t33[("+1 tablas más")]
   subgraph s10["UC-35-12 · Conciliar acuse del proveedor"]
-    o29["POST /webhooks/providers/{providerCode}/receipts"]:::op
+    o30["POST /webhooks/providers/{providerCode}/receipts"]:::op
   end
   subgraph s11["UC-35-13 · Marcar in-app como leída"]
-    o33["POST /notifications/in-app/{id}/read"]:::op
+    o34["POST /notifications/in-app/{id}/read"]:::op
   end
   subgraph s12["ctrl:MessagingController · Operaciones de MessagingController que el README no…"]
-    o35["POST /notifications/in-app/read-all"]:::op
-    o36["GET /notifications/me"]:::op
-    o37["GET /notifications/preferences/me"]:::op
-    o38["PUT /notifications/preferences/me"]:::op
+    o36["POST /notifications/in-app/read-all"]:::op
+    o37["GET /notifications/me"]:::op
+    o38["GET /notifications/preferences/me"]:::op
+    o39["PUT /notifications/preferences/me"]:::op
   end
   subgraph s13["ctrl:MessagingInternalController · Operaciones de MessagingInternalController q…"]
-    o39["GET /internal/notifications/pending"]:::op
+    o40["GET /internal/notifications/pending"]:::op
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
@@ -185,40 +190,68 @@ flowchart LR
   o19 -->|"LEE"| t22
   o19 -->|"LEE"| t23
   a2 --> o24
-  o24 -->|"CREA"| t25
+  o24 -->|"ACTUALIZA"| t25
+  o24 -->|"LEE"| t25
+  o24 -->|"CREA"| t26
   o24 -->|"LEE"| t20
-  o24 -->|"LEE"| t26
-  o24 -->|"CREA"| t27
   o24 -->|"LEE"| t27
-  o24 -->|"ACTUALIZA"| t22
-  o24 -.-> t28
-  a30 --> o29
-  o29 -->|"CREA"| t31
-  o29 -->|"LEE"| t31
-  o29 -->|"LEE"| t26
-  o29 -->|"ACTUALIZA"| t27
-  o29 -->|"LEE"| t27
-  o29 -->|"ACTUALIZA"| t22
-  o29 -.-> t32
-  a34 --> o33
-  o33 -->|"ACTUALIZA"| t25
-  o33 -->|"LEE"| t25
-  a34 --> o35
-  o35 -->|"ACTUALIZA"| t25
-  o35 -->|"LEE"| t25
-  a34 --> o36
-  o36 -->|"LEE"| t25
-  a34 --> o37
-  o37 -->|"LEE"| t20
-  o37 -->|"LEE"| t23
-  a34 --> o38
+  o24 -->|"CREA"| t28
+  o24 -.-> t29
+  a31 --> o30
+  o30 -->|"CREA"| t32
+  o30 -->|"LEE"| t32
+  o30 -->|"LEE"| t27
+  o30 -->|"ACTUALIZA"| t28
+  o30 -->|"LEE"| t28
+  o30 -->|"ACTUALIZA"| t22
+  o30 -.-> t33
+  a35 --> o34
+  o34 -->|"ACTUALIZA"| t26
+  o34 -->|"LEE"| t26
+  a35 --> o36
+  o36 -->|"ACTUALIZA"| t26
+  o36 -->|"LEE"| t26
+  a35 --> o37
+  o37 -->|"LEE"| t26
+  a35 --> o38
   o38 -->|"LEE"| t20
-  o38 -->|"CREA"| t23
   o38 -->|"LEE"| t23
-  a2 --> o39
+  a35 --> o39
   o39 -->|"LEE"| t20
-  o39 -->|"ACTUALIZA"| t22
-  o39 -->|"LEE"| t22
+  o39 -->|"CREA"| t23
+  o39 -->|"LEE"| t23
+  a2 --> o40
+  o40 -->|"LEE"| t20
+  o40 -->|"ACTUALIZA"| t22
+  o40 -->|"LEE"| t22
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+### Diagrama 2 de 2 — etapas `ctrl:WebPushController`
+
+```mermaid
+flowchart LR
+  a2(["Cualquier sesión válida"]):::actor
+  a4(["USER · MESSAGING_ADMIN"]):::actor
+  t6[("iam.devices")]:::tabla
+  subgraph s0["ctrl:WebPushController · Operaciones de WebPushController que el README no asig…"]
+    o1["DESCONOCIDO /notifications/web-push"]:::op
+    o3["GET /notifications/web-push/config"]:::op
+    o5["DELETE /notifications/web-push/subscription"]:::op
+    o7["PUT /notifications/web-push/subscription"]:::op
+  end
+  a2 --> o1
+  a4 --> o3
+  a4 --> o5
+  o5 -->|"ACTUALIZA"| t6
+  o5 -->|"LEE"| t6
+  a4 --> o7
+  o7 -->|"ACTUALIZA"| t6
+  o7 -->|"CREA"| t6
+  o7 -->|"LEE"| t6
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -554,8 +587,67 @@ flowchart TD
   n34[("ACTUALIZA messaging.notification_requests")]:::efecto
   n33 --> n34
   n29 -->|"no"| n34
-  n35(("201 Responde con éxito")):::ok
+  n35["Llama a WebPushService.pushToUser"]:::llamada
   n34 --> n35
+  n36["Intenta"]:::intento
+  n35 --> n36
+  n37[("LEE iam.devices")]:::efecto
+  n36 --> n37
+  n38["Repite: por cada const device de devices"]:::bucle
+  n37 --> n38
+  n39["Llama a WebPushService.sendTo"]:::llamada
+  n38 -->|"cada elemento"| n39
+  n40["Intenta"]:::intento
+  n39 --> n40
+  n41{"status !== undefined && GONE_STATUS_CODES.includes(status)"}:::decision
+  n40 -->|"si falla"| n41
+  n42["Llama a WebPushService.forget"]:::llamada
+  n41 -->|"sí"| n42
+  n43["Transacción: transactional(…)"]:::transaccion
+  n42 --> n43
+  n44[("LEE iam.devices · ACTUALIZA iam.devices")]:::efecto
+  n43 --> n44
+  n45{"device"}:::decision
+  n44 --> n45
+  n46[("ACTUALIZA iam.devices")]:::efecto
+  n45 -->|"sí"| n46
+  n47{"pushTarget"}:::decision
+  n40 --> n47
+  n46 --> n47
+  n45 -->|"no"| n47
+  n41 -->|"no"| n47
+  n38 -->|"al terminar"| n47
+  n48["Llama a WebPushService.pushToUser"]:::llamada
+  n47 -->|"sí"| n48
+  n49["Intenta"]:::intento
+  n48 --> n49
+  n50[("LEE iam.devices")]:::efecto
+  n49 --> n50
+  n51["Repite: por cada const device de devices"]:::bucle
+  n50 --> n51
+  n52["Llama a WebPushService.sendTo"]:::llamada
+  n51 -->|"cada elemento"| n52
+  n53["Intenta"]:::intento
+  n52 --> n53
+  n54{"status !== undefined && GONE_STATUS_CODES.includes(status)"}:::decision
+  n53 -->|"si falla"| n54
+  n55["Llama a WebPushService.forget"]:::llamada
+  n54 -->|"sí"| n55
+  n56["Transacción: transactional(…)"]:::transaccion
+  n55 --> n56
+  n57[("LEE iam.devices · ACTUALIZA iam.devices")]:::efecto
+  n56 --> n57
+  n58{"device"}:::decision
+  n57 --> n58
+  n59[("ACTUALIZA iam.devices")]:::efecto
+  n58 -->|"sí"| n59
+  n60(("201 Responde con éxito")):::ok
+  n53 --> n60
+  n59 --> n60
+  n58 -->|"no"| n60
+  n54 -->|"no"| n60
+  n51 -->|"al terminar"| n60
+  n47 -->|"no"| n60
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -936,7 +1028,7 @@ Crear una solicitud de notificación
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -946,9 +1038,9 @@ flowchart TD
   n1 --> n2
   n3["Llama a NotificationsService.createRequest"]:::llamada
   n2 --> n3
-  n4{"!dto.recipientUserId && !dto.recipientAddress"}:::decision
+  n4{"!recipientUserId"}:::decision
   n3 --> n4
-  n5(["422 PRECONDITION_FAILED La notificación necesita destinatario interno o dirección de destino"]):::error
+  n5(["422 PRECONDITION_FAILED La notificación a una dirección externa también necesita el usuario destinatario / La…"]):::error
   n4 -->|"sí"| n5
   n6["Transacción: transactional(…)"]:::transaccion
   n4 -->|"no"| n6
@@ -1010,7 +1102,89 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /queues/{code}/jobs
+#### 14. DESCONOCIDO /notifications/web-push
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: La dirección de push no pertenece a un servicio de navegador conocido |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3{"!isAllowedPushEndpoint(endpoint)"}:::decision
+  n2 --> n3
+  n4(["400 VALIDATION_FAILED La dirección de push no pertenece a un servicio de navegador conocido"]):::error
+  n3 -->|"sí"| n4
+  n5(("200 Responde con éxito")):::ok
+  n3 -->|"no"| n5
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. PUT /notifications/web-push/subscription
+
+Guarda la suscripción push de este navegador
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: La dirección de push no pertenece a un servicio de navegador conocido |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Las notificaciones push no están activadas en este entorno |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a WebPushController.assertKnownPushService"]:::llamada
+  n2 --> n3
+  n4{"!isAllowedPushEndpoint(endpoint)"}:::decision
+  n3 --> n4
+  n5(["400 VALIDATION_FAILED La dirección de push no pertenece a un servicio de navegador conocido"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a WebPushService.subscribe"]:::llamada
+  n4 -->|"no"| n6
+  n7{"!this.vapid"}:::decision
+  n6 --> n7
+  n8(["422 PRECONDITION_FAILED Las notificaciones push no están activadas en este entorno"]):::error
+  n7 -->|"sí"| n8
+  n9["Transacción: transactional(…)"]:::transaccion
+  n7 -->|"no"| n9
+  n10[("LEE iam.devices")]:::efecto
+  n9 --> n10
+  n11{"existing"}:::decision
+  n10 --> n11
+  n12[("ACTUALIZA iam.devices · ACTUALIZA iam.devices · ACTUALIZA iam.devices · ACTUALIZA iam.devices · ACTUALIZA iam…")]:::efecto
+  n11 -->|"sí"| n12
+  n13[("CREA iam.devices")]:::efecto
+  n12 --> n13
+  n11 -->|"no"| n13
+  n14(("204 Responde con éxito")):::ok
+  n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 16. POST /queues/{code}/jobs
 
 Encolar un trabajo
 
@@ -1080,7 +1254,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /queues/dead-letter/{deadLetterJobId}/redrive
+#### 17. POST /queues/dead-letter/{deadLetterJobId}/redrive
 
 Reencolar un trabajo desde la cola muerta
 
@@ -1179,7 +1353,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /webhooks/providers/{providerCode}/receipts
+#### 18. POST /webhooks/providers/{providerCode}/receipts
 
 Conciliar el acuse de entrega que envía el proveedor
 
@@ -1208,7 +1382,7 @@ flowchart TD
   n6 --> n7
   n8(["404 NOT_FOUND Proveedor no encontrado"]):::error
   n7 -->|"sí"| n8
-  n9{"!verifySignature(secret, rawBody, dto.signature)"}:::decision
+  n9{"!verifySignature(secret, signedBody, dto.signature)"}:::decision
   n7 -->|"no"| n9
   n10(["401 UNAUTHENTICATED Firma del acuse del proveedor inválida"]):::error
   n9 -->|"sí"| n10
@@ -1256,3 +1430,5 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
 | GET /notifications/me | 200, 401, 403, 429 | 1 |
+| GET /notifications/web-push/config | 200, 401, 403, 429 | 0 |
+| DELETE /notifications/web-push/subscription | 204, 400, 401, 403, 429 | 2 |

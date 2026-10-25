@@ -643,6 +643,19 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       display: 'Immunization completed',
     },
 
+    // --- servicios recibidos (vs_received_service_type) ---------------------------
+    // Mismas claves y displays que `gen_seeds.py` (modelo, v4.2.49): ambos lados
+    // siembran por id, y el id sale de `clinical:<NOMBRE>`. Un tipo nuevo se agrega
+    // acá y en el value set del modelo, al final.
+    RECEIVED_SERVICE_INTERVENTION: {
+      code: 'RECEIVED_SERVICE_INTERVENTION',
+      display: 'Received service: medical intervention',
+    },
+    RECEIVED_SERVICE_VACCINATION: {
+      code: 'RECEIVED_SERVICE_VACCINATION',
+      display: 'Received service: vaccination',
+    },
+
     // --- appointments (referenciado por check-in) ------------------------------
     /**
      * Turno pedido por el paciente y todavía sin aceptar (FHIR `pending`).

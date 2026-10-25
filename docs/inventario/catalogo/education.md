@@ -20,8 +20,8 @@
 | [course_modules](#course_modules) | Agrupa unidades temáticas de cursos para organizar una ruta educativa. | 11 | 5 | 4 | COINCIDE |
 | [course_reviews](#course_reviews) | Almacena evaluaciones y comentarios de participantes sobre cursos para mejorar la oferta educativa. | 11 | 5 | 2 | COINCIDE |
 | [course_versions](#course_versions) | Preserva versiones de cursos para mantener el contexto de contenidos y evaluaciones ofrecidos. | 11 | 5 | 3 | COINCIDE |
-| [courses](#courses) | Representa cursos de formación para profesionales y personal del ecosistema sanitario. | 23 | 14 | 11 | COINCIDE |
-| [enrollments](#enrollments) | Registra inscripciones de usuarios a cursos para administrar participación y avance. | 17 | 8 | 8 | COINCIDE |
+| [courses](#courses) | Representa cursos de formación para profesionales y personal del ecosistema sanitario. | 23 | 14 | 16 | COINCIDE |
+| [enrollments](#enrollments) | Registra inscripciones de usuarios a cursos para administrar participación y avance. | 17 | 8 | 9 | COINCIDE |
 | [instructors](#instructors) | Cataloga instructores responsables de impartir o revisar formación sanitaria. | 14 | 9 | 2 | COINCIDE |
 | [lesson_progress](#lesson_progress) | Conserva el avance de participantes por lección para seguir cumplimiento de contenidos. | 10 | 5 | 3 | COINCIDE |
 | [lessons](#lessons) | Define lecciones que componen módulos formativos para impartir contenidos estructurados. | 16 | 7 | 3 | COINCIDE |
@@ -949,7 +949,7 @@ Representa cursos de formación para profesionales y personal del ecosistema san
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_47_education.puml: courses`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_47_education.puml` · **DDL:** `SQL/47_education/02_tables.sql`
 - **Entidad del ORM:** `Courses` — `src/modules/education/entities/courses.entity.ts`
-- **Resumen:** 23 columnas · 14 índices · 11 FK salientes · 9 entrantes · 11 operaciones
+- **Resumen:** 23 columnas · 14 índices · 11 FK salientes · 9 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -1033,7 +1033,10 @@ Representa cursos de formación para profesionales y personal del ecosistema san
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /education/assessments/{id}/attempts | LEE | DIRECTA |
+| POST /education/attempts/{id}/submit | LEE | DIRECTA |
 | POST /education/certificates/{id}/cme-credits | LEE | DIRECTA |
+| POST /education/certificates/{id}/revoke | LEE | DIRECTA |
 | POST /education/courses/{id}/assessments | LEE | DIRECTA |
 | POST /education/courses/{id}/cohorts | LEE | DIRECTA |
 | POST /education/courses/{id}/instructors | LEE | DIRECTA |
@@ -1044,6 +1047,8 @@ Representa cursos de formación para profesionales y personal del ecosistema san
 | POST /education/courses/publish | LEE | DIRECTA |
 | POST /education/enrollments | LEE | DIRECTA |
 | POST /education/enrollments/{id}/certificate | LEE | DIRECTA |
+| POST /education/enrollments/{id}/complete | LEE | DIRECTA |
+| POST /education/enrollments/{id}/lesson-progress | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1068,7 +1073,7 @@ Registra inscripciones de usuarios a cursos para administrar participación y av
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_47_education.puml: enrollments`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_47_education.puml` · **DDL:** `SQL/47_education/02_tables.sql`
 - **Entidad del ORM:** `Enrollments` — `src/modules/education/entities/enrollments.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 4 entrantes · 8 operaciones
+- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 4 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -1127,6 +1132,7 @@ Registra inscripciones de usuarios a cursos para administrar participación y av
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /education/assessments/{id}/attempts | LEE | DIRECTA |
+| POST /education/attempts/{id}/submit | LEE | DIRECTA |
 | POST /education/enrollments | CREA | DIRECTA |
 | POST /education/enrollments | LEE | DIRECTA |
 | POST /education/enrollments/{id}/certificate | LEE | DIRECTA |
@@ -1196,7 +1202,7 @@ Cataloga instructores responsables de impartir o revisar formación sanitaria.
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_instructors_tenant_id` | no | tenant_id | Soporta la clave foránea fk_instructors_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_instructors_tenant_id` | no | tenant_id | Soporta la clave foránea fk_instructors_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_instructors_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_instructors_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_instructors_user_id` | no | user_id | Soporta la clave foránea fk_instructors_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_instructors_photo_file_id` | no | photo_file_id | Soporta la clave foránea fk_instructors_photo_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
