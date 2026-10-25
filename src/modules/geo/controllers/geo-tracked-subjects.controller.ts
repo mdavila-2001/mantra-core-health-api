@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { GeoTrackedSubjectsService } from '../services';
 import {
   CreateTrackedSubjectDto,
@@ -36,6 +41,11 @@ export class GeoTrackedSubjectsController {
   constructor(private readonly service: GeoTrackedSubjectsService) {}
 
   /** UC-13-01. */
+  @Audited({
+    action: 'TRACKED_SUBJECT_ENROLLED',
+    entity: 'tracked_subject',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -50,6 +60,11 @@ export class GeoTrackedSubjectsController {
   }
 
   /** UC-13-03. */
+  @Audited({
+    action: 'LOCATION_PINGS_INGESTED',
+    entity: 'tracked_subject',
+    entityId: 'param:id',
+  })
   @Post(':id/pings')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -75,6 +90,11 @@ export class GeoTrackedSubjectsController {
   }
 
   /** UC-13-10. */
+  @Audited({
+    action: 'TRACKED_SUBJECT_CONSENT_REVOKED',
+    entity: 'tracked_subject',
+    entityId: 'param:id',
+  })
   @Post(':id/revoke-consent')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

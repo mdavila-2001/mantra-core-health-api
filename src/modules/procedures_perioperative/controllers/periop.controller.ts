@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   requireTenantId,
@@ -135,6 +136,11 @@ export class PeriopController {
   }
 
   /** UC-53-01. */
+  @Audited({
+    action: 'PERIOP_CASE_SCHEDULED',
+    entity: 'procedure_case',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases')
   @Roles('SURGERY_SCHEDULER', 'SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -151,6 +157,11 @@ export class PeriopController {
   }
 
   /** C-13 (CAN-INT-001). */
+  @Audited({
+    action: 'PERIOP_CASE_UPDATED',
+    entity: 'procedure_case',
+    entityId: 'param:id',
+  })
   @Patch('procedure-cases/:id')
   @Roles('SURGERY_SCHEDULER', 'SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -168,6 +179,11 @@ export class PeriopController {
   }
 
   /** C-14 (CAN-INT-002). */
+  @Audited({
+    action: 'PERIOP_CASE_CONFIRMED',
+    entity: 'procedure_case',
+    entityId: 'param:id',
+  })
   @Post('procedure-cases/:id/confirm')
   @Roles('SURGERY_SCHEDULER', 'SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -185,6 +201,11 @@ export class PeriopController {
   }
 
   /** UC-53-02. */
+  @Audited({
+    action: 'PERIOP_CASE_DIAGNOSES_ADDED',
+    entity: 'procedure_case_diagnosis',
+    entityId: 'param:id',
+  })
   @Post('procedure-cases/:id/diagnoses')
   @Roles('SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -201,6 +222,11 @@ export class PeriopController {
   }
 
   /** UC-53-02. */
+  @Audited({
+    action: 'PERIOP_TEAM_MEMBER_ASSIGNED',
+    entity: 'procedure_case_team_member',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/team-members')
   @Roles('SURGERY_SCHEDULER', 'SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -214,6 +240,11 @@ export class PeriopController {
   }
 
   /** UC-53-03. */
+  @Audited({
+    action: 'PREOPERATIVE_ASSESSMENT_CREATED',
+    entity: 'preoperative_assessment',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/preoperative-assessments')
   @Roles('ANESTHESIOLOGIST', 'SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -238,6 +269,11 @@ export class PeriopController {
    * sólo pasa a `READY_FOR_SURGERY` cuando se verifican las que tiene, el
    * circuito preoperatorio no podía cerrarse.
    */
+  @Audited({
+    action: 'PREOPERATIVE_ORDER_CREATED',
+    entity: 'preoperative_order',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/preoperative-orders')
   @Roles('ANESTHESIOLOGIST', 'SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -286,6 +322,11 @@ export class PeriopController {
    * `TEAM_ACCEPTED` y nada escribía ese estado —todos nacen `TEAM_ASSIGNED`—,
    * así que **ningún caso quirúrgico podía confirmarse jamás**.
    */
+  @Audited({
+    action: 'PERIOP_TEAM_PARTICIPATION_ACCEPTED',
+    entity: 'procedure_case_team_member',
+    entityId: 'param:memberId',
+  })
   @Post('procedure-cases/:id/team-members/:memberId/accept')
   @Roles(
     'SURGEON',
@@ -316,6 +357,11 @@ export class PeriopController {
    * esto, negarse era callarse, y quedaba indistinguible de no haber
    * respondido todavía.
    */
+  @Audited({
+    action: 'PERIOP_TEAM_PARTICIPATION_ANSWERED',
+    entity: 'procedure_case_team_member',
+    entityId: 'param:memberId',
+  })
   @Post('procedure-cases/:id/team-members/:memberId/respond')
   @Roles(
     'SURGEON',
@@ -340,6 +386,11 @@ export class PeriopController {
   }
 
   /** UC-53-04. */
+  @Audited({
+    action: 'PREOPERATIVE_ORDERS_VERIFIED',
+    entity: 'preoperative_order',
+    entityId: 'param:id',
+  })
   @Post('procedure-cases/:id/preoperative-orders/verify')
   @Roles('ANESTHESIOLOGIST', 'PERIOP_NURSE', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -356,6 +407,11 @@ export class PeriopController {
   }
 
   /** UC-53-05. */
+  @Audited({
+    action: 'SURGICAL_SAFETY_CHECKLIST_PHASE_SUBMITTED',
+    entity: 'procedure_case',
+    entityId: 'param:id',
+  })
   @Post('procedure-cases/:id/safety-checklists/:checklistId/responses')
   @Roles('PERIOP_NURSE', 'SURGEON', 'ANESTHESIOLOGIST', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -374,6 +430,11 @@ export class PeriopController {
   }
 
   /** UC-53-06. */
+  @Audited({
+    action: 'ANESTHESIA_PLAN_CREATED',
+    entity: 'anesthesia_plan',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/anesthesia-plans')
   @Roles('ANESTHESIOLOGIST', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -391,6 +452,11 @@ export class PeriopController {
   }
 
   /** UC-53-06. */
+  @Audited({
+    action: 'ANESTHESIA_PLAN_APPROVED',
+    entity: 'anesthesia_plan',
+    entityId: 'param:planId',
+  })
   @Post('procedure-cases/:id/anesthesia-plans/:planId/approve')
   @Roles('ANESTHESIOLOGIST', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -404,6 +470,11 @@ export class PeriopController {
   }
 
   /** UC-53-07. */
+  @Audited({
+    action: 'ANESTHESIA_EVENT_RECORDED',
+    entity: 'anesthesia_event',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/anesthesia-events')
   @Roles('ANESTHESIOLOGIST', 'PERIOP_NURSE', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -421,6 +492,11 @@ export class PeriopController {
   }
 
   /** UC-53-08. */
+  @Audited({
+    action: 'OPERATIVE_STEP_CREATED',
+    entity: 'operative_step',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/operative-steps')
   @Roles('SURGEON', 'PERIOP_NURSE', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -434,6 +510,11 @@ export class PeriopController {
   }
 
   /** UC-53-08. */
+  @Audited({
+    action: 'OPERATIVE_FINDING_RECORDED',
+    entity: 'operative_finding',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/findings')
   @Roles('SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -451,6 +532,11 @@ export class PeriopController {
   }
 
   /** UC-53-09. */
+  @Audited({
+    action: 'PROCEDURE_IMPLANT_RECORDED',
+    entity: 'procedure_implant',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/implants')
   @Roles('SURGEON', 'PERIOP_NURSE', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -467,6 +553,11 @@ export class PeriopController {
   }
 
   /** UC-53-10. */
+  @Audited({
+    action: 'PROCEDURE_MEDICATION_USE_RECORDED',
+    entity: 'procedure_medication_use',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/medication-uses')
   @Roles('ANESTHESIOLOGIST', 'PERIOP_NURSE', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -482,6 +573,11 @@ export class PeriopController {
   }
 
   /** UC-53-10. */
+  @Audited({
+    action: 'PROCEDURE_SPECIMEN_RECORDED',
+    entity: 'procedure_specimen',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/specimens')
   @Roles('SURGEON', 'PERIOP_NURSE', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -495,6 +591,11 @@ export class PeriopController {
   }
 
   /** UC-53-11. */
+  @Audited({
+    action: 'OPERATIVE_REPORT_DRAFTED',
+    entity: 'operative_report',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/operative-reports')
   @Roles('SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -511,6 +612,11 @@ export class PeriopController {
   }
 
   /** UC-53-11. */
+  @Audited({
+    action: 'OPERATIVE_REPORT_SIGNED',
+    entity: 'operative_report',
+    entityId: 'param:reportId',
+  })
   @Post('procedure-cases/:id/operative-reports/:reportId/sign')
   @Roles('SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -528,6 +634,11 @@ export class PeriopController {
   }
 
   /** UC-53-12. */
+  @Audited({
+    action: 'PACU_ADMITTED',
+    entity: 'pacu_stay',
+    entityId: 'result.id',
+  })
   @Post('procedure-cases/:id/pacu-stays')
   @Roles('PERIOP_NURSE', 'ANESTHESIOLOGIST', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -541,6 +652,11 @@ export class PeriopController {
   }
 
   /** UC-53-12. */
+  @Audited({
+    action: 'PACU_ASSESSMENT_RECORDED',
+    entity: 'pacu_assessment',
+    entityId: 'result.id',
+  })
   @Post('pacu-stays/:stayId/assessments')
   @Roles('PERIOP_NURSE', 'ANESTHESIOLOGIST', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -557,6 +673,11 @@ export class PeriopController {
   }
 
   /** UC-53-12. */
+  @Audited({
+    action: 'PACU_DISCHARGED',
+    entity: 'pacu_stay',
+    entityId: 'param:stayId',
+  })
   @Post('pacu-stays/:stayId/discharge')
   @Roles('ANESTHESIOLOGIST', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -573,6 +694,11 @@ export class PeriopController {
   }
 
   /** UC-53-13. */
+  @Audited({
+    action: 'PERIOP_CASE_CANCELLED',
+    entity: 'procedure_case',
+    entityId: 'param:id',
+  })
   @Post('procedure-cases/:id/cancel')
   @Roles('SURGERY_SCHEDULER', 'SURGEON', 'PERIOP_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -589,6 +715,11 @@ export class PeriopController {
   }
 
   /** UC-53-14. */
+  @Audited({
+    action: 'PERIOP_CHARGES_POSTED',
+    entity: 'procedure_charge_item',
+    entityId: 'param:id',
+  })
   @Post('procedure-cases/:id/charge-items/post')
   @Roles('PERIOP_ADMIN', 'BILLING')
   @HttpCode(HttpStatus.CREATED)

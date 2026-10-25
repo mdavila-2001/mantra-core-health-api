@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -63,6 +64,11 @@ export class CrossStoreWorkerController {
   ) {}
 
   /** UC-62-02 + UC-62-03. */
+  @Audited({
+    action: 'PROJECTION_DELIVERY_PROCESSED',
+    entity: 'projection_delivery_attempt',
+    entityId: 'result.id',
+  })
   @Post('projections/deliveries/process')
   @Roles('SYSTEM', 'PROJECTION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -79,6 +85,11 @@ export class CrossStoreWorkerController {
   }
 
   /** UC-62-04 (envío). */
+  @Audited({
+    action: 'PROJECTION_DEAD_LETTERED',
+    entity: 'projection_dead_letter',
+    entityId: 'result.id',
+  })
   @Post('projections/dead-letters')
   @Roles('SYSTEM', 'PROJECTION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -95,6 +106,11 @@ export class CrossStoreWorkerController {
   }
 
   /** UC-62-09. */
+  @Audited({
+    action: 'DATA_DELETION_REQUEST_EXPANDED',
+    entity: 'deletion_request',
+    entityId: 'param:id',
+  })
   @Post('deletion-requests/:id/expand')
   @Roles('SYSTEM', 'DELETION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -131,6 +147,11 @@ export class CrossStoreWorkerController {
   }
 
   /** UC-62-10. */
+  @Audited({
+    action: 'DATA_DELETION_EXECUTED',
+    entity: 'deletion_execution',
+    entityId: 'result.id',
+  })
   @Post('deletion-targets/:id/executions')
   @Roles('SYSTEM', 'DELETION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -163,6 +184,11 @@ export class CrossStoreWorkerController {
   }
 
   /** UC-62-11 (verificación). */
+  @Audited({
+    action: 'DATA_DELETION_VERIFIED',
+    entity: 'deletion_verification',
+    entityId: 'result.id',
+  })
   @Post('deletion-targets/:id/verifications')
   @Roles('SYSTEM', 'DELETION_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -180,6 +206,11 @@ export class CrossStoreWorkerController {
   }
 
   /** UC-62-12. */
+  @Audited({
+    action: 'CACHE_INVALIDATION_JOB_CREATED',
+    entity: 'cache_invalidation_job',
+    entityId: 'result.id',
+  })
   @Post('cache/invalidations')
   @Roles('SYSTEM', 'MAINTENANCE_WORKER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
