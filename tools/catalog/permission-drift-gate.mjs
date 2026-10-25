@@ -6,6 +6,8 @@
 // Es un trinquete, no una exigencia de deriva cero: la que hoy existe está en
 // `permission-drift-allowlist.json` y no bloquea; lo que se agregue sin figurar ahí, sí. En el otro
 // sentido, una excepción que ya no hace falta también falla, para que la lista sólo pueda encogerse.
+// La lista distingue las rutas **revisadas** (`reviewed`: un grupo con el motivo por el que no
+// necesitan `@Roles` y la evidencia de dónde se autorizan) de las **sin revisar** (`routes`).
 //
 //   node tools/catalog/permission-drift-gate.mjs            comprueba (exit 1 si hay deriva nueva u obsoleta)
 //   node tools/catalog/permission-drift-gate.mjs --write    reescribe la lista con la deriva actual
@@ -13,7 +15,7 @@
 // Requiere `yarn build` previo y la misma base que `generate-openapi.mjs` (MikroORM valida la
 // conexión al arrancar el módulo raíz). No consulta `authz.roles`: lo sembrado sale del código.
 import 'reflect-metadata';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NestFactory } from '@nestjs/core';
@@ -40,8 +42,13 @@ async function main() {
   const { PLATFORM_ROLE_CODES } = await dist(
     'modules/data_catalog/services/permission-drift.service.js',
   );
-  const { blockingDrift, computePermissionDrift, routeKey, staleAllowlist } =
-    await dist('modules/data_catalog/permission-drift/permission-drift.js');
+  const {
+    blockingDrift,
+    computePermissionDrift,
+    invalidAllowlist,
+    routeKey,
+    staleAllowlist,
+  } = await dist('modules/data_catalog/permission-drift/permission-drift.js');
 
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['error'],
@@ -64,25 +71,41 @@ async function main() {
   });
   await app.close();
 
+  const actual = new Set(informe.routesWithoutRoles.map(routeKey));
   if (escribir) {
+    // Los grupos revisados conservan su motivo y su evidencia: `--write` sólo les quita las rutas
+    // que dejaron de derivar. Lo que deriva y no está revisado queda en `routes`.
+    const previa = existsSync(ALLOWLIST)
+      ? JSON.parse(readFileSync(ALLOWLIST, 'utf8'))
+      : {};
+    const reviewed = (previa.reviewed ?? [])
+      .map((grupo) => ({
+        ...grupo,
+        routes: grupo.routes.filter((ruta) => actual.has(ruta)),
+      }))
+      .filter((grupo) => grupo.routes.length > 0);
+    const revisadas = new Set(reviewed.flatMap((grupo) => grupo.routes));
     const lista = {
       roles: informe.usedNotSeeded.map((u) => u.role).sort(),
-      routes: informe.routesWithoutRoles.map(routeKey).sort(),
+      routes: [...actual].filter((ruta) => !revisadas.has(ruta)).sort(),
+      reviewed,
     };
     writeFileSync(ALLOWLIST, `${JSON.stringify(lista, null, 2)}\n`);
     console.log(
-      `Lista reescrita: ${lista.roles.length} rol(es) sin sembrar, ${lista.routes.length} ruta(s) sin @Roles.`,
+      `Lista reescrita: ${lista.roles.length} rol(es) sin sembrar, ${revisadas.size} ruta(s) revisadas, ${lista.routes.length} ruta(s) sin revisar.`,
     );
     return 0;
   }
 
   const permitido = JSON.parse(readFileSync(ALLOWLIST, 'utf8'));
   const problemas = [
+    ...invalidAllowlist(permitido),
     ...blockingDrift(informe, permitido),
     ...staleAllowlist(informe, permitido),
   ];
+  const revisadas = (permitido.reviewed ?? []).flatMap((g) => g.routes).length;
   console.log(
-    `Rutas: ${informe.routes.total} (${informe.routes.public} públicas, ${informe.routes.withRoles} con @Roles, ${informe.routes.withoutRoles} sin @Roles).`,
+    `Rutas: ${informe.routes.total} (${informe.routes.public} públicas, ${informe.routes.withRoles} con @Roles, ${informe.routes.withoutRoles} sin @Roles: ${revisadas} revisadas con motivo, ${(permitido.routes ?? []).length} sin revisar).`,
   );
   if (problemas.length === 0) {
     console.log('✓ permission-drift-gate: sin deriva de permisos nueva.');
