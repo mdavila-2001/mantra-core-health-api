@@ -13,21 +13,21 @@ Contratos de entrada y salida. La validación vive en `class-validator`; la docu
 
 ## Por caso de uso
 
-| UC | Entrada | Salida |
-| --- | --- | --- |
-| 01 | `PublishDomainEventInput` (interfaz del servicio, no DTO HTTP) | `PublishDomainEventResult` |
-| 02 | `RunOutboxRelayDto` | `OutboxRelayResponseDto` (+ `RelayedMessageDto`) |
-| 03 | `DispatchEventDto` | `DispatchEventResponseDto` (+ `DispatchedSubscriberDto`) |
-| 04 | `AckEventDeliveryDto` | `EventDeliveryResponseDto` |
-| 05 | `EnqueueJobDto` | `JobResponseDto` |
-| 06 | `ClaimJobsDto` | `ClaimJobsResponseDto` (+ `ClaimedJobDto`) |
-| 07 | `CompleteJobDto` | `JobResponseDto` |
-| 08 | `FailJobDto` | `FailJobResponseDto` |
-| 09 | `RedriveDeadLetterDto` | `RedriveResponseDto` |
-| 10 | `CreateNotificationRequestDto` | `NotificationRequestResponseDto` |
-| 11 | `DeliverNotificationDto` | `DeliverNotificationResponseDto` |
-| 12 | `ProviderReceiptDto` | `ProviderReceiptResponseDto` |
-| 13 | — (sin cuerpo) | `InAppReadResponseDto` |
+| UC  | Entrada                                                        | Salida                                                   |
+| --- | -------------------------------------------------------------- | -------------------------------------------------------- |
+| 01  | `PublishDomainEventInput` (interfaz del servicio, no DTO HTTP) | `PublishDomainEventResult`                               |
+| 02  | `RunOutboxRelayDto`                                            | `OutboxRelayResponseDto` (+ `RelayedMessageDto`)         |
+| 03  | `DispatchEventDto`                                             | `DispatchEventResponseDto` (+ `DispatchedSubscriberDto`) |
+| 04  | `AckEventDeliveryDto`                                          | `EventDeliveryResponseDto`                               |
+| 05  | `EnqueueJobDto`                                                | `JobResponseDto`                                         |
+| 06  | `ClaimJobsDto`                                                 | `ClaimJobsResponseDto` (+ `ClaimedJobDto`)               |
+| 07  | `CompleteJobDto`                                               | `JobResponseDto`                                         |
+| 08  | `FailJobDto`                                                   | `FailJobResponseDto`                                     |
+| 09  | `RedriveDeadLetterDto`                                         | `RedriveResponseDto`                                     |
+| 10  | `CreateNotificationRequestDto`                                 | `NotificationRequestResponseDto`                         |
+| 11  | `DeliverNotificationDto`                                       | `DeliverNotificationResponseDto`                         |
+| 12  | `ProviderReceiptDto`                                           | `ProviderReceiptResponseDto`                             |
+| 13  | — (sin cuerpo)                                                 | `InAppReadResponseDto`                                   |
 
 ## Decisiones que no son obvias
 

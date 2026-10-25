@@ -11287,6 +11287,150 @@
         "security": []
       }
     },
+    "/notifications/web-push/config": {
+      "get": {
+        "operationId": "WebPushController_config",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Clave pública VAPID, o enabled=false si no hay push",
+        "tags": [
+          "messaging"
+        ],
+        "description": "Clave pública VAPID, o enabled=false si no hay push. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/notifications/web-push/subscription": {
+      "put": {
+        "operationId": "WebPushController_subscribe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebPushSubscriptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Guarda la suscripción push de este navegador",
+        "tags": [
+          "messaging"
+        ],
+        "description": "Guarda la suscripción push de este navegador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "delete": {
+        "operationId": "WebPushController_unsubscribe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebPushUnsubscribeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Quita la suscripción push de este navegador",
+        "tags": [
+          "messaging"
+        ],
+        "description": "Quita la suscripción push de este navegador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/internal/storage-lifecycle/audio/{assetId}/begin": {
       "post": {
         "operationId": "InternalStorageLifecycleController_begin",
@@ -99384,6 +99528,24 @@
         },
         "additionalProperties": false
       },
+      "DiagnosticUnitBranchDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 200,
+            "example": "Sucursal Equipetrol"
+          },
+          "address": {
+            "$ref": "#/components/schemas/OwnSiteAddressDto"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
       "DiagnosticUnitProfileDto": {
         "type": "object",
         "properties": {
@@ -99418,6 +99580,13 @@
           },
           "primarySite": {
             "$ref": "#/components/schemas/DiagnosticUnitPrimarySiteDto"
+          },
+          "branches": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiagnosticUnitBranchDto"
+            }
           }
         },
         "additionalProperties": false
@@ -104498,6 +104667,53 @@
         "required": [
           "providerMessageRef",
           "receiptType"
+        ],
+        "additionalProperties": false
+      },
+      "WebPushKeysDto": {
+        "type": "object",
+        "properties": {
+          "p256dh": {
+            "type": "string",
+            "description": "Clave pública ECDH (base64url)"
+          },
+          "auth": {
+            "type": "string",
+            "description": "Secreto de autenticación (base64url)"
+          }
+        },
+        "required": [
+          "p256dh",
+          "auth"
+        ],
+        "additionalProperties": false
+      },
+      "WebPushSubscriptionDto": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "description": "Dirección HTTPS del servicio de push del navegador"
+          },
+          "keys": {
+            "$ref": "#/components/schemas/WebPushKeysDto"
+          }
+        },
+        "required": [
+          "endpoint",
+          "keys"
+        ],
+        "additionalProperties": false
+      },
+      "WebPushUnsubscribeDto": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "endpoint"
         ],
         "additionalProperties": false
       },

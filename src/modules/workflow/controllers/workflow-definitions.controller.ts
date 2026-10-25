@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { StateMachineDefinitionService } from '../services';
 import {
   RegisterStateMachineDto,
@@ -39,6 +44,11 @@ export class WorkflowDefinitionsController {
   ) {}
 
   /** UC-32-01. */
+  @Audited({
+    action: 'STATE_MACHINE_REGISTERED',
+    entity: 'state_machine_definition',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('WORKFLOW_ARCHITECT', 'GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -55,6 +65,11 @@ export class WorkflowDefinitionsController {
   }
 
   /** UC-32-02. */
+  @Audited({
+    action: 'STATE_MACHINE_STATES_DEFINED',
+    entity: 'state_machine_definition',
+    entityId: 'param:id',
+  })
   @Post(':id/states')
   @Roles('WORKFLOW_ARCHITECT', 'GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -72,6 +87,11 @@ export class WorkflowDefinitionsController {
   }
 
   /** UC-32-03. */
+  @Audited({
+    action: 'STATE_MACHINE_TRANSITION_DEFINED',
+    entity: 'state_transition_definition',
+    entityId: 'result.id',
+  })
   @Post(':id/transitions')
   @Roles('WORKFLOW_ARCHITECT', 'GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -88,6 +108,11 @@ export class WorkflowDefinitionsController {
   }
 
   /** UC-32-04. */
+  @Audited({
+    action: 'STATE_MACHINE_PUBLISHED',
+    entity: 'state_machine_definition',
+    entityId: 'param:id',
+  })
   @Post(':id/publish')
   @Roles('WORKFLOW_ARCHITECT', 'GOVERNANCE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

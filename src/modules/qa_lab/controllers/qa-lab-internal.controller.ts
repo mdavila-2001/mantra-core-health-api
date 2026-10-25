@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { QaCatalogService } from '../services';
 import { RunDueSchedulesDto, RunDueSchedulesResponseDto } from '../dto';
 
@@ -28,6 +33,10 @@ export class QaLabInternalController {
    * que el README documenta como pendiente ("`test_schedules` guarda cron y
    * `next_run_at`; el tick que las dispara...").
    */
+  @Audited({
+    action: 'QA_DUE_SCHEDULES_RUN',
+    entity: 'test_schedule',
+  })
   @Post('schedules/run-due')
   @Roles('SYSTEM', 'QA_ADMIN')
   @HttpCode(HttpStatus.OK)

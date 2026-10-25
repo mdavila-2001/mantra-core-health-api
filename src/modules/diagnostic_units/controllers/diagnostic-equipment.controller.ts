@@ -8,7 +8,12 @@ import {
   Patch,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { DiagnosticEquipmentService } from '../services';
 import { EquipmentResponseDto, UpdateEquipmentDto } from '../dto';
 
@@ -25,6 +30,11 @@ export class DiagnosticEquipmentController {
   constructor(private readonly equipmentService: DiagnosticEquipmentService) {}
 
   /** UC-23-09. */
+  @Audited({
+    action: 'DIAGNOSTIC_EQUIPMENT_UPDATED',
+    entity: 'diagnostic_equipment',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

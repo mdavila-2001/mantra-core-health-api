@@ -120,6 +120,11 @@ export class TenantsController {
    * Sólo owner o admin **de esa** organización (o la plataforma): un `staff`
    * la ve y no la edita.
    */
+  @Audited({
+    action: 'TENANT_UPDATED',
+    entity: 'tenant',
+    entityId: 'param:tenantId',
+  })
   @Patch(':tenantId')
   @ApiOperation({ summary: 'Editar los datos de la propia organización' })
   updateTenant(
@@ -208,6 +213,11 @@ export class TenantsController {
   }
 
   /** UC-04-03. */
+  @Audited({
+    action: 'CHILD_TENANT_CREATED',
+    entity: 'tenant',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/child-tenants')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -221,6 +231,11 @@ export class TenantsController {
   }
 
   /** UC-04-04. */
+  @Audited({
+    action: 'BRANCH_CREATED',
+    entity: 'branch',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/branches')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -252,6 +267,11 @@ export class TenantsController {
   }
 
   /** UC-04-05. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_INVITED',
+    entity: 'tenant_membership',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/memberships')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Incorporar un usuario al tenant (membership)' })
@@ -264,6 +284,11 @@ export class TenantsController {
   }
 
   /** UC-04-06. */
+  @Audited({
+    action: 'BRANCH_MEMBERSHIP_ASSIGNED',
+    entity: 'branch_membership',
+    entityId: 'result.id',
+  })
   @Post(':tenantId/memberships/:membershipId/branch-assignments')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Asignar la membresía a una branch' })
@@ -282,6 +307,11 @@ export class TenantsController {
   }
 
   /** UC-04-07. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_TRANSFERRED',
+    entity: 'tenant_membership',
+    entityId: 'param:membershipId',
+  })
   @Post(':tenantId/memberships/:membershipId/transfer')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Transferir la membresía entre branches' })
@@ -295,6 +325,11 @@ export class TenantsController {
   }
 
   /** UC-04-08. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_ROLE_CHANGED',
+    entity: 'tenant_membership',
+    entityId: 'param:membershipId',
+  })
   @Patch(':tenantId/memberships/:membershipId/role')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cambiar rol / scope de la membresía' })
@@ -313,6 +348,11 @@ export class TenantsController {
   }
 
   /** UC-04-09. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_OFFBOARDED',
+    entity: 'tenant_membership',
+    entityId: 'param:membershipId',
+  })
   @Post(':tenantId/memberships/:membershipId/offboard')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Revocar / offboarding de un miembro' })

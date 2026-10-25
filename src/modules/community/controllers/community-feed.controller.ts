@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   NotAudited,
   ParseOptionalLimitPipe,
@@ -54,6 +55,10 @@ export class CommunityFeedController {
   constructor(private readonly service: CommunityFeedService) {}
 
   /** UC-19-15. */
+  @Audited({
+    action: 'COMMUNITY_FEED_REBUILT',
+    entity: 'feed_item',
+  })
   @Post('rebuild')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

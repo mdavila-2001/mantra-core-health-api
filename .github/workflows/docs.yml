@@ -477,8 +477,10 @@ jobs:
             docs/data \
             docs/postman
 
-      - name: Cobertura documental — sin marcadores pendientes, sin páginas vacías, sin módulos sin documentar
-        run: yarn docs:coverage
+      - name: Cobertura documental — sin marcadores pendientes, sin páginas vacías, sin módulos sin documentar, sin planes ni pendientes
+        run: |
+          yarn docs:coverage:test
+          yarn docs:coverage
 
       - name: Enlaces internos — sin enlaces rotos, sin páginas huérfanas
         run: yarn docs:links

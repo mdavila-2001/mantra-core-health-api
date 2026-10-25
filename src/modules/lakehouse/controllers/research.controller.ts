@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -57,6 +58,11 @@ export class ResearchController {
    * Va antes que la cohorte porque ésta lo exige; sin esta operación el flujo
    * de investigación no tenía por dónde empezar.
    */
+  @Audited({
+    action: 'DEIDENTIFICATION_PROFILE_CREATED',
+    entity: 'research_project',
+    entityId: 'result.id',
+  })
   @Post('deidentification-profiles')
   @Roles(
     'RESEARCH_GOVERNANCE',
@@ -75,6 +81,11 @@ export class ResearchController {
     return this.releaseService.createDeidentificationProfile(dto, actor);
   }
 
+  @Audited({
+    action: 'RESEARCH_COHORT_DEFINED',
+    entity: 'cohort_definition',
+    entityId: 'result.id',
+  })
   @Post('projects/:id/cohorts')
   @Roles('PRINCIPAL_INVESTIGATOR', 'RESEARCH_GOVERNANCE', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -92,6 +103,11 @@ export class ResearchController {
   }
 
   /** UC-63-10. */
+  @Audited({
+    action: 'DATASET_RELEASE_REQUESTED',
+    entity: 'dataset_release_request',
+    entityId: 'result.id',
+  })
   @Post('dataset-releases')
   @Roles('PRINCIPAL_INVESTIGATOR', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -108,6 +124,11 @@ export class ResearchController {
   }
 
   /** UC-63-11. */
+  @Audited({
+    action: 'DATASET_RELEASE_APPROVED',
+    entity: 'dataset_release_request',
+    entityId: 'param:id',
+  })
   @Post('dataset-releases/:id/approve')
   @Roles('RESEARCH_GOVERNANCE', 'DPO', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -141,6 +162,11 @@ export class ResearchController {
   }
 
   /** UC-63-12. */
+  @Audited({
+    action: 'DATASET_RELEASE_REVOKED',
+    entity: 'dataset_release_request',
+    entityId: 'param:id',
+  })
   @Post('dataset-releases/:id/revoke')
   @Roles('RESEARCH_GOVERNANCE', 'DPO', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

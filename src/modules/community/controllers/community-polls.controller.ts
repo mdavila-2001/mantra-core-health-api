@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { CommunityPollsService, CommunityPollsReadService } from '../services';
 import {
   CreatePollDto,
@@ -37,6 +37,11 @@ export class CommunityPollsController {
   ) {}
 
   /** Bootstrap: crea una encuesta con sus opciones sobre un post. */
+  @Audited({
+    action: 'POLL_CREATED',
+    entity: 'poll',
+    entityId: 'result.id',
+  })
   @Post('posts/:postId/polls')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una encuesta con opciones sobre un post' })
@@ -49,6 +54,11 @@ export class CommunityPollsController {
   }
 
   /** UC-19-12. */
+  @Audited({
+    action: 'POLL_VOTED',
+    entity: 'poll_vote',
+    entityId: 'result.id',
+  })
   @Post('polls/:pollId/votes')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Votar en una encuesta' })

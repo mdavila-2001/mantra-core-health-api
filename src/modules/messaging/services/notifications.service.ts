@@ -21,6 +21,17 @@ import { MessagingErrorReason } from '../messaging.error-reasons';
 import { providerReceiptSignedString } from '../provider-receipt-signature';
 import { NotificationsGateway } from '../gateways';
 import {
+  safeRoute,
+  WebPushService,
+  type WebPushMessage,
+} from './web-push.service';
+
+/** La ruta a abrir, si el aviso la trae en su payload (`payload.route`). */
+function routeFromPayload(payload: unknown): string | undefined {
+  const route = (payload as { route?: unknown } | null | undefined)?.route;
+  return typeof route === 'string' ? safeRoute(route) : undefined;
+}
+import {
   CreateNotificationRequestDto,
   NotificationRequestResponseDto,
   PendingNotificationsResponseDto,
@@ -99,6 +110,9 @@ export class NotificationsService implements InAppNotificationEmitter {
     // la escritura. En producción, Nest siempre lo resuelve (está en
     // `MessagingModule.providers`).
     private readonly gateway?: NotificationsGateway,
+    // Opcional por la misma razón que el socket: un push caído no puede tumbar
+    // la entrega, y los specs que no lo necesitan no tienen que construirlo.
+    private readonly webPush?: WebPushService,
   ) {
     this.logger.setContext(NotificationsService.name);
   }
@@ -342,7 +356,8 @@ export class NotificationsService implements InAppNotificationEmitter {
     dto: DeliverNotificationDto,
     actor: AuthenticatedUser,
   ): Promise<DeliverNotificationResponseDto> {
-    return this.em.transactional(async (tx) => {
+    let pushTarget: WebPushMessage | undefined;
+    const response = await this.em.transactional(async (tx) => {
       const request = await this.notificationsRepo.findRequestForUpdate(
         tx,
         requestId,
@@ -493,6 +508,12 @@ export class NotificationsService implements InAppNotificationEmitter {
             actorUserId: actor.id,
           },
         ).id;
+        pushTarget = {
+          recipientUserId: request.recipientUserId,
+          subject: dto.subject ?? '',
+          route: routeFromPayload(request.payloadJson),
+          notificationId: inAppNotificationId,
+        };
       }
 
       request.statusConceptId = sent
@@ -520,6 +541,9 @@ export class NotificationsService implements InAppNotificationEmitter {
         duplicate: false,
       };
     });
+    // Después del commit y fuera de todo lock: el push sale hacia un tercero.
+    if (pushTarget) void this.webPush?.pushToUser(pushTarget);
+    return response;
   }
 
   /**
@@ -737,6 +761,11 @@ export class NotificationsService implements InAppNotificationEmitter {
         result.availableAt &&
         new Date(result.availableAt).getTime() <= Date.now()
       ) {
+        void this.webPush?.pushToUser({
+          recipientUserId: input.recipientUserId,
+          subject: input.subject,
+          notificationId: result.inAppNotificationId,
+        });
         this.gateway?.notifyUser(input.recipientUserId, {
           id: result.inAppNotificationId,
           category: input.category,
