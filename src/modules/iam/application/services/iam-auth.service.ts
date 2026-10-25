@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -35,22 +35,18 @@ import {
   PurgeResultDto,
 } from '../../presentation/dto';
 import { conceptIdsToRoleCodes } from './role-mapping';
-// Los roles de negocio (los diez actores clínicos incluidos) viven en `authz`,
-// no en `iam.user_global_roles`: el emisor del token los pide a su dueño.
-import { AuthzEffectiveRolesService } from '../../../authz/services';
-// Lectura cross-dominio acotada al límite de autenticación: al emitir el token
-// se resuelven las membresías de tenant del sujeto para embeberlas como claim.
-import { TenantMemberships, Tenants } from '../../../directory/entities';
 import {
-  DIR,
-  TENANT_TYPE_CODE_BY_CONCEPT_ID,
-  type TenantTypeCode,
-} from '../../../directory/directory.concepts';
+  ACCOUNT_PROFILE_IDS_PORT,
+  type AccountProfileIdsPort,
+} from '../ports/account-profile-ids.port';
 import {
-  HealthPractitionerProfilesRepository,
-  PatientProfilesRepository,
-  PersonAccountLinksRepository,
-} from '../../../profiles/infrastructure/repositories';
+  BUSINESS_ROLES_PORT,
+  type BusinessRolesPort,
+} from '../ports/business-roles.port';
+import {
+  TENANT_CLAIMS_PORT,
+  type TenantClaimsPort,
+} from '../ports/tenant-claims.port';
 
 /**
  * Flujos de autenticación de sesión: login (UC-01-04), rotación de tokens con
@@ -119,10 +115,12 @@ export class IamAuthService {
     private readonly rolesRepo: UserGlobalRolesRepository,
     private readonly lockoutsRepo: AccountLockoutsRepository,
     private readonly eventsRepo: SecurityEventsRepository,
-    private readonly effectiveRoles: AuthzEffectiveRolesService,
-    private readonly accountLinksRepo: PersonAccountLinksRepository,
-    private readonly patientProfilesRepo: PatientProfilesRepository,
-    private readonly practitionerProfilesRepo: HealthPractitionerProfilesRepository,
+    @Inject(BUSINESS_ROLES_PORT)
+    private readonly effectiveRoles: BusinessRolesPort,
+    @Inject(ACCOUNT_PROFILE_IDS_PORT)
+    private readonly profileIds: AccountProfileIdsPort,
+    @Inject(TENANT_CLAIMS_PORT)
+    private readonly tenantClaims: TenantClaimsPort,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
     private readonly mfaRepo?: MfaFactorsRepository,
@@ -226,14 +224,7 @@ export class IamAuthService {
     em: EntityManager,
     userId: string,
   ): Promise<string[]> {
-    const memberships =
-      (await em.find(TenantMemberships, {
-        userId,
-        statusConceptId: {
-          $in: [DIR.MEMBERSHIP_ACTIVE, CONCEPTS.MEMBERSHIP_ACTIVE],
-        },
-      })) ?? [];
-    return [...new Set(memberships.map((m) => m.tenantId))];
+    return this.tenantClaims.listActiveTenantIds(em, userId);
   }
 
   /**
@@ -259,10 +250,7 @@ export class IamAuthService {
     em: EntityManager,
     userId: string,
   ): Promise<string | undefined> {
-    const link = await this.accountLinksRepo.findActiveByUser(em, userId);
-    if (!link) return undefined;
-    const patient = await this.patientProfilesRepo.findById(em, link.personId);
-    return patient?.profileId;
+    return this.profileIds.findPatientProfileId(em, userId);
   }
 
   /**
@@ -288,13 +276,7 @@ export class IamAuthService {
     em: EntityManager,
     userId: string,
   ): Promise<string | undefined> {
-    const link = await this.accountLinksRepo.findActiveByUser(em, userId);
-    if (!link) return undefined;
-    const practitioner = await this.practitionerProfilesRepo.findById(
-      em,
-      link.personId,
-    );
-    return practitioner?.profileId;
+    return this.profileIds.findPractitionerProfileId(em, userId);
   }
 
   /**
@@ -329,26 +311,7 @@ export class IamAuthService {
     tenantNames: Record<string, string>;
     tenantTypes: Record<string, string>;
   }> {
-    if (tenantIds.length === 0) return { tenantNames: {}, tenantTypes: {} };
-    const rows = await em.find(Tenants, { id: { $in: tenantIds } });
-    const tenantNames = Object.fromEntries(
-      rows.map((row) => [row.id, row.tradeName || row.legalName || row.code]),
-    );
-    const tenantTypes = Object.fromEntries(
-      rows
-        .map(
-          (row) =>
-            [
-              row.id,
-              TENANT_TYPE_CODE_BY_CONCEPT_ID[row.tenantTypeConceptId],
-            ] as const,
-        )
-        .filter(
-          (entry): entry is readonly [string, TenantTypeCode] =>
-            entry[1] !== undefined,
-        ),
-    );
-    return { tenantNames, tenantTypes };
+    return this.tenantClaims.describeTenants(em, tenantIds);
   }
 
   /**
