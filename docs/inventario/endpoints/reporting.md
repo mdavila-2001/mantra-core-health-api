@@ -15,13 +15,13 @@
 | 1 | POST | `/reporting/dashboards` | Componer un tablero con sus widgets | MEDIO | 4 | REPORTING_ADMIN, REPORT_AUTHOR |
 | 2 | POST | `/reporting/data-sources` | Registrar una fuente de datos gobernada | MEDIO | 2 | REPORTING_ADMIN, DATA_STEWARD |
 | 3 | POST | `/reporting/definitions` | Autorar una definición con sus parámetros y columnas | MEDIO | 5 | REPORTING_ADMIN, REPORT_AUTHOR |
-| 4 | POST | `/reporting/definitions/{id}/deprecate` | Deprecar la definición y suspender sus programaciones | MEDIO | 4 | REPORTING_ADMIN |
+| 4 | POST | `/reporting/definitions/{id}/deprecate` | Deprecar la definición y suspender sus programaciones | MEDIO | 3 | REPORTING_ADMIN |
 | 5 | POST | `/reporting/definitions/{id}/executions` | Encolar una corrida parametrizada | MEDIO | 4 | REPORTING_ADMIN, REPORT_VIEWER |
 | 6 | POST | `/reporting/definitions/{id}/schedules` | Programar la distribución periódica del reporte | MEDIO | 3 | REPORTING_ADMIN, REPORT_AUTHOR |
-| 7 | POST | `/reporting/definitions/{id}/versions/publish` | Publicar una versión del reporte | MEDIO | 5 | REPORTING_ADMIN, REPORT_AUTHOR |
+| 7 | POST | `/reporting/definitions/{id}/versions/publish` | Publicar una versión del reporte | MEDIO | 4 | REPORTING_ADMIN, REPORT_AUTHOR |
 | 8 | POST | `/reporting/executions/{id}/distributions` | Crear las distribuciones del reporte por destinatario | MEDIO | 4 | SYSTEM, REPORTING_ADMIN |
-| 9 | POST | `/reporting/executions/{id}/retry` | Devolver a la cola una corrida fallida | MEDIO | 5 | SYSTEM, REPORTING_ADMIN |
-| 10 | POST | `/reporting/executions/{id}/snapshot` | Registrar el artefacto materializado y cerrar la corrida | MEDIO | 4 | SYSTEM |
+| 9 | POST | `/reporting/executions/{id}/retry` | Devolver a la cola una corrida fallida | MEDIO | 4 | SYSTEM, REPORTING_ADMIN |
+| 10 | POST | `/reporting/executions/{id}/snapshot` | Registrar el artefacto materializado y cerrar la corrida | MEDIO | 3 | SYSTEM |
 | 11 | POST | `/reporting/scheduler/tick` | Disparar las programaciones vencidas | MEDIO | 5 | SYSTEM |
 | 12 | POST | `/reporting/schedules/{id}/subscriptions` | Suscribirse a una programación | MEDIO | 4 | REPORT_VIEWER, REPORTING_ADMIN |
 
@@ -34,7 +34,7 @@
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.createDashboard` — `src/modules/reporting/controllers/reporting.controller.ts:201`
+- **Implementación:** `ReportingController.createDashboard` — `src/modules/reporting/controllers/reporting.controller.ts:250`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -44,14 +44,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/dashboards` la atiende `ReportingController.createDashboard` (src/modules/reporting/controllers/reporting.controller.ts:201). Exige sesión con alguno de los roles REPORTING_ADMIN, REPORT_AUTHOR. Valida el cuerpo como `CreateDashboardDto` (13 campos, 5 obligatorios). Delega en `ReportingDefinitionsService.createDashboard`. Crea filas en reporting.dashboard_widgets, reporting.dashboards. Lee reporting.dashboards, reporting.report_definitions.
+`POST /reporting/dashboards` la atiende `ReportingController.createDashboard` (src/modules/reporting/controllers/reporting.controller.ts:250). Exige sesión con alguno de los roles REPORTING_ADMIN, REPORT_AUTHOR. Valida el cuerpo como `CreateDashboardDto` (13 campos, 5 obligatorios). Delega en `ReportingDefinitionsService.createDashboard`. Crea filas en reporting.dashboard_widgets, reporting.dashboards. Lee reporting.dashboards, reporting.report_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:201` |
+| ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:250` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -61,9 +61,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `reporting.dashboard_widgets` | ESCRIBE | CREA | DIRECTA | ReportingController.createDashboard → ReportingDefinitionsService.createDashboard → ReportingDefinitionsRepository.createWidget | `src/modules/reporting/repositories/reporting-definitions.repository.ts:606` |
-| `reporting.dashboards` | ESCRIBE | CREA | DIRECTA | ReportingController.createDashboard → ReportingDefinitionsService.createDashboard → ReportingDefinitionsRepository.createDashboard | `src/modules/reporting/repositories/reporting-definitions.repository.ts:528` |
-| `reporting.dashboards` | LEE | LEE | DIRECTA | ReportingController.createDashboard → ReportingDefinitionsService.createDashboard → ReportingDefinitionsRepository.findDashboardByCode | `src/modules/reporting/repositories/reporting-definitions.repository.ts:555` |
+| `reporting.dashboard_widgets` | ESCRIBE | CREA | DIRECTA | ReportingController.createDashboard → ReportingDefinitionsService.createDashboard → ReportingDefinitionsRepository.createWidget | `src/modules/reporting/repositories/reporting-definitions.repository.ts:612` |
+| `reporting.dashboards` | ESCRIBE | CREA | DIRECTA | ReportingController.createDashboard → ReportingDefinitionsService.createDashboard → ReportingDefinitionsRepository.createDashboard | `src/modules/reporting/repositories/reporting-definitions.repository.ts:534` |
+| `reporting.dashboards` | LEE | LEE | DIRECTA | ReportingController.createDashboard → ReportingDefinitionsService.createDashboard → ReportingDefinitionsRepository.findDashboardByCode | `src/modules/reporting/repositories/reporting-definitions.repository.ts:561` |
 | `reporting.report_definitions` | LEE | LEE | DIRECTA | ReportingController.createDashboard → ReportingDefinitionsService.createDashboard → ReportingDefinitionsRepository.findDefinitionById | `src/modules/reporting/repositories/reporting-definitions.repository.ts:225` |
 
 ### Cuerpo — DTO `CreateDashboardDto` · `application/json`
@@ -141,7 +141,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición del widget no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe un tablero con ese código |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un widget CHART necesita su tipo de gráfico; PreconditionFailedException: El widget apunta a un reporte deprecado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -167,7 +166,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.createDataSource` — `src/modules/reporting/controllers/reporting.controller.ts:57`
+- **Implementación:** `ReportingController.createDataSource` — `src/modules/reporting/controllers/reporting.controller.ts:62`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -177,14 +176,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/data-sources` la atiende `ReportingController.createDataSource` (src/modules/reporting/controllers/reporting.controller.ts:57). Exige sesión con alguno de los roles REPORTING_ADMIN, DATA_STEWARD. Valida el cuerpo como `CreateDataSourceDto` (8 campos, 3 obligatorios). Delega en `ReportingDefinitionsService.createDataSource`. Crea filas en reporting.report_data_sources. Lee reporting.report_data_sources.
+`POST /reporting/data-sources` la atiende `ReportingController.createDataSource` (src/modules/reporting/controllers/reporting.controller.ts:62). Exige sesión con alguno de los roles REPORTING_ADMIN, DATA_STEWARD. Valida el cuerpo como `CreateDataSourceDto` (8 campos, 3 obligatorios). Delega en `ReportingDefinitionsService.createDataSource`. Crea filas en reporting.report_data_sources. Lee reporting.report_data_sources.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REPORTING_ADMIN, DATA_STEWARD | `src/modules/reporting/controllers/reporting.controller.ts:57` |
+| ROL | Alguno de: REPORTING_ADMIN, DATA_STEWARD | `src/modules/reporting/controllers/reporting.controller.ts:62` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -278,7 +277,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.createDefinition` — `src/modules/reporting/controllers/reporting.controller.ts:73`
+- **Implementación:** `ReportingController.createDefinition` — `src/modules/reporting/controllers/reporting.controller.ts:83`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -288,14 +287,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/definitions` la atiende `ReportingController.createDefinition` (src/modules/reporting/controllers/reporting.controller.ts:73). Exige sesión con alguno de los roles REPORTING_ADMIN, REPORT_AUTHOR. Valida el cuerpo como `CreateDefinitionDto` (25 campos, 6 obligatorios). Delega en `ReportingDefinitionsService.createDefinition`. Crea filas en reporting.report_columns, reporting.report_definitions, reporting.report_parameters. Lee reporting.report_data_sources, reporting.report_definitions.
+`POST /reporting/definitions` la atiende `ReportingController.createDefinition` (src/modules/reporting/controllers/reporting.controller.ts:83). Exige sesión con alguno de los roles REPORTING_ADMIN, REPORT_AUTHOR. Valida el cuerpo como `CreateDefinitionDto` (25 campos, 6 obligatorios). Delega en `ReportingDefinitionsService.createDefinition`. Crea filas en reporting.report_columns, reporting.report_definitions, reporting.report_parameters. Lee reporting.report_data_sources, reporting.report_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:73` |
+| ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:83` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -305,11 +304,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `reporting.report_columns` | ESCRIBE | CREA | DIRECTA | ReportingController.createDefinition → ReportingDefinitionsService.createDefinition → ReportingDefinitionsRepository.createColumn | `src/modules/reporting/repositories/reporting-definitions.repository.ts:383` |
+| `reporting.report_columns` | ESCRIBE | CREA | DIRECTA | ReportingController.createDefinition → ReportingDefinitionsService.createDefinition → ReportingDefinitionsRepository.createColumn | `src/modules/reporting/repositories/reporting-definitions.repository.ts:389` |
 | `reporting.report_data_sources` | LEE | LEE | DIRECTA | ReportingController.createDefinition → ReportingDefinitionsService.createDefinition → ReportingDefinitionsRepository.findDataSourceById | `src/modules/reporting/repositories/reporting-definitions.repository.ts:163` |
 | `reporting.report_definitions` | ESCRIBE | CREA | DIRECTA | ReportingController.createDefinition → ReportingDefinitionsService.createDefinition → ReportingDefinitionsRepository.createDefinition | `src/modules/reporting/repositories/reporting-definitions.repository.ts:193` |
-| `reporting.report_definitions` | LEE | LEE | DIRECTA | ReportingController.createDefinition → ReportingDefinitionsService.createDefinition → ReportingDefinitionsRepository.findDefinitionByCode | `src/modules/reporting/repositories/reporting-definitions.repository.ts:251` |
-| `reporting.report_parameters` | ESCRIBE | CREA | DIRECTA | ReportingController.createDefinition → ReportingDefinitionsService.createDefinition → ReportingDefinitionsRepository.createParameter | `src/modules/reporting/repositories/reporting-definitions.repository.ts:302` |
+| `reporting.report_definitions` | LEE | LEE | DIRECTA | ReportingController.createDefinition → ReportingDefinitionsService.createDefinition → ReportingDefinitionsRepository.findDefinitionByCode | `src/modules/reporting/repositories/reporting-definitions.repository.ts:257` |
+| `reporting.report_parameters` | ESCRIBE | CREA | DIRECTA | ReportingController.createDefinition → ReportingDefinitionsService.createDefinition → ReportingDefinitionsRepository.createParameter | `src/modules/reporting/repositories/reporting-definitions.repository.ts:308` |
 
 ### Cuerpo — DTO `CreateDefinitionDto` · `application/json`
 
@@ -415,7 +414,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Fuente de datos no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe una definición con ese código |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un reporte no público necesita declarar el permiso que exige; PreconditionFailedException: El código de {kind} está repetido; PreconditionFailedException: La fuente de datos no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -441,7 +439,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.deprecateDefinition` — `src/modules/reporting/controllers/reporting.controller.ts:229`
+- **Implementación:** `ReportingController.deprecateDefinition` — `src/modules/reporting/controllers/reporting.controller.ts:288`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -451,16 +449,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/definitions/{id}/deprecate` la atiende `ReportingController.deprecateDefinition` (src/modules/reporting/controllers/reporting.controller.ts:229). Exige sesión con alguno de los roles REPORTING_ADMIN. Valida el cuerpo como `DeprecateDefinitionDto` (1 campo, 1 obligatorio). Delega en `ReportingDefinitionsService.deprecateDefinition`. Actualiza reporting.report_definitions, reporting.report_schedules. Lee reporting.report_definitions, reporting.report_schedules.
+`POST /reporting/definitions/{id}/deprecate` la atiende `ReportingController.deprecateDefinition` (src/modules/reporting/controllers/reporting.controller.ts:288). Exige sesión con alguno de los roles REPORTING_ADMIN. Valida el cuerpo como `DeprecateDefinitionDto` (1 campo, 1 obligatorio). Delega en `ReportingDefinitionsService.deprecateDefinition`. Actualiza reporting.report_schedules. Lee reporting.report_definitions, reporting.report_schedules.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:229` |
+| ROL | Alguno de: REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:288` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:229` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:288` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -469,10 +467,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `reporting.report_definitions` | ESCRIBE | ACTUALIZA | POR_TIPO | ReportingController.deprecateDefinition → ReportingDefinitionsService.deprecateDefinition | `src/modules/reporting/services/reporting-definitions.service.ts:499` |
-| `reporting.report_definitions` | LEE | LEE | DIRECTA | ReportingController.deprecateDefinition → ReportingDefinitionsService.deprecateDefinition → ReportingDefinitionsRepository.findDefinitionForUpdate | `src/modules/reporting/repositories/reporting-definitions.repository.ts:233` |
-| `reporting.report_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | ReportingController.deprecateDefinition → ReportingDefinitionsService.deprecateDefinition | `src/modules/reporting/services/reporting-definitions.service.ts:493` |
-| `reporting.report_schedules` | LEE | LEE | DIRECTA | ReportingController.deprecateDefinition → ReportingDefinitionsService.deprecateDefinition → ReportingRunsRepository.findSchedulesByDefinitionForUpdate | `src/modules/reporting/repositories/reporting-runs.repository.ts:327` |
+| `reporting.report_definitions` | LEE | LEE | DIRECTA | ReportingController.deprecateDefinition → ReportingDefinitionsService.deprecateDefinition → ReportingDefinitionsRepository.findDefinitionForUpdate | `src/modules/reporting/repositories/reporting-definitions.repository.ts:239` |
+| `reporting.report_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | ReportingController.deprecateDefinition → ReportingDefinitionsService.deprecateDefinition | `src/modules/reporting/services/reporting-definitions.service.ts:497` |
+| `reporting.report_schedules` | LEE | LEE | DIRECTA | ReportingController.deprecateDefinition → ReportingDefinitionsService.deprecateDefinition → ReportingRunsRepository.findSchedulesByDefinitionForUpdate | `src/modules/reporting/repositories/reporting-runs.repository.ts:335` |
 
 ### Parámetros
 
@@ -520,7 +517,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición no encontrada |
 | 409 | `CONFLICT` | ConflictException: La definición ya está deprecada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -545,7 +541,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.createExecution` — `src/modules/reporting/controllers/reporting.controller.ts:105`
+- **Implementación:** `ReportingController.createExecution` — `src/modules/reporting/controllers/reporting.controller.ts:125`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -555,16 +551,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/definitions/{id}/executions` la atiende `ReportingController.createExecution` (src/modules/reporting/controllers/reporting.controller.ts:105). Exige sesión con alguno de los roles REPORTING_ADMIN, REPORT_VIEWER. Valida el cuerpo como `CreateExecutionDto` (3 campos, 0 obligatorios). Delega en `ReportingRunsService.createExecution`. Crea filas en reporting.report_executions. Lee reporting.report_definitions, reporting.report_parameters, reporting.report_versions.
+`POST /reporting/definitions/{id}/executions` la atiende `ReportingController.createExecution` (src/modules/reporting/controllers/reporting.controller.ts:125). Exige sesión con alguno de los roles REPORTING_ADMIN, REPORT_VIEWER. Valida el cuerpo como `CreateExecutionDto` (3 campos, 0 obligatorios). Delega en `ReportingRunsService.createExecution`. Crea filas en reporting.report_executions. Lee reporting.report_definitions, reporting.report_parameters, reporting.report_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REPORTING_ADMIN, REPORT_VIEWER | `src/modules/reporting/controllers/reporting.controller.ts:105` |
+| ROL | Alguno de: REPORTING_ADMIN, REPORT_VIEWER | `src/modules/reporting/controllers/reporting.controller.ts:125` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:105` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:125` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -575,8 +571,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 |---|---|---|---|---|---|
 | `reporting.report_definitions` | LEE | LEE | DIRECTA | ReportingController.createExecution → ReportingRunsService.createExecution → ReportingDefinitionsRepository.findDefinitionById | `src/modules/reporting/repositories/reporting-definitions.repository.ts:225` |
 | `reporting.report_executions` | ESCRIBE | CREA | DIRECTA | ReportingController.createExecution → ReportingRunsService.createExecution → ReportingRunsRepository.createExecution | `src/modules/reporting/repositories/reporting-runs.repository.ts:124` |
-| `reporting.report_parameters` | LEE | LEE | DIRECTA | ReportingController.createExecution → ReportingRunsService.createExecution → ReportingDefinitionsRepository.findParametersByDefinition | `src/modules/reporting/repositories/reporting-definitions.repository.ts:324` |
-| `reporting.report_versions` | LEE | LEE | DIRECTA | ReportingController.createExecution → ReportingRunsService.createExecution → ReportingDefinitionsRepository.findActiveVersion | `src/modules/reporting/repositories/reporting-definitions.repository.ts:476` |
+| `reporting.report_parameters` | LEE | LEE | DIRECTA | ReportingController.createExecution → ReportingRunsService.createExecution → ReportingDefinitionsRepository.findParametersByDefinition | `src/modules/reporting/repositories/reporting-definitions.repository.ts:330` |
+| `reporting.report_versions` | LEE | LEE | DIRECTA | ReportingController.createExecution → ReportingRunsService.createExecution → ReportingDefinitionsRepository.findActiveVersion | `src/modules/reporting/repositories/reporting-definitions.repository.ts:482` |
 
 ### Parámetros
 
@@ -627,7 +623,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición no está activa; PreconditionFailedException: La definición no tiene versión publicada; PreconditionFailedException: Faltan parámetros obligatorios del reporte |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -652,7 +647,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.createSchedule` — `src/modules/reporting/controllers/reporting.controller.ts:139`
+- **Implementación:** `ReportingController.createSchedule` — `src/modules/reporting/controllers/reporting.controller.ts:169`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -662,16 +657,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/definitions/{id}/schedules` la atiende `ReportingController.createSchedule` (src/modules/reporting/controllers/reporting.controller.ts:139). Exige sesión con alguno de los roles REPORTING_ADMIN, REPORT_AUTHOR. Valida el cuerpo como `ReportingCreateScheduleDto` (7 campos, 4 obligatorios). Delega en `ReportingRunsService.createSchedule`. Crea filas en reporting.report_schedules. Lee reporting.report_definitions, reporting.report_parameters.
+`POST /reporting/definitions/{id}/schedules` la atiende `ReportingController.createSchedule` (src/modules/reporting/controllers/reporting.controller.ts:169). Exige sesión con alguno de los roles REPORTING_ADMIN, REPORT_AUTHOR. Valida el cuerpo como `ReportingCreateScheduleDto` (7 campos, 4 obligatorios). Delega en `ReportingRunsService.createSchedule`. Crea filas en reporting.report_schedules. Lee reporting.report_definitions, reporting.report_parameters.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:139` |
+| ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:169` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:139` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:169` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -681,8 +676,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `reporting.report_definitions` | LEE | LEE | DIRECTA | ReportingController.createSchedule → ReportingRunsService.createSchedule → ReportingDefinitionsRepository.findDefinitionById | `src/modules/reporting/repositories/reporting-definitions.repository.ts:225` |
-| `reporting.report_parameters` | LEE | LEE | DIRECTA | ReportingController.createSchedule → ReportingRunsService.createSchedule → ReportingDefinitionsRepository.findParametersByDefinition | `src/modules/reporting/repositories/reporting-definitions.repository.ts:324` |
-| `reporting.report_schedules` | ESCRIBE | CREA | DIRECTA | ReportingController.createSchedule → ReportingRunsService.createSchedule → ReportingRunsRepository.createSchedule | `src/modules/reporting/repositories/reporting-runs.repository.ts:263` |
+| `reporting.report_parameters` | LEE | LEE | DIRECTA | ReportingController.createSchedule → ReportingRunsService.createSchedule → ReportingDefinitionsRepository.findParametersByDefinition | `src/modules/reporting/repositories/reporting-definitions.repository.ts:330` |
+| `reporting.report_schedules` | ESCRIBE | CREA | DIRECTA | ReportingController.createSchedule → ReportingRunsService.createSchedule → ReportingRunsRepository.createSchedule | `src/modules/reporting/repositories/reporting-runs.repository.ts:266` |
 
 ### Parámetros
 
@@ -746,7 +741,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición no está activa; PreconditionFailedException: Faltan parámetros obligatorios del reporte |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -771,7 +765,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.publishVersion` — `src/modules/reporting/controllers/reporting.controller.ts:88`
+- **Implementación:** `ReportingController.publishVersion` — `src/modules/reporting/controllers/reporting.controller.ts:103`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -781,16 +775,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/definitions/{id}/versions/publish` la atiende `ReportingController.publishVersion` (src/modules/reporting/controllers/reporting.controller.ts:88). Exige sesión con alguno de los roles REPORTING_ADMIN, REPORT_AUTHOR. Valida el cuerpo como `PublishReportVersionDto` (1 campo, 0 obligatorios). Delega en `ReportingDefinitionsService.publishVersion`. Crea filas en reporting.report_versions. Actualiza reporting.report_definitions. Lee reporting.report_definitions, reporting.report_parameters, reporting.report_versions.
+`POST /reporting/definitions/{id}/versions/publish` la atiende `ReportingController.publishVersion` (src/modules/reporting/controllers/reporting.controller.ts:103). Exige sesión con alguno de los roles REPORTING_ADMIN, REPORT_AUTHOR. Valida el cuerpo como `PublishReportVersionDto` (1 campo, 0 obligatorios). Delega en `ReportingDefinitionsService.publishVersion`. Crea filas en reporting.report_versions. Lee reporting.report_definitions, reporting.report_parameters, reporting.report_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:88` |
+| ROL | Alguno de: REPORTING_ADMIN, REPORT_AUTHOR | `src/modules/reporting/controllers/reporting.controller.ts:103` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:88` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:103` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -799,11 +793,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `reporting.report_definitions` | ESCRIBE | ACTUALIZA | POR_TIPO | ReportingController.publishVersion → ReportingDefinitionsService.publishVersion | `src/modules/reporting/services/reporting-definitions.service.ts:349` |
-| `reporting.report_definitions` | LEE | LEE | DIRECTA | ReportingController.publishVersion → ReportingDefinitionsService.publishVersion → ReportingDefinitionsRepository.findDefinitionForUpdate | `src/modules/reporting/repositories/reporting-definitions.repository.ts:233` |
-| `reporting.report_parameters` | LEE | LEE | DIRECTA | ReportingController.publishVersion → ReportingDefinitionsService.publishVersion → ReportingDefinitionsRepository.findParametersByDefinition | `src/modules/reporting/repositories/reporting-definitions.repository.ts:324` |
-| `reporting.report_versions` | ESCRIBE | CREA | DIRECTA | ReportingController.publishVersion → ReportingDefinitionsService.publishVersion → ReportingDefinitionsRepository.createVersion | `src/modules/reporting/repositories/reporting-definitions.repository.ts:439` |
-| `reporting.report_versions` | LEE | LEE | DIRECTA | ReportingController.publishVersion → ReportingDefinitionsService.publishVersion → ReportingDefinitionsRepository.findVersion | `src/modules/reporting/repositories/reporting-definitions.repository.ts:467` |
+| `reporting.report_definitions` | LEE | LEE | DIRECTA | ReportingController.publishVersion → ReportingDefinitionsService.publishVersion → ReportingDefinitionsRepository.findDefinitionForUpdate | `src/modules/reporting/repositories/reporting-definitions.repository.ts:239` |
+| `reporting.report_parameters` | LEE | LEE | DIRECTA | ReportingController.publishVersion → ReportingDefinitionsService.publishVersion → ReportingDefinitionsRepository.findParametersByDefinition | `src/modules/reporting/repositories/reporting-definitions.repository.ts:330` |
+| `reporting.report_versions` | ESCRIBE | CREA | DIRECTA | ReportingController.publishVersion → ReportingDefinitionsService.publishVersion → ReportingDefinitionsRepository.createVersion | `src/modules/reporting/repositories/reporting-definitions.repository.ts:445` |
+| `reporting.report_versions` | LEE | LEE | DIRECTA | ReportingController.publishVersion → ReportingDefinitionsService.publishVersion → ReportingDefinitionsRepository.findVersion | `src/modules/reporting/repositories/reporting-definitions.repository.ts:473` |
 
 ### Parámetros
 
@@ -849,7 +842,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición no encontrada |
 | 409 | `CONFLICT` | ConflictException: Esa versión ya está publicada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una definición deprecada no admite versiones |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -875,7 +867,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.dispatchDistributions` — `src/modules/reporting/controllers/reporting.controller.ts:168`
+- **Implementación:** `ReportingController.dispatchDistributions` — `src/modules/reporting/controllers/reporting.controller.ts:207`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -885,16 +877,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/executions/{id}/distributions` la atiende `ReportingController.dispatchDistributions` (src/modules/reporting/controllers/reporting.controller.ts:168). Exige sesión con alguno de los roles SYSTEM, REPORTING_ADMIN. Valida el cuerpo como `DispatchDistributionDto` (5 campos, 0 obligatorios). Delega en `ReportingRunsService.dispatchDistributions`. Crea filas en reporting.report_distributions. Lee reporting.report_distributions, reporting.report_executions, reporting.report_subscriptions.
+`POST /reporting/executions/{id}/distributions` la atiende `ReportingController.dispatchDistributions` (src/modules/reporting/controllers/reporting.controller.ts:207). Exige sesión con alguno de los roles SYSTEM, REPORTING_ADMIN. Valida el cuerpo como `DispatchDistributionDto` (5 campos, 0 obligatorios). Delega en `ReportingRunsService.dispatchDistributions`. Crea filas en reporting.report_distributions. Lee reporting.report_distributions, reporting.report_executions, reporting.report_subscriptions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:168` |
+| ROL | Alguno de: SYSTEM, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:207` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:168` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:207` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -903,10 +895,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `reporting.report_distributions` | ESCRIBE | CREA | DIRECTA | ReportingController.dispatchDistributions → ReportingRunsService.dispatchDistributions → ReportingRunsRepository.createDistribution | `src/modules/reporting/repositories/reporting-runs.repository.ts:380` |
-| `reporting.report_distributions` | LEE | LEE | DIRECTA | ReportingController.dispatchDistributions → ReportingRunsService.dispatchDistributions → ReportingRunsRepository.findDistributionsByExecution | `src/modules/reporting/repositories/reporting-runs.repository.ts:401` |
+| `reporting.report_distributions` | ESCRIBE | CREA | DIRECTA | ReportingController.dispatchDistributions → ReportingRunsService.dispatchDistributions → ReportingRunsRepository.createDistribution | `src/modules/reporting/repositories/reporting-runs.repository.ts:388` |
+| `reporting.report_distributions` | LEE | LEE | DIRECTA | ReportingController.dispatchDistributions → ReportingRunsService.dispatchDistributions → ReportingRunsRepository.findDistributionsByExecution | `src/modules/reporting/repositories/reporting-runs.repository.ts:409` |
 | `reporting.report_executions` | LEE | LEE | DIRECTA | ReportingController.dispatchDistributions → ReportingRunsService.dispatchDistributions → ReportingRunsRepository.findExecutionById | `src/modules/reporting/repositories/reporting-runs.repository.ts:153` |
-| `reporting.report_subscriptions` | LEE | LEE | DIRECTA | ReportingController.dispatchDistributions → ReportingRunsService.dispatchDistributions → ReportingRunsRepository.findActiveSubscriptions | `src/modules/reporting/repositories/reporting-runs.repository.ts:482` |
+| `reporting.report_subscriptions` | LEE | LEE | DIRECTA | ReportingController.dispatchDistributions → ReportingRunsService.dispatchDistributions → ReportingRunsRepository.findActiveSubscriptions | `src/modules/reporting/repositories/reporting-runs.repository.ts:490` |
 
 ### Parámetros
 
@@ -964,7 +956,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se distribuye una ejecución que terminó con éxito; PreconditionFailedException: Un destinatario USER necesita su identificador; PreconditionFailedException: Un destinatario ADDRESS necesita su dirección |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -989,7 +980,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.retryExecution` — `src/modules/reporting/controllers/reporting.controller.ts:213`
+- **Implementación:** `ReportingController.retryExecution` — `src/modules/reporting/controllers/reporting.controller.ts:267`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -999,16 +990,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/executions/{id}/retry` la atiende `ReportingController.retryExecution` (src/modules/reporting/controllers/reporting.controller.ts:213). Exige sesión con alguno de los roles SYSTEM, REPORTING_ADMIN. Valida el cuerpo como `RetryExecutionDto` (1 campo, 0 obligatorios). Delega en `ReportingRunsService.retryExecution`. Actualiza reporting.report_distributions, reporting.report_executions. Lee reporting.report_definitions, reporting.report_distributions, reporting.report_executions.
+`POST /reporting/executions/{id}/retry` la atiende `ReportingController.retryExecution` (src/modules/reporting/controllers/reporting.controller.ts:267). Exige sesión con alguno de los roles SYSTEM, REPORTING_ADMIN. Valida el cuerpo como `RetryExecutionDto` (1 campo, 0 obligatorios). Delega en `ReportingRunsService.retryExecution`. Actualiza reporting.report_distributions. Lee reporting.report_definitions, reporting.report_distributions, reporting.report_executions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:213` |
+| ROL | Alguno de: SYSTEM, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:267` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:213` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:267` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1018,10 +1009,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `reporting.report_definitions` | LEE | LEE | DIRECTA | ReportingController.retryExecution → ReportingRunsService.retryExecution → ReportingDefinitionsRepository.findDefinitionById | `src/modules/reporting/repositories/reporting-definitions.repository.ts:225` |
-| `reporting.report_distributions` | ESCRIBE | ACTUALIZA | POR_TIPO | ReportingController.retryExecution → ReportingRunsService.retryExecution | `src/modules/reporting/services/reporting-runs.service.ts:634` |
-| `reporting.report_distributions` | LEE | LEE | DIRECTA | ReportingController.retryExecution → ReportingRunsService.retryExecution → ReportingRunsRepository.findDistributionsByExecutionForUpdate | `src/modules/reporting/repositories/reporting-runs.repository.ts:415` |
-| `reporting.report_executions` | ESCRIBE | ACTUALIZA | POR_TIPO | ReportingController.retryExecution → ReportingRunsService.retryExecution | `src/modules/reporting/services/reporting-runs.service.ts:617` |
-| `reporting.report_executions` | LEE | LEE | DIRECTA | ReportingController.retryExecution → ReportingRunsService.retryExecution → ReportingRunsRepository.findExecutionForUpdate | `src/modules/reporting/repositories/reporting-runs.repository.ts:167` |
+| `reporting.report_distributions` | ESCRIBE | ACTUALIZA | POR_TIPO | ReportingController.retryExecution → ReportingRunsService.retryExecution | `src/modules/reporting/services/reporting-runs.service.ts:631` |
+| `reporting.report_distributions` | LEE | LEE | DIRECTA | ReportingController.retryExecution → ReportingRunsService.retryExecution → ReportingRunsRepository.findDistributionsByExecutionForUpdate | `src/modules/reporting/repositories/reporting-runs.repository.ts:423` |
+| `reporting.report_executions` | LEE | LEE | DIRECTA | ReportingController.retryExecution → ReportingRunsService.retryExecution → ReportingRunsRepository.findExecutionForUpdate | `src/modules/reporting/repositories/reporting-runs.repository.ts:170` |
 
 ### Parámetros
 
@@ -1067,7 +1057,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo se reintenta una ejecución fallida; PreconditionFailedException: La definición está deprecada: no se reintenta su corrida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1092,7 +1081,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.materializeSnapshot` — `src/modules/reporting/controllers/reporting.controller.ts:122`
+- **Implementación:** `ReportingController.materializeSnapshot` — `src/modules/reporting/controllers/reporting.controller.ts:147`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1102,16 +1091,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/executions/{id}/snapshot` la atiende `ReportingController.materializeSnapshot` (src/modules/reporting/controllers/reporting.controller.ts:122). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `MaterializeSnapshotDto` (6 campos, 1 obligatorio). Delega en `ReportingRunsService.materializeSnapshot`. Crea filas en reporting.report_snapshots. Actualiza reporting.report_executions. Lee reporting.report_executions, reporting.report_snapshots.
+`POST /reporting/executions/{id}/snapshot` la atiende `ReportingController.materializeSnapshot` (src/modules/reporting/controllers/reporting.controller.ts:147). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `MaterializeSnapshotDto` (6 campos, 1 obligatorio). Delega en `ReportingRunsService.materializeSnapshot`. Crea filas en reporting.report_snapshots. Lee reporting.report_executions, reporting.report_snapshots.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/reporting/controllers/reporting.controller.ts:122` |
+| ROL | Alguno de: SYSTEM | `src/modules/reporting/controllers/reporting.controller.ts:147` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:122` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:147` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1120,10 +1109,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `reporting.report_executions` | ESCRIBE | ACTUALIZA | POR_TIPO | ReportingController.materializeSnapshot → ReportingRunsService.materializeSnapshot | `src/modules/reporting/services/reporting-runs.service.ts:213` |
-| `reporting.report_executions` | LEE | LEE | DIRECTA | ReportingController.materializeSnapshot → ReportingRunsService.materializeSnapshot → ReportingRunsRepository.findExecutionForUpdate | `src/modules/reporting/repositories/reporting-runs.repository.ts:167` |
-| `reporting.report_snapshots` | ESCRIBE | CREA | DIRECTA | ReportingController.materializeSnapshot → ReportingRunsService.materializeSnapshot → ReportingRunsRepository.createSnapshot | `src/modules/reporting/repositories/reporting-runs.repository.ts:216` |
-| `reporting.report_snapshots` | LEE | LEE | DIRECTA | ReportingController.materializeSnapshot → ReportingRunsService.materializeSnapshot → ReportingRunsRepository.findSnapshotByExecution | `src/modules/reporting/repositories/reporting-runs.repository.ts:242` |
+| `reporting.report_executions` | LEE | LEE | DIRECTA | ReportingController.materializeSnapshot → ReportingRunsService.materializeSnapshot → ReportingRunsRepository.findExecutionForUpdate | `src/modules/reporting/repositories/reporting-runs.repository.ts:170` |
+| `reporting.report_snapshots` | ESCRIBE | CREA | DIRECTA | ReportingController.materializeSnapshot → ReportingRunsService.materializeSnapshot → ReportingRunsRepository.createSnapshot | `src/modules/reporting/repositories/reporting-runs.repository.ts:219` |
+| `reporting.report_snapshots` | LEE | LEE | DIRECTA | ReportingController.materializeSnapshot → ReportingRunsService.materializeSnapshot → ReportingRunsRepository.findSnapshotByExecution | `src/modules/reporting/repositories/reporting-runs.repository.ts:245` |
 
 ### Parámetros
 
@@ -1183,7 +1171,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Ejecución no encontrada |
 | 409 | `CONFLICT` | ConflictException: La ejecución ya está materializada; ConflictException: La ejecución ya tiene snapshot |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una ejecución fallida se reintenta antes de materializar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1209,7 +1196,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.schedulerTick` — `src/modules/reporting/controllers/reporting.controller.ts:152`
+- **Implementación:** `ReportingController.schedulerTick` — `src/modules/reporting/controllers/reporting.controller.ts:187`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1219,14 +1206,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/scheduler/tick` la atiende `ReportingController.schedulerTick` (src/modules/reporting/controllers/reporting.controller.ts:152). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `SchedulerTickDto` (2 campos, 0 obligatorios). Delega en `ReportingRunsService.schedulerTick`. Crea filas en reporting.report_executions. Actualiza reporting.report_schedules. Lee reporting.report_definitions, reporting.report_schedules, reporting.report_versions.
+`POST /reporting/scheduler/tick` la atiende `ReportingController.schedulerTick` (src/modules/reporting/controllers/reporting.controller.ts:187). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `SchedulerTickDto` (2 campos, 0 obligatorios). Delega en `ReportingRunsService.schedulerTick`. Crea filas en reporting.report_executions. Actualiza reporting.report_schedules. Lee reporting.report_definitions, reporting.report_schedules, reporting.report_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/reporting/controllers/reporting.controller.ts:152` |
+| ROL | Alguno de: SYSTEM | `src/modules/reporting/controllers/reporting.controller.ts:187` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1239,8 +1226,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | `reporting.report_definitions` | LEE | LEE | DIRECTA | ReportingController.schedulerTick → ReportingRunsService.schedulerTick → ReportingDefinitionsRepository.findDefinitionById | `src/modules/reporting/repositories/reporting-definitions.repository.ts:225` |
 | `reporting.report_executions` | ESCRIBE | CREA | DIRECTA | ReportingController.schedulerTick → ReportingRunsService.schedulerTick → ReportingRunsRepository.createExecution | `src/modules/reporting/repositories/reporting-runs.repository.ts:124` |
 | `reporting.report_schedules` | ESCRIBE | ACTUALIZA | POR_TIPO | ReportingController.schedulerTick → ReportingRunsService.schedulerTick | `src/modules/reporting/services/reporting-runs.service.ts:362` |
-| `reporting.report_schedules` | LEE | LEE | DIRECTA | ReportingController.schedulerTick → ReportingRunsService.schedulerTick → ReportingRunsRepository.findDueSchedules | `src/modules/reporting/repositories/reporting-runs.repository.ts:307` |
-| `reporting.report_versions` | LEE | LEE | DIRECTA | ReportingController.schedulerTick → ReportingRunsService.schedulerTick → ReportingDefinitionsRepository.findActiveVersion | `src/modules/reporting/repositories/reporting-definitions.repository.ts:476` |
+| `reporting.report_schedules` | LEE | LEE | DIRECTA | ReportingController.schedulerTick → ReportingRunsService.schedulerTick → ReportingRunsRepository.findDueSchedules | `src/modules/reporting/repositories/reporting-runs.repository.ts:314` |
+| `reporting.report_versions` | LEE | LEE | DIRECTA | ReportingController.schedulerTick → ReportingRunsService.schedulerTick → ReportingDefinitionsRepository.findActiveVersion | `src/modules/reporting/repositories/reporting-definitions.repository.ts:482` |
 
 ### Cuerpo — DTO `SchedulerTickDto` · `application/json`
 
@@ -1306,7 +1293,7 @@ El árbol de decisión completo está en [flujos](../flujos/reporting.md).
 - **Bloque:** Auditoría y Reporting
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ReportingController.subscribe` — `src/modules/reporting/controllers/reporting.controller.ts:184`
+- **Implementación:** `ReportingController.subscribe` — `src/modules/reporting/controllers/reporting.controller.ts:228`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1316,16 +1303,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 ### Cómo se atiende (sistema)
 
-`POST /reporting/schedules/{id}/subscriptions` la atiende `ReportingController.subscribe` (src/modules/reporting/controllers/reporting.controller.ts:184). Exige sesión con alguno de los roles REPORT_VIEWER, REPORTING_ADMIN. Valida el cuerpo como `SubscribeDto` (1 campo, 1 obligatorio). Delega en `ReportingRunsService.subscribe`. Crea filas en reporting.report_subscriptions. Actualiza reporting.report_subscriptions. Lee reporting.report_schedules, reporting.report_subscriptions.
+`POST /reporting/schedules/{id}/subscriptions` la atiende `ReportingController.subscribe` (src/modules/reporting/controllers/reporting.controller.ts:228). Exige sesión con alguno de los roles REPORT_VIEWER, REPORTING_ADMIN. Valida el cuerpo como `SubscribeDto` (1 campo, 1 obligatorio). Delega en `ReportingRunsService.subscribe`. Crea filas en reporting.report_subscriptions. Actualiza reporting.report_subscriptions. Lee reporting.report_schedules, reporting.report_subscriptions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: REPORT_VIEWER, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:184` |
+| ROL | Alguno de: REPORT_VIEWER, REPORTING_ADMIN | `src/modules/reporting/controllers/reporting.controller.ts:228` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:184` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/reporting/controllers/reporting.controller.ts:228` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1334,10 +1321,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `reporting.report_schedules` | LEE | LEE | DIRECTA | ReportingController.subscribe → ReportingRunsService.subscribe → ReportingRunsRepository.findScheduleById | `src/modules/reporting/repositories/reporting-runs.repository.ts:293` |
+| `reporting.report_schedules` | LEE | LEE | DIRECTA | ReportingController.subscribe → ReportingRunsService.subscribe → ReportingRunsRepository.findScheduleById | `src/modules/reporting/repositories/reporting-runs.repository.ts:296` |
 | `reporting.report_subscriptions` | ESCRIBE | ACTUALIZA | POR_TIPO | ReportingController.subscribe → ReportingRunsService.subscribe | `src/modules/reporting/services/reporting-runs.service.ts:546` |
-| `reporting.report_subscriptions` | ESCRIBE | CREA | DIRECTA | ReportingController.subscribe → ReportingRunsService.subscribe → ReportingRunsRepository.createSubscription | `src/modules/reporting/repositories/reporting-runs.repository.ts:450` |
-| `reporting.report_subscriptions` | LEE | LEE | DIRECTA | ReportingController.subscribe → ReportingRunsService.subscribe → ReportingRunsRepository.findSubscription | `src/modules/reporting/repositories/reporting-runs.repository.ts:470` |
+| `reporting.report_subscriptions` | ESCRIBE | CREA | DIRECTA | ReportingController.subscribe → ReportingRunsService.subscribe → ReportingRunsRepository.createSubscription | `src/modules/reporting/repositories/reporting-runs.repository.ts:458` |
+| `reporting.report_subscriptions` | LEE | LEE | DIRECTA | ReportingController.subscribe → ReportingRunsService.subscribe → ReportingRunsRepository.findSubscription | `src/modules/reporting/repositories/reporting-runs.repository.ts:478` |
 
 ### Parámetros
 
@@ -1386,7 +1373,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/reporti
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Programación no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La programación no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 

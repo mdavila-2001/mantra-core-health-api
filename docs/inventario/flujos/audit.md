@@ -3,13 +3,13 @@
 # Flujos del módulo `audit`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 11 (11 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 14 (12 con decisiones propias, 2 sin ellas)
 - Inventario de endpoints del módulo: [audit](../endpoints/audit.md)
 
 ## Proceso: Módulo 10 — Audit, Provenance and Version Histories
 
-- **Código:** `audit` · **Agrupación:** CASO_DE_USO_README · **Operaciones:** 11
-- **Actores:** SECURITY_ADMIN
+- **Código:** `audit` · **Agrupación:** MIXTO · **Operaciones:** 14
+- **Actores:** AUDITOR · DPO · PATIENT · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/audit/README.md`
 
@@ -34,12 +34,17 @@ _Fuente: `src/modules/audit/README.md:3`_
 | `UC-10-10` | Detectar acceso anómalo | POST /audit/anomaly/scan | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-10-11` | Registrar decisión de moderación / gobernanza | POST /moderation/decisions | SECURITY_ADMIN | MEDIO | 6 |
 | `UC-10-12` | Registrar acceso delegado / de tercero gobernado | POST /audit/third-party-access | SECURITY_ADMIN | MEDIO | 7 |
+| `ctrl:AuditMeController` | Operaciones de AuditMeController que el README no asigna a un caso de uso | GET /audit/me/data-access | PATIENT | BAJO | 5 |
+| `ctrl:AuditQueryController` | Operaciones de AuditQueryController que el README no asigna a un caso de uso | GET /audit/data-access | AUDITOR · DPO · SECURITY_ADMIN | BAJO | 1 |
+|  |  | GET /audit/log | AUDITOR · DPO · SECURITY_ADMIN | BAJO | 1 |
 
 ### Diagrama — etapas `UC-10-01`, `UC-10-04`, `UC-10-05`…
 
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
+  a27(["PATIENT"]):::actor
+  a33(["AUDITOR · DPO · SECURITY_ADMIN"]):::actor
   t3[("audit.audit_log")]:::tabla
   t4[("audit.data_access_log")]:::tabla
   t5[("audit.patient_content_access_log")]:::tabla
@@ -52,6 +57,10 @@ flowchart LR
   t22[("audit.identity_verification_access_log")]:::tabla
   t23[("audit.insurance_decision_access_log")]:::tabla
   t24[("audit.pharmacy_inventory_access_log")]:::tabla
+  t28[("profiles.health_practitioner_profiles")]:::tabla
+  t29[("profiles.patient_profiles")]:::tabla
+  t30[("profiles.person_account_links")]:::tabla
+  t31[("profiles.persons")]:::tabla
   subgraph s0["UC-10-01 · Registrar acceso/lectura clínica (accounting WORM) + provenance"]
     o1["POST /audit/data-access"]:::op
   end
@@ -83,6 +92,13 @@ flowchart LR
   t25[("+1 tablas más")]
   subgraph s9["UC-10-12 · Registrar acceso delegado / de tercero gobernado"]
     o20["POST /audit/third-party-access"]:::op
+  end
+  subgraph s10["ctrl:AuditMeController · Operaciones de AuditMeController que el README no asig…"]
+    o26["GET /audit/me/data-access"]:::op
+  end
+  subgraph s11["ctrl:AuditQueryController · Operaciones de AuditQueryController que el README n…"]
+    o32["GET /audit/data-access"]:::op
+    o34["GET /audit/log"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -146,6 +162,16 @@ flowchart LR
   o20 -->|"CREA"| t23
   o20 -->|"CREA"| t24
   o20 -.-> t25
+  a27 --> o26
+  o26 -->|"LEE"| t4
+  o26 -->|"LEE"| t28
+  o26 -->|"LEE"| t29
+  o26 -->|"LEE"| t30
+  o26 -->|"LEE"| t31
+  a33 --> o32
+  o32 -->|"LEE"| t4
+  a33 --> o34
+  o34 -->|"LEE"| t3
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -385,6 +411,7 @@ Verificar integridad tamper-evidence de la cadena
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.BAD_REQUEST} |
 
 ```mermaid
 flowchart TD
@@ -393,31 +420,35 @@ flowchart TD
   n1 --> n2
   n3["Llama a AuditEventsService.verifyIntegrity"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4{"limit !== undefined && (!Number.isInteger(limit) || limit ‹ 1 || limit › INTEGRITY_MAX_DIAGNOSTIC_LIMIT)"}:::decision
   n3 --> n4
-  n5["Llama a AuditLogRepository.findChain"]:::llamada
-  n4 --> n5
-  n6[("LEE audit.audit_log")]:::efecto
-  n5 --> n6
-  n7["Llama a AuditLogRepository.append"]:::llamada
+  n5(["500 INTERNAL {HttpStatus.BAD_REQUEST}"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a AuditLogRepository.findChain"]:::llamada
   n6 --> n7
-  n8["Llama a AuditLogRepository.withRequestOrigin"]:::llamada
+  n8[("LEE audit.audit_log")]:::efecto
   n7 --> n8
-  n9["Llama a AuditLogRepository.sessionDeviceId"]:::llamada
+  n9["Llama a AuditLogRepository.append"]:::llamada
   n8 --> n9
-  n10{"context.deviceId === undefined"}:::decision
+  n10["Llama a AuditLogRepository.withRequestOrigin"]:::llamada
   n9 --> n10
-  n11[("LEE iam.sessions")]:::efecto
-  n10 -->|"sí"| n11
-  n12["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n11["Llama a AuditLogRepository.sessionDeviceId"]:::llamada
+  n10 --> n11
+  n12{"context.deviceId === undefined"}:::decision
   n11 --> n12
-  n10 -->|"no"| n12
-  n13[("LEE audit.audit_log")]:::efecto
-  n12 --> n13
-  n14[("CREA audit.audit_log")]:::efecto
+  n13[("LEE iam.sessions")]:::efecto
+  n12 -->|"sí"| n13
+  n14["Llama a AuditLogRepository.findChainTip"]:::llamada
   n13 --> n14
-  n15(("200 Responde con éxito")):::ok
+  n12 -->|"no"| n14
+  n15[("LEE audit.audit_log")]:::efecto
   n14 --> n15
+  n16[("CREA audit.audit_log")]:::efecto
+  n15 --> n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -426,7 +457,54 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /audit/retention/apply
+#### 6. GET /audit/me/data-access
+
+Quién accedió a mi historia y con qué finalidad
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil de paciente no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a MyDataAccessService.list"]:::llamada
+  n2 --> n3
+  n4["Llama a MyDataAccessService.ownPatientProfileId"]:::llamada
+  n3 --> n4
+  n5["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n4 --> n5
+  n6[("LEE profiles.person_account_links")]:::efecto
+  n5 --> n6
+  n7["Llama a PatientProfilesRepository.findById"]:::llamada
+  n6 --> n7
+  n8[("LEE profiles.patient_profiles")]:::efecto
+  n7 --> n8
+  n9{"!patientProfileId"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Perfil de paciente no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PatientAccessLogRepository.accessesTo"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE audit.data_access_log · LEE profiles.person_account_links · LEE profiles.persons · LEE profiles.health_pr…")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. POST /audit/retention/apply
 
 Aplicar retención / archivado / litigation-hold
 
@@ -481,7 +559,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /audit/third-party-access
+#### 8. POST /audit/third-party-access
 
 Registrar acceso delegado / de tercero gobernado
 
@@ -581,7 +659,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /compliance/audit-export
+#### 9. POST /compliance/audit-export
 
 Exportar evidencia de auditoría para cumplimiento
 
@@ -645,7 +723,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /moderation/decisions
+#### 10. POST /moderation/decisions
 
 Registrar decisión de moderación / gobernanza analítica
 
@@ -711,7 +789,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /privacy/dsar
+#### 11. POST /privacy/dsar
 
 Tramitar DSAR (solicitud del titular)
 
@@ -767,7 +845,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. PATCH /privacy/dsar/{id}
+#### 12. PATCH /privacy/dsar/{id}
 
 Avanzar la máquina de estados de una solicitud DSAR
 
@@ -836,3 +914,11 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+### Operaciones sin decisiones propias
+
+Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
+
+| Operación | Respuestas posibles | Tablas |
+|---|---|---|
+| GET /audit/data-access | 200, 401, 403, 429 | 1 |
+| GET /audit/log | 200, 401, 403, 429 | 1 |
