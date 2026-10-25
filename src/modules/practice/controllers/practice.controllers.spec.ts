@@ -39,6 +39,7 @@ describe('PracticesController', () => {
     };
     const inventoryService = { createItem: mockFn() };
     const organizationReadService = { getConsole: mockFn() };
+    const offersService = { listOffers: mockFn(), updateOffer: mockFn() };
     const controller = new PracticesController(
       sitesService as any,
       accreditationsService as any,
@@ -47,6 +48,7 @@ describe('PracticesController', () => {
       workforceService as any,
       inventoryService as any,
       organizationReadService as any,
+      offersService as any,
     );
     return {
       controller,
@@ -57,6 +59,7 @@ describe('PracticesController', () => {
       workforceService,
       inventoryService,
       organizationReadService,
+      offersService,
     };
   }
 
@@ -97,10 +100,28 @@ describe('PracticesController', () => {
 
   it('delegates publishHealthcareService (UC-14-06)', async () => {
     const d = build();
-    const dto = {};
+    const dto = {} as any;
     await d.controller.publishHealthcareService('p1', dto, actor);
     expect(d.structureService.publishHealthcareService).toHaveBeenCalledWith(
       'p1',
+      dto,
+      actor,
+    );
+  });
+
+  it('delegates listHealthcareServices con la sede opcional', async () => {
+    const d = build();
+    await d.controller.listHealthcareServices('p1', actor, 's1');
+    expect(d.offersService.listOffers).toHaveBeenCalledWith('p1', 's1', actor);
+  });
+
+  it('delegates updateHealthcareService (PATCH)', async () => {
+    const d = build();
+    const dto = { active: false };
+    await d.controller.updateHealthcareService('p1', 'hs1', dto, actor);
+    expect(d.offersService.updateOffer).toHaveBeenCalledWith(
+      'p1',
+      'hs1',
       dto,
       actor,
     );
