@@ -8,6 +8,7 @@ import {
   valueSetId,
   valueSetMemberId,
 } from './dynamic-enum-catalog';
+import { CLIN } from '../../modules/clinical/clinical.concepts';
 
 /**
  * El catálogo es una declaración a mano, así que sus invariantes se comprueban
@@ -123,6 +124,29 @@ describe('DYNAMIC_ENUM_CATALOG', () => {
       'profiles.persons.administrative_gender_concept_id',
     );
     expect(targets).toContain('profiles.persons.sex_at_birth_concept_id');
+  });
+});
+
+describe('service-request-performer-selection', () => {
+  const entry = DYNAMIC_ENUM_CATALOG.find(
+    (e) => e.code === 'service-request-performer-selection',
+  );
+
+  it('existe con los tres modos y por defecto que elija el paciente', () => {
+    expect(entry).toBeDefined();
+    expect(entry!.concepts).toHaveLength(3);
+    expect(entry!.defaultConceptId).toBe(
+      CLIN.SERVICE_REQUEST_PERFORMER_PATIENT_CHOICE,
+    );
+  });
+
+  it('gobierna solo la columna del modo del ejecutor, que ningún otro conjunto gobierna', () => {
+    const column = 'clinical.service_requests.performer_selection_concept_id';
+    expect(entry!.targets).toEqual([column]);
+    const owners = DYNAMIC_ENUM_CATALOG.filter((e) =>
+      e.targets.includes(column),
+    );
+    expect(owners).toHaveLength(1);
   });
 });
 

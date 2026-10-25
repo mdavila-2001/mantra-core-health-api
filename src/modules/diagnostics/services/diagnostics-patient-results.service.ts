@@ -28,7 +28,11 @@ import {
 import { FileUploadService } from '../../common/services';
 import type { FileContentDto } from '../../common/dto';
 import { DiagnosticOrdersRepository, ReportsRepository } from '../repositories';
-import { DIAGNOSTIC_CATEGORIES, DIAG } from '../diagnostics.concepts';
+import {
+  DIAGNOSTIC_CATEGORIES,
+  DIAG,
+  PATIENT_PORTAL_CATEGORIES,
+} from '../diagnostics.concepts';
 import type {
   DiagnosticResultShareDto,
   DiagnosticResultSharesResponseDto,
@@ -175,18 +179,24 @@ export class DiagnosticsPatientResultsService {
     const rows = await this.ordersRepo.findOrdersForPatientPortal(
       em,
       patientProfileId,
-      DIAGNOSTIC_CATEGORIES,
+      PATIENT_PORTAL_CATEGORIES,
       limit + 1,
     );
     const truncated = rows.length > limit;
     const page = rows.slice(0, limit);
 
     const [settlements, preparation, reportByOrder] = await Promise.all([
+      // La liquidación del seguro es de las órdenes diagnósticas: una orden de
+      // procedimiento no tiene reclamo y no se le inventa una liquidación.
       this.settlements.forOrders(
         em,
         actor.id,
         'DIAGNOSTIC',
-        page.map((order) => order.id),
+        page
+          .filter((order) =>
+            DIAGNOSTIC_CATEGORIES.includes(order.categoryConceptId ?? ''),
+          )
+          .map((order) => order.id),
       ),
       this.preparationByConcept(
         em,
