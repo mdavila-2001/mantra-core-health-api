@@ -41,8 +41,9 @@ notify() {
   token="$(sed -n 's/^TELEGRAM_BOT_TOKEN=//p' "$TELEGRAM_ENV" | tr -d "'\"")"
   chat="$(sed -n 's/^TELEGRAM_CHAT_ID=//p' "$TELEGRAM_ENV" | tr -d "'\"")"
   [ -n "$token" ] && [ -n "$chat" ] || return 0
-  curl -s -m 15 -o /dev/null "https://api.telegram.org/bot$token/sendMessage" \
-    --data-urlencode "chat_id=$chat" --data-urlencode "text=$1" || true
+  # La URL lleva el token: va por la config en stdin, no por argv (lo vería `ps`).
+  printf 'url = "https://api.telegram.org/bot%s/sendMessage"\n' "$token" |
+    curl -s -m 15 -o /dev/null -K - --data-urlencode "chat_id=$chat" --data-urlencode "text=$1" || true
 }
 
 db() { docker exec coolify-db psql -U coolify -d coolify -tAc "$1" 2>/dev/null; }
@@ -68,7 +69,9 @@ branch_sha() {
 deploy() {
   local uuid="$1" token
   token="$(cat "$TOKEN_FILE")"
-  curl -s -m 60 -X POST -H "Authorization: Bearer $token" "$COOLIFY/deploy?uuid=$uuid&force=false"
+  # El token va por la config en stdin, no por argv (lo vería `ps`).
+  printf 'header = "Authorization: Bearer %s"\n' "$token" |
+    curl -s -m 60 -K - -X POST "$COOLIFY/deploy?uuid=$uuid&force=false"
 }
 
 one_app() {
