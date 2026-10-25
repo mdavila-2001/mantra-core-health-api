@@ -3,12 +3,14 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { PractitionerSimpleAccountingRepository } from '../repositories';
 import { PractitionerAccountingService } from './practitioner-accounting.service';
+import { AccountingScopeService } from './accounting-scope.service';
 import { PracticeTenantLookupService } from '../../practice/services';
 import { Appointments, Encounters } from '../../clinical/entities';
 import { CLIN } from '../../clinical/clinical.concepts';
@@ -86,7 +88,43 @@ export class PractitionerSimpleAccountingService {
     private readonly repo: PractitionerSimpleAccountingRepository,
     private readonly practitionerAccounting: PractitionerAccountingService,
     private readonly practiceTenantLookup: PracticeTenantLookupService,
+    private readonly scope: AccountingScopeService,
   ) {}
+
+  /**
+   * Práctica de una escritura: el profesional está vinculado a ella (misma regla
+   * que sus hermanos) y es del tenant activo (ACC-01, como `createOwnLiability`).
+   */
+  private async ownPracticeForWrite(
+    actor: AuthenticatedUser,
+    practiceId: string,
+  ): Promise<void> {
+    await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
+    await this.scope.practice(practiceId);
+  }
+
+  /**
+   * Acota una fila cargada por UUID al tenant activo, a través de su práctica
+   * (ACC-01). Lo ajeno responde idéntico a lo inexistente: 404, mismo mensaje y
+   * `reason`, sin `details`. Después, la vinculación del profesional con la
+   * práctica de la fila.
+   */
+  private async ownRow<T extends { practiceId: string }>(
+    row: T | null,
+    actor: AuthenticatedUser,
+    failure: { message: string; reason: AccountingErrorReason },
+  ): Promise<T> {
+    const tenantId = requireTenantId();
+    const owner = row
+      ? await this.practiceTenantLookup.findTenantOfPractice(row.practiceId)
+      : null;
+    const scoped = assertResourceInTenant(row, owner, tenantId, failure);
+    await this.practitionerAccounting.assertOwnsPractice(
+      actor,
+      scoped.practiceId,
+    );
+    return scoped;
+  }
 
   /* ---- los tres números -------------------------------------------------- */
 
@@ -268,7 +306,7 @@ export class PractitionerSimpleAccountingService {
     dto: CreateSimpleAccountDto,
     actor: AuthenticatedUser,
   ): Promise<SimpleAccountDto> {
-    await this.practitionerAccounting.assertOwnsPractice(actor, dto.practiceId);
+    await this.ownPracticeForWrite(actor, dto.practiceId);
     const name = this.validName(dto.name);
     const accountClass = this.validClass(dto.accountClass);
     const em = this.em.fork();
@@ -380,18 +418,10 @@ export class PractitionerSimpleAccountingService {
     actor: AuthenticatedUser,
   ): Promise<PractitionerSimpleAccounts> {
     const account = isUuid(id) ? await this.repo.findAccount(em, id) : null;
-    if (!account) {
-      throw new ResourceNotFoundException(
-        'Cuenta no encontrada',
-        { accountId: id },
-        AccountingErrorReason.SIMPLE_ACCOUNT_NOT_FOUND,
-      );
-    }
-    await this.practitionerAccounting.assertOwnsPractice(
-      actor,
-      account.practiceId,
-    );
-    return account;
+    return this.ownRow(account, actor, {
+      message: 'Cuenta no encontrada',
+      reason: AccountingErrorReason.SIMPLE_ACCOUNT_NOT_FOUND,
+    });
   }
 
   private validName(name: string | undefined): string {
@@ -445,7 +475,7 @@ export class PractitionerSimpleAccountingService {
     dto: CreateSimpleRecordDto,
     actor: AuthenticatedUser,
   ): Promise<SimpleRecordDto> {
-    await this.practitionerAccounting.assertOwnsPractice(actor, dto.practiceId);
+    await this.ownPracticeForWrite(actor, dto.practiceId);
     if (!isRecordKind(dto.kind))
       this.invalid('Falta qué es: gasto, activo o deuda.');
     const kind = dto.kind;
@@ -518,18 +548,10 @@ export class PractitionerSimpleAccountingService {
     actor: AuthenticatedUser,
   ): Promise<PractitionerSimpleRecords> {
     const record = isUuid(id) ? await this.repo.findRecord(em, id) : null;
-    if (!record) {
-      throw new ResourceNotFoundException(
-        'Registro no encontrado',
-        { recordId: id },
-        AccountingErrorReason.SIMPLE_RECORD_NOT_FOUND,
-      );
-    }
-    await this.practitionerAccounting.assertOwnsPractice(
-      actor,
-      record.practiceId,
-    );
-    return record;
+    return this.ownRow(record, actor, {
+      message: 'Registro no encontrado',
+      reason: AccountingErrorReason.SIMPLE_RECORD_NOT_FOUND,
+    });
   }
 
   /* ---- transacciones debe/haber ------------------------------------------ */
@@ -548,7 +570,7 @@ export class PractitionerSimpleAccountingService {
     dto: CreateSimpleTransactionDto,
     actor: AuthenticatedUser,
   ): Promise<SimpleTransactionDto> {
-    await this.practitionerAccounting.assertOwnsPractice(actor, dto.practiceId);
+    await this.ownPracticeForWrite(actor, dto.practiceId);
     const em = this.em.fork();
     await this.assertTransactionContent(em, dto, dto.practiceId);
     const created = this.repo.createTransaction(em, {
@@ -635,18 +657,10 @@ export class PractitionerSimpleAccountingService {
     const transaction = isUuid(id)
       ? await this.repo.findTransaction(em, id)
       : null;
-    if (!transaction) {
-      throw new ResourceNotFoundException(
-        'Transacción no encontrada',
-        { transactionId: id },
-        AccountingErrorReason.SIMPLE_TRANSACTION_NOT_FOUND,
-      );
-    }
-    await this.practitionerAccounting.assertOwnsPractice(
-      actor,
-      transaction.practiceId,
-    );
-    return transaction;
+    return this.ownRow(transaction, actor, {
+      message: 'Transacción no encontrada',
+      reason: AccountingErrorReason.SIMPLE_TRANSACTION_NOT_FOUND,
+    });
   }
 
   /** 422 con el motivo en castellano: el front lo muestra tal cual. */

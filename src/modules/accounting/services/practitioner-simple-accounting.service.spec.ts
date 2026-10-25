@@ -4,6 +4,8 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { PractitionerSimpleAccountingService } from './practitioner-simple-accounting.service';
+import { AccountingScopeService } from './accounting-scope.service';
+import { inTenant } from './accounting-scope.testing';
 import { GENERAL_ACCOUNTS } from './practitioner-simple-accounting.rules';
 import { AccountingErrorReason } from '../accounting.error-reasons';
 import {
@@ -23,6 +25,8 @@ import { INS } from '../../insurance/domain/insurance.concepts';
 
 const PRACTICE = '11111111-1111-4111-8111-111111111111';
 const OTHER_PRACTICE = '22222222-2222-4222-8222-222222222222';
+/** Una práctica de OTRA organización (tenant-2). */
+const FOREIGN_PRACTICE = '33333333-3333-4333-8333-333333333333';
 const actor = {
   id: 'user-1',
   roles: ['PRACTITIONER'],
@@ -123,13 +127,24 @@ function build() {
     assertOwnsPractice: mockFn().mockResolvedValue('prof-1'),
   };
   const practiceTenantLookup = {
-    findTenantOfPractice: mockFn().mockResolvedValue('tenant-1'),
+    findTenantOfPractice: mockFn(async (practiceId: string) =>
+      practiceId === FOREIGN_PRACTICE ? 'tenant-2' : 'tenant-1',
+    ),
   };
-  const service = new PractitionerSimpleAccountingService(
-    rootEm as any,
-    repo as any,
-    practitionerAccounting as any,
+  const scope = new AccountingScopeService(
     practiceTenantLookup as any,
+    ...(Array(8).fill(undefined) as [any, any, any, any, any, any, any, any]),
+  );
+  // Cada método corre dentro del tenant activo (tenant-1), como en una petición.
+  const service = inTenant(
+    new PractitionerSimpleAccountingService(
+      rootEm as any,
+      repo as any,
+      practitionerAccounting as any,
+      practiceTenantLookup as any,
+      scope,
+    ),
+    'tenant-1',
   );
   return {
     service,
@@ -150,6 +165,15 @@ async function seeded(ctx: ReturnType<typeof build>, practiceId = PRACTICE) {
       (a) => a.practiceId === practiceId && a.code === code,
     )!;
   return byCode;
+}
+
+async function rejected(promise: Promise<unknown>): Promise<any> {
+  return promise.then(
+    () => {
+      throw new Error('debía rechazar');
+    },
+    (e: unknown) => e,
+  );
 }
 
 async function expectRejected(
@@ -256,6 +280,134 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
         ctx.practitionerAccounting.assertOwnsPractice,
       ).toHaveBeenLastCalledWith(actor, OTHER_PRACTICE);
       expect(foreign.name).not.toBe('Hack');
+    });
+  });
+
+  describe('alcance de tenant (ACC-01)', () => {
+    async function foreignRows(ctx: ReturnType<typeof build>) {
+      await seeded(ctx, FOREIGN_PRACTICE);
+      const account = ctx.repo.accounts.find(
+        (a) => a.practiceId === FOREIGN_PRACTICE && a.code === '5.1',
+      )!;
+      const record = {
+        id: uuid(),
+        practiceId: FOREIGN_PRACTICE,
+        kind: 'EXPENSE',
+        recordDate: new Date('2026-09-01T00:00:00Z'),
+        accountId: account.id,
+        description: 'ajeno',
+        amount: '1.00',
+      };
+      const transaction = {
+        id: uuid(),
+        practiceId: FOREIGN_PRACTICE,
+        transactionDate: new Date('2026-09-01T00:00:00Z'),
+        description: 'ajeno',
+        debitAccountId: account.id,
+        creditAccountId: account.id,
+        amount: '1.00',
+      };
+      ctx.repo.records.push(record);
+      ctx.repo.transactions.push(transaction);
+      return { account, record, transaction };
+    }
+
+    it('lo ajeno responde idéntico a lo inexistente: 404, mismo mensaje y reason, sin details', async () => {
+      const ctx = build();
+      const { account, record, transaction } = await foreignRows(ctx);
+      ctx.practitionerAccounting.assertOwnsPractice.mockClear();
+      const missing = uuid();
+      const body = (e: any) => ({
+        status: e.getStatus(),
+        response: e.getResponse(),
+      });
+      const cases: [string, () => Promise<unknown>, () => Promise<unknown>][] =
+        [
+          [
+            'cuenta (PUT)',
+            () => ctx.service.updateAccount(account.id, { name: 'X' }, actor),
+            () => ctx.service.updateAccount(missing, { name: 'X' }, actor),
+          ],
+          [
+            'cuenta (DELETE)',
+            () => ctx.service.deleteAccount(account.id, actor),
+            () => ctx.service.deleteAccount(missing, actor),
+          ],
+          [
+            'registro (PUT)',
+            () => ctx.service.updateRecord(record.id, {}, actor),
+            () => ctx.service.updateRecord(missing, {}, actor),
+          ],
+          [
+            'registro (DELETE)',
+            () => ctx.service.deleteRecord(record.id, actor),
+            () => ctx.service.deleteRecord(missing, actor),
+          ],
+          [
+            'transacción (PUT)',
+            () => ctx.service.updateTransaction(transaction.id, {}, actor),
+            () => ctx.service.updateTransaction(missing, {}, actor),
+          ],
+          [
+            'transacción (DELETE)',
+            () => ctx.service.deleteTransaction(transaction.id, actor),
+            () => ctx.service.deleteTransaction(missing, actor),
+          ],
+        ];
+      for (const [, foreign, absent] of cases) {
+        const a = await rejected(foreign());
+        const b = await rejected(absent());
+        expect(a).toBeInstanceOf(ResourceNotFoundException);
+        expect(body(a)).toEqual(body(b));
+        expect(JSON.stringify(body(a))).not.toContain('details');
+      }
+      expect(ctx.removed).toHaveLength(0);
+      // y ni siquiera se llegó a preguntar por la vinculación con la práctica ajena
+      expect(
+        ctx.practitionerAccounting.assertOwnsPractice,
+      ).not.toHaveBeenCalledWith(actor, FOREIGN_PRACTICE);
+    });
+
+    it('no se escribe en una práctica de otro tenant aunque el profesional figure vinculado', async () => {
+      const ctx = build();
+      const byCode = await seeded(ctx);
+      const before = ctx.repo.accounts.length;
+      const writes = [
+        ctx.service.createAccount(
+          { practiceId: FOREIGN_PRACTICE, name: 'X', accountClass: 'ASSET' },
+          actor,
+        ),
+        ctx.service.createRecord(
+          {
+            practiceId: FOREIGN_PRACTICE,
+            kind: 'EXPENSE',
+            date: '2026-09-01',
+            accountId: byCode('5.1').id,
+            description: 'x',
+            amount: '1',
+          },
+          actor,
+        ),
+        ctx.service.createTransaction(
+          {
+            practiceId: FOREIGN_PRACTICE,
+            date: '2026-09-01',
+            description: 'x',
+            debitAccountId: byCode('1.1').id,
+            creditAccountId: byCode('1.2').id,
+            amount: '1',
+          },
+          actor,
+        ),
+      ];
+      for (const write of writes) {
+        const error = await rejected(write);
+        expect(error).toBeInstanceOf(ResourceNotFoundException);
+        expect(error.message).toBe('Práctica no encontrada');
+      }
+      expect(ctx.repo.accounts).toHaveLength(before);
+      expect(ctx.repo.records).toHaveLength(0);
+      expect(ctx.repo.transactions).toHaveLength(0);
     });
   });
 

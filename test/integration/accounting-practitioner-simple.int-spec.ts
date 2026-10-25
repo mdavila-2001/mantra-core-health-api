@@ -4,6 +4,8 @@ import { randomUUID } from 'node:crypto';
 import { buildOrmConfig } from '../../src/orm/config/orm.config';
 import { PractitionerSimpleAccountingRepository } from '../../src/modules/accounting/repositories';
 import { PractitionerSimpleAccountingService } from '../../src/modules/accounting/services/practitioner-simple-accounting.service';
+import { AccountingScopeService } from '../../src/modules/accounting/services/accounting-scope.service';
+import { inTenant } from '../../src/modules/accounting/services/accounting-scope.testing';
 import { CLIN } from '../../src/modules/clinical/clinical.concepts';
 import { BILL } from '../../src/modules/billing/billing.concepts';
 import { INS } from '../../src/modules/insurance/domain/insurance.concepts';
@@ -120,11 +122,28 @@ describe('Contabilidad simple del doctor (DB real)', () => {
       ],
     );
 
-    service = new PractitionerSimpleAccountingService(
-      orm.em as never,
-      new PractitionerSimpleAccountingRepository(),
-      { assertOwnsPractice: async () => parent.practitioner } as never,
-      { findTenantOfPractice: async () => parent.tenant } as never,
+    const lookup = { findTenantOfPractice: async () => parent.tenant } as never;
+    service = inTenant(
+      new PractitionerSimpleAccountingService(
+        orm.em as never,
+        new PractitionerSimpleAccountingRepository(),
+        { assertOwnsPractice: async () => parent.practitioner } as never,
+        lookup,
+        new AccountingScopeService(
+          lookup,
+          ...(Array(8).fill(undefined) as [
+            never,
+            never,
+            never,
+            never,
+            never,
+            never,
+            never,
+            never,
+          ]),
+        ),
+      ),
+      parent.tenant,
     );
   });
 
