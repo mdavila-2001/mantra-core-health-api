@@ -7,52 +7,60 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Concepto | Cantidad |
 |---|---|
 | Tablas en el DDL del modelo | 1230 |
-| Entidades del ORM | 1263 |
+| Entidades del ORM | 1271 |
 | Tablas del DDL con entidad | 1230 |
 | Tablas del DDL **sin** entidad | 0 |
-| Entidades del ORM **sin** tabla en el DDL | 33 |
+| Entidades del ORM **sin** tabla en el DDL | 41 |
 | Columnas del DDL ausentes en su entidad | 1 |
 | Columnas con nulabilidad divergente | 24 |
 | Columnas con tipo divergente | 0 |
-| Columnas de la entidad que el DDL no tiene | 9 |
+| Columnas de la entidad que el DDL no tiene | 17 |
 
 ## Entidades del ORM sin tabla en el DDL
 
 | Tabla que declara | Clase | Dónde la declara el modelo |
 |---|---|---|
+| `billing.siat_simulated_invoices` | SiatSimulatedInvoices | **en ninguna fuente de DDL del modelo** |
+| `billing.siat_simulated_outbox` | SiatSimulatedOutbox | **en ninguna fuente de DDL del modelo** |
 | `clinical.patient_reported_health_statements` | PatientReportedHealthStatements | **en ninguna fuente de DDL del modelo** |
+| `clinical.received_services` | ReceivedServices | **en ninguna fuente de DDL del modelo** |
+| `data_catalog.catalog_operations` | CatalogOperations | sólo en un parche: `SQL\patches\2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
+| `data_catalog.catalog_operation_impacts` | CatalogOperationImpacts | sólo en un parche: `SQL\patches\2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
+| `data_catalog.catalog_processes` | CatalogProcesses | sólo en un parche: `SQL\patches\2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
+| `data_catalog.catalog_process_steps` | CatalogProcessSteps | sólo en un parche: `SQL\patches\2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
+| `data_catalog.catalog_process_step_operations` | CatalogProcessStepOperations | sólo en un parche: `SQL\patches\2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
 | `organization_extensions.data_use_agreements` | DataUseAgreements | **en ninguna fuente de DDL del modelo** |
 | `payments.cash_registers` | CashRegisters | **en ninguna fuente de DDL del modelo** |
-| `pharmacy_inventory.purchase_quotations` | PurchaseQuotations | sólo en un parche: `SQL/patches/2026-09-08_v428_billing_quotations.sql` |
+| `pharmacy_inventory.purchase_quotations` | PurchaseQuotations | sólo en un parche: `SQL\patches\2026-09-08_v428_billing_quotations.sql` |
 | `procedures_perioperative.instrument_sets` | InstrumentSets | **en ninguna fuente de DDL del modelo** |
 | `procedures_perioperative.sterilization_loads` | SterilizationLoads | **en ninguna fuente de DDL del modelo** |
 | `system_ops.accepted_risks` | AcceptedRisks | **en ninguna fuente de DDL del modelo** |
-| `time_series.ads_delivery_event_series` | AdsDeliveryEventSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `time_series.ai_runtime_metric_series` | AiRuntimeMetricSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `time_series.application_tracking_series` | ApplicationTrackingSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `time_series.audit_access_metric_series` | AuditAccessMetricSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `time_series.device_raw_reading_series` | DeviceRawReadingSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `time_series.ingestion_pipeline_metric_series` | IngestionPipelineMetricSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `time_series.lab_analyzer_event_series` | LabAnalyzerEventSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `time_series.location_ping_series` | LocationPingSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `time_series.normalized_vital_series` | NormalizedVitalSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `time_series.payment_gateway_metric_series` | PaymentGatewayMetricSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `time_series.service_sli_series` | ServiceSliSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `time_series.telemetry_event_series` | TelemetryEventSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
-| `vector_rag.embedding_jobs` | EmbeddingJobs | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.embedding_model_versions` | EmbeddingModelVersions | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.rag_access_policies` | RagAccessPolicies | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.retrieval_candidates` | RetrievalCandidates | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.retrieval_evidence` | RetrievalEvidence | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.retrieval_feedback_events` | RetrievalFeedbackEvents | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.retrieval_sessions` | RetrievalSessions | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.vector_chunks` | VectorChunks | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.vector_collections` | VectorCollections | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.vector_deletion_jobs` | VectorDeletionJobs | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.vector_documents` | VectorDocuments | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.vector_embeddings` | VectorEmbeddings | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.vector_reconciliation_runs` | VectorReconciliationRuns | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
-| `vector_rag.vector_tenant_bindings` | VectorTenantBindings | almacén no relacional: `NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql` |
+| `time_series.ads_delivery_event_series` | AdsDeliveryEventSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `time_series.ai_runtime_metric_series` | AiRuntimeMetricSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `time_series.application_tracking_series` | ApplicationTrackingSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `time_series.audit_access_metric_series` | AuditAccessMetricSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `time_series.device_raw_reading_series` | DeviceRawReadingSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `time_series.ingestion_pipeline_metric_series` | IngestionPipelineMetricSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `time_series.lab_analyzer_event_series` | LabAnalyzerEventSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `time_series.location_ping_series` | LocationPingSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `time_series.normalized_vital_series` | NormalizedVitalSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `time_series.payment_gateway_metric_series` | PaymentGatewayMetricSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `time_series.service_sli_series` | ServiceSliSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `time_series.telemetry_event_series` | TelemetryEventSeries | almacén no relacional: `NoSQL\58_time_series_timescaledb\time_series.timescaledb.sql` |
+| `vector_rag.embedding_jobs` | EmbeddingJobs | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.embedding_model_versions` | EmbeddingModelVersions | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.rag_access_policies` | RagAccessPolicies | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.retrieval_candidates` | RetrievalCandidates | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.retrieval_evidence` | RetrievalEvidence | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.retrieval_feedback_events` | RetrievalFeedbackEvents | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.retrieval_sessions` | RetrievalSessions | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.vector_chunks` | VectorChunks | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.vector_collections` | VectorCollections | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.vector_deletion_jobs` | VectorDeletionJobs | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.vector_documents` | VectorDocuments | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.vector_embeddings` | VectorEmbeddings | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.vector_reconciliation_runs` | VectorReconciliationRuns | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
+| `vector_rag.vector_tenant_bindings` | VectorTenantBindings | almacén no relacional: `NoSQL\59_vector_rag_pgvector\vector_rag.pgvector.sql` |
 
 ## Tablas del DDL sin entidad en el ORM
 

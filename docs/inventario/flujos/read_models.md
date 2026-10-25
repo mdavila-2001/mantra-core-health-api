@@ -27,14 +27,14 @@ _Fuente: `src/modules/read_models/README.md:3`_
 | `UC-30-02` | Publicar contrato de vista (upsert portal/route + view + hijos) | POST /portals/{portalCode}/routes/{routeCode}/views | SECURITY_ADMIN | MEDIO | 12 |
 | `UC-30-03` | Refresh manual de la MV (REFRESH CONCURRENTLY) | POST /read-models/{definitionId}/refresh | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-30-04` | Backfill inicial (FULL) de la MV | POST /read-models/{definitionId}/backfill | SECURITY_ADMIN | MEDIO | 2 |
-| `UC-30-05` | Devuelve contrato, masking y staleness; actualmente data queda vacío | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | Cualquier sesión válida | BAJO | 6 |
+| `UC-30-05` | Devuelve contrato, masking y staleness; actualmente data queda vacío | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | Cualquier sesión válida | BAJO | 30 |
 | `UC-30-06` | Invalidar y recomputar tras cambio upstream | POST /read-models/{definitionId}/invalidate | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-30-07` | Reconciliar la MV divergente (result REPAIRED) | POST /read-models/{definitionId}/reconcile | SYSTEM · SECURITY_ADMIN | MEDIO | 2 |
 | `UC-30-08` | Nueva versión N+1 en DRAFT (anterior sigue ACTIVE) | POST /read-models/definitions/{schema}/{object}/versions | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-30-09` | Preferencias de vista (validadas contra el allow-list) | PUT /views/{frontendPageViewId}/preferences | Cualquier sesión válida | ALTO | 5 |
 | `UC-30-10` | Proyecciones públicas (sin PHI, sin sesión) | GET /public/{slug} | Público (sin sesión) | BAJO | 1 |
 |  |  | GET /public/directory | Público (sin sesión) | BAJO | 1 |
-| `UC-30-11` | Derivar available_actions_json (estado + permiso) | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | Cualquier sesión válida | BAJO | 4 |
+| `UC-30-11` | Derivar available_actions_json (estado + permiso) | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | Cualquier sesión válida | BAJO | 25 |
 | `UC-30-12` | Detectar staleness/degradación de las MV | GET /read-models/health | SYSTEM · SECURITY_ADMIN | BAJO | 2 |
 | `UC-30-13` | Deprecar (ACTIVE→DEPRECATED) y retirar (guarda de FK) | DELETE /read-models/definitions/{id} | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /read-models/definitions/{id}/deprecate | SECURITY_ADMIN | MEDIO | 2 |
@@ -45,8 +45,8 @@ _Fuente: `src/modules/read_models/README.md:3`_
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a15(["Cualquier sesión válida"]):::actor
-  a19(["SYSTEM · SECURITY_ADMIN"]):::actor
-  a24(["Público (sin sesión)"]):::actor
+  a25(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a30(["Público (sin sesión)"]):::actor
   t3[("read_models.read_model_definitions")]:::tabla
   t4[("read_models.read_model_dependencies")]:::tabla
   t6[("read_models.frontend_page_views")]:::tabla
@@ -54,9 +54,14 @@ flowchart LR
   t8[("read_models.frontend_view_actions")]:::tabla
   t9[("read_models.frontend_view_fields")]:::tabla
   t12[("read_models.read_model_refresh_runs")]:::tabla
-  t16[("read_models.portal_surfaces")]:::tabla
-  t22[("read_models.user_view_preferences")]:::tabla
-  t25[("read_models.public_provider_directory")]:::tabla
+  t16[("authz.access_policies")]:::tabla
+  t17[("authz.care_relationships")]:::tabla
+  t18[("authz.clinical_access_grants")]:::tabla
+  t19[("authz.field_permissions")]:::tabla
+  t20[("authz.patient_legal_representations")]:::tabla
+  t21[("authz.permissions")]:::tabla
+  t28[("read_models.user_view_preferences")]:::tabla
+  t31[("read_models.public_provider_directory")]:::tabla
   subgraph s0["UC-30-01 · Registrar y publicar un contrato versionado + dependencias upstream"]
     o1["POST /read-models/definitions"]:::op
   end
@@ -70,34 +75,36 @@ flowchart LR
   subgraph s3["UC-30-04 · Backfill inicial (FULL) de la MV"]
     o13["POST /read-models/{definitionId}/backfill"]:::op
   end
+  t22[("+24 tablas más")]
   subgraph s4["UC-30-05 · Devuelve contrato, masking y staleness; actualmente data queda vacío"]
     o14["GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data"]:::op
   end
   subgraph s5["UC-30-06 · Invalidar y recomputar tras cambio upstream"]
-    o17["POST /read-models/{definitionId}/invalidate"]:::op
+    o23["POST /read-models/{definitionId}/invalidate"]:::op
   end
   subgraph s6["UC-30-07 · Reconciliar la MV divergente (result REPAIRED)"]
-    o18["POST /read-models/{definitionId}/reconcile"]:::op
+    o24["POST /read-models/{definitionId}/reconcile"]:::op
   end
   subgraph s7["UC-30-08 · Nueva versión N+1 en DRAFT (anterior sigue ACTIVE)"]
-    o20["POST /read-models/definitions/{schema}/{object}/versions"]:::op
+    o26["POST /read-models/definitions/{schema}/{object}/versions"]:::op
   end
   subgraph s8["UC-30-09 · Preferencias de vista (validadas contra el allow-list)"]
-    o21["PUT /views/{frontendPageViewId}/preferences"]:::op
+    o27["PUT /views/{frontendPageViewId}/preferences"]:::op
   end
   subgraph s9["UC-30-10 · Proyecciones públicas (sin PHI, sin sesión)"]
-    o23["GET /public/{slug}"]:::op
-    o26["GET /public/directory"]:::op
+    o29["GET /public/{slug}"]:::op
+    o32["GET /public/directory"]:::op
   end
+  t34[("+19 tablas más")]
   subgraph s10["UC-30-11 · Derivar available_actions_json (estado + permiso)"]
-    o27["GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions"]:::op
+    o33["GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions"]:::op
   end
   subgraph s11["UC-30-12 · Detectar staleness/degradación de las MV"]
-    o28["GET /read-models/health"]:::op
+    o35["GET /read-models/health"]:::op
   end
   subgraph s12["UC-30-13 · Deprecar (ACTIVE→DEPRECATED) y retirar (guarda de FK)"]
-    o29["DELETE /read-models/definitions/{id}"]:::op
-    o30["POST /read-models/definitions/{id}/deprecate"]:::op
+    o36["DELETE /read-models/definitions/{id}"]:::op
+    o37["POST /read-models/definitions/{id}/deprecate"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -118,47 +125,51 @@ flowchart LR
   o13 -->|"LEE"| t3
   o13 -->|"CREA"| t12
   a15 --> o14
-  o14 -->|"LEE"| t6
-  o14 -->|"LEE"| t7
-  o14 -->|"LEE"| t8
-  o14 -->|"LEE"| t9
   o14 -->|"LEE"| t16
-  o14 -->|"LEE"| t12
-  a2 --> o17
-  o17 -->|"LEE"| t3
-  o17 -->|"CREA"| t12
-  a19 --> o18
-  o18 -->|"LEE"| t3
-  o18 -->|"CREA"| t12
-  a2 --> o20
-  o20 -->|"CREA"| t3
-  o20 -->|"LEE"| t3
-  o20 -->|"CREA"| t4
-  a15 --> o21
-  o21 -->|"LEE"| t6
-  o21 -->|"LEE"| t9
-  o21 -->|"ACTUALIZA"| t22
-  o21 -->|"CREA"| t22
-  o21 -->|"LEE"| t22
-  a24 --> o23
-  o23 -->|"LEE"| t25
-  a24 --> o26
-  o26 -->|"LEE"| t25
+  o14 -->|"LEE"| t17
+  o14 -->|"LEE"| t18
+  o14 -->|"LEE"| t19
+  o14 -->|"LEE"| t20
+  o14 -->|"LEE"| t21
+  o14 -.-> t22
+  a2 --> o23
+  o23 -->|"LEE"| t3
+  o23 -->|"CREA"| t12
+  a25 --> o24
+  o24 -->|"LEE"| t3
+  o24 -->|"CREA"| t12
+  a2 --> o26
+  o26 -->|"CREA"| t3
+  o26 -->|"LEE"| t3
+  o26 -->|"CREA"| t4
   a15 --> o27
   o27 -->|"LEE"| t6
-  o27 -->|"LEE"| t7
-  o27 -->|"LEE"| t8
-  o27 -->|"LEE"| t16
-  a19 --> o28
-  o28 -->|"LEE"| t3
-  o28 -->|"LEE"| t12
-  a2 --> o29
-  o29 -->|"LEE"| t6
-  o29 -->|"ACTUALIZA"| t3
-  o29 -->|"LEE"| t3
-  a2 --> o30
-  o30 -->|"ACTUALIZA"| t3
-  o30 -->|"LEE"| t3
+  o27 -->|"LEE"| t9
+  o27 -->|"ACTUALIZA"| t28
+  o27 -->|"CREA"| t28
+  o27 -->|"LEE"| t28
+  a30 --> o29
+  o29 -->|"LEE"| t31
+  a30 --> o32
+  o32 -->|"LEE"| t31
+  a15 --> o33
+  o33 -->|"LEE"| t16
+  o33 -->|"LEE"| t17
+  o33 -->|"LEE"| t18
+  o33 -->|"LEE"| t19
+  o33 -->|"LEE"| t20
+  o33 -->|"LEE"| t21
+  o33 -.-> t34
+  a25 --> o35
+  o35 -->|"LEE"| t3
+  o35 -->|"LEE"| t12
+  a2 --> o36
+  o36 -->|"LEE"| t6
+  o36 -->|"ACTUALIZA"| t3
+  o36 -->|"LEE"| t3
+  a2 --> o37
+  o37 -->|"ACTUALIZA"| t3
+  o37 -->|"LEE"| t3
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -293,27 +304,27 @@ Derivar available_actions_json (estado + permiso + purpose)
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Portal no encontrado; ResourceNotFoundException: Ruta no encontrada; ResourceNotFoundException: Vista no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · parámetros de consulta (400)…"}}:::acceso
   n1 --> n2
   n3["Llama a FrontendViewsService.deriveAvailableActions"]:::llamada
   n2 --> n3
-  n4["Llama a FrontendViewsService.resolveView"]:::llamada
+  n4["Llama a FrontendViewsService.resolveContract"]:::llamada
   n3 --> n4
   n5["Llama a PortalSurfacesRepository.findByCode"]:::llamada
   n4 --> n5
   n6[("LEE read_models.portal_surfaces")]:::efecto
   n5 --> n6
-  n7{"!surface"}:::decision
+  n7{"!portal"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Portal no encontrado"]):::error
+  n8(["↩ (relanza el error capturado)"]):::error
   n7 -->|"sí"| n8
   n9["Llama a FrontendRoutesRepository.findBySurfaceAndCode"]:::llamada
   n7 -->|"no"| n9
@@ -321,7 +332,7 @@ flowchart TD
   n9 --> n10
   n11{"!route"}:::decision
   n10 --> n11
-  n12(["404 NOT_FOUND Ruta no encontrada"]):::error
+  n12(["↩ (relanza el error capturado)"]):::error
   n11 -->|"sí"| n12
   n13["Llama a FrontendPageViewsRepository.findByRouteAndCode"]:::llamada
   n11 -->|"no"| n13
@@ -329,14 +340,107 @@ flowchart TD
   n13 --> n14
   n15{"!view"}:::decision
   n14 --> n15
-  n16(["404 NOT_FOUND Vista no encontrada"]):::error
+  n16(["↩ (relanza el error capturado)"]):::error
   n15 -->|"sí"| n16
-  n17["Llama a FrontendViewChildrenRepository.listActions"]:::llamada
+  n17["Llama a ViewContractAuthorizer.authorizeView"]:::llamada
   n15 -->|"no"| n17
-  n18[("LEE read_models.frontend_view_actions")]:::efecto
+  n18{"portal.statusConceptId !== CONCEPTS.STATE_ACTIVE || route.statusConceptId !== CONCEPTS.STATE_ACTIVE || view.s…"}:::decision
   n17 --> n18
-  n19(("200 Responde con éxito")):::ok
-  n18 --> n19
+  n19(["↩ (relanza el error capturado)"]):::error
+  n18 -->|"sí"| n19
+  n20{"needsTenant && !request.tenantId"}:::decision
+  n18 -->|"no"| n20
+  n21(["↩ (relanza el error capturado)"]):::error
+  n20 -->|"sí"| n21
+  n22{"needsPatient"}:::decision
+  n20 -->|"no"| n22
+  n23{"!patientProfileId"}:::decision
+  n22 -->|"sí"| n23
+  n24(["↩ (relanza el error capturado)"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a ClinicalViewPatientAccess.canAccess"]:::llamada
+  n23 -->|"no"| n25
+  n26["Intenta"]:::intento
+  n25 --> n26
+  n27(["↩ (relanza el error capturado)"]):::error
+  n26 -->|"si falla"| n27
+  n28{"patientProfileId !== user.patientProfileId && !(await this.patients.canAccess(user, patientProfileId))"}:::decision
+  n26 --> n28
+  n29(["↩ (relanza el error capturado)"]):::error
+  n28 -->|"sí"| n29
+  n30{"route.featureFlagCode && !(await this.flags.isEnabled(route.featureFlagCode, request.tenantId))"}:::decision
+  n28 -->|"no"| n30
+  n22 -->|"no"| n30
+  n31(["↩ (relanza el error capturado)"]):::error
+  n30 -->|"sí"| n31
+  n32{"!privileged"}:::decision
+  n30 -->|"no"| n32
+  n33["Llama a TerminologyViewAudienceGate.isInAudience"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("LEE terminology.value_set_versions · LEE terminology.value_set_members · LEE terminology.catalog_concepts")]:::efecto
+  n33 --> n34
+  n35{"portal.audienceRoleValueSetId && !(await this.audience.isInAudience(user, portal.audienceRoleValueSetId))"}:::decision
+  n34 --> n35
+  n36(["↩ (relanza el error capturado)"]):::error
+  n35 -->|"sí"| n36
+  n37["Llama a AuthzViewPermissionGate.holds"]:::llamada
+  n35 -->|"no"| n37
+  n38["Llama a AuthzEffectiveRolesService.scopedAssignmentsForUser"]:::llamada
+  n37 --> n38
+  n39[("LEE authz.roles")]:::efecto
+  n38 --> n39
+  n40{"codes.length › 0"}:::decision
+  n39 --> n40
+  n41[("LEE authz.roles")]:::efecto
+  n40 -->|"sí"| n41
+  n42["Repite: mientras frontier.length › 0"]:::bucle
+  n41 --> n42
+  n43[("LEE authz.roles")]:::efecto
+  n42 -->|"cada elemento"| n43
+  n44[("LEE authz.role_permissions")]:::efecto
+  n43 --> n44
+  n42 -->|"al terminar"| n44
+  n45[("LEE authz.user_permission_grants")]:::efecto
+  n44 --> n45
+  n40 -->|"no"| n45
+  n46{"route.requiredPermissionId && !(await this.permissions.holds( user, request.tenantId, route.requiredPermissio…"}:::decision
+  n45 --> n46
+  n47(["↩ (relanza el error capturado)"]):::error
+  n46 -->|"sí"| n47
+  n48{"route.purposeOfUseConceptId && request.purposeOfUseConceptId !== route.purposeOfUseConceptId"}:::decision
+  n46 -->|"no"| n48
+  n32 -->|"no"| n48
+  n49(["↩ (relanza el error capturado)"]):::error
+  n48 -->|"sí"| n49
+  n50["Llama a FrontendViewChildrenRepository.listActions"]:::llamada
+  n48 -->|"no"| n50
+  n51[("LEE read_models.frontend_view_actions")]:::efecto
+  n50 --> n51
+  n52["Llama a FrontendViewsService.deriveActionsFor"]:::llamada
+  n51 --> n52
+  n53["Repite: map(…)"]:::bucle
+  n52 --> n53
+  n54["Llama a ViewContractAuthorizer.actionPermitted"]:::llamada
+  n53 -->|"cada elemento"| n54
+  n55["Llama a AuthzViewPermissionGate.holds"]:::llamada
+  n54 --> n55
+  n56{"codes.length › 0"}:::decision
+  n55 --> n56
+  n57[("LEE authz.roles")]:::efecto
+  n56 -->|"sí"| n57
+  n58["Repite: mientras frontier.length › 0"]:::bucle
+  n57 --> n58
+  n59[("LEE authz.roles")]:::efecto
+  n58 -->|"cada elemento"| n59
+  n60[("LEE authz.role_permissions")]:::efecto
+  n59 --> n60
+  n58 -->|"al terminar"| n60
+  n61[("LEE authz.user_permission_grants")]:::efecto
+  n60 --> n61
+  n56 -->|"no"| n61
+  n62(("200 Responde con éxito")):::ok
+  n61 --> n62
+  n53 -->|"al terminar"| n62
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -354,7 +458,7 @@ Servir el read model al frontend (consent-aware, masking heredado)
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Portal no encontrado; ResourceNotFoundException: Ruta no encontrada; ResourceNotFoundException: Vista no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La proyección no está disponible |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -364,15 +468,15 @@ flowchart TD
   n1 --> n2
   n3["Llama a FrontendViewsService.serveData"]:::llamada
   n2 --> n3
-  n4["Llama a FrontendViewsService.resolveView"]:::llamada
+  n4["Llama a FrontendViewsService.resolveContract"]:::llamada
   n3 --> n4
   n5["Llama a PortalSurfacesRepository.findByCode"]:::llamada
   n4 --> n5
   n6[("LEE read_models.portal_surfaces")]:::efecto
   n5 --> n6
-  n7{"!surface"}:::decision
+  n7{"!portal"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Portal no encontrado"]):::error
+  n8(["↩ (relanza el error capturado)"]):::error
   n7 -->|"sí"| n8
   n9["Llama a FrontendRoutesRepository.findBySurfaceAndCode"]:::llamada
   n7 -->|"no"| n9
@@ -380,7 +484,7 @@ flowchart TD
   n9 --> n10
   n11{"!route"}:::decision
   n10 --> n11
-  n12(["404 NOT_FOUND Ruta no encontrada"]):::error
+  n12(["↩ (relanza el error capturado)"]):::error
   n11 -->|"sí"| n12
   n13["Llama a FrontendPageViewsRepository.findByRouteAndCode"]:::llamada
   n11 -->|"no"| n13
@@ -388,22 +492,127 @@ flowchart TD
   n13 --> n14
   n15{"!view"}:::decision
   n14 --> n15
-  n16(["404 NOT_FOUND Vista no encontrada"]):::error
+  n16(["↩ (relanza el error capturado)"]):::error
   n15 -->|"sí"| n16
-  n17["Llama a FrontendViewChildrenRepository.listFields"]:::llamada
+  n17["Llama a ViewContractAuthorizer.authorizeView"]:::llamada
   n15 -->|"no"| n17
-  n18[("LEE read_models.frontend_view_fields")]:::efecto
+  n18{"portal.statusConceptId !== CONCEPTS.STATE_ACTIVE || route.statusConceptId !== CONCEPTS.STATE_ACTIVE || view.s…"}:::decision
   n17 --> n18
-  n19["Llama a FrontendViewChildrenRepository.listActions"]:::llamada
-  n18 --> n19
-  n20[("LEE read_models.frontend_view_actions")]:::efecto
-  n19 --> n20
-  n21["Llama a ReadModelRefreshRunsRepository.findLatestByDefinition"]:::llamada
-  n20 --> n21
-  n22[("LEE read_models.read_model_refresh_runs")]:::efecto
-  n21 --> n22
-  n23(("200 Responde con éxito")):::ok
-  n22 --> n23
+  n19(["↩ (relanza el error capturado)"]):::error
+  n18 -->|"sí"| n19
+  n20{"needsTenant && !request.tenantId"}:::decision
+  n18 -->|"no"| n20
+  n21(["↩ (relanza el error capturado)"]):::error
+  n20 -->|"sí"| n21
+  n22{"needsPatient"}:::decision
+  n20 -->|"no"| n22
+  n23{"!patientProfileId"}:::decision
+  n22 -->|"sí"| n23
+  n24(["↩ (relanza el error capturado)"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a ClinicalViewPatientAccess.canAccess"]:::llamada
+  n23 -->|"no"| n25
+  n26["Intenta"]:::intento
+  n25 --> n26
+  n27(["↩ (relanza el error capturado)"]):::error
+  n26 -->|"si falla"| n27
+  n28{"patientProfileId !== user.patientProfileId && !(await this.patients.canAccess(user, patientProfileId))"}:::decision
+  n26 --> n28
+  n29(["↩ (relanza el error capturado)"]):::error
+  n28 -->|"sí"| n29
+  n30{"route.featureFlagCode && !(await this.flags.isEnabled(route.featureFlagCode, request.tenantId))"}:::decision
+  n28 -->|"no"| n30
+  n22 -->|"no"| n30
+  n31(["↩ (relanza el error capturado)"]):::error
+  n30 -->|"sí"| n31
+  n32{"!privileged"}:::decision
+  n30 -->|"no"| n32
+  n33["Llama a TerminologyViewAudienceGate.isInAudience"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("LEE terminology.value_set_versions · LEE terminology.value_set_members · LEE terminology.catalog_concepts")]:::efecto
+  n33 --> n34
+  n35{"portal.audienceRoleValueSetId && !(await this.audience.isInAudience(user, portal.audienceRoleValueSetId))"}:::decision
+  n34 --> n35
+  n36(["↩ (relanza el error capturado)"]):::error
+  n35 -->|"sí"| n36
+  n37["Llama a AuthzViewPermissionGate.holds"]:::llamada
+  n35 -->|"no"| n37
+  n38["Llama a AuthzEffectiveRolesService.scopedAssignmentsForUser"]:::llamada
+  n37 --> n38
+  n39[("LEE authz.roles")]:::efecto
+  n38 --> n39
+  n40{"codes.length › 0"}:::decision
+  n39 --> n40
+  n41[("LEE authz.roles")]:::efecto
+  n40 -->|"sí"| n41
+  n42["Repite: mientras frontier.length › 0"]:::bucle
+  n41 --> n42
+  n43[("LEE authz.roles")]:::efecto
+  n42 -->|"cada elemento"| n43
+  n44[("LEE authz.role_permissions")]:::efecto
+  n43 --> n44
+  n42 -->|"al terminar"| n44
+  n45[("LEE authz.user_permission_grants")]:::efecto
+  n44 --> n45
+  n40 -->|"no"| n45
+  n46{"route.requiredPermissionId && !(await this.permissions.holds( user, request.tenantId, route.requiredPermissio…"}:::decision
+  n45 --> n46
+  n47(["↩ (relanza el error capturado)"]):::error
+  n46 -->|"sí"| n47
+  n48{"route.purposeOfUseConceptId && request.purposeOfUseConceptId !== route.purposeOfUseConceptId"}:::decision
+  n46 -->|"no"| n48
+  n32 -->|"no"| n48
+  n49(["↩ (relanza el error capturado)"]):::error
+  n48 -->|"sí"| n49
+  n50["Llama a ViewContractAuthorizer.authorizedFields"]:::llamada
+  n48 -->|"no"| n50
+  n51["Repite: por cada const field de fields"]:::bucle
+  n50 --> n51
+  n52{"field.permissionId && !authorized.privileged"}:::decision
+  n51 -->|"cada elemento"| n52
+  n53{"allowed === undefined"}:::decision
+  n52 -->|"sí"| n53
+  n54["Llama a AuthzViewPermissionGate.holds"]:::llamada
+  n53 -->|"sí"| n54
+  n55["Llama a AuthzEffectiveRolesService.scopedAssignmentsForUser"]:::llamada
+  n54 --> n55
+  n56[("LEE authz.roles")]:::efecto
+  n55 --> n56
+  n57{"codes.length › 0"}:::decision
+  n56 --> n57
+  n58[("LEE authz.roles")]:::efecto
+  n57 -->|"sí"| n58
+  n59["Repite: mientras frontier.length › 0"]:::bucle
+  n58 --> n59
+  n60[("LEE authz.roles")]:::efecto
+  n59 -->|"cada elemento"| n60
+  n61[("LEE authz.role_permissions")]:::efecto
+  n60 --> n61
+  n59 -->|"al terminar"| n61
+  n62[("LEE authz.user_permission_grants")]:::efecto
+  n61 --> n62
+  n57 -->|"no"| n62
+  n63["Llama a FrontendViewChildrenRepository.listFields"]:::llamada
+  n62 --> n63
+  n53 -->|"no"| n63
+  n52 -->|"no"| n63
+  n51 -->|"al terminar"| n63
+  n64[("LEE read_models.frontend_view_fields")]:::efecto
+  n63 --> n64
+  n65["Llama a FrontendViewChildrenRepository.listActions"]:::llamada
+  n64 --> n65
+  n66[("LEE read_models.frontend_view_actions")]:::efecto
+  n65 --> n66
+  n67["Llama a ReadModelDefinitionsRepository.findById"]:::llamada
+  n66 --> n67
+  n68[("LEE read_models.read_model_definitions")]:::efecto
+  n67 --> n68
+  n69{"!definition"}:::decision
+  n68 --> n69
+  n70(["422 PRECONDITION_FAILED La proyección no está disponible"]):::error
+  n69 -->|"sí"| n70
+  n71["… el resto del árbol (62 nodos) está en el JSON del inventario"]:::corte
+  n69 -->|"no"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

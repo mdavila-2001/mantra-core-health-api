@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ResourceNotFoundException } from '../../common';
-import { conceptCode } from '../../common/constants/concept-code';
+import { ResourceNotFoundException } from '../../../common';
+import { conceptCode } from '../../../common/constants/concept-code';
 import {
   catalogControl,
   defectsControl,
@@ -11,8 +11,8 @@ import {
   restoreControl,
   sloControl,
   type Control,
-} from './domain/readiness';
-import { OpsConsoleRepository } from './ops-console.repository';
+} from '../domain/readiness';
+import { OpsConsoleRepository } from '../infrastructure/repositories/ops-console.repository';
 
 const iso = (value: Date | string | null | undefined) =>
   value ? new Date(value).toISOString() : null;

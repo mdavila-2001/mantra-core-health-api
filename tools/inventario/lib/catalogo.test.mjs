@@ -10,6 +10,7 @@ import {
   resumirCatalogo,
 } from './catalogo.mjs';
 import { leerAppendOnly } from './catalogo-fuentes.mjs';
+import { rutaDelModelo } from './salida.mjs';
 import { leerConsultas } from './consultas.mjs';
 import { crearAnalizadorDeDatos } from './datos.mjs';
 import { dominiosPorEsquema } from './documentos.mjs';
@@ -347,11 +348,7 @@ test('operaciones por tabla: la inversa del inventario de endpoints', () => {
 // ---------------------------------------------------------------------------------------------
 // Contra el modelo y el código reales (se construye una vez, ~25 s).
 
-const MODEL_ROOT = path.resolve(
-  process.cwd(),
-  '..',
-  'mantra-core-health-model',
-);
+const MODEL_ROOT = rutaDelModelo(process.cwd());
 let modelo;
 let catalogo;
 let endpointsReales;

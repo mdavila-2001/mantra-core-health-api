@@ -14,6 +14,7 @@ import {
   ConflictException,
   ResourceNotFoundException,
 } from '../../../../common';
+import { commonRecords } from './iam-registration.testing';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] };
 
@@ -56,7 +57,7 @@ function build() {
     refreshRepo as any,
     lockoutsRepo as any,
     eventsRepo as any,
-    contactPointsRepo as any,
+    commonRecords({ contactPoints: contactPointsRepo }),
     logger as any,
   );
   return {

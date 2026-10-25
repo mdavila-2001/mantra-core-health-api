@@ -5,7 +5,7 @@
 - **Bloque:** Operaciones de Plataforma (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 - **Operaciones:** 22 (22 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 8 · MEDIO 5 · BAJO 9
-- **Tablas distintas que tocan:** 14
+- **Tablas distintas que tocan:** 15
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/telemetry.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -13,27 +13,27 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | GET | `/admin/analytics/funnels` | Embudos definidos con sus pasos | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 2 | GET | `/admin/analytics/funnels/{funnelId}/report` | Embudo por sesión: denominador, conversión por paso y conversiones confirmadas por servidor | BAJO | 5 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 2 | GET | `/admin/analytics/funnels/{funnelId}/report` | Embudo por sesión: denominador, conversión por paso y conversiones confirmadas por servidor | BAJO | 6 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
 | 3 | GET | `/admin/analytics/overview` | Totales, rutas y eventos principales de la ventana | BAJO | 1 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
 | 4 | GET | `/admin/analytics/pipeline-health` | Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara | BAJO | 2 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 5 | GET | `/admin/analytics/sessions` | Sesiones de la ventana (sin identificadores de sesión ni sujeto) | BAJO | 1 | PLATFORM_ADMIN, SECURITY_ADMIN, DPO |
+| 5 | GET | `/admin/analytics/sessions` | Sesiones de la ventana (sin identificadores de sesión ni sujeto) | BAJO | 2 | PLATFORM_ADMIN, SECURITY_ADMIN, DPO |
 | 6 | GET | `/admin/analytics/sessions/{id}` | Timeline de una sesión: eventos y nombres de propiedad, sin valores | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DPO |
 | 7 | GET | `/admin/analytics/timeseries` | Eventos y sesiones por hora o día (UTC), cubos vacíos en 0 | BAJO | 1 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 8 | GET | `/admin/analytics/web-vitals` | p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra | BAJO | 1 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
-| 9 | POST | `/telemetry/activity-events` | Capturar evento(s) de actividad consent-aware (batch) | ALTO | 8 | sesión (sin roles) |
+| 8 | GET | `/admin/analytics/web-vitals` | p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra | BAJO | 3 | PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO |
+| 9 | POST | `/telemetry/activity-events` | Capturar evento(s) de actividad consent-aware (batch) | ALTO | 10 | sesión (sin roles) |
 | 10 | POST | `/telemetry/analytics-subjects` | Provisionar sujeto de analítica pseudónimo | MEDIO | 2 | SECURITY_ADMIN |
-| 11 | POST | `/telemetry/client-contexts` | Registrar contexto de cliente/dispositivo + journey | ALTO | 4 | sesión (sin roles) |
-| 12 | POST | `/telemetry/conversion-events` | Registrar evento de conversión con atribución | ALTO | 6 | sesión (sin roles) |
+| 11 | POST | `/telemetry/client-contexts` | Registrar contexto de cliente/dispositivo + journey | ALTO | 5 | sesión (sin roles) |
+| 12 | POST | `/telemetry/conversion-events` | Registrar evento de conversión con atribución | ALTO | 7 | sesión (sin roles) |
 | 13 | POST | `/telemetry/disclosure-acceptances` | Registrar aceptación de disclosure por usuario/sesión | ALTO | 3 | sesión (sin roles) |
 | 14 | POST | `/telemetry/disclosure-versions` | Publicar versión de disclosure de tracking | MEDIO | 3 | SECURITY_ADMIN |
 | 15 | POST | `/telemetry/event-schemas` | Registrar esquema de evento de actividad (versionado) | MEDIO | 3 | SECURITY_ADMIN |
 | 16 | POST | `/telemetry/funnels` | Definir funnel y sus pasos | MEDIO | 5 | SECURITY_ADMIN |
-| 17 | POST | `/telemetry/session-journeys/{id}/close` | Cerrar journey de sesión y consolidar métricas | ALTO | 2 | sesión (sin roles) |
+| 17 | POST | `/telemetry/session-journeys/{id}/close` | Cerrar journey de sesión y consolidar métricas | ALTO | 4 | sesión (sin roles) |
 | 18 | POST | `/telemetry/tracking-consents` | Otorgar consentimiento de tracking por propósito | ALTO | 2 | sesión (sin roles) |
 | 19 | POST | `/telemetry/tracking-consents/{id}/withdraw` | Retirar consentimiento y desactivar sujeto (cascada) | ALTO | 4 | sesión (sin roles) |
 | 20 | GET | `/telemetry/tracking-consents/me` | Estado vigente de mi consentimiento de tracking | BAJO | 1 | sesión (sin roles) |
 | 21 | POST | `/telemetry/tracking-purposes` | Definir propósito de tracking y base legal | MEDIO | 2 | SECURITY_ADMIN |
-| 22 | POST | `/telemetry/web-vitals` | Registrar métricas Core Web Vitals por ruta (batch) | ALTO | 2 | sesión (sin roles) |
+| 22 | POST | `/telemetry/web-vitals` | Registrar métricas Core Web Vitals por ruta (batch) | ALTO | 6 | sesión (sin roles) |
 
 ---
 
@@ -44,7 +44,7 @@
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryAnalyticsController.listFunnels` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:146`
+- **Implementación:** `TelemetryAnalyticsController.listFunnels` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:149`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -54,14 +54,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/funnels` la atiende `TelemetryAnalyticsController.listFunnels` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:146). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.listFunnels`. Lee telemetry.activity_event_schema_definitions, telemetry.funnel_definitions, telemetry.funnel_steps.
+`GET /admin/analytics/funnels` la atiende `TelemetryAnalyticsController.listFunnels` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:149). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.listFunnels`. Lee telemetry.activity_event_schema_definitions, telemetry.funnel_definitions, telemetry.funnel_steps.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:146` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:149` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
@@ -69,9 +69,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.activity_event_schema_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:243` |
-| `telemetry.funnel_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:243` |
-| `telemetry.funnel_steps` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:243` |
+| `telemetry.activity_event_schema_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:324` |
+| `telemetry.funnel_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:324` |
+| `telemetry.funnel_steps` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listFunnels → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:324` |
 
 ### Cuerpo
 
@@ -109,7 +109,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryAnalyticsController.funnelReport` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:153`
+- **Implementación:** `TelemetryAnalyticsController.funnelReport` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:156`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -119,27 +119,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/funnels/{funnelId}/report` la atiende `TelemetryAnalyticsController.funnelReport` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:153). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.funnelReport`. Lee telemetry.activity_event_schema_definitions, telemetry.conversion_events, telemetry.funnel_definitions, telemetry.funnel_steps, telemetry.user_activity_events.
+`GET /admin/analytics/funnels/{funnelId}/report` la atiende `TelemetryAnalyticsController.funnelReport` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:156). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.funnelReport`. Lee telemetry.activity_event_schema_definitions, telemetry.conversion_events, telemetry.funnel_definitions, telemetry.funnel_steps, telemetry.session_journeys, telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:153` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:156` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: funnelId | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:153` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: funnelId | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:156` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.activity_event_schema_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:243` |
-| `telemetry.conversion_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsRepository.serverConversions | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:302` |
-| `telemetry.funnel_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:243` |
-| `telemetry.funnel_steps` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:243` |
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsRepository.funnelReach | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:272` |
+| `telemetry.activity_event_schema_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:324` |
+| `telemetry.conversion_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsRepository.serverConversions | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:398` |
+| `telemetry.funnel_definitions` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:324` |
+| `telemetry.funnel_steps` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsService.listFunnels → TelemetryAnalyticsRepository.listFunnels | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:324` |
+| `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsRepository.serverConversions → TelemetryAnalyticsRepository.rowInTenant | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:94` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.funnelReport → TelemetryAnalyticsService.funnelReport → TelemetryAnalyticsRepository.funnelReach | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:354` |
 
 ### Parámetros
 
@@ -175,7 +176,9 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-analytics.controller.spec.ts:61` |
 
 ### Flujos
 
@@ -190,7 +193,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryAnalyticsController.overview` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:118`
+- **Implementación:** `TelemetryAnalyticsController.overview` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:121`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -200,14 +203,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/overview` la atiende `TelemetryAnalyticsController.overview` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:118). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.overview`. Lee telemetry.user_activity_events.
+`GET /admin/analytics/overview` la atiende `TelemetryAnalyticsController.overview` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:121). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.overview`. Lee telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:118` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:121` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
@@ -215,7 +218,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.overview → TelemetryAnalyticsService.overview → TelemetryAnalyticsRepository.overview | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:51` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.overview → TelemetryAnalyticsService.overview → TelemetryAnalyticsRepository.overview | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:113` |
 
 ### Parámetros
 
@@ -248,7 +251,9 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-analytics.controller.spec.ts:58` |
 
 ### Flujos
 
@@ -263,7 +268,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryAnalyticsController.pipelineHealth` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:166`
+- **Implementación:** `TelemetryAnalyticsController.pipelineHealth` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:169`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -273,14 +278,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/pipeline-health` la atiende `TelemetryAnalyticsController.pipelineHealth` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:166). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.pipelineHealth`. Lee telemetry.client_contexts, telemetry.user_activity_events.
+`GET /admin/analytics/pipeline-health` la atiende `TelemetryAnalyticsController.pipelineHealth` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:169). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.pipelineHealth`. Lee telemetry.client_contexts, telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:166` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:169` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
@@ -288,8 +293,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.client_contexts` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.pipelineHealth → TelemetryAnalyticsService.pipelineHealth → TelemetryAnalyticsRepository.pipelineHealth | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:340` |
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.pipelineHealth → TelemetryAnalyticsService.pipelineHealth → TelemetryAnalyticsRepository.pipelineHealth | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:321` |
+| `telemetry.client_contexts` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.pipelineHealth → TelemetryAnalyticsService.pipelineHealth → TelemetryAnalyticsRepository.pipelineHealth | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:438` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.pipelineHealth → TelemetryAnalyticsService.pipelineHealth → TelemetryAnalyticsRepository.pipelineHealth | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:418` |
 
 ### Parámetros
 
@@ -322,7 +327,9 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-analytics.controller.spec.ts:62` |
 
 ### Flujos
 
@@ -337,7 +344,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryAnalyticsController.listSessions` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:176`
+- **Implementación:** `TelemetryAnalyticsController.listSessions` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:179`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -347,14 +354,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/sessions` la atiende `TelemetryAnalyticsController.listSessions` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:176). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DPO. Delega en `TelemetryAnalyticsService.listSessions`. Lee telemetry.session_journeys.
+`GET /admin/analytics/sessions` la atiende `TelemetryAnalyticsController.listSessions` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:179). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DPO. Delega en `TelemetryAnalyticsService.listSessions`. Lee telemetry.session_journeys, telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:176` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:179` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
@@ -362,7 +369,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listSessions → TelemetryAnalyticsService.listSessions → TelemetryAnalyticsRepository.listSessions | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:179` |
+| `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listSessions → TelemetryAnalyticsService.listSessions → TelemetryAnalyticsRepository.listSessions | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:256` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.listSessions → TelemetryAnalyticsService.listSessions → TelemetryAnalyticsRepository.listSessions → TelemetryAnalyticsRepository.sessionInTenant | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:69` |
 
 ### Parámetros
 
@@ -397,7 +405,9 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-analytics.controller.spec.ts:63` |
 
 ### Flujos
 
@@ -412,7 +422,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryAnalyticsController.getSession` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:185`
+- **Implementación:** `TelemetryAnalyticsController.getSession` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:188`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -422,25 +432,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/sessions/{id}` la atiende `TelemetryAnalyticsController.getSession` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:185). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DPO. Delega en `TelemetryAnalyticsService.getSession`. Lee telemetry.session_journeys, telemetry.user_activity_event_properties, telemetry.user_activity_events.
+`GET /admin/analytics/sessions/{id}` la atiende `TelemetryAnalyticsController.getSession` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:188). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DPO. Delega en `TelemetryAnalyticsService.getSession`. Lee telemetry.session_journeys, telemetry.user_activity_event_properties, telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:185` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:188` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:185` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:188` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.findSession | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:200` |
-| `telemetry.user_activity_event_properties` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.sessionTimeline | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:218` |
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.sessionTimeline | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:218` |
+| `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.findSession | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:279` |
+| `telemetry.user_activity_event_properties` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.sessionTimeline | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:299` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.getSession → TelemetryAnalyticsService.getSession → TelemetryAnalyticsRepository.sessionTimeline | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:299` |
 
 ### Parámetros
 
@@ -471,7 +481,9 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-analytics.controller.spec.ts:64` |
 
 ### Flujos
 
@@ -486,7 +498,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryAnalyticsController.timeseries` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:127`
+- **Implementación:** `TelemetryAnalyticsController.timeseries` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:130`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -496,14 +508,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/timeseries` la atiende `TelemetryAnalyticsController.timeseries` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:127). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.timeseries`. Lee telemetry.user_activity_events.
+`GET /admin/analytics/timeseries` la atiende `TelemetryAnalyticsController.timeseries` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:130). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.timeseries`. Lee telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:127` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:130` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
@@ -511,7 +523,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.timeseries → TelemetryAnalyticsService.timeseries → TelemetryAnalyticsRepository.timeseries | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:91` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.timeseries → TelemetryAnalyticsService.timeseries → TelemetryAnalyticsRepository.timeseries | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:153` |
 
 ### Parámetros
 
@@ -544,7 +556,9 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-analytics.controller.spec.ts:59` |
 
 ### Flujos
 
@@ -559,7 +573,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryAnalyticsController.webVitals` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:136`
+- **Implementación:** `TelemetryAnalyticsController.webVitals` — `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:139`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -569,14 +583,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /admin/analytics/web-vitals` la atiende `TelemetryAnalyticsController.webVitals` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:136). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.webVitals`. Lee telemetry.web_vitals.
+`GET /admin/analytics/web-vitals` la atiende `TelemetryAnalyticsController.webVitals` (src/modules/telemetry/controllers/telemetry-analytics.controller.ts:139). Exige sesión con alguno de los roles PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO. Delega en `TelemetryAnalyticsService.webVitals`. Lee telemetry.session_journeys, telemetry.user_activity_events, telemetry.web_vitals.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:136` |
+| ROL | Alguno de: PLATFORM_ADMIN, SECURITY_ADMIN, DATA_PLATFORM_ADMIN, MARKETING_MANAGER, DPO | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:139` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
@@ -584,7 +598,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.web_vitals` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.webVitals → TelemetryAnalyticsService.webVitals → TelemetryAnalyticsRepository.webVitals | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:124` |
+| `telemetry.session_journeys` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.webVitals → TelemetryAnalyticsService.webVitals → TelemetryAnalyticsRepository.webVitals → TelemetryAnalyticsRepository.rowInTenant | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:94` |
+| `telemetry.user_activity_events` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.webVitals → TelemetryAnalyticsService.webVitals → TelemetryAnalyticsRepository.webVitals → TelemetryAnalyticsRepository.rowInTenant | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:94` |
+| `telemetry.web_vitals` | LEE | LEE | POR_SQL | TelemetryAnalyticsController.webVitals → TelemetryAnalyticsService.webVitals → TelemetryAnalyticsRepository.webVitals | `src/modules/telemetry/repositories/telemetry-analytics.repository.ts:192` |
 
 ### Parámetros
 
@@ -619,7 +635,9 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/telemetry/controllers/telemetry-analytics.controller.spec.ts:60` |
 
 ### Flujos
 
@@ -634,7 +652,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryEventsController.captureActivityEvents` — `src/modules/telemetry/controllers/telemetry-events.controller.ts:41`
+- **Implementación:** `TelemetryEventsController.captureActivityEvents` — `src/modules/telemetry/controllers/telemetry-events.controller.ts:45`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -644,14 +662,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/activity-events` la atiende `TelemetryEventsController.captureActivityEvents` (src/modules/telemetry/controllers/telemetry-events.controller.ts:41). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CaptureActivityEventsDto` (20 campos, 2 obligatorios). Delega en `TelemetryEventsService.captureActivityEvents`. Crea filas en telemetry.session_journeys, telemetry.user_activity_event_properties, telemetry.user_activity_events. Actualiza telemetry.session_journeys. Lee telemetry.activity_event_schema_definitions, telemetry.session_journeys, telemetry.tracking_consents, telemetry.user_activity_events.
+`POST /telemetry/activity-events` la atiende `TelemetryEventsController.captureActivityEvents` (src/modules/telemetry/controllers/telemetry-events.controller.ts:45). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CaptureActivityEventsDto` (17 campos, 2 obligatorios). Delega en `TelemetryEventsService.captureActivityEvents`. Crea filas en telemetry.session_journeys, telemetry.user_activity_event_properties, telemetry.user_activity_events. Actualiza telemetry.session_journeys. Lee iam.sessions, telemetry.activity_event_schema_definitions, telemetry.analytics_subjects, telemetry.session_journeys, telemetry.tracking_consents, telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:41` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:45` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -661,39 +679,38 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `iam.sessions` | LEE | LEE | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → TelemetryEventsService.actorSessionId → ActorSessionsRepository.findIdByToken | `src/modules/telemetry/repositories/actor-sessions.repository.ts:28` |
 | `telemetry.activity_event_schema_definitions` | LEE | LEE | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → ActivityEventSchemaDefinitionsRepository.findById | `src/modules/telemetry/repositories/activity-event-schema-definitions.repository.ts:67` |
-| `telemetry.session_journeys` | ESCRIBE | ACTUALIZA | POR_TIPO | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents | `src/modules/telemetry/services/telemetry-events.service.ts:197` |
-| `telemetry.session_journeys` | ESCRIBE | CREA | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → TelemetryEventsService.resolveJourney → SessionJourneysRepository.create | `src/modules/telemetry/repositories/session-journeys.repository.ts:72` |
-| `telemetry.session_journeys` | LEE | LEE | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → TelemetryEventsService.resolveJourney → SessionJourneysRepository.findById | `src/modules/telemetry/repositories/session-journeys.repository.ts:48` |
+| `telemetry.analytics_subjects` | LEE | LEE | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → TelemetryEventsService.assertOwnedSubject → AnalyticsSubjectsRepository.findById | `src/modules/telemetry/repositories/analytics-subjects.repository.ts:40` |
+| `telemetry.session_journeys` | ESCRIBE | ACTUALIZA | POR_TIPO | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents | `src/modules/telemetry/services/telemetry-events.service.ts:243` |
+| `telemetry.session_journeys` | ESCRIBE | CREA | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → TelemetryEventsService.openJourney → SessionJourneysRepository.create | `src/modules/telemetry/repositories/session-journeys.repository.ts:72` |
+| `telemetry.session_journeys` | LEE | LEE | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → TelemetryEventsService.assertOwnedJourney → SessionJourneysRepository.findById | `src/modules/telemetry/repositories/session-journeys.repository.ts:48` |
 | `telemetry.tracking_consents` | LEE | LEE | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → TelemetryEventsService.consentAllows → TrackingConsentsRepository.findLatest | `src/modules/telemetry/repositories/tracking-consents.repository.ts:65` |
 | `telemetry.user_activity_event_properties` | ESCRIBE | CREA | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → UserActivityEventPropertiesRepository.create | `src/modules/telemetry/repositories/user-activity-event-properties.repository.ts:63` |
-| `telemetry.user_activity_events` | ESCRIBE | CREA | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → UserActivityEventsRepository.create | `src/modules/telemetry/repositories/user-activity-events.repository.ts:90` |
-| `telemetry.user_activity_events` | LEE | LEE | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → UserActivityEventsRepository.findByIdempotencyKey | `src/modules/telemetry/repositories/user-activity-events.repository.ts:79` |
+| `telemetry.user_activity_events` | ESCRIBE | CREA | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → UserActivityEventsRepository.create | `src/modules/telemetry/repositories/user-activity-events.repository.ts:106` |
+| `telemetry.user_activity_events` | LEE | LEE | DIRECTA | TelemetryEventsController.captureActivityEvents → TelemetryEventsService.captureActivityEvents → UserActivityEventsRepository.findByIdempotencyKey | `src/modules/telemetry/repositories/user-activity-events.repository.ts:84` |
 
 ### Cuerpo — DTO `CaptureActivityEventsDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `events` | `array<ActivityEventItemDto>` | Sí | mínimo 1 elemento(s); máximo 500 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(500)` `@ValidateNested({ each: true })` `@Type(() => ActivityEventItemDto)` | Lote de eventos de actividad | `src/modules/telemetry/dto/activity-event.dto.ts:225` |
-| `events[].eventSchemaDefinitionId` | `string` | Sí | formato uuid | `@IsUUID()` | Esquema de evento activo | `src/modules/telemetry/dto/activity-event.dto.ts:83` |
-| `events[].eventName` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Nombre del evento (override del esquema) | `src/modules/telemetry/dto/activity-event.dto.ts:95` |
-| `events[].eventIdempotencyKey` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Clave de idempotencia del evento | `src/modules/telemetry/dto/activity-event.dto.ts:107` |
-| `events[].analyticsSubjectId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sujeto de analítica pseudónimo | `src/modules/telemetry/dto/activity-event.dto.ts:118` |
-| `events[].userId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Usuario (para gate de consentimiento) | `src/modules/telemetry/dto/activity-event.dto.ts:129` |
-| `events[].sessionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sesión asociada | `src/modules/telemetry/dto/activity-event.dto.ts:137` |
-| `events[].sessionJourneyId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Journey de sesión existente a enlazar | `src/modules/telemetry/dto/activity-event.dto.ts:148` |
-| `events[].tenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant | `src/modules/telemetry/dto/activity-event.dto.ts:156` |
-| `events[].portalTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de portal (concept id) | `src/modules/telemetry/dto/activity-event.dto.ts:167` |
-| `events[].routeTemplate` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Plantilla de ruta (sin ids en claro) | `src/modules/telemetry/dto/activity-event.dto.ts:179` |
-| `events[].occurredAt` | `string` | No | — | `@IsOptional()` `@IsISO8601()` | Instante de ocurrencia (ISO-8601) | `src/modules/telemetry/dto/activity-event.dto.ts:187` |
-| `events[].correlationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Correlation id | `src/modules/telemetry/dto/activity-event.dto.ts:195` |
-| `events[].properties` | `array<ActivityEventPropertyDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => ActivityEventPropertyDto)` | Propiedades permitidas y minimizadas | `src/modules/telemetry/dto/activity-event.dto.ts:208` |
-| `events[].properties[].propertyName` | `string` | No | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Nombre de la propiedad | `src/modules/telemetry/dto/activity-event.dto.ts:26` |
-| `events[].properties[].valueType` | `string` | No | valores: STRING, NUMBER, BOOLEAN | `@IsOptional()` `@IsIn(['STRING', 'NUMBER', 'BOOLEAN'])` | Tipo de valor | `src/modules/telemetry/dto/activity-event.dto.ts:37` |
-| `events[].properties[].valueString` | `string` | No | longitud máxima 4000 | `@IsOptional()` `@IsString()` `@MaxLength(4000)` | Valor string | `src/modules/telemetry/dto/activity-event.dto.ts:46` |
-| `events[].properties[].valueNumber` | `number` | No | — | `@IsOptional()` `@IsNumber()` | Valor numérico | `src/modules/telemetry/dto/activity-event.dto.ts:54` |
-| `events[].properties[].valueBoolean` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Valor booleano | `src/modules/telemetry/dto/activity-event.dto.ts:62` |
-| `events[].properties[].dataClassificationConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Clasificación de dato (concept id) | `src/modules/telemetry/dto/activity-event.dto.ts:73` |
+| `events` | `array<ActivityEventItemDto>` | Sí | mínimo 1 elemento(s); máximo 500 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(500)` `@ValidateNested({ each: true })` `@Type(() => ActivityEventItemDto)` | Lote de eventos de actividad | `src/modules/telemetry/dto/activity-event.dto.ts:208` |
+| `events[].eventSchemaDefinitionId` | `string` | Sí | formato uuid | `@IsUUID()` | Esquema de evento activo | `src/modules/telemetry/dto/activity-event.dto.ts:88` |
+| `events[].eventName` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Nombre del evento (override del esquema) | `src/modules/telemetry/dto/activity-event.dto.ts:100` |
+| `events[].eventIdempotencyKey` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Clave de idempotencia del evento | `src/modules/telemetry/dto/activity-event.dto.ts:112` |
+| `events[].analyticsSubjectId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sujeto de analítica pseudónimo; debe ser del usuario autenticado | `src/modules/telemetry/dto/activity-event.dto.ts:124` |
+| `events[].sessionJourneyId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Journey de sesión existente a enlazar; debe ser de una sesión del usuario autenticado | `src/modules/telemetry/dto/activity-event.dto.ts:136` |
+| `events[].portalTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de portal (concept id) | `src/modules/telemetry/dto/activity-event.dto.ts:147` |
+| `events[].routeTemplate` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Plantilla de ruta (sin ids en claro) | `src/modules/telemetry/dto/activity-event.dto.ts:159` |
+| `events[].occurredAt` | `string` | No | — | `@IsOptional()` `@IsISO8601()` | Instante de ocurrencia (ISO-8601) | `src/modules/telemetry/dto/activity-event.dto.ts:167` |
+| `events[].correlationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Correlation id | `src/modules/telemetry/dto/activity-event.dto.ts:175` |
+| `events[].properties` | `array<ActivityEventPropertyDto>` | No | máximo 25 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(25)` `@ValidateNested({ each: true })` `@Type(() => ActivityEventPropertyDto)` | Propiedades declaradas por el esquema del evento (máximo 25, el tope del proveedor) | `src/modules/telemetry/dto/activity-event.dto.ts:191` |
+| `events[].properties[].propertyName` | `string` | No | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Nombre de la propiedad | `src/modules/telemetry/dto/activity-event.dto.ts:29` |
+| `events[].properties[].valueType` | `string` | No | valores: STRING, NUMBER, BOOLEAN | `@IsOptional()` `@IsIn(['STRING', 'NUMBER', 'BOOLEAN'])` | Tipo de valor | `src/modules/telemetry/dto/activity-event.dto.ts:40` |
+| `events[].properties[].valueString` | `string` | No | longitud máxima 4000 | `@IsOptional()` `@IsString()` `@MaxLength(4000)` | Valor string | `src/modules/telemetry/dto/activity-event.dto.ts:49` |
+| `events[].properties[].valueNumber` | `number` | No | — | `@IsOptional()` `@IsNumber()` | Valor numérico | `src/modules/telemetry/dto/activity-event.dto.ts:57` |
+| `events[].properties[].valueBoolean` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Valor booleano | `src/modules/telemetry/dto/activity-event.dto.ts:65` |
+| `events[].properties[].dataClassificationConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ignorado: la clasificación del dato la fija el servidor desde el esquema del evento | `src/modules/telemetry/dto/activity-event.dto.ts:78` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -717,10 +734,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
       "eventName": "Nombre de ejemplo",
       "eventIdempotencyKey": "valor-ejemplo",
       "analyticsSubjectId": "00000000-0000-4000-8000-000000000001",
-      "userId": "00000000-0000-4000-8000-000000000001",
-      "sessionId": "00000000-0000-4000-8000-000000000001",
       "sessionJourneyId": "00000000-0000-4000-8000-000000000001",
-      "tenantId": "00000000-0000-4000-8000-000000000001",
       "portalTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "routeTemplate": "valor-ejemplo",
       "occurredAt": "valor-ejemplo",
@@ -746,10 +760,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `inserted` | `number` | Sí | — | — | Eventos insertados (consent-aware) | `src/modules/telemetry/dto/activity-event.dto.ts:234` |
-| `skipped` | `number` | Sí | — | — | Eventos descartados por falta de consentimiento o reenvío | `src/modules/telemetry/dto/activity-event.dto.ts:242` |
-| `eventIds` | `array<string>` | Sí | — | — | Ids de los eventos insertados | `src/modules/telemetry/dto/activity-event.dto.ts:248` |
-| `sessionJourneyId` | `string` | No | formato uuid | — | Journey de sesión afectado | `src/modules/telemetry/dto/activity-event.dto.ts:257` |
+| `inserted` | `number` | Sí | — | — | Eventos insertados (consent-aware) | `src/modules/telemetry/dto/activity-event.dto.ts:217` |
+| `skipped` | `number` | Sí | — | — | Eventos descartados por falta de consentimiento o reenvío | `src/modules/telemetry/dto/activity-event.dto.ts:225` |
+| `eventIds` | `array<string>` | Sí | — | — | Ids de los eventos insertados | `src/modules/telemetry/dto/activity-event.dto.ts:231` |
+| `sessionJourneyId` | `string` | No | formato uuid | — | Journey de sesión afectado | `src/modules/telemetry/dto/activity-event.dto.ts:240` |
 
 ### Respuestas posibles
 
@@ -759,8 +773,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Esquema de evento no encontrado; ResourceNotFoundException: Journey de sesión no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Esquema de evento no encontrado; ResourceNotFoundException: Sujeto de analítica no encontrado; ResourceNotFoundException: Journey de sesión no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión autenticada no está registrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} |
 
 El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 
@@ -781,7 +797,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryConsentController.provisionSubject` — `src/modules/telemetry/controllers/telemetry-consent.controller.ts:75`
+- **Implementación:** `TelemetryConsentController.provisionSubject` — `src/modules/telemetry/controllers/telemetry-consent.controller.ts:90`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -791,14 +807,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/analytics-subjects` la atiende `TelemetryConsentController.provisionSubject` (src/modules/telemetry/controllers/telemetry-consent.controller.ts:75). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ProvisionAnalyticsSubjectDto` (5 campos, 0 obligatorios). Delega en `TelemetryConsentService.provisionSubject`. Crea filas en telemetry.analytics_subjects. Lee telemetry.analytics_subjects.
+`POST /telemetry/analytics-subjects` la atiende `TelemetryConsentController.provisionSubject` (src/modules/telemetry/controllers/telemetry-consent.controller.ts:90). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ProvisionAnalyticsSubjectDto` (5 campos, 0 obligatorios). Delega en `TelemetryConsentService.provisionSubject`. Crea filas en telemetry.analytics_subjects. Lee telemetry.analytics_subjects.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:75` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:90` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -882,7 +898,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryEventsController.captureClientContext` — `src/modules/telemetry/controllers/telemetry-events.controller.ts:53`
+- **Implementación:** `TelemetryEventsController.captureClientContext` — `src/modules/telemetry/controllers/telemetry-events.controller.ts:62`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -892,14 +908,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/client-contexts` la atiende `TelemetryEventsController.captureClientContext` (src/modules/telemetry/controllers/telemetry-events.controller.ts:53). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateClientContextDto` (18 campos, 0 obligatorios). Delega en `TelemetryEventsService.captureClientContext`. Crea filas en telemetry.client_contexts, telemetry.session_journeys. Actualiza telemetry.session_journeys. Lee telemetry.session_journeys.
+`POST /telemetry/client-contexts` la atiende `TelemetryEventsController.captureClientContext` (src/modules/telemetry/controllers/telemetry-events.controller.ts:62). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateClientContextDto` (17 campos, 0 obligatorios). Delega en `TelemetryEventsService.captureClientContext`. Crea filas en telemetry.client_contexts, telemetry.session_journeys. Lee iam.sessions, telemetry.analytics_subjects, telemetry.session_journeys.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:53` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:62` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -909,33 +925,33 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `iam.sessions` | LEE | LEE | DIRECTA | TelemetryEventsController.captureClientContext → TelemetryEventsService.captureClientContext → TelemetryEventsService.actorSessionId → ActorSessionsRepository.findIdByToken | `src/modules/telemetry/repositories/actor-sessions.repository.ts:28` |
+| `telemetry.analytics_subjects` | LEE | LEE | DIRECTA | TelemetryEventsController.captureClientContext → TelemetryEventsService.captureClientContext → TelemetryEventsService.assertOwnedSubject → AnalyticsSubjectsRepository.findById | `src/modules/telemetry/repositories/analytics-subjects.repository.ts:40` |
 | `telemetry.client_contexts` | ESCRIBE | CREA | DIRECTA | TelemetryEventsController.captureClientContext → TelemetryEventsService.captureClientContext → ClientContextsRepository.create | `src/modules/telemetry/repositories/client-contexts.repository.ts:103` |
-| `telemetry.session_journeys` | ESCRIBE | ACTUALIZA | POR_TIPO | TelemetryEventsController.captureClientContext → TelemetryEventsService.captureClientContext | `src/modules/telemetry/services/telemetry-events.service.ts:270` |
-| `telemetry.session_journeys` | ESCRIBE | CREA | DIRECTA | TelemetryEventsController.captureClientContext → TelemetryEventsService.captureClientContext → TelemetryEventsService.resolveJourney → SessionJourneysRepository.create | `src/modules/telemetry/repositories/session-journeys.repository.ts:72` |
-| `telemetry.session_journeys` | LEE | LEE | DIRECTA | TelemetryEventsController.captureClientContext → TelemetryEventsService.captureClientContext → TelemetryEventsService.resolveJourney → SessionJourneysRepository.findById | `src/modules/telemetry/repositories/session-journeys.repository.ts:48` |
+| `telemetry.session_journeys` | ESCRIBE | CREA | DIRECTA | TelemetryEventsController.captureClientContext → TelemetryEventsService.captureClientContext → TelemetryEventsService.openJourney → SessionJourneysRepository.create | `src/modules/telemetry/repositories/session-journeys.repository.ts:72` |
+| `telemetry.session_journeys` | LEE | LEE | DIRECTA | TelemetryEventsController.captureClientContext → TelemetryEventsService.captureClientContext → TelemetryEventsService.assertOwnedJourney → SessionJourneysRepository.findById | `src/modules/telemetry/repositories/session-journeys.repository.ts:48` |
 
 ### Cuerpo — DTO `CreateClientContextDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `sessionJourneyId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Journey de sesión existente a enlazar | `src/modules/telemetry/dto/client-context.dto.ts:22` |
-| `sessionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sesión (se usa para crear el journey si no existe) | `src/modules/telemetry/dto/client-context.dto.ts:33` |
-| `analyticsSubjectId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sujeto de analítica | `src/modules/telemetry/dto/client-context.dto.ts:41` |
-| `portalTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de portal (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:52` |
-| `deviceTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de dispositivo (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:63` |
-| `osFamilyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Familia de SO (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:74` |
-| `browserFamilyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Familia de navegador (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:85` |
-| `appVersion` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/telemetry/dto/client-context.dto.ts:94` |
-| `screenClass` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/telemetry/dto/client-context.dto.ts:103` |
-| `viewportBucket` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/telemetry/dto/client-context.dto.ts:112` |
-| `locale` | `string` | No | longitud máxima 20 | `@IsOptional()` `@IsString()` `@MaxLength(20)` | — | `src/modules/telemetry/dto/client-context.dto.ts:121` |
-| `timezoneOffsetMinutes` | `number` | No | — | `@IsOptional()` `@IsInt()` | — | `src/modules/telemetry/dto/client-context.dto.ts:129` |
-| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | País (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:137` |
-| `regionCoarse` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/telemetry/dto/client-context.dto.ts:146` |
-| `ipPrefixHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del prefijo de IP | `src/modules/telemetry/dto/client-context.dto.ts:158` |
-| `userAgentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del user agent | `src/modules/telemetry/dto/client-context.dto.ts:167` |
-| `isBot` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Marcado como bot | `src/modules/telemetry/dto/client-context.dto.ts:175` |
-| `dataClassificationConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Clasificación de dato (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:186` |
+| `sessionJourneyId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Journey de sesión existente a enlazar; debe ser de una sesión del usuario autenticado. Si falta, se usa el journey abierto de la sesión autenticada | `src/modules/telemetry/dto/client-context.dto.ts:23` |
+| `analyticsSubjectId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sujeto de analítica; debe ser del usuario autenticado | `src/modules/telemetry/dto/client-context.dto.ts:34` |
+| `portalTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de portal (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:45` |
+| `deviceTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de dispositivo (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:56` |
+| `osFamilyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Familia de SO (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:67` |
+| `browserFamilyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Familia de navegador (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:78` |
+| `appVersion` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/telemetry/dto/client-context.dto.ts:87` |
+| `screenClass` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/telemetry/dto/client-context.dto.ts:96` |
+| `viewportBucket` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/telemetry/dto/client-context.dto.ts:105` |
+| `locale` | `string` | No | longitud máxima 20 | `@IsOptional()` `@IsString()` `@MaxLength(20)` | — | `src/modules/telemetry/dto/client-context.dto.ts:114` |
+| `timezoneOffsetMinutes` | `number` | No | — | `@IsOptional()` `@IsInt()` | — | `src/modules/telemetry/dto/client-context.dto.ts:122` |
+| `countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | País (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:130` |
+| `regionCoarse` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/telemetry/dto/client-context.dto.ts:139` |
+| `ipPrefixHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del prefijo de IP | `src/modules/telemetry/dto/client-context.dto.ts:151` |
+| `userAgentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del user agent | `src/modules/telemetry/dto/client-context.dto.ts:160` |
+| `isBot` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Marcado como bot | `src/modules/telemetry/dto/client-context.dto.ts:168` |
+| `dataClassificationConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Clasificación de dato (concept id) | `src/modules/telemetry/dto/client-context.dto.ts:179` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -948,7 +964,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 ```json
 {
   "sessionJourneyId": "00000000-0000-4000-8000-000000000001",
-  "sessionId": "00000000-0000-4000-8000-000000000001",
   "analyticsSubjectId": "00000000-0000-4000-8000-000000000001",
   "portalTypeConceptId": "00000000-0000-4000-8000-000000000001",
   "deviceTypeConceptId": "00000000-0000-4000-8000-000000000001",
@@ -974,9 +989,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/telemetry/dto/client-context.dto.ts:195` |
-| `sessionJourneyId` | `string` | Sí | formato uuid | — | Journey de sesión creado o enlazado | `src/modules/telemetry/dto/client-context.dto.ts:204` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/telemetry/dto/client-context.dto.ts:210` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/telemetry/dto/client-context.dto.ts:188` |
+| `sessionJourneyId` | `string` | Sí | formato uuid | — | Journey de sesión creado o enlazado | `src/modules/telemetry/dto/client-context.dto.ts:197` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/telemetry/dto/client-context.dto.ts:203` |
 
 ### Respuestas posibles
 
@@ -986,7 +1001,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sujeto de analítica no encontrado; ResourceNotFoundException: Journey de sesión no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La sesión autenticada no está registrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
@@ -1008,7 +1024,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryEventsController.recordConversion` — `src/modules/telemetry/controllers/telemetry-events.controller.ts:77`
+- **Implementación:** `TelemetryEventsController.recordConversion` — `src/modules/telemetry/controllers/telemetry-events.controller.ts:97`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1018,14 +1034,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/conversion-events` la atiende `TelemetryEventsController.recordConversion` (src/modules/telemetry/controllers/telemetry-events.controller.ts:77). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateConversionEventDto` (5 campos, 2 obligatorios). Delega en `TelemetryEventsService.recordConversion`. Crea filas en telemetry.conversion_events. Actualiza telemetry.session_journeys. Lee telemetry.analytics_subjects, telemetry.conversion_events, telemetry.funnel_definitions, telemetry.session_journeys.
+`POST /telemetry/conversion-events` la atiende `TelemetryEventsController.recordConversion` (src/modules/telemetry/controllers/telemetry-events.controller.ts:97). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateConversionEventDto` (5 campos, 2 obligatorios). Delega en `TelemetryEventsService.recordConversion`. Crea filas en telemetry.conversion_events. Lee iam.sessions, telemetry.analytics_subjects, telemetry.conversion_events, telemetry.funnel_definitions, telemetry.session_journeys, telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:77` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:97` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1035,12 +1051,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.analytics_subjects` | LEE | LEE | DIRECTA | TelemetryEventsController.recordConversion → TelemetryEventsService.recordConversion → AnalyticsSubjectsRepository.findById | `src/modules/telemetry/repositories/analytics-subjects.repository.ts:40` |
+| `iam.sessions` | LEE | LEE | DIRECTA | TelemetryEventsController.recordConversion → TelemetryEventsService.recordConversion → TelemetryEventsService.assertOwnedJourney → ActorSessionsRepository.belongsToUser | `src/modules/telemetry/repositories/actor-sessions.repository.ts:45` |
+| `telemetry.analytics_subjects` | LEE | LEE | DIRECTA | TelemetryEventsController.recordConversion → TelemetryEventsService.recordConversion → TelemetryEventsService.assertOwnedSubject → AnalyticsSubjectsRepository.findById | `src/modules/telemetry/repositories/analytics-subjects.repository.ts:40` |
 | `telemetry.conversion_events` | ESCRIBE | CREA | DIRECTA | TelemetryEventsController.recordConversion → TelemetryEventsService.recordConversion → ConversionEventsRepository.create | `src/modules/telemetry/repositories/conversion-events.repository.ts:58` |
 | `telemetry.conversion_events` | LEE | LEE | DIRECTA | TelemetryEventsController.recordConversion → TelemetryEventsService.recordConversion → ConversionEventsRepository.findExisting | `src/modules/telemetry/repositories/conversion-events.repository.ts:43` |
 | `telemetry.funnel_definitions` | LEE | LEE | DIRECTA | TelemetryEventsController.recordConversion → TelemetryEventsService.recordConversion → FunnelDefinitionsRepository.findById | `src/modules/telemetry/repositories/funnel-definitions.repository.ts:48` |
-| `telemetry.session_journeys` | ESCRIBE | ACTUALIZA | POR_TIPO | TelemetryEventsController.recordConversion → TelemetryEventsService.recordConversion | `src/modules/telemetry/services/telemetry-events.service.ts:413` |
-| `telemetry.session_journeys` | LEE | LEE | DIRECTA | TelemetryEventsController.recordConversion → TelemetryEventsService.recordConversion → SessionJourneysRepository.findById | `src/modules/telemetry/repositories/session-journeys.repository.ts:48` |
+| `telemetry.session_journeys` | LEE | LEE | DIRECTA | TelemetryEventsController.recordConversion → TelemetryEventsService.recordConversion → TelemetryEventsService.assertOwnedJourney → SessionJourneysRepository.findById | `src/modules/telemetry/repositories/session-journeys.repository.ts:48` |
+| `telemetry.user_activity_events` | LEE | LEE | DIRECTA | TelemetryEventsController.recordConversion → TelemetryEventsService.recordConversion → TelemetryEventsService.assertOwnedEvent → UserActivityEventsRepository.findById | `src/modules/telemetry/repositories/user-activity-events.repository.ts:95` |
 
 ### Cuerpo — DTO `CreateConversionEventDto` · `application/json`
 
@@ -1092,7 +1109,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Funnel no encontrado; ResourceNotFoundException: Sujeto de analítica no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Funnel no encontrado; ResourceNotFoundException: Sujeto de analítica no encontrado; ResourceNotFoundException: Journey de sesión no encontrado; ResourceNotFoundException: Evento de actividad no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
@@ -1114,7 +1131,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryConsentController.acceptDisclosure` — `src/modules/telemetry/controllers/telemetry-consent.controller.ts:41`
+- **Implementación:** `TelemetryConsentController.acceptDisclosure` — `src/modules/telemetry/controllers/telemetry-consent.controller.ts:46`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1124,14 +1141,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/disclosure-acceptances` la atiende `TelemetryConsentController.acceptDisclosure` (src/modules/telemetry/controllers/telemetry-consent.controller.ts:41). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateDisclosureAcceptanceDto` (5 campos, 1 obligatorio). Delega en `TelemetryConsentService.acceptDisclosure`. Crea filas en telemetry.tracking_disclosure_acceptances. Lee telemetry.tracking_disclosure_acceptances, telemetry.tracking_disclosure_versions.
+`POST /telemetry/disclosure-acceptances` la atiende `TelemetryConsentController.acceptDisclosure` (src/modules/telemetry/controllers/telemetry-consent.controller.ts:46). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateDisclosureAcceptanceDto` (4 campos, 1 obligatorio). Delega en `TelemetryConsentService.acceptDisclosure`. Crea filas en telemetry.tracking_disclosure_acceptances. Lee telemetry.tracking_disclosure_acceptances, telemetry.tracking_disclosure_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:41` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:46` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1150,10 +1167,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `trackingDisclosureVersionId` | `string` | Sí | formato uuid | `@IsUUID()` | Versión de disclosure aceptada | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:14` |
-| `userId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Usuario que acepta (por defecto el autenticado) | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:25` |
-| `sessionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sesión asociada | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:33` |
-| `ipPrefixHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del prefijo de IP (sin PII en claro) | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:45` |
-| `userAgentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del user agent (sin PII en claro) | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:57` |
+| `sessionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sesión asociada | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:22` |
+| `ipPrefixHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del prefijo de IP (sin PII en claro) | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:34` |
+| `userAgentHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash del user agent (sin PII en claro) | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:46` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1168,7 +1184,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 ```json
 {
   "trackingDisclosureVersionId": "00000000-0000-4000-8000-000000000001",
-  "userId": "00000000-0000-4000-8000-000000000001",
   "sessionId": "00000000-0000-4000-8000-000000000001",
   "ipPrefixHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "userAgentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -1181,10 +1196,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:66` |
-| `trackingDisclosureVersionId` | `string` | Sí | formato uuid | — | Identificador asociado a tracking disclosure version. | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:72` |
-| `userId` | `string` | Sí | formato uuid | — | Identificador asociado a user. | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:78` |
-| `acceptedAt` | `string` | Sí | formato date-time | — | Valor de accepted at mantenido por la instancia. | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:84` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:55` |
+| `trackingDisclosureVersionId` | `string` | Sí | formato uuid | — | Identificador asociado a tracking disclosure version. | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:61` |
+| `userId` | `string` | Sí | formato uuid | — | Identificador asociado a user. | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:67` |
+| `acceptedAt` | `string` | Sí | formato date-time | — | Valor de accepted at mantenido por la instancia. | `src/modules/telemetry/dto/disclosure-acceptance.dto.ts:73` |
 
 ### Respuestas posibles
 
@@ -1218,7 +1233,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryGovernanceController.publishDisclosure` — `src/modules/telemetry/controllers/telemetry-governance.controller.ts:59`
+- **Implementación:** `TelemetryGovernanceController.publishDisclosure` — `src/modules/telemetry/controllers/telemetry-governance.controller.ts:74`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1228,14 +1243,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/disclosure-versions` la atiende `TelemetryGovernanceController.publishDisclosure` (src/modules/telemetry/controllers/telemetry-governance.controller.ts:59). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDisclosureVersionDto` (5 campos, 1 obligatorio). Delega en `TelemetryGovernanceService.publishDisclosure`. Crea filas en telemetry.tracking_disclosure_versions. Actualiza telemetry.tracking_disclosure_versions. Lee telemetry.tracking_disclosure_versions.
+`POST /telemetry/disclosure-versions` la atiende `TelemetryGovernanceController.publishDisclosure` (src/modules/telemetry/controllers/telemetry-governance.controller.ts:74). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDisclosureVersionDto` (5 campos, 1 obligatorio). Delega en `TelemetryGovernanceService.publishDisclosure`. Crea filas en telemetry.tracking_disclosure_versions. Actualiza telemetry.tracking_disclosure_versions. Lee telemetry.tracking_disclosure_versions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:59` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:74` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1323,7 +1338,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryGovernanceController.registerEventSchema` — `src/modules/telemetry/controllers/telemetry-governance.controller.ts:45`
+- **Implementación:** `TelemetryGovernanceController.registerEventSchema` — `src/modules/telemetry/controllers/telemetry-governance.controller.ts:55`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1333,14 +1348,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/event-schemas` la atiende `TelemetryGovernanceController.registerEventSchema` (src/modules/telemetry/controllers/telemetry-governance.controller.ts:45). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateEventSchemaDto` (8 campos, 2 obligatorios). Delega en `TelemetryGovernanceService.registerEventSchema`. Crea filas en telemetry.activity_event_schema_definitions. Lee telemetry.activity_event_schema_definitions, telemetry.tracking_purpose_definitions.
+`POST /telemetry/event-schemas` la atiende `TelemetryGovernanceController.registerEventSchema` (src/modules/telemetry/controllers/telemetry-governance.controller.ts:55). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateEventSchemaDto` (8 campos, 2 obligatorios). Delega en `TelemetryGovernanceService.registerEventSchema`. Crea filas en telemetry.activity_event_schema_definitions. Lee telemetry.activity_event_schema_definitions, telemetry.tracking_purpose_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:45` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:55` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1438,7 +1453,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryGovernanceController.defineFunnel` — `src/modules/telemetry/controllers/telemetry-governance.controller.ts:71`
+- **Implementación:** `TelemetryGovernanceController.defineFunnel` — `src/modules/telemetry/controllers/telemetry-governance.controller.ts:91`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1448,14 +1463,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/funnels` la atiende `TelemetryGovernanceController.defineFunnel` (src/modules/telemetry/controllers/telemetry-governance.controller.ts:71). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateFunnelDto` (9 campos, 5 obligatorios). Delega en `TelemetryGovernanceService.defineFunnel`. Crea filas en telemetry.funnel_definitions, telemetry.funnel_steps. Lee telemetry.activity_event_schema_definitions, telemetry.funnel_definitions, telemetry.tracking_purpose_definitions.
+`POST /telemetry/funnels` la atiende `TelemetryGovernanceController.defineFunnel` (src/modules/telemetry/controllers/telemetry-governance.controller.ts:91). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateFunnelDto` (9 campos, 5 obligatorios). Delega en `TelemetryGovernanceService.defineFunnel`. Crea filas en telemetry.funnel_definitions, telemetry.funnel_steps. Lee telemetry.activity_event_schema_definitions, telemetry.funnel_definitions, telemetry.tracking_purpose_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:71` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:91` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1566,7 +1581,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryEventsController.closeJourney` — `src/modules/telemetry/controllers/telemetry-events.controller.ts:87`
+- **Implementación:** `TelemetryEventsController.closeJourney` — `src/modules/telemetry/controllers/telemetry-events.controller.ts:113`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1576,16 +1591,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/session-journeys/{id}/close` la atiende `TelemetryEventsController.closeJourney` (src/modules/telemetry/controllers/telemetry-events.controller.ts:87). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CloseJourneyDto` (2 campos, 0 obligatorios). Delega en `TelemetryEventsService.closeJourney`. Actualiza telemetry.session_journeys. Lee telemetry.session_journeys.
+`POST /telemetry/session-journeys/{id}/close` la atiende `TelemetryEventsController.closeJourney` (src/modules/telemetry/controllers/telemetry-events.controller.ts:113). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CloseJourneyDto` (2 campos, 0 obligatorios). Delega en `TelemetryEventsService.closeJourney`. Actualiza telemetry.session_journeys. Lee iam.sessions, telemetry.session_journeys, telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:87` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:113` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/telemetry/controllers/telemetry-events.controller.ts:87` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/telemetry/controllers/telemetry-events.controller.ts:113` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1594,8 +1609,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.session_journeys` | ESCRIBE | ACTUALIZA | POR_TIPO | TelemetryEventsController.closeJourney → TelemetryEventsService.closeJourney | `src/modules/telemetry/services/telemetry-events.service.ts:463` |
-| `telemetry.session_journeys` | LEE | LEE | DIRECTA | TelemetryEventsController.closeJourney → TelemetryEventsService.closeJourney → SessionJourneysRepository.findById | `src/modules/telemetry/repositories/session-journeys.repository.ts:48` |
+| `iam.sessions` | LEE | LEE | DIRECTA | TelemetryEventsController.closeJourney → TelemetryEventsService.closeJourney → TelemetryEventsService.assertOwnedJourney → ActorSessionsRepository.belongsToUser | `src/modules/telemetry/repositories/actor-sessions.repository.ts:45` |
+| `telemetry.session_journeys` | ESCRIBE | ACTUALIZA | POR_TIPO | TelemetryEventsController.closeJourney → TelemetryEventsService.closeJourney | `src/modules/telemetry/services/telemetry-events.service.ts:515` |
+| `telemetry.session_journeys` | LEE | LEE | DIRECTA | TelemetryEventsController.closeJourney → TelemetryEventsService.closeJourney → TelemetryEventsService.assertOwnedJourney → SessionJourneysRepository.findById | `src/modules/telemetry/repositories/session-journeys.repository.ts:48` |
+| `telemetry.user_activity_events` | LEE | LEE | DIRECTA | TelemetryEventsController.closeJourney → TelemetryEventsService.closeJourney → TelemetryEventsService.assertOwnedEvent → UserActivityEventsRepository.findById | `src/modules/telemetry/repositories/user-activity-events.repository.ts:95` |
 
 ### Parámetros
 
@@ -1644,7 +1661,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado; ResourceNotFoundException: Evento de actividad no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El journey ya está cerrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1667,7 +1684,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryConsentController.grantConsent` — `src/modules/telemetry/controllers/telemetry-consent.controller.ts:54`
+- **Implementación:** `TelemetryConsentController.grantConsent` — `src/modules/telemetry/controllers/telemetry-consent.controller.ts:64`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1677,14 +1694,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/tracking-consents` la atiende `TelemetryConsentController.grantConsent` (src/modules/telemetry/controllers/telemetry-consent.controller.ts:54). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateTrackingConsentDto` (5 campos, 1 obligatorio). Delega en `TelemetryConsentService.grantConsent`. Crea filas en telemetry.tracking_consents. Lee telemetry.tracking_purpose_definitions.
+`POST /telemetry/tracking-consents` la atiende `TelemetryConsentController.grantConsent` (src/modules/telemetry/controllers/telemetry-consent.controller.ts:64). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateTrackingConsentDto` (4 campos, 1 obligatorio). Delega en `TelemetryConsentService.grantConsent`. Crea filas en telemetry.tracking_consents. Lee telemetry.tracking_purpose_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:54` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:64` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1702,10 +1719,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `purposeDefinitionId` | `string` | Sí | formato uuid | `@IsUUID()` | Propósito de tracking (requiere consentimiento) | `src/modules/telemetry/dto/tracking-consent.dto.ts:14` |
-| `userId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Usuario que consiente (por defecto el autenticado) | `src/modules/telemetry/dto/tracking-consent.dto.ts:25` |
-| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Jurisdicción (concept id) | `src/modules/telemetry/dto/tracking-consent.dto.ts:36` |
-| `consentVersion` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | Versión del consentimiento | `src/modules/telemetry/dto/tracking-consent.dto.ts:48` |
-| `evidenceHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash de la evidencia de consentimiento | `src/modules/telemetry/dto/tracking-consent.dto.ts:60` |
+| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Jurisdicción (concept id) | `src/modules/telemetry/dto/tracking-consent.dto.ts:25` |
+| `consentVersion` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | Versión del consentimiento | `src/modules/telemetry/dto/tracking-consent.dto.ts:37` |
+| `evidenceHash` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Hash de la evidencia de consentimiento | `src/modules/telemetry/dto/tracking-consent.dto.ts:49` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1720,7 +1736,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 ```json
 {
   "purposeDefinitionId": "00000000-0000-4000-8000-000000000001",
-  "userId": "00000000-0000-4000-8000-000000000001",
   "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
   "consentVersion": "valor-ejemplo",
   "evidenceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -1733,12 +1748,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:69` |
-| `userId` | `string` | Sí | formato uuid | — | Identificador asociado a user. | `src/modules/telemetry/dto/tracking-consent.dto.ts:75` |
-| `purposeDefinitionId` | `string` | Sí | formato uuid | — | Identificador asociado a purpose definition. | `src/modules/telemetry/dto/tracking-consent.dto.ts:81` |
-| `decisionConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a decision concept. | `src/modules/telemetry/dto/tracking-consent.dto.ts:87` |
-| `grantedAt` | `string` | No | formato date-time | — | Valor de granted at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:93` |
-| `withdrawnAt` | `string` | No | formato date-time | — | Valor de withdrawn at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:99` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:58` |
+| `userId` | `string` | Sí | formato uuid | — | Identificador asociado a user. | `src/modules/telemetry/dto/tracking-consent.dto.ts:64` |
+| `purposeDefinitionId` | `string` | Sí | formato uuid | — | Identificador asociado a purpose definition. | `src/modules/telemetry/dto/tracking-consent.dto.ts:70` |
+| `decisionConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a decision concept. | `src/modules/telemetry/dto/tracking-consent.dto.ts:76` |
+| `grantedAt` | `string` | No | formato date-time | — | Valor de granted at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:82` |
+| `withdrawnAt` | `string` | No | formato date-time | — | Valor de withdrawn at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:88` |
 
 ### Respuestas posibles
 
@@ -1773,7 +1788,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryConsentController.withdrawConsent` — `src/modules/telemetry/controllers/telemetry-consent.controller.ts:86`
+- **Implementación:** `TelemetryConsentController.withdrawConsent` — `src/modules/telemetry/controllers/telemetry-consent.controller.ts:106`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1783,23 +1798,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/tracking-consents/{id}/withdraw` la atiende `TelemetryConsentController.withdrawConsent` (src/modules/telemetry/controllers/telemetry-consent.controller.ts:86). Exige sesión; el controlador no declara roles. Delega en `TelemetryConsentService.withdrawConsent`. Crea filas en telemetry.tracking_consents. Actualiza telemetry.analytics_subjects. Lee telemetry.analytics_subjects, telemetry.tracking_consents.
+`POST /telemetry/tracking-consents/{id}/withdraw` la atiende `TelemetryConsentController.withdrawConsent` (src/modules/telemetry/controllers/telemetry-consent.controller.ts:106). Exige sesión; el controlador no declara roles. Delega en `TelemetryConsentService.withdrawConsent`. Crea filas en telemetry.tracking_consents. Actualiza telemetry.analytics_subjects. Lee telemetry.analytics_subjects, telemetry.tracking_consents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:86` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:106` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:86` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:106` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.analytics_subjects` | ESCRIBE | ACTUALIZA | POR_TIPO | TelemetryConsentController.withdrawConsent → TelemetryConsentService.withdrawConsent | `src/modules/telemetry/services/telemetry-consent.service.ts:302` |
+| `telemetry.analytics_subjects` | ESCRIBE | ACTUALIZA | POR_TIPO | TelemetryConsentController.withdrawConsent → TelemetryConsentService.withdrawConsent | `src/modules/telemetry/services/telemetry-consent.service.ts:311` |
 | `telemetry.analytics_subjects` | LEE | LEE | DIRECTA | TelemetryConsentController.withdrawConsent → TelemetryConsentService.withdrawConsent → AnalyticsSubjectsRepository.findActiveByConsent | `src/modules/telemetry/repositories/analytics-subjects.repository.ts:68` |
 | `telemetry.tracking_consents` | ESCRIBE | CREA | DIRECTA | TelemetryConsentController.withdrawConsent → TelemetryConsentService.withdrawConsent → TrackingConsentsRepository.create | `src/modules/telemetry/repositories/tracking-consents.repository.ts:80` |
 | `telemetry.tracking_consents` | LEE | LEE | DIRECTA | TelemetryConsentController.withdrawConsent → TelemetryConsentService.withdrawConsent → TrackingConsentsRepository.findById | `src/modules/telemetry/repositories/tracking-consents.repository.ts:56` |
@@ -1818,12 +1833,12 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:69` |
-| `userId` | `string` | Sí | formato uuid | — | Identificador asociado a user. | `src/modules/telemetry/dto/tracking-consent.dto.ts:75` |
-| `purposeDefinitionId` | `string` | Sí | formato uuid | — | Identificador asociado a purpose definition. | `src/modules/telemetry/dto/tracking-consent.dto.ts:81` |
-| `decisionConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a decision concept. | `src/modules/telemetry/dto/tracking-consent.dto.ts:87` |
-| `grantedAt` | `string` | No | formato date-time | — | Valor de granted at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:93` |
-| `withdrawnAt` | `string` | No | formato date-time | — | Valor de withdrawn at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:99` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:58` |
+| `userId` | `string` | Sí | formato uuid | — | Identificador asociado a user. | `src/modules/telemetry/dto/tracking-consent.dto.ts:64` |
+| `purposeDefinitionId` | `string` | Sí | formato uuid | — | Identificador asociado a purpose definition. | `src/modules/telemetry/dto/tracking-consent.dto.ts:70` |
+| `decisionConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a decision concept. | `src/modules/telemetry/dto/tracking-consent.dto.ts:76` |
+| `grantedAt` | `string` | No | formato date-time | — | Valor de granted at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:82` |
+| `withdrawnAt` | `string` | No | formato date-time | — | Valor de withdrawn at mantenido por la instancia. | `src/modules/telemetry/dto/tracking-consent.dto.ts:88` |
 
 ### Respuestas posibles
 
@@ -1858,7 +1873,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryConsentController.getMyConsent` — `src/modules/telemetry/controllers/telemetry-consent.controller.ts:65`
+- **Implementación:** `TelemetryConsentController.getMyConsent` — `src/modules/telemetry/controllers/telemetry-consent.controller.ts:80`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1868,14 +1883,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /telemetry/tracking-consents/me` la atiende `TelemetryConsentController.getMyConsent` (src/modules/telemetry/controllers/telemetry-consent.controller.ts:65). Exige sesión; el controlador no declara roles. Delega en `TelemetryConsentService.getMyStatus`. Lee telemetry.tracking_consents.
+`GET /telemetry/tracking-consents/me` la atiende `TelemetryConsentController.getMyConsent` (src/modules/telemetry/controllers/telemetry-consent.controller.ts:80). Exige sesión; el controlador no declara roles. Delega en `TelemetryConsentService.getMyStatus`. Lee telemetry.tracking_consents.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:65` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:80` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_QUERY | purposeDefinitionId (obligatorio) | `contrato (parameters)` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1900,9 +1915,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `status` | `string` | Sí | valores: GRANTED, WITHDRAWN, NONE | — | `GRANTED` si la última decisión es el otorgamiento, `WITHDRAWN` si es el retiro y `NONE` si nunca decidió. | `src/modules/telemetry/dto/tracking-consent.dto.ts:109` |
-| `consentId` | `string` | No | formato uuid | — | Consentimiento que hay que pasar a `POST /telemetry/tracking-consents/:id/withdraw` para retirarlo. Sólo viene con `GRANTED`. | `src/modules/telemetry/dto/tracking-consent.dto.ts:116` |
-| `purposeDefinitionId` | `string` | Sí | formato uuid | — | Propósito consultado. | `src/modules/telemetry/dto/tracking-consent.dto.ts:120` |
+| `status` | `string` | Sí | valores: GRANTED, WITHDRAWN, NONE | — | `GRANTED` si la última decisión es el otorgamiento, `WITHDRAWN` si es el retiro y `NONE` si nunca decidió. | `src/modules/telemetry/dto/tracking-consent.dto.ts:98` |
+| `consentId` | `string` | No | formato uuid | — | Consentimiento que hay que pasar a `POST /telemetry/tracking-consents/:id/withdraw` para retirarlo. Sólo viene con `GRANTED`. | `src/modules/telemetry/dto/tracking-consent.dto.ts:105` |
+| `purposeDefinitionId` | `string` | Sí | formato uuid | — | Propósito consultado. | `src/modules/telemetry/dto/tracking-consent.dto.ts:109` |
 
 ### Respuestas posibles
 
@@ -1933,7 +1948,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryGovernanceController.definePurpose` — `src/modules/telemetry/controllers/telemetry-governance.controller.ts:33`
+- **Implementación:** `TelemetryGovernanceController.definePurpose` — `src/modules/telemetry/controllers/telemetry-governance.controller.ts:38`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1943,14 +1958,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/tracking-purposes` la atiende `TelemetryGovernanceController.definePurpose` (src/modules/telemetry/controllers/telemetry-governance.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateTrackingPurposeDto` (8 campos, 2 obligatorios). Delega en `TelemetryGovernanceService.definePurpose`. Crea filas en telemetry.tracking_purpose_definitions. Lee telemetry.tracking_purpose_definitions.
+`POST /telemetry/tracking-purposes` la atiende `TelemetryGovernanceController.definePurpose` (src/modules/telemetry/controllers/telemetry-governance.controller.ts:38). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateTrackingPurposeDto` (8 campos, 2 obligatorios). Delega en `TelemetryGovernanceService.definePurpose`. Crea filas en telemetry.tracking_purpose_definitions. Lee telemetry.tracking_purpose_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:33` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/telemetry/controllers/telemetry-governance.controller.ts:38` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -2045,7 +2060,7 @@ El árbol de decisión completo está en [flujos](../flujos/telemetry.md).
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `TelemetryEventsController.recordWebVitals` — `src/modules/telemetry/controllers/telemetry-events.controller.ts:65`
+- **Implementación:** `TelemetryEventsController.recordWebVitals` — `src/modules/telemetry/controllers/telemetry-events.controller.ts:80`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2055,14 +2070,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /telemetry/web-vitals` la atiende `TelemetryEventsController.recordWebVitals` (src/modules/telemetry/controllers/telemetry-events.controller.ts:65). Exige sesión; el controlador no declara roles. Valida el cuerpo como `RecordWebVitalsDto` (10 campos, 3 obligatorios). Delega en `TelemetryEventsService.recordWebVitals`. Crea filas en telemetry.web_vitals. Lee telemetry.session_journeys.
+`POST /telemetry/web-vitals` la atiende `TelemetryEventsController.recordWebVitals` (src/modules/telemetry/controllers/telemetry-events.controller.ts:80). Exige sesión; el controlador no declara roles. Valida el cuerpo como `RecordWebVitalsDto` (10 campos, 3 obligatorios). Delega en `TelemetryEventsService.recordWebVitals`. Crea filas en telemetry.web_vitals. Lee iam.sessions, telemetry.analytics_subjects, telemetry.client_contexts, telemetry.session_journeys, telemetry.user_activity_events.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:65` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:80` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -2072,7 +2087,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `telemetry.session_journeys` | LEE | LEE | DIRECTA | TelemetryEventsController.recordWebVitals → TelemetryEventsService.recordWebVitals → SessionJourneysRepository.findById | `src/modules/telemetry/repositories/session-journeys.repository.ts:48` |
+| `iam.sessions` | LEE | LEE | DIRECTA | TelemetryEventsController.recordWebVitals → TelemetryEventsService.recordWebVitals → TelemetryEventsService.assertOwnedJourney → ActorSessionsRepository.belongsToUser | `src/modules/telemetry/repositories/actor-sessions.repository.ts:45` |
+| `telemetry.analytics_subjects` | LEE | LEE | DIRECTA | TelemetryEventsController.recordWebVitals → TelemetryEventsService.recordWebVitals → TelemetryEventsService.assertOwnedSubject → AnalyticsSubjectsRepository.findById | `src/modules/telemetry/repositories/analytics-subjects.repository.ts:40` |
+| `telemetry.client_contexts` | LEE | LEE | DIRECTA | TelemetryEventsController.recordWebVitals → TelemetryEventsService.recordWebVitals → TelemetryEventsService.assertOwnedContext → ClientContextsRepository.findById | `src/modules/telemetry/repositories/client-contexts.repository.ts:92` |
+| `telemetry.session_journeys` | LEE | LEE | DIRECTA | TelemetryEventsController.recordWebVitals → TelemetryEventsService.recordWebVitals → TelemetryEventsService.assertOwnedJourney → SessionJourneysRepository.findById | `src/modules/telemetry/repositories/session-journeys.repository.ts:48` |
+| `telemetry.user_activity_events` | LEE | LEE | DIRECTA | TelemetryEventsController.recordWebVitals → TelemetryEventsService.recordWebVitals → TelemetryEventsService.assertOwnedEvent → UserActivityEventsRepository.findById | `src/modules/telemetry/repositories/user-activity-events.repository.ts:95` |
 | `telemetry.web_vitals` | ESCRIBE | CREA | DIRECTA | TelemetryEventsController.recordWebVitals → TelemetryEventsService.recordWebVitals → WebVitalsRepository.create | `src/modules/telemetry/repositories/web-vitals.repository.ts:64` |
 
 ### Cuerpo — DTO `RecordWebVitalsDto` · `application/json`
@@ -2140,7 +2159,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Journey de sesión no encontrado; ResourceNotFoundException: Sujeto de analítica no encontrado; ResourceNotFoundException: Evento de actividad no encontrado; ResourceNotFoundException: Contexto de cliente no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/telemetry.md).

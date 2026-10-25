@@ -23,12 +23,12 @@ import {
 import {
   LEGAL_ENTITY_TYPE_CODES,
   type LegalEntityTypeCode,
-} from '../../../directory/legal-entity-types';
+} from '../../../../common/constants/legal-entity-types';
 import {
   BrokerProfileDto,
   DiagnosticUnitProfileDto,
   PayerProfileDto,
-} from '../../../directory/dto';
+} from '../../../../common/dto/tenant-type-profile.dto';
 
 /**
  * Los cinco documentos legales de afiliación en PDF (subtarea 1.2), ya

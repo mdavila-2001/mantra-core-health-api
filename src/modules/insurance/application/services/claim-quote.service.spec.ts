@@ -3,7 +3,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../../common';
-import { InsurancePlanBenefits } from '../../entities';
+import { InsurancePlanBenefits, PatientCoverages } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
 import { ClaimCoveragePolicy } from './claim-coverage-policy';
 import { ClaimQuoteService } from './claim-quote.service';
@@ -51,7 +51,12 @@ function build(
           )
         : [],
     ),
-    findOne: fn().mockResolvedValue(null),
+    // La política relee la cobertura del cobro (PatientCoverages): es del plan.
+    findOne: fn().mockImplementation(async (entity: unknown) =>
+      entity === PatientCoverages
+        ? { id: 'coverage-1', insurancePlanId: PLAN }
+        : null,
+    ),
     flush: fn(),
   };
   const em = { fork: fn().mockReturnValue(forked), transactional: fn() };
