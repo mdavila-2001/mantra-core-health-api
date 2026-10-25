@@ -1,16 +1,22 @@
 -- ============================================================================
--- SALUD · patch v4.2.19 (data_catalog · nuevo módulo 67) sobre una BD viva
--- Fecha: 2026-09-18
+-- SALUD · patch v4.2.24 (data_catalog · módulo 67) sobre una BD viva
+-- Fecha original: 2026-09-18 (API, v4.2.19) · promovido al modelo: 2026-09-26
+--
+-- PROMOCIÓN AL MODELO (carril M1, reparto de 6 máquinas). Colisionaba con
+-- v4.2.19 de custodian_tenant_rls (dos parches distintos, mismo número, en
+-- árboles distintos: éste vivía sólo en la copia vendorizada de la API).
+-- Se renumera a v4.2.24, continuando la secuencia única del modelo (hasta
+-- acá: v4.2.23).
+--
+-- `diagram_67_data_catalog.puml` YA EXISTE, transcribiendo estas mismas 8
+-- tablas: verificado regenerando con `gen_ddl.py 67` y diffeando columna por
+-- columna contra este patch — 0 diferencias en las 8 tablas (tipo y
+-- obligatoriedad), y los 15 nombres de índice, idénticos. Este archivo sigue
+-- siendo el único camino para una base YA viva; una base nueva sale con estas
+-- tablas desde `SQL/67_data_catalog/`.
 -- Idempotente (CREATE SCHEMA/TABLE/INDEX IF NOT EXISTS, FK con duplicate_object).
 -- UNA sola pasada: no hay backfill (módulo nuevo, cero filas). El primer
 -- escaneo del catálogo lo puebla desde la API.
---
--- ⚠️ DESVÍO DECLARADO DEL PROCESO CANÓNICO — mismo caso que v4.2.6
--- (medical_groups). El flujo oficial es .puml → SQL/ → BD → ORM; este módulo
--- no tiene todavía su `.puml` y este archivo es DDL escrito a mano. Su espejo
--- en el ORM son `src/modules/data_catalog/entities/*` y
--- `src/orm/catalog/{indexes,foreign-keys}/data_catalog.*.ts`. Queda pendiente
--- declarar `diagram_67_data_catalog.puml` con este mismo contenido.
 --
 -- QUÉ CIERRA. Portal administrativo (inspiración ATLAS, pilar "catálogo"):
 -- responder por cada tabla y columna qué es, POR QUÉ EXISTE, qué significa una

@@ -30,6 +30,8 @@ import {
   AnnotationIdParamDto,
   AnnotationPatchDto,
   CatalogObjectsQueryDto,
+  ClassificationRunDto,
+  ColumnIdParamDto,
   CoverageQueryDto,
   CursorQueryDto,
   EvidenceInputDto,
@@ -43,18 +45,22 @@ import {
   CatalogColumnsDto,
   CatalogCoverageDto,
   CatalogObjectDetailDto,
+  ClassificationRunResultDto,
   CatalogObjectsPageDto,
   ChangesPageDto,
   EvidenceDto,
   ImpactDto,
+  PermissionDriftDto,
   ScanAcceptedDto,
   ScanDto,
   ScansPageDto,
   SchemaSummaryDto,
 } from '../dto/catalog-response.dto';
+import { CatalogClassificationService } from '../services/catalog-classification.service';
 import { CatalogGovernanceService } from '../services/catalog-governance.service';
 import { CatalogReadService } from '../services/catalog-read.service';
 import { CatalogScanService } from '../services/catalog-scan.service';
+import { PermissionDriftService } from '../services/permission-drift.service';
 
 const IDEMPOTENCY_KEY = /^[A-Za-z0-9._:-]{8,128}$/;
 
@@ -62,8 +68,8 @@ const IDEMPOTENCY_KEY = /^[A-Za-z0-9._:-]{8,128}$/;
  * Catálogo de datos **vivo**: lo que un escaneo de `pg_catalog` observa de la base primaria y lo
  * que el equipo de datos curó encima (fichas, evidencia, revisiones).
  *
- * Lecturas para los cinco roles del catálogo; escrituras y escaneos sólo para
- * `GOVERNANCE_ADMIN` y `DATA_PLATFORM_ADMIN`. Fuera de cualquier tenant: son datos de la
+ * Lecturas para los roles de lectura del portal; escrituras y escaneos sólo para
+ * `CATALOG_WRITE_ROLES`. Fuera de cualquier tenant: son datos de la
  * plataforma. La autorización la decide esta API, no la pantalla.
  */
 @ApiTags('admin-catalog')
@@ -75,6 +81,8 @@ export class AdminCatalogController {
     private readonly read: CatalogReadService,
     private readonly governance: CatalogGovernanceService,
     private readonly scans: CatalogScanService,
+    private readonly classification: CatalogClassificationService,
+    private readonly drift: PermissionDriftService,
   ) {}
 
   @Get('schemas')
@@ -150,6 +158,38 @@ export class AdminCatalogController {
     return this.governance.addEvidence(actor.id, p.id, dto);
   }
 
+  @Get('columns/:id/evidence')
+  @Roles(...PORTAL_READ_ROLES)
+  @ApiOperation({
+    summary: 'Evidencia enlazada a una columna',
+  })
+  @ApiResponse({ status: 200, type: [EvidenceDto] })
+  @ApiResponse({ status: 404, description: 'No existe la columna' })
+  columnEvidence(@Param() p: ColumnIdParamDto) {
+    return this.read.columnEvidence(p.id);
+  }
+
+  @Audited({
+    action: 'CATALOG_EVIDENCE_ADDED',
+    entity: 'catalog_evidence_item',
+    entityId: 'result.id',
+  })
+  @Post('columns/:id/evidence')
+  @Roles(...CATALOG_WRITE_ROLES)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Enlaza evidencia a una columna',
+  })
+  @ApiResponse({ status: 201, type: EvidenceDto })
+  @ApiResponse({ status: 404, description: 'No existe la columna' })
+  addColumnEvidence(
+    @Param() p: ColumnIdParamDto,
+    @Body() dto: EvidenceInputDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.governance.addColumnEvidence(actor.id, p.id, dto);
+  }
+
   @Get('objects/:id/history')
   @Roles(...PORTAL_READ_ROLES)
   @ApiOperation({
@@ -210,6 +250,36 @@ export class AdminCatalogController {
   }
 
   @Audited({
+    action: 'CATALOG_ANNOTATION_SAVED',
+    entity: 'catalog_annotation',
+    entityId: 'result.id',
+  })
+  @Put('columns/:id/annotation')
+  @Roles(...CATALOG_WRITE_ROLES)
+  @ApiOperation({
+    summary:
+      'Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED',
+  })
+  @ApiResponse({ status: 200, type: AnnotationDto })
+  @ApiResponse({ status: 404, description: 'No existe la columna' })
+  @ApiResponse({
+    status: 409,
+    description: 'La ficha cambió desde que se leyó (`CONCURRENCY_CONFLICT`)',
+  })
+  @ApiResponse({
+    status: 422,
+    description:
+      'No puede enviarse a revisión: falta la definición (`VALIDATION_FAILED`, `details.violations`)',
+  })
+  saveColumnAnnotation(
+    @Param() p: ColumnIdParamDto,
+    @Body() dto: AnnotationPatchDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.governance.saveColumnAnnotation(actor.id, p.id, dto);
+  }
+
+  @Audited({
     action: 'CATALOG_ANNOTATION_REVIEWED',
     entity: 'catalog_annotation',
     entityId: 'param:id',
@@ -239,6 +309,39 @@ export class AdminCatalogController {
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     return this.governance.review(actor.id, p.id, dto);
+  }
+
+  @Audited({
+    action: 'CATALOG_CLASSIFICATION_RUN',
+    entity: 'catalog_annotation',
+  })
+  @Post('classification/run')
+  @Roles(...CATALOG_WRITE_ROLES)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Corre la clasificación automática de sensibilidad sobre las columnas observadas',
+    description:
+      'Crea fichas de columna en AUTO_DETECTED (certeza) o NEEDS_REVIEW (duda). Nunca baja un nivel ni pisa fichas escritas por una persona o que ya salieron de AUTO_DETECTED.',
+  })
+  @ApiResponse({ status: 200, type: ClassificationRunResultDto })
+  runClassification(
+    @Body() dto: ClassificationRunDto,
+  ): Promise<ClassificationRunResultDto> {
+    return this.classification.run(dto.schema);
+  }
+
+  @Get('permission-drift')
+  @Roles(...PORTAL_READ_ROLES)
+  @ApiOperation({
+    summary:
+      'Deriva de permisos: roles que las rutas exigen contra los que la API siembra',
+    description:
+      'Compara los `@Roles(...)` de todas las rutas (leídos al arrancar) con los roles de los `*.roles.ts` y con `authz.roles`: roles usados sin sembrar, sembrados sin usar y rutas autenticadas sin `@Roles`.',
+  })
+  @ApiResponse({ status: 200, type: PermissionDriftDto })
+  permissionDrift() {
+    return this.drift.report();
   }
 
   @Get('coverage')

@@ -53914,6 +53914,7 @@ paths:
           schema:
             type: string
             enum:
+              - AUTO_DETECTED
               - DRAFT
               - NEEDS_REVIEW
               - APPROVED
@@ -54123,6 +54124,93 @@ paths:
       description: >-
         Enlaza evidencia a un objeto. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /admin/catalog/columns/{id}/evidence:
+    get:
+      operationId: AdminCatalogController_columnEvidence
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EvidenceDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: No existe la columna
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Evidencia enlazada a una columna
+      tags:
+        - admin-catalog
+      description: >-
+        Evidencia enlazada a una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+    post:
+      operationId: AdminCatalogController_addColumnEvidence
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataCatalogEvidenceInputDto'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidenceDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: No existe la columna
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Enlaza evidencia a una columna
+      tags:
+        - admin-catalog
+      description: >-
+        Enlaza evidencia a una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /admin/catalog/objects/{id}/history:
     get:
       operationId: AdminCatalogController_history
@@ -54318,6 +54406,56 @@ paths:
       description: >-
         Crea o edita la ficha de un objeto (con versión esperada). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /admin/catalog/columns/{id}/annotation:
+    put:
+      operationId: AdminCatalogController_saveColumnAnnotation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnnotationPatchDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnotationDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: No existe la columna
+        '409':
+          description: La ficha cambió desde que se leyó (`CONCURRENCY_CONFLICT`)
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          description: 'No puede enviarse a revisión: falta la definición (`VALIDATION_FAILED`, `details.violations`)'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED
+      tags:
+        - admin-catalog
+      description: >-
+        Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED.
+        Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el
+        envelope ErrorResponse.
   /admin/catalog/annotations/{id}/review:
     post:
       operationId: AdminCatalogController_review
@@ -54367,6 +54505,76 @@ paths:
       description: >-
         Aprueba o rechaza la revisión vigente de una ficha. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /admin/catalog/classification/run:
+    post:
+      description: >-
+        Crea fichas de columna en AUTO_DETECTED (certeza) o NEEDS_REVIEW (duda). Nunca baja un nivel ni pisa fichas
+        escritas por una persona o que ya salieron de AUTO_DETECTED.
+      operationId: AdminCatalogController_runClassification
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassificationRunDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassificationRunResultDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Corre la clasificación automática de sensibilidad sobre las columnas observadas
+      tags:
+        - admin-catalog
+  /admin/catalog/permission-drift:
+    get:
+      description: >-
+        Compara los `@Roles(...)` de todas las rutas (leídos al arrancar) con los roles de los `*.roles.ts` y con
+        `authz.roles`: roles usados sin sembrar, sembrados sin usar y rutas autenticadas sin `@Roles`.
+      operationId: AdminCatalogController_permissionDrift
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionDriftDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: 'Deriva de permisos: roles que las rutas exigen contra los que la API siembra'
+      tags:
+        - admin-catalog
   /admin/catalog/coverage:
     get:
       operationId: AdminCatalogController_coverage
@@ -54522,6 +54730,76 @@ paths:
       description: >-
         Un escaneo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error
         usan el envelope ErrorResponse.
+  /internal/catalog/scans/run-next:
+    post:
+      description: >-
+        Cierra los escaneos abandonados, retoma el que está en cola o, si venció el intervalo de la sonda, pide uno
+        nuevo. `claimed: 0` si no había nada que hacer. `fenced: true` si el escaneo perdió su lease.
+      operationId: InternalCatalogScansController_runNext
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunNextResultDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: 'Sonda: reclama y ejecuta el siguiente escaneo (worker)'
+      tags:
+        - data-catalog-internal
+  /internal/catalog/inventory/import:
+    post:
+      description: >-
+        Lee `inventario/` y escribe `catalog_operations`, `catalog_operation_impacts`, `catalog_processes`,
+        `catalog_process_steps` y `catalog_process_step_operations` en una transacción. Idempotente: lo que no cambió no
+        se toca. Corre después de un escaneo, porque cada impacto apunta a un objeto de `catalog_objects`. Una operación
+        que deja de aparecer queda `NOT_OBSERVED`. 503 si la instancia no tiene el inventario.
+      operationId: InternalCatalogInventoryController_importInventory
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryImportResultDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          description: El inventario no está disponible en esta instancia
+      security:
+        - bearer: []
+      summary: Importa el inventario de la API a las tablas de operaciones y procesos (worker)
+      tags:
+        - data-catalog-internal
   /system-context/dynamic-enums/bindings:
     get:
       description: Permite descubrir qué campos `*_concept_id` son de catálogo sin conocer ningún uuid.
@@ -60456,6 +60734,10 @@ tags:
     description: >-
       Operaciones del dominio funcional cross_store_consistency. Consulte el catálogo Markdown de endpoints para
       payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: data-catalog-internal
+    description: >-
+      Operaciones del dominio funcional data catalog internal. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: delegated-access-authz
     description: >-
       Operaciones del dominio funcional delegated access authz. Consulte el catálogo Markdown de endpoints para payloads
@@ -96074,6 +96356,7 @@ components:
         reviewStatus:
           type: string
           enum:
+            - AUTO_DETECTED
             - DRAFT
             - NEEDS_REVIEW
             - APPROVED
@@ -96091,11 +96374,15 @@ components:
           type: string
           enum:
             - UNKNOWN
-            - NONE
+            - ANONYMIZED
+            - PUBLIC
             - INTERNAL
-            - PII
-            - PHI
-            - SECRET
+            - PSEUDONYMIZED
+            - PERSONAL
+            - PHI_IDENTIFIER
+            - PHI_SENSITIVE
+            - PHI_SPECIAL
+            - CREDENTIAL
       required:
         - id
         - reviewStatus
@@ -96295,11 +96582,15 @@ components:
           type: string
           enum:
             - UNKNOWN
-            - NONE
+            - ANONYMIZED
+            - PUBLIC
             - INTERNAL
-            - PII
-            - PHI
-            - SECRET
+            - PSEUDONYMIZED
+            - PERSONAL
+            - PHI_IDENTIFIER
+            - PHI_SENSITIVE
+            - PHI_SPECIAL
+            - CREDENTIAL
         openQuestions:
           type: array
           items:
@@ -96326,12 +96617,16 @@ components:
         reviewStatus:
           type: string
           enum:
+            - AUTO_DETECTED
             - DRAFT
             - NEEDS_REVIEW
             - APPROVED
             - REJECTED
         origin:
           type: string
+          enum:
+            - MANUAL
+            - AUTO_CLASSIFIER
         currentRevisionNo:
           type: number
         approvedRevisionNo:
@@ -96619,6 +96914,26 @@ components:
         - kind
         - reference
       additionalProperties: false
+    ClassificationRecordDto:
+      type: object
+      properties:
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        classifiedBy:
+          type: string
+          description: Identidad y versión del clasificador
+        ruleId:
+          type: string
+        basis:
+          type: string
+          description: Norma o identificador que sustenta la regla
+      required:
+        - confidence
+        - classifiedBy
+        - ruleId
+        - basis
     RevisionDto:
       type: object
       properties:
@@ -96626,6 +96941,14 @@ components:
           type: number
         origin:
           type: string
+          enum:
+            - MANUAL
+            - AUTO_CLASSIFIER
+        classification:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/ClassificationRecordDto'
         submittedStatus:
           type: string
         changeReason:
@@ -96741,6 +97064,7 @@ components:
           type: string
           nullable: true
           enum:
+            - AUTO_DETECTED
             - DRAFT
             - NEEDS_REVIEW
             - APPROVED
@@ -96913,11 +97237,15 @@ components:
           type: string
           enum:
             - UNKNOWN
-            - NONE
+            - ANONYMIZED
+            - PUBLIC
             - INTERNAL
-            - PII
-            - PHI
-            - SECRET
+            - PSEUDONYMIZED
+            - PERSONAL
+            - PHI_IDENTIFIER
+            - PHI_SENSITIVE
+            - PHI_SPECIAL
+            - CREDENTIAL
         consumers:
           maxItems: 50
           type: array
@@ -96951,6 +97279,143 @@ components:
         - decision
         - expectedRevisionNo
       additionalProperties: false
+    ClassificationRunDto:
+      type: object
+      properties:
+        schema:
+          type: string
+          description: Limita la corrida a un schema
+      additionalProperties: false
+    ClassificationRunResultDto:
+      type: object
+      properties:
+        examined:
+          type: number
+          description: Columnas observadas que se miraron
+        unclassified:
+          type: number
+          description: 'Columnas que ninguna regla reconoció: quedan sin clasificar'
+        created:
+          type: number
+          description: Fichas nuevas
+        raised:
+          type: number
+          description: Fichas de la máquina subidas a un nivel más alto
+        sentToReview:
+          type: number
+          description: De las creadas o subidas, las que quedaron en NEEDS_REVIEW por duda
+        skippedManual:
+          type: number
+          description: 'No tocadas: las escribió una persona'
+        skippedReviewed:
+          type: number
+          description: 'No tocadas: ya salieron de AUTO_DETECTED'
+        skippedNotHigher:
+          type: number
+          description: 'No tocadas: la propuesta no era más alta (nunca baja)'
+        conflicts:
+          type: number
+          description: 'No escritas: otra petición cambió la ficha antes'
+      required:
+        - examined
+        - unclassified
+        - created
+        - raised
+        - sentToReview
+        - skippedManual
+        - skippedReviewed
+        - skippedNotHigher
+        - conflicts
+    RoutesSummaryDto:
+      type: object
+      properties:
+        total:
+          type: number
+        public:
+          type: number
+        withRoles:
+          type: number
+        withoutRoles:
+          type: number
+          description: 'Autenticadas sin `@Roles`: las pasa cualquier sesión'
+      required:
+        - total
+        - public
+        - withRoles
+        - withoutRoles
+    DriftRouteRefDto:
+      type: object
+      properties:
+        method:
+          type: string
+          example: GET
+        template:
+          type: string
+          example: /admin/catalog/objects/:id
+        controller:
+          type: string
+        handler:
+          type: string
+      required:
+        - method
+        - template
+        - controller
+        - handler
+    UsedNotSeededDto:
+      type: object
+      properties:
+        role:
+          type: string
+        routeCount:
+          type: number
+          description: Cuántas rutas lo exigen
+        inDatabase:
+          type: object
+          nullable: true
+          description: Si hay fila en `authz.roles`; `null` si no se consultó
+        sample:
+          type: array
+          items:
+            $ref: '#/components/schemas/DriftRouteRefDto'
+      required:
+        - role
+        - routeCount
+        - sample
+    PermissionDriftDto:
+      type: object
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        routes:
+          $ref: '#/components/schemas/RoutesSummaryDto'
+        usedNotSeeded:
+          description: >-
+            Roles que una ruta exige y la API no siembra: sólo `SUPERADMIN` (por comodín) ejerce esas rutas hasta que
+            exista el rol
+          type: array
+          items:
+            $ref: '#/components/schemas/UsedNotSeededDto'
+        seededNotUsed:
+          description: Roles sembrados que ninguna ruta exige
+          type: array
+          items:
+            type: string
+        routesWithoutRoles:
+          description: Rutas autenticadas sin `@Roles` ni `@Public` (recortada)
+          type: array
+          items:
+            $ref: '#/components/schemas/DriftRouteRefDto'
+        routesWithoutRolesTruncated:
+          type: boolean
+          description: '`true` si `routesWithoutRoles` se recortó; el total está en `routes.withoutRoles`'
+      required:
+        - generatedAt
+        - routes
+        - usedNotSeeded
+        - seededNotUsed
+        - routesWithoutRoles
+        - routesWithoutRolesTruncated
     DimensionSummaryDto:
       type: object
       properties:
@@ -97141,6 +97606,142 @@ components:
         - created
         - acceptedAt
         - statusUrl
+    RunNextResultDto:
+      type: object
+      properties:
+        claimed:
+          type: number
+          enum:
+            - 0
+            - 1
+          description: 1 si este tick tomó un escaneo; 0 si no había nada que hacer
+        scanId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - QUEUED
+            - RUNNING
+            - SUCCEEDED
+            - FAILED
+            - CANCELLED
+        fenced:
+          type: boolean
+          description: '`true` si el escaneo perdió su lease y no se pisó lo que otro proceso cerró'
+      required:
+        - claimed
+    InventoryImportSourceDto:
+      type: object
+      properties:
+        hash:
+          type: string
+          description: Huella del inventario (la misma de `GET /admin/portal/version`)
+        operaciones:
+          type: number
+        procesos:
+          type: number
+      required:
+        - hash
+        - operaciones
+        - procesos
+    InventoryImportOperationsDto:
+      type: object
+      properties:
+        added:
+          type: number
+          description: Operaciones nuevas en la base
+        changed:
+          type: number
+          description: Operaciones cuya huella técnica cambió
+        reappeared:
+          type: number
+          description: Operaciones `NOT_OBSERVED` que volvieron a aparecer
+        unchanged:
+          type: number
+          description: 'Operaciones que no cambiaron: no se tocó su fila'
+        notObserved:
+          type: number
+          description: Operaciones que dejaron de aparecer y pasaron a `NOT_OBSERVED` (no se borran)
+      required:
+        - added
+        - changed
+        - reappeared
+        - unchanged
+        - notObserved
+    InventoryImportImpactsDto:
+      type: object
+      properties:
+        written:
+          type: number
+          description: Impactos escritos en esta corrida
+        skippedNotCataloged:
+          type: number
+          description: >-
+            Tablas que el inventario no tiene catalogadas y la sonda tampoco observó (estado actual, no sólo esta
+            corrida)
+        skippedUnresolved:
+          type: number
+          description: 'Tablas que el inventario da por catalogadas y la sonda aún no observó: correr un escaneo y volver a importar'
+      required:
+        - written
+        - skippedNotCataloged
+        - skippedUnresolved
+    InventoryImportProcessesDto:
+      type: object
+      properties:
+        added:
+          type: number
+        changed:
+          type: number
+        unchanged:
+          type: number
+      required:
+        - added
+        - changed
+        - unchanged
+    InventoryImportStepsDto:
+      type: object
+      properties:
+        written:
+          type: number
+          description: Etapas escritas en esta corrida
+      required:
+        - written
+    InventoryImportStepOperationsDto:
+      type: object
+      properties:
+        written:
+          type: number
+          description: Enlaces etapa-operación escritos
+        skippedUnresolved:
+          type: number
+          description: Enlaces cuya operación no está en el inventario de endpoints
+      required:
+        - written
+        - skippedUnresolved
+    InventoryImportResultDto:
+      type: object
+      properties:
+        inventory:
+          $ref: '#/components/schemas/InventoryImportSourceDto'
+        operations:
+          $ref: '#/components/schemas/InventoryImportOperationsDto'
+        impacts:
+          $ref: '#/components/schemas/InventoryImportImpactsDto'
+        processes:
+          $ref: '#/components/schemas/InventoryImportProcessesDto'
+        steps:
+          $ref: '#/components/schemas/InventoryImportStepsDto'
+        stepOperations:
+          $ref: '#/components/schemas/InventoryImportStepOperationsDto'
+      required:
+        - inventory
+        - operations
+        - impacts
+        - processes
+        - steps
+        - stepOperations
     CreateEnumDefinitionDto:
       type: object
       properties:

@@ -29,13 +29,14 @@
 | [`delegated_access`](delegated_access.md) | 5 | 5 | 7 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 8 | 12 | 10 | 13 |
 | [`profiles`](profiles.md) | 5 | 11 | 14 | 19 | 30 |
+| [`telemetry`](telemetry.md) | 5 | 6 | 15 | 14 | 12 |
 | [`audit`](audit.md) | 4 | 6 | 7 | 131 | 9 |
 | [`geo`](geo.md) | 4 | 4 | 6 | 6 | 14 |
+| [`iam`](iam.md) | 4 | 16 | 13 | 14 | 24 |
 | [`integrations`](integrations.md) | 4 | 4 | 9 | 10 | 9 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 5 | 6 | 8 |
-| [`telemetry`](telemetry.md) | 4 | 5 | 15 | 14 | 12 |
+| [`data_catalog`](data_catalog.md) | 3 | 7 | 3 | 13 | 4 |
 | [`directory`](directory.md) | 3 | 10 | 5 | 7 | 20 |
-| [`iam`](iam.md) | 3 | 15 | 13 | 14 | 24 |
 | [`messaging`](messaging.md) | 3 | 3 | 4 | 22 | 2 |
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
 | [`pharmacy`](pharmacy.md) | 3 | 10 | 12 | 9 | 13 |
@@ -47,7 +48,6 @@
 | [`audio_assets`](audio_assets.md) | 2 | 4 | 2 | 4 | 1 |
 | [`automation`](automation.md) | 2 | 4 | 4 | 16 | 1 |
 | [`cross_store_consistency`](cross_store_consistency.md) | 2 | 5 | 3 | 20 | 1 |
-| [`data_catalog`](data_catalog.md) | 2 | 4 | 2 | 8 | 4 |
 | [`graph_intelligence`](graph_intelligence.md) | 2 | 3 | 2 | 13 | 1 |
 | [`health_data`](health_data.md) | 2 | 5 | 7 | 34 | 1 |
 | [`integration_contracts`](integration_contracts.md) | 2 | 4 | 9 | 9 | 13 |
@@ -77,4 +77,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **275** | **420** | **414** | **1263** | **518** |
+| **Total** | **278** | **425** | **415** | **1268** | **518** |

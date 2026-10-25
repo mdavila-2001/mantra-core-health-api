@@ -14,7 +14,7 @@ const ficha = (
   rowGrain: 'Una fila por persona física, identificada por su id.',
   businessOwner: 'Admisión',
   dataSteward: null,
-  sensitivity: 'PII',
+  sensitivity: 'PERSONAL',
   openQuestions: [],
   reviewStatus: 'APPROVED',
   currentRevisionNo: 2,

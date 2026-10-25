@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 35 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 38 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `iam-auth`, `iam-users`
-- **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamUsersController`
+- **Etiquetas OpenAPI:** `iam-auth`, `iam-onboarding-drafts`, `iam-users`
+- **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamOnboardingDraftsController`, `IamUsersController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -29,23 +29,26 @@ Referencia exhaustiva de 35 operación(es) del módulo `iam`, derivada del contr
 16. [POST /iam/auth/verify-email](#16-post-iam-auth-verify-email) — Verificar el correo con el token recibido
 17. [GET /iam/me/sessions](#17-get-iam-me-sessions) — Listar mis sesiones abiertas
 18. [POST /iam/me/sessions/{id}/revoke](#18-post-iam-me-sessions-id-revoke) — Cerrar una de mis sesiones
-19. [GET /iam/users](#19-get-iam-users) — Listado paginado de usuarios
-20. [POST /iam/users](#20-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
-21. [GET /iam/users/{id}](#21-get-iam-users-id) — Ficha de un usuario
-22. [POST /iam/users/{id}/anonymize](#22-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
-23. [GET /iam/users/{id}/credentials](#23-get-iam-users-id-credentials) — Credenciales del usuario
-24. [POST /iam/users/{id}/credentials/{cid}/revoke](#24-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
-25. [POST /iam/users/{id}/credentials/federated](#25-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
-26. [GET /iam/users/{id}/devices](#26-get-iam-users-id-devices) — Dispositivos del usuario
-27. [POST /iam/users/{id}/devices](#27-post-iam-users-id-devices) — Registrar un dispositivo del usuario
-28. [GET /iam/users/{id}/global-roles](#28-get-iam-users-id-global-roles) — Roles globales del usuario
-29. [POST /iam/users/{id}/global-roles](#29-post-iam-users-id-global-roles) — Conceder o revocar un rol global
-30. [POST /iam/users/{id}/lock](#30-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
-31. [GET /iam/users/{id}/mfa-factors](#31-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
-32. [POST /iam/users/{id}/mfa-factors](#32-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
-33. [GET /iam/users/{id}/sessions](#33-get-iam-users-id-sessions) — Sesiones del usuario
-34. [POST /iam/users/assisted-practitioner-registration](#34-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
-35. [POST /iam/users/assisted-registration](#35-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+19. [DELETE /iam/onboarding-drafts/{formType}/{draftId}](#19-delete-iam-onboarding-drafts-formtype-draftid) — Elimina el borrador al completar el alta exitosamente o por descarte del usuario
+20. [GET /iam/onboarding-drafts/{formType}/{draftId}](#20-get-iam-onboarding-drafts-formtype-draftid) — Recupera un borrador de alta guardado por identificador y tipo de formulario
+21. [PUT /iam/onboarding-drafts/{formType}/{draftId}](#21-put-iam-onboarding-drafts-formtype-draftid) — Guarda o actualiza el avance del formulario de alta en borrador
+22. [GET /iam/users](#22-get-iam-users) — Listado paginado de usuarios
+23. [POST /iam/users](#23-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
+24. [GET /iam/users/{id}](#24-get-iam-users-id) — Ficha de un usuario
+25. [POST /iam/users/{id}/anonymize](#25-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
+26. [GET /iam/users/{id}/credentials](#26-get-iam-users-id-credentials) — Credenciales del usuario
+27. [POST /iam/users/{id}/credentials/{cid}/revoke](#27-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
+28. [POST /iam/users/{id}/credentials/federated](#28-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
+29. [GET /iam/users/{id}/devices](#29-get-iam-users-id-devices) — Dispositivos del usuario
+30. [POST /iam/users/{id}/devices](#30-post-iam-users-id-devices) — Registrar un dispositivo del usuario
+31. [GET /iam/users/{id}/global-roles](#31-get-iam-users-id-global-roles) — Roles globales del usuario
+32. [POST /iam/users/{id}/global-roles](#32-post-iam-users-id-global-roles) — Conceder o revocar un rol global
+33. [POST /iam/users/{id}/lock](#33-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
+34. [GET /iam/users/{id}/mfa-factors](#34-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
+35. [POST /iam/users/{id}/mfa-factors](#35-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
+36. [GET /iam/users/{id}/sessions](#36-get-iam-users-id-sessions) — Sesiones del usuario
+37. [POST /iam/users/assisted-practitioner-registration](#37-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
+38. [POST /iam/users/assisted-registration](#38-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
 
 ---
 
@@ -1255,6 +1258,7 @@ Content-Type: application/json
 | `email` | Sí | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
 | `birthDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `phone` | Sí | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Teléfono de contacto en formato E.164 o nacional: dígitos, espacios, paréntesis, + y guion, mínimo 6 caracteres | `+59170000000` |
+| `additionalPhones` | No | `array<string>` | longitud máxima PHONE_MAX_LENGTH; máximo 4 elemento(s); patrón runtime `PHONE_PATTERN` | Otros teléfonos de la persona, además del principal; mismo formato que phone | `["+59170000000"]` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
 | `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo | `valor-ejemplo` |
 | `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
@@ -1274,6 +1278,10 @@ Content-Type: application/json
 | `guardianName` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre del tutor o persona autorizada | `Nombre de ejemplo` |
 | `guardianPhone` | No | `string` | longitud máxima 40; patrón runtime `/^[+]?[0-9 ()-]{6,}$/` | Teléfono del tutor, en formato E.164 o nacional | `+59170000000` |
 | `guardianRelationshipConceptId` | No | `string` | formato `uuid` | Parentesco del contacto de emergencia (conjunto related-person-relationship) | `00000000-0000-4000-8000-000000000001` |
+| `additionalEmergencyContacts` | No | `array<AdditionalEmergencyContactDto>` | máximo 4 elemento(s) | Otros contactos de emergencia, además del primero | `[{"name":"Nombre de ejemplo","phone":"+59170000000","relationshipConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `additionalEmergencyContacts[].name` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre del contacto | `Nombre de ejemplo` |
+| `additionalEmergencyContacts[].phone` | No | `string` | longitud máxima 40; patrón runtime `/^[+]?[0-9 ()-]{6,}$/` | Teléfono del contacto, en formato E.164 o nacional | `+59170000000` |
+| `additionalEmergencyContacts[].relationshipConceptId` | No | `string` | formato `uuid` | Parentesco del contacto (conjunto related-person-relationship) | `00000000-0000-4000-8000-000000000001` |
 | `privateInsurancePlanId` | No | `string` | formato `uuid` | Plan de la aseguradora privada declarada | `00000000-0000-4000-8000-000000000001` |
 | `publicInsurancePlanId` | No | `string` | formato `uuid` | Plan del seguro público declarado | `00000000-0000-4000-8000-000000000001` |
 | `billingTaxId` | No | `string` | longitud máxima 20; patrón runtime `/^[0-9]{4,20}$/` | NIT para facturación (sólo el número) | `00000000-0000-4000-8000-000000000001` |
@@ -1301,6 +1309,9 @@ Content-Type: application/json
   "email": "usuario@example.com",
   "birthDate": "2026-07-31",
   "phone": "+59170000000",
+  "additionalPhones": [
+    "+59170000000"
+  ],
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
   "occupationFreeText": "valor-ejemplo",
   "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
@@ -1320,6 +1331,13 @@ Content-Type: application/json
   "guardianName": "Nombre de ejemplo",
   "guardianPhone": "+59170000000",
   "guardianRelationshipConceptId": "00000000-0000-4000-8000-000000000001",
+  "additionalEmergencyContacts": [
+    {
+      "name": "Nombre de ejemplo",
+      "phone": "+59170000000",
+      "relationshipConceptId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
   "privateInsurancePlanId": "00000000-0000-4000-8000-000000000001",
   "publicInsurancePlanId": "00000000-0000-4000-8000-000000000001",
   "billingTaxId": "00000000-0000-4000-8000-000000000001",
@@ -2742,7 +2760,304 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /iam/users
+## 19. DELETE /iam/onboarding-drafts/{formType}/{draftId}
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-onboarding-drafts`
+- **Nombre:** Elimina el borrador al completar el alta exitosamente o por descarte del usuario
+- **Operation ID:** `IamOnboardingDraftsController_deleteDraft`
+- **Autenticación:** Pública
+- **Implementación:** [IamOnboardingDraftsController.deleteDraft](../../src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts)
+
+### Descripción de negocio
+
+Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /iam/onboarding-drafts/{formType}/{draftId}` en `IamOnboardingDraftsController_deleteDraft`. El controlador delega en `IamOnboardingDraftsService.deleteDraft`. No recibe body. El tipo de retorno estático es `{ ok: boolean }`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `formType` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `draftId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /iam/onboarding-drafts/valor-ejemplo/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /iam/onboarding-drafts/valor-ejemplo/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `{ ok: boolean }` | No |
+| 400 | Operación completada correctamente. | `{ ok: boolean }` | No |
+| 401 | Operación completada correctamente. | `{ ok: boolean }` | No |
+| 403 | Operación completada correctamente. | `{ ok: boolean }` | No |
+| 404 | Operación completada correctamente. | `{ ok: boolean }` | No |
+| 409 | Operación completada correctamente. | `{ ok: boolean }` | No |
+| 422 | Operación completada correctamente. | `{ ok: boolean }` | No |
+| 429 | Operación completada correctamente. | `{ ok: boolean }` | No |
+| 500 | Operación completada correctamente. | `{ ok: boolean }` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ ok: boolean }`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/onboarding-drafts/{formType}/{draftId}"
+}
+```
+
+---
+
+## 20. GET /iam/onboarding-drafts/{formType}/{draftId}
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-onboarding-drafts`
+- **Nombre:** Recupera un borrador de alta guardado por identificador y tipo de formulario
+- **Operation ID:** `IamOnboardingDraftsController_getDraft`
+- **Autenticación:** Pública
+- **Implementación:** [IamOnboardingDraftsController.getDraft](../../src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts)
+
+### Descripción de negocio
+
+Recupera un borrador de alta guardado por identificador y tipo de formulario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/onboarding-drafts/{formType}/{draftId}` en `IamOnboardingDraftsController_getDraft`. El controlador delega en `IamOnboardingDraftsService.getDraft`. No recibe body. El tipo de retorno estático es `OnboardingDraftPayload | null`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `formType` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `draftId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/onboarding-drafts/valor-ejemplo/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/onboarding-drafts/valor-ejemplo/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `OnboardingDraftPayload | null` | No |
+| 400 | Consulta completada correctamente. | `OnboardingDraftPayload | null` | No |
+| 401 | Consulta completada correctamente. | `OnboardingDraftPayload | null` | No |
+| 403 | Consulta completada correctamente. | `OnboardingDraftPayload | null` | No |
+| 404 | Consulta completada correctamente. | `OnboardingDraftPayload | null` | No |
+| 429 | Consulta completada correctamente. | `OnboardingDraftPayload | null` | No |
+| 500 | Consulta completada correctamente. | `OnboardingDraftPayload | null` | No |
+
+El controlador declara `OnboardingDraftPayload | null`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/onboarding-drafts/{formType}/{draftId}"
+}
+```
+
+---
+
+## 21. PUT /iam/onboarding-drafts/{formType}/{draftId}
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-onboarding-drafts`
+- **Nombre:** Guarda o actualiza el avance del formulario de alta en borrador
+- **Operation ID:** `IamOnboardingDraftsController_saveDraft`
+- **Autenticación:** Pública
+- **Implementación:** [IamOnboardingDraftsController.saveDraft](../../src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts)
+
+### Descripción de negocio
+
+Guarda o actualiza el avance del formulario de alta en borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /iam/onboarding-drafts/{formType}/{draftId}` en `IamOnboardingDraftsController_saveDraft`. El controlador delega en `IamOnboardingDraftsService.saveDraft`. No recibe body. El tipo de retorno estático es `{ ok: boolean; savedAt: string }`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `formType` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `draftId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+PUT /iam/onboarding-drafts/valor-ejemplo/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+PUT /iam/onboarding-drafts/valor-ejemplo/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
+| 400 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
+| 401 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
+| 403 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
+| 404 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
+| 409 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
+| 422 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
+| 429 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
+| 500 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ ok: boolean; savedAt: string }`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "savedAt": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `savedAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/onboarding-drafts/{formType}/{draftId}"
+}
+```
+
+---
+
+## 22. GET /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -2875,7 +3190,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /iam/users
+## 23. POST /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3013,7 +3328,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /iam/users/{id}
+## 24. GET /iam/users/{id}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3139,7 +3454,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /iam/users/{id}/anonymize
+## 25. POST /iam/users/{id}/anonymize
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3248,7 +3563,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /iam/users/{id}/credentials
+## 26. GET /iam/users/{id}/credentials
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3377,7 +3692,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /iam/users/{id}/credentials/{cid}/revoke
+## 27. POST /iam/users/{id}/credentials/{cid}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3487,7 +3802,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /iam/users/{id}/credentials/federated
+## 28. POST /iam/users/{id}/credentials/federated
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3621,7 +3936,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /iam/users/{id}/devices
+## 29. GET /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3746,7 +4061,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /iam/users/{id}/devices
+## 30. POST /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3879,7 +4194,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /iam/users/{id}/global-roles
+## 31. GET /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4000,7 +4315,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /iam/users/{id}/global-roles
+## 32. POST /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4129,7 +4444,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /iam/users/{id}/lock
+## 33. POST /iam/users/{id}/lock
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4251,7 +4566,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /iam/users/{id}/mfa-factors
+## 34. GET /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4374,7 +4689,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /iam/users/{id}/mfa-factors
+## 35. POST /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4520,7 +4835,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /iam/users/{id}/sessions
+## 36. GET /iam/users/{id}/sessions
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4645,7 +4960,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /iam/users/assisted-practitioner-registration
+## 37. POST /iam/users/assisted-practitioner-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4945,7 +5260,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /iam/users/assisted-registration
+## 38. POST /iam/users/assisted-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`

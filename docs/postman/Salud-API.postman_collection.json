@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1510 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1510 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1523 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1523 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -4723,7 +4723,7 @@
       ]
     },
     {
-      "name": "admin (101)",
+      "name": "admin (108)",
       "item": [
         {
           "name": "admin-catalog",
@@ -4839,7 +4839,7 @@
                     },
                     {
                       "key": "reviewStatus",
-                      "value": "DRAFT",
+                      "value": "AUTO_DETECTED",
                       "description": "`NONE`: objetos sin ficha",
                       "disabled": true
                     },
@@ -4876,6 +4876,54 @@
                       "  const list = Array.isArray(body) ? body : (body.objects || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('objectId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/permission-drift · Deriva de permisos: roles que las rutas exigen contra los que la API siembra",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/permission-drift",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "permission-drift"
+                  ]
+                },
+                "description": "Compara los `@Roles(...)` de todas las rutas (leídos al arrancar) con los roles de los `*.roles.ts` y con `authz.roles`: roles usados sin sembrar, sembrados sin usar y rutas autenticadas sin `@Roles`.\n\n`GET /admin/catalog/permission-drift`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `AdminCatalogController_permissionDrift`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('permissionDriftId', first.id);",
                       "}"
                     ]
                   }
@@ -4986,6 +5034,67 @@
                       "  const list = Array.isArray(body) ? body : (body.schemas || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('schemaId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /admin/catalog/classification/run · Corre la clasificación automática de sensibilidad sobre las columnas observadas",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/classification/run",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "classification",
+                    "run"
+                  ]
+                },
+                "description": "Crea fichas de columna en AUTO_DETECTED (certeza) o NEEDS_REVIEW (duda). Nunca baja un nivel ni pisa fichas escritas por una persona o que ya salieron de AUTO_DETECTED.\n\n`POST /admin/catalog/classification/run`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `AdminCatalogController_runClassification`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"schema\": \"schema-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{runId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.runId);",
+                      "  if (id) pm.environment.set('runId', id);",
                       "}"
                     ]
                   }
@@ -5115,6 +5224,75 @@
               ]
             },
             {
+              "name": "POST /admin/catalog/columns/{id}/evidence · Enlaza evidencia a una columna",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/columns/:id/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "columns",
+                    ":id",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{columnId}}",
+                      "description": "Identificador de ruta · variable `{{columnId}}`"
+                    }
+                  ]
+                },
+                "description": "Enlaza evidencia a una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /admin/catalog/columns/{id}/evidence`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `AdminCatalogController_addColumnEvidence`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"kind\": \"SCHEMA_COMMENT\",\n  \"reference\": \"reference-ejemplo\",\n  \"excerpt\": \"excerpt-ejemplo\",\n  \"sourceRevision\": \"sourceRevision-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{columnId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.columnId);",
+                      "  if (id) pm.environment.set('columnId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /admin/catalog/objects/{id}/evidence · Enlaza evidencia a un objeto",
               "request": {
                 "method": "POST",
@@ -5177,6 +5355,63 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.objectId);",
                       "  if (id) pm.environment.set('objectId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/catalog/columns/{id}/evidence · Evidencia enlazada a una columna",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/columns/:id/evidence",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "columns",
+                    ":id",
+                    "evidence"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{columnId}}",
+                      "description": "Identificador de ruta · variable `{{columnId}}`"
+                    }
+                  ]
+                },
+                "description": "Evidencia enlazada a una columna. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/catalog/columns/{id}/evidence`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `AdminCatalogController_columnEvidence`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.columns || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('columnId', first.id);",
                       "}"
                     ]
                   }
@@ -5603,6 +5838,68 @@
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('scanId', first.id);",
                       "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /admin/catalog/columns/{id}/annotation · Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/catalog/columns/:id/annotation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "catalog",
+                    "columns",
+                    ":id",
+                    "annotation"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{columnId}}",
+                      "description": "Identificador de ruta · variable `{{columnId}}`"
+                    }
+                  ]
+                },
+                "description": "Crea o edita la ficha de una columna (con versión esperada); guardar a mano saca la ficha de AUTO_DETECTED. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /admin/catalog/columns/{id}/annotation`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500\n\noperationId: `AdminCatalogController_saveColumnAnnotation`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"expectedVersion\": 0,\n  \"submit\": true,\n  \"changeReason\": \"changeReason-ejemplo\",\n  \"businessName\": {},\n  \"definition\": {},\n  \"purpose\": {},\n  \"existenceRationale\": {},\n  \"rowGrain\": {},\n  \"alternativesRationale\": {},\n  \"deletionImpact\": {},\n  \"businessOwner\": {},\n  \"dataSteward\": {},\n  \"technicalOwner\": {},\n  \"unit\": {},\n  \"valueDomain\": {},\n  \"nullSemantics\": {},\n  \"sensitivity\": \"UNKNOWN\",\n  \"consumers\": [\n    \"consumers-ejemplo\"\n  ],\n  \"openQuestions\": [\n    {\n      \"field\": \"field-ejemplo\",\n      \"question\": \"question-ejemplo\",\n      \"owner\": \"owner-ejemplo\",\n      \"dueDate\": \"2026-01-01T00:00:00.000Z\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
                     ]
                   }
                 }
@@ -11147,6 +11444,117 @@
                       "  const list = Array.isArray(body) ? body : (body.sessions || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('sessionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "telemetry-onboarding-analytics",
+          "item": [
+            {
+              "name": "GET /admin/analytics/onboarding/funnel · Reporte de embudo y deserción paso a paso para formularios de alta",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/onboarding/funnel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "onboarding",
+                    "funnel"
+                  ]
+                },
+                "description": "Reporte de embudo y deserción paso a paso para formularios de alta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/onboarding/funnel`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TelemetryOnboardingAnalyticsController_getFunnelReport`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.analytics || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('analyticId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/analytics/onboarding/heatmap · Mapa de calor por campo y nivel de fricción para formularios de alta",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/onboarding/heatmap?metric=metric-ejemplo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "onboarding",
+                    "heatmap"
+                  ],
+                  "query": [
+                    {
+                      "key": "metric",
+                      "value": "metric-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Mapa de calor por campo y nivel de fricción para formularios de alta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/onboarding/heatmap`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500\n\noperationId: `TelemetryOnboardingAnalyticsController_getHeatmapReport`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.analytics || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('analyticId', first.id);",
                       "}"
                     ]
                   }
@@ -43420,7 +43828,7 @@
       ]
     },
     {
-      "name": "iam (35)",
+      "name": "iam (38)",
       "item": [
         {
           "name": "iam-auth",
@@ -44428,6 +44836,178 @@
                       "  const id = body && (body.id || body.sessionId);",
                       "  if (id) pm.environment.set('sessionId', id);",
                       "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "iam-onboarding-drafts",
+          "item": [
+            {
+              "name": "GET /iam/onboarding-drafts/{formType}/{draftId} · Recupera un borrador de alta guardado por identificador y tipo de formulario",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "onboarding-drafts",
+                    ":formType",
+                    ":draftId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "formType",
+                      "value": "{{formType}}",
+                      "description": "Identificador de ruta · variable `{{formType}}`"
+                    },
+                    {
+                      "key": "draftId",
+                      "value": "{{draftId}}",
+                      "description": "Identificador de ruta · variable `{{draftId}}`"
+                    }
+                  ]
+                },
+                "description": "Recupera un borrador de alta guardado por identificador y tipo de formulario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /iam/onboarding-drafts/{formType}/{draftId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500\n\noperationId: `IamOnboardingDraftsController_getDraft`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.onboardingDrafts || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('onboardingDraftId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /iam/onboarding-drafts/{formType}/{draftId} · Guarda o actualiza el avance del formulario de alta en borrador",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "onboarding-drafts",
+                    ":formType",
+                    ":draftId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "formType",
+                      "value": "{{formType}}",
+                      "description": "Identificador de ruta · variable `{{formType}}`"
+                    },
+                    {
+                      "key": "draftId",
+                      "value": "{{draftId}}",
+                      "description": "Identificador de ruta · variable `{{draftId}}`"
+                    }
+                  ]
+                },
+                "description": "Guarda o actualiza el avance del formulario de alta en borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /iam/onboarding-drafts/{formType}/{draftId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `IamOnboardingDraftsController_saveDraft`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /iam/onboarding-drafts/{formType}/{draftId} · Elimina el borrador al completar el alta exitosamente o por descarte del usuario",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "onboarding-drafts",
+                    ":formType",
+                    ":draftId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "formType",
+                      "value": "{{formType}}",
+                      "description": "Identificador de ruta · variable `{{formType}}`"
+                    },
+                    {
+                      "key": "draftId",
+                      "value": "{{draftId}}",
+                      "description": "Identificador de ruta · variable `{{draftId}}`"
+                    }
+                  ]
+                },
+                "description": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /iam/onboarding-drafts/{formType}/{draftId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500\n\noperationId: `IamOnboardingDraftsController_deleteDraft`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
                     ]
                   }
                 }
@@ -51675,7 +52255,7 @@
       ]
     },
     {
-      "name": "internal (43)",
+      "name": "internal (45)",
       "item": [
         {
           "name": "audio-assets-internal",
@@ -52686,6 +53266,107 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.rebuildId);",
                       "  if (id) pm.environment.set('rebuildId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "data-catalog-internal",
+          "item": [
+            {
+              "name": "POST /internal/catalog/inventory/import · Importa el inventario de la API a las tablas de operaciones y procesos (worker)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/catalog/inventory/import",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "catalog",
+                    "inventory",
+                    "import"
+                  ]
+                },
+                "description": "Lee `inventario/` y escribe `catalog_operations`, `catalog_operation_impacts`, `catalog_processes`, `catalog_process_steps` y `catalog_process_step_operations` en una transacción. Idempotente: lo que no cambió no se toca. Corre después de un escaneo, porque cada impacto apunta a un objeto de `catalog_objects`. Una operación que deja de aparecer queda `NOT_OBSERVED`. 503 si la instancia no tiene el inventario.\n\n`POST /internal/catalog/inventory/import`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500, 503\n\noperationId: `InternalCatalogInventoryController_importInventory`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{importId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.importId);",
+                      "  if (id) pm.environment.set('importId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /internal/catalog/scans/run-next · Sonda: reclama y ejecuta el siguiente escaneo (worker)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/internal/catalog/scans/run-next",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "internal",
+                    "catalog",
+                    "scans",
+                    "run-next"
+                  ]
+                },
+                "description": "Cierra los escaneos abandonados, retoma el que está en cola o, si venció el intervalo de la sonda, pide uno nuevo. `claimed: 0` si no había nada que hacer. `fenced: true` si el escaneo perdió su lease.\n\n`POST /internal/catalog/scans/run-next`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 422, 429, 500\n\noperationId: `InternalCatalogScansController_runNext`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{scanId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.scanId);",
+                      "  if (id) pm.environment.set('scanId', id);",
                       "}"
                     ]
                   }
@@ -87007,7 +87688,7 @@
       ]
     },
     {
-      "name": "telemetry (14)",
+      "name": "telemetry (15)",
       "item": [
         {
           "name": "telemetry-consent",
@@ -87844,6 +88525,61 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.trackingPurposeId);",
                       "  if (id) pm.environment.set('trackingPurposeId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "telemetry-onboarding-analytics",
+          "item": [
+            {
+              "name": "POST /telemetry/onboarding-events · Captura eventos de telemetría de alta y avance en formularios de registro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/telemetry/onboarding-events",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "telemetry",
+                    "onboarding-events"
+                  ]
+                },
+                "description": "Captura eventos de telemetría de alta y avance en formularios de registro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /telemetry/onboarding-events`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500\n\noperationId: `TelemetryOnboardingAnalyticsController_recordEvents`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{onboardingEventId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.onboardingEventId);",
+                      "  if (id) pm.environment.set('onboardingEventId', id);",
                       "}"
                     ]
                   }
