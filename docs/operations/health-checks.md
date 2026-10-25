@@ -11,6 +11,20 @@
   runtime no tenga `BYPASSRLS` ni sea superusuario. Si alguna falla responde `503`
   `DEPENDENCY_UNAVAILABLE` con el estado de cada chequeo.
 
+La sonda de PostgreSQL también comprueba que la base esté realmente lista, y cuando eso es lo único
+que falla el `503` lleva un `reason` propio en lugar del genérico
+`SYSTEM_READINESS_DEPENDENCY_UNAVAILABLE`:
+
+| `reason` | Qué dice | Cómo se cierra |
+|---|---|---|
+| `SYSTEM_SCHEMA_INTEGRITY_INCOMPLETE` | El bootstrap del DDL dejó FKs o únicos de integridad sin aplicar (por datos huérfanos) | Corregir los datos y reiniciar; `SCHEMA_INTEGRITY_ENFORCE=false` es la válvula explícita |
+| `SYSTEM_SEED_CORE_INCOMPLETE` | Un seed núcleo falló en este proceso (fuera de producción, sin `SEED_CORE_FAILURE_FATAL=true`), o con `SEED_ON_BOOT=false` faltan conceptos del catálogo interno en la base | Sembrar con `yarn seed:boot` y revisar el log del arranque |
+
+Con `SEED_ON_BOOT=false` la sonda compara los ids de los conceptos que el código declara contra
+`terminology.catalog_concepts` (una consulta, cacheada cuando pasa). Es una sonda por **contenido**:
+la base no guarda un marcador de versión del seed, así que detecta un concepto que falta, no un valor
+que cambió conservando su id.
+
 `@nestjs/terminus` figura en `package.json`, pero la readiness no lo usa.
 
 ## Workers

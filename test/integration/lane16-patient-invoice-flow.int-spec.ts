@@ -159,6 +159,8 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
     lines: Array<{ serviceConceptId: string; billedAmount: string }>,
     extra: Record<string, unknown> = {},
   ) {
+    // `assertProviderClaimScope` resuelve las prácticas del tenant del contexto: sin él
+    // (como en una petición sin `X-Tenant-Id`) el reclamo directo se rechaza con TENANT_REQUIRED.
     const created = await inTenant(() =>
       claims.submitClaim(
         {

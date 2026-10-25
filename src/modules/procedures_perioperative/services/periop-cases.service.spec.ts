@@ -30,6 +30,7 @@ const CASE = '55555555-5555-5555-5555-555555555555';
 const CONDITION = '66666666-6666-6666-6666-666666666666';
 const REASON = '77777777-7777-7777-7777-777777777777';
 const BILLABLE = '88888888-8888-8888-8888-888888888888';
+const PROCEDURE = '99999999-9999-9999-9999-999999999999';
 const TENANT_A = '11111111-1111-1111-1111-111111111111';
 const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
@@ -103,6 +104,15 @@ function build() {
     countCasesMatching: mockFn().mockResolvedValue(0),
     findMilestonesByCase: mockFn().mockResolvedValue([]),
     findChargeItemsForUpdate: mockFn(),
+    // Procedimiento del paciente y tenant pedidos, salvo que el test diga otra cosa.
+    findProcedureOfPatient: mockFn(
+      (_tx: unknown, id: string, patientProfileId: string, tenantId: string) =>
+        Promise.resolve({
+          id,
+          patientProfileId,
+          custodianTenantId: tenantId,
+        }),
+    ),
   };
   const credentialsRepo = {
     // Por defecto, toda credencial es vigente; los tests que prueban el bloqueo
@@ -227,6 +237,53 @@ describe('PeriopCasesService', () => {
           teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
         }),
       );
+    });
+
+    it('links the primary procedure only after proving it belongs to the case patient', async () => {
+      const d = build();
+      wire(d);
+
+      await d.service.scheduleCase(
+        scheduleDto({ primaryProcedureId: PROCEDURE }),
+        actor,
+      );
+
+      expect(d.casesRepo.findProcedureOfPatient).toHaveBeenCalledWith(
+        d.tx,
+        PROCEDURE,
+        PATIENT,
+        TENANT,
+      );
+      expect(d.casesRepo.createCase).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ primaryProcedureId: PROCEDURE }),
+      );
+    });
+
+    it('refuses a primary procedure of another patient and creates nothing', async () => {
+      const d = build();
+      wire(d);
+      d.casesRepo.findProcedureOfPatient.mockResolvedValue(null);
+
+      await expect(
+        d.service.scheduleCase(
+          scheduleDto({ primaryProcedureId: PROCEDURE }),
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason:
+          ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT,
+      });
+      expect(d.casesRepo.createCase).not.toHaveBeenCalled();
+    });
+
+    it('does not look up a procedure when none is sent', async () => {
+      const d = build();
+      wire(d);
+
+      await d.service.scheduleCase(scheduleDto(), actor);
+
+      expect(d.casesRepo.findProcedureOfPatient).not.toHaveBeenCalled();
     });
 
     it('records the first status transition with the case', async () => {
@@ -1761,6 +1818,123 @@ describe('PeriopCasesService · alcance de tenant (PERIOP-01)', () => {
         expect(d.casesRepo.createChargeItem).not.toHaveBeenCalled();
       },
     );
+
+    describe('primaryProcedureId del cliente (#864)', () => {
+      /**
+       * Deja listo el alta del caso para que lo único que pueda fallar sea el
+       * procedimiento.
+       *
+       * @param d - Sistema bajo prueba.
+       */
+      function wireSchedule(d: ReturnType<typeof build>) {
+        d.casesRepo.findOverlappingCases.mockResolvedValue([]);
+        d.casesRepo.countCases.mockResolvedValue(0);
+        d.casesRepo.findCaseByNumber.mockResolvedValue(null);
+        d.casesRepo.createCase.mockReturnValue({ id: CASE });
+        d.casesRepo.createMilestone.mockReturnValue({ id: 'milestone-1' });
+      }
+
+      it('busca el procedimiento con el paciente del caso y el tenant del contexto, no el del cuerpo', async () => {
+        const d = build();
+        wireSchedule(d);
+
+        await d.service.scheduleCase(
+          scheduleDto({
+            primaryProcedureId: PROCEDURE,
+            custodianTenantId: TENANT_B,
+          }),
+          actor,
+        );
+
+        expect(d.casesRepo.findProcedureOfPatient).toHaveBeenCalledWith(
+          d.tx,
+          PROCEDURE,
+          PATIENT,
+          TENANT_A,
+        );
+        expect(d.casesRepo.createCase.mock.calls[0][1].primaryProcedureId).toBe(
+          PROCEDURE,
+        );
+      });
+
+      it('rechaza con 404 el procedimiento de otro paciente o de otro tenant y no crea el caso', async () => {
+        const d = build();
+        wireSchedule(d);
+        // La consulta filtra por paciente y tenant: uno ajeno no vuelve.
+        d.casesRepo.findProcedureOfPatient.mockResolvedValue(null);
+
+        const error = await d.service
+          .scheduleCase(scheduleDto({ primaryProcedureId: PROCEDURE }), actor)
+          .catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(ResourceNotFoundException);
+        expect((error as ResourceNotFoundException).reason).toBe(
+          ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT,
+        );
+        expect(d.casesRepo.createCase).not.toHaveBeenCalled();
+        expect(d.casesRepo.createUtilizationEvent).not.toHaveBeenCalled();
+      });
+
+      it('no se fía del filtro de la consulta: una fila de otro paciente o tenant también es 404', async () => {
+        for (const foreign of [
+          { patientProfileId: 'otro-paciente', custodianTenantId: TENANT_A },
+          { patientProfileId: PATIENT, custodianTenantId: TENANT_B },
+        ]) {
+          const d = build();
+          wireSchedule(d);
+          d.casesRepo.findProcedureOfPatient.mockResolvedValue({
+            id: PROCEDURE,
+            ...foreign,
+          });
+
+          await expect(
+            d.service.scheduleCase(
+              scheduleDto({ primaryProcedureId: PROCEDURE }),
+              actor,
+            ),
+          ).rejects.toMatchObject({
+            reason:
+              ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT,
+          });
+          expect(d.casesRepo.createCase).not.toHaveBeenCalled();
+        }
+      });
+
+      it('el procedimiento ajeno y el inexistente responden idéntico (mismo mensaje, sin details)', async () => {
+        const responses: unknown[] = [];
+        for (const found of [
+          null,
+          {
+            id: PROCEDURE,
+            patientProfileId: 'otro',
+            custodianTenantId: TENANT_A,
+          },
+        ]) {
+          const d = build();
+          wireSchedule(d);
+          d.casesRepo.findProcedureOfPatient.mockResolvedValue(found);
+          const error: any = await d.service
+            .scheduleCase(scheduleDto({ primaryProcedureId: PROCEDURE }), actor)
+            .catch((e: unknown) => e);
+          responses.push({
+            message: error.message,
+            reason: error.reason,
+            details: error.details,
+          });
+        }
+        expect(responses[0]).toEqual(responses[1]);
+        expect((responses[0] as any).details).toBeUndefined();
+      });
+
+      it('sin primaryProcedureId no consulta ningún procedimiento', async () => {
+        const d = build();
+        wireSchedule(d);
+
+        await d.service.scheduleCase(scheduleDto(), actor);
+
+        expect(d.casesRepo.findProcedureOfPatient).not.toHaveBeenCalled();
+      });
+    });
 
     it('programar un caso toma el tenant custodio del contexto e ignora el del cuerpo', async () => {
       const d = build();

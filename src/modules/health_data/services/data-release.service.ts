@@ -264,6 +264,7 @@ export class DataReleaseService {
           dto.patientProfileId,
         );
       }
+      await this.assertFileInTenant(tx, tenantId, dto.fileId);
       if (dto.deidentificationRunId) {
         const deidRun = assertHealthResourceInTenant(
           await this.releaseRepo.findDeidRunById(tx, dto.deidentificationRunId),

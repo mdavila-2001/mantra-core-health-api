@@ -371,90 +371,73 @@ flowchart TD
   n16 --> n17
   n18(["↩ (relanza el error capturado)"]):::error
   n17 -->|"sí"| n18
-  n19{"studyCreated"}:::decision
+  n19["Llama a DicomRepository.imagingStudyPatientId"]:::llamada
   n17 -->|"no"| n19
-  n20["Llama a DicomCatalogService.assertClinicalReferences"]:::llamada
-  n19 -->|"sí"| n20
-  n21["Llama a DicomRepository.patientProfileExists"]:::llamada
+  n20[("LEE diagnostics.imaging_studies")]:::efecto
+  n19 --> n20
+  n21["Llama a DicomRepository.createStudy"]:::llamada
   n20 --> n21
-  n22[("LEE profiles.patient_profiles")]:::efecto
+  n22[("CREA object_storage.dicom_study_manifests")]:::efecto
   n21 --> n22
-  n23{"dto.patientProfileId && (!dto.imagingStudyId || !(await this.dicomRepo.patientProfileExists(tx, dto.patientPr…"}:::decision
+  n23["Repite: por cada const seriesDto de dto.series"]:::bucle
   n22 --> n23
-  n24(["↩ (relanza el error capturado)"]):::error
-  n23 -->|"sí"| n24
-  n25["Llama a DicomRepository.imagingStudyInScope"]:::llamada
-  n23 -->|"no"| n25
-  n26[("LEE diagnostics.imaging_studies")]:::efecto
+  n24["Llama a DicomRepository.findSeriesByUidForUpdate"]:::llamada
+  n23 -->|"cada elemento"| n24
+  n25[("LEE object_storage.dicom_series_manifests")]:::efecto
+  n24 --> n25
+  n26{"seriesDto.thumbnailObjectManifestId"}:::decision
   n25 --> n26
-  n27{"dto.imagingStudyId && !(await this.dicomRepo.imagingStudyInScope( tx, dto.imagingStudyId, tenantId, dto.patie…"}:::decision
-  n26 --> n27
-  n28(["↩ (relanza el error capturado)"]):::error
-  n27 -->|"sí"| n28
-  n29["Llama a DicomRepository.createStudy"]:::llamada
-  n27 -->|"no"| n29
-  n19 -->|"no"| n29
-  n30[("CREA object_storage.dicom_study_manifests")]:::efecto
+  n27["Llama a DicomCatalogService.requireManifestInTenant"]:::llamada
+  n26 -->|"sí"| n27
+  n28["Llama a ObjectStorageRepository.findManifestById"]:::llamada
+  n27 --> n28
+  n29[("LEE object_storage.object_manifests")]:::efecto
+  n28 --> n29
+  n30{"!manifest || manifest.tenantId !== tenantId"}:::decision
   n29 --> n30
-  n31["Repite: por cada const seriesDto de dto.series"]:::bucle
-  n30 --> n31
-  n32["Llama a DicomRepository.findSeriesByUidForUpdate"]:::llamada
-  n31 -->|"cada elemento"| n32
-  n33[("LEE object_storage.dicom_series_manifests")]:::efecto
+  n31(["↩ (relanza el error capturado)"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a DicomRepository.createSeries"]:::llamada
+  n30 -->|"no"| n32
+  n26 -->|"no"| n32
+  n33[("CREA object_storage.dicom_series_manifests")]:::efecto
   n32 --> n33
-  n34{"seriesDto.thumbnailObjectManifestId"}:::decision
+  n34["Repite: por cada const instanceDto de seriesDto.instances"]:::bucle
   n33 --> n34
-  n35["Llama a DicomCatalogService.requireManifestInTenant"]:::llamada
-  n34 -->|"sí"| n35
-  n36["Llama a ObjectStorageRepository.findManifestById"]:::llamada
+  n35["Llama a DicomRepository.findInstanceByUid"]:::llamada
+  n34 -->|"cada elemento"| n35
+  n36[("LEE object_storage.dicom_instance_manifests")]:::efecto
   n35 --> n36
-  n37[("LEE object_storage.object_manifests")]:::efecto
+  n37["Llama a DicomCatalogService.requireManifestInTenant"]:::llamada
   n36 --> n37
-  n38{"!manifest || manifest.tenantId !== tenantId"}:::decision
+  n38["Llama a ObjectStorageRepository.findManifestById"]:::llamada
   n37 --> n38
-  n39(["↩ (relanza el error capturado)"]):::error
-  n38 -->|"sí"| n39
-  n40["Llama a DicomRepository.createSeries"]:::llamada
-  n38 -->|"no"| n40
-  n34 -->|"no"| n40
-  n41[("CREA object_storage.dicom_series_manifests")]:::efecto
-  n40 --> n41
-  n42["Repite: por cada const instanceDto de seriesDto.instances"]:::bucle
-  n41 --> n42
-  n43["Llama a DicomRepository.findInstanceByUid"]:::llamada
-  n42 -->|"cada elemento"| n43
-  n44[("LEE object_storage.dicom_instance_manifests")]:::efecto
+  n39[("LEE object_storage.object_manifests")]:::efecto
+  n38 --> n39
+  n40{"!manifest || manifest.tenantId !== tenantId"}:::decision
+  n39 --> n40
+  n41(["↩ (relanza el error capturado)"]):::error
+  n40 -->|"sí"| n41
+  n42["Llama a DicomRepository.createInstance"]:::llamada
+  n40 -->|"no"| n42
+  n43[("CREA object_storage.dicom_instance_manifests")]:::efecto
+  n42 --> n43
+  n44["Llama a DicomRepository.countInstancesBySeries"]:::llamada
   n43 --> n44
-  n45["Llama a DicomCatalogService.requireManifestInTenant"]:::llamada
+  n34 -->|"al terminar"| n44
+  n45[("LEE object_storage.dicom_instance_manifests")]:::efecto
   n44 --> n45
-  n46["Llama a ObjectStorageRepository.findManifestById"]:::llamada
+  n46[("ACTUALIZA object_storage.dicom_series_manifests")]:::efecto
   n45 --> n46
-  n47[("LEE object_storage.object_manifests")]:::efecto
+  n47["Llama a DicomRepository.findSeriesByStudy"]:::llamada
   n46 --> n47
-  n48{"!manifest || manifest.tenantId !== tenantId"}:::decision
+  n23 -->|"al terminar"| n47
+  n48[("LEE object_storage.dicom_series_manifests")]:::efecto
   n47 --> n48
-  n49(["↩ (relanza el error capturado)"]):::error
-  n48 -->|"sí"| n49
-  n50["Llama a DicomRepository.createInstance"]:::llamada
-  n48 -->|"no"| n50
-  n51[("CREA object_storage.dicom_instance_manifests")]:::efecto
-  n50 --> n51
-  n52["Llama a DicomRepository.countInstancesBySeries"]:::llamada
-  n51 --> n52
-  n42 -->|"al terminar"| n52
-  n53[("LEE object_storage.dicom_instance_manifests")]:::efecto
-  n52 --> n53
-  n54[("ACTUALIZA object_storage.dicom_series_manifests")]:::efecto
-  n53 --> n54
-  n55["Llama a DicomRepository.findSeriesByStudy"]:::llamada
-  n54 --> n55
-  n31 -->|"al terminar"| n55
-  n56[("LEE object_storage.dicom_series_manifests")]:::efecto
-  n55 --> n56
-  n57[("ACTUALIZA object_storage.dicom_study_manifests · ACTUALIZA object_storage.dicom_study_manifests")]:::efecto
-  n56 --> n57
-  n58(("201 Responde con éxito")):::ok
-  n57 --> n58
+  n49[("ACTUALIZA object_storage.dicom_study_manifests · ACTUALIZA object_storage.dicom_study_manifests")]:::efecto
+  n48 --> n49
+  n50(("201 Responde con éxito")):::ok
+  n49 --> n50
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

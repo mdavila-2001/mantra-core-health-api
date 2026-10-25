@@ -3,8 +3,8 @@
 # Endpoints del módulo `insurance`
 
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-- **Operaciones:** 63 (55 en el contrato, 8 sólo en el código)
-- **Riesgo:** ALTO 20 · MEDIO 22 · BAJO 21
+- **Operaciones:** 71 (71 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 27 · MEDIO 22 · BAJO 22
 - **Tablas distintas que tocan:** 90
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/insurance.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -12,24 +12,24 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/['insurance/campaigns', 'insurance-campaigns']` | — | ALTO | 8 | sesión (sin roles) |
-| 2 | POST | `/['insurance/campaigns', 'insurance-campaigns']` | — | ALTO | 14 | sesión (sin roles) |
-| 3 | GET | `/['insurance/campaigns', 'insurance-campaigns']/{id}` | — | ALTO | 8 | sesión (sin roles) |
-| 4 | PATCH | `/['insurance/campaigns', 'insurance-campaigns']/{id}` | — | ALTO | 15 | sesión (sin roles) |
-| 5 | PATCH | `/['insurance/campaigns', 'insurance-campaigns']/{id}/status` | — | ALTO | 9 | sesión (sin roles) |
-| 6 | GET | `/['insurance/campaigns', 'insurance-campaigns']/active` | Pública, sin token: rutas fijas van ANTES que `:id` para que Nest no las lea como un identificador. | BAJO | 4 | pública |
-| 7 | GET | `/['insurance/campaigns', 'insurance-campaigns']/my-benefits` | El perfil sale del JWT (`pid`): el paciente nunca lo pone en la URL. | ALTO | 12 | sesión (sin roles) |
-| 8 | GET | `/['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId}` | Debe declararse ANTES de `GET :id`: si no, `patient` se leería como un id. El perfil viaja en la URL para que un intento sobre el de otro afiliado sea verificable y auditable. Se conserva junto a `my-benefits` para el caso de IDOR con un perfil ajeno explícito. | ALTO | 12 | sesión (sin roles) |
-| 9 | POST | `/broker-commission-statements` | Generar liquidación de comisión de broker | MEDIO | 4 | BILLING, FINANCE |
-| 10 | POST | `/claim-disputes/{id}/appeal-decisions` | Emitir decisión de apelación (inmutable) | MEDIO | 4 | BILLING, FINANCE |
-| 11 | POST | `/coordination-of-benefits` | Determinar coordinación de beneficios (COB) | MEDIO | 4 | BILLING, FINANCE |
-| 12 | POST | `/coverage-eligibility-requests` | Solicitar y resolver elegibilidad (270/271) | MEDIO | 5 | BILLING, FINANCE |
-| 13 | POST | `/employer-groups` | Alta de grupo empleador (soporte) | MEDIO | 1 | SECURITY_ADMIN |
-| 14 | GET | `/insurance-brokers` | Listar los brokers del tenant activo | BAJO | 3 | sesión (sin roles) |
-| 15 | POST | `/insurance-brokers` | Alta de broker (soporte) | MEDIO | 1 | SECURITY_ADMIN |
-| 16 | GET | `/insurance-brokers/{id}` | Consultar el perfil y las vinculaciones de un broker | BAJO | 4 | sesión (sin roles) |
-| 17 | POST | `/insurance-brokers/{id}/agreements` | Alta de acuerdo broker–aseguradora (soporte) | MEDIO | 3 | SECURITY_ADMIN |
-| 18 | GET | `/insurance-brokers/{id}/clients` | Listar la cartera comercial de un broker (sin datos clínicos) | BAJO | 3 | sesión (sin roles) |
+| 1 | POST | `/broker-commission-statements` | Generar liquidación de comisión de broker | MEDIO | 4 | BILLING, FINANCE |
+| 2 | POST | `/claim-disputes/{id}/appeal-decisions` | Emitir decisión de apelación (inmutable) | MEDIO | 4 | BILLING, FINANCE |
+| 3 | POST | `/coordination-of-benefits` | Determinar coordinación de beneficios (COB) | MEDIO | 4 | BILLING, FINANCE |
+| 4 | POST | `/coverage-eligibility-requests` | Solicitar y resolver elegibilidad (270/271) | MEDIO | 5 | BILLING, FINANCE |
+| 5 | POST | `/employer-groups` | Alta de grupo empleador (soporte) | MEDIO | 1 | SECURITY_ADMIN |
+| 6 | GET | `/insurance-brokers` | Listar los brokers del tenant activo | BAJO | 3 | sesión (sin roles) |
+| 7 | POST | `/insurance-brokers` | Alta de broker (soporte) | MEDIO | 1 | SECURITY_ADMIN |
+| 8 | GET | `/insurance-brokers/{id}` | Consultar el perfil y las vinculaciones de un broker | BAJO | 4 | sesión (sin roles) |
+| 9 | POST | `/insurance-brokers/{id}/agreements` | Alta de acuerdo broker–aseguradora (soporte) | MEDIO | 3 | SECURITY_ADMIN |
+| 10 | GET | `/insurance-brokers/{id}/clients` | Listar la cartera comercial de un broker (sin datos clínicos) | BAJO | 3 | sesión (sin roles) |
+| 11 | GET | `/insurance-campaigns` | Listar las campañas de la aseguradora activa | ALTO | 8 | sesión (sin roles) |
+| 12 | POST | `/insurance-campaigns` | Crear una campaña preventiva de la aseguradora | ALTO | 14 | sesión (sin roles) |
+| 13 | GET | `/insurance-campaigns/{id}` | Consultar una campaña de la aseguradora activa | ALTO | 8 | sesión (sin roles) |
+| 14 | PATCH | `/insurance-campaigns/{id}` | Editar una campaña en borrador o pausada (422 si está activa o vencida) | ALTO | 15 | sesión (sin roles) |
+| 15 | PATCH | `/insurance-campaigns/{id}/status` | Activar, pausar o finalizar una campaña (transiciones cerradas) | ALTO | 9 | sesión (sin roles) |
+| 16 | GET | `/insurance-campaigns/active` | Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`) | BAJO | 4 | pública |
+| 17 | GET | `/insurance-campaigns/my-benefits` | Campañas vigentes de mi aseguradora, para el afiliado autenticado | ALTO | 12 | sesión (sin roles) |
+| 18 | GET | `/insurance-campaigns/patient/{patientProfileId}` | Campañas vigentes de la aseguradora del afiliado (sólo el titular) | ALTO | 12 | sesión (sin roles) |
 | 19 | GET | `/insurance-carrier-catalog` | Catálogo público de aseguradoras y sus planes de salud | BAJO | 3 | pública |
 | 20 | GET | `/insurance-carriers` | Listar las aseguradoras del tenant activo | BAJO | 6 | sesión (sin roles) |
 | 21 | POST | `/insurance-carriers` | Alta de aseguradora (soporte) | MEDIO | 1 | SECURITY_ADMIN |
@@ -51,37 +51,1034 @@
 | 37 | PUT | `/insurance-plans/{planId}/premium` | Declarar la prima de lista mensual de un plan administrable | ALTO | 5 | sesión (sin roles) |
 | 38 | POST | `/insurance-products/{productId}/plans` | Crear un plan del carrier del tenant activo | ALTO | 4 | sesión (sin roles) |
 | 39 | GET | `/insurance/analytics/loss-ratio` | Tablero de siniestralidad, gasto per cápita y epidemiología de la aseguradora del tenant activo | BAJO | 19 | sesión (sin roles) |
-| 40 | GET | `/insurance/my-claims` | Solicitudes de seguro propias, con su dictamen vigente | BAJO | 14 | sesión (sin roles) |
-| 41 | POST | `/insurance/patients/conversation` | Abrir o reutilizar la conversación interna con un paciente autorizado | ALTO | 15 | sesión (sin roles) |
-| 42 | GET | `/insurance/patients/options` | Aseguradoras disponibles en el alcance autorizado | BAJO | 2 | sesión (sin roles) |
-| 43 | POST | `/insurance/patients/search` | Consultar directorio de pacientes autorizado | ALTO | 13 | sesión (sin roles) |
-| 44 | GET | `/insurance/portability/certificates/{certificateId}/json` | Descargar el certificado de portabilidad en JSON interoperable | ALTO | 9 | sesión (sin roles) |
-| 45 | GET | `/insurance/portability/certificates/{certificateId}/pdf` | Descargar el certificado de portabilidad en PDF | ALTO | 9 | sesión (sin roles) |
-| 46 | POST | `/insurance/portability/export` | Exportar el historial de póliza y siniestralidad del titular a 1 clic | ALTO | 37 | sesión (sin roles) |
-| 47 | GET | `/insurance/received-claims` | Solicitudes de seguro recibidas por la aseguradora activa | BAJO | 15 | sesión (sin roles) |
-| 48 | POST | `/insurance/received-claims/{id}/decision` | Dictaminar una solicitud recibida (definitivo) | ALTO | 28 | sesión (sin roles) |
-| 49 | POST | `/patient-coverages` | Registrar cobertura de paciente y dependientes | MEDIO | 5 | BILLING, FINANCE |
-| 50 | GET | `/patient-coverages/me` | Mi cobertura | BAJO | 3 | BILLING, FINANCE, PATIENT |
-| 51 | GET | `/practitioner-settlement-batches` | Listar los lotes de liquidación del alcance del actor | BAJO | 10 | sesión (sin roles) |
-| 52 | POST | `/practitioner-settlement-batches` | Generar (o repetir) el lote de liquidación del período | ALTO | 13 | sesión (sin roles) |
-| 53 | GET | `/practitioner-settlement-batches/{id}` | Consultar un lote de liquidación | BAJO | 11 | sesión (sin roles) |
-| 54 | GET | `/practitioners/{profileId}/insurance-networks` | Aseguradoras con las que trabaja el profesional | BAJO | 4 | SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT |
-| 55 | POST | `/prior-authorization-requests` | Solicitar autorización previa con items | MEDIO | 14 | BILLING, FINANCE |
-| 56 | GET | `/prior-authorization-requests/{id}` | Detalle de una solicitud de aprobación (aseguradora) | BAJO | 13 | BILLING, FINANCE |
-| 57 | POST | `/prior-authorization-requests/{id}/determinations` | Emitir determinación de autorización previa | MEDIO | 18 | BILLING, FINANCE |
-| 58 | GET | `/prior-authorization-requests/inbox` | Bandeja de solicitudes de aprobación (aseguradora) | BAJO | 13 | BILLING, FINANCE |
-| 59 | POST | `/provider-networks` | Alta de red de prestadores (soporte) | MEDIO | 2 | SECURITY_ADMIN |
-| 60 | POST | `/provider-networks/{id}/memberships` | Alta de membresía de prestador en la red | MEDIO | 2 | SECURITY_ADMIN |
-| 61 | GET | `/public/portability/verify/{manifestHash}` | Verificar la autenticidad de un certificado de portabilidad por su sello | BAJO | 2 | pública |
-| 62 | POST | `/reconciliation-batches` | Abrir lote de conciliación | MEDIO | 3 | SECURITY_ADMIN |
-| 63 | POST | `/reconciliation-batches/{id}/items` | Agregar ítem de conciliación al lote | MEDIO | 6 | SECURITY_ADMIN |
+| 40 | GET | `/insurance/campaigns` | Listar las campañas de la aseguradora activa | ALTO | 8 | sesión (sin roles) |
+| 41 | POST | `/insurance/campaigns` | Crear una campaña preventiva de la aseguradora | ALTO | 14 | sesión (sin roles) |
+| 42 | GET | `/insurance/campaigns/{id}` | Consultar una campaña de la aseguradora activa | ALTO | 8 | sesión (sin roles) |
+| 43 | PATCH | `/insurance/campaigns/{id}` | Editar una campaña en borrador o pausada (422 si está activa o vencida) | ALTO | 15 | sesión (sin roles) |
+| 44 | PATCH | `/insurance/campaigns/{id}/status` | Activar, pausar o finalizar una campaña (transiciones cerradas) | ALTO | 9 | sesión (sin roles) |
+| 45 | GET | `/insurance/campaigns/active` | Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`) | BAJO | 4 | pública |
+| 46 | GET | `/insurance/campaigns/my-benefits` | Campañas vigentes de mi aseguradora, para el afiliado autenticado | ALTO | 12 | sesión (sin roles) |
+| 47 | GET | `/insurance/campaigns/patient/{patientProfileId}` | Campañas vigentes de la aseguradora del afiliado (sólo el titular) | ALTO | 12 | sesión (sin roles) |
+| 48 | GET | `/insurance/my-claims` | Solicitudes de seguro propias, con su dictamen vigente | BAJO | 14 | sesión (sin roles) |
+| 49 | POST | `/insurance/patients/conversation` | Abrir o reutilizar la conversación interna con un paciente autorizado | ALTO | 15 | sesión (sin roles) |
+| 50 | GET | `/insurance/patients/options` | Aseguradoras disponibles en el alcance autorizado | BAJO | 2 | sesión (sin roles) |
+| 51 | POST | `/insurance/patients/search` | Consultar directorio de pacientes autorizado | ALTO | 13 | sesión (sin roles) |
+| 52 | GET | `/insurance/portability/certificates/{certificateId}/json` | Descargar el certificado de portabilidad en JSON interoperable | ALTO | 9 | sesión (sin roles) |
+| 53 | GET | `/insurance/portability/certificates/{certificateId}/pdf` | Descargar el certificado de portabilidad en PDF | ALTO | 9 | sesión (sin roles) |
+| 54 | POST | `/insurance/portability/export` | Exportar el historial de póliza y siniestralidad del titular a 1 clic | ALTO | 37 | sesión (sin roles) |
+| 55 | GET | `/insurance/received-claims` | Solicitudes de seguro recibidas por la aseguradora activa | BAJO | 15 | sesión (sin roles) |
+| 56 | POST | `/insurance/received-claims/{id}/decision` | Dictaminar una solicitud recibida (definitivo) | ALTO | 28 | sesión (sin roles) |
+| 57 | POST | `/patient-coverages` | Registrar cobertura de paciente y dependientes | MEDIO | 5 | BILLING, FINANCE |
+| 58 | GET | `/patient-coverages/me` | Mi cobertura | BAJO | 3 | BILLING, FINANCE, PATIENT |
+| 59 | GET | `/practitioner-settlement-batches` | Listar los lotes de liquidación del alcance del actor | BAJO | 10 | sesión (sin roles) |
+| 60 | POST | `/practitioner-settlement-batches` | Generar (o repetir) el lote de liquidación del período | ALTO | 13 | sesión (sin roles) |
+| 61 | GET | `/practitioner-settlement-batches/{id}` | Consultar un lote de liquidación | BAJO | 11 | sesión (sin roles) |
+| 62 | GET | `/practitioners/{profileId}/insurance-networks` | Aseguradoras con las que trabaja el profesional | BAJO | 4 | SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT |
+| 63 | POST | `/prior-authorization-requests` | Solicitar autorización previa con items | MEDIO | 14 | BILLING, FINANCE |
+| 64 | GET | `/prior-authorization-requests/{id}` | Detalle de una solicitud de aprobación (aseguradora) | BAJO | 13 | BILLING, FINANCE |
+| 65 | POST | `/prior-authorization-requests/{id}/determinations` | Emitir determinación de autorización previa | MEDIO | 18 | BILLING, FINANCE |
+| 66 | GET | `/prior-authorization-requests/inbox` | Bandeja de solicitudes de aprobación (aseguradora) | BAJO | 13 | BILLING, FINANCE |
+| 67 | POST | `/provider-networks` | Alta de red de prestadores (soporte) | MEDIO | 2 | SECURITY_ADMIN |
+| 68 | POST | `/provider-networks/{id}/memberships` | Alta de membresía de prestador en la red | MEDIO | 2 | SECURITY_ADMIN |
+| 69 | GET | `/public/portability/verify/{manifestHash}` | Verificar la autenticidad de un certificado de portabilidad por su sello | BAJO | 2 | pública |
+| 70 | POST | `/reconciliation-batches` | Abrir lote de conciliación | MEDIO | 3 | SECURITY_ADMIN |
+| 71 | POST | `/reconciliation-batches/{id}/items` | Agregar ítem de conciliación al lote | MEDIO | 6 | SECURITY_ADMIN |
 
 ---
 
-## 1. GET /['insurance/campaigns', 'insurance-campaigns']
+## 1. POST /broker-commission-statements
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Generar liquidación de comisión de broker
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `BrokerCommissionController.generate` — `src/modules/insurance/presentation/controllers/broker-commission.controller.ts:29`
+
+### Qué es y para qué sirve (negocio)
+
+Generar liquidación de comisión de broker. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /broker-commission-statements` la atiende `BrokerCommissionController.generate` (src/modules/insurance/presentation/controllers/broker-commission.controller.ts:29). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateCommissionStatementDto` (6 campos, 4 obligatorios). Delega en `BrokerCommissionService.generate`. Crea filas en insurance.broker_commission_statements. Lee insurance.broker_carrier_agreements, insurance.broker_commission_statements, insurance.insurance_brokers.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/broker-commission.controller.ts:29` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `insurance.broker_carrier_agreements` | LEE | LEE | DIRECTA | BrokerCommissionController.generate → BrokerCommissionService.generate → CatalogRepository.findAgreement | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:292` |
+| `insurance.broker_commission_statements` | ESCRIBE | CREA | DIRECTA | BrokerCommissionController.generate → BrokerCommissionService.generate → SettlementRepository.createStatement | `src/modules/insurance/infrastructure/repositories/settlement.repository.ts:279` |
+| `insurance.broker_commission_statements` | LEE | LEE | DIRECTA | BrokerCommissionController.generate → BrokerCommissionService.generate → SettlementRepository.findStatementByUnique | `src/modules/insurance/infrastructure/repositories/settlement.repository.ts:261` |
+| `insurance.insurance_brokers` | LEE | LEE | DIRECTA | BrokerCommissionController.generate → BrokerCommissionService.generate → CatalogRepository.findBroker | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:243` |
+
+### Cuerpo — DTO `CreateCommissionStatementDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `insuranceBrokerId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:11` |
+| `brokerCarrierAgreementId` | `string` | Sí | formato uuid | `@IsUUID()` | Acuerdo broker–aseguradora | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:18` |
+| `periodStart` | `string` | Sí | formato date | `@IsString()` | — | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:25` |
+| `periodEnd` | `string` | Sí | formato date | `@IsString()` | — | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:32` |
+| `grossPremiumAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Prima bruta del periodo | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:43` |
+| `commissionAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Comisión calculada | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:51` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "insuranceBrokerId": "00000000-0000-4000-8000-000000000001",
+  "brokerCarrierAgreementId": "00000000-0000-4000-8000-000000000001",
+  "periodStart": "2026-07-31",
+  "periodEnd": "2026-07-31"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "insuranceBrokerId": "00000000-0000-4000-8000-000000000001",
+  "brokerCarrierAgreementId": "00000000-0000-4000-8000-000000000001",
+  "periodStart": "2026-07-31",
+  "periodEnd": "2026-07-31",
+  "grossPremiumAmount": "10000.00",
+  "commissionAmount": "500.00"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado; ResourceNotFoundException: Acuerdo broker–aseguradora no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe liquidación para el periodo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El acuerdo no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:BrokerCommissionController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 2. POST /claim-disputes/{id}/appeal-decisions
+
+- **Origen:** CONTRATO
+- **Nombre:** Emitir decisión de apelación (inmutable)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AppealsController.decide` — `src/modules/insurance/presentation/controllers/appeals.controller.ts:37`
+
+### Qué es y para qué sirve (negocio)
+
+Emitir decisión de apelación (inmutable). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /claim-disputes/{id}/appeal-decisions` la atiende `AppealsController.decide` (src/modules/insurance/presentation/controllers/appeals.controller.ts:37). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateAppealDecisionDto` (3 campos, 1 obligatorio). Delega en `AppealsService.decide`. Crea filas en insurance.claim_appeal_decisions. Actualiza insurance.claim_disputes. Lee insurance.claim_appeal_decisions, insurance.claim_disputes.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/appeals.controller.ts:37` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/appeals.controller.ts:37` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `insurance.claim_appeal_decisions` | ESCRIBE | CREA | DIRECTA | AppealsController.decide → AppealsService.decide → DisputeRepository.createAppealDecision | `src/modules/insurance/infrastructure/repositories/dispute.repository.ts:45` |
+| `insurance.claim_appeal_decisions` | LEE | LEE | DIRECTA | AppealsController.decide → AppealsService.decide → DisputeRepository.latestDecision | `src/modules/insurance/infrastructure/repositories/dispute.repository.ts:27` |
+| `insurance.claim_disputes` | ESCRIBE | ACTUALIZA | POR_TIPO | AppealsController.decide → AppealsService.decide | `src/modules/insurance/application/services/appeals.service.ts:90` |
+| `insurance.claim_disputes` | LEE | LEE | DIRECTA | AppealsController.decide → AppealsService.decide → DisputeRepository.findDispute | `src/modules/insurance/infrastructure/repositories/dispute.repository.ts:19` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `CreateAppealDecisionDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `decision` | `string` | Sí | valores: UPHELD, OVERTURNED | `@IsIn(['UPHELD', 'OVERTURNED'])` | — | `src/modules/insurance/presentation/dto/appeals.dto.ts:17` |
+| `adjustedAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Monto ajustado tras la decisión | `src/modules/insurance/presentation/dto/appeals.dto.ts:28` |
+| `rationaleText` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/insurance/presentation/dto/appeals.dto.ts:37` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "decision": "UPHELD"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "decision": "UPHELD",
+  "adjustedAmount": "15.00",
+  "rationaleText": "valor-ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Disputa no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La disputa no admite decisión en su estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:AppealsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 3. POST /coordination-of-benefits
+
+- **Origen:** CONTRATO
+- **Nombre:** Determinar coordinación de beneficios (COB)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CoverageController.determineCob` — `src/modules/insurance/presentation/controllers/coverage.controller.ts:89`
+
+### Qué es y para qué sirve (negocio)
+
+Determinar coordinación de beneficios (COB). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /coordination-of-benefits` la atiende `CoverageController.determineCob` (src/modules/insurance/presentation/controllers/coverage.controller.ts:89). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateCobDto` (5 campos, 2 obligatorios). Delega en `CoverageService.determineCob`. Crea filas en insurance.coordination_of_benefits. Actualiza insurance.coordination_of_benefits. Lee insurance.coordination_of_benefits, insurance.patient_coverages.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/coverage.controller.ts:89` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `insurance.coordination_of_benefits` | ESCRIBE | ACTUALIZA | POR_TIPO | CoverageController.determineCob → CoverageService.determineCob | `src/modules/insurance/application/services/coverage.service.ts:261` |
+| `insurance.coordination_of_benefits` | ESCRIBE | CREA | DIRECTA | CoverageController.determineCob → CoverageService.determineCob → CoverageRepository.createCob | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:266` |
+| `insurance.coordination_of_benefits` | LEE | LEE | DIRECTA | CoverageController.determineCob → CoverageService.determineCob → CoverageRepository.latestActiveCob | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:248` |
+| `insurance.patient_coverages` | LEE | LEE | DIRECTA | CoverageController.determineCob → CoverageService.determineCob → CoverageRepository.findCoverage | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:42` |
+
+### Cuerpo — DTO `CreateCobDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/coverage.dto.ts:146` |
+| `primaryPatientCoverageId` | `string` | Sí | formato uuid | `@IsUUID()` | Cobertura primaria | `src/modules/insurance/presentation/dto/coverage.dto.ts:153` |
+| `secondaryPatientCoverageId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cobertura secundaria | `src/modules/insurance/presentation/dto/coverage.dto.ts:161` |
+| `tertiaryPatientCoverageId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cobertura terciaria | `src/modules/insurance/presentation/dto/coverage.dto.ts:169` |
+| `effectiveFrom` | `string` | No | formato date | `@IsOptional()` `@IsString()` | — | `src/modules/insurance/presentation/dto/coverage.dto.ts:177` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "primaryPatientCoverageId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "primaryPatientCoverageId": "00000000-0000-4000-8000-000000000001",
+  "secondaryPatientCoverageId": "00000000-0000-4000-8000-000000000001",
+  "tertiaryPatientCoverageId": "00000000-0000-4000-8000-000000000001",
+  "effectiveFrom": "2026-07-31"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cobertura primaria no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: COB requiere al menos una cobertura secundaria |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:CoverageController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 4. POST /coverage-eligibility-requests
+
+- **Origen:** CONTRATO
+- **Nombre:** Solicitar y resolver elegibilidad (270/271)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CoverageController.requestEligibility` — `src/modules/insurance/presentation/controllers/coverage.controller.ts:73`
+
+### Qué es y para qué sirve (negocio)
+
+Solicitar y resolver elegibilidad (270/271). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /coverage-eligibility-requests` la atiende `CoverageController.requestEligibility` (src/modules/insurance/presentation/controllers/coverage.controller.ts:73). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateEligibilityRequestDto` (4 campos, 1 obligatorio). Delega en `CoverageService.requestEligibility`. Crea filas en insurance.coverage_eligibility_requests, insurance.coverage_eligibility_responses. Actualiza insurance.coverage_eligibility_requests. Lee insurance.coverage_eligibility_requests, insurance.patient_coverages.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/coverage.controller.ts:73` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `insurance.coverage_eligibility_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | CoverageController.requestEligibility → CoverageService.requestEligibility | `src/modules/insurance/application/services/coverage.service.ts:220` |
+| `insurance.coverage_eligibility_requests` | ESCRIBE | CREA | DIRECTA | CoverageController.requestEligibility → CoverageService.requestEligibility → CoverageRepository.createEligibilityRequest | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:303` |
+| `insurance.coverage_eligibility_requests` | LEE | LEE | DIRECTA | CoverageController.requestEligibility → CoverageService.requestEligibility → CoverageRepository.findRequestByIdempotency | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:289` |
+| `insurance.coverage_eligibility_responses` | ESCRIBE | CREA | DIRECTA | CoverageController.requestEligibility → CoverageService.requestEligibility → CoverageRepository.createEligibilityResponse | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:325` |
+| `insurance.patient_coverages` | LEE | LEE | DIRECTA | CoverageController.requestEligibility → CoverageService.requestEligibility → CoverageRepository.findCoverage | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:42` |
+
+### Cuerpo — DTO `CreateEligibilityRequestDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `patientCoverageId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/coverage.dto.ts:110` |
+| `serviceDate` | `string` | No | formato date | `@IsOptional()` `@IsString()` | — | `src/modules/insurance/presentation/dto/coverage.dto.ts:118` |
+| `idempotencyKey` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | — | `src/modules/insurance/presentation/dto/coverage.dto.ts:127` |
+| `benefitSummary` | `object` | No | — | `@IsOptional()` | Resumen de beneficios recibido del pagador | `src/modules/insurance/presentation/dto/coverage.dto.ts:136` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "patientCoverageId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "patientCoverageId": "00000000-0000-4000-8000-000000000001",
+  "serviceDate": "2026-07-31",
+  "idempotencyKey": "valor-ejemplo",
+  "benefitSummary": {}
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cobertura no encontrada |
+| 409 | `CONFLICT` | ConflictException: Solicitud de elegibilidad duplicada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:CoverageController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. POST /employer-groups
+
+- **Origen:** CONTRATO
+- **Nombre:** Alta de grupo empleador (soporte)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceBackboneController.createEmployerGroup` — `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:344`
+
+### Qué es y para qué sirve (negocio)
+
+Alta de grupo empleador (soporte). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /employer-groups` la atiende `InsuranceBackboneController.createEmployerGroup` (src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:344). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateEmployerGroupDto` (3 campos, 3 obligatorios). Delega en `InsuranceBackboneService.createEmployerGroup`. Crea filas en insurance.employer_groups.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:344` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `insurance.employer_groups` | ESCRIBE | CREA | DIRECTA | InsuranceBackboneController.createEmployerGroup → InsuranceBackboneService.createEmployerGroup → CatalogRepository.createEmployerGroup | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:274` |
+
+### Cuerpo — DTO `CreateEmployerGroupDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:539` |
+| `groupCode` | `string` | Sí | longitud mínima 1; longitud máxima 60 | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:548` |
+| `legalName` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@MinLength(1)` `@MaxLength(200)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:557` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "groupCode": "CODIGO_EJEMPLO",
+  "legalName": "Nombre de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "groupCode": "CODIGO_EJEMPLO",
+  "legalName": "Nombre de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceBackboneController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 6. GET /insurance-brokers
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar los brokers del tenant activo
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceReadController.listBrokers` — `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:81`
+
+### Qué es y para qué sirve (negocio)
+
+Listar los brokers del tenant activo. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /insurance-brokers` la atiende `InsuranceReadController.listBrokers` (src/modules/insurance/presentation/controllers/insurance-read.controller.ts:81). Exige sesión; el controlador no declara roles. Delega en `InsuranceReadService.listBrokers`. Lee insurance.broker_carrier_agreements, insurance.insurance_brokers, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:81` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `insurance.broker_carrier_agreements` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokers → InsuranceReadService.listBrokers → InsuranceReadRepository.findAgreements | `src/modules/insurance/infrastructure/repositories/read.repository.ts:166` |
+| `insurance.insurance_brokers` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokers → InsuranceReadService.listBrokers → InsuranceReadRepository.findBrokersByTenant | `src/modules/insurance/infrastructure/repositories/read.repository.ts:137` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokers → InsuranceReadService.listBrokers → InsuranceReadService.conceptMap → InsuranceReadRepository.findConcepts | `src/modules/insurance/infrastructure/repositories/read.repository.ts:200` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<BrokerDirectoryResponseDto>` · DTO `BrokerDirectoryResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<BrokerSummaryDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:414` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:364` |
+| `items[].brokerCode` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:368` |
+| `items[].legalName` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:372` |
+| `items[].licenseNumber` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:376` |
+| `items[].jurisdiction` | `InsuranceConceptDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:380` |
+| `items[].jurisdiction.code` | `string` | Sí | — | — | — | sin fuente |
+| `items[].jurisdiction.display` | `string` | Sí | — | — | — | sin fuente |
+| `items[].status` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:384` |
+| `items[].status.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `items[].status.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
+| `items[].verification` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:388` |
+| `items[].verification.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `items[].verification.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
+| `items[].independent` | `boolean` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:399` |
+| `items[].currentCarrierCount` | `number` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:403` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:407` |
+| `count` | `number` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:418` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. POST /insurance-brokers
+
+- **Origen:** CONTRATO
+- **Nombre:** Alta de broker (soporte)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceBackboneController.createBroker` — `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:296`
+
+### Qué es y para qué sirve (negocio)
+
+Alta de broker (soporte). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /insurance-brokers` la atiende `InsuranceBackboneController.createBroker` (src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:296). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateBrokerDto` (4 campos, 3 obligatorios). Delega en `InsuranceBackboneService.createBroker`. Crea filas en insurance.insurance_brokers.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:296` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `insurance.insurance_brokers` | ESCRIBE | CREA | DIRECTA | InsuranceBackboneController.createBroker → InsuranceBackboneService.createBroker → CatalogRepository.createBroker | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:256` |
+
+### Cuerpo — DTO `CreateBrokerDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:502` |
+| `brokerCode` | `string` | Sí | longitud mínima 1; longitud máxima 60 | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:511` |
+| `legalName` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@MinLength(1)` `@MaxLength(200)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:520` |
+| `licenseNumber` | `string` | No | longitud máxima 80 | `@IsOptional()` `@IsString()` `@MaxLength(80)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:529` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "brokerCode": "CODIGO_EJEMPLO",
+  "legalName": "Nombre de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "brokerCode": "CODIGO_EJEMPLO",
+  "legalName": "Nombre de ejemplo",
+  "licenseNumber": "valor-ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceBackboneController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 8. GET /insurance-brokers/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Consultar el perfil y las vinculaciones de un broker
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceReadController.getBroker` — `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:94`
+
+### Qué es y para qué sirve (negocio)
+
+Consultar el perfil y las vinculaciones de un broker. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /insurance-brokers/{id}` la atiende `InsuranceReadController.getBroker` (src/modules/insurance/presentation/controllers/insurance-read.controller.ts:94). Exige sesión; el controlador no declara roles. Delega en `InsuranceReadService.getBroker`. Lee insurance.broker_carrier_agreements, insurance.insurance_brokers, insurance.insurance_carriers, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:94` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:94` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `insurance.broker_carrier_agreements` | LEE | LEE | DIRECTA | InsuranceReadController.getBroker → InsuranceReadService.getBroker → InsuranceReadRepository.findAgreements | `src/modules/insurance/infrastructure/repositories/read.repository.ts:166` |
+| `insurance.insurance_brokers` | LEE | LEE | DIRECTA | InsuranceReadController.getBroker → InsuranceReadService.getBroker → InsuranceReadRepository.findBrokerByTenant | `src/modules/insurance/infrastructure/repositories/read.repository.ts:150` |
+| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceReadController.getBroker → InsuranceReadService.getBroker → InsuranceReadRepository.findCarriersByIds | `src/modules/insurance/infrastructure/repositories/read.repository.ts:179` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | InsuranceReadController.getBroker → InsuranceReadService.getBroker → InsuranceReadService.conceptMap → InsuranceReadRepository.findConcepts | `src/modules/insurance/infrastructure/repositories/read.repository.ts:200` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<BrokerProfileDto>` · DTO `BrokerProfileDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:364` |
+| `brokerCode` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:368` |
+| `legalName` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:372` |
+| `licenseNumber` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:376` |
+| `jurisdiction` | `InsuranceConceptDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:380` |
+| `jurisdiction.code` | `string` | Sí | — | — | — | sin fuente |
+| `jurisdiction.display` | `string` | Sí | — | — | — | sin fuente |
+| `status` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:384` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `status.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
+| `verification` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:388` |
+| `verification.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `verification.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
+| `independent` | `boolean` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:399` |
+| `currentCarrierCount` | `number` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:403` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:407` |
+| `agreements` | `array<BrokerAgreementDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:431` |
+| `agreements[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:314` |
+| `agreements[].insuranceCarrierId` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:318` |
+| `agreements[].carrierLegalName` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:322` |
+| `agreements[].agreementCode` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:326` |
+| `agreements[].commissionModel` | `InsuranceConceptDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:330` |
+| `agreements[].commissionModel.code` | `string` | Sí | — | — | — | sin fuente |
+| `agreements[].commissionModel.display` | `string` | Sí | — | — | — | sin fuente |
+| `agreements[].effectiveFrom` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:334` |
+| `agreements[].effectiveTo` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:338` |
+| `agreements[].status` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:342` |
+| `agreements[].status.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `agreements[].status.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
+| `agreements[].current` | `boolean` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:353` |
+| `agreements[].contractFileId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:357` |
+| `publicProfileId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:441` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 9. POST /insurance-brokers/{id}/agreements
+
+- **Origen:** CONTRATO
+- **Nombre:** Alta de acuerdo broker–aseguradora (soporte)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceBackboneController.createAgreement` — `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:320`
+
+### Qué es y para qué sirve (negocio)
+
+Alta de acuerdo broker–aseguradora (soporte). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /insurance-brokers/{id}/agreements` la atiende `InsuranceBackboneController.createAgreement` (src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:320). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateBrokerAgreementDto` (4 campos, 2 obligatorios). Delega en `InsuranceBackboneService.createAgreement`. Crea filas en insurance.broker_carrier_agreements. Lee insurance.insurance_brokers, insurance.insurance_carriers.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:320` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:320` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `insurance.broker_carrier_agreements` | ESCRIBE | CREA | DIRECTA | InsuranceBackboneController.createAgreement → InsuranceBackboneService.createAgreement → CatalogRepository.createAgreement | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:305` |
+| `insurance.insurance_brokers` | LEE | LEE | DIRECTA | InsuranceBackboneController.createAgreement → InsuranceBackboneService.createAgreement → CatalogRepository.findBroker | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:243` |
+| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceBackboneController.createAgreement → InsuranceBackboneService.createAgreement → CatalogRepository.findCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:36` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `CreateBrokerAgreementDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `insuranceCarrierId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:567` |
+| `agreementCode` | `string` | Sí | longitud mínima 1; longitud máxima 60 | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:576` |
+| `effectiveFrom` | `string` | No | formato date | `@IsOptional()` `@IsString()` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:584` |
+| `effectiveTo` | `string` | No | formato date | `@IsOptional()` `@IsString()` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:592` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
+  "agreementCode": "CODIGO_EJEMPLO"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
+  "agreementCode": "CODIGO_EJEMPLO",
+  "effectiveFrom": "2026-07-31",
+  "effectiveTo": "2026-07-31"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado; ResourceNotFoundException: Aseguradora no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceBackboneController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 10. GET /insurance-brokers/{id}/clients
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar la cartera comercial de un broker (sin datos clínicos)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceReadController.listBrokerClients` — `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:112`
+
+### Qué es y para qué sirve (negocio)
+
+Listar la cartera comercial de un broker (sin datos clínicos). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /insurance-brokers/{id}/clients` la atiende `InsuranceReadController.listBrokerClients` (src/modules/insurance/presentation/controllers/insurance-read.controller.ts:112). Exige sesión; el controlador no declara roles. Delega en `InsuranceReadService.listBrokerClients`. Lee insurance.broker_clients, insurance.insurance_brokers, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:112` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:112` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `insurance.broker_clients` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokerClients → InsuranceReadService.listBrokerClients → InsuranceReadRepository.findBrokerClients | `src/modules/insurance/infrastructure/repositories/read.repository.ts:187` |
+| `insurance.insurance_brokers` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokerClients → InsuranceReadService.listBrokerClients → InsuranceReadRepository.findBrokerByTenant | `src/modules/insurance/infrastructure/repositories/read.repository.ts:150` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokerClients → InsuranceReadService.listBrokerClients → InsuranceReadService.conceptMap → InsuranceReadRepository.findConcepts | `src/modules/insurance/infrastructure/repositories/read.repository.ts:200` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<BrokerPortfolioResponseDto>` · DTO `BrokerPortfolioResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<BrokerClientDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:490` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:455` |
+| `items[].patientProfileId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:459` |
+| `items[].employerGroupId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:463` |
+| `items[].clientType` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:467` |
+| `items[].clientType.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `items[].clientType.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
+| `items[].assignedBrokerUserId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:471` |
+| `items[].effectiveFrom` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:475` |
+| `items[].effectiveTo` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:479` |
+| `items[].status` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:483` |
+| `items[].status.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
+| `items[].status.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
+| `count` | `number` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:494` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 11. GET /insurance-campaigns
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar las campañas de la aseguradora activa
 - **Bloque:** Financiero y ERP
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -89,13 +1086,13 @@
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+Listar las campañas de la aseguradora activa. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`GET /['insurance/campaigns', 'insurance-campaigns']` la atiende `InsuranceCampaignsController.list` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.list`. Crea filas en audit.audit_log. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
+`GET /insurance-campaigns` la atiende `InsuranceCampaignsController.list` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.list`. Crea filas en audit.audit_log. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
 
 ### Requerimientos
 
@@ -103,8 +1100,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -123,7 +1120,10 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `InsuranceCampaignListQueryDto` | — |
+| `type` | query | No | `string` | — |
+| `status` | query | No | `string` | — |
+| `cursor` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
 
 ### Cuerpo
 
@@ -180,10 +1180,10 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 2. POST /['insurance/campaigns', 'insurance-campaigns']
+## 12. POST /insurance-campaigns
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Crear una campaña preventiva de la aseguradora
 - **Bloque:** Financiero y ERP
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -191,13 +1191,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+Crear una campaña preventiva de la aseguradora. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /['insurance/campaigns', 'insurance-campaigns']` la atiende `InsuranceCampaignsController.create` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateInsuranceCampaignDto` (15 campos, 10 obligatorios). Delega en `InsuranceCampaignsService.create`. Crea filas en audit.audit_log, insurance.insurance_campaign_partners, insurance.insurance_campaigns. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.network_provider_memberships, insurance.provider_networks y 3 más.
+`POST /insurance-campaigns` la atiende `InsuranceCampaignsController.create` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateInsuranceCampaignDto` (15 campos, 10 obligatorios). Delega en `InsuranceCampaignsService.create`. Crea filas en audit.audit_log, insurance.insurance_campaign_partners, insurance.insurance_campaigns. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.network_provider_memberships, insurance.provider_networks y 3 más.
 
 ### Requerimientos
 
@@ -205,8 +1205,10 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -227,7 +1229,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 | `terminology.code_system_versions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.resolveIcd10ConceptId | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:167` |
 | `terminology.code_systems` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.resolveIcd10ConceptId | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:167` |
 
-### Cuerpo — DTO `CreateInsuranceCampaignDto`
+### Cuerpo — DTO `CreateInsuranceCampaignDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
@@ -326,7 +1328,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: No se puede activar una campaña cuya vigencia ya terminó; BadRequestException: El código CIE-10 {code} no está en el catálogo |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: No se puede activar una campaña cuya vigencia ya terminó; BadRequestException: El código CIE-10 {code} no está en el catálogo |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
@@ -346,10 +1348,10 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 3. GET /['insurance/campaigns', 'insurance-campaigns']/{id}
+## 13. GET /insurance-campaigns/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Consultar una campaña de la aseguradora activa
 - **Bloque:** Financiero y ERP
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -357,13 +1359,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+Consultar una campaña de la aseguradora activa. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`GET /['insurance/campaigns', 'insurance-campaigns']/{id}` la atiende `InsuranceCampaignsController.getById` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.getById`. Crea filas en audit.audit_log. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
+`GET /insurance-campaigns/{id}` la atiende `InsuranceCampaignsController.getById` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.getById`. Crea filas en audit.audit_log. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
 
 ### Requerimientos
 
@@ -371,9 +1373,9 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -448,10 +1450,10 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 4. PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}
+## 14. PATCH /insurance-campaigns/{id}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Editar una campaña en borrador o pausada (422 si está activa o vencida)
 - **Bloque:** Financiero y ERP
 - **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -459,13 +1461,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+Editar una campaña en borrador o pausada (422 si está activa o vencida). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}` la atiende `InsuranceCampaignsController.update` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateInsuranceCampaignDto` (13 campos, 0 obligatorios). Delega en `InsuranceCampaignsService.update`. Crea filas en audit.audit_log, insurance.insurance_campaign_partners. Actualiza insurance.insurance_campaigns. Borra de insurance.insurance_campaign_partners. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.network_provider_memberships, insurance.provider_networks y 3 más.
+`PATCH /insurance-campaigns/{id}` la atiende `InsuranceCampaignsController.update` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateInsuranceCampaignDto` (13 campos, 0 obligatorios). Delega en `InsuranceCampaignsService.update`. Crea filas en audit.audit_log, insurance.insurance_campaign_partners. Actualiza insurance.insurance_campaigns. Borra de insurance.insurance_campaign_partners. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.network_provider_memberships, insurance.provider_networks y 3 más.
 
 ### Requerimientos
 
@@ -473,9 +1475,11 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -503,7 +1507,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `UpdateInsuranceCampaignDto`
+### Cuerpo — DTO `UpdateInsuranceCampaignDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
@@ -584,7 +1588,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: El código CIE-10 {code} no está en el catálogo |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: El código CIE-10 {code} no está en el catálogo |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora; ForbiddenException: La campaña pertenece a otra aseguradora |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
@@ -603,10 +1607,10 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 5. PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status
+## 15. PATCH /insurance-campaigns/{id}/status
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** —
+- **Origen:** CONTRATO
+- **Nombre:** Activar, pausar o finalizar una campaña (transiciones cerradas)
 - **Bloque:** Financiero y ERP
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -614,13 +1618,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+Activar, pausar o finalizar una campaña (transiciones cerradas). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
 
-_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status` la atiende `InsuranceCampaignsController.changeStatus` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateInsuranceCampaignStatusDto` (1 campo, 1 obligatorio). Delega en `InsuranceCampaignsService.changeStatus`. Crea filas en audit.audit_log. Actualiza insurance.insurance_campaigns. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
+`PATCH /insurance-campaigns/{id}/status` la atiende `InsuranceCampaignsController.changeStatus` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateInsuranceCampaignStatusDto` (1 campo, 1 obligatorio). Delega en `InsuranceCampaignsService.changeStatus`. Crea filas en audit.audit_log. Actualiza insurance.insurance_campaigns. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
 
 ### Requerimientos
 
@@ -628,9 +1632,11 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -652,7 +1658,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 |---|---|---|---|---|
 | `id` | path | Sí | `string` | — |
 
-### Cuerpo — DTO `UpdateInsuranceCampaignStatusDto`
+### Cuerpo — DTO `UpdateInsuranceCampaignStatusDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
@@ -708,7 +1714,7 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora; ForbiddenException: La campaña pertenece a otra aseguradora |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
@@ -727,10 +1733,10 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 6. GET /['insurance/campaigns', 'insurance-campaigns']/active
+## 16. GET /insurance-campaigns/active
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Pública, sin token: rutas fijas van ANTES que `:id` para que Nest no las lea como un identificador.
+- **Origen:** CONTRATO
+- **Nombre:** Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`)
 - **Bloque:** Financiero y ERP
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -738,20 +1744,20 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Pública, sin token: rutas fijas van ANTES que `:id` para que Nest no las lea como un identificador. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`GET /['insurance/campaigns', 'insurance-campaigns']/active` la atiende `InsuranceCampaignsController.listActive` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:93). Es una ruta pública: no exige token. Delega en `InsuranceCampaignsService.listActivePublic`. Lee insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
+`GET /insurance-campaigns/active` la atiende `InsuranceCampaignsController.listActive` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:93). Es una ruta pública: no exige token. Delega en `InsuranceCampaignsService.listActivePublic`. Lee insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:93` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -766,7 +1772,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
-| `—` | query | sin dato | `ActiveCampaignsQueryDto` | — |
+| `carrierId` | query | No | `string` | Acota a una aseguradora. Sin filtro, trae de todas. |
 
 ### Cuerpo
 
@@ -813,10 +1819,10 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 7. GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits
+## 17. GET /insurance-campaigns/my-benefits
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** El perfil sale del JWT (`pid`): el paciente nunca lo pone en la URL.
+- **Origen:** CONTRATO
+- **Nombre:** Campañas vigentes de mi aseguradora, para el afiliado autenticado
 - **Bloque:** Financiero y ERP
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -824,13 +1830,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-El perfil sale del JWT (`pid`): el paciente nunca lo pone en la URL. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+Campañas vigentes de mi aseguradora, para el afiliado autenticado. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits` la atiende `InsuranceCampaignsController.myBenefits` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.listMyBenefits`. Crea filas en audit.audit_log. Lee audit.audit_log, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 3 más.
+`GET /insurance-campaigns/my-benefits` la atiende `InsuranceCampaignsController.myBenefits` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.listMyBenefits`. Crea filas en audit.audit_log. Lee audit.audit_log, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 3 más.
 
 ### Requerimientos
 
@@ -838,8 +1844,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -904,10 +1910,10 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 8. GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId}
+## 18. GET /insurance-campaigns/patient/{patientProfileId}
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Debe declararse ANTES de `GET :id`: si no, `patient` se leería como un id. El perfil viaja en la URL para que un intento sobre el de otro afiliado sea verificable y auditable. Se conserva junto a `my-benefits` para el caso de IDOR con un perfil ajeno explícito.
+- **Origen:** CONTRATO
+- **Nombre:** Campañas vigentes de la aseguradora del afiliado (sólo el titular)
 - **Bloque:** Financiero y ERP
 - **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -915,13 +1921,13 @@ _Ninguna prueba existente menciona esta operación._
 
 ### Qué es y para qué sirve (negocio)
 
-Debe declararse ANTES de `GET :id`: si no, `patient` se leería como un id. El perfil viaja en la URL para que un intento sobre el de otro afiliado sea verificable y auditable. Se conserva junto a `my-benefits` para el caso de IDOR con un perfil ajeno explícito. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+Campañas vigentes de la aseguradora del afiliado (sólo el titular). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId}` la atiende `InsuranceCampaignsController.listForPatient` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.listActiveForPatient`. Crea filas en audit.audit_log. Lee audit.audit_log, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 3 más.
+`GET /insurance-campaigns/patient/{patientProfileId}` la atiende `InsuranceCampaignsController.listForPatient` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.listActiveForPatient`. Crea filas en audit.audit_log. Lee audit.audit_log, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 3 más.
 
 ### Requerimientos
 
@@ -929,9 +1935,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1000,995 +2006,6 @@ _Ninguna prueba existente menciona esta operación._
 ### Flujos
 
 - src / modules / insurance — etapa `ctrl:InsuranceCampaignsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
-
----
-
-## 9. POST /broker-commission-statements
-
-- **Origen:** CONTRATO
-- **Nombre:** Generar liquidación de comisión de broker
-- **Bloque:** Financiero y ERP
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
-- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `BrokerCommissionController.generate` — `src/modules/insurance/presentation/controllers/broker-commission.controller.ts:29`
-
-### Qué es y para qué sirve (negocio)
-
-Generar liquidación de comisión de broker. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
-
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-
-### Cómo se atiende (sistema)
-
-`POST /broker-commission-statements` la atiende `BrokerCommissionController.generate` (src/modules/insurance/presentation/controllers/broker-commission.controller.ts:29). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateCommissionStatementDto` (6 campos, 4 obligatorios). Delega en `BrokerCommissionService.generate`. Crea filas en insurance.broker_commission_statements. Lee insurance.broker_carrier_agreements, insurance.broker_commission_statements, insurance.insurance_brokers.
-
-### Requerimientos
-
-| Tipo | Detalle | Fuente |
-|---|---|---|
-| AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/broker-commission.controller.ts:29` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
-
-### Tablas que afecta
-
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `insurance.broker_carrier_agreements` | LEE | LEE | DIRECTA | BrokerCommissionController.generate → BrokerCommissionService.generate → CatalogRepository.findAgreement | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:292` |
-| `insurance.broker_commission_statements` | ESCRIBE | CREA | DIRECTA | BrokerCommissionController.generate → BrokerCommissionService.generate → SettlementRepository.createStatement | `src/modules/insurance/infrastructure/repositories/settlement.repository.ts:279` |
-| `insurance.broker_commission_statements` | LEE | LEE | DIRECTA | BrokerCommissionController.generate → BrokerCommissionService.generate → SettlementRepository.findStatementByUnique | `src/modules/insurance/infrastructure/repositories/settlement.repository.ts:261` |
-| `insurance.insurance_brokers` | LEE | LEE | DIRECTA | BrokerCommissionController.generate → BrokerCommissionService.generate → CatalogRepository.findBroker | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:243` |
-
-### Cuerpo — DTO `CreateCommissionStatementDto` · `application/json`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `insuranceBrokerId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:11` |
-| `brokerCarrierAgreementId` | `string` | Sí | formato uuid | `@IsUUID()` | Acuerdo broker–aseguradora | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:18` |
-| `periodStart` | `string` | Sí | formato date | `@IsString()` | — | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:25` |
-| `periodEnd` | `string` | Sí | formato date | `@IsString()` | — | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:32` |
-| `grossPremiumAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Prima bruta del periodo | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:43` |
-| `commissionAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Comisión calculada | `src/modules/insurance/presentation/dto/broker-commission.dto.ts:51` |
-
-**Payload mínimo** (sólo los obligatorios):
-
-```json
-{
-  "insuranceBrokerId": "00000000-0000-4000-8000-000000000001",
-  "brokerCarrierAgreementId": "00000000-0000-4000-8000-000000000001",
-  "periodStart": "2026-07-31",
-  "periodEnd": "2026-07-31"
-}
-```
-
-<details><summary>Payload completo de ejemplo</summary>
-
-```json
-{
-  "insuranceBrokerId": "00000000-0000-4000-8000-000000000001",
-  "brokerCarrierAgreementId": "00000000-0000-4000-8000-000000000001",
-  "periodStart": "2026-07-31",
-  "periodEnd": "2026-07-31",
-  "grossPremiumAmount": "10000.00",
-  "commissionAmount": "500.00"
-}
-```
-
-</details>
-
-### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
-
-### Respuestas posibles
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado; ResourceNotFoundException: Acuerdo broker–aseguradora no encontrado |
-| 409 | `CONFLICT` | ConflictException: Ya existe liquidación para el periodo |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El acuerdo no está activo |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-El árbol de decisión completo está en [flujos](../flujos/insurance.md).
-
-### Pruebas que la mencionan
-
-_Ninguna prueba existente menciona esta operación._
-
-### Flujos
-
-- src / modules / insurance — etapa `ctrl:BrokerCommissionController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
-
----
-
-## 10. POST /claim-disputes/{id}/appeal-decisions
-
-- **Origen:** CONTRATO
-- **Nombre:** Emitir decisión de apelación (inmutable)
-- **Bloque:** Financiero y ERP
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
-- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AppealsController.decide` — `src/modules/insurance/presentation/controllers/appeals.controller.ts:37`
-
-### Qué es y para qué sirve (negocio)
-
-Emitir decisión de apelación (inmutable). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
-
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-
-### Cómo se atiende (sistema)
-
-`POST /claim-disputes/{id}/appeal-decisions` la atiende `AppealsController.decide` (src/modules/insurance/presentation/controllers/appeals.controller.ts:37). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateAppealDecisionDto` (3 campos, 1 obligatorio). Delega en `AppealsService.decide`. Crea filas en insurance.claim_appeal_decisions. Actualiza insurance.claim_disputes. Lee insurance.claim_appeal_decisions, insurance.claim_disputes.
-
-### Requerimientos
-
-| Tipo | Detalle | Fuente |
-|---|---|---|
-| AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/appeals.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/appeals.controller.ts:37` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
-
-### Tablas que afecta
-
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `insurance.claim_appeal_decisions` | ESCRIBE | CREA | DIRECTA | AppealsController.decide → AppealsService.decide → DisputeRepository.createAppealDecision | `src/modules/insurance/infrastructure/repositories/dispute.repository.ts:45` |
-| `insurance.claim_appeal_decisions` | LEE | LEE | DIRECTA | AppealsController.decide → AppealsService.decide → DisputeRepository.latestDecision | `src/modules/insurance/infrastructure/repositories/dispute.repository.ts:27` |
-| `insurance.claim_disputes` | ESCRIBE | ACTUALIZA | POR_TIPO | AppealsController.decide → AppealsService.decide | `src/modules/insurance/application/services/appeals.service.ts:90` |
-| `insurance.claim_disputes` | LEE | LEE | DIRECTA | AppealsController.decide → AppealsService.decide → DisputeRepository.findDispute | `src/modules/insurance/infrastructure/repositories/dispute.repository.ts:19` |
-
-### Parámetros
-
-| Nombre | En | Obligatorio | Tipo | Descripción |
-|---|---|---|---|---|
-| `id` | path | Sí | `string` | — |
-
-### Cuerpo — DTO `CreateAppealDecisionDto` · `application/json`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `decision` | `string` | Sí | valores: UPHELD, OVERTURNED | `@IsIn(['UPHELD', 'OVERTURNED'])` | — | `src/modules/insurance/presentation/dto/appeals.dto.ts:17` |
-| `adjustedAmount` | `string` | No | — | `@IsOptional()` `@IsNumberString()` | Monto ajustado tras la decisión | `src/modules/insurance/presentation/dto/appeals.dto.ts:28` |
-| `rationaleText` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/insurance/presentation/dto/appeals.dto.ts:37` |
-
-**Payload mínimo** (sólo los obligatorios):
-
-```json
-{
-  "decision": "UPHELD"
-}
-```
-
-<details><summary>Payload completo de ejemplo</summary>
-
-```json
-{
-  "decision": "UPHELD",
-  "adjustedAmount": "15.00",
-  "rationaleText": "valor-ejemplo"
-}
-```
-
-</details>
-
-### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
-
-### Respuestas posibles
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Disputa no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La disputa no admite decisión en su estado actual |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-El árbol de decisión completo está en [flujos](../flujos/insurance.md).
-
-### Pruebas que la mencionan
-
-_Ninguna prueba existente menciona esta operación._
-
-### Flujos
-
-- src / modules / insurance — etapa `ctrl:AppealsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
-
----
-
-## 11. POST /coordination-of-benefits
-
-- **Origen:** CONTRATO
-- **Nombre:** Determinar coordinación de beneficios (COB)
-- **Bloque:** Financiero y ERP
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
-- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CoverageController.determineCob` — `src/modules/insurance/presentation/controllers/coverage.controller.ts:89`
-
-### Qué es y para qué sirve (negocio)
-
-Determinar coordinación de beneficios (COB). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
-
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-
-### Cómo se atiende (sistema)
-
-`POST /coordination-of-benefits` la atiende `CoverageController.determineCob` (src/modules/insurance/presentation/controllers/coverage.controller.ts:89). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateCobDto` (5 campos, 2 obligatorios). Delega en `CoverageService.determineCob`. Crea filas en insurance.coordination_of_benefits. Actualiza insurance.coordination_of_benefits. Lee insurance.coordination_of_benefits, insurance.patient_coverages.
-
-### Requerimientos
-
-| Tipo | Detalle | Fuente |
-|---|---|---|
-| AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/coverage.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
-
-### Tablas que afecta
-
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `insurance.coordination_of_benefits` | ESCRIBE | ACTUALIZA | POR_TIPO | CoverageController.determineCob → CoverageService.determineCob | `src/modules/insurance/application/services/coverage.service.ts:261` |
-| `insurance.coordination_of_benefits` | ESCRIBE | CREA | DIRECTA | CoverageController.determineCob → CoverageService.determineCob → CoverageRepository.createCob | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:266` |
-| `insurance.coordination_of_benefits` | LEE | LEE | DIRECTA | CoverageController.determineCob → CoverageService.determineCob → CoverageRepository.latestActiveCob | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:248` |
-| `insurance.patient_coverages` | LEE | LEE | DIRECTA | CoverageController.determineCob → CoverageService.determineCob → CoverageRepository.findCoverage | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:42` |
-
-### Cuerpo — DTO `CreateCobDto` · `application/json`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/coverage.dto.ts:146` |
-| `primaryPatientCoverageId` | `string` | Sí | formato uuid | `@IsUUID()` | Cobertura primaria | `src/modules/insurance/presentation/dto/coverage.dto.ts:153` |
-| `secondaryPatientCoverageId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cobertura secundaria | `src/modules/insurance/presentation/dto/coverage.dto.ts:161` |
-| `tertiaryPatientCoverageId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Cobertura terciaria | `src/modules/insurance/presentation/dto/coverage.dto.ts:169` |
-| `effectiveFrom` | `string` | No | formato date | `@IsOptional()` `@IsString()` | — | `src/modules/insurance/presentation/dto/coverage.dto.ts:177` |
-
-**Payload mínimo** (sólo los obligatorios):
-
-```json
-{
-  "patientProfileId": "00000000-0000-4000-8000-000000000001",
-  "primaryPatientCoverageId": "00000000-0000-4000-8000-000000000001"
-}
-```
-
-<details><summary>Payload completo de ejemplo</summary>
-
-```json
-{
-  "patientProfileId": "00000000-0000-4000-8000-000000000001",
-  "primaryPatientCoverageId": "00000000-0000-4000-8000-000000000001",
-  "secondaryPatientCoverageId": "00000000-0000-4000-8000-000000000001",
-  "tertiaryPatientCoverageId": "00000000-0000-4000-8000-000000000001",
-  "effectiveFrom": "2026-07-31"
-}
-```
-
-</details>
-
-### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
-
-### Respuestas posibles
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cobertura primaria no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: COB requiere al menos una cobertura secundaria |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-El árbol de decisión completo está en [flujos](../flujos/insurance.md).
-
-### Pruebas que la mencionan
-
-_Ninguna prueba existente menciona esta operación._
-
-### Flujos
-
-- src / modules / insurance — etapa `ctrl:CoverageController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
-
----
-
-## 12. POST /coverage-eligibility-requests
-
-- **Origen:** CONTRATO
-- **Nombre:** Solicitar y resolver elegibilidad (270/271)
-- **Bloque:** Financiero y ERP
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
-- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CoverageController.requestEligibility` — `src/modules/insurance/presentation/controllers/coverage.controller.ts:73`
-
-### Qué es y para qué sirve (negocio)
-
-Solicitar y resolver elegibilidad (270/271). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
-
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-
-### Cómo se atiende (sistema)
-
-`POST /coverage-eligibility-requests` la atiende `CoverageController.requestEligibility` (src/modules/insurance/presentation/controllers/coverage.controller.ts:73). Exige sesión con alguno de los roles BILLING, FINANCE. Valida el cuerpo como `CreateEligibilityRequestDto` (4 campos, 1 obligatorio). Delega en `CoverageService.requestEligibility`. Crea filas en insurance.coverage_eligibility_requests, insurance.coverage_eligibility_responses. Actualiza insurance.coverage_eligibility_requests. Lee insurance.coverage_eligibility_requests, insurance.patient_coverages.
-
-### Requerimientos
-
-| Tipo | Detalle | Fuente |
-|---|---|---|
-| AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/coverage.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
-
-### Tablas que afecta
-
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `insurance.coverage_eligibility_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | CoverageController.requestEligibility → CoverageService.requestEligibility | `src/modules/insurance/application/services/coverage.service.ts:220` |
-| `insurance.coverage_eligibility_requests` | ESCRIBE | CREA | DIRECTA | CoverageController.requestEligibility → CoverageService.requestEligibility → CoverageRepository.createEligibilityRequest | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:303` |
-| `insurance.coverage_eligibility_requests` | LEE | LEE | DIRECTA | CoverageController.requestEligibility → CoverageService.requestEligibility → CoverageRepository.findRequestByIdempotency | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:289` |
-| `insurance.coverage_eligibility_responses` | ESCRIBE | CREA | DIRECTA | CoverageController.requestEligibility → CoverageService.requestEligibility → CoverageRepository.createEligibilityResponse | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:325` |
-| `insurance.patient_coverages` | LEE | LEE | DIRECTA | CoverageController.requestEligibility → CoverageService.requestEligibility → CoverageRepository.findCoverage | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:42` |
-
-### Cuerpo — DTO `CreateEligibilityRequestDto` · `application/json`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `patientCoverageId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/coverage.dto.ts:110` |
-| `serviceDate` | `string` | No | formato date | `@IsOptional()` `@IsString()` | — | `src/modules/insurance/presentation/dto/coverage.dto.ts:118` |
-| `idempotencyKey` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | — | `src/modules/insurance/presentation/dto/coverage.dto.ts:127` |
-| `benefitSummary` | `object` | No | — | `@IsOptional()` | Resumen de beneficios recibido del pagador | `src/modules/insurance/presentation/dto/coverage.dto.ts:136` |
-
-**Payload mínimo** (sólo los obligatorios):
-
-```json
-{
-  "patientCoverageId": "00000000-0000-4000-8000-000000000001"
-}
-```
-
-<details><summary>Payload completo de ejemplo</summary>
-
-```json
-{
-  "patientCoverageId": "00000000-0000-4000-8000-000000000001",
-  "serviceDate": "2026-07-31",
-  "idempotencyKey": "valor-ejemplo",
-  "benefitSummary": {}
-}
-```
-
-</details>
-
-### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
-
-### Respuestas posibles
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cobertura no encontrada |
-| 409 | `CONFLICT` | ConflictException: Solicitud de elegibilidad duplicada |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-El árbol de decisión completo está en [flujos](../flujos/insurance.md).
-
-### Pruebas que la mencionan
-
-_Ninguna prueba existente menciona esta operación._
-
-### Flujos
-
-- src / modules / insurance — etapa `ctrl:CoverageController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
-
----
-
-## 13. POST /employer-groups
-
-- **Origen:** CONTRATO
-- **Nombre:** Alta de grupo empleador (soporte)
-- **Bloque:** Financiero y ERP
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
-- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InsuranceBackboneController.createEmployerGroup` — `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:344`
-
-### Qué es y para qué sirve (negocio)
-
-Alta de grupo empleador (soporte). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
-
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-
-### Cómo se atiende (sistema)
-
-`POST /employer-groups` la atiende `InsuranceBackboneController.createEmployerGroup` (src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:344). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateEmployerGroupDto` (3 campos, 3 obligatorios). Delega en `InsuranceBackboneService.createEmployerGroup`. Crea filas en insurance.employer_groups.
-
-### Requerimientos
-
-| Tipo | Detalle | Fuente |
-|---|---|---|
-| AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:344` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
-
-### Tablas que afecta
-
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `insurance.employer_groups` | ESCRIBE | CREA | DIRECTA | InsuranceBackboneController.createEmployerGroup → InsuranceBackboneService.createEmployerGroup → CatalogRepository.createEmployerGroup | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:274` |
-
-### Cuerpo — DTO `CreateEmployerGroupDto` · `application/json`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:539` |
-| `groupCode` | `string` | Sí | longitud mínima 1; longitud máxima 60 | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:548` |
-| `legalName` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@MinLength(1)` `@MaxLength(200)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:557` |
-
-**Payload mínimo** (sólo los obligatorios):
-
-```json
-{
-  "tenantId": "00000000-0000-4000-8000-000000000001",
-  "groupCode": "CODIGO_EJEMPLO",
-  "legalName": "Nombre de ejemplo"
-}
-```
-
-<details><summary>Payload completo de ejemplo</summary>
-
-```json
-{
-  "tenantId": "00000000-0000-4000-8000-000000000001",
-  "groupCode": "CODIGO_EJEMPLO",
-  "legalName": "Nombre de ejemplo"
-}
-```
-
-</details>
-
-### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
-
-### Respuestas posibles
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-El árbol de decisión completo está en [flujos](../flujos/insurance.md).
-
-### Pruebas que la mencionan
-
-_Ninguna prueba existente menciona esta operación._
-
-### Flujos
-
-- src / modules / insurance — etapa `ctrl:InsuranceBackboneController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
-
----
-
-## 14. GET /insurance-brokers
-
-- **Origen:** CONTRATO
-- **Nombre:** Listar los brokers del tenant activo
-- **Bloque:** Financiero y ERP
-- **Riesgo:** BAJO — Sólo lee
-- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InsuranceReadController.listBrokers` — `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:81`
-
-### Qué es y para qué sirve (negocio)
-
-Listar los brokers del tenant activo. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
-
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-
-### Cómo se atiende (sistema)
-
-`GET /insurance-brokers` la atiende `InsuranceReadController.listBrokers` (src/modules/insurance/presentation/controllers/insurance-read.controller.ts:81). Exige sesión; el controlador no declara roles. Delega en `InsuranceReadService.listBrokers`. Lee insurance.broker_carrier_agreements, insurance.insurance_brokers, terminology.catalog_concepts.
-
-### Requerimientos
-
-| Tipo | Detalle | Fuente |
-|---|---|---|
-| AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
-
-### Tablas que afecta
-
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `insurance.broker_carrier_agreements` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokers → InsuranceReadService.listBrokers → InsuranceReadRepository.findAgreements | `src/modules/insurance/infrastructure/repositories/read.repository.ts:166` |
-| `insurance.insurance_brokers` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokers → InsuranceReadService.listBrokers → InsuranceReadRepository.findBrokersByTenant | `src/modules/insurance/infrastructure/repositories/read.repository.ts:137` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokers → InsuranceReadService.listBrokers → InsuranceReadService.conceptMap → InsuranceReadRepository.findConcepts | `src/modules/insurance/infrastructure/repositories/read.repository.ts:200` |
-
-### Cuerpo
-
-La operación no recibe cuerpo.
-
-### Respuesta — `Promise<BrokerDirectoryResponseDto>` · DTO `BrokerDirectoryResponseDto`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `items` | `array<BrokerSummaryDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:414` |
-| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:364` |
-| `items[].brokerCode` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:368` |
-| `items[].legalName` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:372` |
-| `items[].licenseNumber` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:376` |
-| `items[].jurisdiction` | `InsuranceConceptDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:380` |
-| `items[].jurisdiction.code` | `string` | Sí | — | — | — | sin fuente |
-| `items[].jurisdiction.display` | `string` | Sí | — | — | — | sin fuente |
-| `items[].status` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:384` |
-| `items[].status.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
-| `items[].status.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
-| `items[].verification` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:388` |
-| `items[].verification.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
-| `items[].verification.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
-| `items[].independent` | `boolean` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:399` |
-| `items[].currentCarrierCount` | `number` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:403` |
-| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:407` |
-| `count` | `number` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:418` |
-
-### Respuestas posibles
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-El árbol de decisión completo está en [flujos](../flujos/insurance.md).
-
-### Pruebas que la mencionan
-
-_Ninguna prueba existente menciona esta operación._
-
-### Flujos
-
-- src / modules / insurance — etapa `ctrl:InsuranceReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
-
----
-
-## 15. POST /insurance-brokers
-
-- **Origen:** CONTRATO
-- **Nombre:** Alta de broker (soporte)
-- **Bloque:** Financiero y ERP
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
-- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InsuranceBackboneController.createBroker` — `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:296`
-
-### Qué es y para qué sirve (negocio)
-
-Alta de broker (soporte). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
-
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-
-### Cómo se atiende (sistema)
-
-`POST /insurance-brokers` la atiende `InsuranceBackboneController.createBroker` (src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:296). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateBrokerDto` (4 campos, 3 obligatorios). Delega en `InsuranceBackboneService.createBroker`. Crea filas en insurance.insurance_brokers.
-
-### Requerimientos
-
-| Tipo | Detalle | Fuente |
-|---|---|---|
-| AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:296` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
-
-### Tablas que afecta
-
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `insurance.insurance_brokers` | ESCRIBE | CREA | DIRECTA | InsuranceBackboneController.createBroker → InsuranceBackboneService.createBroker → CatalogRepository.createBroker | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:256` |
-
-### Cuerpo — DTO `CreateBrokerDto` · `application/json`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:502` |
-| `brokerCode` | `string` | Sí | longitud mínima 1; longitud máxima 60 | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:511` |
-| `legalName` | `string` | Sí | longitud mínima 1; longitud máxima 200 | `@IsString()` `@MinLength(1)` `@MaxLength(200)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:520` |
-| `licenseNumber` | `string` | No | longitud máxima 80 | `@IsOptional()` `@IsString()` `@MaxLength(80)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:529` |
-
-**Payload mínimo** (sólo los obligatorios):
-
-```json
-{
-  "tenantId": "00000000-0000-4000-8000-000000000001",
-  "brokerCode": "CODIGO_EJEMPLO",
-  "legalName": "Nombre de ejemplo"
-}
-```
-
-<details><summary>Payload completo de ejemplo</summary>
-
-```json
-{
-  "tenantId": "00000000-0000-4000-8000-000000000001",
-  "brokerCode": "CODIGO_EJEMPLO",
-  "legalName": "Nombre de ejemplo",
-  "licenseNumber": "valor-ejemplo"
-}
-```
-
-</details>
-
-### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
-
-### Respuestas posibles
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-El árbol de decisión completo está en [flujos](../flujos/insurance.md).
-
-### Pruebas que la mencionan
-
-_Ninguna prueba existente menciona esta operación._
-
-### Flujos
-
-- src / modules / insurance — etapa `ctrl:InsuranceBackboneController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
-
----
-
-## 16. GET /insurance-brokers/{id}
-
-- **Origen:** CONTRATO
-- **Nombre:** Consultar el perfil y las vinculaciones de un broker
-- **Bloque:** Financiero y ERP
-- **Riesgo:** BAJO — Sólo lee
-- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InsuranceReadController.getBroker` — `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:94`
-
-### Qué es y para qué sirve (negocio)
-
-Consultar el perfil y las vinculaciones de un broker. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
-
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-
-### Cómo se atiende (sistema)
-
-`GET /insurance-brokers/{id}` la atiende `InsuranceReadController.getBroker` (src/modules/insurance/presentation/controllers/insurance-read.controller.ts:94). Exige sesión; el controlador no declara roles. Delega en `InsuranceReadService.getBroker`. Lee insurance.broker_carrier_agreements, insurance.insurance_brokers, insurance.insurance_carriers, terminology.catalog_concepts.
-
-### Requerimientos
-
-| Tipo | Detalle | Fuente |
-|---|---|---|
-| AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:94` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
-
-### Tablas que afecta
-
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `insurance.broker_carrier_agreements` | LEE | LEE | DIRECTA | InsuranceReadController.getBroker → InsuranceReadService.getBroker → InsuranceReadRepository.findAgreements | `src/modules/insurance/infrastructure/repositories/read.repository.ts:166` |
-| `insurance.insurance_brokers` | LEE | LEE | DIRECTA | InsuranceReadController.getBroker → InsuranceReadService.getBroker → InsuranceReadRepository.findBrokerByTenant | `src/modules/insurance/infrastructure/repositories/read.repository.ts:150` |
-| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceReadController.getBroker → InsuranceReadService.getBroker → InsuranceReadRepository.findCarriersByIds | `src/modules/insurance/infrastructure/repositories/read.repository.ts:179` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | InsuranceReadController.getBroker → InsuranceReadService.getBroker → InsuranceReadService.conceptMap → InsuranceReadRepository.findConcepts | `src/modules/insurance/infrastructure/repositories/read.repository.ts:200` |
-
-### Parámetros
-
-| Nombre | En | Obligatorio | Tipo | Descripción |
-|---|---|---|---|---|
-| `id` | path | Sí | `string` | — |
-
-### Cuerpo
-
-La operación no recibe cuerpo.
-
-### Respuesta — `Promise<BrokerProfileDto>` · DTO `BrokerProfileDto`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:364` |
-| `brokerCode` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:368` |
-| `legalName` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:372` |
-| `licenseNumber` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:376` |
-| `jurisdiction` | `InsuranceConceptDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:380` |
-| `jurisdiction.code` | `string` | Sí | — | — | — | sin fuente |
-| `jurisdiction.display` | `string` | Sí | — | — | — | sin fuente |
-| `status` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:384` |
-| `status.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
-| `status.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
-| `verification` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:388` |
-| `verification.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
-| `verification.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
-| `independent` | `boolean` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:399` |
-| `currentCarrierCount` | `number` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:403` |
-| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:407` |
-| `agreements` | `array<BrokerAgreementDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:431` |
-| `agreements[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:314` |
-| `agreements[].insuranceCarrierId` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:318` |
-| `agreements[].carrierLegalName` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:322` |
-| `agreements[].agreementCode` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:326` |
-| `agreements[].commissionModel` | `InsuranceConceptDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:330` |
-| `agreements[].commissionModel.code` | `string` | Sí | — | — | — | sin fuente |
-| `agreements[].commissionModel.display` | `string` | Sí | — | — | — | sin fuente |
-| `agreements[].effectiveFrom` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:334` |
-| `agreements[].effectiveTo` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:338` |
-| `agreements[].status` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:342` |
-| `agreements[].status.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
-| `agreements[].status.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
-| `agreements[].current` | `boolean` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:353` |
-| `agreements[].contractFileId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:357` |
-| `publicProfileId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:441` |
-
-### Respuestas posibles
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-El árbol de decisión completo está en [flujos](../flujos/insurance.md).
-
-### Pruebas que la mencionan
-
-_Ninguna prueba existente menciona esta operación._
-
-### Flujos
-
-- src / modules / insurance — etapa `ctrl:InsuranceReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
-
----
-
-## 17. POST /insurance-brokers/{id}/agreements
-
-- **Origen:** CONTRATO
-- **Nombre:** Alta de acuerdo broker–aseguradora (soporte)
-- **Bloque:** Financiero y ERP
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
-- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InsuranceBackboneController.createAgreement` — `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:320`
-
-### Qué es y para qué sirve (negocio)
-
-Alta de acuerdo broker–aseguradora (soporte). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
-
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-
-### Cómo se atiende (sistema)
-
-`POST /insurance-brokers/{id}/agreements` la atiende `InsuranceBackboneController.createAgreement` (src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:320). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateBrokerAgreementDto` (4 campos, 2 obligatorios). Delega en `InsuranceBackboneService.createAgreement`. Crea filas en insurance.broker_carrier_agreements. Lee insurance.insurance_brokers, insurance.insurance_carriers.
-
-### Requerimientos
-
-| Tipo | Detalle | Fuente |
-|---|---|---|
-| AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:320` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:320` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
-
-### Tablas que afecta
-
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `insurance.broker_carrier_agreements` | ESCRIBE | CREA | DIRECTA | InsuranceBackboneController.createAgreement → InsuranceBackboneService.createAgreement → CatalogRepository.createAgreement | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:305` |
-| `insurance.insurance_brokers` | LEE | LEE | DIRECTA | InsuranceBackboneController.createAgreement → InsuranceBackboneService.createAgreement → CatalogRepository.findBroker | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:243` |
-| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceBackboneController.createAgreement → InsuranceBackboneService.createAgreement → CatalogRepository.findCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:36` |
-
-### Parámetros
-
-| Nombre | En | Obligatorio | Tipo | Descripción |
-|---|---|---|---|---|
-| `id` | path | Sí | `string` | — |
-
-### Cuerpo — DTO `CreateBrokerAgreementDto` · `application/json`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `insuranceCarrierId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:567` |
-| `agreementCode` | `string` | Sí | longitud mínima 1; longitud máxima 60 | `@IsString()` `@MinLength(1)` `@MaxLength(60)` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:576` |
-| `effectiveFrom` | `string` | No | formato date | `@IsOptional()` `@IsString()` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:584` |
-| `effectiveTo` | `string` | No | formato date | `@IsOptional()` `@IsString()` | — | `src/modules/insurance/presentation/dto/backbone.dto.ts:592` |
-
-**Payload mínimo** (sólo los obligatorios):
-
-```json
-{
-  "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
-  "agreementCode": "CODIGO_EJEMPLO"
-}
-```
-
-<details><summary>Payload completo de ejemplo</summary>
-
-```json
-{
-  "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
-  "agreementCode": "CODIGO_EJEMPLO",
-  "effectiveFrom": "2026-07-31",
-  "effectiveTo": "2026-07-31"
-}
-```
-
-</details>
-
-### Respuesta — `Promise<CreatedResourceDto>` · DTO `CreatedResourceDto` · HTTP `HttpStatus.CREATED`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del recurso creado. | `src/modules/insurance/presentation/dto/common.dto.ts:12` |
-
-### Respuestas posibles
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado; ResourceNotFoundException: Aseguradora no encontrada |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-El árbol de decisión completo está en [flujos](../flujos/insurance.md).
-
-### Pruebas que la mencionan
-
-_Ninguna prueba existente menciona esta operación._
-
-### Flujos
-
-- src / modules / insurance — etapa `ctrl:InsuranceBackboneController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
-
----
-
-## 18. GET /insurance-brokers/{id}/clients
-
-- **Origen:** CONTRATO
-- **Nombre:** Listar la cartera comercial de un broker (sin datos clínicos)
-- **Bloque:** Financiero y ERP
-- **Riesgo:** BAJO — Sólo lee
-- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InsuranceReadController.listBrokerClients` — `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:112`
-
-### Qué es y para qué sirve (negocio)
-
-Listar la cartera comercial de un broker (sin datos clínicos). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
-
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-
-### Cómo se atiende (sistema)
-
-`GET /insurance-brokers/{id}/clients` la atiende `InsuranceReadController.listBrokerClients` (src/modules/insurance/presentation/controllers/insurance-read.controller.ts:112). Exige sesión; el controlador no declara roles. Delega en `InsuranceReadService.listBrokerClients`. Lee insurance.broker_clients, insurance.insurance_brokers, terminology.catalog_concepts.
-
-### Requerimientos
-
-| Tipo | Detalle | Fuente |
-|---|---|---|
-| AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:112` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:112` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
-
-### Tablas que afecta
-
-| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
-|---|---|---|---|---|---|
-| `insurance.broker_clients` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokerClients → InsuranceReadService.listBrokerClients → InsuranceReadRepository.findBrokerClients | `src/modules/insurance/infrastructure/repositories/read.repository.ts:187` |
-| `insurance.insurance_brokers` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokerClients → InsuranceReadService.listBrokerClients → InsuranceReadRepository.findBrokerByTenant | `src/modules/insurance/infrastructure/repositories/read.repository.ts:150` |
-| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | InsuranceReadController.listBrokerClients → InsuranceReadService.listBrokerClients → InsuranceReadService.conceptMap → InsuranceReadRepository.findConcepts | `src/modules/insurance/infrastructure/repositories/read.repository.ts:200` |
-
-### Parámetros
-
-| Nombre | En | Obligatorio | Tipo | Descripción |
-|---|---|---|---|---|
-| `id` | path | Sí | `string` | — |
-
-### Cuerpo
-
-La operación no recibe cuerpo.
-
-### Respuesta — `Promise<BrokerPortfolioResponseDto>` · DTO `BrokerPortfolioResponseDto`
-
-| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
-|---|---|---|---|---|---|---|
-| `items` | `array<BrokerClientDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:490` |
-| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:455` |
-| `items[].patientProfileId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:459` |
-| `items[].employerGroupId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:463` |
-| `items[].clientType` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:467` |
-| `items[].clientType.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
-| `items[].clientType.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
-| `items[].assignedBrokerUserId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:471` |
-| `items[].effectiveFrom` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:475` |
-| `items[].effectiveTo` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:479` |
-| `items[].status` | `InsuranceConceptDto` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:483` |
-| `items[].status.code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:14` |
-| `items[].status.display` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:18` |
-| `count` | `number` | Sí | — | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:494` |
-
-### Respuestas posibles
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-El árbol de decisión completo está en [flujos](../flujos/insurance.md).
-
-### Pruebas que la mencionan
-
-_Ninguna prueba existente menciona esta operación._
-
-### Flujos
-
-- src / modules / insurance — etapa `ctrl:InsuranceReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 
@@ -2090,8 +2107,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2184,10 +2201,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2282,9 +2299,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-read.controller.ts:64` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2446,11 +2463,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:98` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2553,11 +2570,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:125` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:125` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2656,8 +2673,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING_OPERATOR, SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/claims-read.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2772,10 +2789,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:100` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2789,12 +2806,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `insurance.insurance_claim_lines` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimsService.replayLinkedClaim | `src/modules/insurance/application/services/claims.service.ts:265` |
 | `insurance.insurance_claims` | ESCRIBE | CREA | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimRepository.createClaim | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:82` |
 | `insurance.insurance_claims` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim | `src/modules/insurance/application/services/claims.service.ts:137` |
-| `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimCoveragePolicy.evaluate → ClaimCoveragePolicy.benefitFor | `src/modules/insurance/application/services/claim-coverage-policy.ts:291` |
+| `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimCoveragePolicy.evaluate → ClaimCoveragePolicy.benefitFor | `src/modules/insurance/application/services/claim-coverage-policy.ts:320` |
 | `insurance.insurance_plans` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → CatalogRepository.findPlanForCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:129` |
 | `insurance.insurance_products` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → LinkedClaimAccessService.coverageForOrder → CatalogRepository.findProduct | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:80` |
 | `insurance.patient_coverages` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → CoverageRepository.findCoverage | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:42` |
-| `insurance.prior_authorization_determinations` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimCoveragePolicy.evaluate → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.latestDetermination | `src/modules/insurance/application/services/claim-coverage-policy.ts:487` |
-| `insurance.prior_authorization_items` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimCoveragePolicy.evaluate → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:382` |
+| `insurance.prior_authorization_determinations` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimCoveragePolicy.evaluate → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.latestDetermination | `src/modules/insurance/application/services/claim-coverage-policy.ts:516` |
+| `insurance.prior_authorization_items` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimCoveragePolicy.evaluate → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:411` |
 | `insurance.prior_authorization_requests` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → ClaimsService.validatePriorAuthorization | `src/modules/insurance/application/services/claims.service.ts:427` |
 | `pharmacy_inventory.inventory_reservation_lines` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → LinkedClaimOrderService.lockAndResolve → LinkedClaimOrderService.loadSnapshot → LinkedClaimOrderService.resolveBatch → LinkedOrderDataRepository.findReservationLines | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:96` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | ClaimsController.submit → ClaimsService.submitClaim → LinkedClaimOrderService.lockAndResolve → LinkedOrderDataRepository.lockPharmacyOrder | `src/modules/insurance/infrastructure/repositories/linked-order-data.repository.ts:65` |
@@ -2892,7 +2909,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cobertura no encontrada |
 | 409 | `CONFLICT` | ConflictException: La clave de idempotencia corresponde a otro reclamo; ConflictException: La clave de idempotencia requiere las mismas líneas; ConflictException: El pedido ya tiene un reclamo activo; ConflictException: Reclamo duplicado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un reclamo sólo puede representar un pedido; PreconditionFailedException: Las secuencias de líneas deben ser únicas; PreconditionFailedException: Los ítems vinculados requieren el pedido completo; PreconditionFailedException: La moneda del importe diagnóstico debe declararse; PreconditionFailedException: El pedido debe estar confirmado y sin sustituciones pendientes antes del retiro; PreconditionFailedException: La cobertura no corresponde a la aseguradora indicada; PreconditionFailedException: La moneda de la cobertura y del pedido debe coincidir; PreconditionFailedException: La cobertura debe estar activa y vigente para presentar el reclamo; PreconditionFailedException: El reclamo debe representar exactamente el pedido y su prestador; PreconditionFailedException: Las líneas deben coincidir con las cantidades e importes del pedido; PreconditionFailedException: La autorización previa debe pertenecer a la misma cobertura y pedido |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un reclamo sólo puede representar un pedido; PreconditionFailedException: Las secuencias de líneas deben ser únicas; PreconditionFailedException: Los ítems vinculados requieren el pedido completo; PreconditionFailedException: La moneda del importe diagnóstico debe declararse; PreconditionFailedException: El pedido debe estar confirmado y sin sustituciones pendientes antes del retiro; PreconditionFailedException: La cobertura no corresponde a la aseguradora indicada; PreconditionFailedException: La moneda de la cobertura y del pedido debe coincidir; PreconditionFailedException: La cobertura debe estar activa y vigente para presentar el reclamo; PreconditionFailedException: El reclamo debe representar exactamente el pedido y su prestador; PreconditionFailedException: Las líneas deben coincidir con las cantidades e importes del pedido; PreconditionFailedException: La autorización previa debe pertenecer a la misma cobertura y pedido; PreconditionFailedException: La cobertura del paciente no corresponde al plan del cobro |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/insurance.md).
@@ -2934,9 +2951,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING_OPERATOR, SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/claims-read.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims-read.controller.ts:84` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -3184,11 +3201,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:150` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims.controller.ts:150` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -3334,11 +3351,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE, BILLING_OPERATOR, SECURITY_ADMIN, PATIENT | `src/modules/insurance/presentation/controllers/claims.controller.ts:220` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims.controller.ts:220` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -3455,11 +3472,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:168` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims.controller.ts:168` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -3570,11 +3587,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:125` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims.controller.ts:125` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -3587,11 +3604,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `iam.devices` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → PatientNoticeAdapter.notifyPatient → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `insurance.insurance_claim_lines` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimRepository.findLine | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:97` |
 | `insurance.insurance_claims` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimRepository.findClaimForUpdate | `src/modules/insurance/infrastructure/repositories/claim.repository.ts:51` |
-| `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.benefitFor | `src/modules/insurance/application/services/claim-coverage-policy.ts:291` |
+| `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.benefitFor | `src/modules/insurance/application/services/claim-coverage-policy.ts:320` |
 | `insurance.patient_coverages` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → CoverageRepository.findCoverage | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:42` |
-| `insurance.prior_authorization_determinations` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.latestDetermination | `src/modules/insurance/application/services/claim-coverage-policy.ts:487` |
-| `insurance.prior_authorization_items` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:382` |
-| `insurance.prior_authorization_requests` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:364` |
+| `insurance.prior_authorization_determinations` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.latestDetermination | `src/modules/insurance/application/services/claim-coverage-policy.ts:516` |
+| `insurance.prior_authorization_items` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:411` |
+| `insurance.prior_authorization_requests` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:393` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → ClaimPatientInvoiceService.issueLocked → ClaimDecisionPublisherAdapter.publish → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → PatientNoticeAdapter.notifyPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | ClaimsController.issuePatientInvoice → ClaimPatientInvoiceService.issue → PatientNoticeAdapter.notifyPatient → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
@@ -3672,7 +3689,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: El proveedor configurado para el canal in-app no existe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {outcome.message}; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cobertura del paciente no corresponde al plan del cobro; PreconditionFailedException: {outcome.message}; PreconditionFailedException: No hay canal in-app activo: falta correr el seed de mensajería; PreconditionFailedException: El canal in-app no tiene configuración de proveedor activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/insurance.md).
@@ -3712,11 +3729,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:186` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/claims.controller.ts:186` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -3827,24 +3844,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/claims.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `insurance.insurance_claim_lines` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.billedUnderAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:471` |
-| `insurance.insurance_claims` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.billedUnderAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:466` |
-| `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.benefitFor | `src/modules/insurance/application/services/claim-coverage-policy.ts:291` |
+| `insurance.insurance_claim_lines` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.billedUnderAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:500` |
+| `insurance.insurance_claims` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.billedUnderAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:495` |
+| `insurance.insurance_plan_benefits` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.benefitFor | `src/modules/insurance/application/services/claim-coverage-policy.ts:320` |
 | `insurance.insurance_plans` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → CatalogRepository.findPlanForCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:129` |
 | `insurance.insurance_products` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → CatalogRepository.findPlanForCarrier → CatalogRepository.findProductForCarrier | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:89` |
 | `insurance.patient_coverages` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → CoverageRepository.findCoverage | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:42` |
-| `insurance.prior_authorization_determinations` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.latestDetermination | `src/modules/insurance/application/services/claim-coverage-policy.ts:487` |
-| `insurance.prior_authorization_items` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:382` |
-| `insurance.prior_authorization_requests` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:364` |
+| `insurance.prior_authorization_determinations` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization → ClaimCoveragePolicy.latestDetermination | `src/modules/insurance/application/services/claim-coverage-policy.ts:516` |
+| `insurance.prior_authorization_items` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:411` |
+| `insurance.prior_authorization_requests` | LEE | LEE | DIRECTA | ClaimsController.quote → ClaimQuoteService.quote → ClaimCoveragePolicy.quoteLine → ClaimCoveragePolicy.assertPriorAuthorization | `src/modules/insurance/application/services/claim-coverage-policy.ts:393` |
 
 ### Cuerpo — DTO `ClaimQuoteDto` · `application/json`
 
@@ -3935,7 +3952,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cobertura no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Las secuencias de líneas deben ser únicas; PreconditionFailedException: La cobertura no corresponde a la aseguradora indicada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Las secuencias de líneas deben ser únicas; PreconditionFailedException: La cobertura no corresponde a la aseguradora indicada; PreconditionFailedException: La cobertura del paciente no corresponde al plan del cobro |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/insurance.md).
@@ -3975,11 +3992,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:174` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:174` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -4093,11 +4110,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:191` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId, benefitId | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:191` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -4206,11 +4223,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:208` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId, benefitId | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:208` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -4320,11 +4337,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:230` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:230` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -4421,11 +4438,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:150` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: productId | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:150` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -4534,8 +4551,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-analytics.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -4650,7 +4667,953 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 40. GET /insurance/my-claims
+## 40. GET /insurance/campaigns
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar las campañas de la aseguradora activa
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceCampaignsController.list` — `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77`
+
+### Qué es y para qué sirve (negocio)
+
+Listar las campañas de la aseguradora activa. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /insurance/campaigns` la atiende `InsuranceCampaignsController.list` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.list`. Crea filas en audit.audit_log. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsRepository.listRowsByCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:233` |
+| `insurance.insurance_campaigns` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsRepository.listRowsByCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:233` |
+| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.carrierOf → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.list → InsuranceCampaignsService.list → InsuranceCampaignsRepository.listRowsByCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:233` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `type` | query | No | `string` | — |
+| `status` | query | No | `string` | — |
+| `cursor` | query | No | `string` | — |
+| `limit` | query | No | `number` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<InsuranceCampaignPageDto>` · DTO `InsuranceCampaignPageDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<InsuranceCampaignResponseDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:388` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:335` |
+| `items[].code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:338` |
+| `items[].title` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:341` |
+| `items[].description` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:344` |
+| `items[].campaignType` | `string` | Sí | valores: LABORATORY, PHARMACY, DIAGNOSTIC_IMAGING, VACCINATION | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:347` |
+| `items[].status` | `string` | Sí | valores: DRAFT, ACTIVE, PAUSED, EXPIRED | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:350` |
+| `items[].effectiveStatus` | `string` | Sí | valores: DRAFT, ACTIVE, PAUSED, EXPIRED | — | EXPIRED si validTo ya pasó, aunque `status` siga ACTIVE/PAUSED: el vencimiento es por fecha, no por transición (CA-04). No hay cron. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:358` |
+| `items[].targetCondition` | `InsuranceCampaignConditionDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:361` |
+| `items[].targetCondition.code` | `string` | Sí | — | — | — | sin fuente |
+| `items[].targetCondition.display` | `string` | Sí | admite null | — | — | sin fuente |
+| `items[].copayBonusPercentage` | `number` | Sí | mínimo 0; máximo 100 | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:364` |
+| `items[].validFrom` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:367` |
+| `items[].validTo` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:370` |
+| `items[].activatedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:373` |
+| `items[].partners` | `array<InsuranceCampaignPartnerDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:376` |
+| `items[].partners[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:317` |
+| `items[].partners[].role` | `string` | Sí | valores: SPONSOR, PROVIDER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:320` |
+| `items[].partners[].type` | `string` | Sí | valores: IMPORTER, MANUFACTURER, LABORATORY, PHARMACY, MEDICAL_CENTER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:323` |
+| `items[].partners[].name` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:326` |
+| `items[].partners[].networkProviderMembershipId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:329` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:379` |
+| `items[].updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:382` |
+| `nextCursor` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:392` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: Cursor inválido |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/insurance-campaigns.int-spec.ts:209` |
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceCampaignsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 41. POST /insurance/campaigns
+
+- **Origen:** CONTRATO
+- **Nombre:** Crear una campaña preventiva de la aseguradora
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceCampaignsController.create` — `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61`
+
+### Qué es y para qué sirve (negocio)
+
+Crear una campaña preventiva de la aseguradora. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /insurance/campaigns` la atiende `InsuranceCampaignsController.create` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateInsuranceCampaignDto` (15 campos, 10 obligatorios). Delega en `InsuranceCampaignsService.create`. Crea filas en audit.audit_log, insurance.insurance_campaign_partners, insurance.insurance_campaigns. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.network_provider_memberships, insurance.provider_networks y 3 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `insurance.insurance_campaign_partners` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.createPartner | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:151` |
+| `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsService.detail → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
+| `insurance.insurance_campaigns` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.createCampaign | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:131` |
+| `insurance.insurance_campaigns` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.findByCarrierAndCode | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:102` |
+| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsService.administrableCarrier → InsuranceCampaignsService.carrierOf → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
+| `insurance.network_provider_memberships` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsService.assertPartnersBelongToCarrier → InsuranceCampaignsRepository.membershipBelongsToCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:374` |
+| `insurance.provider_networks` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsService.assertPartnersBelongToCarrier → InsuranceCampaignsRepository.membershipBelongsToCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:374` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.resolveIcd10ConceptId | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:167` |
+| `terminology.code_system_versions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.resolveIcd10ConceptId | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:167` |
+| `terminology.code_systems` | LEE | LEE | POR_SQL | InsuranceCampaignsController.create → InsuranceCampaignsService.create → InsuranceCampaignsRepository.resolveIcd10ConceptId | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:167` |
+
+### Cuerpo — DTO `CreateInsuranceCampaignDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `code` | `string` | Sí | patrón runtime /^[A-Z0-9][A-Z0-9-]{2,39}$/ | `@Matches(/^[A-Z0-9][A-Z0-9-]{2,39}$/, { message: 'El código debe tener de 3 a 40 caracteres: mayúsculas, dígitos y guiones', })` | Único por aseguradora; mayúsculas, dígitos y guiones. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:118` |
+| `title` | `string` | Sí | longitud mínima 3; longitud máxima 200 | `@IsString()` `@Length(3, 200)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:125` |
+| `description` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:131` |
+| `campaignType` | `string` | Sí | valores: LABORATORY, PHARMACY, DIAGNOSTIC_IMAGING, VACCINATION | `@IsIn(CAMPAIGN_TYPES)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:135` |
+| `targetConditionCode` | `string` | No | longitud máxima 16 | `@IsOptional()` `@IsString()` `@MaxLength(16)` | Código CIE-10 de la patología que se previene. Sólo descriptivo: no filtra afiliados (D4). | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:145` |
+| `copayBonusPercentage` | `number` | Sí | mínimo 0; máximo 100 | `@IsNumber({ maxDecimalPlaces: 2 })` `@Min(0)` `@Max(100)` | Porcentaje del copago que la aseguradora bonifica. 100 = copago Bs. 0. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:158` |
+| `validFrom` | `string` | Sí | formato date; patrón runtime DATE_ONLY | `@Matches(DATE_ONLY, { message: 'validFrom debe ser AAAA-MM-DD' })` `@IsISO8601({ strict: true })` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:163` |
+| `validTo` | `string` | Sí | formato date; patrón runtime DATE_ONLY | `@Matches(DATE_ONLY, { message: 'validTo debe ser AAAA-MM-DD' })` `@IsISO8601({ strict: true })` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:168` |
+| `partners` | `array<InsuranceCampaignPartnerInputDto>` | Sí | mínimo 1 elemento(s); máximo 20 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(20)` `@ValidateNested({ each: true })` `@Type(() => InsuranceCampaignPartnerInputDto)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:176` |
+| `partners[].role` | `string` | Sí | valores: SPONSOR, PROVIDER | `@IsIn(CAMPAIGN_PARTNER_ROLES)` | SPONSOR = importadora o fabricante que financia; PROVIDER = donde el afiliado se atiende | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:78` |
+| `partners[].type` | `string` | Sí | valores: IMPORTER, MANUFACTURER, LABORATORY, PHARMACY, MEDICAL_CENTER | `@IsIn(CAMPAIGN_PARTNER_TYPES)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:82` |
+| `partners[].name` | `string` | Sí | longitud mínima 2; longitud máxima 160 | `@IsString()` `@Length(2, 160)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:87` |
+| `partners[].partnerTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Referencia blanda al tenant del aliado, si es un tenant del sistema. Sin FK física. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:96` |
+| `partners[].networkProviderMembershipId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Membresía de la red de prestadores de la aseguradora, si aplica. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:105` |
+| `activate` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Si es true, la campaña nace ACTIVE en vez de DRAFT. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:184` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "code": "CMP-CARDIO-2026",
+  "title": "Chequeo Preventivo Cardiovascular y Perfil Lipídico",
+  "campaignType": "LABORATORY",
+  "copayBonusPercentage": 100,
+  "validFrom": "2026-09-25",
+  "validTo": "2026-11-24",
+  "partners": [
+    {
+      "role": "SPONSOR",
+      "type": "IMPORTER",
+      "name": "Laboratorio Central AloVida"
+    }
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "code": "CMP-CARDIO-2026",
+  "title": "Chequeo Preventivo Cardiovascular y Perfil Lipídico",
+  "description": "Texto descriptivo de ejemplo",
+  "campaignType": "LABORATORY",
+  "targetConditionCode": "I10",
+  "copayBonusPercentage": 100,
+  "validFrom": "2026-09-25",
+  "validTo": "2026-11-24",
+  "partners": [
+    {
+      "role": "SPONSOR",
+      "type": "IMPORTER",
+      "name": "Laboratorio Central AloVida",
+      "partnerTenantId": "00000000-0000-4000-8000-000000000001",
+      "networkProviderMembershipId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "activate": false
+}
+```
+
+</details>
+
+### Respuesta — `Promise<InsuranceCampaignResponseDto>` · DTO `InsuranceCampaignResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:335` |
+| `code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:338` |
+| `title` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:341` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:344` |
+| `campaignType` | `string` | Sí | valores: LABORATORY, PHARMACY, DIAGNOSTIC_IMAGING, VACCINATION | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:347` |
+| `status` | `string` | Sí | valores: DRAFT, ACTIVE, PAUSED, EXPIRED | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:350` |
+| `effectiveStatus` | `string` | Sí | valores: DRAFT, ACTIVE, PAUSED, EXPIRED | — | EXPIRED si validTo ya pasó, aunque `status` siga ACTIVE/PAUSED: el vencimiento es por fecha, no por transición (CA-04). No hay cron. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:358` |
+| `targetCondition` | `InsuranceCampaignConditionDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:361` |
+| `targetCondition.code` | `string` | Sí | — | — | — | sin fuente |
+| `targetCondition.display` | `string` | Sí | admite null | — | — | sin fuente |
+| `copayBonusPercentage` | `number` | Sí | mínimo 0; máximo 100 | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:364` |
+| `validFrom` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:367` |
+| `validTo` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:370` |
+| `activatedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:373` |
+| `partners` | `array<InsuranceCampaignPartnerDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:376` |
+| `partners[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:317` |
+| `partners[].role` | `string` | Sí | valores: SPONSOR, PROVIDER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:320` |
+| `partners[].type` | `string` | Sí | valores: IMPORTER, MANUFACTURER, LABORATORY, PHARMACY, MEDICAL_CENTER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:323` |
+| `partners[].name` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:326` |
+| `partners[].networkProviderMembershipId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:329` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:379` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:382` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: No se puede activar una campaña cuya vigencia ya terminó; BadRequestException: El código CIE-10 {code} no está en el catálogo |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe una campaña con ese código en la aseguradora |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La membresía de red del aliado no pertenece a esta aseguradora |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/insurance-campaigns.int-spec.ts:178` |
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceCampaignsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 42. GET /insurance/campaigns/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Consultar una campaña de la aseguradora activa
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceCampaignsController.getById` — `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148`
+
+### Qué es y para qué sirve (negocio)
+
+Consultar una campaña de la aseguradora activa. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /insurance/campaigns/{id}` la atiende `InsuranceCampaignsController.getById` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.getById`. Crea filas en audit.audit_log. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → DirectoryTenantAdministrationAdapter.assertCanRead → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.auditDenied → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
+| `insurance.insurance_campaigns` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.assertNotCrossTenant → InsuranceCampaignsRepository.findAnyById | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:123` |
+| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsService.readableCarrier → InsuranceCampaignsService.carrierOf → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.getById → InsuranceCampaignsService.getById → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<InsuranceCampaignResponseDto>` · DTO `InsuranceCampaignResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:335` |
+| `code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:338` |
+| `title` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:341` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:344` |
+| `campaignType` | `string` | Sí | valores: LABORATORY, PHARMACY, DIAGNOSTIC_IMAGING, VACCINATION | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:347` |
+| `status` | `string` | Sí | valores: DRAFT, ACTIVE, PAUSED, EXPIRED | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:350` |
+| `effectiveStatus` | `string` | Sí | valores: DRAFT, ACTIVE, PAUSED, EXPIRED | — | EXPIRED si validTo ya pasó, aunque `status` siga ACTIVE/PAUSED: el vencimiento es por fecha, no por transición (CA-04). No hay cron. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:358` |
+| `targetCondition` | `InsuranceCampaignConditionDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:361` |
+| `targetCondition.code` | `string` | Sí | — | — | — | sin fuente |
+| `targetCondition.display` | `string` | Sí | admite null | — | — | sin fuente |
+| `copayBonusPercentage` | `number` | Sí | mínimo 0; máximo 100 | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:364` |
+| `validFrom` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:367` |
+| `validTo` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:370` |
+| `activatedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:373` |
+| `partners` | `array<InsuranceCampaignPartnerDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:376` |
+| `partners[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:317` |
+| `partners[].role` | `string` | Sí | valores: SPONSOR, PROVIDER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:320` |
+| `partners[].type` | `string` | Sí | valores: IMPORTER, MANUFACTURER, LABORATORY, PHARMACY, MEDICAL_CENTER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:323` |
+| `partners[].name` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:326` |
+| `partners[].networkProviderMembershipId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:329` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:379` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:382` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora; ForbiddenException: La campaña pertenece a otra aseguradora |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/insurance-campaigns.int-spec.ts:198` |
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceCampaignsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 43. PATCH /insurance/campaigns/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Editar una campaña en borrador o pausada (422 si está activa o vencida)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceCampaignsController.update` — `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178`
+
+### Qué es y para qué sirve (negocio)
+
+Editar una campaña en borrador o pausada (422 si está activa o vencida). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /insurance/campaigns/{id}` la atiende `InsuranceCampaignsController.update` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateInsuranceCampaignDto` (13 campos, 0 obligatorios). Delega en `InsuranceCampaignsService.update`. Crea filas en audit.audit_log, insurance.insurance_campaign_partners. Actualiza insurance.insurance_campaigns. Borra de insurance.insurance_campaign_partners. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.network_provider_memberships, insurance.provider_networks y 3 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `insurance.insurance_campaign_partners` | BORRA | BORRA | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsRepository.deletePartners | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:143` |
+| `insurance.insurance_campaign_partners` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsRepository.createPartner | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:151` |
+| `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.detail → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
+| `insurance.insurance_campaigns` | ESCRIBE | ACTUALIZA | POR_TIPO | InsuranceCampaignsController.update → InsuranceCampaignsService.update | `src/modules/insurance/application/services/insurance-campaigns.service.ts:387` |
+| `insurance.insurance_campaigns` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.requireOwnedEntity → InsuranceCampaignsRepository.findEntityForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:111` |
+| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.administrableCarrier → InsuranceCampaignsService.carrierOf → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
+| `insurance.network_provider_memberships` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.assertPartnersBelongToCarrier → InsuranceCampaignsRepository.membershipBelongsToCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:374` |
+| `insurance.provider_networks` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsService.assertPartnersBelongToCarrier → InsuranceCampaignsRepository.membershipBelongsToCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:374` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsRepository.resolveIcd10ConceptId | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:167` |
+| `terminology.code_system_versions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsRepository.resolveIcd10ConceptId | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:167` |
+| `terminology.code_systems` | LEE | LEE | POR_SQL | InsuranceCampaignsController.update → InsuranceCampaignsService.update → InsuranceCampaignsRepository.resolveIcd10ConceptId | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:167` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `UpdateInsuranceCampaignDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `title` | `string` | No | longitud mínima 3; longitud máxima 200 | `@IsOptional()` `@IsString()` `@Length(3, 200)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:206` |
+| `description` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:212` |
+| `campaignType` | `string` | No | valores: LABORATORY, PHARMACY, DIAGNOSTIC_IMAGING, VACCINATION | `@IsOptional()` `@IsIn(CAMPAIGN_TYPES)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:217` |
+| `targetConditionCode` | `string` | No | longitud máxima 16 | `@IsOptional()` `@IsString()` `@MaxLength(16)` | Código CIE-10 de la patología que se previene. Sólo descriptivo: no filtra afiliados (D4). | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:227` |
+| `copayBonusPercentage` | `number` | No | mínimo 0; máximo 100 | `@IsOptional()` `@IsNumber({ maxDecimalPlaces: 2 })` `@Min(0)` `@Max(100)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:239` |
+| `validFrom` | `string` | No | formato date; patrón runtime DATE_ONLY | `@IsOptional()` `@Matches(DATE_ONLY, { message: 'validFrom debe ser AAAA-MM-DD' })` `@IsISO8601({ strict: true })` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:245` |
+| `validTo` | `string` | No | formato date; patrón runtime DATE_ONLY | `@IsOptional()` `@Matches(DATE_ONLY, { message: 'validTo debe ser AAAA-MM-DD' })` `@IsISO8601({ strict: true })` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:251` |
+| `partners` | `array<InsuranceCampaignPartnerInputDto>` | No | mínimo 1 elemento(s); máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(20)` `@ValidateNested({ each: true })` `@Type(() => InsuranceCampaignPartnerInputDto)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:260` |
+| `partners[].role` | `string` | No | valores: SPONSOR, PROVIDER | `@IsIn(CAMPAIGN_PARTNER_ROLES)` | SPONSOR = importadora o fabricante que financia; PROVIDER = donde el afiliado se atiende | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:78` |
+| `partners[].type` | `string` | No | valores: IMPORTER, MANUFACTURER, LABORATORY, PHARMACY, MEDICAL_CENTER | `@IsIn(CAMPAIGN_PARTNER_TYPES)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:82` |
+| `partners[].name` | `string` | No | longitud mínima 2; longitud máxima 160 | `@IsString()` `@Length(2, 160)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:87` |
+| `partners[].partnerTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Referencia blanda al tenant del aliado, si es un tenant del sistema. Sin FK física. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:96` |
+| `partners[].networkProviderMembershipId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Membresía de la red de prestadores de la aseguradora, si aplica. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:105` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "title": "Chequeo Preventivo Cardiovascular y Perfil Lipídico",
+  "description": "Texto descriptivo de ejemplo",
+  "campaignType": "LABORATORY",
+  "targetConditionCode": "I10",
+  "copayBonusPercentage": 100,
+  "validFrom": "2026-09-25",
+  "validTo": "2026-11-24",
+  "partners": [
+    {
+      "role": "SPONSOR",
+      "type": "IMPORTER",
+      "name": "Laboratorio Central AloVida",
+      "partnerTenantId": "00000000-0000-4000-8000-000000000001",
+      "networkProviderMembershipId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<InsuranceCampaignResponseDto>` · DTO `InsuranceCampaignResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:335` |
+| `code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:338` |
+| `title` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:341` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:344` |
+| `campaignType` | `string` | Sí | valores: LABORATORY, PHARMACY, DIAGNOSTIC_IMAGING, VACCINATION | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:347` |
+| `status` | `string` | Sí | valores: DRAFT, ACTIVE, PAUSED, EXPIRED | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:350` |
+| `effectiveStatus` | `string` | Sí | valores: DRAFT, ACTIVE, PAUSED, EXPIRED | — | EXPIRED si validTo ya pasó, aunque `status` siga ACTIVE/PAUSED: el vencimiento es por fecha, no por transición (CA-04). No hay cron. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:358` |
+| `targetCondition` | `InsuranceCampaignConditionDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:361` |
+| `targetCondition.code` | `string` | Sí | — | — | — | sin fuente |
+| `targetCondition.display` | `string` | Sí | admite null | — | — | sin fuente |
+| `copayBonusPercentage` | `number` | Sí | mínimo 0; máximo 100 | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:364` |
+| `validFrom` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:367` |
+| `validTo` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:370` |
+| `activatedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:373` |
+| `partners` | `array<InsuranceCampaignPartnerDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:376` |
+| `partners[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:317` |
+| `partners[].role` | `string` | Sí | valores: SPONSOR, PROVIDER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:320` |
+| `partners[].type` | `string` | Sí | valores: IMPORTER, MANUFACTURER, LABORATORY, PHARMACY, MEDICAL_CENTER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:323` |
+| `partners[].name` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:326` |
+| `partners[].networkProviderMembershipId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:329` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:379` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:382` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: El código CIE-10 {code} no está en el catálogo |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora; ForbiddenException: La campaña pertenece a otra aseguradora |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una campaña en estado {current} no se puede editar; pausela primero; PreconditionFailedException: La membresía de red del aliado no pertenece a esta aseguradora |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/insurance-campaigns.int-spec.ts:318` |
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceCampaignsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 44. PATCH /insurance/campaigns/{id}/status
+
+- **Origen:** CONTRATO
+- **Nombre:** Activar, pausar o finalizar una campaña (transiciones cerradas)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceCampaignsController.changeStatus` — `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159`
+
+### Qué es y para qué sirve (negocio)
+
+Activar, pausar o finalizar una campaña (transiciones cerradas). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /insurance/campaigns/{id}/status` la atiende `InsuranceCampaignsController.changeStatus` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateInsuranceCampaignStatusDto` (1 campo, 1 obligatorio). Delega en `InsuranceCampaignsService.changeStatus`. Crea filas en audit.audit_log. Actualiza insurance.insurance_campaigns. Lee audit.audit_log, directory.tenant_memberships, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsService.administrableCarrier → DirectoryTenantAdministrationAdapter.canAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
+| `insurance.insurance_campaigns` | ESCRIBE | ACTUALIZA | POR_TIPO | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus | `src/modules/insurance/application/services/insurance-campaigns.service.ts:324` |
+| `insurance.insurance_campaigns` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsService.requireOwnedEntity → InsuranceCampaignsRepository.findEntityForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:111` |
+| `insurance.insurance_carriers` | LEE | LEE | DIRECTA | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsService.administrableCarrier → InsuranceCampaignsService.carrierOf → CatalogRepository.findCarrierByTenantId | `src/modules/insurance/infrastructure/repositories/catalog.repository.ts:49` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus → InsuranceCampaignsRepository.getRowForCarrier | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:186` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `UpdateInsuranceCampaignStatusDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `status` | `string` | Sí | valores: ACTIVE, PAUSED, EXPIRED | `@IsIn(CAMPAIGN_TARGET_STATUSES)` | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:191` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "status": "ACTIVE"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "status": "ACTIVE"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<InsuranceCampaignResponseDto>` · DTO `InsuranceCampaignResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:335` |
+| `code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:338` |
+| `title` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:341` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:344` |
+| `campaignType` | `string` | Sí | valores: LABORATORY, PHARMACY, DIAGNOSTIC_IMAGING, VACCINATION | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:347` |
+| `status` | `string` | Sí | valores: DRAFT, ACTIVE, PAUSED, EXPIRED | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:350` |
+| `effectiveStatus` | `string` | Sí | valores: DRAFT, ACTIVE, PAUSED, EXPIRED | — | EXPIRED si validTo ya pasó, aunque `status` siga ACTIVE/PAUSED: el vencimiento es por fecha, no por transición (CA-04). No hay cron. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:358` |
+| `targetCondition` | `InsuranceCampaignConditionDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:361` |
+| `targetCondition.code` | `string` | Sí | — | — | — | sin fuente |
+| `targetCondition.display` | `string` | Sí | admite null | — | — | sin fuente |
+| `copayBonusPercentage` | `number` | Sí | mínimo 0; máximo 100 | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:364` |
+| `validFrom` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:367` |
+| `validTo` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:370` |
+| `activatedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:373` |
+| `partners` | `array<InsuranceCampaignPartnerDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:376` |
+| `partners[].id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:317` |
+| `partners[].role` | `string` | Sí | valores: SPONSOR, PROVIDER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:320` |
+| `partners[].type` | `string` | Sí | valores: IMPORTER, MANUFACTURER, LABORATORY, PHARMACY, MEDICAL_CENTER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:323` |
+| `partners[].name` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:326` |
+| `partners[].networkProviderMembershipId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:329` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:379` |
+| `updatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:382` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora; ForbiddenException: La campaña pertenece a otra aseguradora |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una campaña en estado {current} no puede pasar a {target}; PreconditionFailedException: La campaña ya venció: no se puede activar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/insurance-campaigns.int-spec.ts:232` |
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceCampaignsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 45. GET /insurance/campaigns/active
+
+- **Origen:** CONTRATO
+- **Nombre:** Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceCampaignsController.listActive` — `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:93`
+
+### Qué es y para qué sirve (negocio)
+
+Campañas vigentes de cualquier aseguradora (o de una, con `carrierId`). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /insurance/campaigns/active` la atiende `InsuranceCampaignsController.listActive` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:93). Es una ruta pública: no exige token. Delega en `InsuranceCampaignsService.listActivePublic`. Lee insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:93` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listActive → InsuranceCampaignsService.listActivePublic → InsuranceCampaignsRepository.listPublicActiveRows | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:353` |
+| `insurance.insurance_campaigns` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listActive → InsuranceCampaignsService.listActivePublic → InsuranceCampaignsRepository.listPublicActiveRows | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:353` |
+| `insurance.insurance_carriers` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listActive → InsuranceCampaignsService.listActivePublic → InsuranceCampaignsRepository.listPublicActiveRows | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:353` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listActive → InsuranceCampaignsService.listActivePublic → InsuranceCampaignsRepository.listPublicActiveRows | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:353` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `carrierId` | query | No | `string` | Acota a una aseguradora. Sin filtro, trae de todas. |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PatientCampaignDto[]>` · DTO `PatientCampaignDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:416` |
+| `code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:419` |
+| `title` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:422` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:425` |
+| `campaignType` | `string` | Sí | valores: LABORATORY, PHARMACY, DIAGNOSTIC_IMAGING, VACCINATION | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:428` |
+| `targetCondition` | `InsuranceCampaignConditionDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:431` |
+| `targetCondition.code` | `string` | Sí | — | — | — | sin fuente |
+| `targetCondition.display` | `string` | Sí | admite null | — | — | sin fuente |
+| `copayBonusPercentage` | `number` | Sí | mínimo 0; máximo 100 | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:434` |
+| `validFrom` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:437` |
+| `validTo` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:440` |
+| `carrierName` | `string` | Sí | — | — | Nombre de la aseguradora que ofrece la campaña. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:445` |
+| `partners` | `array<PatientCampaignPartnerDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:448` |
+| `partners[].role` | `string` | Sí | valores: SPONSOR, PROVIDER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:398` |
+| `partners[].type` | `string` | Sí | valores: IMPORTER, MANUFACTURER, LABORATORY, PHARMACY, MEDICAL_CENTER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:401` |
+| `partners[].name` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:404` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/insurance-campaigns.int-spec.ts:332` |
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceCampaignsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 46. GET /insurance/campaigns/my-benefits
+
+- **Origen:** CONTRATO
+- **Nombre:** Campañas vigentes de mi aseguradora, para el afiliado autenticado
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceCampaignsController.myBenefits` — `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108`
+
+### Qué es y para qué sirve (negocio)
+
+Campañas vigentes de mi aseguradora, para el afiliado autenticado. Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /insurance/campaigns/my-benefits` la atiende `InsuranceCampaignsController.myBenefits` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.listMyBenefits`. Crea filas en audit.audit_log. Lee audit.audit_log, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 3 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
+| `insurance.insurance_campaigns` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
+| `insurance.insurance_carriers` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
+| `insurance.insurance_plans` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
+| `insurance.insurance_products` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
+| `insurance.patient_coverages` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.myBenefits → InsuranceCampaignsService.listMyBenefits → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PatientCampaignDto[]>` · DTO `PatientCampaignDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:416` |
+| `code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:419` |
+| `title` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:422` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:425` |
+| `campaignType` | `string` | Sí | valores: LABORATORY, PHARMACY, DIAGNOSTIC_IMAGING, VACCINATION | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:428` |
+| `targetCondition` | `InsuranceCampaignConditionDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:431` |
+| `targetCondition.code` | `string` | Sí | — | — | — | sin fuente |
+| `targetCondition.display` | `string` | Sí | admite null | — | — | sin fuente |
+| `copayBonusPercentage` | `number` | Sí | mínimo 0; máximo 100 | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:434` |
+| `validFrom` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:437` |
+| `validTo` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:440` |
+| `carrierName` | `string` | Sí | — | — | Nombre de la aseguradora que ofrece la campaña. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:445` |
+| `partners` | `array<PatientCampaignPartnerDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:448` |
+| `partners[].role` | `string` | Sí | valores: SPONSOR, PROVIDER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:398` |
+| `partners[].type` | `string` | Sí | valores: IMPORTER, MANUFACTURER, LABORATORY, PHARMACY, MEDICAL_CENTER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:401` |
+| `partners[].name` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:404` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La cuenta no tiene un perfil de paciente asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceCampaignsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 47. GET /insurance/campaigns/patient/{patientProfileId}
+
+- **Origen:** CONTRATO
+- **Nombre:** Campañas vigentes de la aseguradora del afiliado (sólo el titular)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `InsuranceCampaignsController.listForPatient` — `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129`
+
+### Qué es y para qué sirve (negocio)
+
+Campañas vigentes de la aseguradora del afiliado (sólo el titular). Dentro del módulo (descripción del modelo, en inglés): «Reconciles insurer companies, brokers, patients, healthcare infrastructure, practitioners, diagnostic units and pharmacies without collapsing them into one generic actor.» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_26_insurance.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /insurance/campaigns/patient/{patientProfileId}` la atiende `InsuranceCampaignsController.listForPatient` (src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129). Exige sesión; el controlador no declara roles. Delega en `InsuranceCampaignsService.listActiveForPatient`. Crea filas en audit.audit_log. Lee audit.audit_log, iam.sessions, insurance.insurance_campaign_partners, insurance.insurance_campaigns, insurance.insurance_carriers, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 3 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `iam.sessions` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → AuditTrailAdapter.record → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `insurance.insurance_campaign_partners` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
+| `insurance.insurance_campaigns` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
+| `insurance.insurance_carriers` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
+| `insurance.insurance_plans` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
+| `insurance.insurance_products` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
+| `insurance.patient_coverages` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:265` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsService.assertOwnership → PatientOwnershipAdapter.assertOwnsPatientProfile → ProfileOwnershipService.assertOwnsPatientProfile → ProfileOwnershipService.belongsToActor → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | InsuranceCampaignsController.listForPatient → InsuranceCampaignsService.listActiveForPatient → InsuranceCampaignsRepository.listActiveRowsForCarriers | `src/modules/insurance/infrastructure/repositories/insurance-campaigns.repository.ts:310` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PatientCampaignDto[]>` · DTO `PatientCampaignDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:416` |
+| `code` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:419` |
+| `title` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:422` |
+| `description` | `string` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:425` |
+| `campaignType` | `string` | Sí | valores: LABORATORY, PHARMACY, DIAGNOSTIC_IMAGING, VACCINATION | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:428` |
+| `targetCondition` | `InsuranceCampaignConditionDto` | Sí | admite null | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:431` |
+| `targetCondition.code` | `string` | Sí | — | — | — | sin fuente |
+| `targetCondition.display` | `string` | Sí | admite null | — | — | sin fuente |
+| `copayBonusPercentage` | `number` | Sí | mínimo 0; máximo 100 | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:434` |
+| `validFrom` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:437` |
+| `validTo` | `string` | Sí | formato date | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:440` |
+| `carrierName` | `string` | Sí | — | — | Nombre de la aseguradora que ofrece la campaña. | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:445` |
+| `partners` | `array<PatientCampaignPartnerDto>` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:448` |
+| `partners[].role` | `string` | Sí | valores: SPONSOR, PROVIDER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:398` |
+| `partners[].type` | `string` | Sí | valores: IMPORTER, MANUFACTURER, LABORATORY, PHARMACY, MEDICAL_CENTER | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:401` |
+| `partners[].name` | `string` | Sí | — | — | — | `src/modules/insurance/presentation/dto/insurance-campaigns.dto.ts:404` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil o la plataforma pueden modificarlo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/insurance.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- src / modules / insurance — etapa `ctrl:InsuranceCampaignsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 48. GET /insurance/my-claims
 
 - **Origen:** CONTRATO
 - **Nombre:** Solicitudes de seguro propias, con su dictamen vigente
@@ -4677,7 +5640,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/my-claims.controller.ts:30` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/insurance/presentation/controllers/my-claims.controller.ts:30` |
 | CABECERA | x-tenant-id (obligatoria) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -4772,7 +5735,7 @@ El árbol de decisión completo está en [flujos](../flujos/insurance.md).
 
 ---
 
-## 41. POST /insurance/patients/conversation
+## 49. POST /insurance/patients/conversation
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir o reutilizar la conversación interna con un paciente autorizado
@@ -4797,10 +5760,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -4881,7 +5844,7 @@ El árbol de decisión completo está en [flujos](../flujos/insurance.md).
 
 ---
 
-## 42. GET /insurance/patients/options
+## 50. GET /insurance/patients/options
 
 - **Origen:** CONTRATO
 - **Nombre:** Aseguradoras disponibles en el alcance autorizado
@@ -4906,8 +5869,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:59` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -4951,7 +5914,7 @@ El árbol de decisión completo está en [flujos](../flujos/insurance.md).
 
 ---
 
-## 43. POST /insurance/patients/search
+## 51. POST /insurance/patients/search
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar directorio de pacientes autorizado
@@ -4976,10 +5939,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:35` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -5088,7 +6051,7 @@ El árbol de decisión completo está en [flujos](../flujos/insurance.md).
 
 ---
 
-## 44. GET /insurance/portability/certificates/{certificateId}/json
+## 52. GET /insurance/portability/certificates/{certificateId}/json
 
 - **Origen:** CONTRATO
 - **Nombre:** Descargar el certificado de portabilidad en JSON interoperable
@@ -5113,9 +6076,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:122` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: certificateId | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:122` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -5170,7 +6133,7 @@ El árbol de decisión completo está en [flujos](../flujos/insurance.md).
 
 ---
 
-## 45. GET /insurance/portability/certificates/{certificateId}/pdf
+## 53. GET /insurance/portability/certificates/{certificateId}/pdf
 
 - **Origen:** CONTRATO
 - **Nombre:** Descargar el certificado de portabilidad en PDF
@@ -5195,9 +6158,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: certificateId | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:84` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -5250,7 +6213,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 46. POST /insurance/portability/export
+## 54. POST /insurance/portability/export
 
 - **Origen:** CONTRATO
 - **Nombre:** Exportar el historial de póliza y siniestralidad del titular a 1 clic
@@ -5275,9 +6238,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle(EXPORT_RATE_LIMIT) | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:58` |
 
 ### Tablas que afecta
@@ -5424,7 +6387,7 @@ El árbol de decisión completo está en [flujos](../flujos/insurance.md).
 
 ---
 
-## 47. GET /insurance/received-claims
+## 55. GET /insurance/received-claims
 
 - **Origen:** CONTRATO
 - **Nombre:** Solicitudes de seguro recibidas por la aseguradora activa
@@ -5449,8 +6412,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurer-received-claims.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -5560,7 +6523,7 @@ El árbol de decisión completo está en [flujos](../flujos/insurance.md).
 
 ---
 
-## 48. POST /insurance/received-claims/{id}/decision
+## 56. POST /insurance/received-claims/{id}/decision
 
 - **Origen:** CONTRATO
 - **Nombre:** Dictaminar una solicitud recibida (definitivo)
@@ -5585,11 +6548,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/insurer-received-claims.controller.ts:96` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurer-received-claims.controller.ts:96` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -5751,7 +6714,7 @@ El árbol de decisión completo está en [flujos](../flujos/insurance.md).
 
 ---
 
-## 49. POST /patient-coverages
+## 57. POST /patient-coverages
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar cobertura de paciente y dependientes
@@ -5776,10 +6739,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/coverage.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -5869,7 +6832,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 50. GET /patient-coverages/me
+## 58. GET /patient-coverages/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Mi cobertura
@@ -5894,8 +6857,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE, PATIENT | `src/modules/insurance/presentation/controllers/coverage.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -5947,7 +6910,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 51. GET /practitioner-settlement-batches
+## 59. GET /practitioner-settlement-batches
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los lotes de liquidación del alcance del actor
@@ -5972,8 +6935,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -6066,7 +7029,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 52. POST /practitioner-settlement-batches
+## 60. POST /practitioner-settlement-batches
 
 - **Origen:** CONTRATO
 - **Nombre:** Generar (o repetir) el lote de liquidación del período
@@ -6091,10 +7054,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -6211,7 +7174,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 53. GET /practitioner-settlement-batches/{id}
+## 61. GET /practitioner-settlement-batches/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar un lote de liquidación
@@ -6236,9 +7199,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts:69` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -6330,7 +7293,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 54. GET /practitioners/{profileId}/insurance-networks
+## 62. GET /practitioners/{profileId}/insurance-networks
 
 - **Origen:** CONTRATO
 - **Nombre:** Aseguradoras con las que trabaja el profesional
@@ -6355,9 +7318,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT | `src/modules/insurance/presentation/controllers/practitioner-insurance-networks.controller.ts:25` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/insurance/presentation/controllers/practitioner-insurance-networks.controller.ts:25` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -6413,7 +7376,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 55. POST /prior-authorization-requests
+## 63. POST /prior-authorization-requests
 
 - **Origen:** CONTRATO
 - **Nombre:** Solicitar autorización previa con items
@@ -6438,10 +7401,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:96` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -6549,7 +7512,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 56. GET /prior-authorization-requests/{id}
+## 64. GET /prior-authorization-requests/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Detalle de una solicitud de aprobación (aseguradora)
@@ -6574,9 +7537,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:77` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -6661,7 +7624,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 57. POST /prior-authorization-requests/{id}/determinations
+## 65. POST /prior-authorization-requests/{id}/determinations
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir determinación de autorización previa
@@ -6686,11 +7649,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:116` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:116` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -6799,7 +7762,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 58. GET /prior-authorization-requests/inbox
+## 66. GET /prior-authorization-requests/inbox
 
 - **Origen:** CONTRATO
 - **Nombre:** Bandeja de solicitudes de aprobación (aseguradora)
@@ -6824,8 +7787,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: BILLING, FINANCE | `src/modules/insurance/presentation/controllers/prior-auth.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -6896,7 +7859,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 59. POST /provider-networks
+## 67. POST /provider-networks
 
 - **Origen:** CONTRATO
 - **Nombre:** Alta de red de prestadores (soporte)
@@ -6921,10 +7884,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:255` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -6996,7 +7959,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 60. POST /provider-networks/{id}/memberships
+## 68. POST /provider-networks/{id}/memberships
 
 - **Origen:** CONTRATO
 - **Nombre:** Alta de membresía de prestador en la red
@@ -7021,11 +7984,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:272` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:272` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -7100,7 +8063,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 61. GET /public/portability/verify/{manifestHash}
+## 69. GET /public/portability/verify/{manifestHash}
 
 - **Origen:** CONTRATO
 - **Nombre:** Verificar la autenticidad de un certificado de portabilidad por su sello
@@ -7179,7 +8142,7 @@ El árbol de decisión completo está en [flujos](../flujos/insurance.md).
 
 ---
 
-## 62. POST /reconciliation-batches
+## 70. POST /reconciliation-batches
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir lote de conciliación
@@ -7204,10 +8167,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/reconciliation.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -7280,7 +8243,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 63. POST /reconciliation-batches/{id}/items
+## 71. POST /reconciliation-batches/{id}/items
 
 - **Origen:** CONTRATO
 - **Nombre:** Agregar ítem de conciliación al lote
@@ -7305,11 +8268,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/insurance/presentation/controllers/reconciliation.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/insurance/presentation/controllers/reconciliation.controller.ts:58` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 

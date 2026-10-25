@@ -5,19 +5,19 @@
 - **Bloque:** Datos y NoSQL (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:37`)
 - **Operaciones:** 14 (14 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 11 · BAJO 3
-- **Tablas distintas que tocan:** 12
+- **Tablas distintas que tocan:** 13
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/time-series.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/ts/admin/compression/run` | Comprimir los chunks más antiguos que el umbral | MEDIO | 4 | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
+| 1 | POST | `/ts/admin/compression/run` | Comprimir los chunks más antiguos que el umbral | MEDIO | 5 | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
 | 2 | POST | `/ts/admin/hypertables` | Convertir una serie en hypertable y declarar su particionado | BAJO | 0 | DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
 | 3 | PATCH | `/ts/admin/hypertables/{table}` | Ajustar la anchura temporal del chunk | BAJO | 0 | DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
-| 4 | POST | `/ts/admin/retention/policies` | Aplicar la retención descartando chunks fuera de ventana | MEDIO | 4 | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
-| 5 | POST | `/ts/admin/rollups/{name}/refresh` | Materializar la ventana de un agregado continuo | MEDIO | 4 | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
-| 6 | POST | `/ts/admin/rollups/audit-daily/refresh` | Refrescar el rollup de conteos diarios de auditoría | MEDIO | 4 | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
+| 4 | POST | `/ts/admin/retention/policies` | Aplicar la retención descartando chunks fuera de ventana | MEDIO | 5 | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
+| 5 | POST | `/ts/admin/rollups/{name}/refresh` | Materializar la ventana de un agregado continuo | MEDIO | 5 | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
+| 6 | POST | `/ts/admin/rollups/audit-daily/refresh` | Refrescar el rollup de conteos diarios de auditoría | MEDIO | 5 | SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN |
 | 7 | POST | `/ts/ads/events/batch-ingest` | Ingerir eventos de entrega de publicidad | MEDIO | 6 | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN |
 | 8 | POST | `/ts/devices/{deviceId}/readings/ingest` | Ingerir lecturas de un dispositivo médico | MEDIO | 6 | INGEST_GATEWAY, DEVICE, SYSTEM, PLATFORM_ADMIN |
 | 9 | POST | `/ts/location/pings/batch-ingest` | Ingerir pings de ubicación | MEDIO | 9 | INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN |
@@ -46,7 +46,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/admin/compression/run` la atiende `TimescaleAdminController.runCompression` (src/modules/time_series/controllers/timescale-admin.controller.ts:92). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RunCompressionDto` (5 campos, 4 obligatorios). Delega en `TimescaleAdminService.runCompression`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica ChunksCompressed.
+`POST /ts/admin/compression/run` la atiende `TimescaleAdminController.runCompression` (src/modules/time_series/controllers/timescale-admin.controller.ts:92). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RunCompressionDto` (5 campos, 4 obligatorios). Delega en `TimescaleAdminService.runCompression`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee directory.tenants, messaging.outbox_messages. Publica ChunksCompressed.
 
 ### Requerimientos
 
@@ -54,15 +54,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `directory.tenants` | LEE | LEE | DIRECTA | TimescaleAdminController.runCompression → TimescaleAdminService.runCompression → TimescaleAdminService.assertTenantExists | `src/modules/time_series/services/timescale-admin.service.ts:180` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.runCompression → TimescaleAdminService.runCompression → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.runCompression → TimescaleAdminService.runCompression → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.runCompression → TimescaleAdminService.runCompression → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -72,7 +73,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `ChunksCompressed` | `src/modules/time_series/services/timescale-admin.service.ts:215` |
+| Evento de dominio | `ChunksCompressed` | `src/modules/time_series/services/timescale-admin.service.ts:246` |
 
 ### Cuerpo — DTO `RunCompressionDto` · `application/json`
 
@@ -125,6 +126,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La serie no declara por qué columnas se segmenta al comprimir. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | — | InternalServerErrorException: La segmentación de compresión declara una columna que no es válida. |
@@ -166,10 +168,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -262,10 +264,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -350,7 +352,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/admin/retention/policies` la atiende `TimescaleAdminController.applyRetention` (src/modules/time_series/controllers/timescale-admin.controller.ts:112). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ApplyRetentionDto` (5 campos, 4 obligatorios). Delega en `TimescaleAdminService.applyRetention`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica ChunksDropped.
+`POST /ts/admin/retention/policies` la atiende `TimescaleAdminController.applyRetention` (src/modules/time_series/controllers/timescale-admin.controller.ts:112). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ApplyRetentionDto` (5 campos, 4 obligatorios). Delega en `TimescaleAdminService.applyRetention`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee directory.tenants, messaging.outbox_messages. Publica ChunksDropped.
 
 ### Requerimientos
 
@@ -358,15 +360,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:112` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `directory.tenants` | LEE | LEE | DIRECTA | TimescaleAdminController.applyRetention → TimescaleAdminService.applyRetention → TimescaleAdminService.assertTenantExists | `src/modules/time_series/services/timescale-admin.service.ts:180` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.applyRetention → TimescaleAdminService.applyRetention → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.applyRetention → TimescaleAdminService.applyRetention → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.applyRetention → TimescaleAdminService.applyRetention → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -376,7 +379,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `ChunksDropped` | `src/modules/time_series/services/timescale-admin.service.ts:283` |
+| Evento de dominio | `ChunksDropped` | `src/modules/time_series/services/timescale-admin.service.ts:315` |
 
 ### Cuerpo — DTO `ApplyRetentionDto` · `application/json`
 
@@ -429,6 +432,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/time_series.md).
@@ -460,7 +464,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/admin/rollups/{name}/refresh` la atiende `TimescaleAdminController.refreshRollup` (src/modules/time_series/controllers/timescale-admin.controller.ts:159). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RefreshRollupDto` (4 campos, 4 obligatorios). Delega en `TimescaleAdminService.refreshRollup`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica un evento calculado (name === 'continuous_audit_daily'
+`POST /ts/admin/rollups/{name}/refresh` la atiende `TimescaleAdminController.refreshRollup` (src/modules/time_series/controllers/timescale-admin.controller.ts:159). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RefreshRollupDto` (4 campos, 4 obligatorios). Delega en `TimescaleAdminService.refreshRollup`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee directory.tenants, messaging.outbox_messages. Publica un evento calculado (name === 'continuous_audit_daily'
             ? 'AuditDailyRollupRefreshed'
             : 'SliRollupMaterialized').
 
@@ -470,15 +474,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `directory.tenants` | LEE | LEE | DIRECTA | TimescaleAdminController.refreshRollup → TimescaleAdminService.refreshRollup → TimescaleAdminService.assertTenantExists | `src/modules/time_series/services/timescale-admin.service.ts:180` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshRollup → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshRollup → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.refreshRollup → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -488,7 +493,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | calculado: `name === 'continuous_audit_daily' ? 'AuditDailyRollupRefreshed' : 'SliRollupMaterialized'` | `src/modules/time_series/services/timescale-admin.service.ts:378` |
+| Evento de dominio | calculado: `name === 'continuous_audit_daily' ? 'AuditDailyRollupRefreshed' : 'SliRollupMaterialized'` | `src/modules/time_series/services/timescale-admin.service.ts:413` |
 
 ### Parámetros
 
@@ -546,6 +551,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: El rollup debe ser uno de: {ROLLUP_NAMES.join(', ')}. |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana a materializar tiene que empezar antes de terminar. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -578,7 +584,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 ### Cómo se atiende (sistema)
 
-`POST /ts/admin/rollups/audit-daily/refresh` la atiende `TimescaleAdminController.refreshAuditDaily` (src/modules/time_series/controllers/timescale-admin.controller.ts:135). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RefreshRollupDto` (4 campos, 4 obligatorios). Delega en `TimescaleAdminService.refreshRollup`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee messaging.outbox_messages. Publica un evento calculado (name === 'continuous_audit_daily'
+`POST /ts/admin/rollups/audit-daily/refresh` la atiende `TimescaleAdminController.refreshAuditDaily` (src/modules/time_series/controllers/timescale-admin.controller.ts:135). Exige sesión con alguno de los roles SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RefreshRollupDto` (4 campos, 4 obligatorios). Delega en `TimescaleAdminService.refreshRollup`. Crea filas en messaging.domain_events, messaging.outbox_messages, time_series.ingestion_pipeline_metric_series. Lee directory.tenants, messaging.outbox_messages. Publica un evento calculado (name === 'continuous_audit_daily'
             ? 'AuditDailyRollupRefreshed'
             : 'SliRollupMaterialized').
 
@@ -588,15 +594,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/timescale-admin.controller.ts:135` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `directory.tenants` | LEE | LEE | DIRECTA | TimescaleAdminController.refreshAuditDaily → TimescaleAdminService.refreshRollup → TimescaleAdminService.assertTenantExists | `src/modules/time_series/services/timescale-admin.service.ts:180` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshAuditDaily → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
 | `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | TimescaleAdminController.refreshAuditDaily → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
 | `messaging.outbox_messages` | LEE | LEE | DIRECTA | TimescaleAdminController.refreshAuditDaily → TimescaleAdminService.refreshRollup → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
@@ -606,7 +613,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | calculado: `name === 'continuous_audit_daily' ? 'AuditDailyRollupRefreshed' : 'SliRollupMaterialized'` | `src/modules/time_series/services/timescale-admin.service.ts:378` |
+| Evento de dominio | calculado: `name === 'continuous_audit_daily' ? 'AuditDailyRollupRefreshed' : 'SliRollupMaterialized'` | `src/modules/time_series/services/timescale-admin.service.ts:413` |
 
 ### Cuerpo — DTO `RefreshRollupDto` · `application/json`
 
@@ -658,6 +665,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana a materializar tiene que empezar antes de terminar. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -698,10 +706,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:157` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -839,11 +847,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGEST_GATEWAY, DEVICE, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:116` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: deviceId | `src/modules/time_series/controllers/series.controller.ts:116` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -981,10 +989,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:206` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1127,10 +1135,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:176` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1253,10 +1261,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:137` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1385,10 +1393,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: DATA_PLATFORM_ADMIN, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:95` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1521,10 +1529,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: INGEST_GATEWAY, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1650,13 +1658,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/time_se
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: ANALYST, DATA_PLATFORM_ADMIN, SYSTEM, PLATFORM_ADMIN | `src/modules/time_series/controllers/series.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_QUERY | dataset (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | from (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | to (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | bucket (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
