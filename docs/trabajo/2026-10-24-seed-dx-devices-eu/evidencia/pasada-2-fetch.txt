@@ -1,6 +1,0 @@
-[hueco] EMDN: bloqueado por la política de red del entorno (proxy 403) — https://health.ec.europa.eu/medical-devices-topics-interest/european-medical-devices-nomenclature-emdn_en
-[hueco] EUDAMED_DATALAKE: bloqueado por la política de red del entorno (proxy 403) — https://api.datalake.sante.service.ec.europa.eu/eudamed/reference?LANGUAGE=en&format=json&api-version=v1.0
-[hueco] IT_BDRDM: bloqueado por la política de red del entorno (proxy 403) — https://www.dati.salute.gov.it/it/dataset/dispositivi-medici/
-[hueco] IT_CND: bloqueado por la política de red del entorno (proxy 403) — https://www.dati.salute.gov.it/it/dataset/classificazione-nazionale-dei-dispositivi-medici-cnd/
-
-Archivos en manifiesto: 0 · huecos de esta corrida: 11 · /home/user/diagnostic-devices-data/eu/cache/manifest.json

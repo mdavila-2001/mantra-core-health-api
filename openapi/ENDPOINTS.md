@@ -2,11 +2,11 @@
 
 # Documentación de endpoints
 
-Se documentan **1541 de 1541 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1542 de 1542 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
-| `accounting` | 45 | [Abrir referencia](endpoints/accounting.md) |
+| `accounting` | 46 | [Abrir referencia](endpoints/accounting.md) |
 | `ads` | 18 | [Abrir referencia](endpoints/ads.md) |
 | `app` | 6 | [Abrir referencia](endpoints/app.md) |
 | `audio_assets` | 10 | [Abrir referencia](endpoints/audio-assets.md) |

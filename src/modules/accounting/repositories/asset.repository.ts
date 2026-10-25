@@ -461,6 +461,25 @@ export class AssetRepository {
   }
 
   /**
+   * El histórico de depreciación de un activo (T26 · criterio 6), de la más
+   * antigua a la más reciente: una fila por período fiscal depreciado.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param assetId - Identificador del activo.
+   * @returns Las depreciaciones registradas del activo.
+   */
+  listDepreciations(
+    em: EntityManager,
+    assetId: string,
+  ): Promise<AssetDepreciations[]> {
+    return em.find(
+      AssetDepreciations,
+      { assetId },
+      { orderBy: { createdAt: 'ASC' } },
+    );
+  }
+
+  /**
    * Crea create depreciation.
    *
    * @param em - Contexto de persistencia o transacción activa.
