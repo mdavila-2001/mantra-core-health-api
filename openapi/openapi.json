@@ -22654,6 +22654,66 @@
         "description": "UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/clinical/patients/{patientProfileId}/received-services": {
+      "get": {
+        "operationId": "ClinicalReadController_getReceivedServices",
+        "parameters": [
+          {
+            "name": "patientProfileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope de la lista (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas",
+        "tags": [
+          "clinical-read"
+        ],
+        "description": "Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/clinical/prescriptions/{id}/pdf": {
       "get": {
         "description": "Autoriza al prescriptor y a quien puede leer la historia del paciente dueño de la receta.",
@@ -34889,6 +34949,57 @@
           "accounting-practitioner"
         ],
         "description": "Prender o apagar la automatización de un activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/accounting/practitioner/assets/{id}/depreciations": {
+      "get": {
+        "description": "Una fila por período fiscal depreciado, en orden de registro, con el valor en libros que dejó. Sólo el profesional vinculado a la práctica del activo; un activo ajeno responde 422 y uno de otra organización, 404.",
+        "operationId": "AccountingPractitionerController_readAssetDepreciations",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Histórico de depreciación de un activo propio",
+        "tags": [
+          "accounting-practitioner"
+        ]
       }
     },
     "/accounting/practitioner/assets/{id}/progress": {
@@ -62259,6 +62370,54 @@
           "medical-groups"
         ],
         "description": "Crear grupo médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/medical-groups/eligible-members": {
+      "get": {
+        "operationId": "MedicalGroupsController_listEligibleMembers",
+        "parameters": [
+          {
+            "name": "serviceCatalogId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Colegas que se pueden invitar a un grupo de este servicio",
+        "tags": [
+          "medical-groups"
+        ],
+        "description": "Colegas que se pueden invitar a un grupo de este servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/medical-groups/patients/{patientProfileId}/conditions": {
@@ -118596,7 +118755,8 @@
           },
           "code": {
             "type": "string",
-            "description": "Código interno del servicio"
+            "description": "Código interno del servicio",
+            "maxLength": 120
           },
           "name": {
             "type": "string",
@@ -118669,6 +118829,11 @@
           "isActive": {
             "type": "boolean",
             "description": "Si el servicio sigue disponible para cotizar"
+          },
+          "termsText": {
+            "type": "string",
+            "description": "Términos propios del servicio. null vuelve a los términos por defecto",
+            "nullable": true
           }
         },
         "additionalProperties": false
