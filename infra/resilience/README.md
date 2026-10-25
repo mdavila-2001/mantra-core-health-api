@@ -78,6 +78,11 @@ stack `alovida-data-<entorno>` del VPS, con los mismos nombres en la misma red.
 3. Desplegar la API desde Coolify y reencender su autodeploy:
    `sudo rm /var/lib/alovida-resilience/autodeploy/api-test.disabled`.
 
+**Hecho en test el 25/10/2026 22:29 UTC**: conteos iguales antes y después
+(1 321 tablas / 23 817 conceptos / 904 usuarios). Corte real de la API: **278 s**,
+no ~1 min (OpenSearch tarda en declararse sano); con la sonda que entonces sólo
+miraba `/auth`, no quedó medido del lado del usuario.
+
 Vuelta atrás: `sudo alovida-data-switchover test rollback`. Con el cambio hecho,
 el reconciliador para cualquier base de Coolify de esa API que vuelva a arrancar.
 
@@ -98,7 +103,5 @@ activar `RLS_ENFORCE`. Mientras tanto la API corre con
   bases del compose (postgres, mongo, redis, opensearch, minio). El standby cubre
   los ~20 min de init/migrate, no el reinicio de postgres. Sacar las bases a un
   stack propio lo elimina, pero mueve volúmenes de datos: requiere ventana.
-- `dev` no está en el failover: su proxy estaba en bucle (`duplicate location`,
-  arreglado en #1321) y no tiene standby todavía.
 - `app.alovidasalud.arauzsoftware.com` apunta en DNS al servidor viejo
   (173.249.39.237): hay que cambiar el registro A a 62.169.18.132.
