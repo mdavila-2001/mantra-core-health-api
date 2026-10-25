@@ -40,16 +40,16 @@
 | [post_shares](#post_shares) | Registra compartidos de publicaciones para conocer cómo circula contenido público entre usuarios. | 11 | 6 | 0 | COINCIDE |
 | [prestige_awards](#prestige_awards) | Registra reconocimientos otorgados a perfiles para comunicar logros o contribuciones comunitarias. | 17 | 6 | 0 | COINCIDE |
 | [prestige_scores](#prestige_scores) | Mantiene puntajes de reputación o participación asociados a perfiles según reglas del producto. | 16 | 4 | 2 | COINCIDE |
-| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 148 | COINCIDE |
+| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 150 | COINCIDE |
 | [reactions](#reactions) | Registra reacciones de usuarios a contenido comunitario para expresar interacción social. | 10 | 6 | 16 | COINCIDE |
 | [review_dimension_scores](#review_dimension_scores) | Desglosa puntuaciones de reseñas por dimensión para resumir la experiencia de atención. | 5 | 2 | 4 | COINCIDE |
 | [review_responses](#review_responses) | Conserva respuestas de prestadores a reseñas para sostener interacción y gestión de reputación. | 11 | 5 | 4 | COINCIDE |
 | [service_reviews](#service_reviews) | Registra reseñas sobre prestadores y servicios, con verificación de experiencia cuando corresponde y sin publicar identificadores de encuentros. | 17 | 11 | 23 | COINCIDE |
-| [social_follows](#social_follows) | Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actualizaciones públicas. | 11 | 7 | 16 | COINCIDE |
+| [social_follows](#social_follows) | Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actualizaciones públicas. | 11 | 7 | 17 | COINCIDE |
 | [social_notifications](#social_notifications) | Genera avisos sobre interacciones sociales para que usuarios conozcan menciones, respuestas o actividad relevante. | 16 | 8 | 1 | COINCIDE |
-| [social_posts](#social_posts) | Conserva publicaciones públicas de profesionales y organizaciones para informar y facilitar su descubrimiento, sin incorporarlas a la historia clínica. | 16 | 10 | 23 | COINCIDE |
+| [social_posts](#social_posts) | Conserva publicaciones públicas de profesionales y organizaciones para informar y facilitar su descubrimiento, sin incorporarlas a la historia clínica. | 16 | 10 | 24 | COINCIDE |
 | [topics](#topics) | Define temas comunitarios para clasificar contenido y espacios de conversación. | 12 | 7 | 2 | COINCIDE |
-| [user_blocks](#user_blocks) | Registra bloqueos entre usuarios para controlar interacciones y seguridad en espacios comunitarios. | 10 | 6 | 31 | COINCIDE |
+| [user_blocks](#user_blocks) | Registra bloqueos entre usuarios para controlar interacciones y seguridad en espacios comunitarios. | 10 | 6 | 32 | COINCIDE |
 | [verified_badges](#verified_badges) | Representa insignias de verificación pública para indicar atributos revisados de perfiles sanitarios. | 15 | 7 | 46 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -2876,7 +2876,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: public_profiles; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `PublicProfiles` — `src/modules/community/entities/public_profiles.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 148 operaciones
+- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 150 operaciones
 
 #### Columnas
 
@@ -3014,8 +3014,10 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | GET /community/moderation/decisions/mine | LEE | DIRECTA |
 | GET /community/notifications | LEE | DIRECTA |
 | GET /community/polls/{pollId} | LEE | DIRECTA |
+| POST /community/polls/{pollId}/votes | LEE | DIRECTA |
 | GET /community/posts/{postId} | LEE | DIRECTA |
 | GET /community/posts/{postId}/comments | LEE | DIRECTA |
+| POST /community/posts/{postId}/polls | LEE | DIRECTA |
 | GET /community/posts/{postId}/reactions | LEE | DIRECTA |
 | GET /community/profiles/{profileId} | LEE | DIRECTA |
 | GET /community/profiles/{profileId}/auto-reply | LEE | DIRECTA |
@@ -3478,7 +3480,7 @@ Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actual
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: social_follows`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `SocialFollows` — `src/modules/community/entities/social_follows.entity.ts`
-- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 0 entrantes · 16 operaciones
+- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 0 entrantes · 17 operaciones
 
 #### Columnas
 
@@ -3540,6 +3542,7 @@ Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actual
 | POST /community/follows | CREA | DIRECTA |
 | POST /community/follows | LEE | DIRECTA |
 | GET /community/polls/{pollId} | LEE | DIRECTA |
+| POST /community/polls/{pollId}/votes | LEE | DIRECTA |
 | GET /community/posts/{postId} | LEE | DIRECTA |
 | GET /community/posts/{postId}/comments | LEE | DIRECTA |
 | GET /community/posts/{postId}/reactions | LEE | DIRECTA |
@@ -3647,7 +3650,7 @@ Conserva publicaciones públicas de profesionales y organizaciones para informar
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: social_posts; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `SocialPosts` — `src/modules/community/entities/social_posts.entity.ts`
-- **Resumen:** 16 columnas · 10 índices · 8 FK salientes · 5 entrantes · 23 operaciones
+- **Resumen:** 16 columnas · 10 índices · 8 FK salientes · 5 entrantes · 24 operaciones
 
 #### Columnas
 
@@ -3710,6 +3713,7 @@ Conserva publicaciones públicas de profesionales y organizaciones para informar
 | GET /community/comments/media/{fileId}/content | LEE | DIRECTA |
 | GET /community/feed | LEE | DIRECTA |
 | GET /community/polls/{pollId} | LEE | DIRECTA |
+| POST /community/polls/{pollId}/votes | LEE | DIRECTA |
 | GET /community/posts/{postId} | LEE | DIRECTA |
 | GET /community/posts/{postId}/comments | LEE | DIRECTA |
 | POST /community/posts/{postId}/polls | LEE | DIRECTA |
@@ -3835,7 +3839,7 @@ Registra bloqueos entre usuarios para controlar interacciones y seguridad en esp
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: user_blocks`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `UserBlocks` — `src/modules/community/entities/user_blocks.entity.ts`
-- **Resumen:** 10 columnas · 6 índices · 6 FK salientes · 0 entrantes · 31 operaciones
+- **Resumen:** 10 columnas · 6 índices · 6 FK salientes · 0 entrantes · 32 operaciones
 
 #### Columnas
 
@@ -3892,6 +3896,7 @@ Registra bloqueos entre usuarios para controlar interacciones y seguridad en esp
 | POST /community/conversations/contacts/search | LEE | POR_SQL |
 | GET /community/feed | LEE | DIRECTA |
 | GET /community/polls/{pollId} | LEE | DIRECTA |
+| POST /community/polls/{pollId}/votes | LEE | DIRECTA |
 | GET /community/posts/{postId} | LEE | DIRECTA |
 | GET /community/posts/{postId}/comments | LEE | DIRECTA |
 | GET /community/posts/{postId}/reactions | LEE | DIRECTA |

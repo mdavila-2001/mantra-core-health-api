@@ -21,8 +21,8 @@
     "tablasAppendOnlyDeclaradas": 140,
     "tablasConOperaciones": 947,
     "orm": {
-      "COINCIDE": 1207,
-      "DIVERGE": 23
+      "COINCIDE": 1206,
+      "DIVERGE": 24
     },
     "columnasOrm": {
       "COINCIDE": 16826,
@@ -69,39 +69,21 @@
         }
       },
       {
-        "tabla": "data_catalog.catalog_operations",
-        "clase": "CatalogOperations",
-        "archivo": "src/modules/data_catalog/entities/catalog_operations.entity.ts",
-        "ddl": {
-          "tipo": "PARCHE",
-          "fuente": "SQL\\patches\\2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
-        }
-      },
-      {
         "tabla": "data_catalog.catalog_operation_impacts",
         "clase": "CatalogOperationImpacts",
         "archivo": "src/modules/data_catalog/entities/catalog_operation_impacts.entity.ts",
         "ddl": {
           "tipo": "PARCHE",
-          "fuente": "SQL\\patches\\2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
+          "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
         }
       },
       {
-        "tabla": "data_catalog.catalog_processes",
-        "clase": "CatalogProcesses",
-        "archivo": "src/modules/data_catalog/entities/catalog_processes.entity.ts",
+        "tabla": "data_catalog.catalog_operations",
+        "clase": "CatalogOperations",
+        "archivo": "src/modules/data_catalog/entities/catalog_operations.entity.ts",
         "ddl": {
           "tipo": "PARCHE",
-          "fuente": "SQL\\patches\\2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
-        }
-      },
-      {
-        "tabla": "data_catalog.catalog_process_steps",
-        "clase": "CatalogProcessSteps",
-        "archivo": "src/modules/data_catalog/entities/catalog_process_steps.entity.ts",
-        "ddl": {
-          "tipo": "PARCHE",
-          "fuente": "SQL\\patches\\2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
+          "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
         }
       },
       {
@@ -110,7 +92,25 @@
         "archivo": "src/modules/data_catalog/entities/catalog_process_step_operations.entity.ts",
         "ddl": {
           "tipo": "PARCHE",
-          "fuente": "SQL\\patches\\2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
+          "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
+        }
+      },
+      {
+        "tabla": "data_catalog.catalog_process_steps",
+        "clase": "CatalogProcessSteps",
+        "archivo": "src/modules/data_catalog/entities/catalog_process_steps.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
+        }
+      },
+      {
+        "tabla": "data_catalog.catalog_processes",
+        "clase": "CatalogProcesses",
+        "archivo": "src/modules/data_catalog/entities/catalog_processes.entity.ts",
+        "ddl": {
+          "tipo": "PARCHE",
+          "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
         }
       },
       {
@@ -137,7 +137,7 @@
         "archivo": "src/modules/pharmacy_inventory/entities/purchase_quotations.entity.ts",
         "ddl": {
           "tipo": "PARCHE",
-          "fuente": "SQL\\patches\\2026-09-08_v428_billing_quotations.sql"
+          "fuente": "SQL/patches/2026-09-08_v428_billing_quotations.sql"
         }
       },
       {
@@ -173,7 +173,7 @@
         "archivo": "src/modules/time_series/entities/ads_delivery_event_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -182,7 +182,7 @@
         "archivo": "src/modules/time_series/entities/ai_runtime_metric_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -191,7 +191,7 @@
         "archivo": "src/modules/time_series/entities/application_tracking_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -200,7 +200,7 @@
         "archivo": "src/modules/time_series/entities/audit_access_metric_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -209,7 +209,7 @@
         "archivo": "src/modules/time_series/entities/device_raw_reading_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -218,7 +218,7 @@
         "archivo": "src/modules/time_series/entities/ingestion_pipeline_metric_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -227,7 +227,7 @@
         "archivo": "src/modules/time_series/entities/lab_analyzer_event_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -236,7 +236,7 @@
         "archivo": "src/modules/time_series/entities/location_ping_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -245,7 +245,7 @@
         "archivo": "src/modules/time_series/entities/normalized_vital_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -254,7 +254,7 @@
         "archivo": "src/modules/time_series/entities/payment_gateway_metric_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -263,7 +263,7 @@
         "archivo": "src/modules/time_series/entities/service_sli_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -272,7 +272,7 @@
         "archivo": "src/modules/time_series/entities/telemetry_event_series.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\58_time_series_timescaledb\\time_series.timescaledb.sql"
+          "fuente": "NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql"
         }
       },
       {
@@ -281,7 +281,7 @@
         "archivo": "src/modules/vector_rag/entities/embedding_jobs.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -290,7 +290,7 @@
         "archivo": "src/modules/vector_rag/entities/embedding_model_versions.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -299,7 +299,7 @@
         "archivo": "src/modules/vector_rag/entities/rag_access_policies.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -308,7 +308,7 @@
         "archivo": "src/modules/vector_rag/entities/retrieval_candidates.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -317,7 +317,7 @@
         "archivo": "src/modules/vector_rag/entities/retrieval_evidence.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -326,7 +326,7 @@
         "archivo": "src/modules/vector_rag/entities/retrieval_feedback_events.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -335,7 +335,7 @@
         "archivo": "src/modules/vector_rag/entities/retrieval_sessions.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -344,7 +344,7 @@
         "archivo": "src/modules/vector_rag/entities/vector_chunks.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -353,7 +353,7 @@
         "archivo": "src/modules/vector_rag/entities/vector_collections.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -362,7 +362,7 @@
         "archivo": "src/modules/vector_rag/entities/vector_deletion_jobs.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -371,7 +371,7 @@
         "archivo": "src/modules/vector_rag/entities/vector_documents.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -380,7 +380,7 @@
         "archivo": "src/modules/vector_rag/entities/vector_embeddings.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -389,7 +389,7 @@
         "archivo": "src/modules/vector_rag/entities/vector_reconciliation_runs.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       },
       {
@@ -398,13 +398,13 @@
         "archivo": "src/modules/vector_rag/entities/vector_tenant_bindings.entity.ts",
         "ddl": {
           "tipo": "NOSQL",
-          "fuente": "NoSQL\\59_vector_rag_pgvector\\vector_rag.pgvector.sql"
+          "fuente": "NoSQL/59_vector_rag_pgvector/vector_rag.pgvector.sql"
         }
       }
     ],
     "tablasSinEntidad": [],
     "columnasAusentesEnOrm": 1,
-    "columnasDeMasEnOrm": 16,
+    "columnasDeMasEnOrm": 17,
     "nulabilidad": 24,
     "tipos": 0,
     "esquemasSinCatalogoDeApi": [],
@@ -3813,8 +3813,8 @@
       "dominio": "Financiero y ERP",
       "columnas": 17,
       "indices": 8,
-      "operaciones": 24,
-      "orm": "COINCIDE",
+      "operaciones": 31,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -4770,7 +4770,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 20,
       "indices": 12,
-      "operaciones": 148,
+      "operaciones": 150,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4825,7 +4825,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 11,
       "indices": 7,
-      "operaciones": 16,
+      "operaciones": 17,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4847,7 +4847,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 16,
       "indices": 10,
-      "operaciones": 23,
+      "operaciones": 24,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4869,7 +4869,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 10,
       "indices": 6,
-      "operaciones": 31,
+      "operaciones": 32,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11557,7 +11557,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 8,
-      "operaciones": 143,
+      "operaciones": 144,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11568,7 +11568,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 20,
       "indices": 12,
-      "operaciones": 66,
+      "operaciones": 67,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12085,7 +12085,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 9,
       "indices": 6,
-      "operaciones": 41,
+      "operaciones": 49,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12096,7 +12096,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 27,
       "indices": 14,
-      "operaciones": 110,
+      "operaciones": 118,
       "orm": "COINCIDE",
       "appendOnly": false
     },

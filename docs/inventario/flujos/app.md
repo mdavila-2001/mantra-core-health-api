@@ -9,7 +9,7 @@
 ## Proceso: app
 
 - **Código:** `app` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 6
-- **Actores:** Cualquier sesión válida · Público (sin sesión)
+- **Actores:** Cualquier sesión válida · PLATFORM_ADMIN · Público (sin sesión) · SECURITY_ADMIN · SRE
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** —
 
@@ -25,8 +25,8 @@ _Sin fuente: ni el README del módulo ni el modelo lo describen._
 |  |  | GET /health | Público (sin sesión) | BAJO | 0 |
 |  |  | GET /liveness | Público (sin sesión) | BAJO | 0 |
 |  |  | GET /readiness | Público (sin sesión) | BAJO | 0 |
-| `ctrl:DataSourcesController` | Operaciones de DataSourcesController que el README no asigna a un caso de uso | GET /health/data-sources | Cualquier sesión válida | BAJO | 0 |
-|  |  | GET /health/data-sources/metrics | Cualquier sesión válida | BAJO | 0 |
+| `ctrl:DataSourcesController` | Operaciones de DataSourcesController que el README no asigna a un caso de uso | GET /health/data-sources | PLATFORM_ADMIN · SRE · SECURITY_ADMIN | BAJO | 0 |
+|  |  | GET /health/data-sources/metrics | PLATFORM_ADMIN · SRE · SECURITY_ADMIN | BAJO | 0 |
 
 ### Diagrama — etapas `ctrl:AppController`, `ctrl:DataSourcesController`
 
@@ -34,6 +34,7 @@ _Sin fuente: ni el README del módulo ni el modelo lo describen._
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a4(["Público (sin sesión)"]):::actor
+  a8(["PLATFORM_ADMIN · SRE · SECURITY_ADMIN"]):::actor
   subgraph s0["ctrl:AppController · Operaciones de AppController que el README no asigna a un…"]
     o1["GET /"]:::op
     o3["GET /health"]:::op
@@ -42,14 +43,14 @@ flowchart LR
   end
   subgraph s1["ctrl:DataSourcesController · Operaciones de DataSourcesController que el README…"]
     o7["GET /health/data-sources"]:::op
-    o8["GET /health/data-sources/metrics"]:::op
+    o9["GET /health/data-sources/metrics"]:::op
   end
   a2 --> o1
   a4 --> o3
   a4 --> o5
   a4 --> o6
-  a2 --> o7
-  a2 --> o8
+  a8 --> o7
+  a8 --> o9
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3

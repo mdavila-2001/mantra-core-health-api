@@ -4,7 +4,7 @@
 
 - **Bloque:** Núcleo y Terminología (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 - **Operaciones:** 19 (19 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 10 · MEDIO 5 · BAJO 4
+- **Riesgo:** ALTO 6 · MEDIO 9 · BAJO 4
 - **Tablas distintas que tocan:** 10
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/common.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -12,9 +12,9 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/common/addresses` | Registrar una dirección (UC-02-04) | ALTO | 1 | sesión (sin roles) |
-| 2 | POST | `/common/contact-points` | Registrar un punto de contacto (UC-02-02) | ALTO | 1 | sesión (sin roles) |
-| 3 | POST | `/common/contact-points/{id}/verify` | Verificar un punto de contacto (UC-02-03) | ALTO | 2 | sesión (sin roles) |
+| 1 | POST | `/common/addresses` | Registrar una dirección (UC-02-04) | MEDIO | 1 | SECURITY_ADMIN |
+| 2 | POST | `/common/contact-points` | Registrar un punto de contacto (UC-02-02) | MEDIO | 1 | SECURITY_ADMIN |
+| 3 | POST | `/common/contact-points/{id}/verify` | Verificar un punto de contacto (UC-02-03) | MEDIO | 2 | SECURITY_ADMIN |
 | 4 | POST | `/common/files` | Crear un archivo con su versión inicial (UC-02-05) | ALTO | 3 | sesión (sin roles) |
 | 5 | DELETE | `/common/files/{id}` | Borrar lógicamente un archivo (UC-02-10) | ALTO | 4 | sesión (sin roles) |
 | 6 | GET | `/common/files/{id}/content` | Descargar el contenido vigente de un archivo | BAJO | 2 | sesión (sin roles) |
@@ -24,7 +24,7 @@
 | 10 | POST | `/common/files/{id}/versions/{vid}/derivatives` | Generar un derivado de una versión (UC-02-07) | ALTO | 5 | sesión (sin roles) |
 | 11 | GET | `/common/files/links` | Listar los archivos adjuntos a un recurso (UC-02-08) | BAJO | 3 | sesión (sin roles) |
 | 12 | POST | `/common/files/upload` | Subir el contenido de un archivo (multipart) | ALTO | 6 | sesión (sin roles) |
-| 13 | POST | `/common/identifiers` | Registrar un identificador oficial (UC-02-01) | ALTO | 2 | sesión (sin roles) |
+| 13 | POST | `/common/identifiers` | Registrar un identificador oficial (UC-02-01) | MEDIO | 2 | SECURITY_ADMIN |
 | 14 | POST | `/internal/files/versions/{vid}/scan-result` | Registrar resultado de escaneo antimalware (UC-02-09) | MEDIO | 2 | SYSTEM, SECURITY_ADMIN |
 | 15 | GET | `/internal/files/versions/pending-scan` | Listar versiones pendientes de escaneo antimalware | BAJO | 1 | SYSTEM, SECURITY_ADMIN |
 | 16 | POST | `/internal/storage-lifecycle/audio/{assetId}/abort` | Abortar la publicación reservada de un audio | MEDIO | 3 | SYSTEM |
@@ -39,9 +39,9 @@
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una dirección (UC-02-04)
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonAddressesController.create` — `src/modules/common/controllers/common-addresses.controller.ts:21`
+- **Implementación:** `CommonAddressesController.create` — `src/modules/common/controllers/common-addresses.controller.ts:27`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -51,14 +51,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/addresses` la atiende `CommonAddressesController.create` (src/modules/common/controllers/common-addresses.controller.ts:21). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateAddressDto` (11 campos, 3 obligatorios). Delega en `AddressesService.create`. Crea filas en common.addresses.
+`POST /common/addresses` la atiende `CommonAddressesController.create` (src/modules/common/controllers/common-addresses.controller.ts:27). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateAddressDto` (11 campos, 3 obligatorios). Delega en `AddressesService.create`. Crea filas en common.addresses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-addresses.controller.ts:21` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-addresses.controller.ts:27` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -168,9 +168,9 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un punto de contacto (UC-02-02)
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonContactPointsController.create` — `src/modules/common/controllers/common-contact-points.controller.ts:33`
+- **Implementación:** `CommonContactPointsController.create` — `src/modules/common/controllers/common-contact-points.controller.ts:40`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -180,14 +180,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/contact-points` la atiende `CommonContactPointsController.create` (src/modules/common/controllers/common-contact-points.controller.ts:33). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateContactPointDto` (6 campos, 4 obligatorios). Delega en `ContactPointsService.create`. Crea filas en common.contact_points.
+`POST /common/contact-points` la atiende `CommonContactPointsController.create` (src/modules/common/controllers/common-contact-points.controller.ts:40). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateContactPointDto` (6 campos, 4 obligatorios). Delega en `ContactPointsService.create`. Crea filas en common.contact_points.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-contact-points.controller.ts:33` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-contact-points.controller.ts:40` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -278,9 +278,9 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Origen:** CONTRATO
 - **Nombre:** Verificar un punto de contacto (UC-02-03)
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonContactPointsController.verify` — `src/modules/common/controllers/common-contact-points.controller.ts:49`
+- **Implementación:** `CommonContactPointsController.verify` — `src/modules/common/controllers/common-contact-points.controller.ts:57`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -290,16 +290,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/contact-points/{id}/verify` la atiende `CommonContactPointsController.verify` (src/modules/common/controllers/common-contact-points.controller.ts:49). Exige sesión; el controlador no declara roles. Valida el cuerpo como `VerifyContactPointDto` (1 campo, 0 obligatorios). Delega en `ContactPointsService.verify`. Actualiza common.contact_points. Lee common.contact_points.
+`POST /common/contact-points/{id}/verify` la atiende `CommonContactPointsController.verify` (src/modules/common/controllers/common-contact-points.controller.ts:57). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyContactPointDto` (1 campo, 0 obligatorios). Delega en `ContactPointsService.verify`. Actualiza common.contact_points. Lee common.contact_points.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-contact-points.controller.ts:49` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-contact-points.controller.ts:57` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-contact-points.controller.ts:49` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/common/controllers/common-contact-points.controller.ts:57` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1310,9 +1310,9 @@ El árbol de decisión completo está en [flujos](../flujos/common.md).
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un identificador oficial (UC-02-01)
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CommonIdentifiersController.create` — `src/modules/common/controllers/common-identifiers.controller.ts:21`
+- **Implementación:** `CommonIdentifiersController.create` — `src/modules/common/controllers/common-identifiers.controller.ts:27`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1322,14 +1322,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /common/identifiers` la atiende `CommonIdentifiersController.create` (src/modules/common/controllers/common-identifiers.controller.ts:21). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateIdentifierDto` (6 campos, 4 obligatorios). Delega en `IdentifiersService.create`. Crea filas en common.identifiers. Lee common.identifiers.
+`POST /common/identifiers` la atiende `CommonIdentifiersController.create` (src/modules/common/controllers/common-identifiers.controller.ts:27). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateIdentifierDto` (6 campos, 4 obligatorios). Delega en `IdentifiersService.create`. Crea filas en common.identifiers. Lee common.identifiers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/common/controllers/common-identifiers.controller.ts:21` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/common/controllers/common-identifiers.controller.ts:27` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |

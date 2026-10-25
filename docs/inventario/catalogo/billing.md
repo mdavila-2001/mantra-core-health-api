@@ -28,7 +28,7 @@
 | [quotations](#quotations) | Representa cotizaciones de prestaciones ligadas a una práctica y a una persona paciente, para informar y acordar costos antes de la atención. | 20 | 9 | 3 | COINCIDE |
 | [receivable_payment_allocations](#receivable_payment_allocations) | Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se cancelaron obligaciones. | 11 | 7 | 10 | COINCIDE |
 | [reimbursements](#reimbursements) | Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servicios de salud. | 11 | 5 | 2 | COINCIDE |
-| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 17 | 8 | 24 | COINCIDE |
+| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 17 | 8 | 31 | DIVERGE |
 | [tax_codes](#tax_codes) | Cataloga códigos tributarios usados para calcular impuestos en documentos financieros del sistema médico. | 14 | 6 | 0 | COINCIDE |
 | [tax_periods](#tax_periods) | Define períodos tributarios para agrupar obligaciones y reportes fiscales de la organización sanitaria. | 13 | 4 | 0 | COINCIDE |
 | [vendors](#vendors) | Cataloga proveedores a quienes la organización sanitaria compra bienes o servicios. | 14 | 6 | 2 | COINCIDE |
@@ -1765,7 +1765,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: service_catalog`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `ServiceCatalog` — `src/modules/billing/entities/service_catalog.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 4 entrantes · 24 operaciones
+- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 4 entrantes · 31 operaciones
 
 #### Columnas
 
@@ -1783,11 +1783,11 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | 10 | `tax_code_id` | `uuid` | Clave foránea → billing.tax_codes.id; Opcional | _sin dato_ | coincide |
 | 11 | `income_account_id` | `uuid` | Clave foránea → accounting.accounts.id; Opcional | _sin dato_ | coincide |
 | 12 | `is_active` | `boolean` | Obligatoria | _sin dato_ | coincide |
-| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:88`)_ | coincide |
-| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:94`)_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:91`)_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/billing/entities/service_catalog.entity.ts:97`)_ | coincide |
 | 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/billing/entities/service_catalog.entity.ts:112`)_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/billing/entities/service_catalog.entity.ts:115`)_ | coincide |
 
 #### Relaciones
 
@@ -1836,7 +1836,14 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | POST /billing/simulated/invoices/{invoiceId}/annulment | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
+| GET /medical-groups | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
+| GET /medical-groups/{id} | LEE | DIRECTA |
+| PATCH /medical-groups/{id}/exercise-notes | LEE | DIRECTA |
+| POST /medical-groups/{id}/members/{memberId}/respond | LEE | DIRECTA |
+| POST /medical-groups/{id}/reschedule-requests | LEE | DIRECTA |
+| POST /medical-groups/{id}/reschedule-requests/respond | LEE | DIRECTA |
+| GET /medical-groups/eligible-members | LEE | DIRECTA |
 | POST /practices | CREA | DIRECTA |
 | GET /public/profiles/o/{slug}/services | LEE | POR_SQL |
 | POST /quotations | LEE | DIRECTA |

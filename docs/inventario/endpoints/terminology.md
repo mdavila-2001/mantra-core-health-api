@@ -539,7 +539,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TerminologyFhirController.translate → ConceptMapsService.translate → ConceptMapsService.curate → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
-| `terminology.concept_maps` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyFhirController.translate → ConceptMapsService.translate → ConceptMapsService.curate | `src/modules/terminology/services/concept-maps.service.ts:156` |
+| `terminology.concept_maps` | ESCRIBE | ACTUALIZA | POR_TIPO | TerminologyFhirController.translate → ConceptMapsService.translate → ConceptMapsService.curate | `src/modules/terminology/services/concept-maps.service.ts:180` |
 | `terminology.concept_maps` | ESCRIBE | CREA | DIRECTA | TerminologyFhirController.translate → ConceptMapsService.translate → ConceptMapsService.curate → ConceptMapsRepository.create | `src/modules/terminology/repositories/concept-maps.repository.ts:100` |
 | `terminology.concept_maps` | LEE | LEE | DIRECTA | TerminologyFhirController.translate → ConceptMapsService.translate → ConceptMapsService.curate → ConceptMapsRepository.findEquivalent | `src/modules/terminology/repositories/concept-maps.repository.ts:59` |
 
@@ -595,7 +595,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Curar un mapeo exige un rol de terminología |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Concepto origen no encontrado; ResourceNotFoundException: Concepto destino no encontrado; ResourceNotFoundException: El mapeo dejó de existir durante el curado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Curar un mapeo exige declarar la equivalencia; PreconditionFailedException: Un concepto no puede mapearse a sí mismo; PreconditionFailedException: Los conceptos del mapeo tienen que estar activos |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |

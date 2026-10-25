@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1551,
+    "total": 1558,
     "porOrigen": {
-      "CONTRATO": 1533,
-      "CONTRATO_AUSENTE": 18
+      "CONTRATO": 1541,
+      "CONTRATO_AUSENTE": 17
     },
     "porRiesgo": {
-      "BAJO": 497,
-      "MEDIO": 875,
-      "ALTO": 179
+      "BAJO": 504,
+      "MEDIO": 879,
+      "ALTO": 175
     },
-    "conTablas": 1479,
-    "sinTablasSinDeterminar": 19,
+    "conTablas": 1480,
+    "sinTablasSinDeterminar": 25,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 882,
-    "conRequerimientos": 1551
+    "conPruebas": 888,
+    "conRequerimientos": 1558
   },
   "endpoints": [
     {
@@ -1244,7 +1244,11 @@
       "nombre": "Estado y enrutado de las fuentes de datos (requiere autenticación)",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN"
+      ],
       "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
@@ -1260,7 +1264,11 @@
       "nombre": "Contadores de operaciones por conexión y por ruta read/write",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SRE",
+        "SECURITY_ADMIN"
+      ],
       "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
@@ -4442,12 +4450,12 @@
     },
     {
       "id": "ClinicalReadController_getReceivedServices",
-      "origen": "CONTRATO_AUSENTE",
+      "origen": "CONTRATO",
       "metodo": "GET",
       "ruta": "/clinical/patients/{patientProfileId}/received-services",
       "modulo": "clinical",
       "bloque": "Clínico y Diagnóstico",
-      "nombre": "Servicios que el paciente recibió: intervenciones médicas realizadas y vacunas. Es la pestaña «Servicios recibidos» de la historia. El estudio de laboratorio y la imagenología no entran: viven en «Resultados». La política de acceso es la del resumen (`ClinicalRecordAccessGuard`) y la lectura deja su asiento en `audit.data_access_log` antes de ejecutarse (`@AccessLogged`).",
+      "nombre": "Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas",
       "riesgo": "BAJO",
       "publica": false,
       "roles": [
@@ -5157,9 +5165,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Registrar una dirección (UC-02-04)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 1,
       "eventos": 0,
       "pruebas": 3,
@@ -5173,9 +5183,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Registrar un punto de contacto (UC-02-02)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 1,
       "eventos": 0,
       "pruebas": 2,
@@ -5189,9 +5201,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Verificar un punto de contacto (UC-02-03)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 2,
       "eventos": 0,
       "pruebas": 2,
@@ -5349,9 +5363,11 @@
       "modulo": "common",
       "bloque": "Núcleo y Terminología",
       "nombre": "Registrar un identificador oficial (UC-02-01)",
-      "riesgo": "ALTO",
+      "riesgo": "MEDIO",
       "publica": false,
-      "roles": [],
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
       "tablas": 2,
       "eventos": 0,
       "pruebas": 2,
@@ -6240,7 +6256,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6288,7 +6304,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -13092,6 +13108,54 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "IamOnboardingDraftsController_deleteDraft",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/iam/onboarding-drafts/{formType}/{draftId}",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamOnboardingDraftsController_getDraft",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/iam/onboarding-drafts/{formType}/{draftId}",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Recupera un borrador de alta guardado por identificador y tipo de formulario",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamOnboardingDraftsController_saveDraft",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/iam/onboarding-drafts/{formType}/{draftId}",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Guarda o actualiza el avance del formulario de alta en borrador",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "IamUsersController_searchUsers",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -16275,7 +16339,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 2,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -16294,7 +16358,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 25,
+      "tablas": 27,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -16313,7 +16377,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16332,7 +16396,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16351,7 +16415,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 4,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16370,7 +16434,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -16389,7 +16453,26 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 3,
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "MedicalGroupsController_listEligibleMembers",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/medical-groups/eligible-members",
+      "modulo": "medical_groups",
+      "bloque": null,
+      "nombre": "Colegas que se pueden invitar a un grupo de este servicio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -26785,6 +26868,50 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "TelemetryOnboardingAnalyticsController_getFunnelReport",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/analytics/onboarding/funnel",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": "Reporte de embudo y deserción paso a paso para formularios de alta",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SECURITY_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "MARKETING_MANAGER",
+        "DPO"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TelemetryOnboardingAnalyticsController_getHeatmapReport",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/admin/analytics/onboarding/heatmap",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": "Mapa de calor por campo y nivel de fricción para formularios de alta",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PLATFORM_ADMIN",
+        "SECURITY_ADMIN",
+        "DATA_PLATFORM_ADMIN",
+        "MARKETING_MANAGER",
+        "DPO"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "TelemetryAnalyticsController_overview",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -27044,6 +27171,22 @@
         "SECURITY_ADMIN"
       ],
       "tablas": 5,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TelemetryOnboardingAnalyticsController_recordEvents",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/telemetry/onboarding-events",
+      "modulo": "telemetry",
+      "bloque": "Operaciones de Plataforma",
+      "nombre": "Captura eventos de telemetría de alta y avance en formularios de registro",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"

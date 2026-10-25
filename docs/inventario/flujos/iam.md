@@ -3,12 +3,12 @@
 # Flujos del módulo `iam`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 36 (30 con decisiones propias, 6 sin ellas)
+- **Operaciones:** 39 (30 con decisiones propias, 9 sin ellas)
 - Inventario de endpoints del módulo: [iam](../endpoints/iam.md)
 
 ## Proceso: IAM
 
-- **Código:** `iam` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 36
+- **Código:** `iam` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 39
 - **Actores:** CLINICIAN · Cualquier sesión válida · Público (sin sesión) · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/iam/README.md`
@@ -42,6 +42,9 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/auth/upload-registration-document | Público (sin sesión) | ALTO | 6 |
 |  |  | POST /iam/auth/upload-registration-signature-image | Público (sin sesión) | ALTO | 6 |
 |  |  | POST /iam/auth/verify-email | Público (sin sesión) | ALTO | 4 |
+| `ctrl:IamOnboardingDraftsController` | Operaciones de IamOnboardingDraftsController que el README no asigna a un caso de uso | DELETE /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
+|  |  | GET /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
+|  |  | PUT /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
 | `ctrl:IamUsersController` | Operaciones de IamUsersController que el README no asigna a un caso de uso | GET /iam/users | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users | SECURITY_ADMIN | MEDIO | 6 |
 |  |  | GET /iam/users/{id} | SECURITY_ADMIN | BAJO | 1 |
@@ -60,7 +63,7 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/users/assisted-practitioner-registration | SECURITY_ADMIN | MEDIO | 45 |
 |  |  | POST /iam/users/assisted-registration | CLINICIAN · SECURITY_ADMIN | MEDIO | 10 |
 
-### Diagrama 1 de 2 — etapas `ctrl:IamAccountSecurityController`, `ctrl:IamAuthController`
+### Diagrama 1 de 2 — etapas `ctrl:IamAccountSecurityController`, `ctrl:IamAuthController`, `ctrl:IamOnboardingDraftsController`
 
 ```mermaid
 flowchart LR
@@ -122,6 +125,11 @@ flowchart LR
     o51["POST /iam/auth/upload-registration-document"]:::op
     o54["POST /iam/auth/upload-registration-signature-image"]:::op
     o55["POST /iam/auth/verify-email"]:::op
+  end
+  subgraph s2["ctrl:IamOnboardingDraftsController · Operaciones de IamOnboardingDraftsControll…"]
+    o56["DELETE /iam/onboarding-drafts/{formType}/{draftId}"]:::op
+    o57["GET /iam/onboarding-drafts/{formType}/{draftId}"]:::op
+    o58["PUT /iam/onboarding-drafts/{formType}/{draftId}"]:::op
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
@@ -243,6 +251,9 @@ flowchart LR
   o55 -->|"LEE"| t16
   o55 -->|"ACTUALIZA"| t13
   o55 -->|"LEE"| t13
+  a11 --> o56
+  a11 --> o57
+  a11 --> o58
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -2410,7 +2421,7 @@ Registrar un dispositivo del usuario
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No tiene acceso a los dispositivos de esta cuenta |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Usuario no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2421,29 +2432,33 @@ flowchart TD
   n1 --> n2
   n3["Llama a IamDevicesService.register"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4{"actor.id !== userId && !actor.roles.some((role) =› ROLES_THAT_MANAGE_DEVICES.includes(role))"}:::decision
   n3 --> n4
-  n5["Llama a UsersRepository.findById"]:::llamada
-  n4 --> n5
-  n6[("LEE iam.users")]:::efecto
-  n5 --> n6
-  n7{"!user"}:::decision
+  n5(["403 FORBIDDEN No tiene acceso a los dispositivos de esta cuenta"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a UsersRepository.findById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Usuario no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a DevicesRepository.create"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA iam.devices")]:::efecto
-  n9 --> n10
-  n11{"trusted"}:::decision
-  n10 --> n11
-  n12["Llama a SecurityEventsRepository.record"]:::llamada
-  n11 -->|"sí"| n12
-  n13[("CREA iam.security_events")]:::efecto
+  n8[("LEE iam.users")]:::efecto
+  n7 --> n8
+  n9{"!user"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Usuario no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a DevicesRepository.create"]:::llamada
+  n9 -->|"no"| n11
+  n12[("CREA iam.devices")]:::efecto
+  n11 --> n12
+  n13{"trusted"}:::decision
   n12 --> n13
-  n14(("201 Responde con éxito")):::ok
-  n13 --> n14
-  n11 -->|"no"| n14
+  n14["Llama a SecurityEventsRepository.record"]:::llamada
+  n13 -->|"sí"| n14
+  n15[("CREA iam.security_events")]:::efecto
+  n14 --> n15
+  n16(("201 Responde con éxito")):::ok
+  n15 --> n16
+  n13 -->|"no"| n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3083,4 +3098,7 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | POST /iam/auth/logout-all | 200, 401, 403, 429 | 4 |
 | POST /iam/auth/sessions/purge | 200, 401, 403, 429 | 3 |
 | GET /iam/me/sessions | 200, 401, 403, 429 | 1 |
+| DELETE /iam/onboarding-drafts/{formType}/{draftId} | 200, 401, 429 | 0 |
+| GET /iam/onboarding-drafts/{formType}/{draftId} | 200, 401, 429 | 0 |
+| PUT /iam/onboarding-drafts/{formType}/{draftId} | 200, 401, 429 | 0 |
 | GET /iam/users | 200, 401, 403, 429 | 2 |

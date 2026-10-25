@@ -118,30 +118,6 @@
         "fuente": "src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:73"
       },
       {
-        "operacion": "CommonAddressesController_create",
-        "metodo": "POST",
-        "ruta": "/common/addresses",
-        "modulo": "common",
-        "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/common/controllers/common-addresses.controller.ts:21"
-      },
-      {
-        "operacion": "CommonContactPointsController_create",
-        "metodo": "POST",
-        "ruta": "/common/contact-points",
-        "modulo": "common",
-        "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/common/controllers/common-contact-points.controller.ts:33"
-      },
-      {
-        "operacion": "CommonContactPointsController_verify",
-        "metodo": "POST",
-        "ruta": "/common/contact-points/{id}/verify",
-        "modulo": "common",
-        "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/common/controllers/common-contact-points.controller.ts:49"
-      },
-      {
         "operacion": "CommonFilesController_createFile",
         "metodo": "POST",
         "ruta": "/common/files",
@@ -188,14 +164,6 @@
         "modulo": "common",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/common/controllers/common-files.controller.ts:73"
-      },
-      {
-        "operacion": "CommonIdentifiersController_create",
-        "metodo": "POST",
-        "ruta": "/common/identifiers",
-        "modulo": "common",
-        "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/common/controllers/common-identifiers.controller.ts:21"
       },
       {
         "operacion": "CommunitySocialController_unblock",
@@ -1126,7 +1094,7 @@
         "fuente": "src/modules/terminology/controllers/terminology-fhir.controller.ts:97"
       }
     ],
-    "cuenta": 139
+    "cuenta": 135
   },
   {
     "id": "FLU-03",
@@ -6009,6 +5977,30 @@
         "fuente": null
       },
       {
+        "operacion": "IamOnboardingDraftsController_deleteDraft",
+        "metodo": "DELETE",
+        "ruta": "/iam/onboarding-drafts/{formType}/{draftId}",
+        "modulo": "iam",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "IamOnboardingDraftsController_getDraft",
+        "metodo": "GET",
+        "ruta": "/iam/onboarding-drafts/{formType}/{draftId}",
+        "modulo": "iam",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "IamOnboardingDraftsController_saveDraft",
+        "metodo": "PUT",
+        "ruta": "/iam/onboarding-drafts/{formType}/{draftId}",
+        "modulo": "iam",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "IamUsersController_getUser",
         "metodo": "GET",
         "ruta": "/iam/users/{id}",
@@ -7140,6 +7132,14 @@
         "operacion": "MedicalGroupsController_respondToReschedule",
         "metodo": "POST",
         "ruta": "/medical-groups/{id}/reschedule-requests/respond",
+        "modulo": "medical_groups",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "MedicalGroupsController_listEligibleMembers",
+        "metodo": "GET",
+        "ruta": "/medical-groups/eligible-members",
         "modulo": "medical_groups",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -10169,6 +10169,22 @@
         "fuente": null
       },
       {
+        "operacion": "TelemetryOnboardingAnalyticsController_getFunnelReport",
+        "metodo": "GET",
+        "ruta": "/admin/analytics/onboarding/funnel",
+        "modulo": "telemetry",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "TelemetryOnboardingAnalyticsController_getHeatmapReport",
+        "metodo": "GET",
+        "ruta": "/admin/analytics/onboarding/heatmap",
+        "modulo": "telemetry",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "TelemetryEventsController_captureActivityEvents",
         "metodo": "POST",
         "ruta": "/telemetry/activity-events",
@@ -10228,6 +10244,14 @@
         "operacion": "TelemetryGovernanceController_defineFunnel",
         "metodo": "POST",
         "ruta": "/telemetry/funnels",
+        "modulo": "telemetry",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "TelemetryOnboardingAnalyticsController_recordEvents",
+        "metodo": "POST",
+        "ruta": "/telemetry/onboarding-events",
         "modulo": "telemetry",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -10825,7 +10849,7 @@
         "fuente": null
       }
     ],
-    "cuenta": 1055
+    "cuenta": 1062
   },
   {
     "id": "FLU-08",
@@ -10833,14 +10857,6 @@
     "titulo": "Operaciones que existen en el código y el contrato OpenAPI no publica",
     "queHacer": "Regenerar el contrato o decidir si deben dejar de existir. Los clientes generados no las ven.",
     "items": [
-      {
-        "operacion": "ClinicalReadController_getReceivedServices",
-        "metodo": "GET",
-        "ruta": "/clinical/patients/{patientProfileId}/received-services",
-        "modulo": "clinical",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/clinical/controllers/clinical-read.controller.ts:110"
-      },
       {
         "operacion": "CommunityPublicController_toInt",
         "metodo": "DESCONOCIDO",
@@ -10978,7 +10994,7 @@
         "fuente": "src/modules/search_platform/controllers/search-platform.controller.ts:114"
       }
     ],
-    "cuenta": 18
+    "cuenta": 17
   },
   {
     "id": "FLU-09",
@@ -11000,7 +11016,7 @@
         "ruta": "/health/data-sources",
         "modulo": "app",
         "detalle": "DataSourceConfigurationError: No hay ninguna conexión registrada como «{name}». Registradas: {known}. (src/persistence/registry/connection.registry.ts:59) | DataSourceConfigurationError: No hay ninguna conexión registrada como «{name}». Registradas: {known}. (src/persistence/registry/connection.registry.ts:59)",
-        "fuente": "src/persistence/health/data-sources.controller.ts:25"
+        "fuente": "src/persistence/health/data-sources.controller.ts:30"
       },
       {
         "operacion": "AppController_readiness",

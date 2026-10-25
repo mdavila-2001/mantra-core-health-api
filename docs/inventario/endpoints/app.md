@@ -14,8 +14,8 @@
 |---|---|---|---|---|---|---|
 | 1 | GET | `/` | Saludo raíz de verificación de despliegue | BAJO | 0 | sesión (sin roles) |
 | 2 | GET | `/health` | Sonda de liveness (sin autenticación) | BAJO | 0 | pública |
-| 3 | GET | `/health/data-sources` | Estado y enrutado de las fuentes de datos (requiere autenticación) | BAJO | 0 | sesión (sin roles) |
-| 4 | GET | `/health/data-sources/metrics` | Contadores de operaciones por conexión y por ruta read/write | BAJO | 0 | sesión (sin roles) |
+| 3 | GET | `/health/data-sources` | Estado y enrutado de las fuentes de datos (requiere autenticación) | BAJO | 0 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN |
+| 4 | GET | `/health/data-sources/metrics` | Contadores de operaciones por conexión y por ruta read/write | BAJO | 0 | PLATFORM_ADMIN, SRE, SECURITY_ADMIN |
 | 5 | GET | `/liveness` | Sonda de liveness sin dependencias externas | BAJO | 0 | pública |
 | 6 | GET | `/readiness` | Sonda de readiness de dependencias obligatorias | BAJO | 0 | pública |
 
@@ -151,7 +151,7 @@ El árbol de decisión completo está en [flujos](../flujos/app.md).
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `DataSourcesController.dataSources` — `src/persistence/health/data-sources.controller.ts:25`
+- **Implementación:** `DataSourcesController.dataSources` — `src/persistence/health/data-sources.controller.ts:30`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -161,14 +161,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /health/data-sources` la atiende `DataSourcesController.dataSources` (src/persistence/health/data-sources.controller.ts:25). Exige sesión; el controlador no declara roles. Delega en `DataSourcesHealthService.report`. No toca tablas relacionales: Consulta el estado del registro de conexiones y las reglas de enrutamiento, en memoria..
+`GET /health/data-sources` la atiende `DataSourcesController.dataSources` (src/persistence/health/data-sources.controller.ts:30). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN. Delega en `DataSourcesHealthService.report`. No toca tablas relacionales: Consulta el estado del registro de conexiones y las reglas de enrutamiento, en memoria..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/persistence/health/data-sources.controller.ts:25` |
+| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN | `src/persistence/health/data-sources.controller.ts:30` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
@@ -215,7 +215,7 @@ El árbol de decisión completo está en [flujos](../flujos/app.md).
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `DataSourcesController.metrics` — `src/persistence/health/data-sources.controller.ts:36`
+- **Implementación:** `DataSourcesController.metrics` — `src/persistence/health/data-sources.controller.ts:42`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -225,14 +225,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /health/data-sources/metrics` la atiende `DataSourcesController.metrics` (src/persistence/health/data-sources.controller.ts:36). Exige sesión; el controlador no declara roles. Delega en `DataSourcesHealthService.metricsSnapshot`. No toca tablas relacionales: Devuelve el contador de métricas en memoria..
+`GET /health/data-sources/metrics` la atiende `DataSourcesController.metrics` (src/persistence/health/data-sources.controller.ts:42). Exige sesión con alguno de los roles PLATFORM_ADMIN, SRE, SECURITY_ADMIN. Delega en `DataSourcesHealthService.metricsSnapshot`. No toca tablas relacionales: Devuelve el contador de métricas en memoria..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/persistence/health/data-sources.controller.ts:36` |
+| ROL | Alguno de: PLATFORM_ADMIN, SRE, SECURITY_ADMIN | `src/persistence/health/data-sources.controller.ts:42` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
