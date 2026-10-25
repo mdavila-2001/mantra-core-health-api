@@ -14,8 +14,8 @@
 | [contact_points](#contact_points) | Conserva medios de contacto de personas y organizaciones para comunicación asistencial y administrativa. | 15 | 5 | 26 | COINCIDE |
 | [file_derivatives](#file_derivatives) | Cataloga derivados de archivos —como representaciones o vistas procesadas— asociados al original. | 7 | 4 | 5 | COINCIDE |
 | [file_links](#file_links) | Vincula archivos con registros de negocio para reutilizar documentos sin duplicar su identidad. | 13 | 6 | 10 | COINCIDE |
-| [file_versions](#file_versions) | Preserva versiones de archivos para mantener trazabilidad e integridad del contenido documental. | 22 | 10 | 63 | COINCIDE |
-| [files](#files) | Cataloga archivos compartidos por los dominios, separando metadata del almacenamiento de contenido. | 15 | 9 | 71 | COINCIDE |
+| [file_versions](#file_versions) | Preserva versiones de archivos para mantener trazabilidad e integridad del contenido documental. | 22 | 10 | 65 | COINCIDE |
+| [files](#files) | Cataloga archivos compartidos por los dominios, separando metadata del almacenamiento de contenido. | 15 | 9 | 74 | COINCIDE |
 | [identifiers](#identifiers) | Centraliza identificadores de personas y entidades para mantener referencias reutilizables entre módulos médicos. | 19 | 10 | 36 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -472,7 +472,7 @@ Preserva versiones de archivos para mantener trazabilidad e integridad del conte
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: file_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `FileVersions` — `src/modules/common/entities/file_versions.entity.ts`
-- **Resumen:** 22 columnas · 10 índices · 8 FK salientes · 3 entrantes · 63 operaciones
+- **Resumen:** 22 columnas · 10 índices · 8 FK salientes · 3 entrantes · 65 operaciones
 
 #### Columnas
 
@@ -542,6 +542,8 @@ Preserva versiones de archivos para mantener trazabilidad e integridad del conte
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | LEE | DIRECTA |
+| GET /billing/service-catalog/{id}/image | LEE | DIRECTA |
 | POST /charts/documents | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/me/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
@@ -629,7 +631,7 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: files`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Files` — `src/modules/common/entities/files.entity.ts`
-- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 85 entrantes · 71 operaciones
+- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 85 entrantes · 74 operaciones
 
 #### Columnas
 
@@ -767,6 +769,8 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /billing/service-catalog | LEE | DIRECTA |
+| GET /billing/service-catalog/{id}/image | LEE | DIRECTA |
 | POST /charts/documents | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -804,6 +808,7 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 | POST /diagnostics/reports/{reportId}/versions | LEE | DIRECTA |
 | PUT /tenants/{tenantId}/logo | LEE | DIRECTA |
 | GET /tenants/{tenantId}/logo/content | LEE | DIRECTA |
+| POST /fhir/r5/$export | LEE | DIRECTA |
 | POST /health-data/deidentification-runs | LEE | DIRECTA |
 | POST /iam/auth/register-organization | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/register-organization | LEE | DIRECTA |

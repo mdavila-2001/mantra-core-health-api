@@ -49,7 +49,7 @@
 
 Actualizar estado/calibración de un equipo. Caso de uso UC-23-09: Actualizar estado/calibración de equipo. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:66`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:66`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -64,7 +64,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-equipment.controller.ts:33` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -156,7 +156,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Retirar (soft-delete) una oferta de estudio. Caso de uso UC-23-08: Retirar (soft-delete) oferta. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:64`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:64`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -232,7 +232,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Renovar/registrar acreditación con evidencia. Caso de uso UC-23-11: Renovar acreditación. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -247,7 +247,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-unit-accreditations.controller.ts:36` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -337,7 +337,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Actualizar un sitio operativo de la unidad. Caso de uso UC-23-02: Actualizar sitio. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -352,7 +352,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:49` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -443,7 +443,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar equipamiento y calibración del sitio. Caso de uso UC-23-09: Registrar equipamiento. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:65`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:65`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -458,7 +458,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/diagnostic_units/controllers/diagnostic-unit-sites.controller.ts:67` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -560,7 +560,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Listar unidades diagnósticas publicadas. Caso de uso Directorio P3: Listar unidades activas y verificadas del tenant activo. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -644,7 +644,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Alta de unidad diagnóstica con sitios y acreditaciones. Caso de uso UC-23-01: Alta de unidad con sitios (1..N) y acreditaciones (0..N). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -658,7 +658,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:183` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -789,7 +789,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Consultar el perfil de una unidad diagnóstica. Caso de uso Directorio P3: Perfil con sedes, equipos, oferta, precios públicos y acreditaciones vigentes. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -941,7 +941,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Registrar una acreditación con evidencia. Caso de uso UC-23-11: Registrar acreditación con evidencia. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:68`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:68`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -956,7 +956,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:311` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1057,7 +1057,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Consola de administración de una unidad diagnóstica. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1264,7 +1264,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Asignar un especialista a la unidad/sitio. Caso de uso UC-23-10: Asignar especialista. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:67`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:67`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1279,7 +1279,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:293` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1384,7 +1384,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Crear un cronograma de precios. Caso de uso UC-23-06: Crear cronograma de precios. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1399,7 +1399,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:275` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1505,7 +1505,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Reconstruir la proyección del perfil público. Caso de uso UC-23-12: Reconstruir proyección del perfil público. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:70`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:70`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1581,7 +1581,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Registrar un sitio operativo de la unidad. Caso de uso UC-23-02: Registrar sitio operativo. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1596,7 +1596,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:202` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1693,7 +1693,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Declarar las especialidades de la unidad. Caso de uso UC-23-04: Declarar especialidades (upsert + soft-close). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1708,7 +1708,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:237` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1806,7 +1806,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Publicar oferta de estudio con componentes (panel). Caso de uso UC-23-05: Publicar oferta con componentes (panel). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -1821,7 +1821,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts:255` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1954,7 +1954,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Verificar la unidad y publicar su perfil público. Caso de uso UC-23-03: Verificar y publicar perfil público. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2044,7 +2044,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Listar las unidades del tenant, publicadas o no. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2135,7 +2135,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Buscar centros de diagnóstico, laboratorio e imagen. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2258,7 +2258,7 @@ El árbol de decisión completo está en [flujos](../flujos/diagnostic_units.md)
 
 Fijar/versionar el precio de un estudio (append-only). Caso de uso UC-23-07: Fijar/versionar precio (append-only). Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 
@@ -2273,7 +2273,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnos
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: scheduleId | `src/modules/diagnostic_units/controllers/diagnostic-pricing.controller.ts:50` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -2377,7 +2377,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Cerrar una versión de precio vigente. Caso de uso UC-23-08: Cerrar versión de precio vigente. Dentro del módulo (descripción del modelo, en inglés): «Gives a diagnostic unit a first-class identity, its own governance boundary, professionals, specialties, study catalog, public profile and versioned prices.» Dominio: Clínico y Diagnóstico.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:63`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:14`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/diagnostic_units/README.md:63`) · MODELO (`Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
 ### Cómo se atiende (sistema)
 

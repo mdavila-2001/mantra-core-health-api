@@ -144,7 +144,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:300` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:300` |
 
 ### Tablas que afecta
@@ -242,7 +242,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:45` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:45` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 5, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:45` |
 
 ### Tablas que afecta
@@ -337,7 +337,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:352` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 5, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:352` |
 
 ### Tablas que afecta
@@ -436,7 +436,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:319` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:319` |
 
 ### Tablas que afecta
@@ -747,7 +747,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:134` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:134` |
 
 ### Tablas que afecta
@@ -1205,7 +1205,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:110` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:110` |
 
 ### Tablas que afecta
@@ -1438,7 +1438,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:234` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:234` |
 
 ### Tablas que afecta
@@ -1755,7 +1755,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:267` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 5, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:267` |
 
 ### Tablas que afecta
@@ -1850,7 +1850,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:373` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:373` |
 
 ### Tablas que afecta
@@ -2019,7 +2019,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:389` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 20, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:389` |
 
 ### Tablas que afecta
@@ -2123,7 +2123,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:199` |
 | CUERPO | multipart/form-data (obligatorio); el tamaño del archivo lo define la ruta, no el límite global | `contrato (requestBody)` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 30, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:199` |
 
 ### Tablas que afecta
@@ -2223,7 +2223,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:154` |
 | CUERPO | multipart/form-data (obligatorio); el tamaño del archivo lo define la ruta, no el límite global | `contrato (requestBody)` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:154` |
 
 ### Tablas que afecta
@@ -2320,7 +2320,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:284` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:284` |
 
 ### Tablas que afecta
@@ -2539,7 +2539,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamOnboardingDraftsController.deleteDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:55`
+- **Implementación:** `IamOnboardingDraftsController.deleteDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:103`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2549,18 +2549,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.deleteDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:55). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.deleteDraft`. No se determinaron tablas para esta operación.
+`DELETE /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.deleteDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:103). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.deleteDraft`. No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:55` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:103` |
+| CABECERA | x-onboarding-draft-secret (opcional) | `contrato (parameters)` |
+| RATE_LIMIT | Límite propio: Throttle({ default: { limit: 60, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:103` |
 
 ### Tablas que afecta
 
-No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres.. _(manual, 2026-10-25; fuente: `src/modules/iam/application/services/iam-onboarding-drafts.service.ts:19`)_
 
 ### Parámetros
 
@@ -2568,6 +2569,7 @@ No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 |---|---|---|---|---|
 | `formType` | path | Sí | `string` | — |
 | `draftId` | path | Sí | `string` | — |
+| `x-onboarding-draft-secret` | header | No | `string` | Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea. |
 
 ### Cuerpo
 
@@ -2591,7 +2593,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:46` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:118` |
 
 ### Flujos
 
@@ -2606,7 +2608,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamOnboardingDraftsController.getDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:23`
+- **Implementación:** `IamOnboardingDraftsController.getDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:47`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2616,18 +2618,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.getDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:23). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.getDraft`. No se determinaron tablas para esta operación.
+`GET /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.getDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:47). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.getDraft`. No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:23` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:47` |
+| CABECERA | x-onboarding-draft-secret (opcional) | `contrato (parameters)` |
+| RATE_LIMIT | Límite propio: Throttle({ default: { limit: 120, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:47` |
 
 ### Tablas que afecta
 
-No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres.. _(manual, 2026-10-25; fuente: `src/modules/iam/application/services/iam-onboarding-drafts.service.ts:19`)_
 
 ### Parámetros
 
@@ -2635,12 +2638,13 @@ No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 |---|---|---|---|---|
 | `formType` | path | Sí | `string` | — |
 | `draftId` | path | Sí | `string` | — |
+| `x-onboarding-draft-secret` | header | No | `string` | Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea. |
 
 ### Cuerpo
 
 La operación no recibe cuerpo.
 
-### Respuesta — `OnboardingDraftPayload | null`
+### Respuesta — `OnboardingDraftPayload`
 
 _No se identificó un DTO de respuesta con campos._
 
@@ -2658,7 +2662,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:36` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:78` |
 
 ### Flujos
 
@@ -2673,7 +2677,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Bloque:** Identidad y Seguridad
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `IamOnboardingDraftsController.saveDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:37`
+- **Implementación:** `IamOnboardingDraftsController.saveDraft` — `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2683,18 +2687,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.saveDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:37). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.saveDraft`. No se determinaron tablas para esta operación.
+`PUT /iam/onboarding-drafts/{formType}/{draftId}` la atiende `IamOnboardingDraftsController.saveDraft` (src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66). Es una ruta pública: no exige token. Delega en `IamOnboardingDraftsService.saveDraft`. No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres..
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
-| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:37` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66` |
+| CABECERA | x-onboarding-draft-secret (opcional) | `contrato (parameters)` |
+| RATE_LIMIT | Límite propio: Throttle({ default: { limit: 60, ttl: 60_000 } }) | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66` |
 
 ### Tablas que afecta
 
-No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+No toca tablas relacionales: El borrador de alta vive sólo en la memoria del proceso (un `Map` con vigencia de 30 días); no hay fila en Postgres.. _(manual, 2026-10-25; fuente: `src/modules/iam/application/services/iam-onboarding-drafts.service.ts:19`)_
 
 ### Parámetros
 
@@ -2702,12 +2707,13 @@ No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
 |---|---|---|---|---|
 | `formType` | path | Sí | `string` | — |
 | `draftId` | path | Sí | `string` | — |
+| `x-onboarding-draft-secret` | header | No | `string` | Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea. |
 
 ### Cuerpo
 
 La operación no recibe cuerpo.
 
-### Respuesta — `{ ok: boolean; savedAt: string }` · HTTP `HttpStatus.OK`
+### Respuesta — `SaveOnboardingDraftResult` · HTTP `HttpStatus.OK`
 
 _No se identificó un DTO de respuesta con campos._
 
@@ -2718,6 +2724,7 @@ _No se identificó un DTO de respuesta con campos._
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.BAD_REQUEST}; DomainException: {HttpStatus.PAYLOAD_TOO_LARGE}; DomainException: {HttpStatus.TOO_MANY_REQUESTS}; DraftStoreFullError: {retryAfterSeconds} |
 
 El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
@@ -2725,7 +2732,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 
 | Tipo | Archivo |
 |---|---|
-| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:29` |
+| CONTROLADOR | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.spec.ts:61` |
 
 ### Flujos
 
@@ -2848,7 +2855,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:277` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -3292,7 +3299,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:296` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -3483,7 +3490,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:349` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -3672,7 +3679,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:384` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -3783,7 +3790,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:366` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -3968,7 +3975,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:332` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -4165,7 +4172,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:254` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -4451,7 +4458,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: CLINICIAN, SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:223` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta

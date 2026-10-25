@@ -12,7 +12,7 @@
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/fhir/r5/$export` | Exportar un Bundle FHIR interoperable con su manifiesto | MEDIO | 12 | PRIVACY_OFFICER, HEALTH_DATA_ADMIN |
+| 1 | POST | `/fhir/r5/$export` | Exportar un Bundle FHIR interoperable con su manifiesto | MEDIO | 13 | PRIVACY_OFFICER, HEALTH_DATA_ADMIN |
 | 2 | GET | `/fhir/r5/Patient/{id}/$everything` | Servir la historia longitudinal del paciente | BAJO | 5 | INTEROP_CONSUMER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN |
 | 3 | POST | `/health-data/canonical-resources/{id}/bindings` | Enlazar el recurso a una entidad de dominio | MEDIO | 5 | CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN |
 | 4 | POST | `/health-data/canonical-resources/{id}/identifiers` | Registrar un identificador de negocio del recurso | MEDIO | 5 | INGESTION_WORKER, CLINICAL_INFORMATICIAN, HEALTH_DATA_ADMIN |
@@ -48,7 +48,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 ### Cómo se atiende (sistema)
 
-`POST /fhir/r5/$export` la atiende `FhirR5Controller.exportBundle` (src/modules/health_data/controllers/fhir-r5.controller.ts:52). Exige sesión con alguno de los roles PRIVACY_OFFICER, HEALTH_DATA_ADMIN. Valida el cuerpo como `ExportBundleDto` (14 campos, 4 obligatorios). Delega en `DataReleaseService.exportBundle`. Crea filas en health_data.health_export_jobs, health_data.health_export_manifests, health_data.health_provenance_records, health_data.health_provenance_targets. Lee authz.clinical_access_grants, consent.consents, health_data.canonical_health_resources, health_data.health_deidentification_profiles, health_data.health_deidentification_runs, health_data.patient_identity_clusters, health_data.patient_identity_members, lakehouse.cohort_definitions.
+`POST /fhir/r5/$export` la atiende `FhirR5Controller.exportBundle` (src/modules/health_data/controllers/fhir-r5.controller.ts:52). Exige sesión con alguno de los roles PRIVACY_OFFICER, HEALTH_DATA_ADMIN. Valida el cuerpo como `ExportBundleDto` (14 campos, 4 obligatorios). Delega en `DataReleaseService.exportBundle`. Crea filas en health_data.health_export_jobs, health_data.health_export_manifests, health_data.health_provenance_records, health_data.health_provenance_targets. Lee authz.clinical_access_grants, common.files, consent.consents, health_data.canonical_health_resources, health_data.health_deidentification_profiles, health_data.health_deidentification_runs, health_data.patient_identity_clusters, health_data.patient_identity_members y 1 más.
 
 ### Requerimientos
 
@@ -58,15 +58,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | ROL | Alguno de: PRIVACY_OFFICER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/fhir-r5.controller.ts:52` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertPatientInTenant → DataReleaseService.resolveReadDecision | `src/modules/health_data/services/data-release.service.ts:502` |
-| `consent.consents` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertConsentInTenant | `src/modules/health_data/services/data-release.service.ts:601` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertPatientInTenant → DataReleaseService.resolveReadDecision | `src/modules/health_data/services/data-release.service.ts:503` |
+| `common.files` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertFileInTenant | `src/modules/health_data/services/data-release.service.ts:632` |
+| `consent.consents` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertConsentInTenant | `src/modules/health_data/services/data-release.service.ts:602` |
 | `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertPatientInTenant → CanonicalResourcesRepository.existsResourceByPatient | `src/modules/health_data/repositories/canonical-resources.repository.ts:207` |
 | `health_data.health_deidentification_profiles` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertCohortInTenant → DataReleaseRepository.findDeidProfileById | `src/modules/health_data/repositories/data-release.repository.ts:31` |
 | `health_data.health_deidentification_runs` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseRepository.findDeidRunById | `src/modules/health_data/repositories/data-release.repository.ts:183` |
@@ -76,7 +77,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | `health_data.health_provenance_targets` | ESCRIBE | CREA | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → HealthProvenanceRepository.createProvenanceTarget | `src/modules/health_data/repositories/health-provenance.repository.ts:173` |
 | `health_data.patient_identity_clusters` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertPatientInTenant → PatientIdentityRepository.findLiveMembershipInTenant | `src/modules/health_data/repositories/patient-identity.repository.ts:344` |
 | `health_data.patient_identity_members` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertPatientInTenant → PatientIdentityRepository.findLiveMembershipInTenant | `src/modules/health_data/repositories/patient-identity.repository.ts:339` |
-| `lakehouse.cohort_definitions` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertCohortInTenant | `src/modules/health_data/services/data-release.service.ts:570` |
+| `lakehouse.cohort_definitions` | LEE | LEE | DIRECTA | FhirR5Controller.exportBundle → DataReleaseService.exportBundle → DataReleaseService.assertCohortInTenant | `src/modules/health_data/services/data-release.service.ts:571` |
 
 ### Cuerpo — DTO `ExportBundleDto` · `application/json`
 
@@ -200,7 +201,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → DataReleaseService.resolveReadDecision | `src/modules/health_data/services/data-release.service.ts:502` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → DataReleaseService.resolveReadDecision | `src/modules/health_data/services/data-release.service.ts:503` |
 | `health_data.canonical_health_resource_versions` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → CanonicalResourcesRepository.findVersionsByIds | `src/modules/health_data/repositories/canonical-resources.repository.ts:303` |
 | `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → CanonicalResourcesRepository.findResourcesByPatient | `src/modules/health_data/repositories/canonical-resources.repository.ts:186` |
 | `health_data.patient_identity_clusters` | LEE | LEE | DIRECTA | FhirR5Controller.serveEverything → DataReleaseService.serveEverything → PatientIdentityRepository.findLiveMembershipInTenant | `src/modules/health_data/repositories/patient-identity.repository.ts:344` |
@@ -285,7 +286,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:235` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -399,7 +400,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:195` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -517,7 +518,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:215` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -632,7 +633,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:362` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -741,7 +742,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:175` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -871,15 +872,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | ROL | Alguno de: PRIVACY_OFFICER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:341` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.files` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseService.assertFileInTenant | `src/modules/health_data/services/data-release.service.ts:631` |
-| `consent.consents` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseService.assertConsentInTenant | `src/modules/health_data/services/data-release.service.ts:601` |
+| `common.files` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseService.assertFileInTenant | `src/modules/health_data/services/data-release.service.ts:632` |
+| `consent.consents` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseService.assertConsentInTenant | `src/modules/health_data/services/data-release.service.ts:602` |
 | `health_data.canonical_health_resource_versions` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseService.assertVersionsInTenant → CanonicalResourcesRepository.findVersionsByIds | `src/modules/health_data/repositories/canonical-resources.repository.ts:303` |
 | `health_data.canonical_health_resources` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseService.assertVersionsInTenant → CanonicalResourcesRepository.findResourcesByIds | `src/modules/health_data/repositories/canonical-resources.repository.ts:225` |
 | `health_data.health_deidentification_profiles` | LEE | LEE | DIRECTA | HealthDataController.recordDeidRun → DataReleaseService.recordDeidRun → DataReleaseRepository.findDeidProfileById | `src/modules/health_data/repositories/data-release.repository.ts:31` |
@@ -1001,7 +1002,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:301` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1119,7 +1120,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | ROL | Alguno de: INGESTION_WORKER, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:113` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1231,7 +1232,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:155` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1334,7 +1335,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:134` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1447,7 +1448,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | ROL | Alguno de: DATA_STEWARD, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:281` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1576,7 +1577,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: HEALTH_DATA_ADMIN, CLINICAL_INFORMATICIAN, DATA_PLATFORM_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:93` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1685,7 +1686,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | ROL | Alguno de: SYSTEM, HEALTH_DATA_ADMIN | `src/modules/health_data/controllers/health-data.controller.ts:322` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1806,7 +1807,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/health_
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/health_data/controllers/health-data.controller.ts:256` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta

@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 import { listTenantScopeDeclarations } from './tenant-scope';
 import type { AuthenticatedUser } from '../auth/authenticated-user.interface';
+import { roleAuthorizesInTenant } from '../auth/roles.guard';
 import { forbiddenWithReason } from '../errors/reasoned-http-exceptions';
 import { SystemErrorReason } from '../errors/system-error-reasons';
 
@@ -10,9 +11,23 @@ import { SystemErrorReason } from '../errors/system-error-reasons';
  */
 export const PRIVILEGED_TENANT_ROLES = new Set(['SUPERADMIN', 'SYSTEM']);
 
-/** Si el actor tiene algún rol de alcance plataforma. */
+/**
+ * Si el actor tiene algún rol de alcance plataforma.
+ *
+ * Un código privilegiado que el token trae además en `scopedRoles` es una
+ * asignación acotada a un tenant, no un rol de plataforma: no habilita el
+ * barrido entre tenants ni la declaración de un tenant ajeno. Sólo cuenta el
+ * que viene como excepción global (`iam.user_global_roles` o una asignación sin
+ * tenant), la misma regla que aplica `roleAuthorizesInTenant`.
+ */
 export function hasPrivilegedTenantRole(user: AuthenticatedUser): boolean {
-  return user.roles?.some((role) => PRIVILEGED_TENANT_ROLES.has(role)) ?? false;
+  return (
+    user.roles?.some(
+      (role) =>
+        PRIVILEGED_TENANT_ROLES.has(role) &&
+        roleAuthorizesInTenant(user, role, undefined),
+    ) ?? false
+  );
 }
 
 /**

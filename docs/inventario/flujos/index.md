@@ -2,17 +2,17 @@
 
 # Inventario de flujos
 
-**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1558 árboles de decisión**.
+**73 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 71 de módulo), **12 máquinas de estado** y **1552 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1385 · sin ellas: 173
+- Operaciones con decisiones propias: 1397 · sin ellas: 155
 - Operaciones sin proceso asignado: 0
-- Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 32 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
+- Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 31 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
 
 Método y límites: [README del inventario](../README.md). Los procesos de módulo se construyen del README de cada módulo (tabla UC → ruta); lo que el README no asigna a un caso de uso se agrupa por controlador y se marca `AGRUPACION_POR_CONTROLADOR`.
 
 | Módulo | Procesos | Operaciones | Máquinas | Documento |
 |---|---|---|---|---|
-| `accounting` | 1 | 45 | 1 | [accounting.md](accounting.md) |
+| `accounting` | 1 | 46 | 1 | [accounting.md](accounting.md) |
 | `ads` | 1 | 18 | 0 | [ads.md](ads.md) |
 | `app` | 1 | 6 | 0 | [app.md](app.md) |
 | `audio_assets` | 1 | 10 | 0 | [audio_assets.md](audio_assets.md) |
@@ -20,7 +20,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `auth_providers` | 1 | 12 | 0 | [auth_providers.md](auth_providers.md) |
 | `authz` | 2 | 32 | 0 | [authz.md](authz.md) |
 | `automation` | 1 | 17 | 0 | [automation.md](automation.md) |
-| `billing` | 1 | 34 | 0 | [billing.md](billing.md) |
+| `billing` | 1 | 35 | 0 | [billing.md](billing.md) |
 | `chart` | 1 | 23 | 0 | [chart.md](chart.md) |
 | `clinical` | 1 | 41 | 1 | [clinical.md](clinical.md) |
 | `clinical_ext` | 1 | 27 | 0 | [clinical_ext.md](clinical_ext.md) |
@@ -45,8 +45,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `health_data` | 1 | 16 | 0 | [health_data.md](health_data.md) |
 | `iam` | 1 | 39 | 0 | [iam.md](iam.md) |
 | `identity_assurance` | 1 | 28 | 0 | [identity_assurance.md](identity_assurance.md) |
-| `insurance` | 1 | 63 | 1 | [insurance.md](insurance.md) |
-| `insurance-campaigns` | 1 | 16 | 0 | [insurance-campaigns.md](insurance-campaigns.md) |
+| `insurance` | 1 | 71 | 1 | [insurance.md](insurance.md) |
 | `integration_contracts` | 1 | 12 | 0 | [integration_contracts.md](integration_contracts.md) |
 | `integrations` | 1 | 15 | 0 | [integrations.md](integrations.md) |
 | `lakehouse` | 1 | 13 | 0 | [lakehouse.md](lakehouse.md) |

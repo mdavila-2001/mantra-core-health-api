@@ -18,6 +18,13 @@ cada rol en cada endpoint administrativo y concentra el privilegio total en un �
 en cuenta al diseñar el modelo de amenazas (Fase 12): comprometer una cuenta `SUPERADMIN` otorga
 bypass de RBAC completo.
 
+El comodín vale sólo para el `SUPERADMIN` de plataforma. Un código privilegiado (`SUPERADMIN`,
+`SYSTEM`) que el token trae también en `scopedRoles` es una asignación acotada a un tenant: no es
+comodín de RBAC, no habilita el barrido entre tenants ni declarar un tenant ajeno
+(`hasPrivilegedTenantRole` y `roleAuthorizesInTenant` aplican la misma regla). Los códigos de rol
+de plataforma (`SUPERADMIN`, `SYSTEM`, `SECURITY_ADMIN`, `USER`, `PATIENT`, `PRACTITIONER`,
+`CLINICIAN`) están reservados: `POST /authz/roles` responde 409 `ROLE_CODE_RESERVED` si se pide uno.
+
 Si el rol no alcanza: `403 FORBIDDEN` (`ErrorCode.FORBIDDEN`, ver `docs/api/error-model.md`).
 
 **Deriva de permisos (gate de CI).** Una ruta autenticada sin `@Roles` ni `@Public` la pasa

@@ -17618,7 +17618,7 @@
       ]
     },
     {
-      "name": "billing (34)",
+      "name": "billing (35)",
       "item": [
         {
           "name": "billing-operations",
@@ -18860,6 +18860,62 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.serviceCatalogId);",
                       "  if (id) pm.environment.set('serviceCatalogId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /billing/service-catalog/{id}/image · Descargar la imagen de un servicio que el actor puede ver",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/billing/service-catalog/:id/image",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "billing",
+                    "service-catalog",
+                    ":id",
+                    "image"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{serviceCatalogId}}",
+                      "description": "Identificador de ruta · variable `{{serviceCatalogId}}`"
+                    }
+                  ]
+                },
+                "description": "Autoriza por contexto: servicio activo de una práctica del tenant activo. 404 uniforme en cualquier otro caso.\n\n`GET /billing/service-catalog/{id}/image`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `BillingServiceCatalogController_getImage`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('imageId', first.id);",
                       "}"
                     ]
                   }
@@ -45658,7 +45714,14 @@
               "name": "GET /iam/onboarding-drafts/{formType}/{draftId} · Recupera un borrador de alta guardado por identificador y tipo de formulario",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "x-onboarding-draft-secret",
+                    "value": "{{x_onboarding_draft_secret}}",
+                    "description": "Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.",
+                    "disabled": true
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
                   "host": [
@@ -45715,7 +45778,14 @@
               "name": "PUT /iam/onboarding-drafts/{formType}/{draftId} · Guarda o actualiza el avance del formulario de alta en borrador",
               "request": {
                 "method": "PUT",
-                "header": [],
+                "header": [
+                  {
+                    "key": "x-onboarding-draft-secret",
+                    "value": "{{x_onboarding_draft_secret}}",
+                    "description": "Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.",
+                    "disabled": true
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
                   "host": [
@@ -45740,7 +45810,7 @@
                     }
                   ]
                 },
-                "description": "Guarda o actualiza el avance del formulario de alta en borrador. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /iam/onboarding-drafts/{formType}/{draftId}`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 409, 422, 429, 500, 504\n\noperationId: `IamOnboardingDraftsController_saveDraft`",
+                "description": "Sin cabecera de secreto crea el borrador y devuelve `draftSecret` una sola vez; con el secreto correcto lo actualiza. Cuerpo máximo 64 KiB; hay topes de borradores totales y por origen (IPv6 por prefijo /64). Un borrador recién creado vive 1 hora; una segunda escritura con el secreto hecha al menos 60 s después de crearlo lo confirma y extiende su vida a 30 días. Con el almacén lleno, el origen sólo puede desalojar su propio borrador no confirmado; si no tiene, 503 con Retry-After.\n\n`PUT /iam/onboarding-drafts/{formType}/{draftId}`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 409, 422, 429, 500, 504\n\noperationId: `IamOnboardingDraftsController_saveDraft`",
                 "auth": {
                   "type": "noauth"
                 }
@@ -45764,7 +45834,14 @@
               "name": "DELETE /iam/onboarding-drafts/{formType}/{draftId} · Elimina el borrador al completar el alta exitosamente o por descarte del usuario",
               "request": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "x-onboarding-draft-secret",
+                    "value": "{{x_onboarding_draft_secret}}",
+                    "description": "Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.",
+                    "disabled": true
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
                   "host": [

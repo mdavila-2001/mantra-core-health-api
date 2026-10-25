@@ -24,7 +24,7 @@ import {
   explicacionDeSistema,
   riesgoDe,
 } from './explicaciones.mjs';
-import { buildHandlerTable } from './handlers.mjs';
+import { buildHandlerTable, claveDeHandler } from './handlers.mjs';
 import {
   loadContract,
   requestBody,
@@ -339,7 +339,7 @@ export function construirInventarioDeEndpoints({
         ruta: fila.ruta,
         modulo: fila.modulo,
         operation,
-        handler: index.controllerMethods.get(fila.operationId.split('__')[0]),
+        handler: index.controllerMethods.get(claveDeHandler(fila.operationId)),
       }),
     );
   }

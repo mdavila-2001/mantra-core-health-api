@@ -10,10 +10,10 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 129 | COINCIDE |
+| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 137 | COINCIDE |
 | [catalog_import_batches](#catalog_import_batches) | Agrupa importaciones de terminología para trazar la carga de fuentes externas y sus resultados. | 13 | 6 | 3 | COINCIDE |
-| [code_system_versions](#code_system_versions) | Registra versiones de sistemas de códigos para preservar el contexto temporal de conceptos clínicos. | 14 | 6 | 17 | COINCIDE |
-| [code_systems](#code_systems) | Define sistemas de codificación sanitaria que permiten interpretar identificadores clínicos de forma interoperable. | 15 | 8 | 14 | COINCIDE |
+| [code_system_versions](#code_system_versions) | Registra versiones de sistemas de códigos para preservar el contexto temporal de conceptos clínicos. | 14 | 6 | 19 | COINCIDE |
+| [code_systems](#code_systems) | Define sistemas de codificación sanitaria que permiten interpretar identificadores clínicos de forma interoperable. | 15 | 8 | 16 | COINCIDE |
 | [concept_designations](#concept_designations) | Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos para su búsqueda y presentación. | 11 | 5 | 20 | COINCIDE |
 | [concept_maps](#concept_maps) | Mantiene correspondencias entre conceptos o sistemas de códigos para facilitar intercambio y normalización semántica. | 12 | 6 | 3 | COINCIDE |
 | [concept_properties](#concept_properties) | Registra propiedades descriptivas de conceptos para ampliar su significado sin duplicar el concepto principal. | 10 | 3 | 21 | COINCIDE |
@@ -196,7 +196,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: catalog_concepts`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CatalogConcepts` — `src/modules/terminology/entities/catalog_concepts.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2522 entrantes · 129 operaciones
+- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2522 entrantes · 137 operaciones
 
 #### Columnas
 
@@ -2811,22 +2811,30 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
-| POST /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
-| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | LEE | POR_SQL |
-| GET /['insurance/campaigns', 'insurance-campaigns']/active | LEE | POR_SQL |
-| GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | LEE | POR_SQL |
-| GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | LEE | POR_SQL |
 | GET /insurance-brokers | LEE | DIRECTA |
 | GET /insurance-brokers/{id} | LEE | DIRECTA |
 | GET /insurance-brokers/{id}/clients | LEE | DIRECTA |
+| GET /insurance-campaigns | LEE | POR_SQL |
+| POST /insurance-campaigns | LEE | POR_SQL |
+| GET /insurance-campaigns/{id} | LEE | POR_SQL |
+| PATCH /insurance-campaigns/{id} | LEE | POR_SQL |
+| PATCH /insurance-campaigns/{id}/status | LEE | POR_SQL |
+| GET /insurance-campaigns/active | LEE | POR_SQL |
+| GET /insurance-campaigns/my-benefits | LEE | POR_SQL |
+| GET /insurance-campaigns/patient/{patientProfileId} | LEE | POR_SQL |
 | GET /insurance-carriers | LEE | DIRECTA |
 | GET /insurance-carriers/{id} | LEE | DIRECTA |
 | GET /insurance-claims | LEE | DIRECTA |
 | GET /insurance-claims/{id} | LEE | DIRECTA |
 | GET /insurance/analytics/loss-ratio | LEE | POR_SQL |
+| GET /insurance/campaigns | LEE | POR_SQL |
+| POST /insurance/campaigns | LEE | POR_SQL |
+| GET /insurance/campaigns/{id} | LEE | POR_SQL |
+| PATCH /insurance/campaigns/{id} | LEE | POR_SQL |
+| PATCH /insurance/campaigns/{id}/status | LEE | POR_SQL |
+| GET /insurance/campaigns/active | LEE | POR_SQL |
+| GET /insurance/campaigns/my-benefits | LEE | POR_SQL |
+| GET /insurance/campaigns/patient/{patientProfileId} | LEE | POR_SQL |
 | GET /insurance/my-claims | LEE | DIRECTA |
 | POST /insurance/patients/conversation | LEE | POR_SQL |
 | POST /insurance/patients/search | LEE | POR_SQL |
@@ -2999,7 +3007,7 @@ Registra versiones de sistemas de códigos para preservar el contexto temporal d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: code_system_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CodeSystemVersions` — `src/modules/terminology/entities/code_system_versions.entity.ts`
-- **Resumen:** 14 columnas · 6 índices · 4 FK salientes · 2 entrantes · 17 operaciones
+- **Resumen:** 14 columnas · 6 índices · 4 FK salientes · 2 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -3055,9 +3063,11 @@ Registra versiones de sistemas de códigos para preservar el contexto temporal d
 |---|---|---|
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
-| POST /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
+| POST /insurance-campaigns | LEE | POR_SQL |
+| PATCH /insurance-campaigns/{id} | LEE | POR_SQL |
 | GET /insurance/analytics/loss-ratio | LEE | POR_SQL |
+| POST /insurance/campaigns | LEE | POR_SQL |
+| PATCH /insurance/campaigns/{id} | LEE | POR_SQL |
 | POST /insurance/portability/export | LEE | POR_SQL |
 | POST /pharmacies/{pharmacyId}/products | LEE | POR_SQL |
 | GET /pharmacy/catalog-products | LEE | POR_SQL |
@@ -3094,7 +3104,7 @@ Define sistemas de codificación sanitaria que permiten interpretar identificado
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: code_systems`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CodeSystems` — `src/modules/terminology/entities/code_systems.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 5 FK salientes · 4 entrantes · 14 operaciones
+- **Resumen:** 15 columnas · 8 índices · 5 FK salientes · 4 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -3156,9 +3166,11 @@ Define sistemas de codificación sanitaria que permiten interpretar identificado
 |---|---|---|
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
-| POST /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
+| POST /insurance-campaigns | LEE | POR_SQL |
+| PATCH /insurance-campaigns/{id} | LEE | POR_SQL |
 | GET /insurance/analytics/loss-ratio | LEE | POR_SQL |
+| POST /insurance/campaigns | LEE | POR_SQL |
+| PATCH /insurance/campaigns/{id} | LEE | POR_SQL |
 | POST /insurance/portability/export | LEE | POR_SQL |
 | POST /pharmacies/{pharmacyId}/products | LEE | POR_SQL |
 | GET /pharmacy/catalog-products | LEE | POR_SQL |

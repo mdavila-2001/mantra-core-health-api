@@ -121,6 +121,7 @@ con `FileUploadService.downloadForAuthorizedContext`:
 | Resultado del paciente | `GET /diagnostic-results/me/:reportId/files/:fileId/content` | Titular + versión liberada y visible + `fileId` del informe. Todo lo demás, 404 |
 | Documento del expediente | `GET /charts/documents/:documentId/files/:fileId/content` | Lectura de la historia del paciente |
 | Adjunto de mensaje | `community-messaging-read` | Participación activa |
+| Imagen de un servicio médico | `GET /billing/service-catalog/:id/image` | Sesión con tenant verificado + servicio activo de una práctica de ese tenant + imagen de sensibilidad normal con versión utilizable. Todo lo demás, 404 uniforme (decisión P-22-8, #852) |
 
 **URL firmada (TX-09).** `POST /common/files/:id/download-url` sigue emitiendo
 `?versionId&expires&signature`, y ahora `GET :id/content` **valida** la firma cuando

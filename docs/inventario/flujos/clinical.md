@@ -552,7 +552,7 @@ stateDiagram-v2
 
 | Operación | Estados de destino que nombra | A través de |
 |---|---|---|
-| POST /clinical/conditions/{id}/change-status | CONDITION_RESOLVED | ConditionsService.changeClinicalStatus |
+| POST /clinical/conditions/{id}/change-status | CONDITION_RESOLVED | ClinicalRecordsController.changeConditionStatus → ConditionsService.changeClinicalStatus |
 
 ## Árbol de decisión por operación
 

@@ -18,8 +18,8 @@
 | [practice_accreditations](#practice_accreditations) | Conserva acreditaciones de una práctica sanitaria para documentar reconocimientos o certificaciones institucionales. | 16 | 8 | 3 | COINCIDE |
 | [practice_settings](#practice_settings) | Almacena opciones operativas de una práctica para adaptar su funcionamiento dentro del sistema médico. | 10 | 4 | 3 | COINCIDE |
 | [practice_sites](#practice_sites) | Identifica ubicaciones donde una práctica presta servicios para vincular agenda, atención y recursos con una sede. | 18 | 11 | 58 | COINCIDE |
-| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 8 | 144 | COINCIDE |
-| [practitioner_role_assignments](#practitioner_role_assignments) | Asigna roles asistenciales a profesionales dentro de una organización o sede para precisar sus responsabilidades operativas. | 20 | 12 | 67 | COINCIDE |
+| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 8 | 146 | COINCIDE |
+| [practitioner_role_assignments](#practitioner_role_assignments) | Asigna roles asistenciales a profesionales dentro de una organización o sede para precisar sus responsabilidades operativas. | 20 | 12 | 68 | COINCIDE |
 | [practitioner_support_assignments](#practitioner_support_assignments) | Vincula personal de apoyo con profesionales o ámbitos de práctica para coordinar tareas de atención y gestión. | 13 | 8 | 1 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -881,7 +881,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practices`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `Practices` — `src/modules/practice/entities/practices.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 50 entrantes · 144 operaciones
+- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 50 entrantes · 146 operaciones
 
 #### Columnas
 
@@ -1014,6 +1014,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | POST /accounting/open-items | LEE | DIRECTA |
 | POST /accounting/practitioner/assets | LEE | DIRECTA |
 | PATCH /accounting/practitioner/assets/{id}/automation | LEE | DIRECTA |
+| GET /accounting/practitioner/assets/{id}/depreciations | LEE | DIRECTA |
 | POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
 | POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
 | POST /accounting/practitioner/entries | LEE | DIRECTA |
@@ -1028,6 +1029,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | GET /billing/patient-statements | LEE | DIRECTA |
 | POST /billing/service-catalog | LEE | DIRECTA |
 | PATCH /billing/service-catalog/{id} | LEE | DIRECTA |
+| GET /billing/service-catalog/{id}/image | LEE | DIRECTA |
 | GET /billing/simulated/charges | LEE | POR_SQL |
 | POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | LEE | POR_SQL |
 | POST /billing/simulated/charges/{chargeId}/invoices | LEE | POR_SQL |
@@ -1150,7 +1152,7 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practitioner_role_assignments`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `PractitionerRoleAssignments` — `src/modules/practice/entities/practitioner_role_assignments.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 7 entrantes · 67 operaciones
+- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 7 entrantes · 68 operaciones
 
 #### Columnas
 
@@ -1237,6 +1239,7 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | GET /accounting/practitioner/assets | LEE | DIRECTA |
 | POST /accounting/practitioner/assets | LEE | DIRECTA |
 | PATCH /accounting/practitioner/assets/{id}/automation | LEE | DIRECTA |
+| GET /accounting/practitioner/assets/{id}/depreciations | LEE | DIRECTA |
 | POST /accounting/practitioner/assets/{id}/progress | LEE | DIRECTA |
 | POST /accounting/practitioner/consultation-income | LEE | DIRECTA |
 | POST /accounting/practitioner/entries | LEE | DIRECTA |

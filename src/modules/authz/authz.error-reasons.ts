@@ -19,6 +19,8 @@ export enum AuthzErrorReason {
 
   /** Ya existe un rol con ese código. */
   ROLE_CODE_ALREADY_EXISTS = 'ROLE_CODE_ALREADY_EXISTS',
+  /** El código pedido es de un rol de plataforma (`SUPERADMIN`, `SYSTEM`, …). */
+  ROLE_CODE_RESERVED = 'ROLE_CODE_RESERVED',
   /** El rol padre referenciado no existe. */
   ROLE_PARENT_NOT_FOUND = 'ROLE_PARENT_NOT_FOUND',
   /** No se encontró el rol. */

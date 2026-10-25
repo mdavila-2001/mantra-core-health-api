@@ -125,7 +125,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: orderId | `src/modules/promotions/controllers/promotions.controller.ts:151` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -246,7 +246,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | ROL | Alguno de: CASHIER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/promotions.controller.ts:116` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -352,14 +352,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | ROL | Alguno de: SYSTEM | `src/modules/promotions/controllers/loyalty.controller.ts:302` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.expirePoints → PromotionsLoyaltyService.expirePoints | `src/modules/promotions/services/promotions-loyalty.service.ts:776` |
+| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.expirePoints → PromotionsLoyaltyService.expirePoints | `src/modules/promotions/services/promotions-loyalty.service.ts:790` |
 | `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.expirePoints → PromotionsLoyaltyService.expirePoints → PromotionsLoyaltyRepository.findMembershipsForSweep | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:547` |
 | `promotions.loyalty_programs` | LEE | LEE | DIRECTA | LoyaltyController.expirePoints → PromotionsLoyaltyService.expirePoints → PromotionsLoyaltyService.loadProgramInScope → PromotionsLoyaltyRepository.findProgramById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:335` |
 | `promotions.points_ledger_entries` | ESCRIBE | CREA | DIRECTA | LoyaltyController.expirePoints → PromotionsLoyaltyService.expirePoints → PromotionsLoyaltyRepository.createLedgerEntry | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:571` |
@@ -618,7 +618,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Alguno de: PATIENT | `src/modules/promotions/controllers/loyalty.controller.ts:154` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -725,7 +725,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:237` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -844,7 +844,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:259` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1115,7 +1115,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | ROL | Alguno de: PROMOTIONS_ADMIN, MARKETING_MANAGER | `src/modules/promotions/controllers/loyalty.controller.ts:196` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1285,14 +1285,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:215` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.enrollMember → PromotionsLoyaltyService.enrollMember | `src/modules/promotions/services/promotions-loyalty.service.ts:381` |
+| `promotions.loyalty_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.enrollMember → PromotionsLoyaltyService.enrollMember | `src/modules/promotions/services/promotions-loyalty.service.ts:390` |
 | `promotions.loyalty_memberships` | ESCRIBE | CREA | DIRECTA | LoyaltyController.enrollMember → PromotionsLoyaltyService.enrollMember → PromotionsLoyaltyRepository.createMembership | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:476` |
 | `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.enrollMember → PromotionsLoyaltyService.enrollMember → PromotionsLoyaltyRepository.findMembershipByMember | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:500` |
 | `promotions.loyalty_programs` | LEE | LEE | DIRECTA | LoyaltyController.enrollMember → PromotionsLoyaltyService.enrollMember → PromotionsLoyaltyService.loadProgramInScope → PromotionsLoyaltyRepository.findProgramById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:335` |
@@ -1396,7 +1396,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | ROL | Alguno de: PROMOTIONS_ADMIN, MARKETING_MANAGER | `src/modules/promotions/controllers/promotions.controller.ts:77` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1555,7 +1555,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/promotions.controller.ts:94` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1770,7 +1770,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | ROL | Alguno de: CASHIER, PROMOTIONS_ADMIN | `src/modules/promotions/controllers/promotions.controller.ts:134` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1886,7 +1886,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/promotions.controller.ts:171` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -1999,7 +1999,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:322` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -2100,7 +2100,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/promotions/controllers/loyalty.controller.ts:343` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -2115,7 +2115,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/promoti
 | `promotions.loyalty_memberships` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralPoints → PromotionsLoyaltyService.lockMembershipInScope → PromotionsLoyaltyRepository.findMembershipById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:515` |
 | `promotions.loyalty_programs` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralPoints → PromotionsLoyaltyService.lockMembershipInScope → PromotionsLoyaltyRepository.findProgramById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:335` |
 | `promotions.loyalty_tiers` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralPoints → PromotionsLoyaltyRepository.findTiersByProgram | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:408` |
-| `promotions.member_referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral | `src/modules/promotions/services/promotions-loyalty.service.ts:981` |
+| `promotions.member_referrals` | ESCRIBE | ACTUALIZA | POR_TIPO | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral | `src/modules/promotions/services/promotions-loyalty.service.ts:995` |
 | `promotions.member_referrals` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyRepository.findReferralById | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:764` |
 | `promotions.points_ledger_entries` | ESCRIBE | CREA | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralPoints → PromotionsLoyaltyRepository.createLedgerEntry | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:571` |
 | `promotions.points_ledger_entries` | LEE | LEE | DIRECTA | LoyaltyController.qualifyReferral → PromotionsLoyaltyService.qualifyReferral → PromotionsLoyaltyService.awardReferral → PromotionsLoyaltyService.awardReferralPoints → PromotionsLoyaltyRepository.findLedgerEntryByKey | `src/modules/promotions/repositories/promotions-loyalty.repository.ts:597` |

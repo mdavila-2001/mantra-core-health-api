@@ -1962,7 +1962,7 @@ Representa estudios de imágenes de un paciente y mantiene su asociación clíni
 | `ix_imaging_studies_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_imaging_studies_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_imaging_studies_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_imaging_studies_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_imaging_studies_patient_profile_id_updated_at` | no | patient_profile_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
-| `ix_imaging_studies_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_imaging_studies_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_imaging_studies_custodian_tenant_id` | no | custodian_tenant_id | Soporta la clave foránea fk_imaging_studies_custodian_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «custodian_tenant_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 

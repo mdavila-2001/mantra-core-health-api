@@ -2,17 +2,17 @@
 
 # Inventario de endpoints
 
-Se inventarían **1558 operaciones HTTP** en **72 módulos**: 1541 publicadas en el contrato OpenAPI y 17 que existen sólo en el código.
+Se inventarían **1552 operaciones HTTP** en **71 módulos**: 1543 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1481
-- Riesgo ALTO 175 · MEDIO 879 · BAJO 504
-- Mencionadas por al menos una prueba: 888
+- Con al menos una tabla identificada: 1491
+- Riesgo ALTO 182 · MEDIO 879 · BAJO 491
+- Mencionadas por al menos una prueba: 889
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
 | Módulo | Operaciones | Riesgo alto | Documento |
 |---|---|---|---|
-| `accounting` | 45 | 0 | [accounting.md](accounting.md) |
+| `accounting` | 46 | 0 | [accounting.md](accounting.md) |
 | `ads` | 18 | 0 | [ads.md](ads.md) |
 | `app` | 6 | 0 | [app.md](app.md) |
 | `audio_assets` | 10 | 2 | [audio_assets.md](audio_assets.md) |
@@ -20,7 +20,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `auth_providers` | 12 | 1 | [auth_providers.md](auth_providers.md) |
 | `authz` | 32 | 0 | [authz.md](authz.md) |
 | `automation` | 17 | 0 | [automation.md](automation.md) |
-| `billing` | 34 | 5 | [billing.md](billing.md) |
+| `billing` | 35 | 5 | [billing.md](billing.md) |
 | `chart` | 23 | 3 | [chart.md](chart.md) |
 | `clinical` | 41 | 1 | [clinical.md](clinical.md) |
 | `clinical_ext` | 27 | 2 | [clinical_ext.md](clinical_ext.md) |
@@ -45,8 +45,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `health_data` | 16 | 0 | [health_data.md](health_data.md) |
 | `iam` | 39 | 18 | [iam.md](iam.md) |
 | `identity_assurance` | 28 | 5 | [identity_assurance.md](identity_assurance.md) |
-| `insurance` | 63 | 20 | [insurance.md](insurance.md) |
-| `insurance-campaigns` | 16 | 0 | [insurance-campaigns.md](insurance-campaigns.md) |
+| `insurance` | 71 | 27 | [insurance.md](insurance.md) |
 | `integration_contracts` | 12 | 0 | [integration_contracts.md](integration_contracts.md) |
 | `integrations` | 15 | 2 | [integrations.md](integrations.md) |
 | `lakehouse` | 13 | 0 | [lakehouse.md](lakehouse.md) |

@@ -1,10 +1,10 @@
 # Equipos de diagnóstico y sus marcas — registros de Europa (EUDAMED, MHRA, Swissmedic)
 
 Sesión `seed-dx-devices-eu` · rama `claude/adoring-curie-xdkt83` (desde `dev`) · código en
-[`tools/terminology-import/diagnostic-devices/eu/`](../../tools/terminology-import/diagnostic-devices/eu/)
+[`tools/terminology-import/diagnostic-devices/eu/`](https://github.com/mdavila-2001/mantra-core-health-api/tree/dev/tools/terminology-import/diagnostic-devices/eu)
 · formato común: `tools/terminology-import/diagnostic-devices/README.md`, escrito por la sesión
 `master` (rama `justin/seed-dx-devices-master`); esta rama lo respeta y no lo modifica
-· fuentes y términos en [`SOURCES.md`](../../tools/terminology-import/diagnostic-devices/eu/SOURCES.md).
+· fuentes y términos en [`SOURCES.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/diagnostic-devices/eu/SOURCES.md).
 
 ## Resumen honesto
 
@@ -46,7 +46,7 @@ la propuesta al final.
 ## Alcance «diagnóstico» según la EMDN
 
 Regla: se decide por **código**, nunca por palabras del nombre (implementado en
-[`lib/emdn-scope.mjs`](../../tools/terminology-import/diagnostic-devices/eu/lib/emdn-scope.mjs)).
+[`lib/emdn-scope.mjs`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/tools/terminology-import/diagnostic-devices/eu/lib/emdn-scope.mjs)).
 Las descripciones de categoría son paráfrasis propias para justificar; el nombre oficial sale de
 la EMDN descargada.
 
