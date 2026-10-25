@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { ReconciliationService } from '../../application/services';
 import {
   CreateReconciliationBatchDto,
@@ -33,6 +38,11 @@ export class ReconciliationController {
   constructor(private readonly service: ReconciliationService) {}
 
   /** UC-26-13a. */
+  @Audited({
+    action: 'INSURANCE_RECONCILIATION_BATCH_CREATED',
+    entity: 'insurance_reconciliation_batch',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -45,6 +55,11 @@ export class ReconciliationController {
   }
 
   /** UC-26-13b. */
+  @Audited({
+    action: 'INSURANCE_RECONCILIATION_ITEM_ADDED',
+    entity: 'insurance_reconciliation_item',
+    entityId: 'result.id',
+  })
   @Post(':id/items')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

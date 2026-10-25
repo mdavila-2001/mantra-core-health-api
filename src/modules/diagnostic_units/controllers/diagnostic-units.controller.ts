@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   TenantAgnostic,
@@ -179,6 +180,11 @@ export class DiagnosticUnitsController {
   }
 
   /** UC-23-01. */
+  @Audited({
+    action: 'DIAGNOSTIC_UNIT_CREATED',
+    entity: 'diagnostic_unit',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -193,6 +199,11 @@ export class DiagnosticUnitsController {
   }
 
   /** UC-23-02. */
+  @Audited({
+    action: 'DIAGNOSTIC_UNIT_SITE_ADDED',
+    entity: 'diagnostic_unit_site',
+    entityId: 'result.id',
+  })
   @Post(':id/sites')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -206,6 +217,11 @@ export class DiagnosticUnitsController {
   }
 
   /** UC-23-03. */
+  @Audited({
+    action: 'DIAGNOSTIC_UNIT_PUBLISHED',
+    entity: 'diagnostic_unit',
+    entityId: 'param:id',
+  })
   @Post(':id/verify-and-publish')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -218,6 +234,11 @@ export class DiagnosticUnitsController {
   }
 
   /** UC-23-04. */
+  @Audited({
+    action: 'DIAGNOSTIC_UNIT_SPECIALTIES_SET',
+    entity: 'diagnostic_unit',
+    entityId: 'param:id',
+  })
   @Put(':id/specialties')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -231,6 +252,11 @@ export class DiagnosticUnitsController {
   }
 
   /** UC-23-05. */
+  @Audited({
+    action: 'DIAGNOSTIC_STUDY_OFFERING_CREATED',
+    entity: 'diagnostic_study_offering',
+    entityId: 'result.id',
+  })
   @Post(':id/study-offerings')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -246,6 +272,11 @@ export class DiagnosticUnitsController {
   }
 
   /** UC-23-06. */
+  @Audited({
+    action: 'DIAGNOSTIC_PRICE_SCHEDULE_CREATED',
+    entity: 'diagnostic_price_schedule',
+    entityId: 'result.id',
+  })
   @Post(':id/price-schedules')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -259,6 +290,11 @@ export class DiagnosticUnitsController {
   }
 
   /** UC-23-10. */
+  @Audited({
+    action: 'DIAGNOSTIC_UNIT_PRACTITIONER_ASSIGNED',
+    entity: 'diagnostic_unit_practitioner_assignment',
+    entityId: 'result.id',
+  })
   @Post(':id/practitioner-assignments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -272,6 +308,11 @@ export class DiagnosticUnitsController {
   }
 
   /** UC-23-11. */
+  @Audited({
+    action: 'DIAGNOSTIC_UNIT_ACCREDITATION_ADDED',
+    entity: 'diagnostic_unit_accreditation',
+    entityId: 'result.id',
+  })
   @Post(':id/accreditations')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -285,6 +326,11 @@ export class DiagnosticUnitsController {
   }
 
   /** UC-23-12. */
+  @Audited({
+    action: 'DIAGNOSTIC_UNIT_REPROJECTED',
+    entity: 'diagnostic_unit',
+    entityId: 'param:id',
+  })
   @Post(':id/reproject')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

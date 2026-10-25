@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   NotAudited,
   Public,
@@ -54,6 +55,11 @@ export class TrackingController {
   constructor(private readonly trackingService: TrackingService) {}
 
   /** UC-37-01. */
+  @Audited({
+    action: 'TRACKABLE_SUBJECT_OPENED',
+    entity: 'trackable_subject',
+    entityId: 'result.id',
+  })
   @Post('trackable-subjects')
   @Roles('TRACKING_ADMIN', 'LOGISTICS_OPERATOR')
   @HttpCode(HttpStatus.CREATED)
@@ -70,6 +76,10 @@ export class TrackingController {
   }
 
   /** UC-37-02. */
+  @Audited({
+    action: 'TRACKING_MILESTONES_DEFINED',
+    entity: 'milestone_definition',
+  })
   @Post('milestone-definitions')
   @Roles('TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -85,6 +95,11 @@ export class TrackingController {
   }
 
   /** UC-37-03. */
+  @Audited({
+    action: 'SHIPMENT_DISPATCHED',
+    entity: 'shipment',
+    entityId: 'param:id',
+  })
   @Post('shipments/:id/dispatch')
   @Roles('LOGISTICS_OPERATOR', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -101,6 +116,11 @@ export class TrackingController {
   }
 
   /** UC-37-04. */
+  @Audited({
+    action: 'TRACKING_EVENT_RECORDED',
+    entity: 'tracking_event',
+    entityId: 'result.id',
+  })
   @Post('trackable-subjects/:id/events')
   @Roles('LOGISTICS_OPERATOR', 'COURIER', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -136,6 +156,11 @@ export class TrackingController {
   }
 
   /** UC-37-06. */
+  @Audited({
+    action: 'SHIPMENT_HANDOFF_RECORDED',
+    entity: 'shipment_handoff',
+    entityId: 'result.id',
+  })
   @Post('shipments/:id/handoffs')
   @Roles('LOGISTICS_OPERATOR', 'COURIER', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -152,6 +177,11 @@ export class TrackingController {
   }
 
   /** UC-37-07. */
+  @Audited({
+    action: 'SHIPMENT_ETA_RECOMPUTED',
+    entity: 'eta_estimate',
+    entityId: 'result.id',
+  })
   @Post('shipments/:id/eta/recompute')
   @Roles('SYSTEM', 'LOGISTICS_OPERATOR', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -168,6 +198,11 @@ export class TrackingController {
   }
 
   /** UC-37-08. */
+  @Audited({
+    action: 'SHIPMENT_DELIVERY_PROOF_RECORDED',
+    entity: 'delivery_proof',
+    entityId: 'result.id',
+  })
   @Post('shipments/:id/delivery-proof')
   @Roles('COURIER', 'LOGISTICS_OPERATOR', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -184,6 +219,11 @@ export class TrackingController {
   }
 
   /** UC-37-09. */
+  @Audited({
+    action: 'SHIPMENT_EXCEPTION_RECORDED',
+    entity: 'tracking_event',
+    entityId: 'result.id',
+  })
   @Post('shipments/:id/exception')
   @Roles('COURIER', 'LOGISTICS_OPERATOR', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -201,6 +241,11 @@ export class TrackingController {
   }
 
   /** UC-37-10. */
+  @Audited({
+    action: 'SHIPMENT_CANCELLED',
+    entity: 'shipment',
+    entityId: 'param:id',
+  })
   @Post('shipments/:id/cancel')
   @Roles('LOGISTICS_OPERATOR', 'TRACKING_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -217,6 +262,10 @@ export class TrackingController {
   }
 
   /** UC-37-11. */
+  @Audited({
+    action: 'TRACKING_SLA_SCANNED',
+    entity: 'shipment',
+  })
   @Post('sla/scan')
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.OK)

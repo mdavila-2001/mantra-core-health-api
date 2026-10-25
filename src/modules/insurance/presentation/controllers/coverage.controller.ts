@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   type AuthenticatedUser,
@@ -53,6 +54,11 @@ export class CoverageController {
   }
 
   /** UC-26-02. */
+  @Audited({
+    action: 'PATIENT_COVERAGE_ENROLLED',
+    entity: 'patient_coverage',
+    entityId: 'result.id',
+  })
   @Post('patient-coverages')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar cobertura de paciente y dependientes' })
@@ -64,6 +70,11 @@ export class CoverageController {
   }
 
   /** UC-26-03. */
+  @Audited({
+    action: 'COVERAGE_ELIGIBILITY_REQUESTED',
+    entity: 'coverage_eligibility_request',
+    entityId: 'result.id',
+  })
   @Post('coverage-eligibility-requests')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Solicitar y resolver elegibilidad (270/271)' })
@@ -75,6 +86,11 @@ export class CoverageController {
   }
 
   /** UC-26-09. */
+  @Audited({
+    action: 'COORDINATION_OF_BENEFITS_DETERMINED',
+    entity: 'coordination_of_benefit',
+    entityId: 'result.id',
+  })
   @Post('coordination-of-benefits')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Determinar coordinación de beneficios (COB)' })

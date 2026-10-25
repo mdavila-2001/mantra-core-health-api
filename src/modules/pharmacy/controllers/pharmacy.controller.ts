@@ -17,7 +17,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PharmacyTenantScopeGuard } from './pharmacy-tenant-scope.guard';
 import {
   PharmaciesService,
@@ -96,6 +101,11 @@ export class PharmacyController {
   }
 
   /** UC-24-01. */
+  @Audited({
+    action: 'PHARMACY_CREATED',
+    entity: 'pharmacy',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -108,6 +118,11 @@ export class PharmacyController {
   }
 
   /** UC-24-03. */
+  @Audited({
+    action: 'PHARMACY_LICENSE_VERIFIED',
+    entity: 'pharmacy_license',
+    entityId: 'param:licenseId',
+  })
   @Post(':pharmacyId/licenses/:licenseId/verify')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -127,6 +142,11 @@ export class PharmacyController {
   }
 
   /** UC-24-02. */
+  @Audited({
+    action: 'PHARMACY_SITE_CREATED',
+    entity: 'pharmacy_site',
+    entityId: 'result.id',
+  })
   @Post(':pharmacyId/sites')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar sede dispensadora' })
@@ -139,6 +159,11 @@ export class PharmacyController {
   }
 
   /** UC-24-04. */
+  @Audited({
+    action: 'PHARMACY_PRODUCT_PUBLISHED',
+    entity: 'pharmacy_product',
+    entityId: 'result.id',
+  })
   @Post(':pharmacyId/products')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -153,6 +178,11 @@ export class PharmacyController {
   }
 
   /** P47 §2. */
+  @Audited({
+    action: 'PHARMACY_PRODUCT_UPDATED',
+    entity: 'pharmacy_product',
+    entityId: 'param:productId',
+  })
   @Patch(':pharmacyId/products/:productId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -176,6 +206,11 @@ export class PharmacyController {
   }
 
   /** UC-24-09. */
+  @Audited({
+    action: 'PHARMACY_PRODUCT_RETIRED',
+    entity: 'pharmacy_product',
+    entityId: 'param:productId',
+  })
   @Delete(':pharmacyId/products/:productId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Retirar (soft-delete) producto del catálogo' })
@@ -188,6 +223,11 @@ export class PharmacyController {
   }
 
   /** UC-24-05. */
+  @Audited({
+    action: 'PHARMACY_PRICE_LIST_CREATED',
+    entity: 'pharmacy_price_list',
+    entityId: 'result.id',
+  })
   @Post(':pharmacyId/price-lists')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -202,6 +242,11 @@ export class PharmacyController {
   }
 
   /** UC-24-06. */
+  @Audited({
+    action: 'PHARMACY_PRODUCT_PRICE_VERSIONED',
+    entity: 'pharmacy_product_price',
+    entityId: 'result.id',
+  })
   @Post(':pharmacyId/price-lists/:priceListId/prices')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Fijar/versionar precio de producto' })
@@ -220,6 +265,11 @@ export class PharmacyController {
   }
 
   /** UC-24-10. */
+  @Audited({
+    action: 'PHARMACY_PRICE_LIST_CLOSED',
+    entity: 'pharmacy_price_list',
+    entityId: 'param:priceListId',
+  })
   @Post(':pharmacyId/price-lists/:priceListId/close')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cerrar/expirar lista de precios' })
@@ -232,6 +282,11 @@ export class PharmacyController {
   }
 
   /** UC-24-07. */
+  @Audited({
+    action: 'PHARMACY_INTEGRATION_CONNECTION_CREATED',
+    entity: 'pharmacy_integration_connection',
+    entityId: 'result.id',
+  })
   @Post(':pharmacyId/integration-connections')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Establecer conexión de integración externa' })
@@ -244,6 +299,11 @@ export class PharmacyController {
   }
 
   /** UC-24-08. */
+  @Audited({
+    action: 'PHARMACY_EXTERNAL_PRODUCT_MAPPED',
+    entity: 'pharmacy_external_product_mapping',
+    entityId: 'result.id',
+  })
   @Post(':pharmacyId/integration-connections/:connId/product-mappings')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Mapear producto a código de proveedor externo' })
@@ -257,6 +317,11 @@ export class PharmacyController {
   }
 
   /** UC-24-11. */
+  @Audited({
+    action: 'PHARMACY_CATALOG_PROJECTED',
+    entity: 'pharmacy',
+    entityId: 'param:pharmacyId',
+  })
   @Post(':pharmacyId/projections')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Proyectar catálogo y precios a read-model' })

@@ -18,6 +18,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   PageResponseDto,
   Roles,
@@ -60,6 +61,11 @@ export class DocumentStoreController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de create conforme al contrato `Promise<DocumentResponseDto>`.
    */
+  @Audited({
+    action: 'DOCUMENT_STORE_DOCUMENT_CREATED',
+    entity: 'document',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles('STORAGE_ADMIN', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -115,6 +121,11 @@ export class DocumentStoreController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de update conforme al contrato `Promise<DocumentResponseDto>`.
    */
+  @Audited({
+    action: 'DOCUMENT_STORE_DOCUMENT_UPDATED',
+    entity: 'document',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @Roles('STORAGE_ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({
@@ -138,6 +149,11 @@ export class DocumentStoreController {
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de soft delete conforme al contrato `Promise<DocumentResponseDto>`.
    */
+  @Audited({
+    action: 'DOCUMENT_STORE_DOCUMENT_DELETED',
+    entity: 'document',
+    entityId: 'param:id',
+  })
   @Delete(':id')
   @Roles('STORAGE_ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Borrado lógico de un documento (soft-delete)' })

@@ -10,7 +10,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { TelemetryConsentService } from '../services';
 import {
   CreateDisclosureAcceptanceDto,
@@ -38,6 +43,11 @@ export class TelemetryConsentController {
   constructor(private readonly consent: TelemetryConsentService) {}
 
   /** UC-28-04. */
+  @Audited({
+    action: 'TRACKING_DISCLOSURE_ACCEPTED',
+    entity: 'tracking_disclosure_acceptance',
+    entityId: 'result.id',
+  })
   @Post('disclosure-acceptances')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
@@ -51,6 +61,11 @@ export class TelemetryConsentController {
   }
 
   /** UC-28-05. */
+  @Audited({
+    action: 'TRACKING_CONSENT_GRANTED',
+    entity: 'tracking_consent',
+    entityId: 'result.id',
+  })
   @Post('tracking-consents')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Otorgar consentimiento de tracking por propósito' })
@@ -72,6 +87,11 @@ export class TelemetryConsentController {
   }
 
   /** UC-28-06 (interno del worker de ingesta). */
+  @Audited({
+    action: 'ANALYTICS_SUBJECT_PROVISIONED',
+    entity: 'analytics_subject',
+    entityId: 'result.id',
+  })
   @Post('analytics-subjects')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -83,6 +103,11 @@ export class TelemetryConsentController {
   }
 
   /** UC-28-12. */
+  @Audited({
+    action: 'TRACKING_CONSENT_WITHDRAWN',
+    entity: 'tracking_consent',
+    entityId: 'param:id',
+  })
   @Post('tracking-consents/:id/withdraw')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

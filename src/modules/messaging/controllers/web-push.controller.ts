@@ -8,7 +8,12 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   WebPushConfigDto,
   WebPushSubscriptionDto,
@@ -39,6 +44,10 @@ export class WebPushController {
     return { enabled: publicKey !== null, publicKey };
   }
 
+  @Audited({
+    action: 'WEB_PUSH_SUBSCRIBED',
+    entity: 'device',
+  })
   @Put('subscription')
   @HttpCode(204)
   @Roles('USER', 'MESSAGING_ADMIN')
@@ -51,6 +60,10 @@ export class WebPushController {
     await this.webPush.subscribe(actor.id, dto);
   }
 
+  @Audited({
+    action: 'WEB_PUSH_UNSUBSCRIBED',
+    entity: 'device',
+  })
   @Delete('subscription')
   @HttpCode(204)
   @Roles('USER', 'MESSAGING_ADMIN')

@@ -11,7 +11,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { FrontendViewsService } from '../services';
 import {
   PublishViewContractDto,
@@ -39,6 +44,11 @@ export class FrontendViewsController {
   constructor(private readonly service: FrontendViewsService) {}
 
   /** UC-30-02. */
+  @Audited({
+    action: 'FRONTEND_VIEW_CONTRACT_PUBLISHED',
+    entity: 'frontend_page_view',
+    entityId: 'result.id',
+  })
   @Post('portals/:portalCode/routes/:routeCode/views')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -89,6 +99,11 @@ export class FrontendViewsController {
   }
 
   /** UC-30-09. */
+  @Audited({
+    action: 'USER_VIEW_PREFERENCES_UPSERTED',
+    entity: 'user_view_preference',
+    entityId: 'result.id',
+  })
   @Put('views/:frontendPageViewId/preferences')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Guardar preferencias de vista del usuario' })

@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ComplianceService } from '../services';
 import { CreateDsarDto, UpdateDsarDto, DsarResponseDto } from '../dto';
 
@@ -26,6 +31,11 @@ export class PrivacyController {
   constructor(private readonly complianceService: ComplianceService) {}
 
   /** UC-10-08 (alta). */
+  @Audited({
+    action: 'DSAR_INTAKE',
+    entity: 'dsar_request',
+    entityId: 'result.id',
+  })
   @Post('dsar')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -38,6 +48,11 @@ export class PrivacyController {
   }
 
   /** UC-10-08 (transición de estado). */
+  @Audited({
+    action: 'DSAR_UPDATE',
+    entity: 'dsar_request',
+    entityId: 'param:id',
+  })
   @Patch('dsar/:id')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
