@@ -14,7 +14,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { ClaimsService } from '../../application/services';
 import {
   CreateClaimDto,
@@ -44,6 +49,11 @@ export class ClaimsController {
   constructor(private readonly service: ClaimsService) {}
 
   /** UC-26-06. El servicio exige membresía OWNER/ADMIN por origen; conserva roles históricos para reclamos genéricos. */
+  @Audited({
+    action: 'INSURANCE_CLAIM_SUBMITTED',
+    entity: 'insurance_claim',
+    entityId: 'result.id',
+  })
   @Post()
   @Roles()
   @HttpCode(HttpStatus.CREATED)
@@ -117,6 +127,11 @@ export class ClaimsController {
    * Las otras escrituras delegan la autorización en el servicio, según el
    * origen vinculado y las membresías activas de prestador o aseguradora.
    */
+  @Audited({
+    action: 'CLAIM_DISPUTE_OPENED',
+    entity: 'claim_dispute',
+    entityId: 'result.id',
+  })
   @Post(':id/disputes')
   @Roles('BILLING_OPERATOR', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

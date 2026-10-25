@@ -9,7 +9,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Public, TenantAgnostic } from '../../../../common';
+import { NotAudited, Public, TenantAgnostic } from '../../../../common';
 import {
   IamOnboardingDraftsService,
   type OnboardingDraftPayload,
@@ -24,7 +24,8 @@ export class IamOnboardingDraftsController {
   @Public()
   @TenantAgnostic()
   @ApiOperation({
-    summary: 'Recupera un borrador de alta guardado por identificador y tipo de formulario',
+    summary:
+      'Recupera un borrador de alta guardado por identificador y tipo de formulario',
   })
   getDraft(
     @Param('formType') formType: string,
@@ -33,6 +34,9 @@ export class IamOnboardingDraftsController {
     return this.service.getDraft(formType, draftId);
   }
 
+  @NotAudited(
+    'Pública y sin actor (audit_log.user_id es NOT NULL); el borrador de alta vive sólo en la memoria del proceso, sin fila en Postgres.',
+  )
   @Put(':formType/:draftId')
   @Public()
   @TenantAgnostic()
@@ -48,12 +52,16 @@ export class IamOnboardingDraftsController {
     return this.service.saveDraft(formType, draftId, payload);
   }
 
+  @NotAudited(
+    'Pública y sin actor (audit_log.user_id es NOT NULL); el borrador de alta vive sólo en la memoria del proceso, sin fila en Postgres.',
+  )
   @Delete(':formType/:draftId')
   @Public()
   @TenantAgnostic()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Elimina el borrador al completar el alta exitosamente o por descarte del usuario',
+    summary:
+      'Elimina el borrador al completar el alta exitosamente o por descarte del usuario',
   })
   deleteDraft(
     @Param('formType') formType: string,
