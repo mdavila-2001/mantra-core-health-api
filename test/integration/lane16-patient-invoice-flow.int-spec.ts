@@ -156,19 +156,23 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
     lines: Array<{ serviceConceptId: string; billedAmount: string }>,
     extra: Record<string, unknown> = {},
   ) {
-    const created = await claims.submitClaim(
-      {
-        insuranceCarrierId: carrier,
-        patientCoverageId: coverageId,
-        billingProviderEntityId: practice,
-        claimIdentifier: `${mark}-${randomUUID().slice(0, 6)}`,
-        lines: lines.map((line, index) => ({
-          lineSequence: index + 1,
-          ...line,
-        })),
-        ...extra,
-      } as never,
-      biller(),
+    // `assertProviderClaimScope` resuelve las prácticas del tenant del contexto: sin él
+    // (como en una petición sin `X-Tenant-Id`) el reclamo directo se rechaza con TENANT_REQUIRED.
+    const created = await inTenant(() =>
+      claims.submitClaim(
+        {
+          insuranceCarrierId: carrier,
+          patientCoverageId: coverageId,
+          billingProviderEntityId: practice,
+          claimIdentifier: `${mark}-${randomUUID().slice(0, 6)}`,
+          lines: lines.map((line, index) => ({
+            lineSequence: index + 1,
+            ...line,
+          })),
+          ...extra,
+        } as never,
+        biller(),
+      ),
     );
     const claimLines = await all<{ id: string; line_sequence: number }>(
       'select id, line_sequence from insurance.insurance_claim_lines where insurance_claim_id = ? order by line_sequence',
