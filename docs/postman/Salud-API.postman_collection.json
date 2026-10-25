@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1533 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1533 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1539 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1539 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -4723,7 +4723,7 @@
       ]
     },
     {
-      "name": "admin (106)",
+      "name": "admin (108)",
       "item": [
         {
           "name": "admin-catalog",
@@ -11444,6 +11444,117 @@
                       "  const list = Array.isArray(body) ? body : (body.sessions || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('sessionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "telemetry-onboarding-analytics",
+          "item": [
+            {
+              "name": "GET /admin/analytics/onboarding/funnel · Reporte de embudo y deserción paso a paso para formularios de alta",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/onboarding/funnel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "onboarding",
+                    "funnel"
+                  ]
+                },
+                "description": "Reporte de embudo y deserción paso a paso para formularios de alta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/onboarding/funnel`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `TelemetryOnboardingAnalyticsController_getFunnelReport`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.analytics || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('analyticId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /admin/analytics/onboarding/heatmap · Mapa de calor por campo y nivel de fricción para formularios de alta",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/analytics/onboarding/heatmap?metric=metric-ejemplo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "analytics",
+                    "onboarding",
+                    "heatmap"
+                  ],
+                  "query": [
+                    {
+                      "key": "metric",
+                      "value": "metric-ejemplo",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Mapa de calor por campo y nivel de fricción para formularios de alta. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /admin/analytics/onboarding/heatmap`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `TelemetryOnboardingAnalyticsController_getHeatmapReport`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.analytics || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('analyticId', first.id);",
                       "}"
                     ]
                   }
@@ -44407,7 +44518,7 @@
       ]
     },
     {
-      "name": "iam (35)",
+      "name": "iam (38)",
       "item": [
         {
           "name": "iam-auth",
@@ -45412,6 +45523,166 @@
                       "  const id = body && (body.id || body.sessionId);",
                       "  if (id) pm.environment.set('sessionId', id);",
                       "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "iam-onboarding-drafts",
+          "item": [
+            {
+              "name": "GET /iam/onboarding-drafts/{formType}/{draftId} · Recupera un borrador de alta guardado por identificador y tipo de formulario",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "onboarding-drafts",
+                    ":formType",
+                    ":draftId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "formType",
+                      "value": "{{formType}}",
+                      "description": "Identificador de ruta · variable `{{formType}}`"
+                    },
+                    {
+                      "key": "draftId",
+                      "value": "{{draftId}}",
+                      "description": "Identificador de ruta · variable `{{draftId}}`"
+                    }
+                  ]
+                },
+                "description": "Recupera un borrador de alta guardado por identificador y tipo de formulario. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /iam/onboarding-drafts/{formType}/{draftId}`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 429, 500, 504\n\noperationId: `IamOnboardingDraftsController_getDraft`",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.onboardingDrafts || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('onboardingDraftId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /iam/onboarding-drafts/{formType}/{draftId} · Guarda o actualiza el avance del formulario de alta en borrador",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "onboarding-drafts",
+                    ":formType",
+                    ":draftId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "formType",
+                      "value": "{{formType}}",
+                      "description": "Identificador de ruta · variable `{{formType}}`"
+                    },
+                    {
+                      "key": "draftId",
+                      "value": "{{draftId}}",
+                      "description": "Identificador de ruta · variable `{{draftId}}`"
+                    }
+                  ]
+                },
+                "description": "Guarda o actualiza el avance del formulario de alta en borrador. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /iam/onboarding-drafts/{formType}/{draftId}`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 409, 422, 429, 500, 504\n\noperationId: `IamOnboardingDraftsController_saveDraft`",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /iam/onboarding-drafts/{formType}/{draftId} · Elimina el borrador al completar el alta exitosamente o por descarte del usuario",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "onboarding-drafts",
+                    ":formType",
+                    ":draftId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "formType",
+                      "value": "{{formType}}",
+                      "description": "Identificador de ruta · variable `{{formType}}`"
+                    },
+                    {
+                      "key": "draftId",
+                      "value": "{{draftId}}",
+                      "description": "Identificador de ruta · variable `{{draftId}}`"
+                    }
+                  ]
+                },
+                "description": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /iam/onboarding-drafts/{formType}/{draftId}`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 409, 422, 429, 500, 504\n\noperationId: `IamOnboardingDraftsController_deleteDraft`",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
                     ]
                   }
                 }
@@ -88504,7 +88775,7 @@
       ]
     },
     {
-      "name": "telemetry (14)",
+      "name": "telemetry (15)",
       "item": [
         {
           "name": "telemetry-consent",
@@ -89341,6 +89612,58 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.trackingPurposeId);",
                       "  if (id) pm.environment.set('trackingPurposeId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "telemetry-onboarding-analytics",
+          "item": [
+            {
+              "name": "POST /telemetry/onboarding-events · Captura eventos de telemetría de alta y avance en formularios de registro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/telemetry/onboarding-events",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "telemetry",
+                    "onboarding-events"
+                  ]
+                },
+                "description": "Captura eventos de telemetría de alta y avance en formularios de registro. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /telemetry/onboarding-events`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `TelemetryOnboardingAnalyticsController_recordEvents`",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{onboardingEventId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.onboardingEventId);",
+                      "  if (id) pm.environment.set('onboardingEventId', id);",
                       "}"
                     ]
                   }

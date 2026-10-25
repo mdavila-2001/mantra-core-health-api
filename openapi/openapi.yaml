@@ -2615,22 +2615,21 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       summary: Recupera un borrador de alta guardado por identificador y tipo de formulario
       tags:
         - iam-onboarding-drafts
+      security: []
       description: >-
-        Recupera un borrador de alta guardado por identificador y tipo de formulario. Requiere JWT y los roles o
-        alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Recupera un borrador de alta guardado por identificador y tipo de formulario. Operación pública; no requiere
+        JWT. Todas las respuestas de error usan el envelope ErrorResponse.
     put:
       operationId: IamOnboardingDraftsController_saveDraft
       parameters:
@@ -2649,10 +2648,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
@@ -2663,12 +2658,15 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       summary: Guarda o actualiza el avance del formulario de alta en borrador
       tags:
         - iam-onboarding-drafts
+      security: []
       description: >-
-        Guarda o actualiza el avance del formulario de alta en borrador. Requiere JWT y los roles o alcances declarados
-        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Guarda o actualiza el avance del formulario de alta en borrador. Operación pública; no requiere JWT. Todas las
+        respuestas de error usan el envelope ErrorResponse.
     delete:
       operationId: IamOnboardingDraftsController_deleteDraft
       parameters:
@@ -2687,10 +2685,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
@@ -2701,12 +2695,15 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       summary: Elimina el borrador al completar el alta exitosamente o por descarte del usuario
       tags:
         - iam-onboarding-drafts
+      security: []
       description: >-
-        Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Requiere JWT y los roles o
-        alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Operación pública; no requiere
+        JWT. Todas las respuestas de error usan el envelope ErrorResponse.
   /profiles/practitioners/me/signature-assets:
     get:
       operationId: PractitionerSignatureAssetsController_getOwn
@@ -61668,10 +61665,6 @@ paths:
           description: ''
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
         '413':
@@ -61682,12 +61675,15 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       summary: Captura eventos de telemetría de alta y avance en formularios de registro
       tags:
         - telemetry-onboarding-analytics
+      security: []
       description: >-
-        Captura eventos de telemetría de alta y avance en formularios de registro. Requiere JWT y los roles o alcances
-        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+        Captura eventos de telemetría de alta y avance en formularios de registro. Operación pública; no requiere JWT.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /admin/analytics/onboarding/funnel:
     get:
       operationId: TelemetryOnboardingAnalyticsController_getFunnelReport
@@ -61705,6 +61701,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Reporte de embudo y deserción paso a paso para formularios de alta
@@ -61735,6 +61733,8 @@ paths:
           $ref: '#/components/responses/RateLimited'
         '500':
           $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
       summary: Mapa de calor por campo y nivel de fricción para formularios de alta

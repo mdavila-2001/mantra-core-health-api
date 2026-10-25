@@ -3855,12 +3855,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3869,13 +3863,17 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "summary": "Recupera un borrador de alta guardado por identificador y tipo de formulario",
         "tags": [
           "iam-onboarding-drafts"
         ],
-        "description": "Recupera un borrador de alta guardado por identificador y tipo de formulario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Recupera un borrador de alta guardado por identificador y tipo de formulario. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       },
       "put": {
         "operationId": "IamOnboardingDraftsController_saveDraft",
@@ -3904,12 +3902,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3924,13 +3916,17 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "summary": "Guarda o actualiza el avance del formulario de alta en borrador",
         "tags": [
           "iam-onboarding-drafts"
         ],
-        "description": "Guarda o actualiza el avance del formulario de alta en borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Guarda o actualiza el avance del formulario de alta en borrador. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       },
       "delete": {
         "operationId": "IamOnboardingDraftsController_deleteDraft",
@@ -3959,12 +3955,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "404": {
             "$ref": "#/components/responses/NotFound"
           },
@@ -3979,13 +3969,17 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "summary": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario",
         "tags": [
           "iam-onboarding-drafts"
         ],
-        "description": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/profiles/practitioners/me/signature-assets": {
@@ -93363,12 +93357,6 @@
           "400": {
             "$ref": "#/components/responses/BadRequest"
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
@@ -93383,13 +93371,17 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "summary": "Captura eventos de telemetría de alta y avance en formularios de registro",
         "tags": [
           "telemetry-onboarding-analytics"
         ],
-        "description": "Captura eventos de telemetría de alta y avance en formularios de registro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        "security": [],
+        "description": "Captura eventos de telemetría de alta y avance en formularios de registro. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/admin/analytics/onboarding/funnel": {
@@ -93414,6 +93406,9 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "security": [
@@ -93459,6 +93454,9 @@
           },
           "500": {
             "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
           }
         },
         "security": [
