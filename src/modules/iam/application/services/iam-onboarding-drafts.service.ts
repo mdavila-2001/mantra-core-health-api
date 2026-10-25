@@ -38,7 +38,14 @@ interface DraftEntry {
   readonly secretHash: Buffer;
   /** Origen normalizado (IPv4, o prefijo /64 en IPv6). */
   readonly origin: string;
-  /** Si el dueño del secreto volvió a guardar: sólo entonces vive el TTL largo. */
+  /** Prefijo agregado del origen (IPv4 tal cual, o /48 en IPv6). */
+  readonly aggregate: string;
+  readonly createdMs: number;
+  /**
+   * Si el dueño del secreto volvió a guardar al menos
+   * {@link CONFIRM_MIN_AGE_MS} después de crearlo: sólo entonces vive el TTL
+   * largo y el borrador deja de ser desalojable.
+   */
   readonly confirmed: boolean;
   expiresAt: number;
 }
@@ -57,6 +64,17 @@ export const MAX_DRAFT_BYTES = 64 * 1024;
 export const MAX_DRAFTS_TOTAL = 2000;
 /** Tope de borradores vivos creados desde un mismo origen (IPv4, o /64 en IPv6). */
 export const MAX_DRAFTS_PER_ORIGIN = 25;
+/**
+ * Tope agregado por prefijo más grueso (/48 en IPv6; en IPv4, la propia
+ * dirección): una sola asignación IPv6 no puede llenar el cupo global
+ * repartiéndose en muchos /64.
+ */
+export const MAX_DRAFTS_PER_AGGREGATE = 100;
+/**
+ * Edad mínima del borrador para que una segunda escritura lo confirme. Evita
+ * que quien crea y reescribe en el acto consiga el TTL largo.
+ */
+export const CONFIRM_MIN_AGE_MS = 60 * 1000;
 /** Vida de un borrador confirmado: el dueño del secreto volvió a guardar. */
 export const CONFIRMED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 /**
@@ -67,6 +85,17 @@ export const CONFIRMED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 export const UNCONFIRMED_TTL_MS = 60 * 60 * 1000;
 const SWEEP_INTERVAL_MS = 10 * 60 * 1000;
 
+/** El almacén está lleno y el origen no tiene un borrador propio que desalojar. */
+export class DraftStoreFullError extends DomainException {
+  constructor(readonly retryAfterSeconds: number) {
+    super(
+      HttpStatus.SERVICE_UNAVAILABLE,
+      ErrorCode.DEPENDENCY_UNAVAILABLE,
+      'No hay capacidad para nuevos borradores en este momento',
+    );
+  }
+}
+
 /**
  * Origen sobre el que se aplica la cuota por origen.
  *
@@ -75,23 +104,38 @@ const SWEEP_INTERVAL_MS = 10 * 60 * 1000;
  * dejaría la cuota sin efecto.
  */
 export function normalizeOrigin(ip: string | undefined): string {
+  return originKeys(ip).origin;
+}
+
+/** Origen (/64 en IPv6) y prefijo agregado (/48 en IPv6) de una dirección. */
+export function originKeys(ip: string | undefined): {
+  origin: string;
+  aggregate: string;
+} {
   const raw = (ip ?? '').trim().toLowerCase();
   const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(raw);
-  if (mapped) return mapped[1];
-  if (isIPv4(raw)) return raw;
-  if (!isIPv6(raw)) return raw === '' ? 'desconocido' : raw;
-  const [zone] = raw.split('%');
+  const plain = mapped ? mapped[1] : raw;
+  if (isIPv4(plain)) return { origin: plain, aggregate: plain };
+  if (!isIPv6(plain)) {
+    const key = plain === '' ? 'desconocido' : plain;
+    return { origin: key, aggregate: key };
+  }
+  const [zone] = plain.split('%');
   const [head, tail = ''] = zone.split('::');
   const headParts = head === '' ? [] : head.split(':');
   const tailParts = tail === '' ? [] : tail.split(':');
-  const hasGap = zone.includes('::');
-  const fill = hasGap ? 8 - headParts.length - tailParts.length : 0;
+  const fill = zone.includes('::')
+    ? 8 - headParts.length - tailParts.length
+    : 0;
   const groups = [
     ...headParts,
     ...Array.from({ length: Math.max(fill, 0) }, () => '0'),
     ...tailParts,
   ].map((group) => group.padStart(4, '0'));
-  return `${groups.slice(0, 4).join(':')}::/64`;
+  return {
+    origin: `${groups.slice(0, 4).join(':')}::/64`,
+    aggregate: `${groups.slice(0, 3).join(':')}::/48`,
+  };
 }
 
 function hashSecret(secret: string): Buffer {
@@ -118,6 +162,7 @@ export class IamOnboardingDraftsService
 {
   private readonly drafts = new Map<string, DraftEntry>();
   private readonly perOrigin = new Map<string, number>();
+  private readonly perAggregate = new Map<string, number>();
   private sweepTimer: NodeJS.Timeout | undefined;
 
   onModuleInit(): void {
@@ -176,8 +221,8 @@ export class IamOnboardingDraftsService
       // recibe el mismo 404 que ante un secreto erróneo.
       if (existing) throw this.notFound();
       const draftSecret = randomBytes(SECRET_BYTES).toString('base64url');
-      const origin = normalizeOrigin(rawOrigin);
-      this.assertCapacity(origin, now);
+      const { origin, aggregate } = originKeys(rawOrigin);
+      this.assertCapacity(origin, aggregate, now);
       this.drafts.set(key, {
         payload: this.buildPayload(
           formType,
@@ -188,14 +233,21 @@ export class IamOnboardingDraftsService
         ),
         secretHash: hashSecret(draftSecret),
         origin,
+        aggregate,
+        createdMs: now,
         confirmed: false,
         expiresAt: now + UNCONFIRMED_TTL_MS,
       });
-      this.perOrigin.set(origin, (this.perOrigin.get(origin) ?? 0) + 1);
+      this.bump(this.perOrigin, origin, 1);
+      this.bump(this.perAggregate, aggregate, 1);
       return { ok: true, savedAt, draftSecret };
     }
 
     const { entry } = this.authorize(formType, draftId, secret);
+    // Una segunda escritura sólo confirma si pasó la edad mínima; antes, el
+    // borrador conserva su TTL corto (no se extiende con reescrituras).
+    const confirmed =
+      entry.confirmed || now - entry.createdMs >= CONFIRM_MIN_AGE_MS;
     this.drafts.set(key, {
       ...entry,
       payload: this.buildPayload(
@@ -205,8 +257,8 @@ export class IamOnboardingDraftsService
         entry.payload.createdAt,
         savedAt,
       ),
-      confirmed: true,
-      expiresAt: now + CONFIRMED_TTL_MS,
+      confirmed,
+      expiresAt: confirmed ? now + CONFIRMED_TTL_MS : entry.expiresAt,
     });
     return { ok: true, savedAt };
   }
@@ -256,20 +308,27 @@ export class IamOnboardingDraftsService
 
   private removeEntry(key: string, entry: DraftEntry): void {
     this.drafts.delete(key);
-    const left = (this.perOrigin.get(entry.origin) ?? 1) - 1;
-    if (left <= 0) this.perOrigin.delete(entry.origin);
-    else this.perOrigin.set(entry.origin, left);
+    this.bump(this.perOrigin, entry.origin, -1);
+    this.bump(this.perAggregate, entry.aggregate, -1);
+  }
+
+  private bump(counter: Map<string, number>, key: string, by: number): void {
+    const next = (counter.get(key) ?? 0) + by;
+    if (next <= 0) counter.delete(key);
+    else counter.set(key, next);
   }
 
   /**
    * Hace lugar para un borrador nuevo.
    *
-   * La cuota por origen va primero: quien la agotó no desaloja a nadie. Con el
-   * almacén lleno se barren los vencidos y, si no alcanza, se desaloja el
-   * borrador nunca actualizado más antiguo (el `Map` conserva el orden de
-   * creación). Sólo si todos son confirmados no hay lugar y responde 503.
+   * Primero las cuotas del origen (/64 en IPv6) y de su prefijo agregado (/48):
+   * quien las agotó recibe 429 y no desaloja a nadie. Con el almacén lleno se
+   * barren los vencidos y, si no alcanza, el origen que pide desaloja como
+   * máximo SU PROPIO borrador no confirmado más antiguo (el `Map` conserva el
+   * orden de creación). Nunca se toca un borrador de otro origen: si el origen
+   * no tiene ninguno desalojable, 503 con `Retry-After`.
    */
-  private assertCapacity(origin: string, now: number): void {
+  private assertCapacity(origin: string, aggregate: string, now: number): void {
     if ((this.perOrigin.get(origin) ?? 0) >= MAX_DRAFTS_PER_ORIGIN) {
       throw new DomainException(
         HttpStatus.TOO_MANY_REQUESTS,
@@ -277,20 +336,29 @@ export class IamOnboardingDraftsService
         'Se alcanzó el máximo de borradores abiertos desde este origen',
       );
     }
+    if ((this.perAggregate.get(aggregate) ?? 0) >= MAX_DRAFTS_PER_AGGREGATE) {
+      throw new DomainException(
+        HttpStatus.TOO_MANY_REQUESTS,
+        ErrorCode.RATE_LIMITED,
+        'Se alcanzó el máximo de borradores abiertos desde esta red',
+      );
+    }
     if (this.drafts.size < MAX_DRAFTS_TOTAL) return;
     this.sweepExpired(now);
     if (this.drafts.size < MAX_DRAFTS_TOTAL) return;
+    let earliestExpiry = Number.POSITIVE_INFINITY;
     for (const [key, entry] of this.drafts) {
-      if (!entry.confirmed) {
+      if (entry.origin === origin && !entry.confirmed) {
         this.removeEntry(key, entry);
         return;
       }
+      earliestExpiry = Math.min(earliestExpiry, entry.expiresAt);
     }
-    throw new DomainException(
-      HttpStatus.SERVICE_UNAVAILABLE,
-      ErrorCode.DEPENDENCY_UNAVAILABLE,
-      'No hay capacidad para nuevos borradores en este momento',
+    const retryAfterSeconds = Math.min(
+      Math.max(Math.ceil((earliestExpiry - now) / 1000), 1),
+      UNCONFIRMED_TTL_MS / 1000,
     );
+    throw new DraftStoreFullError(retryAfterSeconds);
   }
 
   private assertPayloadShape(payload: OnboardingDraftPayload): void {

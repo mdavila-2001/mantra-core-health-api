@@ -9,7 +9,9 @@ import {
   Ip,
   Param,
   Put,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiHeader,
   ApiNotFoundResponse,
@@ -19,6 +21,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import { NotAudited, Public, TenantAgnostic } from '../../../../common';
 import {
+  DraftStoreFullError,
   IamOnboardingDraftsService,
   ONBOARDING_DRAFT_SECRET_HEADER,
   type OnboardingDraftPayload,
@@ -71,7 +74,7 @@ export class IamOnboardingDraftsController {
   @ApiOperation({
     summary: 'Guarda o actualiza el avance del formulario de alta en borrador',
     description:
-      'Sin cabecera de secreto crea el borrador y devuelve `draftSecret` una sola vez; con el secreto correcto lo actualiza. Cuerpo máximo 64 KiB; hay topes de borradores totales y por origen (IPv6 por prefijo /64). Un borrador recién creado vive 1 hora; la primera escritura posterior con el secreto la extiende a 30 días.',
+      'Sin cabecera de secreto crea el borrador y devuelve `draftSecret` una sola vez; con el secreto correcto lo actualiza. Cuerpo máximo 64 KiB; hay topes de borradores totales y por origen (IPv6 por prefijo /64). Un borrador recién creado vive 1 hora; una segunda escritura con el secreto hecha al menos 60 s después de crearlo lo confirma y extiende su vida a 30 días. Con el almacén lleno, el origen sólo puede desalojar su propio borrador no confirmado; si no tiene, 503 con Retry-After.',
   })
   saveDraft(
     @Param('formType') formType: string,
@@ -79,8 +82,16 @@ export class IamOnboardingDraftsController {
     @Body() payload: OnboardingDraftPayload,
     @Ip() ip: string,
     @Headers(ONBOARDING_DRAFT_SECRET_HEADER) secret?: string,
+    @Res({ passthrough: true }) res?: Response,
   ): SaveOnboardingDraftResult {
-    return this.service.saveDraft(formType, draftId, payload, secret, ip);
+    try {
+      return this.service.saveDraft(formType, draftId, payload, secret, ip);
+    } catch (error) {
+      if (error instanceof DraftStoreFullError) {
+        res?.setHeader('Retry-After', String(error.retryAfterSeconds));
+      }
+      throw error;
+    }
   }
 
   @NotAudited(
