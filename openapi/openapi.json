@@ -116836,6 +116836,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "assetId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "currencyConceptId": {
             "type": "string",
             "format": "uuid"
