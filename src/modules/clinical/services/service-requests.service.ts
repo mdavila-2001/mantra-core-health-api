@@ -29,6 +29,8 @@ import {
 import { DiagnosticStudyOfferings } from '../../diagnostic_units/entities';
 // P43: la orden puede declarar de qué formulario médico cerrado sale.
 import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
+import { PerformerSelectionValidator } from './performer-selection.validator';
+import { SuggestedSiteNamesReader } from './suggested-site-names.reader';
 
 /**
  * Cómo trata `create` la regla de antiduplicación cuando el llamador no es la
@@ -60,6 +62,8 @@ export class ServiceRequestsService {
    * @param outbox - Publicación transaccional del hecho (MCH-027).
    * @param clinicalNotifications - Aviso in-app al paciente (MCH-027).
    * @param formOrigin - Valida la instancia de formulario de origen (P43).
+   * @param performerSelection - Reglas del modo de ejecutor (centros médicos).
+   * @param siteNames - Nombre de la sede sugerida, para el paciente.
    */
   constructor(
     private readonly em: EntityManager,
@@ -71,6 +75,8 @@ export class ServiceRequestsService {
     private readonly outbox: OutboxService,
     private readonly clinicalNotifications: ClinicalNotificationsService,
     private readonly formOrigin: FormInstanceOriginValidator,
+    private readonly performerSelection: PerformerSelectionValidator,
+    private readonly siteNames: SuggestedSiteNamesReader,
   ) {
     this.logger.setContext(ServiceRequestsService.name);
   }
@@ -235,6 +241,17 @@ export class ServiceRequestsService {
         );
       }
 
+      // La recomendación de ejecutor se valida antes de escribir nada: 422 si el
+      // modo no es coherente. No toca `performerTenantId` (ver más abajo).
+      const performer = await this.performerSelection.resolve(tx, {
+        procedureConceptId: dto.codeConceptId,
+        performerSelectionConceptId: dto.performerSelectionConceptId,
+        performerPractitionerProfileId: dto.performerPractitionerProfileId,
+        suggestedPracticeSiteId: dto.suggestedPracticeSiteId,
+        requesterProfileId:
+          dto.requesterProfileId ?? actor.practitionerProfileId,
+      });
+
       const decision = await this.resolveDuplicateDecision(tx, dto, options);
 
       const sr = this.serviceRequestsRepo.create(tx, {
@@ -248,7 +265,13 @@ export class ServiceRequestsService {
         priorityConceptId: dto.priorityConceptId,
         statusConceptId: decision.statusConceptId,
         requesterProfileId: dto.requesterProfileId,
+        // Tal como llegó: la sugerencia de una sede NO le da a su organización
+        // acceso a la orden (RN-11); solo `performerTenantId` lo concede.
         performerTenantId: dto.performerTenantId,
+        performerSelectionConceptId: performer.performerSelectionConceptId,
+        performerPractitionerProfileId:
+          performer.performerPractitionerProfileId ?? undefined,
+        suggestedPracticeSiteId: performer.suggestedPracticeSiteId ?? undefined,
         previousDiagnosticReportId: decision.previousDiagnosticReportId,
         duplicateOverrideReason: decision.duplicateOverrideReason,
         actorUserId: actor.id,
@@ -310,6 +333,17 @@ export class ServiceRequestsService {
         formInstanceId: sr.formInstanceId ?? null,
         status: sr.statusConceptId,
         intent: sr.intentConceptId ?? CLIN.SERVICE_REQUEST_INTENT_ORDER,
+        performerSelectionConceptId: performer.performerSelectionConceptId,
+        performerPractitionerProfileId:
+          performer.performerPractitionerProfileId,
+        suggestedPracticeSiteId: performer.suggestedPracticeSiteId,
+        suggestedPracticeSiteName: performer.suggestedPracticeSiteId
+          ? ((
+              await this.siteNames.namesFor(tx, [
+                performer.suggestedPracticeSiteId,
+              ])
+            ).get(performer.suggestedPracticeSiteId) ?? null)
+          : null,
         createdAt: sr.createdAt,
       };
     });

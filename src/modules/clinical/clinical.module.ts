@@ -64,7 +64,11 @@ import {
   // `InsuranceModule` para que el detalle del reclamo la use sin importar
   // este módulo entero.
   DuplicateStudyDetector,
+  PerformerSelectionValidator,
+  PerformerSiteReader,
+  SuggestedSiteNamesReader,
 } from './services';
+import { PerformerSiteDbReader } from './services/performer-site-db.reader';
 import {
   CareEpisodesRepository,
   AppointmentsRepository,
@@ -190,6 +194,11 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
   providers: [
     // Repositorios
     FormInstanceOriginValidator,
+    // Recomendación de ejecutor de la orden: lee ofertas y afiliaciones de las
+    // sedes por el EntityManager, sin importar `PracticeModule`.
+    { provide: PerformerSiteReader, useClass: PerformerSiteDbReader },
+    PerformerSelectionValidator,
+    SuggestedSiteNamesReader,
     PersonAccountLinksRepository,
     PatientProfilesRepository,
     PatientPortalProxiesRepository,

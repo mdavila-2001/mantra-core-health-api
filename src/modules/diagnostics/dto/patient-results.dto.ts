@@ -152,6 +152,26 @@ export class PatientOrderSummaryDto implements PatientSettlementProjection {
   /** Prioridad (concept id). */
   @ApiPropertyOptional({ format: 'uuid' }) priorityConceptId?: string;
 
+  /**
+   * Quién ejecuta la orden según la recomendación del médico (concept id del
+   * conjunto `service-request-performer-selection`); `null` en una orden
+   * anterior a ese dato. Es una recomendación: el paciente puede elegir otro centro.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerSelectionConceptId!: string | null;
+
+  /** Médico ejecutor («lo hago yo»), o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerPractitionerProfileId!: string | null;
+
+  /** Sede que el médico sugirió, o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  suggestedPracticeSiteId!: string | null;
+
+  /** Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. */
+  @ApiProperty({ nullable: true, type: String })
+  suggestedPracticeSiteName!: string | null;
+
   /** Cuándo se pidió. */
   @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
 

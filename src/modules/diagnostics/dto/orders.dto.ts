@@ -37,6 +37,22 @@ export class DiagnosticOrderSummaryDto {
   /** Profesional que la solicitó. */
   @ApiPropertyOptional({ format: 'uuid' }) requesterProfileId?: string;
 
+  /** Modo de ejecutor recomendado (concept id); `null` en una orden anterior a ese dato. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerSelectionConceptId!: string | null;
+
+  /** Médico ejecutor («lo hago yo»), o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerPractitionerProfileId!: string | null;
+
+  /** Sede sugerida, o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  suggestedPracticeSiteId!: string | null;
+
+  /** Nombre de la sede sugerida, o `null`. */
+  @ApiProperty({ nullable: true, type: String })
+  suggestedPracticeSiteName!: string | null;
+
   /** Cuándo se pidió. */
   @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
 
