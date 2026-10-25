@@ -2497,6 +2497,14 @@
         "fuente": null
       },
       {
+        "operacion": "AccountingPractitionerController_readAssetDepreciations",
+        "metodo": "GET",
+        "ruta": "/accounting/practitioner/assets/{id}/depreciations",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "AccountingPractitionerController_readLiabilitySchedule",
         "metodo": "GET",
         "ruta": "/accounting/practitioner/liabilities/{id}/schedule",
@@ -7145,6 +7153,14 @@
         "fuente": null
       },
       {
+        "operacion": "MedicalGroupsController_listEligibleMembers",
+        "metodo": "GET",
+        "ruta": "/medical-groups/eligible-members",
+        "modulo": "medical_groups",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "MedicalGroupsController_listPatientConditions",
         "metodo": "GET",
         "ruta": "/medical-groups/patients/{patientProfileId}/conditions",
@@ -10825,7 +10841,7 @@
         "fuente": null
       }
     ],
-    "cuenta": 1055
+    "cuenta": 1057
   },
   {
     "id": "FLU-08",
@@ -10833,14 +10849,6 @@
     "titulo": "Operaciones que existen en el código y el contrato OpenAPI no publica",
     "queHacer": "Regenerar el contrato o decidir si deben dejar de existir. Los clientes generados no las ven.",
     "items": [
-      {
-        "operacion": "ClinicalReadController_getReceivedServices",
-        "metodo": "GET",
-        "ruta": "/clinical/patients/{patientProfileId}/received-services",
-        "modulo": "clinical",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/clinical/controllers/clinical-read.controller.ts:110"
-      },
       {
         "operacion": "CommunityPublicController_toInt",
         "metodo": "DESCONOCIDO",
@@ -10978,7 +10986,7 @@
         "fuente": "src/modules/search_platform/controllers/search-platform.controller.ts:114"
       }
     ],
-    "cuenta": 18
+    "cuenta": 17
   },
   {
     "id": "FLU-09",

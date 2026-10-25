@@ -2,7 +2,7 @@
 
 # Mapa de operaciones
 
-1551 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
+1553 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
 
 «Quién la llama» sale del inventario de clientes del frontend (`docs/reports/generated/api-inventory.md`). Una operación sin cliente puede ser interna, móvil o deuda: la columna informa, no concluye.
 
@@ -45,6 +45,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/accounting/practitioner/assets` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | BAJO | PRACTITIONER | AssetsLiabilitiesClient | SIN_PRUEBAS · CON_DECISIONES |
 | POST `/accounting/practitioner/assets` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | MEDIO | PRACTITIONER | AssetsLiabilitiesClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | PATCH `/accounting/practitioner/assets/{id}/automation` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | MEDIO | PRACTITIONER | AssetsLiabilitiesClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
+| GET `/accounting/practitioner/assets/{id}/depreciations` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | BAJO | PRACTITIONER | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/accounting/practitioner/assets/{id}/progress` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | MEDIO | PRACTITIONER | AssetsLiabilitiesClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | POST `/accounting/practitioner/consultation-income` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | MEDIO | PRACTITIONER | AccountingClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | POST `/accounting/practitioner/entries` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | MEDIO | PRACTITIONER | AccountingClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
@@ -251,7 +252,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/clinical/medication-requests/{id}/sign` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalRecordsController) | clinical | MEDIO | CLINICIAN · PRACTITIONER | ClinicalClient | ESCRIBE · CON_DECISIONES |
 | POST `/clinical/observations` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalObservationsController) | clinical | MEDIO | CLINICIAN · PRACTITIONER | ClinicalClient | ESCRIBE · CON_DECISIONES |
 | PATCH `/clinical/observations/{id}/amend` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalObservationsController) | clinical | MEDIO | CLINICIAN · PRACTITIONER | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| GET `/clinical/patients/{patientProfileId}/received-services` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalReadController) | clinical | BAJO | CLINICIAN · PRACTITIONER · PATIENT | — | CONTRATO_AUSENTE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
+| GET `/clinical/patients/{patientProfileId}/received-services` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalReadController) | clinical | BAJO | CLINICIAN · PRACTITIONER · PATIENT | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
 | GET `/clinical/patients/{patientProfileId}/summary` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalReadController) | clinical | MEDIO | CLINICIAN · PRACTITIONER · PATIENT | ClinicalClient | ESCRIBE |
 | GET `/clinical/prescription-signature-policies` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalPrescriptionPoliciesController) | clinical | BAJO | CLINICIAN · SECURITY_ADMIN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
 | POST `/clinical/prescription-signature-policies` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalPrescriptionPoliciesController) | clinical | MEDIO | CLINICIAN · SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
@@ -911,6 +912,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/medical-groups/{id}/members/{memberId}/respond` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/medical-groups/{id}/reschedule-requests` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/medical-groups/{id}/reschedule-requests/respond` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/medical-groups/eligible-members` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | BAJO | PRACTITIONER · CLINICIAN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/medical-groups/patients/{patientProfileId}/conditions` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | BAJO | PRACTITIONER · CLINICIAN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/internal/event-deliveries/{id}/ack` | Módulo 35 — Mensajería (outbox, colas y notificación multicanal) (UC-35-04) | messaging | MEDIO | SYSTEM · MESSAGING_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/internal/events/{domainEventId}/dispatch` | Módulo 35 — Mensajería (outbox, colas y notificación multicanal) (UC-35-03) | messaging | MEDIO | SYSTEM · MESSAGING_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
