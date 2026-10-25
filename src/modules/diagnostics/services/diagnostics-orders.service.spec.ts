@@ -26,12 +26,14 @@ function build() {
     findReportsByPatient: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const siteNames = { namesFor: mockFn().mockResolvedValue(new Map()) };
   const service = new DiagnosticsOrdersService(
     em as any,
     repo as any,
+    siteNames as any,
     logger as any,
   );
-  return { service, repo, em, fork };
+  return { service, repo, em, fork, siteNames };
 }
 
 /**
@@ -161,5 +163,33 @@ describe('DiagnosticsOrdersService', () => {
       expect(out.reports).toEqual([]);
       expect(out.truncated).toEqual([]);
     });
+  });
+
+  it('cada orden del personal trae los campos del ejecutor recomendado y el nombre de la sede', async () => {
+    const { service, repo, siteNames } = build();
+    repo.findOrdersByPatient.mockResolvedValue([
+      {
+        ...order('o1'),
+        performerSelectionConceptId: 'modo-self',
+        performerPractitionerProfileId: 'doc-1',
+        suggestedPracticeSiteId: 'site-1',
+      },
+      order('o2'),
+    ]);
+    siteNames.namesFor.mockResolvedValue(new Map([['site-1', 'Centro Norte']]));
+
+    const res = await service.getPatientOrders('t1', PATIENT, 50);
+
+    expect(res.orders[0]).toMatchObject({
+      performerSelectionConceptId: 'modo-self',
+      performerPractitionerProfileId: 'doc-1',
+      suggestedPracticeSiteId: 'site-1',
+      suggestedPracticeSiteName: 'Centro Norte',
+    });
+    expect(res.orders[1]).toMatchObject({
+      performerSelectionConceptId: null,
+      suggestedPracticeSiteName: null,
+    });
+    expect(siteNames.namesFor).toHaveBeenCalledTimes(1);
   });
 });

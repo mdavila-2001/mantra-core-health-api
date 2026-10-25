@@ -1,4 +1,5 @@
 import { PatientSettlementService } from '../../insurance/application/services/patient-settlement.service';
+import { SuggestedSiteNamesReader } from '../../clinical/services/suggested-site-names.reader';
 import { unavailableSettlement } from '../../insurance/presentation/dto/patient-settlement.dto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -98,6 +99,8 @@ export class DiagnosticsPatientResultsService {
    * @param grantsRepo - Grants sujeto→recurso: los resultados compartidos.
    * @param careRepo - Relaciones asistenciales, para exigir vínculo vigente al compartir (CL-48).
    * @param logger - Registro estructurado.
+   * @param settlements - Liquidación del seguro de cada orden diagnóstica.
+   * @param siteNames - Nombre de la sede que el médico sugirió, para mostrarle al paciente un nombre y no un uuid.
    * @param fileUpload - Bytes de un archivo ya autorizado por contexto (CL-40).
    */
   constructor(
@@ -110,6 +113,7 @@ export class DiagnosticsPatientResultsService {
     private readonly careRepo: CareRelationshipsRepository,
     private readonly logger: PinoLogger,
     private readonly settlements: PatientSettlementService,
+    private readonly siteNames: SuggestedSiteNamesReader,
     private readonly fileUpload?: FileUploadService,
   ) {
     this.logger.setContext(DiagnosticsPatientResultsService.name);
@@ -185,28 +189,34 @@ export class DiagnosticsPatientResultsService {
     const truncated = rows.length > limit;
     const page = rows.slice(0, limit);
 
-    const [settlements, preparation, reportByOrder] = await Promise.all([
-      // La liquidación del seguro es de las órdenes diagnósticas: una orden de
-      // procedimiento no tiene reclamo y no se le inventa una liquidación.
-      this.settlements.forOrders(
-        em,
-        actor.id,
-        'DIAGNOSTIC',
-        page
-          .filter((order) =>
-            DIAGNOSTIC_CATEGORIES.includes(order.categoryConceptId ?? ''),
-          )
-          .map((order) => order.id),
-      ),
-      this.preparationByConcept(
-        em,
-        page.map((order) => order.codeConceptId),
-      ),
-      this.releasedReportByOrder(
-        em,
-        page.map((order) => order.id),
-      ),
-    ]);
+    const [settlements, preparation, reportByOrder, suggestedSiteNames] =
+      await Promise.all([
+        // La liquidación del seguro es de las órdenes diagnósticas: una orden de
+        // procedimiento no tiene reclamo y no se le inventa una liquidación.
+        this.settlements.forOrders(
+          em,
+          actor.id,
+          'DIAGNOSTIC',
+          page
+            .filter((order) =>
+              DIAGNOSTIC_CATEGORIES.includes(order.categoryConceptId ?? ''),
+            )
+            .map((order) => order.id),
+        ),
+        this.preparationByConcept(
+          em,
+          page.map((order) => order.codeConceptId),
+        ),
+        this.releasedReportByOrder(
+          em,
+          page.map((order) => order.id),
+        ),
+        // Una sola lectura por página: el paciente ve el nombre, no el uuid.
+        this.siteNames.namesFor(
+          em,
+          page.map((order) => order.suggestedPracticeSiteId),
+        ),
+      ]);
 
     const items: PatientOrderSummaryDto[] = page.map((order) => {
       const reportId = reportByOrder.get(order.id);
@@ -218,6 +228,13 @@ export class DiagnosticsPatientResultsService {
         categoryConceptId: order.categoryConceptId,
         statusConceptId: order.statusConceptId,
         priorityConceptId: order.priorityConceptId,
+        performerSelectionConceptId: order.performerSelectionConceptId ?? null,
+        performerPractitionerProfileId:
+          order.performerPractitionerProfileId ?? null,
+        suggestedPracticeSiteId: order.suggestedPracticeSiteId ?? null,
+        suggestedPracticeSiteName: order.suggestedPracticeSiteId
+          ? (suggestedSiteNames.get(order.suggestedPracticeSiteId) ?? null)
+          : null,
         createdAt: order.createdAt,
         preparationInstructions: preparation.get(order.codeConceptId),
         hasReleasedResult: reportId !== undefined,

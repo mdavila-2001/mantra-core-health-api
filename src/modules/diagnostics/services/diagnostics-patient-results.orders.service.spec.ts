@@ -63,6 +63,7 @@ function build() {
   const grantsRepo = {};
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
 
+  const siteNames = { namesFor: mockFn().mockResolvedValue(new Map()) };
   const settlements = {
     forOrders: mockFn(async () => new Map()),
     activeClaimForDispensation: mockFn(async () => undefined),
@@ -77,8 +78,10 @@ function build() {
     {} as any,
     logger as any,
     settlements as any,
+    siteNames as any,
   );
   return {
+    siteNames,
     service,
     ordersRepo,
     reportsRepo,
@@ -310,5 +313,63 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
     accountLinksRepo.findActiveByUser.mockResolvedValue(null);
 
     await expect(service.listOwnOrders(USER, 50)).rejects.toThrow();
+  });
+});
+
+describe('DiagnosticsPatientResultsService · orden con ejecutor recomendado', () => {
+  const procedure = (id: string, extra: Record<string, unknown> = {}) => ({
+    ...order(id),
+    categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+    performerSelectionConceptId: 'modo-organizacion',
+    performerPractitionerProfileId: undefined,
+    suggestedPracticeSiteId: 'site-1',
+    ...extra,
+  });
+
+  it('cada orden trae los tres campos y el nombre de la sede sugerida (texto, no uuid)', async () => {
+    const { service, ordersRepo, siteNames } = build();
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([procedure('o1')]);
+    siteNames.namesFor.mockResolvedValue(new Map([['site-1', 'Centro Norte']]));
+
+    const [item] = (await service.listOwnOrders(USER, 50)).items;
+
+    expect(item).toMatchObject({
+      performerSelectionConceptId: 'modo-organizacion',
+      performerPractitionerProfileId: null,
+      suggestedPracticeSiteId: 'site-1',
+      suggestedPracticeSiteName: 'Centro Norte',
+    });
+  });
+
+  it('los nombres se resuelven en una sola lectura por página', async () => {
+    const { service, ordersRepo, siteNames } = build();
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([
+      procedure('o1'),
+      procedure('o2', { suggestedPracticeSiteId: 'site-2' }),
+      procedure('o3'),
+    ]);
+
+    await service.listOwnOrders(USER, 50);
+
+    expect(siteNames.namesFor).toHaveBeenCalledTimes(1);
+    expect(siteNames.namesFor.mock.calls[0][1]).toEqual([
+      'site-1',
+      'site-2',
+      'site-1',
+    ]);
+  });
+
+  it('una orden anterior a este dato (sin los campos) sale con null, no con undefined', async () => {
+    const { service, ordersRepo } = build();
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([order('o1')]);
+
+    const [item] = (await service.listOwnOrders(USER, 50)).items;
+
+    expect(item).toMatchObject({
+      performerSelectionConceptId: null,
+      performerPractitionerProfileId: null,
+      suggestedPracticeSiteId: null,
+      suggestedPracticeSiteName: null,
+    });
   });
 });
