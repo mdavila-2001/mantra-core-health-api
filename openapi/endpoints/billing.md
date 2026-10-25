@@ -2560,6 +2560,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "code": "CODIGO_EJEMPLO",
       "name": "Nombre de ejemplo",
       "descriptionText": "Texto descriptivo de ejemplo",
+      "termsText": "valor-ejemplo",
       "imageFileId": "00000000-0000-4000-8000-000000000001",
       "serviceConceptId": "00000000-0000-4000-8000-000000000001",
       "defaultPrice": "valor-ejemplo",
@@ -2580,12 +2581,13 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ServiceCatalogItemDto>` | Sin restricción adicional declarada | Servicios de esta página, ordenados por código. | `[{"id":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","descriptionText":"Texto descriptivo de ejemplo","imageFileId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","defaultPrice":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001","currencyCode":"BOB","taxCodeId":"00000000-0000-4000-8000-000000000001","incomeAccountId":"00000000-0000-4000-8000-000000000001","isActive":true}]` |
+| `items` | Sí | `array<ServiceCatalogItemDto>` | Sin restricción adicional declarada | Servicios de esta página, ordenados por código. | `[{"id":"00000000-0000-4000-8000-000000000001","practiceId":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","descriptionText":"Texto descriptivo de ejemplo","termsText":"valor-ejemplo","imageFileId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","defaultPrice":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001","currencyCode":"BOB","taxCodeId":"00000000-0000-4000-8000-000000000001","incomeAccountId":"00000000-0000-4000-8000-000000000001","isActive":true}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `items[].practiceId` | Sí | `string` | formato `uuid` | Identificador asociado a practice. | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Valor de code mantenido por la instancia. | `CODIGO_EJEMPLO` |
 | `items[].name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
 | `items[].descriptionText` | No | `string` | Sin restricción adicional declarada | Valor de description text mantenido por la instancia. | `Texto descriptivo de ejemplo` |
+| `items[].termsText` | No | `string` | Sin restricción adicional declarada | Términos propios del servicio (carril 22). Ausente = usa los términos por defecto, cuyo texto legal provee el propietario. | `valor-ejemplo` |
 | `items[].imageFileId` | No | `string` | formato `uuid` | Identificador asociado a image file. Es el id de un archivo de `common.files`, no una URL. Quién puede leer ese contenido lo decide `common.files`, y hoy sólo lo entrega a quien lo subió o a un rol de revisión. | `00000000-0000-4000-8000-000000000001` |
 | `items[].serviceConceptId` | No | `string` | formato `uuid` | Identificador asociado a service concept. | `00000000-0000-4000-8000-000000000001` |
 | `items[].defaultPrice` | Sí | `string` | Sin restricción adicional declarada | Valor de default price mantenido por la instancia. | `valor-ejemplo` |
@@ -2676,7 +2678,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `practiceId` | Sí | `string` | formato `uuid` | Práctica (practice.practices) | `00000000-0000-4000-8000-000000000001` |
-| `code` | Sí | `string` | longitud máxima 60 | Código interno del servicio | `CODIGO_EJEMPLO` |
+| `code` | Sí | `string` | longitud máxima 120 | Código interno del servicio | `CODIGO_EJEMPLO` |
 | `name` | Sí | `string` | longitud máxima 200 | Nombre del servicio | `Nombre de ejemplo` |
 | `descriptionText` | No | `string` | longitud máxima 2000 | Descripción larga del servicio, para la tarjeta | `Texto descriptivo de ejemplo` |
 | `imageFileId` | No | `string` | formato `uuid` | Imagen del servicio (`common.files`) | `00000000-0000-4000-8000-000000000001` |
@@ -2736,6 +2738,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "code": "CODIGO_EJEMPLO",
   "name": "Nombre de ejemplo",
   "descriptionText": "Texto descriptivo de ejemplo",
+  "termsText": "valor-ejemplo",
   "imageFileId": "00000000-0000-4000-8000-000000000001",
   "serviceConceptId": "00000000-0000-4000-8000-000000000001",
   "defaultPrice": "valor-ejemplo",
@@ -2756,6 +2759,7 @@ Campos de la respuesta:
 | `code` | Sí | `string` | Sin restricción adicional declarada | Valor de code mantenido por la instancia. | `CODIGO_EJEMPLO` |
 | `name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
 | `descriptionText` | No | `string` | Sin restricción adicional declarada | Valor de description text mantenido por la instancia. | `Texto descriptivo de ejemplo` |
+| `termsText` | No | `string` | Sin restricción adicional declarada | Términos propios del servicio (carril 22). Ausente = usa los términos por defecto, cuyo texto legal provee el propietario. | `valor-ejemplo` |
 | `imageFileId` | No | `string` | formato `uuid` | Identificador asociado a image file. Es el id de un archivo de `common.files`, no una URL. Quién puede leer ese contenido lo decide `common.files`, y hoy sólo lo entrega a quien lo subió o a un rol de revisión. | `00000000-0000-4000-8000-000000000001` |
 | `serviceConceptId` | No | `string` | formato `uuid` | Identificador asociado a service concept. | `00000000-0000-4000-8000-000000000001` |
 | `defaultPrice` | Sí | `string` | Sin restricción adicional declarada | Valor de default price mantenido por la instancia. | `valor-ejemplo` |
@@ -2847,6 +2851,7 @@ Content-Type: application/json
 | `defaultPrice` | No | `string` | patrón runtime `PRICE_PATTERN` | Precio de referencia del servicio | `150.00` |
 | `currencyConceptId` | No | `string` | formato `uuid` | Moneda del precio (concepto). Sólo se acepta junto con `defaultPrice` | `00000000-0000-4000-8000-000000000001` |
 | `isActive` | No | `boolean` | Sin restricción adicional declarada | Si el servicio sigue disponible para cotizar | `true` |
+| `termsText` | No | `string` | longitud máxima 20000; admite null | Términos propios del servicio. null vuelve a los términos por defecto | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -2862,7 +2867,8 @@ Content-Type: application/json
   "name": "Nombre de ejemplo",
   "defaultPrice": "150.00",
   "currencyConceptId": "00000000-0000-4000-8000-000000000001",
-  "isActive": true
+  "isActive": true,
+  "termsText": "valor-ejemplo"
 }
 ```
 
@@ -2891,6 +2897,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "code": "CODIGO_EJEMPLO",
   "name": "Nombre de ejemplo",
   "descriptionText": "Texto descriptivo de ejemplo",
+  "termsText": "valor-ejemplo",
   "imageFileId": "00000000-0000-4000-8000-000000000001",
   "serviceConceptId": "00000000-0000-4000-8000-000000000001",
   "defaultPrice": "valor-ejemplo",
@@ -2911,6 +2918,7 @@ Campos de la respuesta:
 | `code` | Sí | `string` | Sin restricción adicional declarada | Valor de code mantenido por la instancia. | `CODIGO_EJEMPLO` |
 | `name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
 | `descriptionText` | No | `string` | Sin restricción adicional declarada | Valor de description text mantenido por la instancia. | `Texto descriptivo de ejemplo` |
+| `termsText` | No | `string` | Sin restricción adicional declarada | Términos propios del servicio (carril 22). Ausente = usa los términos por defecto, cuyo texto legal provee el propietario. | `valor-ejemplo` |
 | `imageFileId` | No | `string` | formato `uuid` | Identificador asociado a image file. Es el id de un archivo de `common.files`, no una URL. Quién puede leer ese contenido lo decide `common.files`, y hoy sólo lo entrega a quien lo subió o a un rol de revisión. | `00000000-0000-4000-8000-000000000001` |
 | `serviceConceptId` | No | `string` | formato `uuid` | Identificador asociado a service concept. | `00000000-0000-4000-8000-000000000001` |
 | `defaultPrice` | Sí | `string` | Sin restricción adicional declarada | Valor de default price mantenido por la instancia. | `valor-ejemplo` |

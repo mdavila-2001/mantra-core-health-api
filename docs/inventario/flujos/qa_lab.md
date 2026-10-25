@@ -3,7 +3,7 @@
 # Flujos del módulo `qa_lab`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 21 (16 con decisiones propias, 5 sin ellas)
+- **Operaciones:** 21 (14 con decisiones propias, 7 sin ellas)
 - Inventario de endpoints del módulo: [qa_lab](../endpoints/qa_lab.md)
 
 ## Proceso: Módulo 36 — Laboratorio de Pruebas y Defectos
@@ -39,7 +39,7 @@ defecto: firma nueva ──> open        firma repetida ──> occurrences++ (y
               ↘ rejected        ↘ triaged        ↘ in_progress
 ```
 
-_Fuente: `src/modules/qa_lab/README.md:72`_
+_Fuente: `src/modules/qa_lab/README.md:70`_
 
 ### Etapas y operaciones
 
@@ -47,16 +47,16 @@ _Fuente: `src/modules/qa_lab/README.md:72`_
 |---|---|---|---|---|---|
 | `UC-36-01` | Registrar entorno gobernado | POST /qa/environments | QA_ADMIN | MEDIO | 2 |
 | `UC-36-02` | Definir caso con aserciones | POST /qa/suites/{suiteId}/cases | QA_ADMIN · QA_ENGINEER | MEDIO | 4 |
-| `UC-36-03` | Publicar suite y activar casos | POST /qa/suites/{suiteId}/publish | QA_ADMIN · QA_ENGINEER | MEDIO | 4 |
+| `UC-36-03` | Publicar suite y activar casos | POST /qa/suites/{suiteId}/publish | QA_ADMIN · QA_ENGINEER | MEDIO | 3 |
 | `UC-36-04` | Disparar corrida | POST /qa/runs | QA_ADMIN · QA_ENGINEER · SYSTEM | MEDIO | 5 |
 | `UC-36-05` | Capturar ejecución y payloads | POST /qa/runs/{runId}/cases/{caseId}/execute | SYSTEM · QA_ENGINEER | MEDIO | 8 |
-| `UC-36-06` | Evaluar aserciones | POST /qa/case-results/{resultId}/evaluate | SYSTEM · QA_ENGINEER | MEDIO | 5 |
-| `UC-36-07` | Cerrar corrida y consolidar | POST /qa/runs/{runId}/finalize | SYSTEM · QA_ENGINEER | MEDIO | 3 |
+| `UC-36-06` | Evaluar aserciones | POST /qa/case-results/{resultId}/evaluate | SYSTEM · QA_ENGINEER | MEDIO | 6 |
+| `UC-36-07` | Cerrar corrida y consolidar | POST /qa/runs/{runId}/finalize | SYSTEM · QA_ENGINEER | BAJO | 2 |
 | `UC-36-08` | Adjuntar evidencia | POST /qa/runs/{runId}/artifacts | SYSTEM · QA_ENGINEER | MEDIO | 3 |
-| `UC-36-09` | Registrar y deduplicar defecto | POST /qa/defects | SYSTEM · QA_ENGINEER · QA_ADMIN | MEDIO | 4 |
-| `UC-36-10` | Triage y transición | PATCH /qa/defects/{defectId} | QA_ADMIN · QA_ENGINEER | MEDIO | 2 |
+| `UC-36-09` | Registrar y deduplicar defecto | POST /qa/defects | SYSTEM · QA_ENGINEER · QA_ADMIN | MEDIO | 7 |
+| `UC-36-10` | Triage y transición | PATCH /qa/defects/{defectId} | QA_ADMIN · QA_ENGINEER | BAJO | 1 |
 | `UC-36-11` | Programar ejecución automática | POST /qa/schedules | QA_ADMIN · QA_ENGINEER | MEDIO | 4 |
-| `UC-36-12` | Enlazar evidencia a release | POST /qa/runs/{runId}/link-release | RELEASE_MANAGER · QA_ADMIN | MEDIO | 3 |
+| `UC-36-12` | Enlazar evidencia a release | POST /qa/runs/{runId}/link-release | RELEASE_MANAGER · QA_ADMIN | BAJO | 2 |
 | `ctrl:QaLabInternalController` | Operaciones de QaLabInternalController que el README no asigna a un caso de uso | POST /internal/qa/schedules/run-due | SYSTEM · QA_ADMIN | MEDIO | 7 |
 | `ctrl:QaLabReadController` | Operaciones de QaLabReadController que el README no asigna a un caso de uso | GET /admin/qa/defects | QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN | BAJO | 1 |
 |  |  | GET /admin/qa/environments | QA_ADMIN · QA_ENGINEER · RELEASE_MANAGER · PLATFORM_ADMIN | BAJO | 1 |
@@ -76,8 +76,8 @@ flowchart LR
   a11(["QA_ADMIN · QA_ENGINEER · SYSTEM"]):::actor
   a14(["SYSTEM · QA_ENGINEER"]):::actor
   a25(["SYSTEM · QA_ENGINEER · QA_ADMIN"]):::actor
-  a31(["RELEASE_MANAGER · QA_ADMIN"]):::actor
-  a33(["SYSTEM · QA_ADMIN"]):::actor
+  a32(["RELEASE_MANAGER · QA_ADMIN"]):::actor
+  a34(["SYSTEM · QA_ADMIN"]):::actor
   t3[("qa_lab.test_environments")]:::tabla
   t6[("qa_lab.test_assertions")]:::tabla
   t7[("qa_lab.test_cases")]:::tabla
@@ -89,7 +89,7 @@ flowchart LR
   t20[("qa_lab.assertion_results")]:::tabla
   t23[("qa_lab.run_artifacts")]:::tabla
   t26[("qa_lab.test_defects")]:::tabla
-  t29[("qa_lab.test_schedules")]:::tabla
+  t30[("qa_lab.test_schedules")]:::tabla
   subgraph s0["UC-36-01 · Registrar entorno gobernado"]
     o1["POST /qa/environments"]:::op
   end
@@ -115,21 +115,22 @@ flowchart LR
   subgraph s7["UC-36-08 · Adjuntar evidencia"]
     o22["POST /qa/runs/{runId}/artifacts"]:::op
   end
+  t27[("+1 tablas más")]
   subgraph s8["UC-36-09 · Registrar y deduplicar defecto"]
     o24["POST /qa/defects"]:::op
   end
   subgraph s9["UC-36-10 · Triage y transición"]
-    o27["PATCH /qa/defects/{defectId}"]:::op
+    o28["PATCH /qa/defects/{defectId}"]:::op
   end
   subgraph s10["UC-36-11 · Programar ejecución automática"]
-    o28["POST /qa/schedules"]:::op
+    o29["POST /qa/schedules"]:::op
   end
   subgraph s11["UC-36-12 · Enlazar evidencia a release"]
-    o30["POST /qa/runs/{runId}/link-release"]:::op
+    o31["POST /qa/runs/{runId}/link-release"]:::op
   end
-  t34[("+1 tablas más")]
+  t35[("+1 tablas más")]
   subgraph s12["ctrl:QaLabInternalController · Operaciones de QaLabInternalController que el RE…"]
-    o32["POST /internal/qa/schedules/run-due"]:::op
+    o33["POST /internal/qa/schedules/run-due"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -142,7 +143,6 @@ flowchart LR
   a5 --> o9
   o9 -->|"ACTUALIZA"| t7
   o9 -->|"LEE"| t7
-  o9 -->|"ACTUALIZA"| t8
   o9 -->|"LEE"| t8
   a11 --> o10
   o10 -->|"LEE"| t7
@@ -164,39 +164,40 @@ flowchart LR
   o19 -->|"LEE"| t6
   o19 -->|"ACTUALIZA"| t17
   o19 -->|"LEE"| t17
+  o19 -->|"LEE"| t12
   a14 --> o21
   o21 -->|"LEE"| t17
-  o21 -->|"ACTUALIZA"| t12
   o21 -->|"LEE"| t12
   a14 --> o22
   o22 -->|"CREA"| t23
   o22 -->|"LEE"| t17
   o22 -->|"LEE"| t12
   a25 --> o24
+  o24 -->|"LEE"| t17
   o24 -->|"LEE"| t7
   o24 -->|"ACTUALIZA"| t26
   o24 -->|"CREA"| t26
   o24 -->|"LEE"| t26
-  a5 --> o27
-  o27 -->|"ACTUALIZA"| t26
-  o27 -->|"LEE"| t26
+  o24 -->|"LEE"| t12
+  o24 -.-> t27
   a5 --> o28
-  o28 -->|"LEE"| t3
-  o28 -->|"CREA"| t29
-  o28 -->|"LEE"| t29
-  o28 -->|"LEE"| t8
-  a31 --> o30
-  o30 -->|"LEE"| t23
-  o30 -->|"ACTUALIZA"| t12
-  o30 -->|"LEE"| t12
-  a33 --> o32
-  o32 -->|"LEE"| t7
-  o32 -->|"LEE"| t3
-  o32 -->|"CREA"| t12
-  o32 -->|"LEE"| t12
-  o32 -->|"ACTUALIZA"| t29
-  o32 -->|"LEE"| t29
-  o32 -.-> t34
+  o28 -->|"LEE"| t26
+  a5 --> o29
+  o29 -->|"LEE"| t3
+  o29 -->|"CREA"| t30
+  o29 -->|"LEE"| t30
+  o29 -->|"LEE"| t8
+  a32 --> o31
+  o31 -->|"LEE"| t23
+  o31 -->|"LEE"| t12
+  a34 --> o33
+  o33 -->|"LEE"| t7
+  o33 -->|"LEE"| t3
+  o33 -->|"CREA"| t12
+  o33 -->|"LEE"| t12
+  o33 -->|"ACTUALIZA"| t30
+  o33 -->|"LEE"| t30
+  o33 -.-> t35
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -267,7 +268,7 @@ flowchart LR
 
 ### Máquina de estados `DEFECT_TRANSITIONS`
 
-Declarada en `src/modules/qa_lab/services/qa-runs.service.ts:101`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+Declarada en `src/modules/qa_lab/services/qa-runs.service.ts:106`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
 
 ```mermaid
 stateDiagram-v2
@@ -333,83 +334,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. GET /admin/qa/runs/{runId}
-
-Corrida con resultados por caso y veredicto por aserción (valor observado)
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a QaLabReadService.getRun"]:::llamada
-  n2 --> n3
-  n4[("LEE qa_lab.test_runs")]:::efecto
-  n3 --> n4
-  n5{"!run"}:::decision
-  n4 --> n5
-  n6(["404 NOT_FOUND Corrida no encontrada"]):::error
-  n5 -->|"sí"| n6
-  n7[("LEE qa_lab.test_case_results · LEE qa_lab.assertion_results · LEE qa_lab.test_cases")]:::efecto
-  n5 -->|"no"| n7
-  n8(("200 Responde con éxito")):::ok
-  n7 --> n8
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 3. GET /admin/qa/suites/{suiteId}
-
-Suite con casos y aserciones
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a QaLabReadService.getSuite"]:::llamada
-  n2 --> n3
-  n4[("LEE qa_lab.test_suites")]:::efecto
-  n3 --> n4
-  n5{"!suite"}:::decision
-  n4 --> n5
-  n6(["404 NOT_FOUND Suite no encontrada"]):::error
-  n5 -->|"sí"| n6
-  n7[("LEE qa_lab.test_cases · LEE qa_lab.test_assertions")]:::efecto
-  n5 -->|"no"| n7
-  n8(("200 Responde con éxito")):::ok
-  n7 --> n8
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 4. POST /internal/qa/schedules/run-due
+#### 2. POST /internal/qa/schedules/run-due
 
 Evaluar programaciones vencidas y encolar sus corridas
 
@@ -449,60 +374,63 @@ flowchart TD
   n11 --> n12
   n13{"!suite || suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE"}:::decision
   n12 --> n13
-  n14{"!environment || environment.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n14{"!sameQaOwner(suite, schedule) || (environment && !sameQaOwner(environment, schedule))"}:::decision
   n13 -->|"no"| n14
-  n15{"policy === 'FORBID'"}:::decision
+  n15{"!environment || environment.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
   n14 -->|"no"| n15
-  n16["Llama a QaRunsRepository.findRunsInProgress"]:::llamada
-  n15 -->|"sí"| n16
-  n17[("LEE qa_lab.test_runs")]:::efecto
-  n16 --> n17
-  n18{"!skippedReason"}:::decision
+  n16{"policy === 'FORBID'"}:::decision
+  n15 -->|"no"| n16
+  n17["Llama a QaRunsRepository.findRunsInProgress"]:::llamada
+  n16 -->|"sí"| n17
+  n18[("LEE qa_lab.test_runs")]:::efecto
   n17 --> n18
-  n15 -->|"no"| n18
-  n19["Llama a QaCatalogRepository.countActiveCases"]:::llamada
-  n18 -->|"sí"| n19
-  n20[("LEE qa_lab.test_cases")]:::efecto
-  n19 --> n20
-  n21{"totalCases === 0"}:::decision
+  n19{"!skippedReason"}:::decision
+  n18 --> n19
+  n16 -->|"no"| n19
+  n20["Llama a QaCatalogRepository.countActiveCases"]:::llamada
+  n19 -->|"sí"| n20
+  n21[("LEE qa_lab.test_cases")]:::efecto
   n20 --> n21
-  n22["Llama a QaCatalogService.nextRunNumber"]:::llamada
-  n21 -->|"no"| n22
-  n23["Llama a QaRunsRepository.findLastRun"]:::llamada
-  n22 --> n23
-  n24[("LEE qa_lab.test_runs")]:::efecto
+  n22{"totalCases === 0"}:::decision
+  n21 --> n22
+  n23["Llama a QaCatalogService.nextRunNumber"]:::llamada
+  n22 -->|"no"| n23
+  n24["Llama a QaRunsRepository.findLastRun"]:::llamada
   n23 --> n24
-  n25["Repite: ciclo for"]:::bucle
+  n25[("LEE qa_lab.test_runs")]:::efecto
   n24 --> n25
-  n26["Llama a QaRunsRepository.findRunByNumber"]:::llamada
-  n25 -->|"cada elemento"| n26
-  n27[("LEE qa_lab.test_runs")]:::efecto
-  n26 --> n27
-  n28(["409 CONFLICT No se pudo asignar número de corrida"]):::error
+  n26["Repite: ciclo for"]:::bucle
+  n25 --> n26
+  n27["Llama a QaRunsRepository.findRunByNumber"]:::llamada
+  n26 -->|"cada elemento"| n27
+  n28[("LEE qa_lab.test_runs")]:::efecto
   n27 --> n28
-  n25 -->|"al terminar"| n28
-  n29["Llama a QaRunsRepository.createRun"]:::llamada
-  n30[("CREA qa_lab.test_runs")]:::efecto
-  n29 --> n30
-  n31{"nextRunAt"}:::decision
-  n13 -->|"sí"| n31
-  n14 -->|"sí"| n31
-  n21 -->|"sí"| n31
+  n29(["409 CONFLICT No se pudo asignar número de corrida"]):::error
+  n28 --> n29
+  n26 -->|"al terminar"| n29
+  n30["Llama a QaRunsRepository.createRun"]:::llamada
+  n31[("CREA qa_lab.test_runs")]:::efecto
   n30 --> n31
-  n18 -->|"no"| n31
-  n32[("ACTUALIZA qa_lab.test_schedules")]:::efecto
-  n31 -->|"sí"| n32
+  n32{"nextRunAt"}:::decision
+  n13 -->|"sí"| n32
+  n14 -->|"sí"| n32
+  n15 -->|"sí"| n32
+  n22 -->|"sí"| n32
+  n31 --> n32
+  n19 -->|"no"| n32
   n33[("ACTUALIZA qa_lab.test_schedules")]:::efecto
-  n31 -->|"no"| n33
-  n34{"runId"}:::decision
-  n32 --> n34
-  n33 --> n34
-  n35[("ACTUALIZA qa_lab.test_schedules · ACTUALIZA qa_lab.test_schedules")]:::efecto
-  n34 -->|"sí"| n35
-  n36(("200 Responde con éxito")):::ok
-  n35 --> n36
-  n34 -->|"no"| n36
-  n7 -->|"al terminar"| n36
+  n32 -->|"sí"| n33
+  n34[("ACTUALIZA qa_lab.test_schedules")]:::efecto
+  n32 -->|"no"| n34
+  n35{"runId"}:::decision
+  n33 --> n35
+  n34 --> n35
+  n36[("ACTUALIZA qa_lab.test_schedules · ACTUALIZA qa_lab.test_schedules")]:::efecto
+  n35 -->|"sí"| n36
+  n37(("200 Responde con éxito")):::ok
+  n36 --> n37
+  n35 -->|"no"| n37
+  n7 -->|"al terminar"| n37
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -511,7 +439,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /qa/case-results/{resultId}/evaluate
+#### 3. POST /qa/case-results/{resultId}/evaluate
 
 Evaluar las aserciones y fijar el resultado del caso
 
@@ -521,7 +449,6 @@ Evaluar las aserciones y fijar el resultado del caso
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Resultado no encontrado |
 | 409 | `CONFLICT` | ConflictException: El resultado ya fue evaluado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso falló en transporte: no hay respuesta que evaluar; PreconditionFailedException: El caso no tiene aserciones |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -535,50 +462,58 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a QaRunsRepository.findCaseResultForUpdate"]:::llamada
+  n5["Llama a QaRunsRepository.findCaseResultById"]:::llamada
   n4 --> n5
   n6[("LEE qa_lab.test_case_results")]:::efecto
   n5 --> n6
-  n7{"!result"}:::decision
+  n7["Llama a QaRunsRepository.findRunById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Resultado no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a QaRunsRepository.countAssertionResults"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE qa_lab.assertion_results")]:::efecto
+  n8[("LEE qa_lab.test_runs")]:::efecto
+  n7 --> n8
+  n9["Llama a QaRunsRepository.findCaseResultForUpdate"]:::llamada
+  n8 --> n9
+  n10[("LEE qa_lab.test_case_results")]:::efecto
   n9 --> n10
-  n11{"alreadyEvaluated › 0"}:::decision
+  n11{"!result"}:::decision
   n10 --> n11
-  n12(["409 CONFLICT El resultado ya fue evaluado"]):::error
+  n12(["↩ (relanza el error capturado)"]):::error
   n11 -->|"sí"| n12
-  n13{"result.errorTypeConceptId === CONCEPTS.ERROR_TRANSPORT"}:::decision
+  n13["Llama a QaRunsRepository.countAssertionResults"]:::llamada
   n11 -->|"no"| n13
-  n14(["422 PRECONDITION_FAILED El caso falló en transporte: no hay respuesta que evaluar"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a QaCatalogRepository.findAssertionsByCase"]:::llamada
-  n13 -->|"no"| n15
-  n16[("LEE qa_lab.test_assertions")]:::efecto
-  n15 --> n16
-  n17{"assertions.length === 0"}:::decision
-  n16 --> n17
-  n18(["422 PRECONDITION_FAILED El caso no tiene aserciones"]):::error
+  n14[("LEE qa_lab.assertion_results")]:::efecto
+  n13 --> n14
+  n15{"alreadyEvaluated › 0"}:::decision
+  n14 --> n15
+  n16(["409 CONFLICT El resultado ya fue evaluado"]):::error
+  n15 -->|"sí"| n16
+  n17{"result.errorTypeConceptId === CONCEPTS.ERROR_TRANSPORT"}:::decision
+  n15 -->|"no"| n17
+  n18(["422 PRECONDITION_FAILED El caso falló en transporte: no hay respuesta que evaluar"]):::error
   n17 -->|"sí"| n18
-  n19["Repite: por cada const assertion de assertions"]:::bucle
+  n19["Llama a QaCatalogRepository.findAssertionsByCase"]:::llamada
   n17 -->|"no"| n19
-  n20["Llama a QaRunsRepository.createAssertionResult"]:::llamada
-  n19 -->|"cada elemento"| n20
-  n21[("CREA qa_lab.assertion_results")]:::efecto
+  n20[("LEE qa_lab.test_assertions")]:::efecto
+  n19 --> n20
+  n21{"assertions.length === 0"}:::decision
   n20 --> n21
-  n22[("ACTUALIZA qa_lab.test_case_results · ACTUALIZA qa_lab.test_case_results · ACTUALIZA qa_lab.test_case_results…")]:::efecto
-  n21 --> n22
-  n19 -->|"al terminar"| n22
-  n23{"failed › 0"}:::decision
-  n22 --> n23
-  n24[("ACTUALIZA qa_lab.test_case_results")]:::efecto
-  n23 -->|"sí"| n24
-  n25(("200 Responde con éxito")):::ok
+  n22(["422 PRECONDITION_FAILED El caso no tiene aserciones"]):::error
+  n21 -->|"sí"| n22
+  n23["Repite: por cada const assertion de assertions"]:::bucle
+  n21 -->|"no"| n23
+  n24["Llama a QaRunsRepository.createAssertionResult"]:::llamada
+  n23 -->|"cada elemento"| n24
+  n25[("CREA qa_lab.assertion_results")]:::efecto
   n24 --> n25
-  n23 -->|"no"| n25
+  n26[("ACTUALIZA qa_lab.test_case_results · ACTUALIZA qa_lab.test_case_results · ACTUALIZA qa_lab.test_case_results…")]:::efecto
+  n25 --> n26
+  n23 -->|"al terminar"| n26
+  n27{"failed › 0"}:::decision
+  n26 --> n27
+  n28[("ACTUALIZA qa_lab.test_case_results")]:::efecto
+  n27 -->|"sí"| n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
+  n27 -->|"no"| n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -587,7 +522,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /qa/defects
+#### 4. POST /qa/defects
 
 Registrar un defecto detectado
 
@@ -597,8 +532,8 @@ Registrar un defecto detectado
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Caso no encontrado |
 | 409 | `CONFLICT` | ConflictException: No se pudo asignar número de defecto |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El resultado pertenece a otro caso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -614,44 +549,59 @@ flowchart TD
   n4 --> n5
   n6[("LEE qa_lab.test_cases")]:::efecto
   n5 --> n6
-  n7{"!testCase"}:::decision
+  n7["Llama a QaCatalogRepository.findSuiteById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Caso no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a QaRunsRepository.findDefectBySignatureForUpdate"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE qa_lab.test_defects")]:::efecto
-  n9 --> n10
-  n11{"existing"}:::decision
+  n8[("LEE qa_lab.test_suites")]:::efecto
+  n7 --> n8
+  n9{"dto.testCaseResultId"}:::decision
+  n8 --> n9
+  n10["Llama a QaRunsRepository.findCaseResultById"]:::llamada
+  n9 -->|"sí"| n10
+  n11[("LEE qa_lab.test_case_results")]:::efecto
   n10 --> n11
-  n12[("ACTUALIZA qa_lab.test_defects · ACTUALIZA qa_lab.test_defects · ACTUALIZA qa_lab.test_defects")]:::efecto
-  n11 -->|"sí"| n12
-  n13{"existing.statusConceptId === CONCEPTS.DEFECT_RESOLVED || existing.statusConceptId === CONCEPTS.DEFECT_CLOSED"}:::decision
+  n12["Llama a QaRunsRepository.findRunById"]:::llamada
+  n11 --> n12
+  n13[("LEE qa_lab.test_runs")]:::efecto
   n12 --> n13
-  n14[("ACTUALIZA qa_lab.test_defects")]:::efecto
-  n13 -->|"sí"| n14
-  n15["Llama a QaRunsService.nextDefectNumber"]:::llamada
-  n14 --> n15
-  n13 -->|"no"| n15
-  n11 -->|"no"| n15
-  n16["Llama a QaRunsRepository.countDefects"]:::llamada
-  n15 --> n16
+  n14{"linked?.testCaseId !== dto.testCaseId"}:::decision
+  n13 --> n14
+  n15(["422 PRECONDITION_FAILED El resultado pertenece a otro caso"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a QaRunsRepository.findDefectBySignatureForUpdate"]:::llamada
+  n14 -->|"no"| n16
+  n9 -->|"no"| n16
   n17[("LEE qa_lab.test_defects")]:::efecto
   n16 --> n17
-  n18["Repite: ciclo for"]:::bucle
+  n18{"existing"}:::decision
   n17 --> n18
-  n19["Llama a QaRunsRepository.findDefectByNumber"]:::llamada
-  n18 -->|"cada elemento"| n19
-  n20[("LEE qa_lab.test_defects")]:::efecto
+  n19[("ACTUALIZA qa_lab.test_defects · ACTUALIZA qa_lab.test_defects · ACTUALIZA qa_lab.test_defects")]:::efecto
+  n18 -->|"sí"| n19
+  n20{"existing.statusConceptId === CONCEPTS.DEFECT_RESOLVED || existing.statusConceptId === CONCEPTS.DEFECT_CLOSED"}:::decision
   n19 --> n20
-  n21(["409 CONFLICT No se pudo asignar número de defecto"]):::error
-  n20 --> n21
-  n18 -->|"al terminar"| n21
-  n22["Llama a QaRunsRepository.createDefect"]:::llamada
-  n23[("CREA qa_lab.test_defects")]:::efecto
+  n21[("ACTUALIZA qa_lab.test_defects")]:::efecto
+  n20 -->|"sí"| n21
+  n22["Llama a QaRunsService.nextDefectNumber"]:::llamada
+  n21 --> n22
+  n20 -->|"no"| n22
+  n18 -->|"no"| n22
+  n23["Llama a QaRunsRepository.countDefects"]:::llamada
   n22 --> n23
-  n24(("201 Responde con éxito")):::ok
+  n24[("LEE qa_lab.test_defects")]:::efecto
   n23 --> n24
+  n25["Repite: ciclo for"]:::bucle
+  n24 --> n25
+  n26["Llama a QaRunsRepository.findDefectByNumber"]:::llamada
+  n25 -->|"cada elemento"| n26
+  n27[("LEE qa_lab.test_defects")]:::efecto
+  n26 --> n27
+  n28(["409 CONFLICT No se pudo asignar número de defecto"]):::error
+  n27 --> n28
+  n25 -->|"al terminar"| n28
+  n29["Llama a QaRunsRepository.createDefect"]:::llamada
+  n30[("CREA qa_lab.test_defects")]:::efecto
+  n29 --> n30
+  n31(("201 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -660,7 +610,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. PATCH /qa/defects/{defectId}
+#### 5. PATCH /qa/defects/{defectId}
 
 Triage y transición de estado del defecto
 
@@ -670,7 +620,6 @@ Triage y transición de estado del defecto
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Defecto no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El defecto está en un estado desconocido; PreconditionFailedException: La transición de estado no está permitida; PreconditionFailedException: Un defecto en curso necesita responsable |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -687,52 +636,20 @@ flowchart TD
   n4 --> n5
   n6[("LEE qa_lab.test_defects")]:::efecto
   n5 --> n6
-  n7{"!defect"}:::decision
+  n7{"!current"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Defecto no encontrado"]):::error
+  n8(["422 PRECONDITION_FAILED El defecto está en un estado desconocido"]):::error
   n7 -->|"sí"| n8
-  n9{"!current"}:::decision
+  n9{"current !== dto.status && !DEFECT_TRANSITIONS[current].includes(dto.status)"}:::decision
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El defecto está en un estado desconocido"]):::error
+  n10(["422 PRECONDITION_FAILED La transición de estado no está permitida"]):::error
   n9 -->|"sí"| n10
-  n11{"current !== dto.status && !DEFECT_TRANSITIONS[current].includes(dto.status)"}:::decision
+  n11{"dto.status === 'IN_PROGRESS' && !dto.assignedToUserId && !defect.assignedToUserId"}:::decision
   n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED La transición de estado no está permitida"]):::error
+  n12(["422 PRECONDITION_FAILED Un defecto en curso necesita responsable"]):::error
   n11 -->|"sí"| n12
-  n13{"dto.status === 'IN_PROGRESS' && !dto.assignedToUserId && !defect.assignedToUserId"}:::decision
+  n13(("200 Responde con éxito")):::ok
   n11 -->|"no"| n13
-  n14(["422 PRECONDITION_FAILED Un defecto en curso necesita responsable"]):::error
-  n13 -->|"sí"| n14
-  n15[("ACTUALIZA qa_lab.test_defects")]:::efecto
-  n13 -->|"no"| n15
-  n16{"dto.severity"}:::decision
-  n15 --> n16
-  n17[("ACTUALIZA qa_lab.test_defects")]:::efecto
-  n16 -->|"sí"| n17
-  n18[("ACTUALIZA qa_lab.test_defects")]:::efecto
-  n17 --> n18
-  n16 -->|"no"| n18
-  n19{"dto.assignedToUserId"}:::decision
-  n18 --> n19
-  n20[("ACTUALIZA qa_lab.test_defects")]:::efecto
-  n19 -->|"sí"| n20
-  n21[("ACTUALIZA qa_lab.test_defects")]:::efecto
-  n20 --> n21
-  n19 -->|"no"| n21
-  n22{"dto.isFlaky !== undefined"}:::decision
-  n21 --> n22
-  n23[("ACTUALIZA qa_lab.test_defects")]:::efecto
-  n22 -->|"sí"| n23
-  n24[("ACTUALIZA qa_lab.test_defects")]:::efecto
-  n23 --> n24
-  n22 -->|"no"| n24
-  n25{"dto.externalIssueRef"}:::decision
-  n24 --> n25
-  n26[("ACTUALIZA qa_lab.test_defects")]:::efecto
-  n25 -->|"sí"| n26
-  n27(("200 Responde con éxito")):::ok
-  n26 --> n27
-  n25 -->|"no"| n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -741,7 +658,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /qa/environments
+#### 6. POST /qa/environments
 
 Registrar un entorno de pruebas gobernado
 
@@ -790,7 +707,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /qa/runs
+#### 7. POST /qa/runs
 
 Disparar una corrida de pruebas
 
@@ -800,7 +717,6 @@ Disparar una corrida de pruebas
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada; ResourceNotFoundException: Entorno no encontrado |
 | 409 | `CONFLICT` | ConflictException: La suite ya tiene una corrida en marcha; ConflictException: No se pudo asignar número de corrida |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suite no está publicada; PreconditionFailedException: El entorno no está activo; PreconditionFailedException: La suite no tiene casos activos |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -818,65 +734,61 @@ flowchart TD
   n4 --> n5
   n6[("LEE qa_lab.test_suites")]:::efecto
   n5 --> n6
-  n7{"!suite"}:::decision
+  n7{"suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Suite no encontrada"]):::error
+  n8(["422 PRECONDITION_FAILED La suite no está publicada"]):::error
   n7 -->|"sí"| n8
-  n9{"suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE"}:::decision
+  n9["Llama a QaCatalogRepository.findEnvironmentById"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La suite no está publicada"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a QaCatalogRepository.findEnvironmentById"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE qa_lab.test_environments")]:::efecto
-  n11 --> n12
-  n13{"!environment"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Entorno no encontrado"]):::error
+  n10[("LEE qa_lab.test_environments")]:::efecto
+  n9 --> n10
+  n11{"!sameQaOwner(environment, suite)"}:::decision
+  n10 --> n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"environment.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED El entorno no está activo"]):::error
   n13 -->|"sí"| n14
-  n15{"environment.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n15{"policy === 'FORBID'"}:::decision
   n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED El entorno no está activo"]):::error
+  n16["Llama a QaRunsRepository.findRunsInProgress"]:::llamada
   n15 -->|"sí"| n16
-  n17{"policy === 'FORBID'"}:::decision
-  n15 -->|"no"| n17
-  n18["Llama a QaRunsRepository.findRunsInProgress"]:::llamada
-  n17 -->|"sí"| n18
-  n19[("LEE qa_lab.test_runs")]:::efecto
-  n18 --> n19
-  n20{"running.length › 0"}:::decision
-  n19 --> n20
-  n21(["409 CONFLICT La suite ya tiene una corrida en marcha"]):::error
-  n20 -->|"sí"| n21
-  n22["Llama a QaCatalogRepository.countActiveCases"]:::llamada
-  n20 -->|"no"| n22
-  n17 -->|"no"| n22
-  n23[("LEE qa_lab.test_cases")]:::efecto
-  n22 --> n23
-  n24{"totalCases === 0"}:::decision
-  n23 --> n24
-  n25(["422 PRECONDITION_FAILED La suite no tiene casos activos"]):::error
-  n24 -->|"sí"| n25
-  n26["Llama a QaRunsService.nextRunNumber"]:::llamada
-  n24 -->|"no"| n26
-  n27["Llama a QaRunsRepository.findLastRun"]:::llamada
+  n17[("LEE qa_lab.test_runs")]:::efecto
+  n16 --> n17
+  n18{"running.length › 0"}:::decision
+  n17 --> n18
+  n19(["409 CONFLICT La suite ya tiene una corrida en marcha"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a QaCatalogRepository.countActiveCases"]:::llamada
+  n18 -->|"no"| n20
+  n15 -->|"no"| n20
+  n21[("LEE qa_lab.test_cases")]:::efecto
+  n20 --> n21
+  n22{"totalCases === 0"}:::decision
+  n21 --> n22
+  n23(["422 PRECONDITION_FAILED La suite no tiene casos activos"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a QaRunsService.nextRunNumber"]:::llamada
+  n22 -->|"no"| n24
+  n25["Llama a QaRunsRepository.findLastRun"]:::llamada
+  n24 --> n25
+  n26[("LEE qa_lab.test_runs")]:::efecto
+  n25 --> n26
+  n27["Repite: ciclo for"]:::bucle
   n26 --> n27
-  n28[("LEE qa_lab.test_runs")]:::efecto
-  n27 --> n28
-  n29["Repite: ciclo for"]:::bucle
+  n28["Llama a QaRunsRepository.findRunByNumber"]:::llamada
+  n27 -->|"cada elemento"| n28
+  n29[("LEE qa_lab.test_runs")]:::efecto
   n28 --> n29
-  n30["Llama a QaRunsRepository.findRunByNumber"]:::llamada
-  n29 -->|"cada elemento"| n30
-  n31[("LEE qa_lab.test_runs")]:::efecto
-  n30 --> n31
-  n32(["409 CONFLICT No se pudo asignar número de corrida"]):::error
+  n30(["409 CONFLICT No se pudo asignar número de corrida"]):::error
+  n29 --> n30
+  n27 -->|"al terminar"| n30
+  n31["Llama a QaRunsRepository.createRun"]:::llamada
+  n32[("CREA qa_lab.test_runs")]:::efecto
   n31 --> n32
-  n29 -->|"al terminar"| n32
-  n33["Llama a QaRunsRepository.createRun"]:::llamada
-  n34[("CREA qa_lab.test_runs")]:::efecto
-  n33 --> n34
-  n35(("201 Responde con éxito")):::ok
-  n34 --> n35
+  n33(("201 Responde con éxito")):::ok
+  n32 --> n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -885,7 +797,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /qa/runs/{runId}/artifacts
+#### 8. POST /qa/runs/{runId}/artifacts
 
 Adjuntar un artefacto de evidencia a la corrida
 
@@ -895,7 +807,6 @@ Adjuntar un artefacto de evidencia a la corrida
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada; ResourceNotFoundException: Resultado no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El resultado pertenece a otra corrida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -912,27 +823,27 @@ flowchart TD
   n4 --> n5
   n6[("LEE qa_lab.test_runs")]:::efecto
   n5 --> n6
-  n7{"!run"}:::decision
+  n7{"dto.testCaseResultId"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Corrida no encontrada"]):::error
+  n8["Llama a QaRunsRepository.findCaseResultById"]:::llamada
   n7 -->|"sí"| n8
-  n9{"dto.testCaseResultId"}:::decision
-  n7 -->|"no"| n9
-  n10["Llama a QaRunsRepository.findCaseResultById"]:::llamada
-  n9 -->|"sí"| n10
-  n11[("LEE qa_lab.test_case_results")]:::efecto
-  n10 --> n11
-  n12{"!result"}:::decision
-  n11 --> n12
-  n13(["404 NOT_FOUND Resultado no encontrado"]):::error
+  n9[("LEE qa_lab.test_case_results")]:::efecto
+  n8 --> n9
+  n10{"!result"}:::decision
+  n9 --> n10
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12{"result.testRunId !== runId"}:::decision
+  n10 -->|"no"| n12
+  n13["Llama a QaRunsRepository.findRunById"]:::llamada
   n12 -->|"sí"| n13
-  n14{"result.testRunId !== runId"}:::decision
-  n12 -->|"no"| n14
+  n14[("LEE qa_lab.test_runs")]:::efecto
+  n13 --> n14
   n15(["422 PRECONDITION_FAILED El resultado pertenece a otra corrida"]):::error
-  n14 -->|"sí"| n15
+  n14 --> n15
   n16["Llama a QaRunsRepository.createArtifact"]:::llamada
-  n14 -->|"no"| n16
-  n9 -->|"no"| n16
+  n12 -->|"no"| n16
+  n7 -->|"no"| n16
   n17[("CREA qa_lab.run_artifacts")]:::efecto
   n16 --> n17
   n18(("201 Responde con éxito")):::ok
@@ -945,7 +856,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /qa/runs/{runId}/cases/{caseId}/execute
+#### 9. POST /qa/runs/{runId}/cases/{caseId}/execute
 
 Registrar la ejecución del caso con sus payloads
 
@@ -955,7 +866,6 @@ Registrar la ejecución del caso con sus payloads
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada; ResourceNotFoundException: Caso no encontrado |
 | 409 | `CONFLICT` | ConflictException: La corrida ya está cerrada; ConflictException: El caso ya se ejecutó en esta corrida |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El caso pertenece a otra suite |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -973,28 +883,28 @@ flowchart TD
   n4 --> n5
   n6[("LEE qa_lab.test_runs")]:::efecto
   n5 --> n6
-  n7{"!run"}:::decision
+  n7{"run.statusConceptId === CONCEPTS.RUN_PASSED || run.statusConceptId === CONCEPTS.RUN_FAILED_STATUS"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Corrida no encontrada"]):::error
+  n8(["409 CONFLICT La corrida ya está cerrada"]):::error
   n7 -->|"sí"| n8
-  n9{"run.statusConceptId === CONCEPTS.RUN_PASSED || run.statusConceptId === CONCEPTS.RUN_FAILED_STATUS"}:::decision
+  n9["Llama a QaCatalogRepository.findCaseById"]:::llamada
   n7 -->|"no"| n9
-  n10(["409 CONFLICT La corrida ya está cerrada"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a QaCatalogRepository.findCaseById"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE qa_lab.test_cases")]:::efecto
-  n11 --> n12
-  n13{"!testCase"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Caso no encontrado"]):::error
+  n10[("LEE qa_lab.test_cases")]:::efecto
+  n9 --> n10
+  n11{"!testCase"}:::decision
+  n10 --> n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"testCase.suiteId !== run.suiteId"}:::decision
+  n11 -->|"no"| n13
+  n14["Llama a QaCatalogRepository.findSuiteById"]:::llamada
   n13 -->|"sí"| n14
-  n15{"testCase.suiteId !== run.suiteId"}:::decision
-  n13 -->|"no"| n15
+  n15[("LEE qa_lab.test_suites")]:::efecto
+  n14 --> n15
   n16(["422 PRECONDITION_FAILED El caso pertenece a otra suite"]):::error
-  n15 -->|"sí"| n16
+  n15 --> n16
   n17["Llama a QaRunsRepository.findCaseResult"]:::llamada
-  n15 -->|"no"| n17
+  n13 -->|"no"| n17
   n18[("LEE qa_lab.test_case_results")]:::efecto
   n17 --> n18
   n19{"previous"}:::decision
@@ -1017,13 +927,8 @@ flowchart TD
   n26 --> n27
   n28[("CREA qa_lab.response_payloads")]:::efecto
   n27 --> n28
-  n29{"run.statusConceptId === CONCEPTS.RUN_QUEUED"}:::decision
+  n29(("201 Responde con éxito")):::ok
   n28 --> n29
-  n30[("ACTUALIZA qa_lab.test_runs · ACTUALIZA qa_lab.test_runs")]:::efecto
-  n29 -->|"sí"| n30
-  n31(("201 Responde con éxito")):::ok
-  n30 --> n31
-  n29 -->|"no"| n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1032,7 +937,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /qa/runs/{runId}/finalize
+#### 10. POST /qa/runs/{runId}/finalize
 
 Cerrar la corrida y consolidar totales
 
@@ -1042,7 +947,6 @@ Cerrar la corrida y consolidar totales
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada |
 | 409 | `CONFLICT` | ConflictException: La corrida ya está cerrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1059,22 +963,16 @@ flowchart TD
   n4 --> n5
   n6[("LEE qa_lab.test_runs")]:::efecto
   n5 --> n6
-  n7{"!run"}:::decision
+  n7{"run.statusConceptId === CONCEPTS.RUN_PASSED || run.statusConceptId === CONCEPTS.RUN_FAILED_STATUS"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Corrida no encontrada"]):::error
+  n8(["409 CONFLICT La corrida ya está cerrada"]):::error
   n7 -->|"sí"| n8
-  n9{"run.statusConceptId === CONCEPTS.RUN_PASSED || run.statusConceptId === CONCEPTS.RUN_FAILED_STATUS"}:::decision
+  n9["Llama a QaRunsRepository.findResultsByRun"]:::llamada
   n7 -->|"no"| n9
-  n10(["409 CONFLICT La corrida ya está cerrada"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a QaRunsRepository.findResultsByRun"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE qa_lab.test_case_results")]:::efecto
-  n11 --> n12
-  n13[("ACTUALIZA qa_lab.test_runs · ACTUALIZA qa_lab.test_runs · ACTUALIZA qa_lab.test_runs · ACTUALIZA qa_lab.test_…")]:::efecto
-  n12 --> n13
-  n14(("200 Responde con éxito")):::ok
-  n13 --> n14
+  n10[("LEE qa_lab.test_case_results")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1083,7 +981,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /qa/runs/{runId}/link-release
+#### 11. POST /qa/runs/{runId}/link-release
 
 Enlazar la evidencia de la corrida a un release
 
@@ -1093,7 +991,6 @@ Enlazar la evidencia de la corrida a un release
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Sólo una corrida que pasó puede respaldar un release; PreconditionFailedException: La corrida no tiene evidencia adjunta |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1110,26 +1007,20 @@ flowchart TD
   n4 --> n5
   n6[("LEE qa_lab.test_runs")]:::efecto
   n5 --> n6
-  n7{"!run"}:::decision
+  n7{"run.statusConceptId !== CONCEPTS.RUN_PASSED"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Corrida no encontrada"]):::error
+  n8(["422 PRECONDITION_FAILED Sólo una corrida que pasó puede respaldar un release"]):::error
   n7 -->|"sí"| n8
-  n9{"run.statusConceptId !== CONCEPTS.RUN_PASSED"}:::decision
+  n9["Llama a QaRunsRepository.findArtifactsByRun"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED Sólo una corrida que pasó puede respaldar un release"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a QaRunsRepository.findArtifactsByRun"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE qa_lab.run_artifacts")]:::efecto
-  n11 --> n12
-  n13{"artifacts.length === 0"}:::decision
-  n12 --> n13
-  n14(["422 PRECONDITION_FAILED La corrida no tiene evidencia adjunta"]):::error
-  n13 -->|"sí"| n14
-  n15[("ACTUALIZA qa_lab.test_runs")]:::efecto
-  n13 -->|"no"| n15
-  n16(("200 Responde con éxito")):::ok
-  n15 --> n16
+  n10[("LEE qa_lab.run_artifacts")]:::efecto
+  n9 --> n10
+  n11{"artifacts.length === 0"}:::decision
+  n10 --> n11
+  n12(["422 PRECONDITION_FAILED La corrida no tiene evidencia adjunta"]):::error
+  n11 -->|"sí"| n12
+  n13(("200 Responde con éxito")):::ok
+  n11 -->|"no"| n13
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1138,7 +1029,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /qa/schedules
+#### 12. POST /qa/schedules
 
 Programar la ejecución automática de la suite
 
@@ -1148,7 +1039,6 @@ Programar la ejecución automática de la suite
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada; ResourceNotFoundException: Entorno no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe una programación con ese código para la suite y el entorno |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La suite no está publicada; PreconditionFailedException: El entorno no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1166,40 +1056,36 @@ flowchart TD
   n4 --> n5
   n6[("LEE qa_lab.test_suites")]:::efecto
   n5 --> n6
-  n7{"!suite"}:::decision
+  n7{"suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Suite no encontrada"]):::error
+  n8(["422 PRECONDITION_FAILED La suite no está publicada"]):::error
   n7 -->|"sí"| n8
-  n9{"suite.stateConceptId !== CONCEPTS.SUITE_ACTIVE"}:::decision
+  n9["Llama a QaCatalogRepository.findEnvironmentById"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La suite no está publicada"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a QaCatalogRepository.findEnvironmentById"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE qa_lab.test_environments")]:::efecto
-  n11 --> n12
-  n13{"!environment"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Entorno no encontrado"]):::error
+  n10[("LEE qa_lab.test_environments")]:::efecto
+  n9 --> n10
+  n11{"!sameQaOwner(environment, suite)"}:::decision
+  n10 --> n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"environment.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED El entorno no está activo"]):::error
   n13 -->|"sí"| n14
-  n15{"environment.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n15["Llama a QaCatalogRepository.findScheduleByCode"]:::llamada
   n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED El entorno no está activo"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a QaCatalogRepository.findScheduleByCode"]:::llamada
-  n15 -->|"no"| n17
-  n18[("LEE qa_lab.test_schedules")]:::efecto
-  n17 --> n18
-  n19{"duplicate"}:::decision
-  n18 --> n19
-  n20(["409 CONFLICT Ya existe una programación con ese código para la suite y el entorno"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a QaCatalogRepository.createSchedule"]:::llamada
-  n19 -->|"no"| n21
-  n22[("CREA qa_lab.test_schedules")]:::efecto
-  n21 --> n22
-  n23(("201 Responde con éxito")):::ok
-  n22 --> n23
+  n16[("LEE qa_lab.test_schedules")]:::efecto
+  n15 --> n16
+  n17{"duplicate"}:::decision
+  n16 --> n17
+  n18(["409 CONFLICT Ya existe una programación con ese código para la suite y el entorno"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a QaCatalogRepository.createSchedule"]:::llamada
+  n17 -->|"no"| n19
+  n20[("CREA qa_lab.test_schedules")]:::efecto
+  n19 --> n20
+  n21(("201 Responde con éxito")):::ok
+  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1208,7 +1094,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /qa/suites/{suiteId}/cases
+#### 13. POST /qa/suites/{suiteId}/cases
 
 Definir un caso de prueba con sus aserciones
 
@@ -1218,7 +1104,6 @@ Definir un caso de prueba con sus aserciones
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe un caso con ese código en la suite |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una aserción JSON_PATH necesita su ruta; PreconditionFailedException: La aserción necesita valor esperado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1247,32 +1132,28 @@ flowchart TD
   n9 --> n10
   n11[("LEE qa_lab.test_suites")]:::efecto
   n10 --> n11
-  n12{"!suite"}:::decision
+  n12["Llama a QaCatalogRepository.findCaseByCode"]:::llamada
   n11 --> n12
-  n13(["404 NOT_FOUND Suite no encontrada"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a QaCatalogRepository.findCaseByCode"]:::llamada
-  n12 -->|"no"| n14
-  n15[("LEE qa_lab.test_cases")]:::efecto
-  n14 --> n15
-  n16{"duplicate"}:::decision
-  n15 --> n16
-  n17(["409 CONFLICT Ya existe un caso con ese código en la suite"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a QaCatalogRepository.findCasesBySuite"]:::llamada
-  n16 -->|"no"| n18
-  n19[("LEE qa_lab.test_cases")]:::efecto
+  n13[("LEE qa_lab.test_cases")]:::efecto
+  n12 --> n13
+  n14{"duplicate"}:::decision
+  n13 --> n14
+  n15(["409 CONFLICT Ya existe un caso con ese código en la suite"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a QaCatalogRepository.findCasesBySuite"]:::llamada
+  n14 -->|"no"| n16
+  n17[("LEE qa_lab.test_cases")]:::efecto
+  n16 --> n17
+  n18["Llama a QaCatalogRepository.createCase"]:::llamada
+  n17 --> n18
+  n19[("CREA qa_lab.test_cases")]:::efecto
   n18 --> n19
-  n20["Llama a QaCatalogRepository.createCase"]:::llamada
+  n20["Llama a QaCatalogRepository.createAssertion"]:::llamada
   n19 --> n20
-  n21[("CREA qa_lab.test_cases")]:::efecto
+  n21[("CREA qa_lab.test_assertions")]:::efecto
   n20 --> n21
-  n22["Llama a QaCatalogRepository.createAssertion"]:::llamada
+  n22(("201 Responde con éxito")):::ok
   n21 --> n22
-  n23[("CREA qa_lab.test_assertions")]:::efecto
-  n22 --> n23
-  n24(("201 Responde con éxito")):::ok
-  n23 --> n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1281,7 +1162,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /qa/suites/{suiteId}/publish
+#### 14. POST /qa/suites/{suiteId}/publish
 
 Publicar la suite y activar sus casos
 
@@ -1291,7 +1172,6 @@ Publicar la suite y activar sus casos
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Suite no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una suite sin casos no puede publicarse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1308,27 +1188,21 @@ flowchart TD
   n4 --> n5
   n6[("LEE qa_lab.test_suites")]:::efecto
   n5 --> n6
-  n7{"!suite"}:::decision
+  n7["Llama a QaCatalogRepository.findCasesBySuiteForUpdate"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Suite no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a QaCatalogRepository.findCasesBySuiteForUpdate"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE qa_lab.test_cases")]:::efecto
-  n9 --> n10
-  n11{"cases.length === 0"}:::decision
-  n10 --> n11
-  n12(["422 PRECONDITION_FAILED Una suite sin casos no puede publicarse"]):::error
-  n11 -->|"sí"| n12
-  n13["Repite: por cada const testCase de cases"]:::bucle
-  n11 -->|"no"| n13
-  n14[("ACTUALIZA qa_lab.test_cases")]:::efecto
-  n13 -->|"cada elemento"| n14
-  n15[("ACTUALIZA qa_lab.test_suites · ACTUALIZA qa_lab.test_suites")]:::efecto
-  n14 --> n15
-  n13 -->|"al terminar"| n15
-  n16(("200 Responde con éxito")):::ok
-  n15 --> n16
+  n8[("LEE qa_lab.test_cases")]:::efecto
+  n7 --> n8
+  n9{"cases.length === 0"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED Una suite sin casos no puede publicarse"]):::error
+  n9 -->|"sí"| n10
+  n11["Repite: por cada const testCase de cases"]:::bucle
+  n9 -->|"no"| n11
+  n12[("ACTUALIZA qa_lab.test_cases")]:::efecto
+  n11 -->|"cada elemento"| n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  n11 -->|"al terminar"| n13
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1347,4 +1221,6 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /admin/qa/environments | 200, 401, 403, 429 | 1 |
 | GET /admin/qa/flows | 200, 401, 403, 429 | 5 |
 | GET /admin/qa/runs | 200, 401, 403, 429 | 1 |
+| GET /admin/qa/runs/{runId} | 200, 400, 401, 403, 429 | 4 |
 | GET /admin/qa/suites | 200, 401, 403, 429 | 3 |
+| GET /admin/qa/suites/{suiteId} | 200, 400, 401, 403, 429 | 3 |

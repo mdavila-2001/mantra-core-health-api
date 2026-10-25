@@ -10,22 +10,22 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [appointment_bookings](#appointment_bookings) | Registra reservas de turnos entre pacientes, profesionales y recursos de atención. | 22 | 15 | 85 | DIVERGE |
+| [appointment_bookings](#appointment_bookings) | Registra reservas de turnos entre pacientes, profesionales y recursos de atención. | 22 | 15 | 105 | DIVERGE |
 | [appointment_payment_states](#appointment_payment_states) | Guarda el estado de pago asociado a una reserva de turno, permitiendo consultar la situación financiera de la cita sin perder su vínculo con la agenda asistencial. | 12 | 4 | 6 | COINCIDE |
 | [appointment_reminders](#appointment_reminders) | Registra recordatorios de turnos para apoyar la comunicación previa a la atención y seguimiento de su entrega. | 13 | 6 | 8 | COINCIDE |
-| [availability_exceptions](#availability_exceptions) | Registra excepciones que modifican la disponibilidad habitual, como cierres, licencias o cambios puntuales. | 12 | 5 | 20 | COINCIDE |
+| [availability_exceptions](#availability_exceptions) | Registra excepciones que modifican la disponibilidad habitual, como cierres, licencias o cambios puntuales. | 12 | 5 | 19 | COINCIDE |
 | [availability_slots](#availability_slots) | Representa intervalos de disponibilidad de profesionales o recursos que pueden ofrecerse para reserva de atención. | 13 | 8 | 0 | COINCIDE |
-| [bookable_slots](#bookable_slots) | Mantiene espacios de agenda listos para reservar y permite coordinar disponibilidad con solicitudes de turnos. | 15 | 7 | 110 | COINCIDE |
-| [booking_cancellations](#booking_cancellations) | Documenta cancelaciones de turnos y sus motivos para conservar el historial operativo de agenda. | 15 | 8 | 3 | COINCIDE |
+| [bookable_slots](#bookable_slots) | Mantiene espacios de agenda listos para reservar y permite coordinar disponibilidad con solicitudes de turnos. | 15 | 7 | 124 | COINCIDE |
+| [booking_cancellations](#booking_cancellations) | Documenta cancelaciones de turnos y sus motivos para conservar el historial operativo de agenda. | 15 | 8 | 6 | COINCIDE |
 | [booking_confirmation_rules](#booking_confirmation_rules) | Establece cuándo y cómo debe confirmarse una reserva para reducir inasistencias y mantener agenda confiable. | 16 | 2 | 7 | COINCIDE |
-| [booking_policies](#booking_policies) | Define reglas de reserva de turnos para controlar anticipación, cancelación y condiciones de agenda. | 19 | 7 | 9 | COINCIDE |
+| [booking_policies](#booking_policies) | Define reglas de reserva de turnos para controlar anticipación, cancelación y condiciones de agenda. | 19 | 7 | 12 | COINCIDE |
 | [booking_reschedules](#booking_reschedules) | Preserva cambios de fecha u hora de reservas para mantener trazabilidad de reprogramaciones. | 9 | 7 | 5 | COINCIDE |
 | [calendar_absences](#calendar_absences) | Registra ausencias de calendario de profesionales o recursos para impedir ofrecer disponibilidad cuando no se prestará atención. | 24 | 7 | 3 | COINCIDE |
 | [practitioner_schedules](#practitioner_schedules) | Define horarios recurrentes de profesionales para calcular períodos en que pueden brindar atención. | 16 | 7 | 15 | COINCIDE |
 | [practitioner_service_offerings](#practitioner_service_offerings) | Define qué prestaciones ofrece cada profesional y bajo qué condiciones, para que la agenda publique y reserve servicios asistenciales disponibles. | 16 | 6 | 12 | COINCIDE |
-| [schedulable_resources](#schedulable_resources) | Cataloga recursos reservables, como profesionales, espacios o equipos, para organizar capacidad asistencial. | 15 | 7 | 98 | COINCIDE |
+| [schedulable_resources](#schedulable_resources) | Cataloga recursos reservables, como profesionales, espacios o equipos, para organizar capacidad asistencial. | 15 | 7 | 111 | COINCIDE |
 | [schedule_rules](#schedule_rules) | Almacena reglas de agenda que controlan cómo se generan y ofrecen espacios de atención. | 16 | 5 | 9 | COINCIDE |
-| [schedule_templates](#schedule_templates) | Define plantillas de horarios que permiten configurar patrones recurrentes de disponibilidad. | 15 | 8 | 15 | COINCIDE |
+| [schedule_templates](#schedule_templates) | Define plantillas de horarios que permiten configurar patrones recurrentes de disponibilidad. | 15 | 8 | 16 | COINCIDE |
 | [slot_holds](#slot_holds) | Retiene temporalmente espacios de agenda durante procesos de reserva para evitar asignaciones concurrentes incompatibles. | 13 | 8 | 13 | COINCIDE |
 | [waitlist_entries](#waitlist_entries) | Administra pacientes en espera para ocupar espacios de atención que se liberen en la agenda. | 15 | 10 | 10 | COINCIDE |
 
@@ -233,7 +233,7 @@ Registra reservas de turnos entre pacientes, profesionales y recursos de atenci�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_41_scheduling.puml: appointment_bookings`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_41_scheduling.puml` · **DDL:** `SQL/41_scheduling/02_tables.sql`
 - **Entidad del ORM:** `AppointmentBookings` — `src/modules/scheduling/entities/appointment_bookings.entity.ts`
-- **Resumen:** 22 columnas · 15 índices · 13 FK salientes · 7 entrantes · 85 operaciones
+- **Resumen:** 22 columnas · 15 índices · 13 FK salientes · 7 entrantes · 105 operaciones
 
 #### Columnas
 
@@ -253,14 +253,14 @@ Registra reservas de turnos entre pacientes, profesionales y recursos de atenci�
 | 12 | `checked_in_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 13 | `reason_text` | `text` | Opcional | _sin dato_ | coincide |
 | 14 | `booking_policy_id` | `uuid` | Clave foránea → scheduling.booking_policies.id; Opcional | _sin dato_ | coincide |
-| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/scheduling/entities/appointment_bookings.entity.ts:123`)_ | coincide |
-| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/scheduling/entities/appointment_bookings.entity.ts:129`)_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/scheduling/entities/appointment_bookings.entity.ts:104`)_ | coincide |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/scheduling/entities/appointment_bookings.entity.ts:110`)_ | coincide |
 | 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/scheduling/entities/appointment_bookings.entity.ts:147`)_ | coincide |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/scheduling/entities/appointment_bookings.entity.ts:128`)_ | coincide |
 | 20 | `cancellation_policy_snapshot` | `jsonb` | Opcional | + v4.0.8 (ALOVIDA CAN-APT): copia congelada de la política de cancelación tal como se aceptó al reservar. Se guarda el snapshot, no una FK, justamente para que un cambio posterior de la política no reescriba lo que el paciente aceptó. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_41_scheduling.puml:231`)_ | coincide |
 | 21 | `practitioner_service_offering_id` | `uuid` | Clave foránea → scheduling.practitioner_service_offerings.id; Opcional | + v4.2.40 — la reserva de un servicio (no de una consulta). `practitioner_service_offering_id` apunta a la oferta del profesional; `service_snapshot` congela lo que el paciente aceptó (nombre, precio, moneda, duración mín/máx y colchones) con el mismo criterio que `cancellation_policy_snapshot`: un cambio posterior de la oferta no reescribe la reserva. Ambas NULL ≡ consulta. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_41_scheduling.puml:235`)_ | coincide |
-| 22 | `service_snapshot` | `jsonb` | Opcional | Copia congelada de lo que el paciente aceptó al reservar el servicio: nombre, precio, moneda, duración mínima y máxima y colchones. Mismo criterio que : un cambio posterior de la oferta no reescribe la reserva. _(JSDOC_ENTIDAD, `src/modules/scheduling/entities/appointment_bookings.entity.ts:182`)_ | coincide |
+| 22 | `service_snapshot` | `jsonb` | Opcional | Copia congelada de lo que el paciente aceptó al reservar el servicio: nombre, precio, moneda, duración mínima y máxima y colchones. Mismo criterio que : un cambio posterior de la oferta no reescribe la reserva. _(JSDOC_ENTIDAD, `src/modules/scheduling/entities/appointment_bookings.entity.ts:163`)_ | coincide |
 
 #### Relaciones
 
@@ -291,14 +291,14 @@ Registra reservas de turnos entre pacientes, profesionales y recursos de atenci�
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_appointment_bookings_tenant_id` | no | tenant_id | Soporta la clave foránea fk_appointment_bookings_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_appointment_bookings_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_appointment_bookings_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_appointment_bookings_tenant_id` | no | tenant_id | Soporta la clave foránea fk_appointment_bookings_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_appointment_bookings_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_appointment_bookings_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_appointment_bookings_bookable_slot_id` | no | bookable_slot_id | Soporta la clave foránea fk_appointment_bookings_bookable_slot_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «bookable_slot_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_appointment_bookings_resource_id` | no | resource_id | Soporta la clave foránea fk_appointment_bookings_resource_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «resource_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_appointment_bookings_appointment_id` | no | appointment_id | Soporta la clave foránea fk_appointment_bookings_appointment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «appointment_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_appointment_bookings_service_concept_id` | no | service_concept_id | Soporta la clave foránea fk_appointment_bookings_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_appointment_bookings_booking_channel_concept_id` | no | booking_channel_concept_id | Soporta la clave foránea fk_appointment_bookings_booking_channel_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_appointment_bookings_booked_by_user_id` | no | booked_by_user_id | Soporta la clave foránea fk_appointment_bookings_booked_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_appointment_bookings_booked_by_user_id` | no | booked_by_user_id | Soporta la clave foránea fk_appointment_bookings_booked_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «booked_by_user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_appointment_bookings_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_appointment_bookings_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_appointment_bookings_booking_policy_id` | no | booking_policy_id | Soporta la clave foránea fk_appointment_bookings_booking_policy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_appointment_bookings_practitioner_service_offering_id` | no | practitioner_service_offering_id | Soporta la clave foránea fk_appointment_bookings_practitioner_service_offering_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -311,6 +311,10 @@ Registra reservas de turnos entre pacientes, profesionales y recursos de atenci�
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /authz/care-relationships | LEE | DIRECTA |
+| POST /authz/legal-representations | LEE | DIRECTA |
+| POST /authz/patients/{patientProfileId}/break-the-glass | LEE | DIRECTA |
+| POST /authz/patients/{patientProfileId}/clinical-access-grants | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | POR_SQL |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | POR_SQL |
 | GET /charts/encounters/{id}/pdf | LEE | POR_SQL |
@@ -342,13 +346,25 @@ Registra reservas de turnos entre pacientes, profesionales y recursos de atenci�
 | GET /clinical/prescriptions/{id}/pdf | LEE | POR_SQL |
 | POST /clinical/procedures/{id}/attachments | LEE | POR_SQL |
 | POST /clinical/service-requests/duplicate-check | LEE | POR_SQL |
+| POST /care-gaps/recompute | LEE | POR_SQL |
+| GET /care-teams | LEE | POR_SQL |
+| POST /care-teams | LEE | POR_SQL |
+| POST /order-sets/{id}/apply | LEE | POR_SQL |
+| POST /patients/{id}/immunization-plan/project | LEE | POR_SQL |
+| GET /referrals | LEE | POR_SQL |
+| POST /referrals | LEE | POR_SQL |
 | PUT /community/ratings | LEE | DIRECTA |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | POR_SQL |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | POR_SQL |
+| GET /forms/instances | LEE | POR_SQL |
+| GET /forms/instances/{id} | LEE | POR_SQL |
 | POST /medical-groups | LEE | POR_SQL |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | POR_SQL |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | POR_SQL |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | POR_SQL |
+| GET /procedure-cases/{id} | LEE | POR_SQL |
+| GET /quotations | LEE | POR_SQL |
+| POST /quotations | LEE | POR_SQL |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | POR_SQL |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | POR_SQL |
 | POST /scheduling/appointments/direct | CREA | DIRECTA |
 | POST /scheduling/appointments/direct | LEE | DIRECTA |
 | POST /scheduling/appointments/walk-in | CREA | DIRECTA |
@@ -384,16 +400,20 @@ Registra reservas de turnos entre pacientes, profesionales y recursos de atenci�
 | POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
 | POST /scheduling/internal/expire-holds | LEE | POR_SQL |
+| POST /scheduling/resources/{id}/close-slots | ACTUALIZA | POR_TIPO |
 | POST /scheduling/resources/{id}/close-slots | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/delay | LEE | DIRECTA |
 | GET /scheduling/resources/{id}/exceptions | LEE | DIRECTA |
-| POST /scheduling/resources/{id}/exceptions | LEE | POR_SQL |
+| POST /scheduling/resources/{id}/exceptions | ACTUALIZA | POR_TIPO |
+| POST /scheduling/resources/{id}/exceptions | LEE | DIRECTA |
 | POST /scheduling/resources/{id}/shift-slots | LEE | DIRECTA |
 | GET /scheduling/service-availability | LEE | POR_SQL |
 | POST /scheduling/service-offerings/{id}/holds | LEE | POR_SQL |
 | POST /scheduling/slots/{id}/holds | LEE | DIRECTA |
+| DELETE /scheduling/templates/{id} | ACTUALIZA | POR_TIPO |
 | DELETE /scheduling/templates/{id} | LEE | DIRECTA |
 | POST /scheduling/templates/{id}/generate-slots | LEE | POR_SQL |
+| GET /scheduling/templates/{id}/live-bookings | LEE | DIRECTA |
 | GET /tenants/{tenantId}/agenda | LEE | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
 
@@ -577,7 +597,7 @@ Registra excepciones que modifican la disponibilidad habitual, como cierres, lic
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_41_scheduling.puml: availability_exceptions`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_41_scheduling.puml` · **DDL:** `SQL/41_scheduling/02_tables.sql`
 - **Entidad del ORM:** `AvailabilityExceptions` — `src/modules/scheduling/entities/availability_exceptions.entity.ts`
-- **Resumen:** 12 columnas · 5 índices · 4 FK salientes · 0 entrantes · 20 operaciones
+- **Resumen:** 12 columnas · 5 índices · 4 FK salientes · 0 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -624,7 +644,6 @@ Registra excepciones que modifican la disponibilidad habitual, como cierres, lic
 | POST /scheduling/bookings/{id}/accept | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/cancel | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/complete | LEE | POR_SQL |
-| POST /scheduling/bookings/{id}/reject | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/reschedule | LEE | POR_SQL |
 | DELETE /scheduling/exceptions/{id} | BORRA | POR_TIPO |
 | DELETE /scheduling/exceptions/{id} | LEE | DIRECTA |
@@ -735,7 +754,7 @@ Mantiene espacios de agenda listos para reservar y permite coordinar disponibili
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_41_scheduling.puml: bookable_slots`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_41_scheduling.puml` · **DDL:** `SQL/41_scheduling/02_tables.sql`
 - **Entidad del ORM:** `BookableSlots` — `src/modules/scheduling/entities/bookable_slots.entity.ts`
-- **Resumen:** 15 columnas · 7 índices · 7 FK salientes · 4 entrantes · 110 operaciones
+- **Resumen:** 15 columnas · 7 índices · 7 FK salientes · 4 entrantes · 124 operaciones
 
 #### Columnas
 
@@ -777,8 +796,8 @@ Mantiene espacios de agenda listos para reservar y permite coordinar disponibili
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_bookable_slots_resource_id` | no | resource_id | Soporta la clave foránea fk_bookable_slots_resource_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 8 consulta(s) de repositorio filtran u ordenan por «resource_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_bookable_slots_schedule_template_id` | no | schedule_template_id | Soporta la clave foránea fk_bookable_slots_schedule_template_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «schedule_template_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_bookable_slots_resource_id` | no | resource_id | Soporta la clave foránea fk_bookable_slots_resource_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 9 consulta(s) de repositorio filtran u ordenan por «resource_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_bookable_slots_schedule_template_id` | no | schedule_template_id | Soporta la clave foránea fk_bookable_slots_schedule_template_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «schedule_template_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_bookable_slots_service_concept_id` | no | service_concept_id | Soporta la clave foránea fk_bookable_slots_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_bookable_slots_practitioner_service_offering_id` | no | practitioner_service_offering_id | Soporta la clave foránea fk_bookable_slots_practitioner_service_offering_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_bookable_slots_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_bookable_slots_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
@@ -820,6 +839,13 @@ Mantiene espacios de agenda listos para reservar y permite coordinar disponibili
 | GET /clinical/prescriptions/{id}/pdf | LEE | POR_SQL |
 | POST /clinical/procedures/{id}/attachments | LEE | POR_SQL |
 | POST /clinical/service-requests/duplicate-check | LEE | POR_SQL |
+| POST /care-gaps/recompute | LEE | POR_SQL |
+| GET /care-teams | LEE | POR_SQL |
+| POST /care-teams | LEE | POR_SQL |
+| POST /order-sets/{id}/apply | LEE | POR_SQL |
+| POST /patients/{id}/immunization-plan/project | LEE | POR_SQL |
+| GET /referrals | LEE | POR_SQL |
+| POST /referrals | LEE | POR_SQL |
 | GET /f/{slug} | LEE | POR_SQL |
 | POST /internal/community/search/reindex | LEE | POR_SQL |
 | GET /l/{slug} | LEE | POR_SQL |
@@ -837,14 +863,19 @@ Mantiene espacios de agenda listos para reservar y permite coordinar disponibili
 | GET /s/{slug} | LEE | POR_SQL |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | POR_SQL |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | POR_SQL |
+| GET /forms/instances | LEE | POR_SQL |
+| GET /forms/instances/{id} | LEE | POR_SQL |
 | POST /medical-groups | LEE | POR_SQL |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | POR_SQL |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | POR_SQL |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | POR_SQL |
 | POST /visit-requests | LEE | DIRECTA |
 | POST /visit-requests/{visitRequestId}/propose-time | LEE | DIRECTA |
 | POST /visit-requests/{visitRequestId}/reschedule | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | POR_SQL |
 | GET /profiles/practitioners/me/onboarding | LEE | DIRECTA |
+| GET /quotations | LEE | POR_SQL |
+| POST /quotations | LEE | POR_SQL |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | POR_SQL |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | POR_SQL |
 | POST /scheduling/appointments/direct | ACTUALIZA | POR_TIPO |
 | POST /scheduling/appointments/direct | CREA | DIRECTA |
 | POST /scheduling/appointments/direct | LEE | DIRECTA |
@@ -894,9 +925,11 @@ Mantiene espacios de agenda listos para reservar y permite coordinar disponibili
 | POST /scheduling/slots/{id}/holds | ACTUALIZA | POR_TIPO |
 | POST /scheduling/slots/{id}/holds | LEE | DIRECTA |
 | DELETE /scheduling/templates/{id} | BORRA | DIRECTA |
+| DELETE /scheduling/templates/{id} | ACTUALIZA | POR_TIPO |
 | DELETE /scheduling/templates/{id} | LEE | DIRECTA |
 | POST /scheduling/templates/{id}/generate-slots | CREA | DIRECTA |
 | POST /scheduling/templates/{id}/generate-slots | LEE | DIRECTA |
+| GET /scheduling/templates/{id}/live-bookings | LEE | DIRECTA |
 | GET /tenants/{tenantId}/agenda | LEE | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
 
@@ -923,7 +956,7 @@ Documenta cancelaciones de turnos y sus motivos para conservar el historial oper
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_41_scheduling.puml: booking_cancellations`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_41_scheduling.puml` · **DDL:** `SQL/41_scheduling/02_tables.sql`
 - **Entidad del ORM:** `BookingCancellations` — `src/modules/scheduling/entities/booking_cancellations.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 8 FK salientes · 0 entrantes · 3 operaciones
+- **Resumen:** 15 columnas · 8 índices · 8 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -978,6 +1011,9 @@ Documenta cancelaciones de turnos y sus motivos para conservar el historial oper
 | POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/cancel | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/reject | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/close-slots | CREA | DIRECTA |
+| POST /scheduling/resources/{id}/exceptions | CREA | DIRECTA |
+| DELETE /scheduling/templates/{id} | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -1077,7 +1113,7 @@ Define reglas de reserva de turnos para controlar anticipación, cancelación y 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_41_scheduling.puml: booking_policies`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_41_scheduling.puml` · **DDL:** `SQL/41_scheduling/02_tables.sql`
 - **Entidad del ORM:** `BookingPolicies` — `src/modules/scheduling/entities/booking_policies.entity.ts`
-- **Resumen:** 19 columnas · 7 índices · 6 FK salientes · 3 entrantes · 9 operaciones
+- **Resumen:** 19 columnas · 7 índices · 6 FK salientes · 3 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -1139,9 +1175,12 @@ Define reglas de reserva de turnos para controlar anticipación, cancelación y 
 | POST /scheduling/bookings/{id}/reject | LEE | DIRECTA |
 | POST /scheduling/holds/{holdToken}/confirm | LEE | DIRECTA |
 | POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/close-slots | LEE | DIRECTA |
+| POST /scheduling/resources/{id}/exceptions | LEE | DIRECTA |
 | GET /scheduling/service-availability | LEE | DIRECTA |
 | POST /scheduling/service-offerings/{id}/holds | LEE | DIRECTA |
 | POST /scheduling/slots/{id}/holds | LEE | DIRECTA |
+| DELETE /scheduling/templates/{id} | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1516,7 +1555,7 @@ Cataloga recursos reservables, como profesionales, espacios o equipos, para orga
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_41_scheduling.puml: schedulable_resources`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_41_scheduling.puml` · **DDL:** `SQL/41_scheduling/02_tables.sql`
 - **Entidad del ORM:** `SchedulableResources` — `src/modules/scheduling/entities/schedulable_resources.entity.ts`
-- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 6 entrantes · 98 operaciones
+- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 6 entrantes · 111 operaciones
 
 #### Columnas
 
@@ -1602,6 +1641,13 @@ Cataloga recursos reservables, como profesionales, espacios o equipos, para orga
 | GET /clinical/prescriptions/{id}/pdf | LEE | POR_SQL |
 | POST /clinical/procedures/{id}/attachments | LEE | POR_SQL |
 | POST /clinical/service-requests/duplicate-check | LEE | POR_SQL |
+| POST /care-gaps/recompute | LEE | POR_SQL |
+| GET /care-teams | LEE | POR_SQL |
+| POST /care-teams | LEE | POR_SQL |
+| POST /order-sets/{id}/apply | LEE | POR_SQL |
+| POST /patients/{id}/immunization-plan/project | LEE | POR_SQL |
+| GET /referrals | LEE | POR_SQL |
+| POST /referrals | LEE | POR_SQL |
 | PUT /community/ratings | LEE | DIRECTA |
 | GET /f/{slug} | LEE | POR_SQL |
 | POST /internal/community/search/reindex | LEE | POR_SQL |
@@ -1620,14 +1666,19 @@ Cataloga recursos reservables, como profesionales, espacios o equipos, para orga
 | GET /s/{slug} | LEE | POR_SQL |
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | POR_SQL |
 | POST /consent/encounters/{encounterId}/informed-consent | LEE | POR_SQL |
+| GET /forms/instances | LEE | POR_SQL |
+| GET /forms/instances/{id} | LEE | POR_SQL |
 | POST /medical-groups | LEE | POR_SQL |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | POR_SQL |
-| GET /object-storage/versions/{versionId}/content/{token} | LEE | POR_SQL |
-| POST /object-storage/versions/{versionId}/signed-url | LEE | POR_SQL |
 | POST /visit-requests | LEE | DIRECTA |
 | POST /visit-requests/{visitRequestId}/propose-time | LEE | DIRECTA |
 | POST /visit-requests/{visitRequestId}/reschedule | LEE | DIRECTA |
+| GET /procedure-cases/{id} | LEE | POR_SQL |
 | GET /profiles/practitioners/me/onboarding | LEE | DIRECTA |
+| GET /quotations | LEE | POR_SQL |
+| POST /quotations | LEE | POR_SQL |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | POR_SQL |
+| GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | POR_SQL |
 | POST /scheduling/appointments/direct | LEE | DIRECTA |
 | POST /scheduling/appointments/walk-in | LEE | DIRECTA |
 | GET /scheduling/bookings | LEE | DIRECTA |
@@ -1666,6 +1717,7 @@ Cataloga recursos reservables, como profesionales, espacios o equipos, para orga
 | DELETE /scheduling/templates/{id} | LEE | DIRECTA |
 | PATCH /scheduling/templates/{id} | LEE | DIRECTA |
 | POST /scheduling/templates/{id}/generate-slots | LEE | DIRECTA |
+| GET /scheduling/templates/{id}/live-bookings | LEE | DIRECTA |
 | POST /scheduling/templates/{id}/reactivate | LEE | DIRECTA |
 | GET /scheduling/waitlist | LEE | DIRECTA |
 | GET /tenants/{tenantId}/agenda | LEE | DIRECTA |
@@ -1772,7 +1824,7 @@ Define plantillas de horarios que permiten configurar patrones recurrentes de di
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_41_scheduling.puml: schedule_templates`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_41_scheduling.puml` · **DDL:** `SQL/41_scheduling/02_tables.sql`
 - **Entidad del ORM:** `ScheduleTemplates` — `src/modules/scheduling/entities/schedule_templates.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 3 entrantes · 15 operaciones
+- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 3 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -1839,6 +1891,7 @@ Define plantillas de horarios que permiten configurar patrones recurrentes de di
 | PATCH /scheduling/templates/{id} | ACTUALIZA | POR_TIPO |
 | PATCH /scheduling/templates/{id} | LEE | DIRECTA |
 | POST /scheduling/templates/{id}/generate-slots | LEE | DIRECTA |
+| GET /scheduling/templates/{id}/live-bookings | LEE | DIRECTA |
 | POST /scheduling/templates/{id}/reactivate | ACTUALIZA | POR_TIPO |
 | POST /scheduling/templates/{id}/reactivate | LEE | DIRECTA |
 

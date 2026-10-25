@@ -2,11 +2,11 @@
 
 # Inventario de endpoints
 
-Se inventarían **1526 operaciones HTTP** en **72 módulos**: 1510 publicadas en el contrato OpenAPI y 16 que existen sólo en el código.
+Se inventarían **1558 operaciones HTTP** en **72 módulos**: 1541 publicadas en el contrato OpenAPI y 17 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1456
-- Riesgo ALTO 182 · MEDIO 883 · BAJO 461
-- Mencionadas por al menos una prueba: 863
+- Con al menos una tabla identificada: 1480
+- Riesgo ALTO 179 · MEDIO 875 · BAJO 504
+- Mencionadas por al menos una prueba: 888
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
@@ -16,21 +16,21 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `ads` | 18 | 0 | [ads.md](ads.md) |
 | `app` | 6 | 0 | [app.md](app.md) |
 | `audio_assets` | 10 | 2 | [audio_assets.md](audio_assets.md) |
-| `audit` | 11 | 1 | [audit.md](audit.md) |
+| `audit` | 14 | 1 | [audit.md](audit.md) |
 | `auth_providers` | 12 | 1 | [auth_providers.md](auth_providers.md) |
-| `authz` | 27 | 0 | [authz.md](authz.md) |
+| `authz` | 32 | 0 | [authz.md](authz.md) |
 | `automation` | 17 | 0 | [automation.md](automation.md) |
 | `billing` | 34 | 5 | [billing.md](billing.md) |
 | `chart` | 23 | 3 | [chart.md](chart.md) |
-| `clinical` | 39 | 1 | [clinical.md](clinical.md) |
-| `clinical_ext` | 27 | 6 | [clinical_ext.md](clinical_ext.md) |
+| `clinical` | 41 | 1 | [clinical.md](clinical.md) |
+| `clinical_ext` | 27 | 2 | [clinical_ext.md](clinical_ext.md) |
 | `common` | 19 | 10 | [common.md](common.md) |
 | `community` | 102 | 29 | [community.md](community.md) |
 | `consent` | 22 | 0 | [consent.md](consent.md) |
 | `content_packs` | 2 | 1 | [content_packs.md](content_packs.md) |
 | `crm` | 16 | 0 | [crm.md](crm.md) |
 | `cross_store_consistency` | 16 | 0 | [cross_store_consistency.md](cross_store_consistency.md) |
-| `data_catalog` | 31 | 0 | [data_catalog.md](data_catalog.md) |
+| `data_catalog` | 38 | 1 | [data_catalog.md](data_catalog.md) |
 | `delegated_access` | 12 | 1 | [delegated_access.md](delegated_access.md) |
 | `diagnostic_units` | 21 | 0 | [diagnostic_units.md](diagnostic_units.md) |
 | `diagnostics` | 31 | 9 | [diagnostics.md](diagnostics.md) |
@@ -43,16 +43,16 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `graph_intelligence` | 15 | 4 | [graph_intelligence.md](graph_intelligence.md) |
 | `health_context` | 13 | 0 | [health_context.md](health_context.md) |
 | `health_data` | 16 | 0 | [health_data.md](health_data.md) |
-| `iam` | 36 | 18 | [iam.md](iam.md) |
+| `iam` | 39 | 18 | [iam.md](iam.md) |
 | `identity_assurance` | 28 | 5 | [identity_assurance.md](identity_assurance.md) |
-| `insurance` | 61 | 20 | [insurance.md](insurance.md) |
+| `insurance` | 63 | 20 | [insurance.md](insurance.md) |
 | `insurance-campaigns` | 16 | 0 | [insurance-campaigns.md](insurance-campaigns.md) |
 | `integration_contracts` | 12 | 0 | [integration_contracts.md](integration_contracts.md) |
 | `integrations` | 15 | 2 | [integrations.md](integrations.md) |
 | `lakehouse` | 13 | 0 | [lakehouse.md](lakehouse.md) |
-| `marketing` | 14 | 2 | [marketing.md](marketing.md) |
-| `medical_groups` | 8 | 0 | [medical_groups.md](medical_groups.md) |
-| `messaging` | 17 | 1 | [messaging.md](messaging.md) |
+| `marketing` | 15 | 2 | [marketing.md](marketing.md) |
+| `medical_groups` | 9 | 0 | [medical_groups.md](medical_groups.md) |
+| `messaging` | 21 | 1 | [messaging.md](messaging.md) |
 | `object_storage` | 14 | 0 | [object_storage.md](object_storage.md) |
 | `ops_console` | 9 | 0 | [ops_console.md](ops_console.md) |
 | `organization_extensions` | 9 | 0 | [organization_extensions.md](organization_extensions.md) |
@@ -73,12 +73,12 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `read_models` | 15 | 1 | [read_models.md](read_models.md) |
 | `redis_runtime` | 6 | 0 | [redis_runtime.md](redis_runtime.md) |
 | `reporting` | 12 | 0 | [reporting.md](reporting.md) |
-| `scheduling` | 58 | 3 | [scheduling.md](scheduling.md) |
+| `scheduling` | 59 | 3 | [scheduling.md](scheduling.md) |
 | `search_platform` | 4 | 0 | [search_platform.md](search_platform.md) |
 | `surveys` | 17 | 2 | [surveys.md](surveys.md) |
 | `system_context` | 13 | 0 | [system_context.md](system_context.md) |
 | `system_ops` | 24 | 1 | [system_ops.md](system_ops.md) |
-| `telemetry` | 22 | 8 | [telemetry.md](telemetry.md) |
+| `telemetry` | 25 | 8 | [telemetry.md](telemetry.md) |
 | `terminology` | 25 | 2 | [terminology.md](terminology.md) |
 | `time_series` | 14 | 0 | [time_series.md](time_series.md) |
 | `tracking` | 11 | 1 | [tracking.md](tracking.md) |

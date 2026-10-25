@@ -8,6 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { buildSourceIndex } from './ast.mjs';
+import { rutaDelModelo } from './salida.mjs';
 import { crearAnalizadorDeDatos } from './datos.mjs';
 import {
   casosDeUsoDe,
@@ -72,7 +73,7 @@ function leerCurado(root) {
  */
 export function construirInventarioDeEndpoints({
   root = process.cwd(),
-  modelRoot = path.resolve(root, '..', 'mantra-core-health-model'),
+  modelRoot = rutaDelModelo(root),
 } = {}) {
   const contract = loadContract(root);
   const index = buildSourceIndex(root);
