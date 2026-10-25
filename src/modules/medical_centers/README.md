@@ -7,10 +7,10 @@ ejecutor de la orden viven en `practice` y `clinical`.
 
 ## Rutas
 
-| Método y ruta | Acceso | Qué hace |
-| --- | --- | --- |
-| `GET /medical-centers/search` | pública (`@TenantAgnostic()`, sin `@Roles`) | Sedes que ofrecen los procedimientos de `procedureConceptIds`, con su cobertura |
-| `GET /medical-centers/search/for-my-orders` | `PATIENT` | Lo mismo, con los procedimientos tomados de las órdenes del titular (`serviceRequestIds`); orden ajena → 404 |
+| Método y ruta                               | Acceso                                      | Qué hace                                                                                                     |
+| ------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `GET /medical-centers/search`               | pública (`@TenantAgnostic()`, sin `@Roles`) | Sedes que ofrecen los procedimientos de `procedureConceptIds`, con su cobertura                              |
+| `GET /medical-centers/search/for-my-orders` | `PATIENT`                                   | Lo mismo, con los procedimientos tomados de las órdenes del titular (`serviceRequestIds`); orden ajena → 404 |
 
 ## Reglas
 
@@ -29,9 +29,9 @@ ejecutor de la orden viven en `practice` y `clinical`.
 
 ## Estructura
 
-| Carpeta | Contenido |
-| --- | --- |
-| `controllers/` | `MedicalCentersController` |
-| `services/` | Búsqueda por cobertura, búsqueda para las órdenes de un paciente y comparador de orden |
-| `ports/` | Lo que el módulo necesita de las demás tablas, como clases abstractas inyectables |
-| `dto/` | Filtros de consulta y respuesta (`MedicalCenterPageDto`) |
+| Carpeta        | Contenido                                                                              |
+| -------------- | -------------------------------------------------------------------------------------- |
+| `controllers/` | `MedicalCentersController`                                                             |
+| `services/`    | Búsqueda por cobertura, búsqueda para las órdenes de un paciente y comparador de orden |
+| `ports/`       | Lo que el módulo necesita de las demás tablas, como clases abstractas inyectables      |
+| `dto/`         | Filtros de consulta y respuesta (`MedicalCenterPageDto`)                               |
