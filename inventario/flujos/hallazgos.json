@@ -118,30 +118,6 @@
         "fuente": "src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:73"
       },
       {
-        "operacion": "CommonAddressesController_create",
-        "metodo": "POST",
-        "ruta": "/common/addresses",
-        "modulo": "common",
-        "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/common/controllers/common-addresses.controller.ts:21"
-      },
-      {
-        "operacion": "CommonContactPointsController_create",
-        "metodo": "POST",
-        "ruta": "/common/contact-points",
-        "modulo": "common",
-        "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/common/controllers/common-contact-points.controller.ts:33"
-      },
-      {
-        "operacion": "CommonContactPointsController_verify",
-        "metodo": "POST",
-        "ruta": "/common/contact-points/{id}/verify",
-        "modulo": "common",
-        "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/common/controllers/common-contact-points.controller.ts:49"
-      },
-      {
         "operacion": "CommonFilesController_createFile",
         "metodo": "POST",
         "ruta": "/common/files",
@@ -188,14 +164,6 @@
         "modulo": "common",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/common/controllers/common-files.controller.ts:73"
-      },
-      {
-        "operacion": "CommonIdentifiersController_create",
-        "metodo": "POST",
-        "ruta": "/common/identifiers",
-        "modulo": "common",
-        "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/common/controllers/common-identifiers.controller.ts:21"
       },
       {
         "operacion": "CommunitySocialController_unblock",
@@ -654,57 +622,57 @@
         "fuente": "src/modules/identity_assurance/controllers/identity-self-service.controller.ts:94"
       },
       {
-        "operacion": "InsuranceCampaignsController_list",
+        "operacion": "InsuranceCampaignsController_list[1]",
         "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']",
+        "ruta": "/insurance-campaigns",
         "modulo": "insurance",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77"
       },
       {
-        "operacion": "InsuranceCampaignsController_create",
+        "operacion": "InsuranceCampaignsController_create[1]",
         "metodo": "POST",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']",
+        "ruta": "/insurance-campaigns",
         "modulo": "insurance",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61"
       },
       {
-        "operacion": "InsuranceCampaignsController_getById",
+        "operacion": "InsuranceCampaignsController_getById[1]",
         "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}",
+        "ruta": "/insurance-campaigns/{id}",
         "modulo": "insurance",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148"
       },
       {
-        "operacion": "InsuranceCampaignsController_update",
+        "operacion": "InsuranceCampaignsController_update[1]",
         "metodo": "PATCH",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}",
+        "ruta": "/insurance-campaigns/{id}",
         "modulo": "insurance",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178"
       },
       {
-        "operacion": "InsuranceCampaignsController_changeStatus",
+        "operacion": "InsuranceCampaignsController_changeStatus[1]",
         "metodo": "PATCH",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}/status",
+        "ruta": "/insurance-campaigns/{id}/status",
         "modulo": "insurance",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159"
       },
       {
-        "operacion": "InsuranceCampaignsController_myBenefits",
+        "operacion": "InsuranceCampaignsController_myBenefits[1]",
         "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/my-benefits",
+        "ruta": "/insurance-campaigns/my-benefits",
         "modulo": "insurance",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108"
       },
       {
-        "operacion": "InsuranceCampaignsController_listForPatient",
+        "operacion": "InsuranceCampaignsController_listForPatient[1]",
         "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId}",
+        "ruta": "/insurance-campaigns/patient/{patientProfileId}",
         "modulo": "insurance",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129"
@@ -756,6 +724,62 @@
         "modulo": "insurance",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:150"
+      },
+      {
+        "operacion": "InsuranceCampaignsController_list[0]",
+        "metodo": "GET",
+        "ruta": "/insurance/campaigns",
+        "modulo": "insurance",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77"
+      },
+      {
+        "operacion": "InsuranceCampaignsController_create[0]",
+        "metodo": "POST",
+        "ruta": "/insurance/campaigns",
+        "modulo": "insurance",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61"
+      },
+      {
+        "operacion": "InsuranceCampaignsController_getById[0]",
+        "metodo": "GET",
+        "ruta": "/insurance/campaigns/{id}",
+        "modulo": "insurance",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148"
+      },
+      {
+        "operacion": "InsuranceCampaignsController_update[0]",
+        "metodo": "PATCH",
+        "ruta": "/insurance/campaigns/{id}",
+        "modulo": "insurance",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178"
+      },
+      {
+        "operacion": "InsuranceCampaignsController_changeStatus[0]",
+        "metodo": "PATCH",
+        "ruta": "/insurance/campaigns/{id}/status",
+        "modulo": "insurance",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159"
+      },
+      {
+        "operacion": "InsuranceCampaignsController_myBenefits[0]",
+        "metodo": "GET",
+        "ruta": "/insurance/campaigns/my-benefits",
+        "modulo": "insurance",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108"
+      },
+      {
+        "operacion": "InsuranceCampaignsController_listForPatient[0]",
+        "metodo": "GET",
+        "ruta": "/insurance/campaigns/patient/{patientProfileId}",
+        "modulo": "insurance",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129"
       },
       {
         "operacion": "InsurerPatientsController_openConversation",
@@ -836,6 +860,38 @@
         "modulo": "pharmacy_inventory",
         "detalle": "escribe y el controlador no declara roles",
         "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:135"
+      },
+      {
+        "operacion": "PracticesController_publishHealthcareService",
+        "metodo": "POST",
+        "ruta": "/practices/{practiceId}/healthcare-services",
+        "modulo": "practice",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/practice/controllers/practices.controller.ts:304"
+      },
+      {
+        "operacion": "PracticesController_updateHealthcareService",
+        "metodo": "PATCH",
+        "ruta": "/practices/{practiceId}/healthcare-services/{id}",
+        "modulo": "practice",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/practice/controllers/practices.controller.ts:349"
+      },
+      {
+        "operacion": "PracticeInvitationsController_invite",
+        "metodo": "POST",
+        "ruta": "/practices/{practiceId}/role-assignments/invitations",
+        "modulo": "practice",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/practice/controllers/practice-invitations.controller.ts:39"
+      },
+      {
+        "operacion": "OrganizationPracticesController_create",
+        "metodo": "POST",
+        "ruta": "/tenants/{tenantId}/practices",
+        "modulo": "practice",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/practice/controllers/organization-practices.controller.ts:41"
       },
       {
         "operacion": "ProfilesPatientsController_addRelatedPerson",
@@ -1126,7 +1182,7 @@
         "fuente": "src/modules/terminology/controllers/terminology-fhir.controller.ts:97"
       }
     ],
-    "cuenta": 139
+    "cuenta": 146
   },
   {
     "id": "FLU-03",
@@ -1279,6 +1335,30 @@
     "titulo": "Operación de riesgo ALTO sin ninguna prueba de integración",
     "queHacer": "Escribir la prueba de integración contra PostgreSQL real (regla 80.2.4). Las sin prueba alguna van primero.",
     "items": [
+      {
+        "operacion": "AccountingPractitionerSimpleController_deleteAccount",
+        "metodo": "DELETE",
+        "ruta": "/accounting/practitioner/simple/accounts/{id}",
+        "modulo": "accounting",
+        "detalle": "sólo prueba de controlador",
+        "fuente": "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:132"
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_deleteRecord",
+        "metodo": "DELETE",
+        "ruta": "/accounting/practitioner/simple/records/{id}",
+        "modulo": "accounting",
+        "detalle": "sólo prueba de controlador",
+        "fuente": "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:204"
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_deleteTransaction",
+        "metodo": "DELETE",
+        "ruta": "/accounting/practitioner/simple/transactions/{id}",
+        "modulo": "accounting",
+        "detalle": "sólo prueba de controlador",
+        "fuente": "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:271"
+      },
       {
         "operacion": "AudioAssetsController_contentById",
         "metodo": "GET",
@@ -1808,57 +1888,57 @@
         "fuente": "src/modules/identity_assurance/controllers/identity-worker.controller.ts:79"
       },
       {
-        "operacion": "InsuranceCampaignsController_list",
+        "operacion": "InsuranceCampaignsController_list[1]",
         "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']",
+        "ruta": "/insurance-campaigns",
         "modulo": "insurance",
         "detalle": "ninguna prueba la menciona",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77"
       },
       {
-        "operacion": "InsuranceCampaignsController_create",
+        "operacion": "InsuranceCampaignsController_create[1]",
         "metodo": "POST",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']",
+        "ruta": "/insurance-campaigns",
         "modulo": "insurance",
         "detalle": "ninguna prueba la menciona",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61"
       },
       {
-        "operacion": "InsuranceCampaignsController_getById",
+        "operacion": "InsuranceCampaignsController_getById[1]",
         "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}",
+        "ruta": "/insurance-campaigns/{id}",
         "modulo": "insurance",
         "detalle": "ninguna prueba la menciona",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148"
       },
       {
-        "operacion": "InsuranceCampaignsController_update",
+        "operacion": "InsuranceCampaignsController_update[1]",
         "metodo": "PATCH",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}",
+        "ruta": "/insurance-campaigns/{id}",
         "modulo": "insurance",
         "detalle": "ninguna prueba la menciona",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178"
       },
       {
-        "operacion": "InsuranceCampaignsController_changeStatus",
+        "operacion": "InsuranceCampaignsController_changeStatus[1]",
         "metodo": "PATCH",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}/status",
+        "ruta": "/insurance-campaigns/{id}/status",
         "modulo": "insurance",
         "detalle": "ninguna prueba la menciona",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159"
       },
       {
-        "operacion": "InsuranceCampaignsController_myBenefits",
+        "operacion": "InsuranceCampaignsController_myBenefits[1]",
         "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/my-benefits",
+        "ruta": "/insurance-campaigns/my-benefits",
         "modulo": "insurance",
         "detalle": "ninguna prueba la menciona",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108"
       },
       {
-        "operacion": "InsuranceCampaignsController_listForPatient",
+        "operacion": "InsuranceCampaignsController_listForPatient[1]",
         "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId}",
+        "ruta": "/insurance-campaigns/patient/{patientProfileId}",
         "modulo": "insurance",
         "detalle": "ninguna prueba la menciona",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129"
@@ -1878,6 +1958,22 @@
         "modulo": "insurance",
         "detalle": "ninguna prueba la menciona",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:230"
+      },
+      {
+        "operacion": "InsuranceCampaignsController_myBenefits[0]",
+        "metodo": "GET",
+        "ruta": "/insurance/campaigns/my-benefits",
+        "modulo": "insurance",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108"
+      },
+      {
+        "operacion": "InsuranceCampaignsController_listForPatient[0]",
+        "metodo": "GET",
+        "ruta": "/insurance/campaigns/patient/{patientProfileId}",
+        "modulo": "insurance",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129"
       },
       {
         "operacion": "InsurancePortabilityController_downloadPdf",
@@ -2248,7 +2344,7 @@
         "fuente": "src/modules/vector_rag/controllers/vector-runtime.controller.ts:189"
       }
     ],
-    "cuenta": 121
+    "cuenta": 126
   },
   {
     "id": "FLU-05",
@@ -2508,6 +2604,110 @@
         "operacion": "AccountingPractitionerController_readLiabilitySchedule",
         "metodo": "GET",
         "ruta": "/accounting/practitioner/liabilities/{id}/schedule",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_listAccounts",
+        "metodo": "GET",
+        "ruta": "/accounting/practitioner/simple/accounts",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_createAccount",
+        "metodo": "POST",
+        "ruta": "/accounting/practitioner/simple/accounts",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_deleteAccount",
+        "metodo": "DELETE",
+        "ruta": "/accounting/practitioner/simple/accounts/{id}",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_updateAccount",
+        "metodo": "PUT",
+        "ruta": "/accounting/practitioner/simple/accounts/{id}",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_listRecords",
+        "metodo": "GET",
+        "ruta": "/accounting/practitioner/simple/records",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_createRecord",
+        "metodo": "POST",
+        "ruta": "/accounting/practitioner/simple/records",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_deleteRecord",
+        "metodo": "DELETE",
+        "ruta": "/accounting/practitioner/simple/records/{id}",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_updateRecord",
+        "metodo": "PUT",
+        "ruta": "/accounting/practitioner/simple/records/{id}",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_summary",
+        "metodo": "GET",
+        "ruta": "/accounting/practitioner/simple/summary",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_listTransactions",
+        "metodo": "GET",
+        "ruta": "/accounting/practitioner/simple/transactions",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_createTransaction",
+        "metodo": "POST",
+        "ruta": "/accounting/practitioner/simple/transactions",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_deleteTransaction",
+        "metodo": "DELETE",
+        "ruta": "/accounting/practitioner/simple/transactions/{id}",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AccountingPractitionerSimpleController_updateTransaction",
+        "metodo": "PUT",
+        "ruta": "/accounting/practitioner/simple/transactions/{id}",
         "modulo": "accounting",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -3377,6 +3577,14 @@
         "fuente": null
       },
       {
+        "operacion": "BillingServiceCatalogController_getImage",
+        "metodo": "GET",
+        "ruta": "/billing/service-catalog/{id}/image",
+        "modulo": "billing",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "BillingSimulatedController_catalogs",
         "metodo": "GET",
         "ruta": "/billing/simulated/catalogs",
@@ -3636,6 +3844,14 @@
         "operacion": "ClinicalPrescriptionExpiryController_sweep",
         "metodo": "POST",
         "ruta": "/clinical/internal/prescription-expiry-notices",
+        "modulo": "clinical",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "ClinicalProcedureCentersController_findOwn",
+        "metodo": "GET",
+        "ruta": "/clinical/me/procedure-centers",
         "modulo": "clinical",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -6201,70 +6417,6 @@
         "fuente": null
       },
       {
-        "operacion": "InsuranceCampaignsController_list",
-        "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']",
-        "modulo": "insurance",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_create",
-        "metodo": "POST",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']",
-        "modulo": "insurance",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_getById",
-        "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}",
-        "modulo": "insurance",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_update",
-        "metodo": "PATCH",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}",
-        "modulo": "insurance",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_changeStatus",
-        "metodo": "PATCH",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}/status",
-        "modulo": "insurance",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_listActive",
-        "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/active",
-        "modulo": "insurance",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_myBenefits",
-        "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/my-benefits",
-        "modulo": "insurance",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_listForPatient",
-        "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId}",
-        "modulo": "insurance",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
         "operacion": "BrokerCommissionController_generate",
         "metodo": "POST",
         "ruta": "/broker-commission-statements",
@@ -6316,6 +6468,70 @@
         "operacion": "InsuranceBackboneController_createAgreement",
         "metodo": "POST",
         "ruta": "/insurance-brokers/{id}/agreements",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_list[1]",
+        "metodo": "GET",
+        "ruta": "/insurance-campaigns",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_create[1]",
+        "metodo": "POST",
+        "ruta": "/insurance-campaigns",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_getById[1]",
+        "metodo": "GET",
+        "ruta": "/insurance-campaigns/{id}",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_update[1]",
+        "metodo": "PATCH",
+        "ruta": "/insurance-campaigns/{id}",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_changeStatus[1]",
+        "metodo": "PATCH",
+        "ruta": "/insurance-campaigns/{id}/status",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_listActive[1]",
+        "metodo": "GET",
+        "ruta": "/insurance-campaigns/active",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_myBenefits[1]",
+        "metodo": "GET",
+        "ruta": "/insurance-campaigns/my-benefits",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_listForPatient[1]",
+        "metodo": "GET",
+        "ruta": "/insurance-campaigns/patient/{patientProfileId}",
         "modulo": "insurance",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -6388,6 +6604,70 @@
         "operacion": "ClaimsController_quote",
         "metodo": "POST",
         "ruta": "/insurance-claims/quote",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_list[0]",
+        "metodo": "GET",
+        "ruta": "/insurance/campaigns",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_create[0]",
+        "metodo": "POST",
+        "ruta": "/insurance/campaigns",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_getById[0]",
+        "metodo": "GET",
+        "ruta": "/insurance/campaigns/{id}",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_update[0]",
+        "metodo": "PATCH",
+        "ruta": "/insurance/campaigns/{id}",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_changeStatus[0]",
+        "metodo": "PATCH",
+        "ruta": "/insurance/campaigns/{id}/status",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_listActive[0]",
+        "metodo": "GET",
+        "ruta": "/insurance/campaigns/active",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_myBenefits[0]",
+        "metodo": "GET",
+        "ruta": "/insurance/campaigns/my-benefits",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "InsuranceCampaignsController_listForPatient[0]",
+        "metodo": "GET",
+        "ruta": "/insurance/campaigns/patient/{patientProfileId}",
         "modulo": "insurance",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -6549,134 +6829,6 @@
         "metodo": "POST",
         "ruta": "/reconciliation-batches/{id}/items",
         "modulo": "insurance",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_list[1]",
-        "metodo": "GET",
-        "ruta": "/insurance-campaigns",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_create[1]",
-        "metodo": "POST",
-        "ruta": "/insurance-campaigns",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_getById[1]",
-        "metodo": "GET",
-        "ruta": "/insurance-campaigns/{id}",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_update[1]",
-        "metodo": "PATCH",
-        "ruta": "/insurance-campaigns/{id}",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_changeStatus[1]",
-        "metodo": "PATCH",
-        "ruta": "/insurance-campaigns/{id}/status",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_listActive[1]",
-        "metodo": "GET",
-        "ruta": "/insurance-campaigns/active",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_myBenefits[1]",
-        "metodo": "GET",
-        "ruta": "/insurance-campaigns/my-benefits",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_listForPatient[1]",
-        "metodo": "GET",
-        "ruta": "/insurance-campaigns/patient/{patientProfileId}",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_list[0]",
-        "metodo": "GET",
-        "ruta": "/insurance/campaigns",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_create[0]",
-        "metodo": "POST",
-        "ruta": "/insurance/campaigns",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_getById[0]",
-        "metodo": "GET",
-        "ruta": "/insurance/campaigns/{id}",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_update[0]",
-        "metodo": "PATCH",
-        "ruta": "/insurance/campaigns/{id}",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_changeStatus[0]",
-        "metodo": "PATCH",
-        "ruta": "/insurance/campaigns/{id}/status",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_listActive[0]",
-        "metodo": "GET",
-        "ruta": "/insurance/campaigns/active",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_myBenefits[0]",
-        "metodo": "GET",
-        "ruta": "/insurance/campaigns/my-benefits",
-        "modulo": "insurance-campaigns",
-        "detalle": "ningún cliente del frontend la declara",
-        "fuente": null
-      },
-      {
-        "operacion": "InsuranceCampaignsController_listForPatient[0]",
-        "metodo": "GET",
-        "ruta": "/insurance/campaigns/patient/{patientProfileId}",
-        "modulo": "insurance-campaigns",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
       },
@@ -7117,6 +7269,22 @@
         "metodo": "GET",
         "ruta": "/r/{code}",
         "modulo": "marketing",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "MedicalCentersController_search",
+        "metodo": "GET",
+        "ruta": "/medical-centers/search",
+        "modulo": "medical_centers",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "MedicalCentersController_searchForMyOrders",
+        "metodo": "GET",
+        "ruta": "/medical-centers/search/for-my-orders",
+        "modulo": "medical_centers",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
       },
@@ -8689,9 +8857,25 @@
         "fuente": null
       },
       {
+        "operacion": "PracticesController_listHealthcareServices",
+        "metodo": "GET",
+        "ruta": "/practices/{practiceId}/healthcare-services",
+        "modulo": "practice",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "PracticesController_publishHealthcareService",
         "metodo": "POST",
         "ruta": "/practices/{practiceId}/healthcare-services",
+        "modulo": "practice",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PracticesController_updateHealthcareService",
+        "metodo": "PATCH",
+        "ruta": "/practices/{practiceId}/healthcare-services/{id}",
         "modulo": "practice",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -8716,6 +8900,14 @@
         "operacion": "PracticesController_assignRole",
         "metodo": "POST",
         "ruta": "/practices/{practiceId}/role-assignments",
+        "modulo": "practice",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PracticeInvitationsController_invite",
+        "metodo": "POST",
+        "ruta": "/practices/{practiceId}/role-assignments/invitations",
         "modulo": "practice",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -8748,6 +8940,22 @@
         "operacion": "PracticesController_decommissionSite",
         "metodo": "DELETE",
         "ruta": "/practices/{practiceId}/sites/{siteId}",
+        "modulo": "practice",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PractitionerInvitationsController_accept",
+        "metodo": "POST",
+        "ruta": "/practitioners/me/role-assignments/{roleId}/accept",
+        "modulo": "practice",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PractitionerInvitationsController_decline",
+        "metodo": "POST",
+        "ruta": "/practitioners/me/role-assignments/{roleId}/decline",
         "modulo": "practice",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -8820,6 +9028,14 @@
         "operacion": "SitesController_createClinicalUnit",
         "metodo": "POST",
         "ruta": "/sites/{siteId}/clinical-units",
+        "modulo": "practice",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "OrganizationPracticesController_create",
+        "metodo": "POST",
+        "ruta": "/tenants/{tenantId}/practices",
         "modulo": "practice",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -10889,7 +11105,7 @@
         "fuente": null
       }
     ],
-    "cuenta": 1063
+    "cuenta": 1078
   },
   {
     "id": "FLU-08",
@@ -10938,70 +11154,6 @@
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:428"
       },
       {
-        "operacion": "InsuranceCampaignsController_list",
-        "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']",
-        "modulo": "insurance",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77"
-      },
-      {
-        "operacion": "InsuranceCampaignsController_create",
-        "metodo": "POST",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']",
-        "modulo": "insurance",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61"
-      },
-      {
-        "operacion": "InsuranceCampaignsController_getById",
-        "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}",
-        "modulo": "insurance",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148"
-      },
-      {
-        "operacion": "InsuranceCampaignsController_update",
-        "metodo": "PATCH",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}",
-        "modulo": "insurance",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178"
-      },
-      {
-        "operacion": "InsuranceCampaignsController_changeStatus",
-        "metodo": "PATCH",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/{id}/status",
-        "modulo": "insurance",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159"
-      },
-      {
-        "operacion": "InsuranceCampaignsController_listActive",
-        "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/active",
-        "modulo": "insurance",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:93"
-      },
-      {
-        "operacion": "InsuranceCampaignsController_myBenefits",
-        "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/my-benefits",
-        "modulo": "insurance",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108"
-      },
-      {
-        "operacion": "InsuranceCampaignsController_listForPatient",
-        "metodo": "GET",
-        "ruta": "/['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId}",
-        "modulo": "insurance",
-        "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129"
-      },
-      {
         "operacion": "WebPushController_assertKnownPushService",
         "metodo": "DESCONOCIDO",
         "ruta": "/notifications/web-push",
@@ -11034,7 +11186,7 @@
         "fuente": "src/modules/search_platform/controllers/search-platform.controller.ts:114"
       }
     ],
-    "cuenta": 17
+    "cuenta": 9
   },
   {
     "id": "FLU-09",
@@ -11056,14 +11208,14 @@
         "ruta": "/health/data-sources",
         "modulo": "app",
         "detalle": "DataSourceConfigurationError: No hay ninguna conexión registrada como «{name}». Registradas: {known}. (src/persistence/registry/connection.registry.ts:59) | DataSourceConfigurationError: No hay ninguna conexión registrada como «{name}». Registradas: {known}. (src/persistence/registry/connection.registry.ts:59)",
-        "fuente": "src/persistence/health/data-sources.controller.ts:25"
+        "fuente": "src/persistence/health/data-sources.controller.ts:30"
       },
       {
         "operacion": "AppController_readiness",
         "metodo": "GET",
         "ruta": "/readiness",
         "modulo": "app",
-        "detalle": "Error: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar (src/app-readiness.service.ts:135) | Error: MongoDB no confirmó el ping (src/modules/document_store/repositories/mongo-connection.provider.ts:60) | Error: Redis no respondió PONG (src/modules/redis_runtime/services/redis-runtime.service.ts:63)",
+        "detalle": "SchemaIntegrityIncompleteError: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar (src/app-readiness.service.ts:178) | SeedCoreIncompleteError: Seeds núcleo fallidos: {failed.join(', ')} (src/app-readiness.service.ts:202) | SeedCoreIncompleteError: Catálogo de conceptos sin materializar: faltan {ids.length - present} de {ids.length} (src/app-readiness.service.ts:219)",
         "fuente": "src/app.controller.ts:63"
       },
       {
@@ -11177,6 +11329,14 @@
         "modulo": "automation",
         "detalle": "DomainException: {HttpStatus.BAD_REQUEST} (src/modules/automation/services/record-automation.service.ts:276)",
         "fuente": "src/modules/automation/controllers/automation-orchestration.controller.ts:235"
+      },
+      {
+        "operacion": "BillingServiceCatalogController_getImage",
+        "metodo": "GET",
+        "ruta": "/billing/service-catalog/{id}/image",
+        "modulo": "billing",
+        "detalle": "Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229)",
+        "fuente": "src/modules/billing/controllers/billing-service-catalog.controller.ts:131"
       },
       {
         "operacion": "ChartDocumentsController_getDocumentFileContent",
@@ -11615,7 +11775,7 @@
         "metodo": "POST",
         "ruta": "/iam/auth/register-practitioner",
         "modulo": "iam",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226)",
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:234"
       },
       {
@@ -11623,7 +11783,7 @@
         "metodo": "POST",
         "ruta": "/iam/auth/upload-registration-document",
         "modulo": "iam",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) | StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:76) | StorageLifecycleDenied: REMOTE_STATE_UNKNOWN (src/common/storage/storage-publication.service.ts:90)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:199"
       },
       {
@@ -11631,15 +11791,23 @@
         "metodo": "POST",
         "ruta": "/iam/auth/upload-registration-signature-image",
         "modulo": "iam",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) | StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:76) | StorageLifecycleDenied: REMOTE_STATE_UNKNOWN (src/common/storage/storage-publication.service.ts:90)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:154"
+      },
+      {
+        "operacion": "IamOnboardingDraftsController_saveDraft",
+        "metodo": "PUT",
+        "ruta": "/iam/onboarding-drafts/{formType}/{draftId}",
+        "modulo": "iam",
+        "detalle": "DomainException: {HttpStatus.BAD_REQUEST} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:372) | DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:379) | DomainException: {HttpStatus.TOO_MANY_REQUESTS} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:333)",
+        "fuente": "src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66"
       },
       {
         "operacion": "IamUsersController_assistedPractitionerRegistration",
         "metodo": "POST",
         "ruta": "/iam/users/assisted-practitioner-registration",
         "modulo": "iam",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226)",
         "fuente": "src/modules/iam/presentation/controllers/iam-users.controller.ts:254"
       },
       {
@@ -11735,16 +11903,16 @@
         "metodo": "GET",
         "ruta": "/admin/ops/traffic",
         "modulo": "ops_console",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/ops_console/ops-traffic.service.ts:93)",
-        "fuente": "src/modules/ops_console/ops-console.controller.ts:162"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/ops_console/application/ops-traffic.service.ts:93)",
+        "fuente": "src/modules/ops_console/presentation/controllers/ops-console.controller.ts:90"
       },
       {
         "operacion": "OpsConsoleController_trafficEndpoints",
         "metodo": "GET",
         "ruta": "/admin/ops/traffic/endpoints",
         "modulo": "ops_console",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/ops_console/ops-traffic.service.ts:93)",
-        "fuente": "src/modules/ops_console/ops-console.controller.ts:174"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/ops_console/application/ops-traffic.service.ts:93)",
+        "fuente": "src/modules/ops_console/presentation/controllers/ops-console.controller.ts:102"
       },
       {
         "operacion": "PeriopController_addDiagnoses",
@@ -11907,6 +12075,6 @@
         "fuente": "src/modules/workflow/controllers/workflow-transitions.controller.ts:73"
       }
     ],
-    "cuenta": 107
+    "cuenta": 109
   }
 ]

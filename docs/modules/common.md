@@ -40,9 +40,9 @@ Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `addresses`, `contact_po
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
-| `POST /common/addresses` | sesión | `common-addresses` |
-| `POST /common/contact-points` | sesión | `common-contact-points` |
-| `POST /common/contact-points/:id/verify` | sesión | `common-contact-points` |
+| `POST /common/addresses` | SECURITY_ADMIN | `common-addresses` |
+| `POST /common/contact-points` | SECURITY_ADMIN | `common-contact-points` |
+| `POST /common/contact-points/:id/verify` | SECURITY_ADMIN | `common-contact-points` |
 | `POST /common/files/upload` | sesión | `common-files` |
 | `GET /common/files/links` | sesión | `common-files` |
 | `GET /common/files/:id/content` | sesión | `common-files` |
@@ -52,7 +52,7 @@ Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `addresses`, `contact_po
 | `POST /common/files/:id/links` | sesión | `common-files` |
 | `DELETE /common/files/:id` | sesión | `common-files` |
 | `POST /common/files/:id/download-url` | sesión | `common-files` |
-| `POST /common/identifiers` | sesión | `common-identifiers` |
+| `POST /common/identifiers` | SECURITY_ADMIN | `common-identifiers` |
 | `GET /internal/files/versions/pending-scan` | SYSTEM, SECURITY_ADMIN | `internal-files` |
 | `POST /internal/files/versions/:vid/scan-result` | SYSTEM, SECURITY_ADMIN | `internal-files` |
 | `POST /internal/storage-lifecycle/audio/:assetId/begin` | SYSTEM | `internal-storage-lifecycle` |
@@ -64,10 +64,10 @@ Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `addresses`, `contact_po
 
 | # | Method & path | Use case | Code | Auth |
 |---|---|---|---|---|
-| 1 | `POST /common/identifiers` | Register an identifier | 201 | JWT |
-| 2 | `POST /common/contact-points` | Register a contact point | 201 | JWT |
-| 3 | `POST /common/contact-points/:id/verify` | Verify a contact point | 200 | JWT |
-| 4 | `POST /common/addresses` | Register an address | 201 | JWT |
+| 1 | `POST /common/identifiers` | Register an identifier | 201 | SECURITY_ADMIN |
+| 2 | `POST /common/contact-points` | Register a contact point | 201 | SECURITY_ADMIN |
+| 3 | `POST /common/contact-points/:id/verify` | Verify a contact point | 200 | SECURITY_ADMIN |
+| 4 | `POST /common/addresses` | Register an address | 201 | SECURITY_ADMIN |
 | 5 | `POST /common/files` | Create file + version 1 | 201 | JWT |
 | 6 | `POST /common/files/:id/versions` | Add a version | 201 | JWT |
 | 7 | `POST /common/files/:id/versions/:vid/derivatives` | Generate a derivative | 201 | JWT |
@@ -121,6 +121,7 @@ con `FileUploadService.downloadForAuthorizedContext`:
 | Resultado del paciente | `GET /diagnostic-results/me/:reportId/files/:fileId/content` | Titular + versión liberada y visible + `fileId` del informe. Todo lo demás, 404 |
 | Documento del expediente | `GET /charts/documents/:documentId/files/:fileId/content` | Lectura de la historia del paciente |
 | Adjunto de mensaje | `community-messaging-read` | Participación activa |
+| Imagen de un servicio médico | `GET /billing/service-catalog/:id/image` | Sesión con tenant verificado + servicio activo de una práctica de ese tenant + imagen de sensibilidad normal con versión utilizable. Todo lo demás, 404 uniforme (decisión P-22-8, #852) |
 
 **URL firmada (TX-09).** `POST /common/files/:id/download-url` sigue emitiendo
 `?versionId&expires&signature`, y ahora `GET :id/content` **valida** la firma cuando

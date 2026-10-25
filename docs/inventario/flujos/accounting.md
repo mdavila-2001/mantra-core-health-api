@@ -3,12 +3,12 @@
 # Flujos del módulo `accounting`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 46 (45 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 59 (58 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [accounting](../endpoints/accounting.md)
 
 ## Proceso: Módulo 16 — Accounting (Libro Mayor y Subledgers)
 
-- **Código:** `accounting` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 46
+- **Código:** `accounting` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 59
 - **Actores:** ACCOUNTING_APPROVER · PRACTITIONER · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/accounting/README.md`
@@ -24,7 +24,7 @@ _Fuente: `src/modules/accounting/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `ctrl:AccountingAccrualController` | Operaciones de AccountingAccrualController que el README no asigna a un caso de uso | POST /accounting/accrual-objects | SECURITY_ADMIN | MEDIO | 9 |
-|  |  | POST /accounting/accruals/run | SECURITY_ADMIN | MEDIO | 13 |
+|  |  | POST /accounting/accruals/run | SECURITY_ADMIN | MEDIO | 14 |
 | `ctrl:AccountingAssetController` | Operaciones de AccountingAssetController que el README no asigna a un caso de uso | POST /accounting/assets/capitalize | SECURITY_ADMIN | MEDIO | 15 |
 |  |  | POST /accounting/depreciation/run | SECURITY_ADMIN | MEDIO | 14 |
 | `ctrl:AccountingCockpitController` | Operaciones de AccountingCockpitController que el README no asigna a un caso de uso | GET /accounting/accrual-objects | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 6 |
@@ -36,38 +36,51 @@ _Fuente: `src/modules/accounting/README.md:3`_
 | `ctrl:AccountingExchangeRateController` | Operaciones de AccountingExchangeRateController que el README no asigna a un caso de uso | POST /accounting/exchange-rates | SYSTEM | MEDIO | 3 |
 | `ctrl:AccountingFiscalController` | Operaciones de AccountingFiscalController que el README no asigna a un caso de uso | POST /accounting/fiscal-periods/{id}/lock | SECURITY_ADMIN | MEDIO | 4 |
 |  |  | POST /accounting/fiscal-years | SECURITY_ADMIN | MEDIO | 4 |
-| `ctrl:AccountingLedgerController` | Operaciones de AccountingLedgerController que el README no asigna a un caso de uso | GET /accounting/accounts | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 2 |
+| `ctrl:AccountingLedgerController` | Operaciones de AccountingLedgerController que el README no asigna a un caso de uso | GET /accounting/accounts | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 3 |
 |  |  | POST /accounting/accounts | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | GET /accounting/balance-sheet | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 5 |
 |  |  | GET /accounting/general-ledger | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 5 |
 |  |  | GET /accounting/income-statement | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 5 |
-|  |  | GET /accounting/journal-transactions | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 2 |
-|  |  | POST /accounting/journal-transactions | SECURITY_ADMIN | MEDIO | 13 |
-|  |  | GET /accounting/journal-transactions/{id} | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 3 |
+|  |  | GET /accounting/journal-transactions | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 3 |
+|  |  | POST /accounting/journal-transactions | SECURITY_ADMIN | MEDIO | 14 |
+|  |  | GET /accounting/journal-transactions/{id} | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 5 |
 |  |  | POST /accounting/journal-transactions/{id}/approve | SECURITY_ADMIN · ACCOUNTING_APPROVER | MEDIO | 4 |
 |  |  | POST /accounting/journal-transactions/{id}/classify | SECURITY_ADMIN · PRACTITIONER | MEDIO | 7 |
 |  |  | POST /accounting/journal-transactions/{id}/files | SECURITY_ADMIN · PRACTITIONER | MEDIO | 4 |
 |  |  | POST /accounting/journal-transactions/{id}/post | SECURITY_ADMIN | MEDIO | 9 |
 |  |  | POST /accounting/journal-transactions/{id}/reverse | SECURITY_ADMIN | MEDIO | 15 |
 |  |  | POST /accounting/journal-transactions/{id}/submit-review | SECURITY_ADMIN · PRACTITIONER | MEDIO | 4 |
-|  |  | POST /accounting/journal-transactions/drafts | SECURITY_ADMIN · PRACTITIONER | MEDIO | 11 |
+|  |  | POST /accounting/journal-transactions/drafts | SECURITY_ADMIN · PRACTITIONER | MEDIO | 12 |
 |  |  | POST /accounting/postings/determine-accounts | SECURITY_ADMIN | BAJO | 1 |
-|  |  | GET /accounting/trial-balance | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 4 |
-| `ctrl:AccountingLiabilityController` | Operaciones de AccountingLiabilityController que el README no asigna a un caso de uso | POST /accounting/liabilities/{id}/payments | SECURITY_ADMIN | MEDIO | 14 |
+|  |  | GET /accounting/trial-balance | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 5 |
+| `ctrl:AccountingLiabilityController` | Operaciones de AccountingLiabilityController que el README no asigna a un caso de uso | POST /accounting/liabilities/{id}/payments | SECURITY_ADMIN | MEDIO | 15 |
 | `ctrl:AccountingPractitionerController` | Operaciones de AccountingPractitionerController que el README no asigna a un caso de uso | GET /accounting/practitioner/assets | PRACTITIONER | BAJO | 3 |
 |  |  | POST /accounting/practitioner/assets | PRACTITIONER | MEDIO | 16 |
 |  |  | PATCH /accounting/practitioner/assets/{id}/automation | PRACTITIONER | MEDIO | 7 |
 |  |  | GET /accounting/practitioner/assets/{id}/depreciations | PRACTITIONER | BAJO | 5 |
 |  |  | POST /accounting/practitioner/assets/{id}/progress | PRACTITIONER | MEDIO | 15 |
-|  |  | POST /accounting/practitioner/consultation-income | PRACTITIONER | MEDIO | 23 |
-|  |  | POST /accounting/practitioner/entries | PRACTITIONER | MEDIO | 17 |
+|  |  | POST /accounting/practitioner/consultation-income | PRACTITIONER | MEDIO | 24 |
+|  |  | POST /accounting/practitioner/entries | PRACTITIONER | MEDIO | 18 |
 |  |  | GET /accounting/practitioner/liabilities | PRACTITIONER | BAJO | 3 |
 |  |  | POST /accounting/practitioner/liabilities | PRACTITIONER | MEDIO | 6 |
 |  |  | PATCH /accounting/practitioner/liabilities/{id}/automation | PRACTITIONER | MEDIO | 7 |
-|  |  | POST /accounting/practitioner/liabilities/{id}/progress | PRACTITIONER | MEDIO | 15 |
+|  |  | POST /accounting/practitioner/liabilities/{id}/progress | PRACTITIONER | MEDIO | 16 |
 |  |  | GET /accounting/practitioner/liabilities/{id}/schedule | PRACTITIONER | BAJO | 5 |
 |  |  | GET /accounting/practitioner/paid-consultations | PRACTITIONER | BAJO | 4 |
-| `ctrl:AccountingSubledgerController` | Operaciones de AccountingSubledgerController que el README no asigna a un caso de uso | POST /accounting/clearing-documents | SECURITY_ADMIN | MEDIO | 15 |
+| `ctrl:AccountingPractitionerSimpleController` | Operaciones de AccountingPractitionerSimpleController que el README no asigna a un caso de uso | GET /accounting/practitioner/simple/accounts | PRACTITIONER | MEDIO | 3 |
+|  |  | POST /accounting/practitioner/simple/accounts | PRACTITIONER | MEDIO | 4 |
+|  |  | DELETE /accounting/practitioner/simple/accounts/{id} | PRACTITIONER | ALTO | 6 |
+|  |  | PUT /accounting/practitioner/simple/accounts/{id} | PRACTITIONER | MEDIO | 6 |
+|  |  | GET /accounting/practitioner/simple/records | PRACTITIONER | BAJO | 2 |
+|  |  | POST /accounting/practitioner/simple/records | PRACTITIONER | MEDIO | 4 |
+|  |  | DELETE /accounting/practitioner/simple/records/{id} | PRACTITIONER | ALTO | 4 |
+|  |  | PUT /accounting/practitioner/simple/records/{id} | PRACTITIONER | MEDIO | 5 |
+|  |  | GET /accounting/practitioner/simple/summary | PRACTITIONER | BAJO | 7 |
+|  |  | GET /accounting/practitioner/simple/transactions | PRACTITIONER | BAJO | 2 |
+|  |  | POST /accounting/practitioner/simple/transactions | PRACTITIONER | MEDIO | 4 |
+|  |  | DELETE /accounting/practitioner/simple/transactions/{id} | PRACTITIONER | ALTO | 4 |
+|  |  | PUT /accounting/practitioner/simple/transactions/{id} | PRACTITIONER | MEDIO | 5 |
+| `ctrl:AccountingSubledgerController` | Operaciones de AccountingSubledgerController que el README no asigna a un caso de uso | POST /accounting/clearing-documents | SECURITY_ADMIN | MEDIO | 16 |
 |  |  | POST /accounting/open-items | SECURITY_ADMIN | MEDIO | 5 |
 
 ### Diagrama 1 de 3 — etapas `ctrl:AccountingAccrualController`, `ctrl:AccountingAssetController`, `ctrl:AccountingCockpitController`…
@@ -83,10 +96,10 @@ flowchart LR
   t6[("accounting.cost_centers")]:::tabla
   t7[("accounting.fiscal_periods")]:::tabla
   t10[("accounting.accrual_postings")]:::tabla
-  t13[("accounting.asset_assignments")]:::tabla
-  t14[("accounting.asset_postings")]:::tabla
-  t15[("accounting.asset_valuations")]:::tabla
-  t16[("accounting.assets")]:::tabla
+  t11[("accounting.assets")]:::tabla
+  t14[("accounting.asset_assignments")]:::tabla
+  t15[("accounting.asset_postings")]:::tabla
+  t16[("accounting.asset_valuations")]:::tabla
   t19[("accounting.asset_depreciations")]:::tabla
   t23[("practice.practices")]:::tabla
   t24[("practice.practitioner_role_assignments")]:::tabla
@@ -102,7 +115,7 @@ flowchart LR
   t40[("erp.business_partners")]:::tabla
   t43[("accounting.exchange_rates")]:::tabla
   t8[("+3 tablas más")]
-  t11[("+7 tablas más")]
+  t12[("+8 tablas más")]
   subgraph s0["ctrl:AccountingAccrualController · Operaciones de AccountingAccrualController q…"]
     o1["POST /accounting/accrual-objects"]:::op
     o9["POST /accounting/accruals/run"]:::op
@@ -110,7 +123,7 @@ flowchart LR
   t17[("+9 tablas más")]
   t20[("+8 tablas más")]
   subgraph s1["ctrl:AccountingAssetController · Operaciones de AccountingAssetController que e…"]
-    o12["POST /accounting/assets/capitalize"]:::op
+    o13["POST /accounting/assets/capitalize"]:::op
     o18["POST /accounting/depreciation/run"]:::op
   end
   t32[("+2 tablas más")]
@@ -143,23 +156,23 @@ flowchart LR
   o9 -->|"CREA"| t10
   o9 -->|"ACTUALIZA"| t5
   o9 -->|"LEE"| t5
-  o9 -->|"LEE"| t6
-  o9 -.-> t11
-  a2 --> o12
-  o12 -->|"LEE"| t3
-  o12 -->|"CREA"| t13
-  o12 -->|"CREA"| t14
-  o12 -->|"CREA"| t15
-  o12 -->|"CREA"| t16
-  o12 -->|"LEE"| t16
-  o12 -.-> t17
+  o9 -->|"LEE"| t11
+  o9 -.-> t12
+  a2 --> o13
+  o13 -->|"LEE"| t3
+  o13 -->|"CREA"| t14
+  o13 -->|"CREA"| t15
+  o13 -->|"CREA"| t16
+  o13 -->|"CREA"| t11
+  o13 -->|"LEE"| t11
+  o13 -.-> t17
   a2 --> o18
   o18 -->|"LEE"| t3
   o18 -->|"CREA"| t19
   o18 -->|"LEE"| t19
-  o18 -->|"CREA"| t14
-  o18 -->|"ACTUALIZA"| t16
-  o18 -->|"LEE"| t16
+  o18 -->|"CREA"| t15
+  o18 -->|"ACTUALIZA"| t11
+  o18 -->|"LEE"| t11
   o18 -.-> t20
   a22 --> o21
   o21 -->|"LEE"| t3
@@ -169,7 +182,7 @@ flowchart LR
   o21 -->|"LEE"| t23
   o21 -->|"LEE"| t24
   a22 --> o25
-  o25 -->|"LEE"| t16
+  o25 -->|"LEE"| t11
   o25 -->|"LEE"| t23
   o25 -->|"LEE"| t24
   a22 --> o26
@@ -221,165 +234,171 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER"]):::actor
-  a6(["SECURITY_ADMIN"]):::actor
-  a22(["SECURITY_ADMIN · ACCOUNTING_APPROVER"]):::actor
-  a24(["SECURITY_ADMIN · PRACTITIONER"]):::actor
+  a7(["SECURITY_ADMIN"]):::actor
+  a23(["SECURITY_ADMIN · ACCOUNTING_APPROVER"]):::actor
+  a25(["SECURITY_ADMIN · PRACTITIONER"]):::actor
   t3[("accounting.accounts")]:::tabla
   t4[("practice.practices")]:::tabla
-  t8[("accounting.journal_transactions")]:::tabla
-  t9[("accounting.ledger_entries")]:::tabla
-  t10[("practice.practitioner_role_assignments")]:::tabla
-  t15[("accounting.cost_centers")]:::tabla
-  t16[("accounting.fiscal_periods")]:::tabla
-  t17[("accounting.fiscal_years")]:::tabla
-  t18[("accounting.journal_entry_assignments")]:::tabla
-  t25[("audit.audit_log")]:::tabla
-  t26[("iam.sessions")]:::tabla
-  t29[("accounting.transaction_files")]:::tabla
-  t33[("accounting.accounting_document_links")]:::tabla
-  t39[("accounting.account_determination_rules")]:::tabla
-  t19[("+7 tablas más")]
-  t27[("+1 tablas más")]
-  t31[("+3 tablas más")]
-  t34[("+9 tablas más")]
-  t37[("+5 tablas más")]
+  t5[("practice.practitioner_role_assignments")]:::tabla
+  t9[("accounting.journal_transactions")]:::tabla
+  t10[("accounting.ledger_entries")]:::tabla
+  t15[("accounting.assets")]:::tabla
+  t16[("accounting.cost_centers")]:::tabla
+  t17[("accounting.fiscal_periods")]:::tabla
+  t18[("accounting.fiscal_years")]:::tabla
+  t19[("accounting.journal_entry_assignments")]:::tabla
+  t26[("audit.audit_log")]:::tabla
+  t27[("iam.sessions")]:::tabla
+  t30[("accounting.transaction_files")]:::tabla
+  t34[("accounting.accounting_document_links")]:::tabla
+  t40[("accounting.account_determination_rules")]:::tabla
+  t20[("+8 tablas más")]
+  t28[("+1 tablas más")]
+  t32[("+3 tablas más")]
+  t35[("+9 tablas más")]
+  t38[("+6 tablas más")]
   subgraph s0["ctrl:AccountingLedgerController · Operaciones de AccountingLedgerController que…"]
     o1["GET /accounting/accounts"]:::op
-    o5["POST /accounting/accounts"]:::op
-    o7["GET /accounting/balance-sheet"]:::op
+    o6["POST /accounting/accounts"]:::op
+    o8["GET /accounting/balance-sheet"]:::op
     o11["GET /accounting/general-ledger"]:::op
     o12["GET /accounting/income-statement"]:::op
     o13["GET /accounting/journal-transactions"]:::op
     o14["POST /accounting/journal-transactions"]:::op
-    o20["GET /accounting/journal-transactions/{id}"]:::op
-    o21["POST /accounting/journal-transactions/{id}/approve"]:::op
-    o23["POST /accounting/journal-transactions/{id}/classify"]:::op
-    o28["POST /accounting/journal-transactions/{id}/files"]:::op
-    o30["POST /accounting/journal-transactions/{id}/post"]:::op
-    o32["POST /accounting/journal-transactions/{id}/reverse"]:::op
-    o35["POST /accounting/journal-transactions/{id}/submit-review"]:::op
-    o36["POST /accounting/journal-transactions/drafts"]:::op
-    o38["POST /accounting/postings/determine-accounts"]:::op
-    o40["GET /accounting/trial-balance"]:::op
+    o21["GET /accounting/journal-transactions/{id}"]:::op
+    o22["POST /accounting/journal-transactions/{id}/approve"]:::op
+    o24["POST /accounting/journal-transactions/{id}/classify"]:::op
+    o29["POST /accounting/journal-transactions/{id}/files"]:::op
+    o31["POST /accounting/journal-transactions/{id}/post"]:::op
+    o33["POST /accounting/journal-transactions/{id}/reverse"]:::op
+    o36["POST /accounting/journal-transactions/{id}/submit-review"]:::op
+    o37["POST /accounting/journal-transactions/drafts"]:::op
+    o39["POST /accounting/postings/determine-accounts"]:::op
+    o41["GET /accounting/trial-balance"]:::op
   end
-  t42[("+8 tablas más")]
+  t43[("+9 tablas más")]
   subgraph s1["ctrl:AccountingLiabilityController · Operaciones de AccountingLiabilityControll…"]
-    o41["POST /accounting/liabilities/{id}/payments"]:::op
+    o42["POST /accounting/liabilities/{id}/payments"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
-  a6 --> o5
-  o5 -->|"CREA"| t3
-  o5 -->|"LEE"| t3
-  o5 -->|"LEE"| t4
-  a2 --> o7
-  o7 -->|"LEE"| t3
-  o7 -->|"LEE"| t8
-  o7 -->|"LEE"| t9
-  o7 -->|"LEE"| t4
-  o7 -->|"LEE"| t10
+  o1 -->|"LEE"| t5
+  a7 --> o6
+  o6 -->|"CREA"| t3
+  o6 -->|"LEE"| t3
+  o6 -->|"LEE"| t4
+  a2 --> o8
+  o8 -->|"LEE"| t3
+  o8 -->|"LEE"| t9
+  o8 -->|"LEE"| t10
+  o8 -->|"LEE"| t4
+  o8 -->|"LEE"| t5
   a2 --> o11
   o11 -->|"LEE"| t3
-  o11 -->|"LEE"| t8
   o11 -->|"LEE"| t9
-  o11 -->|"LEE"| t4
   o11 -->|"LEE"| t10
+  o11 -->|"LEE"| t4
+  o11 -->|"LEE"| t5
   a2 --> o12
   o12 -->|"LEE"| t3
-  o12 -->|"LEE"| t8
   o12 -->|"LEE"| t9
-  o12 -->|"LEE"| t4
   o12 -->|"LEE"| t10
+  o12 -->|"LEE"| t4
+  o12 -->|"LEE"| t5
   a2 --> o13
-  o13 -->|"LEE"| t8
+  o13 -->|"LEE"| t9
   o13 -->|"LEE"| t4
-  a6 --> o14
+  o13 -->|"LEE"| t5
+  a7 --> o14
   o14 -->|"LEE"| t3
   o14 -->|"LEE"| t15
   o14 -->|"LEE"| t16
   o14 -->|"LEE"| t17
-  o14 -->|"CREA"| t18
-  o14 -->|"CREA"| t8
-  o14 -.-> t19
-  a2 --> o20
-  o20 -->|"LEE"| t8
-  o20 -->|"LEE"| t9
-  o20 -->|"LEE"| t4
-  a22 --> o21
-  o21 -->|"ACTUALIZA"| t8
-  o21 -->|"LEE"| t8
-  o21 -->|"LEE"| t4
+  o14 -->|"LEE"| t18
+  o14 -->|"CREA"| t19
+  o14 -.-> t20
+  a2 --> o21
+  o21 -->|"LEE"| t19
+  o21 -->|"LEE"| t9
   o21 -->|"LEE"| t10
-  a24 --> o23
-  o23 -->|"ACTUALIZA"| t8
-  o23 -->|"LEE"| t8
-  o23 -->|"CREA"| t25
-  o23 -->|"LEE"| t25
-  o23 -->|"LEE"| t26
-  o23 -->|"LEE"| t4
-  o23 -.-> t27
-  a24 --> o28
-  o28 -->|"LEE"| t8
-  o28 -->|"CREA"| t29
-  o28 -->|"LEE"| t4
-  o28 -->|"LEE"| t10
-  a6 --> o30
-  o30 -->|"LEE"| t16
-  o30 -->|"LEE"| t17
-  o30 -->|"ACTUALIZA"| t8
-  o30 -->|"LEE"| t8
-  o30 -->|"LEE"| t9
-  o30 -->|"CREA"| t25
-  o30 -.-> t31
-  a6 --> o32
-  o32 -->|"CREA"| t33
-  o32 -->|"LEE"| t33
-  o32 -->|"LEE"| t16
-  o32 -->|"LEE"| t17
-  o32 -->|"CREA"| t18
-  o32 -->|"LEE"| t18
-  o32 -.-> t34
-  a24 --> o35
-  o35 -->|"ACTUALIZA"| t8
-  o35 -->|"LEE"| t8
-  o35 -->|"LEE"| t4
-  o35 -->|"LEE"| t10
-  a24 --> o36
-  o36 -->|"LEE"| t3
-  o36 -->|"LEE"| t15
-  o36 -->|"LEE"| t16
-  o36 -->|"LEE"| t17
-  o36 -->|"CREA"| t18
-  o36 -->|"CREA"| t8
-  o36 -.-> t37
-  a6 --> o38
-  o38 -->|"LEE"| t39
-  a2 --> o40
-  o40 -->|"LEE"| t3
-  o40 -->|"LEE"| t8
-  o40 -->|"LEE"| t9
-  o40 -->|"LEE"| t4
-  a6 --> o41
+  o21 -->|"LEE"| t4
+  o21 -->|"LEE"| t5
+  a23 --> o22
+  o22 -->|"ACTUALIZA"| t9
+  o22 -->|"LEE"| t9
+  o22 -->|"LEE"| t4
+  o22 -->|"LEE"| t5
+  a25 --> o24
+  o24 -->|"ACTUALIZA"| t9
+  o24 -->|"LEE"| t9
+  o24 -->|"CREA"| t26
+  o24 -->|"LEE"| t26
+  o24 -->|"LEE"| t27
+  o24 -->|"LEE"| t4
+  o24 -.-> t28
+  a25 --> o29
+  o29 -->|"LEE"| t9
+  o29 -->|"CREA"| t30
+  o29 -->|"LEE"| t4
+  o29 -->|"LEE"| t5
+  a7 --> o31
+  o31 -->|"LEE"| t17
+  o31 -->|"LEE"| t18
+  o31 -->|"ACTUALIZA"| t9
+  o31 -->|"LEE"| t9
+  o31 -->|"LEE"| t10
+  o31 -->|"CREA"| t26
+  o31 -.-> t32
+  a7 --> o33
+  o33 -->|"CREA"| t34
+  o33 -->|"LEE"| t34
+  o33 -->|"LEE"| t17
+  o33 -->|"LEE"| t18
+  o33 -->|"CREA"| t19
+  o33 -->|"LEE"| t19
+  o33 -.-> t35
+  a25 --> o36
+  o36 -->|"ACTUALIZA"| t9
+  o36 -->|"LEE"| t9
+  o36 -->|"LEE"| t4
+  o36 -->|"LEE"| t5
+  a25 --> o37
+  o37 -->|"LEE"| t3
+  o37 -->|"LEE"| t15
+  o37 -->|"LEE"| t16
+  o37 -->|"LEE"| t17
+  o37 -->|"LEE"| t18
+  o37 -->|"CREA"| t19
+  o37 -.-> t38
+  a7 --> o39
+  o39 -->|"LEE"| t40
+  a2 --> o41
   o41 -->|"LEE"| t3
-  o41 -->|"LEE"| t15
-  o41 -->|"LEE"| t16
-  o41 -->|"LEE"| t17
-  o41 -->|"CREA"| t18
-  o41 -->|"CREA"| t8
-  o41 -.-> t42
+  o41 -->|"LEE"| t9
+  o41 -->|"LEE"| t10
+  o41 -->|"LEE"| t4
+  o41 -->|"LEE"| t5
+  a7 --> o42
+  o42 -->|"LEE"| t3
+  o42 -->|"LEE"| t15
+  o42 -->|"LEE"| t16
+  o42 -->|"LEE"| t17
+  o42 -->|"LEE"| t18
+  o42 -->|"CREA"| t19
+  o42 -.-> t43
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 3 de 3 — etapas `ctrl:AccountingPractitionerController`, `ctrl:AccountingSubledgerController`
+### Diagrama 3 de 3 — etapas `ctrl:AccountingPractitionerController`, `ctrl:AccountingPractitionerSimpleController`, `ctrl:AccountingSubledgerController`
 
 ```mermaid
 flowchart LR
   a2(["PRACTITIONER"]):::actor
-  a43(["SECURITY_ADMIN"]):::actor
+  a61(["SECURITY_ADMIN"]):::actor
   t3[("accounting.accounts")]:::tabla
   t4[("accounting.assets")]:::tabla
   t5[("practice.practitioner_role_assignments")]:::tabla
@@ -394,25 +413,30 @@ flowchart LR
   t22[("accounting.cost_centers")]:::tabla
   t23[("accounting.fiscal_years")]:::tabla
   t24[("accounting.journal_entry_assignments")]:::tabla
-  t25[("accounting.journal_transactions")]:::tabla
-  t30[("accounting.liabilities")]:::tabla
-  t32[("accounting.liability_schedules")]:::tabla
-  t39[("billing.invoices")]:::tabla
-  t40[("clinical.appointments")]:::tabla
-  t41[("clinical.encounters")]:::tabla
-  t44[("accounting.clearing_documents")]:::tabla
-  t45[("accounting.clearing_items")]:::tabla
-  t46[("accounting.company_bank_accounts")]:::tabla
-  t49[("accounting.ledger_entries")]:::tabla
-  t50[("accounting.open_items")]:::tabla
-  t51[("accounting.subledger_accounts")]:::tabla
+  t29[("accounting.liabilities")]:::tabla
+  t31[("accounting.liability_schedules")]:::tabla
+  t38[("billing.invoices")]:::tabla
+  t39[("clinical.appointments")]:::tabla
+  t40[("clinical.encounters")]:::tabla
+  t42[("accounting.practitioner_simple_accounts")]:::tabla
+  t45[("accounting.practitioner_simple_records")]:::tabla
+  t46[("accounting.practitioner_simple_transactions")]:::tabla
+  t53[("insurance.claim_adjudication_versions")]:::tabla
+  t54[("insurance.insurance_claims")]:::tabla
+  t62[("accounting.clearing_documents")]:::tabla
+  t63[("accounting.clearing_items")]:::tabla
+  t64[("accounting.company_bank_accounts")]:::tabla
+  t67[("accounting.journal_transactions")]:::tabla
+  t68[("accounting.ledger_entries")]:::tabla
+  t69[("accounting.open_items")]:::tabla
+  t70[("accounting.subledger_accounts")]:::tabla
   t10[("+10 tablas más")]
   t15[("+1 tablas más")]
   t20[("+9 tablas más")]
-  t26[("+17 tablas más")]
-  t28[("+11 tablas más")]
-  t34[("+1 tablas más")]
-  t36[("+9 tablas más")]
+  t25[("+18 tablas más")]
+  t27[("+12 tablas más")]
+  t33[("+1 tablas más")]
+  t35[("+10 tablas más")]
   subgraph s0["ctrl:AccountingPractitionerController · Operaciones de AccountingPractitionerCo…"]
     o1["GET /accounting/practitioner/assets"]:::op
     o6["POST /accounting/practitioner/assets"]:::op
@@ -420,18 +444,34 @@ flowchart LR
     o16["GET /accounting/practitioner/assets/{id}/depreciations"]:::op
     o19["POST /accounting/practitioner/assets/{id}/progress"]:::op
     o21["POST /accounting/practitioner/consultation-income"]:::op
-    o27["POST /accounting/practitioner/entries"]:::op
-    o29["GET /accounting/practitioner/liabilities"]:::op
-    o31["POST /accounting/practitioner/liabilities"]:::op
-    o33["PATCH /accounting/practitioner/liabilities/{id}/automation"]:::op
-    o35["POST /accounting/practitioner/liabilities/{id}/progress"]:::op
-    o37["GET /accounting/practitioner/liabilities/{id}/schedule"]:::op
-    o38["GET /accounting/practitioner/paid-consultations"]:::op
+    o26["POST /accounting/practitioner/entries"]:::op
+    o28["GET /accounting/practitioner/liabilities"]:::op
+    o30["POST /accounting/practitioner/liabilities"]:::op
+    o32["PATCH /accounting/practitioner/liabilities/{id}/automation"]:::op
+    o34["POST /accounting/practitioner/liabilities/{id}/progress"]:::op
+    o36["GET /accounting/practitioner/liabilities/{id}/schedule"]:::op
+    o37["GET /accounting/practitioner/paid-consultations"]:::op
   end
-  t47[("+9 tablas más")]
-  subgraph s1["ctrl:AccountingSubledgerController · Operaciones de AccountingSubledgerControll…"]
-    o42["POST /accounting/clearing-documents"]:::op
-    o48["POST /accounting/open-items"]:::op
+  t55[("+1 tablas más")]
+  subgraph s1["ctrl:AccountingPractitionerSimpleController · Operaciones de AccountingPractiti…"]
+    o41["GET /accounting/practitioner/simple/accounts"]:::op
+    o43["POST /accounting/practitioner/simple/accounts"]:::op
+    o44["DELETE /accounting/practitioner/simple/accounts/{id}"]:::op
+    o47["PUT /accounting/practitioner/simple/accounts/{id}"]:::op
+    o48["GET /accounting/practitioner/simple/records"]:::op
+    o49["POST /accounting/practitioner/simple/records"]:::op
+    o50["DELETE /accounting/practitioner/simple/records/{id}"]:::op
+    o51["PUT /accounting/practitioner/simple/records/{id}"]:::op
+    o52["GET /accounting/practitioner/simple/summary"]:::op
+    o56["GET /accounting/practitioner/simple/transactions"]:::op
+    o57["POST /accounting/practitioner/simple/transactions"]:::op
+    o58["DELETE /accounting/practitioner/simple/transactions/{id}"]:::op
+    o59["PUT /accounting/practitioner/simple/transactions/{id}"]:::op
+  end
+  t65[("+10 tablas más")]
+  subgraph s2["ctrl:AccountingSubledgerController · Operaciones de AccountingSubledgerControll…"]
+    o60["POST /accounting/clearing-documents"]:::op
+    o66["POST /accounting/open-items"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -469,72 +509,141 @@ flowchart LR
   o19 -.-> t20
   a2 --> o21
   o21 -->|"LEE"| t3
+  o21 -->|"LEE"| t4
   o21 -->|"LEE"| t22
   o21 -->|"LEE"| t18
   o21 -->|"LEE"| t23
   o21 -->|"CREA"| t24
-  o21 -->|"CREA"| t25
-  o21 -.-> t26
-  a2 --> o27
-  o27 -->|"LEE"| t3
-  o27 -->|"LEE"| t22
-  o27 -->|"LEE"| t18
-  o27 -->|"LEE"| t23
-  o27 -->|"CREA"| t24
-  o27 -->|"CREA"| t25
-  o27 -.-> t28
-  a2 --> o29
-  o29 -->|"LEE"| t3
-  o29 -->|"LEE"| t30
-  o29 -->|"LEE"| t5
-  a2 --> o31
-  o31 -->|"LEE"| t3
-  o31 -->|"CREA"| t30
-  o31 -->|"LEE"| t30
-  o31 -->|"CREA"| t32
-  o31 -->|"LEE"| t14
-  o31 -->|"LEE"| t5
-  a2 --> o33
-  o33 -->|"ACTUALIZA"| t30
-  o33 -->|"LEE"| t30
-  o33 -->|"CREA"| t12
-  o33 -->|"LEE"| t12
-  o33 -->|"LEE"| t13
-  o33 -->|"LEE"| t14
-  o33 -.-> t34
-  a2 --> o35
-  o35 -->|"LEE"| t3
-  o35 -->|"LEE"| t22
-  o35 -->|"LEE"| t18
-  o35 -->|"LEE"| t23
-  o35 -->|"CREA"| t24
-  o35 -->|"CREA"| t25
-  o35 -.-> t36
+  o21 -.-> t25
+  a2 --> o26
+  o26 -->|"LEE"| t3
+  o26 -->|"LEE"| t4
+  o26 -->|"LEE"| t22
+  o26 -->|"LEE"| t18
+  o26 -->|"LEE"| t23
+  o26 -->|"CREA"| t24
+  o26 -.-> t27
+  a2 --> o28
+  o28 -->|"LEE"| t3
+  o28 -->|"LEE"| t29
+  o28 -->|"LEE"| t5
+  a2 --> o30
+  o30 -->|"LEE"| t3
+  o30 -->|"CREA"| t29
+  o30 -->|"LEE"| t29
+  o30 -->|"CREA"| t31
+  o30 -->|"LEE"| t14
+  o30 -->|"LEE"| t5
+  a2 --> o32
+  o32 -->|"ACTUALIZA"| t29
+  o32 -->|"LEE"| t29
+  o32 -->|"CREA"| t12
+  o32 -->|"LEE"| t12
+  o32 -->|"LEE"| t13
+  o32 -->|"LEE"| t14
+  o32 -.-> t33
+  a2 --> o34
+  o34 -->|"LEE"| t3
+  o34 -->|"LEE"| t4
+  o34 -->|"LEE"| t22
+  o34 -->|"LEE"| t18
+  o34 -->|"LEE"| t23
+  o34 -->|"CREA"| t24
+  o34 -.-> t35
+  a2 --> o36
+  o36 -->|"LEE"| t3
+  o36 -->|"LEE"| t29
+  o36 -->|"LEE"| t31
+  o36 -->|"LEE"| t14
+  o36 -->|"LEE"| t5
   a2 --> o37
-  o37 -->|"LEE"| t3
-  o37 -->|"LEE"| t30
-  o37 -->|"LEE"| t32
-  o37 -->|"LEE"| t14
+  o37 -->|"LEE"| t38
+  o37 -->|"LEE"| t39
+  o37 -->|"LEE"| t40
   o37 -->|"LEE"| t5
-  a2 --> o38
-  o38 -->|"LEE"| t39
-  o38 -->|"LEE"| t40
-  o38 -->|"LEE"| t41
-  o38 -->|"LEE"| t5
-  a43 --> o42
-  o42 -->|"LEE"| t3
-  o42 -->|"CREA"| t44
-  o42 -->|"LEE"| t44
-  o42 -->|"CREA"| t45
-  o42 -->|"LEE"| t46
-  o42 -->|"LEE"| t22
-  o42 -.-> t47
-  a43 --> o48
-  o48 -->|"LEE"| t25
-  o48 -->|"LEE"| t49
-  o48 -->|"CREA"| t50
-  o48 -->|"LEE"| t51
-  o48 -->|"LEE"| t14
+  a2 --> o41
+  o41 -->|"CREA"| t42
+  o41 -->|"LEE"| t42
+  o41 -->|"LEE"| t5
+  a2 --> o43
+  o43 -->|"CREA"| t42
+  o43 -->|"LEE"| t42
+  o43 -->|"LEE"| t14
+  o43 -->|"LEE"| t5
+  a2 --> o44
+  o44 -->|"BORRA"| t42
+  o44 -->|"LEE"| t42
+  o44 -->|"LEE"| t45
+  o44 -->|"LEE"| t46
+  o44 -->|"LEE"| t14
+  o44 -->|"LEE"| t5
+  a2 --> o47
+  o47 -->|"ACTUALIZA"| t42
+  o47 -->|"LEE"| t42
+  o47 -->|"LEE"| t45
+  o47 -->|"LEE"| t46
+  o47 -->|"LEE"| t14
+  o47 -->|"LEE"| t5
+  a2 --> o48
+  o48 -->|"LEE"| t45
+  o48 -->|"LEE"| t5
+  a2 --> o49
+  o49 -->|"LEE"| t42
+  o49 -->|"CREA"| t45
+  o49 -->|"LEE"| t14
+  o49 -->|"LEE"| t5
+  a2 --> o50
+  o50 -->|"BORRA"| t45
+  o50 -->|"LEE"| t45
+  o50 -->|"LEE"| t14
+  o50 -->|"LEE"| t5
+  a2 --> o51
+  o51 -->|"LEE"| t42
+  o51 -->|"ACTUALIZA"| t45
+  o51 -->|"LEE"| t45
+  o51 -->|"LEE"| t14
+  o51 -->|"LEE"| t5
+  a2 --> o52
+  o52 -->|"LEE"| t38
+  o52 -->|"LEE"| t39
+  o52 -->|"LEE"| t40
+  o52 -->|"LEE"| t53
+  o52 -->|"LEE"| t54
+  o52 -->|"LEE"| t14
+  o52 -.-> t55
+  a2 --> o56
+  o56 -->|"LEE"| t46
+  o56 -->|"LEE"| t5
+  a2 --> o57
+  o57 -->|"LEE"| t42
+  o57 -->|"CREA"| t46
+  o57 -->|"LEE"| t14
+  o57 -->|"LEE"| t5
+  a2 --> o58
+  o58 -->|"BORRA"| t46
+  o58 -->|"LEE"| t46
+  o58 -->|"LEE"| t14
+  o58 -->|"LEE"| t5
+  a2 --> o59
+  o59 -->|"LEE"| t42
+  o59 -->|"ACTUALIZA"| t46
+  o59 -->|"LEE"| t46
+  o59 -->|"LEE"| t14
+  o59 -->|"LEE"| t5
+  a61 --> o60
+  o60 -->|"LEE"| t3
+  o60 -->|"LEE"| t4
+  o60 -->|"CREA"| t62
+  o60 -->|"LEE"| t62
+  o60 -->|"CREA"| t63
+  o60 -->|"LEE"| t64
+  o60 -.-> t65
+  a61 --> o66
+  o66 -->|"LEE"| t67
+  o66 -->|"LEE"| t68
+  o66 -->|"CREA"| t69
+  o66 -->|"LEE"| t70
+  o66 -->|"LEE"| t14
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -592,6 +701,7 @@ Plan de cuentas de una práctica
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La práctica consultada pertenece a otra organización |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: No se pudo verificar la vinculación del profesional con la práctica; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -613,12 +723,32 @@ flowchart TD
   n6 -->|"no"| n8
   n9(["403 FORBIDDEN La práctica consultada pertenece a otra organización"]):::error
   n8 -->|"sí"| n9
-  n10["Llama a AccountsRepository.findByPractice"]:::llamada
+  n10["Llama a LedgerReadService.assertPractitionerOwnsPractice"]:::llamada
   n8 -->|"no"| n10
-  n11[("LEE accounting.accounts")]:::efecto
+  n11{"!actor.practitionerProfileId"}:::decision
   n10 --> n11
-  n12(("200 Responde con éxito")):::ok
-  n11 --> n12
+  n12(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n11 -->|"sí"| n12
+  n13{"!this.practiceTenantLookup"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED No se pudo verificar la vinculación del profesional con la práctica"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n13 -->|"no"| n15
+  n16["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n15 --> n16
+  n17[("LEE practice.practitioner_role_assignments")]:::efecto
+  n16 --> n17
+  n18{"!practiceIds.includes(practiceId)"}:::decision
+  n17 --> n18
+  n19(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a AccountsRepository.findByPractice"]:::llamada
+  n18 -->|"no"| n20
+  n21[("LEE accounting.accounts")]:::efecto
+  n20 --> n21
+  n22(("200 Responde con éxito")):::ok
+  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1915,6 +2045,7 @@ Libro diario de una práctica
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La práctica consultada pertenece a otra organización |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: No se pudo verificar la vinculación del profesional con la práctica; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1936,12 +2067,32 @@ flowchart TD
   n6 -->|"no"| n8
   n9(["403 FORBIDDEN La práctica consultada pertenece a otra organización"]):::error
   n8 -->|"sí"| n9
-  n10["Llama a JournalRepository.findTransactions"]:::llamada
+  n10["Llama a LedgerReadService.assertPractitionerOwnsPractice"]:::llamada
   n8 -->|"no"| n10
-  n11[("LEE accounting.journal_transactions")]:::efecto
+  n11{"!actor.practitionerProfileId"}:::decision
   n10 --> n11
-  n12(("200 Responde con éxito")):::ok
-  n11 --> n12
+  n12(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n11 -->|"sí"| n12
+  n13{"!this.practiceTenantLookup"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED No se pudo verificar la vinculación del profesional con la práctica"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n13 -->|"no"| n15
+  n16["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n15 --> n16
+  n17[("LEE practice.practitioner_role_assignments")]:::efecto
+  n16 --> n17
+  n18{"!practiceIds.includes(practiceId)"}:::decision
+  n17 --> n18
+  n19(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a JournalRepository.findTransactions"]:::llamada
+  n18 -->|"no"| n20
+  n21[("LEE accounting.journal_transactions")]:::efecto
+  n20 --> n21
+  n22(("200 Responde con éxito")):::ok
+  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2003,47 +2154,56 @@ flowchart TD
   n17 --> n18
   n19[("LEE accounting.profit_centers")]:::efecto
   n18 --> n19
-  n20{"period && period.statusConceptId !== ACCT.PERIOD_OPEN"}:::decision
+  n20["Llama a AccountingScopeService.assetsInPractice"]:::llamada
   n19 --> n20
-  n21(["422 PRECONDITION_FAILED El periodo fiscal no está ABIERTO"]):::error
-  n20 -->|"sí"| n21
-  n22["Llama a JournalRepository.findByTransactionNumber"]:::llamada
-  n20 -->|"no"| n22
-  n23[("LEE accounting.journal_transactions")]:::efecto
+  n21["Repite: por cada const id de unique(ids)"]:::bucle
+  n20 --> n21
+  n22["Llama a AssetRepository.findById"]:::llamada
+  n21 -->|"cada elemento"| n22
+  n23[("LEE accounting.assets")]:::efecto
   n22 --> n23
-  n24{"clash"}:::decision
+  n24{"period && period.statusConceptId !== ACCT.PERIOD_OPEN"}:::decision
   n23 --> n24
-  n25(["409 CONFLICT El número de asiento ya existe en la práctica"]):::error
+  n21 -->|"al terminar"| n24
+  n25(["422 PRECONDITION_FAILED El periodo fiscal no está ABIERTO"]):::error
   n24 -->|"sí"| n25
-  n26["Llama a JournalRepository.createTransaction"]:::llamada
+  n26["Llama a JournalRepository.findByTransactionNumber"]:::llamada
   n24 -->|"no"| n26
-  n27[("CREA accounting.journal_transactions")]:::efecto
+  n27[("LEE accounting.journal_transactions")]:::efecto
   n26 --> n27
-  n28["Llama a LedgerService.writeLines"]:::llamada
+  n28{"clash"}:::decision
   n27 --> n28
-  n29["Repite: por cada const line de lines"]:::bucle
-  n28 --> n29
-  n30["Llama a JournalRepository.createLedgerEntry"]:::llamada
-  n29 -->|"cada elemento"| n30
-  n31[("CREA accounting.ledger_entries")]:::efecto
+  n29(["409 CONFLICT El número de asiento ya existe en la práctica"]):::error
+  n28 -->|"sí"| n29
+  n30["Llama a JournalRepository.createTransaction"]:::llamada
+  n28 -->|"no"| n30
+  n31[("CREA accounting.journal_transactions")]:::efecto
   n30 --> n31
-  n32["Llama a JournalRepository.createAssignment"]:::llamada
+  n32["Llama a LedgerService.writeLines"]:::llamada
   n31 --> n32
-  n33[("CREA accounting.journal_entry_assignments")]:::efecto
+  n33["Repite: por cada const line de lines"]:::bucle
   n32 --> n33
-  n34["Llama a AuditTrailService.record"]:::llamada
-  n33 --> n34
-  n29 -->|"al terminar"| n34
-  n35["Llama a AuditLogRepository.append"]:::llamada
+  n34["Llama a JournalRepository.createLedgerEntry"]:::llamada
+  n33 -->|"cada elemento"| n34
+  n35[("CREA accounting.ledger_entries")]:::efecto
   n34 --> n35
-  n36["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n36["Llama a JournalRepository.createAssignment"]:::llamada
   n35 --> n36
-  n37[("LEE audit.audit_log")]:::efecto
+  n37[("CREA accounting.journal_entry_assignments")]:::efecto
   n36 --> n37
-  n38[("CREA audit.audit_log")]:::efecto
+  n38["Llama a AuditTrailService.record"]:::llamada
   n37 --> n38
-  n39(("201 Responde con éxito")):::ok
+  n33 -->|"al terminar"| n38
+  n39["Llama a AuditLogRepository.append"]:::llamada
   n38 --> n39
+  n40["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n39 --> n40
+  n41[("LEE audit.audit_log")]:::efecto
+  n40 --> n41
+  n42[("CREA audit.audit_log")]:::efecto
+  n41 --> n42
+  n43(("201 Responde con éxito")):::ok
+  n42 --> n43
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2063,6 +2223,7 @@ Un asiento con sus líneas
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La práctica consultada pertenece a otra organización |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Asiento no encontrado; ResourceNotFoundException: Práctica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: No se pudo verificar la vinculación del profesional con la práctica; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2092,12 +2253,36 @@ flowchart TD
   n10 -->|"no"| n12
   n13(["403 FORBIDDEN La práctica consultada pertenece a otra organización"]):::error
   n12 -->|"sí"| n13
-  n14["Llama a JournalRepository.findEntriesByTransaction"]:::llamada
+  n14["Llama a LedgerReadService.assertPractitionerOwnsPractice"]:::llamada
   n12 -->|"no"| n14
-  n15[("LEE accounting.ledger_entries")]:::efecto
+  n15{"!actor.practitionerProfileId"}:::decision
   n14 --> n15
-  n16(("200 Responde con éxito")):::ok
-  n15 --> n16
+  n16(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n15 -->|"sí"| n16
+  n17{"!this.practiceTenantLookup"}:::decision
+  n15 -->|"no"| n17
+  n18(["422 PRECONDITION_FAILED No se pudo verificar la vinculación del profesional con la práctica"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n17 -->|"no"| n19
+  n20["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n19 --> n20
+  n21[("LEE practice.practitioner_role_assignments")]:::efecto
+  n20 --> n21
+  n22{"!practiceIds.includes(practiceId)"}:::decision
+  n21 --> n22
+  n23(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a JournalRepository.findEntriesByTransaction"]:::llamada
+  n22 -->|"no"| n24
+  n25[("LEE accounting.ledger_entries")]:::efecto
+  n24 --> n25
+  n26["Llama a JournalRepository.assignmentsForEntries"]:::llamada
+  n25 --> n26
+  n27[("LEE accounting.journal_entry_assignments")]:::efecto
+  n26 --> n27
+  n28(("200 Responde con éxito")):::ok
+  n27 --> n28
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2680,33 +2865,42 @@ flowchart TD
   n25 --> n26
   n27[("LEE accounting.profit_centers")]:::efecto
   n26 --> n27
-  n28["Llama a JournalRepository.findByTransactionNumber"]:::llamada
+  n28["Llama a AccountingScopeService.assetsInPractice"]:::llamada
   n27 --> n28
-  n29[("LEE accounting.journal_transactions")]:::efecto
+  n29["Repite: por cada const id de unique(ids)"]:::bucle
   n28 --> n29
-  n30{"clash"}:::decision
-  n29 --> n30
-  n31(["409 CONFLICT El número de asiento ya existe en la práctica"]):::error
-  n30 -->|"sí"| n31
-  n32["Llama a JournalRepository.createTransaction"]:::llamada
-  n30 -->|"no"| n32
-  n33[("CREA accounting.journal_transactions")]:::efecto
+  n30["Llama a AssetRepository.findById"]:::llamada
+  n29 -->|"cada elemento"| n30
+  n31[("LEE accounting.assets")]:::efecto
+  n30 --> n31
+  n32["Llama a JournalRepository.findByTransactionNumber"]:::llamada
+  n31 --> n32
+  n29 -->|"al terminar"| n32
+  n33[("LEE accounting.journal_transactions")]:::efecto
   n32 --> n33
-  n34["Llama a LedgerService.writeLines"]:::llamada
+  n34{"clash"}:::decision
   n33 --> n34
-  n35["Repite: por cada const line de lines"]:::bucle
-  n34 --> n35
-  n36["Llama a JournalRepository.createLedgerEntry"]:::llamada
-  n35 -->|"cada elemento"| n36
-  n37[("CREA accounting.ledger_entries")]:::efecto
+  n35(["409 CONFLICT El número de asiento ya existe en la práctica"]):::error
+  n34 -->|"sí"| n35
+  n36["Llama a JournalRepository.createTransaction"]:::llamada
+  n34 -->|"no"| n36
+  n37[("CREA accounting.journal_transactions")]:::efecto
   n36 --> n37
-  n38["Llama a JournalRepository.createAssignment"]:::llamada
+  n38["Llama a LedgerService.writeLines"]:::llamada
   n37 --> n38
-  n39[("CREA accounting.journal_entry_assignments")]:::efecto
+  n39["Repite: por cada const line de lines"]:::bucle
   n38 --> n39
-  n40(("201 Responde con éxito")):::ok
-  n39 --> n40
-  n35 -->|"al terminar"| n40
+  n40["Llama a JournalRepository.createLedgerEntry"]:::llamada
+  n39 -->|"cada elemento"| n40
+  n41[("CREA accounting.ledger_entries")]:::efecto
+  n40 --> n41
+  n42["Llama a JournalRepository.createAssignment"]:::llamada
+  n41 --> n42
+  n43[("CREA accounting.journal_entry_assignments")]:::efecto
+  n42 --> n43
+  n44(("201 Responde con éxito")):::ok
+  n43 --> n44
+  n39 -->|"al terminar"| n44
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4165,7 +4359,965 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 45. GET /accounting/trial-balance
+#### 45. GET /accounting/practitioner/simple/accounts
+
+Cuentas de la contabilidad simple de una práctica
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.listAccounts"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n3 --> n4
+  n5{"!actor.practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practitioner_role_assignments")]:::efecto
+  n8 --> n9
+  n10{"!practiceIds.includes(practiceId)"}:::decision
+  n9 --> n10
+  n11(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PractitionerSimpleAccountingService.ensureGeneralAccounts"]:::llamada
+  n10 -->|"no"| n12
+  n13["Llama a PractitionerSimpleAccountingRepository.countSeededAccounts"]:::llamada
+  n12 --> n13
+  n14[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n13 --> n14
+  n15{"(await this.repo.countSeededAccounts(em, practiceId)) › 0"}:::decision
+  n14 --> n15
+  n16["Llama a PractitionerSimpleAccountingRepository.countSeededAccounts"]:::llamada
+  n15 -->|"sí"| n16
+  n17[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n16 --> n17
+  n18["Repite: por cada const [code, name, accountClass] de GENERAL_ACCOUNTS"]:::bucle
+  n17 --> n18
+  n15 -->|"no"| n18
+  n19["Llama a PractitionerSimpleAccountingRepository.createAccount"]:::llamada
+  n18 -->|"cada elemento"| n19
+  n20[("CREA accounting.practitioner_simple_accounts")]:::efecto
+  n19 --> n20
+  n21["Llama a PractitionerSimpleAccountingRepository.listAccounts"]:::llamada
+  n20 --> n21
+  n18 -->|"al terminar"| n21
+  n22[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n21 --> n22
+  n23(("200 Responde con éxito")):::ok
+  n22 --> n23
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 46. POST /accounting/practitioner/simple/accounts
+
+Crear una cuenta (o un tipo de gasto, activo o deuda)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya tiene una cuenta con ese nombre en esa clase. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: {message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.createAccount"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerSimpleAccountingService.ownPracticeForWrite"]:::llamada
+  n3 --> n4
+  n5["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n4 --> n5
+  n6{"!actor.practitionerProfileId"}:::decision
+  n5 --> n6
+  n7(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n6 -->|"sí"| n7
+  n8{"!practiceIds.includes(practiceId)"}:::decision
+  n6 -->|"no"| n8
+  n9(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a PractitionerSimpleAccountingService.validName"]:::llamada
+  n8 -->|"no"| n10
+  n11["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n10 --> n11
+  n12(["422 PRECONDITION_FAILED {message}"]):::error
+  n11 --> n12
+  n13{"problem"}:::decision
+  n14["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n13 -->|"sí"| n14
+  n15(["422 PRECONDITION_FAILED {message}"]):::error
+  n14 --> n15
+  n16["Llama a PractitionerSimpleAccountingService.validClass"]:::llamada
+  n13 -->|"no"| n16
+  n17["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED {message}"]):::error
+  n17 --> n18
+  n19{"!isAccountClass(value)"}:::decision
+  n20["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n19 -->|"sí"| n20
+  n21(["422 PRECONDITION_FAILED {message}"]):::error
+  n20 --> n21
+  n22["Transacción: transactional(…)"]:::transaccion
+  n19 -->|"no"| n22
+  n23["Llama a PractitionerSimpleAccountingService.ensureGeneralAccounts"]:::llamada
+  n22 --> n23
+  n24["Llama a PractitionerSimpleAccountingRepository.countSeededAccounts"]:::llamada
+  n23 --> n24
+  n25[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n24 --> n25
+  n26{"(await this.repo.countSeededAccounts(em, practiceId)) › 0"}:::decision
+  n25 --> n26
+  n27["Llama a PractitionerSimpleAccountingRepository.countSeededAccounts"]:::llamada
+  n26 -->|"sí"| n27
+  n28[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n27 --> n28
+  n29["Repite: por cada const [code, name, accountClass] de GENERAL_ACCOUNTS"]:::bucle
+  n28 --> n29
+  n26 -->|"no"| n29
+  n30["Llama a PractitionerSimpleAccountingRepository.createAccount"]:::llamada
+  n29 -->|"cada elemento"| n30
+  n31[("CREA accounting.practitioner_simple_accounts")]:::efecto
+  n30 --> n31
+  n32["Llama a PractitionerSimpleAccountingRepository.listAccounts"]:::llamada
+  n31 --> n32
+  n29 -->|"al terminar"| n32
+  n33[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n32 --> n33
+  n34["Llama a PractitionerSimpleAccountingService.assertNameFree"]:::llamada
+  n33 --> n34
+  n35{"taken"}:::decision
+  n34 --> n35
+  n36(["409 CONFLICT Ya tiene una cuenta con ese nombre en esa clase."]):::error
+  n35 -->|"sí"| n36
+  n37["Llama a PractitionerSimpleAccountingRepository.createAccount"]:::llamada
+  n35 -->|"no"| n37
+  n38[("CREA accounting.practitioner_simple_accounts")]:::efecto
+  n37 --> n38
+  n39(("201 Responde con éxito")):::ok
+  n38 --> n39
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 47. DELETE /accounting/practitioner/simple/accounts/{id}
+
+Borrar una cuenta propia
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Es una cuenta general: se puede renombrar, no borrar.; ConflictException: La usa{uses === 1 ? '' : 'n'} {uses} registro{uses === 1 ? '' : 's'}: cambiales la cuenta antes de borrarla. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.deleteAccount"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerSimpleAccountingService.requireAccount"]:::llamada
+  n3 --> n4
+  n5["Llama a PractitionerSimpleAccountingRepository.findAccount"]:::llamada
+  n4 --> n5
+  n6[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n5 --> n6
+  n7["Llama a PractitionerSimpleAccountingService.ownRow"]:::llamada
+  n6 --> n7
+  n8["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n7 --> n8
+  n9{"!actor.practitionerProfileId"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n9 -->|"sí"| n10
+  n11{"!practiceIds.includes(practiceId)"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n11 -->|"sí"| n12
+  n13{"account.seeded"}:::decision
+  n11 -->|"no"| n13
+  n14(["409 CONFLICT Es una cuenta general: se puede renombrar, no borrar."]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PractitionerSimpleAccountingRepository.countAccountUsage"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE accounting.practitioner_simple_records · LEE accounting.practitioner_simple_transactions")]:::efecto
+  n15 --> n16
+  n17{"uses › 0"}:::decision
+  n16 --> n17
+  n18(["409 CONFLICT La usa{uses === 1 ? '' : 'n'} {uses} registro{uses === 1 ? '' : 's'}: cambiales la cuenta antes…"]):::error
+  n17 -->|"sí"| n18
+  n19[("BORRA accounting.practitioner_simple_accounts")]:::efecto
+  n17 -->|"no"| n19
+  n20(("204 Responde con éxito")):::ok
+  n19 --> n20
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 48. PUT /accounting/practitioner/simple/accounts/{id}
+
+Renombrar una cuenta
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: No se puede cambiar la clase de una cuenta general o que ya se usa.; ConflictException: Ya tiene una cuenta con ese nombre en esa clase. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: {message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.updateAccount"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerSimpleAccountingService.requireAccount"]:::llamada
+  n3 --> n4
+  n5["Llama a PractitionerSimpleAccountingRepository.findAccount"]:::llamada
+  n4 --> n5
+  n6[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n5 --> n6
+  n7["Llama a PractitionerSimpleAccountingService.ownRow"]:::llamada
+  n6 --> n7
+  n8["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n7 --> n8
+  n9{"!actor.practitionerProfileId"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n9 -->|"sí"| n10
+  n11{"!practiceIds.includes(practiceId)"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PractitionerSimpleAccountingService.validName"]:::llamada
+  n11 -->|"no"| n13
+  n14["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n13 --> n14
+  n15(["422 PRECONDITION_FAILED {message}"]):::error
+  n14 --> n15
+  n16{"problem"}:::decision
+  n17["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n16 -->|"sí"| n17
+  n18(["422 PRECONDITION_FAILED {message}"]):::error
+  n17 --> n18
+  n19["Llama a PractitionerSimpleAccountingService.validClass"]:::llamada
+  n16 -->|"no"| n19
+  n20["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n19 --> n20
+  n21(["422 PRECONDITION_FAILED {message}"]):::error
+  n20 --> n21
+  n22{"!isAccountClass(value)"}:::decision
+  n23["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n22 -->|"sí"| n23
+  n24(["422 PRECONDITION_FAILED {message}"]):::error
+  n23 --> n24
+  n25{"accountClass !== account.accountClass"}:::decision
+  n22 -->|"no"| n25
+  n26["Llama a PractitionerSimpleAccountingRepository.countAccountUsage"]:::llamada
+  n25 -->|"sí"| n26
+  n27[("LEE accounting.practitioner_simple_records · LEE accounting.practitioner_simple_transactions")]:::efecto
+  n26 --> n27
+  n28{"account.seeded || (await this.repo.countAccountUsage(em, account.id)) › 0"}:::decision
+  n27 --> n28
+  n29(["409 CONFLICT No se puede cambiar la clase de una cuenta general o que ya se usa."]):::error
+  n28 -->|"sí"| n29
+  n30["Llama a PractitionerSimpleAccountingRepository.listAccounts"]:::llamada
+  n28 -->|"no"| n30
+  n25 -->|"no"| n30
+  n31[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n30 --> n31
+  n32["Llama a PractitionerSimpleAccountingService.assertNameFree"]:::llamada
+  n31 --> n32
+  n33{"taken"}:::decision
+  n32 --> n33
+  n34(["409 CONFLICT Ya tiene una cuenta con ese nombre en esa clase."]):::error
+  n33 -->|"sí"| n34
+  n35[("ACTUALIZA accounting.practitioner_simple_accounts · ACTUALIZA accounting.practitioner_simple_accounts")]:::efecto
+  n33 -->|"no"| n35
+  n36(("200 Responde con éxito")):::ok
+  n35 --> n36
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 49. GET /accounting/practitioner/simple/records
+
+Gastos, activos y deudas de una práctica
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.listRecords"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n3 --> n4
+  n5{"!actor.practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practitioner_role_assignments")]:::efecto
+  n8 --> n9
+  n10{"!practiceIds.includes(practiceId)"}:::decision
+  n9 --> n10
+  n11(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PractitionerSimpleAccountingRepository.listRecords"]:::llamada
+  n10 -->|"no"| n12
+  n13[("LEE accounting.practitioner_simple_records")]:::efecto
+  n12 --> n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 50. POST /accounting/practitioner/simple/records
+
+Registrar un gasto, un activo o una deuda
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: {message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.createRecord"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerSimpleAccountingService.ownPracticeForWrite"]:::llamada
+  n3 --> n4
+  n5["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n4 --> n5
+  n6{"!actor.practitionerProfileId"}:::decision
+  n5 --> n6
+  n7(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n6 -->|"sí"| n7
+  n8{"!practiceIds.includes(practiceId)"}:::decision
+  n6 -->|"no"| n8
+  n9(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n8 -->|"sí"| n9
+  n10{"!isRecordKind(dto.kind)"}:::decision
+  n8 -->|"no"| n10
+  n11["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n10 -->|"sí"| n11
+  n12(["422 PRECONDITION_FAILED {message}"]):::error
+  n11 --> n12
+  n13["Llama a PractitionerSimpleAccountingService.assertRecordContent"]:::llamada
+  n10 -->|"no"| n13
+  n14["Llama a PractitionerSimpleAccountingRepository.findAccount"]:::llamada
+  n13 --> n14
+  n15[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n14 --> n15
+  n16{"!account || account.practiceId !== practiceId"}:::decision
+  n15 --> n16
+  n17["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n16 -->|"sí"| n17
+  n18(["422 PRECONDITION_FAILED {message}"]):::error
+  n17 --> n18
+  n19{"account.accountClass !== CLASS_OF_KIND[kind]"}:::decision
+  n16 -->|"no"| n19
+  n20["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n19 -->|"sí"| n20
+  n21(["422 PRECONDITION_FAILED {message}"]):::error
+  n20 --> n21
+  n22["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n19 -->|"no"| n22
+  n23(["422 PRECONDITION_FAILED {message}"]):::error
+  n22 --> n23
+  n24{"problem"}:::decision
+  n25["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n24 -->|"sí"| n25
+  n26(["422 PRECONDITION_FAILED {message}"]):::error
+  n25 --> n26
+  n27["Llama a PractitionerSimpleAccountingRepository.createRecord"]:::llamada
+  n24 -->|"no"| n27
+  n28[("CREA accounting.practitioner_simple_records")]:::efecto
+  n27 --> n28
+  n29(("201 Responde con éxito")):::ok
+  n28 --> n29
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 51. DELETE /accounting/practitioner/simple/records/{id}
+
+Borrar un gasto, un activo o una deuda
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.deleteRecord"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerSimpleAccountingService.requireRecord"]:::llamada
+  n3 --> n4
+  n5["Llama a PractitionerSimpleAccountingRepository.findRecord"]:::llamada
+  n4 --> n5
+  n6[("LEE accounting.practitioner_simple_records")]:::efecto
+  n5 --> n6
+  n7["Llama a PractitionerSimpleAccountingService.ownRow"]:::llamada
+  n6 --> n7
+  n8["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n7 --> n8
+  n9{"!actor.practitionerProfileId"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n9 -->|"sí"| n10
+  n11{"!practiceIds.includes(practiceId)"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n11 -->|"sí"| n12
+  n13[("BORRA accounting.practitioner_simple_records")]:::efecto
+  n11 -->|"no"| n13
+  n14(("204 Responde con éxito")):::ok
+  n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 52. PUT /accounting/practitioner/simple/records/{id}
+
+Editar un gasto, un activo o una deuda
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: {message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.updateRecord"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerSimpleAccountingService.requireRecord"]:::llamada
+  n3 --> n4
+  n5["Llama a PractitionerSimpleAccountingRepository.findRecord"]:::llamada
+  n4 --> n5
+  n6[("LEE accounting.practitioner_simple_records")]:::efecto
+  n5 --> n6
+  n7["Llama a PractitionerSimpleAccountingService.ownRow"]:::llamada
+  n6 --> n7
+  n8["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n7 --> n8
+  n9{"!actor.practitionerProfileId"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n9 -->|"sí"| n10
+  n11{"!practiceIds.includes(practiceId)"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PractitionerSimpleAccountingService.assertRecordContent"]:::llamada
+  n11 -->|"no"| n13
+  n14["Llama a PractitionerSimpleAccountingRepository.findAccount"]:::llamada
+  n13 --> n14
+  n15[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n14 --> n15
+  n16{"!account || account.practiceId !== practiceId"}:::decision
+  n15 --> n16
+  n17["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n16 -->|"sí"| n17
+  n18(["422 PRECONDITION_FAILED {message}"]):::error
+  n17 --> n18
+  n19{"account.accountClass !== CLASS_OF_KIND[kind]"}:::decision
+  n16 -->|"no"| n19
+  n20["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n19 -->|"sí"| n20
+  n21(["422 PRECONDITION_FAILED {message}"]):::error
+  n20 --> n21
+  n22["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n19 -->|"no"| n22
+  n23(["422 PRECONDITION_FAILED {message}"]):::error
+  n22 --> n23
+  n24{"problem"}:::decision
+  n25["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n24 -->|"sí"| n25
+  n26(["422 PRECONDITION_FAILED {message}"]):::error
+  n25 --> n26
+  n27[("ACTUALIZA accounting.practitioner_simple_records · ACTUALIZA accounting.practitioner_simple_records · ACTUALI…")]:::efecto
+  n24 -->|"no"| n27
+  n28(("200 Responde con éxito")):::ok
+  n27 --> n28
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 53. GET /accounting/practitioner/simple/summary
+
+Pacientes atendidos, cobrado y esperado de las aseguradoras
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.summary"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n3 --> n4
+  n5{"!actor.practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practitioner_role_assignments")]:::efecto
+  n8 --> n9
+  n10{"!practiceIds.includes(practiceId)"}:::decision
+  n9 --> n10
+  n11(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PracticeTenantLookupService.findTenantOfPractice"]:::llamada
+  n10 -->|"no"| n12
+  n13["Llama a PracticesRepository.findById"]:::llamada
+  n12 --> n13
+  n14[("LEE practice.practices")]:::efecto
+  n13 --> n14
+  n15[("LEE clinical.appointments")]:::efecto
+  n14 --> n15
+  n16["Llama a PractitionerSimpleAccountingService.ownEncounterIds"]:::llamada
+  n15 --> n16
+  n17[("LEE clinical.encounters")]:::efecto
+  n16 --> n17
+  n18["Llama a PractitionerSimpleAccountingService.collectedCents"]:::llamada
+  n17 --> n18
+  n19[("LEE billing.invoices")]:::efecto
+  n18 --> n19
+  n20["Llama a PractitionerSimpleAccountingService.pendingFromInsurers"]:::llamada
+  n19 --> n20
+  n21[("LEE insurance.insurance_claims · LEE insurance.claim_adjudication_versions")]:::efecto
+  n20 --> n21
+  n22(("200 Responde con éxito")):::ok
+  n21 --> n22
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 54. GET /accounting/practitioner/simple/transactions
+
+Transacciones debe/haber de una práctica
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.listTransactions"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n3 --> n4
+  n5{"!actor.practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practitioner_role_assignments")]:::efecto
+  n8 --> n9
+  n10{"!practiceIds.includes(practiceId)"}:::decision
+  n9 --> n10
+  n11(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PractitionerSimpleAccountingRepository.listTransactions"]:::llamada
+  n10 -->|"no"| n12
+  n13[("LEE accounting.practitioner_simple_transactions")]:::efecto
+  n12 --> n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 55. POST /accounting/practitioner/simple/transactions
+
+Registrar una transacción debe/haber
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: {message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.createTransaction"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerSimpleAccountingService.ownPracticeForWrite"]:::llamada
+  n3 --> n4
+  n5["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n4 --> n5
+  n6{"!actor.practitionerProfileId"}:::decision
+  n5 --> n6
+  n7(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n6 -->|"sí"| n7
+  n8{"!practiceIds.includes(practiceId)"}:::decision
+  n6 -->|"no"| n8
+  n9(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a PractitionerSimpleAccountingService.assertTransactionContent"]:::llamada
+  n8 -->|"no"| n10
+  n11["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n10 --> n11
+  n12(["422 PRECONDITION_FAILED {message}"]):::error
+  n11 --> n12
+  n13{"descriptionIssue"}:::decision
+  n14["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n13 -->|"sí"| n14
+  n15(["422 PRECONDITION_FAILED {message}"]):::error
+  n14 --> n15
+  n16["Llama a PractitionerSimpleAccountingService.assertOwnAccount"]:::llamada
+  n13 -->|"no"| n16
+  n17["Llama a PractitionerSimpleAccountingRepository.findAccount"]:::llamada
+  n16 --> n17
+  n18[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n17 --> n18
+  n19["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n18 --> n19
+  n20(["422 PRECONDITION_FAILED {message}"]):::error
+  n19 --> n20
+  n21{"!account || account.practiceId !== practiceId"}:::decision
+  n22["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n21 -->|"sí"| n22
+  n23(["422 PRECONDITION_FAILED {message}"]):::error
+  n22 --> n23
+  n24["Llama a PractitionerSimpleAccountingService.assertOwnAccount"]:::llamada
+  n21 -->|"no"| n24
+  n25["Llama a PractitionerSimpleAccountingRepository.findAccount"]:::llamada
+  n24 --> n25
+  n26[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n25 --> n26
+  n27["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n26 --> n27
+  n28(["422 PRECONDITION_FAILED {message}"]):::error
+  n27 --> n28
+  n29{"!account || account.practiceId !== practiceId"}:::decision
+  n30["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n29 -->|"sí"| n30
+  n31(["422 PRECONDITION_FAILED {message}"]):::error
+  n30 --> n31
+  n32{"dto.debitAccountId === dto.creditAccountId"}:::decision
+  n29 -->|"no"| n32
+  n33["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n32 -->|"sí"| n33
+  n34(["422 PRECONDITION_FAILED {message}"]):::error
+  n33 --> n34
+  n35["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n32 -->|"no"| n35
+  n36(["422 PRECONDITION_FAILED {message}"]):::error
+  n35 --> n36
+  n37{"problem"}:::decision
+  n38["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n37 -->|"sí"| n38
+  n39(["422 PRECONDITION_FAILED {message}"]):::error
+  n38 --> n39
+  n40["Llama a PractitionerSimpleAccountingRepository.createTransaction"]:::llamada
+  n37 -->|"no"| n40
+  n41[("CREA accounting.practitioner_simple_transactions")]:::efecto
+  n40 --> n41
+  n42(("201 Responde con éxito")):::ok
+  n41 --> n42
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 56. DELETE /accounting/practitioner/simple/transactions/{id}
+
+Borrar una transacción debe/haber
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.deleteTransaction"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerSimpleAccountingService.requireTransaction"]:::llamada
+  n3 --> n4
+  n5["Llama a PractitionerSimpleAccountingRepository.findTransaction"]:::llamada
+  n4 --> n5
+  n6[("LEE accounting.practitioner_simple_transactions")]:::efecto
+  n5 --> n6
+  n7["Llama a PractitionerSimpleAccountingService.ownRow"]:::llamada
+  n6 --> n7
+  n8["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n7 --> n8
+  n9{"!actor.practitionerProfileId"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n9 -->|"sí"| n10
+  n11{"!practiceIds.includes(practiceId)"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n11 -->|"sí"| n12
+  n13[("BORRA accounting.practitioner_simple_transactions")]:::efecto
+  n11 -->|"no"| n13
+  n14(("204 Responde con éxito")):::ok
+  n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 57. PUT /accounting/practitioner/simple/transactions/{id}
+
+Editar una transacción debe/haber
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica; PreconditionFailedException: {message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerSimpleAccountingService.updateTransaction"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerSimpleAccountingService.requireTransaction"]:::llamada
+  n3 --> n4
+  n5["Llama a PractitionerSimpleAccountingRepository.findTransaction"]:::llamada
+  n4 --> n5
+  n6[("LEE accounting.practitioner_simple_transactions")]:::efecto
+  n5 --> n6
+  n7["Llama a PractitionerSimpleAccountingService.ownRow"]:::llamada
+  n6 --> n7
+  n8["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n7 --> n8
+  n9{"!actor.practitionerProfileId"}:::decision
+  n8 --> n9
+  n10(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n9 -->|"sí"| n10
+  n11{"!practiceIds.includes(practiceId)"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PractitionerSimpleAccountingService.assertTransactionContent"]:::llamada
+  n11 -->|"no"| n13
+  n14["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n13 --> n14
+  n15(["422 PRECONDITION_FAILED {message}"]):::error
+  n14 --> n15
+  n16{"descriptionIssue"}:::decision
+  n17["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n16 -->|"sí"| n17
+  n18(["422 PRECONDITION_FAILED {message}"]):::error
+  n17 --> n18
+  n19["Llama a PractitionerSimpleAccountingService.assertOwnAccount"]:::llamada
+  n16 -->|"no"| n19
+  n20["Llama a PractitionerSimpleAccountingRepository.findAccount"]:::llamada
+  n19 --> n20
+  n21[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n20 --> n21
+  n22["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n21 --> n22
+  n23(["422 PRECONDITION_FAILED {message}"]):::error
+  n22 --> n23
+  n24{"!account || account.practiceId !== practiceId"}:::decision
+  n25["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n24 -->|"sí"| n25
+  n26(["422 PRECONDITION_FAILED {message}"]):::error
+  n25 --> n26
+  n27["Llama a PractitionerSimpleAccountingService.assertOwnAccount"]:::llamada
+  n24 -->|"no"| n27
+  n28["Llama a PractitionerSimpleAccountingRepository.findAccount"]:::llamada
+  n27 --> n28
+  n29[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n28 --> n29
+  n30["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n29 --> n30
+  n31(["422 PRECONDITION_FAILED {message}"]):::error
+  n30 --> n31
+  n32{"!account || account.practiceId !== practiceId"}:::decision
+  n33["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n32 -->|"sí"| n33
+  n34(["422 PRECONDITION_FAILED {message}"]):::error
+  n33 --> n34
+  n35{"dto.debitAccountId === dto.creditAccountId"}:::decision
+  n32 -->|"no"| n35
+  n36["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n35 -->|"sí"| n36
+  n37(["422 PRECONDITION_FAILED {message}"]):::error
+  n36 --> n37
+  n38["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n35 -->|"no"| n38
+  n39(["422 PRECONDITION_FAILED {message}"]):::error
+  n38 --> n39
+  n40{"problem"}:::decision
+  n41["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n40 -->|"sí"| n41
+  n42(["422 PRECONDITION_FAILED {message}"]):::error
+  n41 --> n42
+  n43[("ACTUALIZA accounting.practitioner_simple_transactions · ACTUALIZA accounting.practitioner_simple_transactions…")]:::efecto
+  n40 -->|"no"| n43
+  n44(("200 Responde con éxito")):::ok
+  n43 --> n44
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 58. GET /accounting/trial-balance
 
 Balance de sumas y saldos
 
@@ -4176,6 +5328,7 @@ Balance de sumas y saldos
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La práctica consultada pertenece a otra organización |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: No se pudo verificar la vinculación del profesional con la práctica; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -4197,20 +5350,40 @@ flowchart TD
   n6 -->|"no"| n8
   n9(["403 FORBIDDEN La práctica consultada pertenece a otra organización"]):::error
   n8 -->|"sí"| n9
-  n10["Llama a JournalRepository.findTransactions"]:::llamada
+  n10["Llama a LedgerReadService.assertPractitionerOwnsPractice"]:::llamada
   n8 -->|"no"| n10
-  n11[("LEE accounting.journal_transactions")]:::efecto
+  n11{"!actor.practitionerProfileId"}:::decision
   n10 --> n11
-  n12["Llama a JournalRepository.findEntriesByTransactions"]:::llamada
-  n11 --> n12
-  n13[("LEE accounting.ledger_entries")]:::efecto
-  n12 --> n13
-  n14["Llama a AccountsRepository.findByPractice"]:::llamada
-  n13 --> n14
-  n15[("LEE accounting.accounts")]:::efecto
-  n14 --> n15
-  n16(("200 Responde con éxito")):::ok
+  n12(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n11 -->|"sí"| n12
+  n13{"!this.practiceTenantLookup"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED No se pudo verificar la vinculación del profesional con la práctica"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
+  n13 -->|"no"| n15
+  n16["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
   n15 --> n16
+  n17[("LEE practice.practitioner_role_assignments")]:::efecto
+  n16 --> n17
+  n18{"!practiceIds.includes(practiceId)"}:::decision
+  n17 --> n18
+  n19(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a JournalRepository.findTransactions"]:::llamada
+  n18 -->|"no"| n20
+  n21[("LEE accounting.journal_transactions")]:::efecto
+  n20 --> n21
+  n22["Llama a JournalRepository.findEntriesByTransactions"]:::llamada
+  n21 --> n22
+  n23[("LEE accounting.ledger_entries")]:::efecto
+  n22 --> n23
+  n24["Llama a AccountsRepository.findByPractice"]:::llamada
+  n23 --> n24
+  n25[("LEE accounting.accounts")]:::efecto
+  n24 --> n25
+  n26(("200 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

@@ -3,13 +3,13 @@
 # Flujos del módulo `practice`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 30 (27 con decisiones propias, 3 sin ellas)
+- **Operaciones:** 36 (33 con decisiones propias, 3 sin ellas)
 - Inventario de endpoints del módulo: [practice](../endpoints/practice.md)
 
 ## Proceso: Módulo Practice (14)
 
-- **Código:** `practice` · **Agrupación:** MIXTO · **Operaciones:** 30
-- **Actores:** ACCOUNTING_APPROVER · ANESTHESIOLOGIST · CLINICIAN · PATIENT · PERIOP_ADMIN · PERIOP_NURSE · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT · SECURITY_ADMIN · SURGEON · SURGERY_SCHEDULER
+- **Código:** `practice` · **Agrupación:** MIXTO · **Operaciones:** 36
+- **Actores:** ACCOUNTING_APPROVER · ANESTHESIOLOGIST · CLINICIAN · Cualquier sesión válida · PATIENT · PERIOP_ADMIN · PERIOP_NURSE · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT · SECURITY_ADMIN · SURGEON · SURGERY_SCHEDULER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/practice/README.md`
 
@@ -28,19 +28,25 @@ _Fuente: `src/modules/practice/README.md:3`_
 | `UC-14-03` | Verificar (→VERIFIED) o caducar (→EXPIRED) | POST /accreditations/{id}/verify | SECURITY_ADMIN | BAJO | 2 |
 | `UC-14-04` | Crear unidad clínica jerárquica | POST /sites/{siteId}/clinical-units | SECURITY_ADMIN | MEDIO | 2 |
 | `UC-14-05` | Crear espacio de atención (AVAILABLE) | POST /sites/{siteId}/care-spaces | SECURITY_ADMIN | MEDIO | 3 |
-| `UC-14-06` | Publicar servicio de salud | POST /practices/{practiceId}/healthcare-services | SECURITY_ADMIN | MEDIO | 3 |
+| `UC-14-06` | Publicar servicio de salud | POST /practices/{practiceId}/healthcare-services | Cualquier sesión válida | ALTO | 7 |
 | `UC-14-07` | Configurar ajuste (upsert) | PUT /practices/{practiceId}/settings/{settingKey} | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-14-08` | Asignar rol de profesional | POST /practices/{practiceId}/role-assignments | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-14-09` | Adjuntar personal de apoyo | POST /role-assignments/{roleId}/support-assignments | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-14-10` | Alta de insumo (stock 0) | POST /practices/{practiceId}/inventory-items | SECURITY_ADMIN | MEDIO | 1 |
 | `UC-14-11` | Movimiento de stock (IN/OUT/ADJUST) | POST /inventory-items/{itemId}/movements | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-14-12` | Desmantelar sitio en cascada | DELETE /practices/{practiceId}/sites/{siteId} | SECURITY_ADMIN | MEDIO | 10 |
+| `ctrl:OrganizationPracticesController` | Operaciones de OrganizationPracticesController que el README no asigna a un caso de uso | POST /tenants/{tenantId}/practices | Cualquier sesión válida | ALTO | 7 |
+| `ctrl:PracticeInvitationsController` | Operaciones de PracticeInvitationsController que el README no asigna a un caso de uso | POST /practices/{practiceId}/role-assignments/invitations | Cualquier sesión válida | ALTO | 7 |
 | `ctrl:PracticesController` | Operaciones de PracticesController que el README no asigna a un caso de uso | GET /practices | SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SCHEDULING_ADMIN · PRACTITIONER · CLINICIAN · ACCOUNTING_APPROVER | BAJO | 2 |
 |  |  | POST /practices | SECURITY_ADMIN | MEDIO | 2 |
+|  |  | GET /practices/{practiceId}/healthcare-services | Cualquier sesión válida | BAJO | 6 |
+|  |  | PATCH /practices/{practiceId}/healthcare-services/{id} | Cualquier sesión válida | ALTO | 7 |
 |  |  | GET /practices/{practiceId}/organization | SECURITY_ADMIN · PERIOP_ADMIN · SURGERY_SCHEDULER · SCHEDULING_ADMIN · PRACTITIONER · CLINICIAN · ACCOUNTING_APPROVER | BAJO | 9 |
-|  |  | GET /practices/{practiceId}/role-assignments | SECURITY_ADMIN | BAJO | 2 |
-|  |  | POST /practices/{practiceId}/role-assignments/self-request | PRACTITIONER | MEDIO | 3 |
+|  |  | GET /practices/{practiceId}/role-assignments | Cualquier sesión válida | BAJO | 3 |
+|  |  | POST /practices/{practiceId}/role-assignments/self-request | PRACTITIONER | MEDIO | 5 |
 |  |  | GET /practices/{practiceId}/sites | SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SCHEDULING_ADMIN | BAJO | 2 |
+| `ctrl:PractitionerInvitationsController` | Operaciones de PractitionerInvitationsController que el README no asigna a un caso de uso | POST /practitioners/me/role-assignments/{roleId}/accept | PRACTITIONER | MEDIO | 2 |
+|  |  | POST /practitioners/me/role-assignments/{roleId}/decline | PRACTITIONER | MEDIO | 2 |
 | `ctrl:PractitionerSitesController` | Operaciones de PractitionerSitesController que el README no asigna a un caso de uso | GET /practitioners/{profileId}/sites | SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · CLINICIAN · PATIENT | BAJO | 5 |
 |  |  | GET /practitioners/me/role-assignments | PRACTITIONER | BAJO | 3 |
 |  |  | POST /practitioners/me/sites | PRACTITIONER · CLINICIAN | MEDIO | 8 |
@@ -48,10 +54,10 @@ _Fuente: `src/modules/practice/README.md:3`_
 |  |  | PATCH /practitioners/me/sites/{siteId} | PRACTITIONER · CLINICIAN | MEDIO | 9 |
 |  |  | PUT /practitioners/me/sites/{siteId}/bank-qr | PRACTITIONER · CLINICIAN | BAJO | 6 |
 |  |  | PUT /practitioners/me/sites/{siteId}/contact-phone | PRACTITIONER · CLINICIAN | MEDIO | 7 |
-| `ctrl:RoleAssignmentsController` | Operaciones de RoleAssignmentsController que el README no asigna a un caso de uso | POST /role-assignments/{roleId}/approve | SECURITY_ADMIN | BAJO | 2 |
-|  |  | POST /role-assignments/{roleId}/end | SECURITY_ADMIN | BAJO | 2 |
-|  |  | POST /role-assignments/{roleId}/reject | SECURITY_ADMIN | BAJO | 2 |
-|  |  | POST /role-assignments/{roleId}/suspend | SECURITY_ADMIN | BAJO | 2 |
+| `ctrl:RoleAssignmentsController` | Operaciones de RoleAssignmentsController que el README no asigna a un caso de uso | POST /role-assignments/{roleId}/approve | Cualquier sesión válida | BAJO | 3 |
+|  |  | POST /role-assignments/{roleId}/end | SECURITY_ADMIN | BAJO | 3 |
+|  |  | POST /role-assignments/{roleId}/reject | Cualquier sesión válida | BAJO | 3 |
+|  |  | POST /role-assignments/{roleId}/suspend | SECURITY_ADMIN | BAJO | 3 |
 | `ctrl:SitesController` | Operaciones de SitesController que el README no asigna a un caso de uso | GET /sites/{siteId}/care-spaces | SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SCHEDULING_ADMIN | BAJO | 3 |
 
 ### Diagrama 1 de 2 — etapas `UC-14-01`, `UC-14-02`, `UC-14-03`…
@@ -59,22 +65,21 @@ _Fuente: `src/modules/practice/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a27(["SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON…"]):::actor
-  a31(["SECURITY_ADMIN · PERIOP_ADMIN · SURGERY_SCHEDULER · SCHEDUL…"]):::actor
-  a35(["PRACTITIONER"]):::actor
-  a37(["SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON…"]):::actor
+  a13(["Cualquier sesión válida"]):::actor
   t3[("practice.practice_sites")]:::tabla
   t5[("practice.practice_accreditations")]:::tabla
   t7[("practice.practices")]:::tabla
   t9[("practice.clinical_units")]:::tabla
   t11[("practice.care_spaces")]:::tabla
-  t13[("practice.healthcare_services")]:::tabla
-  t15[("practice.practice_settings")]:::tabla
-  t17[("practice.practitioner_role_assignments")]:::tabla
-  t19[("practice.practitioner_support_assignments")]:::tabla
-  t21[("practice.inventory_items")]:::tabla
-  t23[("practice.inventory_movements")]:::tabla
-  t29[("billing.service_catalog")]:::tabla
+  t14[("directory.tenant_memberships")]:::tabla
+  t15[("practice.healthcare_services")]:::tabla
+  t18[("practice.practice_settings")]:::tabla
+  t20[("practice.practitioner_role_assignments")]:::tabla
+  t22[("practice.practitioner_support_assignments")]:::tabla
+  t24[("practice.inventory_items")]:::tabla
+  t26[("practice.inventory_movements")]:::tabla
+  t30[("common.addresses")]:::tabla
+  t31[("directory.tenants")]:::tabla
   subgraph s0["UC-14-01 · Alta de sitio (op. status PLANNED)"]
     o1["POST /practices/{practiceId}/sites"]:::op
   end
@@ -90,36 +95,36 @@ flowchart LR
   subgraph s4["UC-14-05 · Crear espacio de atención (AVAILABLE)"]
     o10["POST /sites/{siteId}/care-spaces"]:::op
   end
+  t16[("+1 tablas más")]
   subgraph s5["UC-14-06 · Publicar servicio de salud"]
     o12["POST /practices/{practiceId}/healthcare-services"]:::op
   end
   subgraph s6["UC-14-07 · Configurar ajuste (upsert)"]
-    o14["PUT /practices/{practiceId}/settings/{settingKey}"]:::op
+    o17["PUT /practices/{practiceId}/settings/{settingKey}"]:::op
   end
   subgraph s7["UC-14-08 · Asignar rol de profesional"]
-    o16["POST /practices/{practiceId}/role-assignments"]:::op
+    o19["POST /practices/{practiceId}/role-assignments"]:::op
   end
   subgraph s8["UC-14-09 · Adjuntar personal de apoyo"]
-    o18["POST /role-assignments/{roleId}/support-assignments"]:::op
+    o21["POST /role-assignments/{roleId}/support-assignments"]:::op
   end
   subgraph s9["UC-14-10 · Alta de insumo (stock 0)"]
-    o20["POST /practices/{practiceId}/inventory-items"]:::op
+    o23["POST /practices/{practiceId}/inventory-items"]:::op
   end
   subgraph s10["UC-14-11 · Movimiento de stock (IN/OUT/ADJUST)"]
-    o22["POST /inventory-items/{itemId}/movements"]:::op
+    o25["POST /inventory-items/{itemId}/movements"]:::op
   end
-  t25[("+4 tablas más")]
+  t28[("+4 tablas más")]
   subgraph s11["UC-14-12 · Desmantelar sitio en cascada"]
-    o24["DELETE /practices/{practiceId}/sites/{siteId}"]:::op
+    o27["DELETE /practices/{practiceId}/sites/{siteId}"]:::op
   end
-  t32[("+3 tablas más")]
-  subgraph s12["ctrl:PracticesController · Operaciones de PracticesController que el README no…"]
-    o26["GET /practices"]:::op
-    o28["POST /practices"]:::op
-    o30["GET /practices/{practiceId}/organization"]:::op
-    o33["GET /practices/{practiceId}/role-assignments"]:::op
-    o34["POST /practices/{practiceId}/role-assignments/self-request"]:::op
-    o36["GET /practices/{practiceId}/sites"]:::op
+  t32[("+1 tablas más")]
+  subgraph s12["ctrl:OrganizationPracticesController · Operaciones de OrganizationPracticesCont…"]
+    o29["POST /tenants/{tenantId}/practices"]:::op
+  end
+  t34[("+1 tablas más")]
+  subgraph s13["ctrl:PracticeInvitationsController · Operaciones de PracticeInvitationsControll…"]
+    o33["POST /practices/{practiceId}/role-assignments/invitations"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -137,167 +142,242 @@ flowchart LR
   o10 -->|"CREA"| t11
   o10 -->|"LEE"| t11
   o10 -->|"LEE"| t9
-  a2 --> o12
+  a13 --> o12
+  o12 -->|"LEE"| t14
   o12 -->|"LEE"| t9
-  o12 -->|"CREA"| t13
+  o12 -->|"CREA"| t15
+  o12 -->|"LEE"| t15
   o12 -->|"LEE"| t3
-  a2 --> o14
-  o14 -->|"ACTUALIZA"| t15
-  o14 -->|"CREA"| t15
-  o14 -->|"LEE"| t15
-  a2 --> o16
-  o16 -->|"LEE"| t9
-  o16 -->|"LEE"| t13
-  o16 -->|"LEE"| t3
-  o16 -->|"CREA"| t17
-  a2 --> o18
-  o18 -->|"LEE"| t7
-  o18 -->|"LEE"| t17
-  o18 -->|"CREA"| t19
-  a2 --> o20
-  o20 -->|"CREA"| t21
-  a2 --> o22
-  o22 -->|"LEE"| t21
-  o22 -->|"CREA"| t23
-  o22 -->|"LEE"| t7
-  a2 --> o24
-  o24 -->|"ACTUALIZA"| t11
-  o24 -->|"LEE"| t11
-  o24 -->|"ACTUALIZA"| t9
-  o24 -->|"LEE"| t9
-  o24 -->|"ACTUALIZA"| t13
-  o24 -->|"LEE"| t13
-  o24 -.-> t25
-  a27 --> o26
-  o26 -->|"LEE"| t7
-  o26 -->|"LEE"| t17
-  a2 --> o28
-  o28 -->|"CREA"| t29
-  o28 -->|"CREA"| t7
-  a31 --> o30
-  o30 -->|"LEE"| t11
-  o30 -->|"LEE"| t9
-  o30 -->|"LEE"| t13
-  o30 -->|"LEE"| t21
-  o30 -->|"LEE"| t5
-  o30 -->|"LEE"| t3
-  o30 -.-> t32
-  a2 --> o33
+  o12 -->|"LEE"| t7
+  o12 -.-> t16
+  a2 --> o17
+  o17 -->|"ACTUALIZA"| t18
+  o17 -->|"CREA"| t18
+  o17 -->|"LEE"| t18
+  a2 --> o19
+  o19 -->|"LEE"| t9
+  o19 -->|"LEE"| t15
+  o19 -->|"LEE"| t3
+  o19 -->|"CREA"| t20
+  a2 --> o21
+  o21 -->|"LEE"| t7
+  o21 -->|"LEE"| t20
+  o21 -->|"CREA"| t22
+  a2 --> o23
+  o23 -->|"CREA"| t24
+  a2 --> o25
+  o25 -->|"LEE"| t24
+  o25 -->|"CREA"| t26
+  o25 -->|"LEE"| t7
+  a2 --> o27
+  o27 -->|"ACTUALIZA"| t11
+  o27 -->|"LEE"| t11
+  o27 -->|"ACTUALIZA"| t9
+  o27 -->|"LEE"| t9
+  o27 -->|"ACTUALIZA"| t15
+  o27 -->|"LEE"| t15
+  o27 -.-> t28
+  a13 --> o29
+  o29 -->|"CREA"| t30
+  o29 -->|"LEE"| t14
+  o29 -->|"LEE"| t31
+  o29 -->|"CREA"| t3
+  o29 -->|"LEE"| t3
+  o29 -->|"CREA"| t7
+  o29 -.-> t32
+  a13 --> o33
+  o33 -->|"LEE"| t14
+  o33 -->|"LEE"| t15
+  o33 -->|"LEE"| t3
   o33 -->|"LEE"| t7
-  o33 -->|"LEE"| t17
-  a35 --> o34
-  o34 -->|"LEE"| t3
-  o34 -->|"LEE"| t7
-  o34 -->|"CREA"| t17
-  a37 --> o36
-  o36 -->|"LEE"| t3
-  o36 -->|"LEE"| t7
+  o33 -->|"CREA"| t20
+  o33 -->|"LEE"| t20
+  o33 -.-> t34
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:PractitionerSitesController`, `ctrl:RoleAssignmentsController`, `ctrl:SitesController`
+### Diagrama 2 de 2 — etapas `ctrl:PracticesController`, `ctrl:PractitionerInvitationsController`, `ctrl:PractitionerSitesController`…
 
 ```mermaid
 flowchart LR
-  a2(["SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRAC…"]):::actor
-  a9(["PRACTITIONER"]):::actor
-  a12(["PRACTITIONER · CLINICIAN"]):::actor
-  a22(["SECURITY_ADMIN"]):::actor
-  a27(["SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON…"]):::actor
-  t3[("common.addresses")]:::tabla
-  t4[("practice.practice_sites")]:::tabla
-  t5[("practice.practices")]:::tabla
-  t6[("practice.practitioner_role_assignments")]:::tabla
-  t7[("profiles.person_account_links")]:::tabla
-  t10[("community.public_profiles")]:::tabla
-  t15[("profiles.health_practitioner_profiles")]:::tabla
-  t28[("practice.care_spaces")]:::tabla
-  t13[("+2 tablas más")]
-  t17[("+3 tablas más")]
-  t20[("+1 tablas más")]
-  subgraph s0["ctrl:PractitionerSitesController · Operaciones de PractitionerSitesController q…"]
-    o1["GET /practitioners/{profileId}/sites"]:::op
-    o8["GET /practitioners/me/role-assignments"]:::op
-    o11["POST /practitioners/me/sites"]:::op
-    o14["DELETE /practitioners/me/sites/{siteId}"]:::op
-    o16["PATCH /practitioners/me/sites/{siteId}"]:::op
-    o18["PUT /practitioners/me/sites/{siteId}/bank-qr"]:::op
-    o19["PUT /practitioners/me/sites/{siteId}/contact-phone"]:::op
+  a2(["SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON…"]):::actor
+  a6(["SECURITY_ADMIN"]):::actor
+  a9(["Cualquier sesión válida"]):::actor
+  a17(["SECURITY_ADMIN · PERIOP_ADMIN · SURGERY_SCHEDULER · SCHEDUL…"]):::actor
+  a26(["PRACTITIONER"]):::actor
+  a28(["SECURITY_ADMIN · SURGERY_SCHEDULER · PERIOP_ADMIN · SURGEON…"]):::actor
+  a32(["SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRAC…"]):::actor
+  a38(["PRACTITIONER · CLINICIAN"]):::actor
+  t3[("practice.practices")]:::tabla
+  t4[("practice.practitioner_role_assignments")]:::tabla
+  t7[("billing.service_catalog")]:::tabla
+  t10[("directory.tenant_memberships")]:::tabla
+  t11[("practice.healthcare_services")]:::tabla
+  t12[("terminology.catalog_concepts")]:::tabla
+  t13[("terminology.concept_properties")]:::tabla
+  t18[("practice.care_spaces")]:::tabla
+  t19[("practice.clinical_units")]:::tabla
+  t20[("practice.inventory_items")]:::tabla
+  t21[("practice.practice_accreditations")]:::tabla
+  t22[("practice.practice_sites")]:::tabla
+  t33[("common.addresses")]:::tabla
+  t34[("profiles.person_account_links")]:::tabla
+  t36[("community.public_profiles")]:::tabla
+  t41[("profiles.health_practitioner_profiles")]:::tabla
+  t15[("+1 tablas más")]
+  t23[("+3 tablas más")]
+  subgraph s0["ctrl:PracticesController · Operaciones de PracticesController que el README no…"]
+    o1["GET /practices"]:::op
+    o5["POST /practices"]:::op
+    o8["GET /practices/{practiceId}/healthcare-services"]:::op
+    o14["PATCH /practices/{practiceId}/healthcare-services/{id}"]:::op
+    o16["GET /practices/{practiceId}/organization"]:::op
+    o24["GET /practices/{practiceId}/role-assignments"]:::op
+    o25["POST /practices/{practiceId}/role-assignments/self-request"]:::op
+    o27["GET /practices/{practiceId}/sites"]:::op
   end
-  subgraph s1["ctrl:RoleAssignmentsController · Operaciones de RoleAssignmentsController que e…"]
-    o21["POST /role-assignments/{roleId}/approve"]:::op
-    o23["POST /role-assignments/{roleId}/end"]:::op
-    o24["POST /role-assignments/{roleId}/reject"]:::op
-    o25["POST /role-assignments/{roleId}/suspend"]:::op
+  subgraph s1["ctrl:PractitionerInvitationsController · Operaciones de PractitionerInvitations…"]
+    o29["POST /practitioners/me/role-assignments/{roleId}/accept"]:::op
+    o30["POST /practitioners/me/role-assignments/{roleId}/decline"]:::op
   end
-  subgraph s2["ctrl:SitesController · Operaciones de SitesController que el README no asigna a…"]
-    o26["GET /sites/{siteId}/care-spaces"]:::op
+  t39[("+2 tablas más")]
+  t43[("+3 tablas más")]
+  t46[("+1 tablas más")]
+  subgraph s2["ctrl:PractitionerSitesController · Operaciones de PractitionerSitesController q…"]
+    o31["GET /practitioners/{profileId}/sites"]:::op
+    o35["GET /practitioners/me/role-assignments"]:::op
+    o37["POST /practitioners/me/sites"]:::op
+    o40["DELETE /practitioners/me/sites/{siteId}"]:::op
+    o42["PATCH /practitioners/me/sites/{siteId}"]:::op
+    o44["PUT /practitioners/me/sites/{siteId}/bank-qr"]:::op
+    o45["PUT /practitioners/me/sites/{siteId}/contact-phone"]:::op
+  end
+  subgraph s3["ctrl:RoleAssignmentsController · Operaciones de RoleAssignmentsController que e…"]
+    o47["POST /role-assignments/{roleId}/approve"]:::op
+    o48["POST /role-assignments/{roleId}/end"]:::op
+    o49["POST /role-assignments/{roleId}/reject"]:::op
+    o50["POST /role-assignments/{roleId}/suspend"]:::op
+  end
+  subgraph s4["ctrl:SitesController · Operaciones de SitesController que el README no asigna a…"]
+    o51["GET /sites/{siteId}/care-spaces"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
-  o1 -->|"LEE"| t5
-  o1 -->|"LEE"| t6
-  o1 -->|"LEE"| t7
+  a6 --> o5
+  o5 -->|"CREA"| t7
+  o5 -->|"CREA"| t3
   a9 --> o8
+  o8 -->|"LEE"| t7
   o8 -->|"LEE"| t10
-  o8 -->|"LEE"| t5
-  o8 -->|"LEE"| t6
-  a12 --> o11
-  o11 -->|"CREA"| t3
-  o11 -->|"CREA"| t4
-  o11 -->|"LEE"| t4
-  o11 -->|"CREA"| t5
-  o11 -->|"LEE"| t5
-  o11 -->|"CREA"| t6
-  o11 -.-> t13
-  a12 --> o14
-  o14 -->|"ACTUALIZA"| t6
-  o14 -->|"LEE"| t6
-  o14 -->|"LEE"| t15
+  o8 -->|"LEE"| t11
+  o8 -->|"LEE"| t3
+  o8 -->|"LEE"| t12
+  o8 -->|"LEE"| t13
+  a9 --> o14
   o14 -->|"LEE"| t7
-  a12 --> o16
-  o16 -->|"ACTUALIZA"| t3
-  o16 -->|"CREA"| t3
-  o16 -->|"LEE"| t3
-  o16 -->|"ACTUALIZA"| t4
-  o16 -->|"LEE"| t4
-  o16 -->|"LEE"| t5
-  o16 -.-> t17
-  a12 --> o18
-  o18 -->|"LEE"| t3
-  o18 -->|"LEE"| t4
-  o18 -->|"LEE"| t5
-  o18 -->|"LEE"| t6
-  o18 -->|"LEE"| t15
-  o18 -->|"LEE"| t7
-  a12 --> o19
-  o19 -->|"LEE"| t3
-  o19 -->|"LEE"| t4
-  o19 -->|"LEE"| t5
-  o19 -->|"ACTUALIZA"| t6
-  o19 -->|"LEE"| t6
-  o19 -->|"LEE"| t15
-  o19 -.-> t20
-  a22 --> o21
-  o21 -->|"LEE"| t5
-  o21 -->|"LEE"| t6
-  a22 --> o23
-  o23 -->|"LEE"| t5
-  o23 -->|"LEE"| t6
-  a22 --> o24
-  o24 -->|"LEE"| t5
-  o24 -->|"LEE"| t6
-  a22 --> o25
-  o25 -->|"LEE"| t5
-  o25 -->|"LEE"| t6
-  a27 --> o26
-  o26 -->|"LEE"| t28
-  o26 -->|"LEE"| t4
-  o26 -->|"LEE"| t5
+  o14 -->|"LEE"| t10
+  o14 -->|"ACTUALIZA"| t11
+  o14 -->|"LEE"| t11
+  o14 -->|"LEE"| t3
+  o14 -->|"LEE"| t12
+  o14 -.-> t15
+  a17 --> o16
+  o16 -->|"LEE"| t18
+  o16 -->|"LEE"| t19
+  o16 -->|"LEE"| t11
+  o16 -->|"LEE"| t20
+  o16 -->|"LEE"| t21
+  o16 -->|"LEE"| t22
+  o16 -.-> t23
+  a9 --> o24
+  o24 -->|"LEE"| t10
+  o24 -->|"LEE"| t3
+  o24 -->|"LEE"| t4
+  a26 --> o25
+  o25 -->|"LEE"| t11
+  o25 -->|"LEE"| t22
+  o25 -->|"LEE"| t3
+  o25 -->|"CREA"| t4
+  o25 -->|"LEE"| t4
+  a28 --> o27
+  o27 -->|"LEE"| t22
+  o27 -->|"LEE"| t3
+  a26 --> o29
+  o29 -->|"ACTUALIZA"| t4
+  o29 -->|"LEE"| t4
+  a26 --> o30
+  o30 -->|"ACTUALIZA"| t4
+  o30 -->|"LEE"| t4
+  a32 --> o31
+  o31 -->|"LEE"| t33
+  o31 -->|"LEE"| t22
+  o31 -->|"LEE"| t3
+  o31 -->|"LEE"| t4
+  o31 -->|"LEE"| t34
+  a26 --> o35
+  o35 -->|"LEE"| t36
+  o35 -->|"LEE"| t3
+  o35 -->|"LEE"| t4
+  a38 --> o37
+  o37 -->|"CREA"| t33
+  o37 -->|"CREA"| t22
+  o37 -->|"LEE"| t22
+  o37 -->|"CREA"| t3
+  o37 -->|"LEE"| t3
+  o37 -->|"CREA"| t4
+  o37 -.-> t39
+  a38 --> o40
+  o40 -->|"ACTUALIZA"| t4
+  o40 -->|"LEE"| t4
+  o40 -->|"LEE"| t41
+  o40 -->|"LEE"| t34
+  a38 --> o42
+  o42 -->|"ACTUALIZA"| t33
+  o42 -->|"CREA"| t33
+  o42 -->|"LEE"| t33
+  o42 -->|"ACTUALIZA"| t22
+  o42 -->|"LEE"| t22
+  o42 -->|"LEE"| t3
+  o42 -.-> t43
+  a38 --> o44
+  o44 -->|"LEE"| t33
+  o44 -->|"LEE"| t22
+  o44 -->|"LEE"| t3
+  o44 -->|"LEE"| t4
+  o44 -->|"LEE"| t41
+  o44 -->|"LEE"| t34
+  a38 --> o45
+  o45 -->|"LEE"| t33
+  o45 -->|"LEE"| t22
+  o45 -->|"LEE"| t3
+  o45 -->|"ACTUALIZA"| t4
+  o45 -->|"LEE"| t4
+  o45 -->|"LEE"| t41
+  o45 -.-> t46
+  a9 --> o47
+  o47 -->|"LEE"| t10
+  o47 -->|"LEE"| t3
+  o47 -->|"LEE"| t4
+  a6 --> o48
+  o48 -->|"LEE"| t10
+  o48 -->|"LEE"| t3
+  o48 -->|"LEE"| t4
+  a9 --> o49
+  o49 -->|"LEE"| t10
+  o49 -->|"LEE"| t3
+  o49 -->|"LEE"| t4
+  a6 --> o50
+  o50 -->|"LEE"| t10
+  o50 -->|"LEE"| t3
+  o50 -->|"LEE"| t4
+  a28 --> o51
+  o51 -->|"LEE"| t18
+  o51 -->|"LEE"| t22
+  o51 -->|"LEE"| t3
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -306,9 +386,9 @@ flowchart LR
 
 ## Máquinas de estado
 
-### Máquina de estados `ASSIGNMENT_TRANSITIONS`
+### Máquina de estados `PRACTICE_ASSIGNMENT_TRANSITIONS`
 
-Declarada en `src/modules/practice/services/practice-workforce.service.ts:43`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+Declarada en `src/modules/practice/services/role-assignment-transitions.ts:10`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
 
 ```mermaid
 stateDiagram-v2
@@ -492,17 +572,75 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /practices/{practiceId}/healthcare-services
+#### 4. GET /practices/{practiceId}/healthcare-services
 
-Publicar un servicio de salud
+Listar los procedimientos que ofrecen las sedes de la práctica
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a HealthcareServiceOffersService.listOffers"]:::llamada
+  n2 --> n3
+  n4["Llama a PracticeAdministrationService.assertCanAdministerPractice"]:::llamada
+  n3 --> n4
+  n5["Llama a PracticesRepository.findById"]:::llamada
+  n4 --> n5
+  n6[("LEE practice.practices")]:::efecto
+  n5 --> n6
+  n7{"!practice"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a TenantAdministrationService.assertCanAdminister"]:::llamada
+  n7 -->|"no"| n9
+  n10(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma"]):::error
+  n9 --> n10
+  n11["Llama a HealthcareServicesRepository.listByPractice"]:::llamada
+  n12[("LEE practice.healthcare_services")]:::efecto
+  n11 --> n12
+  n13["Llama a HealthcareServiceOffersService.toOffers"]:::llamada
+  n12 --> n13
+  n14["Llama a ServiceCatalogRepository.findByIds"]:::llamada
+  n13 --> n14
+  n15[("LEE billing.service_catalog")]:::efecto
+  n14 --> n15
+  n16[("LEE terminology.catalog_concepts")]:::efecto
+  n15 --> n16
+  n17["Llama a ProcedureReferenceReader.referencesFor"]:::llamada
+  n16 --> n17
+  n18[("LEE terminology.concept_properties")]:::efecto
+  n17 --> n18
+  n19(("200 Responde con éxito")):::ok
+  n18 --> n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. POST /practices/{practiceId}/healthcare-services
+
+Publicar un procedimiento del nomenclador en una sede
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica; PreconditionFailedException: La unidad clínica no existe |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica; PreconditionFailedException: La unidad clínica no existe; PreconditionFailedException: El concepto no es un procedimiento del nomenclador |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -512,44 +650,78 @@ flowchart TD
   n1 --> n2
   n3["Llama a ClinicalStructureService.publishHealthcareService"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Intenta"]:::intento
   n3 --> n4
-  n5{"practice.statusConceptId !== PRAC.PRACTICE_ACTIVE"}:::decision
+  n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED La práctica no está activa"]):::error
-  n5 -->|"sí"| n6
-  n7{"dto.practiceSiteId"}:::decision
-  n5 -->|"no"| n7
-  n8["Llama a PracticeSitesRepository.findById"]:::llamada
-  n7 -->|"sí"| n8
-  n9[("LEE practice.practice_sites")]:::efecto
+  n6["Llama a PracticeAdministrationService.assertCanAdministerPractice"]:::llamada
+  n5 --> n6
+  n7["Llama a PracticesRepository.findById"]:::llamada
+  n6 --> n7
+  n8[("LEE practice.practices")]:::efecto
+  n7 --> n8
+  n9{"!practice"}:::decision
   n8 --> n9
-  n10{"!site || site.practiceId !== practiceId"}:::decision
-  n9 --> n10
-  n11(["422 PRECONDITION_FAILED El sitio no pertenece a la práctica"]):::error
-  n10 -->|"sí"| n11
-  n12{"dto.clinicalUnitId"}:::decision
-  n10 -->|"no"| n12
-  n7 -->|"no"| n12
-  n13["Llama a ClinicalUnitsRepository.findById"]:::llamada
-  n12 -->|"sí"| n13
-  n14[("LEE practice.clinical_units")]:::efecto
-  n13 --> n14
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a TenantAdministrationService.assertCanAdminister"]:::llamada
+  n9 -->|"no"| n11
+  n12(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma"]):::error
+  n11 --> n12
+  n13{"practice.statusConceptId !== PRAC.PRACTICE_ACTIVE"}:::decision
+  n14(["422 PRECONDITION_FAILED La práctica no está activa"]):::error
+  n13 -->|"sí"| n14
   n15["Llama a PracticeSitesRepository.findById"]:::llamada
-  n14 --> n15
+  n13 -->|"no"| n15
   n16[("LEE practice.practice_sites")]:::efecto
   n15 --> n16
-  n17{"!unit || !unitSite || unitSite.practiceId !== practiceId"}:::decision
+  n17{"!site || site.practiceId !== practiceId"}:::decision
   n16 --> n17
-  n18(["422 PRECONDITION_FAILED La unidad clínica no existe"]):::error
+  n18(["422 PRECONDITION_FAILED El sitio no pertenece a la práctica"]):::error
   n17 -->|"sí"| n18
-  n19["Llama a HealthcareServicesRepository.create"]:::llamada
+  n19{"dto.clinicalUnitId"}:::decision
   n17 -->|"no"| n19
-  n12 -->|"no"| n19
-  n20[("CREA practice.healthcare_services")]:::efecto
-  n19 --> n20
-  n21(("201 Responde con éxito")):::ok
+  n20["Llama a ClinicalUnitsRepository.findById"]:::llamada
+  n19 -->|"sí"| n20
+  n21[("LEE practice.clinical_units")]:::efecto
   n20 --> n21
+  n22["Llama a PracticeSitesRepository.findById"]:::llamada
+  n21 --> n22
+  n23[("LEE practice.practice_sites")]:::efecto
+  n22 --> n23
+  n24{"!unit || !unitSite || unitSite.practiceId !== practiceId"}:::decision
+  n23 --> n24
+  n25(["422 PRECONDITION_FAILED La unidad clínica no existe"]):::error
+  n24 -->|"sí"| n25
+  n26["Llama a ProcedureReferenceReader.isProcedure"]:::llamada
+  n24 -->|"no"| n26
+  n19 -->|"no"| n26
+  n27[("LEE terminology.value_set_members")]:::efecto
+  n26 --> n27
+  n28{"!(await this.procedures.isProcedure(tx, dto.serviceConceptId))"}:::decision
+  n27 --> n28
+  n29(["422 PRECONDITION_FAILED El concepto no es un procedimiento del nomenclador"]):::error
+  n28 -->|"sí"| n29
+  n30["Llama a HealthcareServicesRepository.findBySiteAndConcept"]:::llamada
+  n28 -->|"no"| n30
+  n31[("LEE practice.healthcare_services")]:::efecto
+  n30 --> n31
+  n32{"existing"}:::decision
+  n31 --> n32
+  n33(["↩ (relanza el error capturado)"]):::error
+  n32 -->|"sí"| n33
+  n34["Llama a HealthcareServicesRepository.create"]:::llamada
+  n32 -->|"no"| n34
+  n35[("CREA practice.healthcare_services")]:::efecto
+  n34 --> n35
+  n36{"error instanceof UniqueConstraintViolationException"}:::decision
+  n4 -->|"si falla"| n36
+  n37(["↩ (relanza el error capturado)"]):::error
+  n36 -->|"sí"| n37
+  n38(["↩ (relanza el error capturado)"]):::error
+  n36 -->|"no"| n38
+  n39(("201 Responde con éxito")):::ok
+  n35 --> n39
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -558,7 +730,83 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. GET /practices/{practiceId}/organization
+#### 6. PATCH /practices/{practiceId}/healthcare-services/{id}
+
+Actualizar el precio o el estado de un procedimiento de la sede
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a HealthcareServiceOffersService.updateOffer"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PracticeAdministrationService.assertCanAdministerPractice"]:::llamada
+  n4 --> n5
+  n6["Llama a PracticesRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE practice.practices")]:::efecto
+  n6 --> n7
+  n8{"!practice"}:::decision
+  n7 --> n8
+  n9(["↩ (relanza el error capturado)"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a TenantAdministrationService.assertCanAdminister"]:::llamada
+  n8 -->|"no"| n10
+  n11(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma"]):::error
+  n10 --> n11
+  n12["Llama a HealthcareServicesRepository.findById"]:::llamada
+  n13[("LEE practice.healthcare_services")]:::efecto
+  n12 --> n13
+  n14{"!service || service.practiceId !== practiceId"}:::decision
+  n13 --> n14
+  n15(["↩ (relanza el error capturado)"]):::error
+  n14 -->|"sí"| n15
+  n16{"dto.serviceCatalogId !== undefined"}:::decision
+  n14 -->|"no"| n16
+  n17[("ACTUALIZA practice.healthcare_services")]:::efecto
+  n16 -->|"sí"| n17
+  n18{"dto.active !== undefined"}:::decision
+  n17 --> n18
+  n16 -->|"no"| n18
+  n19[("ACTUALIZA practice.healthcare_services")]:::efecto
+  n18 -->|"sí"| n19
+  n20[("ACTUALIZA practice.healthcare_services · ACTUALIZA practice.healthcare_services")]:::efecto
+  n19 --> n20
+  n18 -->|"no"| n20
+  n21["Llama a HealthcareServiceOffersService.toOffers"]:::llamada
+  n20 --> n21
+  n22["Llama a ServiceCatalogRepository.findByIds"]:::llamada
+  n21 --> n22
+  n23[("LEE billing.service_catalog")]:::efecto
+  n22 --> n23
+  n24[("LEE terminology.catalog_concepts")]:::efecto
+  n23 --> n24
+  n25["Llama a ProcedureReferenceReader.referencesFor"]:::llamada
+  n24 --> n25
+  n26[("LEE terminology.concept_properties")]:::efecto
+  n25 --> n26
+  n27(("200 Responde con éxito")):::ok
+  n26 --> n27
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. GET /practices/{practiceId}/organization
 
 Consola de organización médica: estructura, plantilla y legajo
 
@@ -628,7 +876,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. GET /practices/{practiceId}/role-assignments
+#### 8. GET /practices/{practiceId}/role-assignments
 
 Listar las vinculaciones profesional-organización de la práctica
 
@@ -637,8 +885,7 @@ Listar las vinculaciones profesional-organización de la práctica
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -648,20 +895,25 @@ flowchart TD
   n1 --> n2
   n3["Llama a PracticeWorkforceService.listPracticeAssignments"]:::llamada
   n2 --> n3
-  n4["Llama a PracticesRepository.findById"]:::llamada
+  n4["Llama a PracticeAdministrationService.assertCanAdministerPractice"]:::llamada
   n3 --> n4
-  n5[("LEE practice.practices")]:::efecto
+  n5["Llama a PracticesRepository.findById"]:::llamada
   n4 --> n5
-  n6{"!practice || practice.tenantId !== tenantId"}:::decision
+  n6[("LEE practice.practices")]:::efecto
   n5 --> n6
-  n7(["404 NOT_FOUND Práctica no encontrada"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a PractitionerRoleAssignmentsRepository.findByPracticePage"]:::llamada
-  n6 -->|"no"| n8
-  n9[("LEE practice.practitioner_role_assignments")]:::efecto
-  n8 --> n9
-  n10(("200 Responde con éxito")):::ok
+  n7{"!practice"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a TenantAdministrationService.assertCanAdminister"]:::llamada
+  n7 -->|"no"| n9
+  n10(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma"]):::error
   n9 --> n10
+  n11["Llama a PractitionerRoleAssignmentsRepository.findByPracticePage"]:::llamada
+  n12[("LEE practice.practitioner_role_assignments")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -670,7 +922,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /practices/{practiceId}/role-assignments
+#### 9. POST /practices/{practiceId}/role-assignments
 
 Asignar un rol de profesional a sitio/unidad/servicio
 
@@ -747,7 +999,96 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /practices/{practiceId}/role-assignments/self-request
+#### 10. POST /practices/{practiceId}/role-assignments/invitations
+
+Invitar a un profesional a procedimientos de una sede
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 409 | `CONFLICT` | ConflictException: El profesional ya tiene una vinculación en curso con ese procedimiento |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica; PreconditionFailedException: El profesional no existe; PreconditionFailedException: El procedimiento no está publicado y activo en esa sede |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PracticeAffiliationInvitationsService.invite"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PracticeAdministrationService.assertCanAdministerPractice"]:::llamada
+  n4 --> n5
+  n6["Llama a PracticesRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE practice.practices")]:::efecto
+  n6 --> n7
+  n8{"!practice"}:::decision
+  n7 --> n8
+  n9(["↩ (relanza el error capturado)"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a TenantAdministrationService.assertCanAdminister"]:::llamada
+  n8 -->|"no"| n10
+  n11(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma"]):::error
+  n10 --> n11
+  n12{"practice.statusConceptId !== PRAC.PRACTICE_ACTIVE"}:::decision
+  n13(["422 PRECONDITION_FAILED La práctica no está activa"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PracticeSitesRepository.findById"]:::llamada
+  n12 -->|"no"| n14
+  n15[("LEE practice.practice_sites")]:::efecto
+  n14 --> n15
+  n16{"!site || site.practiceId !== practiceId"}:::decision
+  n15 --> n16
+  n17(["422 PRECONDITION_FAILED El sitio no pertenece a la práctica"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n16 -->|"no"| n18
+  n19[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n18 --> n19
+  n20{"!practitioner"}:::decision
+  n19 --> n20
+  n21(["422 PRECONDITION_FAILED El profesional no existe"]):::error
+  n20 -->|"sí"| n21
+  n22["Repite: por cada const serviceId de dto.healthcareServiceIds"]:::bucle
+  n20 -->|"no"| n22
+  n23["Llama a HealthcareServicesRepository.findById"]:::llamada
+  n22 -->|"cada elemento"| n23
+  n24[("LEE practice.healthcare_services")]:::efecto
+  n23 --> n24
+  n25{"!service || service.practiceId !== practiceId || service.practiceSiteId !== dto.practiceSiteId || service.sta…"}:::decision
+  n24 --> n25
+  n26(["422 PRECONDITION_FAILED El procedimiento no está publicado y activo en esa sede"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a PractitionerRoleAssignmentsRepository.findOpenForServices"]:::llamada
+  n25 -->|"no"| n27
+  n22 -->|"al terminar"| n27
+  n28[("LEE practice.practitioner_role_assignments")]:::efecto
+  n27 --> n28
+  n29{"open.length › 0"}:::decision
+  n28 --> n29
+  n30(["409 CONFLICT El profesional ya tiene una vinculación en curso con ese procedimiento"]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a PractitionerRoleAssignmentsRepository.create"]:::llamada
+  n29 -->|"no"| n31
+  n32[("CREA practice.practitioner_role_assignments")]:::efecto
+  n31 --> n32
+  n33(("201 Responde con éxito")):::ok
+  n32 --> n33
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 11. POST /practices/{practiceId}/role-assignments/self-request
 
 Solicitar la propia vinculación a una organización
 
@@ -758,7 +1099,8 @@ Solicitar la propia vinculación a una organización
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica |
+| 409 | `CONFLICT` | ConflictException: Ya tenés una vinculación en curso con ese procedimiento |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica; PreconditionFailedException: El procedimiento no está publicado y activo en esa sede |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -796,13 +1138,34 @@ flowchart TD
   n15 --> n16
   n17(["422 PRECONDITION_FAILED El sitio no pertenece a la práctica"]):::error
   n16 -->|"sí"| n17
-  n18["Llama a PractitionerRoleAssignmentsRepository.create"]:::llamada
+  n18{"dto.healthcareServiceId"}:::decision
   n16 -->|"no"| n18
   n13 -->|"no"| n18
-  n19[("CREA practice.practitioner_role_assignments")]:::efecto
-  n18 --> n19
-  n20(("201 Responde con éxito")):::ok
+  n19["Llama a PracticeWorkforceService.assertServiceOfferedBySite"]:::llamada
+  n18 -->|"sí"| n19
+  n20["Llama a HealthcareServicesRepository.findById"]:::llamada
   n19 --> n20
+  n21[("LEE practice.healthcare_services")]:::efecto
+  n20 --> n21
+  n22{"!practiceSiteId || !service || service.practiceId !== practiceId || service.practiceSiteId !== practiceSiteId…"}:::decision
+  n21 --> n22
+  n23(["422 PRECONDITION_FAILED El procedimiento no está publicado y activo en esa sede"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a PractitionerRoleAssignmentsRepository.findOpenForServices"]:::llamada
+  n22 -->|"no"| n24
+  n25[("LEE practice.practitioner_role_assignments")]:::efecto
+  n24 --> n25
+  n26{"open.length › 0"}:::decision
+  n25 --> n26
+  n27(["409 CONFLICT Ya tenés una vinculación en curso con ese procedimiento"]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a PractitionerRoleAssignmentsRepository.create"]:::llamada
+  n26 -->|"no"| n28
+  n18 -->|"no"| n28
+  n29[("CREA practice.practitioner_role_assignments")]:::efecto
+  n28 --> n29
+  n30(("201 Responde con éxito")):::ok
+  n29 --> n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -811,7 +1174,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. PUT /practices/{practiceId}/settings/{settingKey}
+#### 12. PUT /practices/{practiceId}/settings/{settingKey}
 
 Configurar un ajuste de práctica (upsert)
 
@@ -855,7 +1218,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. GET /practices/{practiceId}/sites
+#### 13. GET /practices/{practiceId}/sites
 
 Listar las sedes de una práctica
 
@@ -897,7 +1260,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /practices/{practiceId}/sites
+#### 14. POST /practices/{practiceId}/sites
 
 Dar de alta un sitio de práctica
 
@@ -946,7 +1309,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. DELETE /practices/{practiceId}/sites/{siteId}
+#### 15. DELETE /practices/{practiceId}/sites/{siteId}
 
 Desmantelar un sitio en cascada (soft-delete)
 
@@ -1029,7 +1392,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. GET /practitioners/{profileId}/sites
+#### 16. GET /practitioners/{profileId}/sites
 
 Consultorios donde atiende el profesional
 
@@ -1083,7 +1446,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. GET /practitioners/me/role-assignments
+#### 17. GET /practitioners/me/role-assignments
 
 Mis vinculaciones con organizaciones
 
@@ -1126,7 +1489,123 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /practitioners/me/sites
+#### 18. POST /practitioners/me/role-assignments/{roleId}/accept
+
+Aceptar una invitación de un centro
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: La vinculación no admite esa acción desde su estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PracticeAffiliationInvitationsService.accept"]:::llamada
+  n2 --> n3
+  n4["Llama a PracticeAffiliationInvitationsService.resolve"]:::llamada
+  n3 --> n4
+  n5{"!practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a PractitionerRoleAssignmentsRepository.findByIdForPractitioner"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practitioner_role_assignments")]:::efecto
+  n8 --> n9
+  n10{"!role"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Vinculación no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12{"!allowed.includes(toStatus)"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED La vinculación no admite esa acción desde su estado actual"]):::error
+  n12 -->|"sí"| n13
+  n14[("ACTUALIZA practice.practitioner_role_assignments · ACTUALIZA practice.practitioner_role_assignments · ACTUALI…")]:::efecto
+  n12 -->|"no"| n14
+  n15{"toStatus === PRAC.ROLE_ASSIGNMENT_REJECTED"}:::decision
+  n14 --> n15
+  n16[("ACTUALIZA practice.practitioner_role_assignments")]:::efecto
+  n15 -->|"sí"| n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
+  n15 -->|"no"| n17
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 19. POST /practitioners/me/role-assignments/{roleId}/decline
+
+Declinar una invitación de un centro
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: La vinculación no admite esa acción desde su estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PracticeAffiliationInvitationsService.decline"]:::llamada
+  n2 --> n3
+  n4["Llama a PracticeAffiliationInvitationsService.resolve"]:::llamada
+  n3 --> n4
+  n5{"!practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a PractitionerRoleAssignmentsRepository.findByIdForPractitioner"]:::llamada
+  n7 --> n8
+  n9[("LEE practice.practitioner_role_assignments")]:::efecto
+  n8 --> n9
+  n10{"!role"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Vinculación no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12{"!allowed.includes(toStatus)"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED La vinculación no admite esa acción desde su estado actual"]):::error
+  n12 -->|"sí"| n13
+  n14[("ACTUALIZA practice.practitioner_role_assignments · ACTUALIZA practice.practitioner_role_assignments · ACTUALI…")]:::efecto
+  n12 -->|"no"| n14
+  n15{"toStatus === PRAC.ROLE_ASSIGNMENT_REJECTED"}:::decision
+  n14 --> n15
+  n16[("ACTUALIZA practice.practitioner_role_assignments")]:::efecto
+  n15 -->|"sí"| n16
+  n17(("200 Responde con éxito")):::ok
+  n16 --> n17
+  n15 -->|"no"| n17
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 20. POST /practitioners/me/sites
 
 Registrar un consultorio propio
 
@@ -1207,7 +1686,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. DELETE /practitioners/me/sites/{siteId}
+#### 21. DELETE /practitioners/me/sites/{siteId}
 
 Retirar un consultorio propio
 
@@ -1265,7 +1744,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. PATCH /practitioners/me/sites/{siteId}
+#### 22. PATCH /practitioners/me/sites/{siteId}
 
 Corregir un consultorio propio
 
@@ -1374,7 +1853,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. PUT /practitioners/me/sites/{siteId}/bank-qr
+#### 23. PUT /practitioners/me/sites/{siteId}/bank-qr
 
 Fijar o quitar el QR bancario de una sede
 
@@ -1444,7 +1923,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. PUT /practitioners/me/sites/{siteId}/contact-phone
+#### 24. PUT /practitioners/me/sites/{siteId}/contact-phone
 
 Guardar o quitar mi teléfono en una sede
 
@@ -1520,7 +1999,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /role-assignments/{roleId}/approve
+#### 25. POST /role-assignments/{roleId}/approve
 
 Aprobar una vinculación pendiente
 
@@ -1544,26 +2023,42 @@ flowchart TD
   n3 --> n4
   n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
+  n6["Llama a PracticeWorkforceService.loadRoleForAdministrator"]:::llamada
   n5 --> n6
   n7["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
   n6 --> n7
   n8[("LEE practice.practitioner_role_assignments")]:::efecto
   n7 --> n8
-  n9["Llama a PracticesRepository.findById"]:::llamada
+  n9{"!role"}:::decision
   n8 --> n9
-  n10[("LEE practice.practices")]:::efecto
-  n9 --> n10
-  n11{"!role || !practice"}:::decision
-  n10 --> n11
-  n12(["↩ (relanza el error capturado)"]):::error
-  n11 -->|"sí"| n12
-  n13{"!allowed.includes(toStatus)"}:::decision
-  n11 -->|"no"| n13
-  n14(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
-  n13 -->|"sí"| n14
-  n15(("200 Responde con éxito")):::ok
-  n13 -->|"no"| n15
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PracticeAdministrationService.assertCanAdministerPractice"]:::llamada
+  n9 -->|"no"| n11
+  n12{"!practice"}:::decision
+  n11 --> n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE practice.practitioner_role_assignments")]:::efecto
+  n15 --> n16
+  n17["Llama a PracticesRepository.findById"]:::llamada
+  n16 --> n17
+  n18[("LEE practice.practices")]:::efecto
+  n17 --> n18
+  n19{"!role || !practice"}:::decision
+  n18 --> n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"sí"| n20
+  n21{"!allowed.includes(toStatus)"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
+  n21 -->|"sí"| n22
+  n23(("200 Responde con éxito")):::ok
+  n21 -->|"no"| n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1572,7 +2067,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /role-assignments/{roleId}/end
+#### 26. POST /role-assignments/{roleId}/end
 
 Finalizar una vinculación
 
@@ -1596,26 +2091,42 @@ flowchart TD
   n3 --> n4
   n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
+  n6["Llama a PracticeWorkforceService.loadRoleForAdministrator"]:::llamada
   n5 --> n6
   n7["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
   n6 --> n7
   n8[("LEE practice.practitioner_role_assignments")]:::efecto
   n7 --> n8
-  n9["Llama a PracticesRepository.findById"]:::llamada
+  n9{"!role"}:::decision
   n8 --> n9
-  n10[("LEE practice.practices")]:::efecto
-  n9 --> n10
-  n11{"!role || !practice"}:::decision
-  n10 --> n11
-  n12(["↩ (relanza el error capturado)"]):::error
-  n11 -->|"sí"| n12
-  n13{"!allowed.includes(toStatus)"}:::decision
-  n11 -->|"no"| n13
-  n14(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
-  n13 -->|"sí"| n14
-  n15(("200 Responde con éxito")):::ok
-  n13 -->|"no"| n15
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PracticeAdministrationService.assertCanAdministerPractice"]:::llamada
+  n9 -->|"no"| n11
+  n12{"!practice"}:::decision
+  n11 --> n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE practice.practitioner_role_assignments")]:::efecto
+  n15 --> n16
+  n17["Llama a PracticesRepository.findById"]:::llamada
+  n16 --> n17
+  n18[("LEE practice.practices")]:::efecto
+  n17 --> n18
+  n19{"!role || !practice"}:::decision
+  n18 --> n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"sí"| n20
+  n21{"!allowed.includes(toStatus)"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
+  n21 -->|"sí"| n22
+  n23(("200 Responde con éxito")):::ok
+  n21 -->|"no"| n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1624,7 +2135,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /role-assignments/{roleId}/reject
+#### 27. POST /role-assignments/{roleId}/reject
 
 Rechazar una vinculación pendiente
 
@@ -1648,26 +2159,42 @@ flowchart TD
   n3 --> n4
   n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
+  n6["Llama a PracticeWorkforceService.loadRoleForAdministrator"]:::llamada
   n5 --> n6
   n7["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
   n6 --> n7
   n8[("LEE practice.practitioner_role_assignments")]:::efecto
   n7 --> n8
-  n9["Llama a PracticesRepository.findById"]:::llamada
+  n9{"!role"}:::decision
   n8 --> n9
-  n10[("LEE practice.practices")]:::efecto
-  n9 --> n10
-  n11{"!role || !practice"}:::decision
-  n10 --> n11
-  n12(["↩ (relanza el error capturado)"]):::error
-  n11 -->|"sí"| n12
-  n13{"!allowed.includes(toStatus)"}:::decision
-  n11 -->|"no"| n13
-  n14(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
-  n13 -->|"sí"| n14
-  n15(("200 Responde con éxito")):::ok
-  n13 -->|"no"| n15
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PracticeAdministrationService.assertCanAdministerPractice"]:::llamada
+  n9 -->|"no"| n11
+  n12{"!practice"}:::decision
+  n11 --> n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE practice.practitioner_role_assignments")]:::efecto
+  n15 --> n16
+  n17["Llama a PracticesRepository.findById"]:::llamada
+  n16 --> n17
+  n18[("LEE practice.practices")]:::efecto
+  n17 --> n18
+  n19{"!role || !practice"}:::decision
+  n18 --> n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"sí"| n20
+  n21{"!allowed.includes(toStatus)"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
+  n21 -->|"sí"| n22
+  n23(("200 Responde con éxito")):::ok
+  n21 -->|"no"| n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1676,7 +2203,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /role-assignments/{roleId}/support-assignments
+#### 28. POST /role-assignments/{roleId}/support-assignments
 
 Adjuntar personal de apoyo a un rol de profesional
 
@@ -1730,7 +2257,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /role-assignments/{roleId}/suspend
+#### 29. POST /role-assignments/{roleId}/suspend
 
 Suspender una vinculación activa
 
@@ -1754,26 +2281,42 @@ flowchart TD
   n3 --> n4
   n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
+  n6["Llama a PracticeWorkforceService.loadRoleForAdministrator"]:::llamada
   n5 --> n6
   n7["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
   n6 --> n7
   n8[("LEE practice.practitioner_role_assignments")]:::efecto
   n7 --> n8
-  n9["Llama a PracticesRepository.findById"]:::llamada
+  n9{"!role"}:::decision
   n8 --> n9
-  n10[("LEE practice.practices")]:::efecto
-  n9 --> n10
-  n11{"!role || !practice"}:::decision
-  n10 --> n11
-  n12(["↩ (relanza el error capturado)"]):::error
-  n11 -->|"sí"| n12
-  n13{"!allowed.includes(toStatus)"}:::decision
-  n11 -->|"no"| n13
-  n14(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
-  n13 -->|"sí"| n14
-  n15(("200 Responde con éxito")):::ok
-  n13 -->|"no"| n15
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PracticeAdministrationService.assertCanAdministerPractice"]:::llamada
+  n9 -->|"no"| n11
+  n12{"!practice"}:::decision
+  n11 --> n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PracticeWorkforceService.loadRoleInScope"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a PractitionerRoleAssignmentsRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE practice.practitioner_role_assignments")]:::efecto
+  n15 --> n16
+  n17["Llama a PracticesRepository.findById"]:::llamada
+  n16 --> n17
+  n18[("LEE practice.practices")]:::efecto
+  n17 --> n18
+  n19{"!role || !practice"}:::decision
+  n18 --> n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n19 -->|"sí"| n20
+  n21{"!allowed.includes(toStatus)"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED La vinculación no admite esa transición desde su estado actual"]):::error
+  n21 -->|"sí"| n22
+  n23(("200 Responde con éxito")):::ok
+  n21 -->|"no"| n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1782,7 +2325,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. GET /sites/{siteId}/care-spaces
+#### 30. GET /sites/{siteId}/care-spaces
 
 Listar los espacios de atención de la sede
 
@@ -1832,7 +2375,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /sites/{siteId}/care-spaces
+#### 31. POST /sites/{siteId}/care-spaces
 
 Crear un espacio de atención bajo una unidad/sitio
 
@@ -1903,7 +2446,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /sites/{siteId}/clinical-units
+#### 32. POST /sites/{siteId}/clinical-units
 
 Crear una unidad clínica jerárquica
 
@@ -1955,6 +2498,79 @@ flowchart TD
   n16 --> n17
   n18(("201 Responde con éxito")):::ok
   n17 --> n18
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 33. POST /tenants/{tenantId}/practices
+
+Crear la práctica y la primera sede de una organización
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 409 | `CONFLICT` | ConflictException: La organización ya tiene una práctica con ese nombre |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La organización todavía no fue verificada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a OrganizationPracticeProvisioningService.provision"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a TenantAdministrationService.assertCanAdminister"]:::llamada
+  n4 --> n5
+  n6(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma"]):::error
+  n5 --> n6
+  n7["Llama a TenantsRepository.findById"]:::llamada
+  n8[("LEE directory.tenants")]:::efecto
+  n7 --> n8
+  n9{"!tenant"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Organización no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11{"tenant.verificationStatusConceptId !== CONCEPTS.TENANT_VERIFIED"}:::decision
+  n9 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED La organización todavía no fue verificada"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PracticesRepository.findByTenantAndCode"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE practice.practices")]:::efecto
+  n13 --> n14
+  n15{"clash"}:::decision
+  n14 --> n15
+  n16(["409 CONFLICT La organización ya tiene una práctica con ese nombre"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PracticesRepository.create"]:::llamada
+  n15 -->|"no"| n17
+  n18[("CREA practice.practices")]:::efecto
+  n17 --> n18
+  n19["Llama a AddressesRepository.create"]:::llamada
+  n18 --> n19
+  n20[("CREA common.addresses")]:::efecto
+  n19 --> n20
+  n21["Llama a PracticeSitesRepository.findByPracticeAndCode"]:::llamada
+  n20 --> n21
+  n22[("LEE practice.practice_sites")]:::efecto
+  n21 --> n22
+  n23["Llama a PracticeSitesRepository.create"]:::llamada
+  n22 --> n23
+  n24[("CREA practice.practice_sites")]:::efecto
+  n23 --> n24
+  n25(("201 Responde con éxito")):::ok
+  n24 --> n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

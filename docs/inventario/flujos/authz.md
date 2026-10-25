@@ -1770,7 +1770,7 @@ Componer un rol (con herencia opcional)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: El rol padre no existe |
-| 409 | `CONFLICT` | ConflictException: Ya existe un rol con ese código |
+| 409 | `CONFLICT` | ConflictException: El código de rol está reservado por la plataforma; ConflictException: Ya existe un rol con ese código |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1780,33 +1780,37 @@ flowchart TD
   n1 --> n2
   n3["Llama a AuthzRolesService.createRole"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4{"RESERVED_ROLE_CODES.has(dto.code.trim().toUpperCase())"}:::decision
   n3 --> n4
-  n5["Llama a RolesRepository.findByCode"]:::llamada
-  n4 --> n5
-  n6[("LEE authz.roles")]:::efecto
-  n5 --> n6
-  n7{"clash"}:::decision
+  n5(["409 CONFLICT El código de rol está reservado por la plataforma"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a RolesRepository.findByCode"]:::llamada
   n6 --> n7
-  n8(["409 CONFLICT Ya existe un rol con ese código"]):::error
-  n7 -->|"sí"| n8
-  n9{"dto.parentRoleId"}:::decision
-  n7 -->|"no"| n9
-  n10["Llama a RolesRepository.findById"]:::llamada
+  n8[("LEE authz.roles")]:::efecto
+  n7 --> n8
+  n9{"clash"}:::decision
+  n8 --> n9
+  n10(["409 CONFLICT Ya existe un rol con ese código"]):::error
   n9 -->|"sí"| n10
-  n11[("LEE authz.roles")]:::efecto
-  n10 --> n11
-  n12{"!parent"}:::decision
-  n11 --> n12
-  n13(["404 NOT_FOUND El rol padre no existe"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a RolesRepository.create"]:::llamada
-  n12 -->|"no"| n14
-  n9 -->|"no"| n14
-  n15[("CREA authz.roles")]:::efecto
-  n14 --> n15
-  n16(("201 Responde con éxito")):::ok
-  n15 --> n16
+  n11{"dto.parentRoleId"}:::decision
+  n9 -->|"no"| n11
+  n12["Llama a RolesRepository.findById"]:::llamada
+  n11 -->|"sí"| n12
+  n13[("LEE authz.roles")]:::efecto
+  n12 --> n13
+  n14{"!parent"}:::decision
+  n13 --> n14
+  n15(["404 NOT_FOUND El rol padre no existe"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a RolesRepository.create"]:::llamada
+  n14 -->|"no"| n16
+  n11 -->|"no"| n16
+  n17[("CREA authz.roles")]:::efecto
+  n16 --> n17
+  n18(("201 Responde con éxito")):::ok
+  n17 --> n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

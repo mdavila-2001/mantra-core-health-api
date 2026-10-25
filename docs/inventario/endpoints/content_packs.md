@@ -42,8 +42,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/content_packs/content-packs.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -110,10 +110,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SUPERADMIN | `src/modules/content_packs/content-packs.controller.ts:69` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -127,7 +127,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `chart.specialty_chart_templates` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ClinicalFormsSeedService.run → ClinicalFormsSeedService.seedForm | `src/common/seed/clinical-forms-seed.service.ts:570` |
 | `clinical_ext.drug_interactions` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → VademecumSeedService.run → VademecumSeedService.seedInteractions | `src/common/seed/vademecum-seed.service.ts:549` |
 | `clinical_ext.drug_interactions` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → VademecumSeedService.run → VademecumSeedService.seedInteractions | `src/common/seed/vademecum-seed.service.ts:548` |
-| `common.contact_points` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
+| `common.contact_points` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → IamUsersService.createUser → CommonRecordsAdapter.createContactPoint → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
 | `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → ProviderAccountsSeedService.ensureMembership | `src/common/seed/provider-accounts-seed.service.ts:204` |
 | `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → ProviderAccountsSeedService.ensureMembership | `src/common/seed/provider-accounts-seed.service.ts:210` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | ContentPacksController.aplicar → ContentPacksService.apply → ContentPacksService.run → ContentPacksService.runAccountsDemo → ProviderAccountsSeedService.run → ProviderAccountsSeedService.ensureAccount → ProviderAccountsSeedService.ensureMembership | `src/common/seed/provider-accounts-seed.service.ts:198` |

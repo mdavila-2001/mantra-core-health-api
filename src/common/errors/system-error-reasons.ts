@@ -56,6 +56,26 @@ export enum SystemErrorReason {
    * dato corrupto o clave distinta). No expone el secreto ni la causa.
    */
   SECRET_CIPHER_INVALID = 'SECRET_CIPHER_INVALID',
+  /** 401: el handshake del socket no trae `auth.token`. */
+  ACCESS_TOKEN_MISSING = 'ACCESS_TOKEN_MISSING',
+  /** 401: el token del handshake del socket no verifica (firma, algoritmo o vencimiento). */
+  ACCESS_TOKEN_INVALID = 'ACCESS_TOKEN_INVALID',
+  /**
+   * 500: `@CurrentUser()` en un handler sin autenticación aplicada. Es un error
+   * de programación, no una condición del request; el cuerpo público no lo expone.
+   */
+  AUTHENTICATION_NOT_APPLIED = 'AUTHENTICATION_NOT_APPLIED',
   /** 503: `/readiness` — alguna dependencia obligatoria no responde. */
   SYSTEM_READINESS_DEPENDENCY_UNAVAILABLE = 'SYSTEM_READINESS_DEPENDENCY_UNAVAILABLE',
+  /**
+   * 503: `/readiness` — el bootstrap del DDL dejó restricciones de integridad
+   * (FKs, únicos) sin aplicar (ORMN-01).
+   */
+  SYSTEM_SCHEMA_INTEGRITY_INCOMPLETE = 'SYSTEM_SCHEMA_INTEGRITY_INCOMPLETE',
+  /**
+   * 503: `/readiness` — un seed núcleo falló en este proceso o, con
+   * `SEED_ON_BOOT=false`, el catálogo de conceptos no está materializado
+   * (SEED-01).
+   */
+  SYSTEM_SEED_CORE_INCOMPLETE = 'SYSTEM_SEED_CORE_INCOMPLETE',
 }

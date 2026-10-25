@@ -186,6 +186,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | La práctica consultada pertenece a otra organización | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se pudo verificar la vinculación del profesional con la práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2708,6 +2711,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | La práctica consultada pertenece a otra organización | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se pudo verificar la vinculación del profesional con la práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3069,6 +3075,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | La práctica consultada pertenece a otra organización | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 404 | `NOT_FOUND` | Asiento no encontrado | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se pudo verificar la vinculación del profesional con la práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -8377,6 +8386,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | La práctica consultada pertenece a otra organización | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se pudo verificar la vinculación del profesional con la práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/ledger-read.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

@@ -7,19 +7,22 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Concepto | Cantidad |
 |---|---|
 | Tablas en el DDL del modelo | 1230 |
-| Entidades del ORM | 1271 |
+| Entidades del ORM | 1274 |
 | Tablas del DDL con entidad | 1230 |
 | Tablas del DDL **sin** entidad | 0 |
-| Entidades del ORM **sin** tabla en el DDL | 41 |
+| Entidades del ORM **sin** tabla en el DDL | 44 |
 | Columnas del DDL ausentes en su entidad | 1 |
 | Columnas con nulabilidad divergente | 24 |
 | Columnas con tipo divergente | 0 |
-| Columnas de la entidad que el DDL no tiene | 17 |
+| Columnas de la entidad que el DDL no tiene | 21 |
 
 ## Entidades del ORM sin tabla en el DDL
 
 | Tabla que declara | Clase | Dónde la declara el modelo |
 |---|---|---|
+| `accounting.practitioner_simple_accounts` | PractitionerSimpleAccounts | **en ninguna fuente de DDL del modelo** |
+| `accounting.practitioner_simple_records` | PractitionerSimpleRecords | **en ninguna fuente de DDL del modelo** |
+| `accounting.practitioner_simple_transactions` | PractitionerSimpleTransactions | **en ninguna fuente de DDL del modelo** |
 | `billing.siat_simulated_invoices` | SiatSimulatedInvoices | **en ninguna fuente de DDL del modelo** |
 | `billing.siat_simulated_outbox` | SiatSimulatedOutbox | **en ninguna fuente de DDL del modelo** |
 | `clinical.patient_reported_health_statements` | PatientReportedHealthStatements | **en ninguna fuente de DDL del modelo** |

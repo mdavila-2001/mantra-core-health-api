@@ -445,7 +445,7 @@ UC-03-09: cura o consulta un mapeo entre conceptos
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Curar un mapeo exige un rol de terminología |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Concepto origen no encontrado; ResourceNotFoundException: Concepto destino no encontrado; ResourceNotFoundException: El mapeo dejó de existir durante el curado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Curar un mapeo exige declarar la equivalencia; PreconditionFailedException: Un concepto no puede mapearse a sí mismo; PreconditionFailedException: Los conceptos del mapeo tienen que estar activos |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -459,76 +459,80 @@ flowchart TD
   n2 --> n3
   n4["Llama a ConceptMapsService.curate"]:::llamada
   n3 --> n4
-  n5{"!dto.equivalence"}:::decision
+  n5{"!actor.roles.some((role) =› CURATOR_ROLES.includes(role))"}:::decision
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED Curar un mapeo exige declarar la equivalencia"]):::error
+  n6(["403 FORBIDDEN Curar un mapeo exige un rol de terminología"]):::error
   n5 -->|"sí"| n6
-  n7{"targetConceptId === dto.sourceConceptId"}:::decision
+  n7{"!dto.equivalence"}:::decision
   n5 -->|"no"| n7
-  n8(["422 PRECONDITION_FAILED Un concepto no puede mapearse a sí mismo"]):::error
+  n8(["422 PRECONDITION_FAILED Curar un mapeo exige declarar la equivalencia"]):::error
   n7 -->|"sí"| n8
-  n9["Transacción: transactional(…)"]:::transaccion
+  n9{"targetConceptId === dto.sourceConceptId"}:::decision
   n7 -->|"no"| n9
-  n10["Llama a CatalogConceptsRepository.findById"]:::llamada
-  n9 --> n10
-  n11[("LEE terminology.catalog_concepts")]:::efecto
-  n10 --> n11
-  n12{"!source"}:::decision
+  n10(["422 PRECONDITION_FAILED Un concepto no puede mapearse a sí mismo"]):::error
+  n9 -->|"sí"| n10
+  n11["Transacción: transactional(…)"]:::transaccion
+  n9 -->|"no"| n11
+  n12["Llama a CatalogConceptsRepository.findById"]:::llamada
   n11 --> n12
-  n13(["404 NOT_FOUND Concepto origen no encontrado"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a CatalogConceptsRepository.findById"]:::llamada
-  n12 -->|"no"| n14
-  n15[("LEE terminology.catalog_concepts")]:::efecto
-  n14 --> n15
-  n16{"!target"}:::decision
-  n15 --> n16
-  n17(["404 NOT_FOUND Concepto destino no encontrado"]):::error
-  n16 -->|"sí"| n17
-  n18["Repite: por cada const [concept, field] de [ [source, 'sourceConceptId'], [target, 'targetCo…"]:::bucle
-  n16 -->|"no"| n18
-  n19{"concept.stateConceptId !== CONCEPTS.TERM_ACTIVE"}:::decision
-  n18 -->|"cada elemento"| n19
-  n20(["422 PRECONDITION_FAILED Los conceptos del mapeo tienen que estar activos"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a ConceptMapsRepository.findEquivalent"]:::llamada
-  n19 -->|"no"| n21
-  n18 -->|"al terminar"| n21
-  n22[("LEE terminology.concept_maps")]:::efecto
-  n21 --> n22
-  n23{"duplicate"}:::decision
-  n22 --> n23
-  n24["Llama a ConceptMapsRepository.findByIdForUpdate"]:::llamada
-  n23 -->|"sí"| n24
-  n25[("LEE terminology.concept_maps")]:::efecto
+  n13[("LEE terminology.catalog_concepts")]:::efecto
+  n12 --> n13
+  n14{"!source"}:::decision
+  n13 --> n14
+  n15(["404 NOT_FOUND Concepto origen no encontrado"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a CatalogConceptsRepository.findById"]:::llamada
+  n14 -->|"no"| n16
+  n17[("LEE terminology.catalog_concepts")]:::efecto
+  n16 --> n17
+  n18{"!target"}:::decision
+  n17 --> n18
+  n19(["404 NOT_FOUND Concepto destino no encontrado"]):::error
+  n18 -->|"sí"| n19
+  n20["Repite: por cada const [concept, field] de [ [source, 'sourceConceptId'], [target, 'targetCo…"]:::bucle
+  n18 -->|"no"| n20
+  n21{"concept.stateConceptId !== CONCEPTS.TERM_ACTIVE"}:::decision
+  n20 -->|"cada elemento"| n21
+  n22(["422 PRECONDITION_FAILED Los conceptos del mapeo tienen que estar activos"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a ConceptMapsRepository.findEquivalent"]:::llamada
+  n21 -->|"no"| n23
+  n20 -->|"al terminar"| n23
+  n24[("LEE terminology.concept_maps")]:::efecto
+  n23 --> n24
+  n25{"duplicate"}:::decision
   n24 --> n25
-  n26{"!locked"}:::decision
-  n25 --> n26
-  n27(["404 NOT_FOUND El mapeo dejó de existir durante el curado"]):::error
-  n26 -->|"sí"| n27
-  n28[("ACTUALIZA terminology.concept_maps · ACTUALIZA terminology.concept_maps")]:::efecto
-  n26 -->|"no"| n28
-  n29["Llama a ConceptMapsRepository.create"]:::llamada
-  n23 -->|"no"| n29
-  n30[("CREA terminology.concept_maps")]:::efecto
-  n29 --> n30
-  n31["Llama a ConceptMapsService.lookup"]:::llamada
-  n28 --> n31
-  n30 --> n31
-  n32["Llama a CatalogConceptsRepository.findById"]:::llamada
+  n26["Llama a ConceptMapsRepository.findByIdForUpdate"]:::llamada
+  n25 -->|"sí"| n26
+  n27[("LEE terminology.concept_maps")]:::efecto
+  n26 --> n27
+  n28{"!locked"}:::decision
+  n27 --> n28
+  n29(["404 NOT_FOUND El mapeo dejó de existir durante el curado"]):::error
+  n28 -->|"sí"| n29
+  n30[("ACTUALIZA terminology.concept_maps · ACTUALIZA terminology.concept_maps")]:::efecto
+  n28 -->|"no"| n30
+  n31["Llama a ConceptMapsRepository.create"]:::llamada
+  n25 -->|"no"| n31
+  n32[("CREA terminology.concept_maps")]:::efecto
   n31 --> n32
-  n33[("LEE terminology.catalog_concepts")]:::efecto
+  n33["Llama a ConceptMapsService.lookup"]:::llamada
+  n30 --> n33
   n32 --> n33
-  n34{"!source"}:::decision
+  n34["Llama a CatalogConceptsRepository.findById"]:::llamada
   n33 --> n34
-  n35(["404 NOT_FOUND Concepto origen no encontrado"]):::error
-  n34 -->|"sí"| n35
-  n36["Llama a ConceptMapsRepository.findTranslations"]:::llamada
-  n34 -->|"no"| n36
-  n37[("LEE terminology.concept_maps")]:::efecto
-  n36 --> n37
-  n38(("200 Responde con éxito")):::ok
-  n37 --> n38
+  n35[("LEE terminology.catalog_concepts")]:::efecto
+  n34 --> n35
+  n36{"!source"}:::decision
+  n35 --> n36
+  n37(["404 NOT_FOUND Concepto origen no encontrado"]):::error
+  n36 -->|"sí"| n37
+  n38["Llama a ConceptMapsRepository.findTranslations"]:::llamada
+  n36 -->|"no"| n38
+  n39[("LEE terminology.concept_maps")]:::efecto
+  n38 --> n39
+  n40(("200 Responde con éxito")):::ok
+  n39 --> n40
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

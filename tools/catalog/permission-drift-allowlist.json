@@ -1,390 +1,608 @@
 {
-  "roles": [
-    "ACCOUNTANT",
-    "ACCOUNTS_PAYABLE",
-    "ADS_ADMIN",
-    "AD_OPS",
-    "AGENT_RUNTIME",
-    "AI_GOVERNANCE_OFFICER",
-    "ANALYST",
-    "API_CONSUMER",
-    "AUTH_SERVICE",
-    "AUTOMATION_ENGINEER",
-    "BILLING_AGENT",
-    "BILLING_OPERATOR",
-    "BUSINESS_ADMIN",
-    "BUYER",
-    "CAPACITY_PLANNER",
-    "CASHIER",
-    "CHANGE_APPROVER",
-    "COMPLIANCE_OFFICER",
-    "CONTENT_EDITOR",
-    "CONTEXT_CONSUMER",
-    "CONTEXT_CURATOR",
-    "CONTRACT_MANAGER",
-    "COURIER",
-    "COURSE_AUTHOR",
-    "CRM_ADMIN",
-    "CRM_AGENT",
-    "DATA_GOVERNANCE_ADMIN",
-    "DATA_PLATFORM_ENGINEER",
-    "DATA_PRIVACY_OFFICER",
-    "DATA_PRODUCT_OWNER",
-    "DEIDENTIFICATION_WORKER",
-    "DELETION_WORKER",
-    "DEPLOY_PIPELINE",
-    "DEVICE",
-    "DICOM_VIEWER",
-    "EDUCATION_ADMIN",
-    "EMBEDDING_WORKER",
-    "EMPLOYEE",
-    "ERP_ADMIN",
-    "FINOPS_ANALYST",
-    "GOVERNANCE",
-    "GRAPH_ANALYST",
-    "GRAPH_ANALYTICS_WORKER",
-    "GRAPH_PROJECTION_WORKER",
-    "HEALTH_DATA_ADMIN",
-    "HR_ADMIN",
-    "IDENTITY_ADMIN",
-    "INCIDENT_COMMANDER",
-    "INGESTION_WORKER",
-    "INGEST_GATEWAY",
-    "INTEROP_CONSUMER",
-    "LEARNER",
-    "LEGAL_COUNSEL",
-    "LOGISTICS_OPERATOR",
-    "MAINTENANCE_WORKER",
-    "MARKETING_MANAGER",
-    "MEMBER",
-    "MESSAGING_ADMIN",
-    "MLOPS_ENGINEER",
-    "MODULE_OWNER",
-    "MPI_STEWARD",
-    "OPERATIONAL_APPROVER",
-    "PACS_GATEWAY",
-    "PAYMENTS_ADMIN",
-    "PHARMACY_STAFF",
-    "PLATFORM_ADMIN",
-    "PLATFORM_OPERATOR",
-    "POLICY_REVIEWER",
-    "PRIVACY_OFFICER",
-    "PROJECTION_WORKER",
-    "PROMOTIONS_ADMIN",
-    "QA_ADMIN",
-    "QA_ENGINEER",
-    "QUALITY_REVIEWER",
-    "RAG_COLLECTION_ADMIN",
-    "RECONCILIATION_WORKER",
-    "RELEASE_MANAGER",
-    "REPORTING_ADMIN",
-    "REPORT_AUTHOR",
-    "REPORT_VIEWER",
-    "RESEARCH_GOVERNANCE",
-    "RETRIEVAL_WORKER",
-    "SAGA_ORCHESTRATOR",
-    "SALES",
-    "SCHEDULER",
-    "SEARCH_ADMIN",
-    "SEARCH_READER",
-    "SOURCE_ADMIN",
-    "SRE",
-    "STORAGE_ADMIN",
-    "STORAGE_CLIENT",
-    "SYSTEM_WORKER",
-    "TERMINOLOGY_ENGINEER",
-    "TRACKING_ADMIN",
-    "TRANSFORMATION_WORKER",
-    "WAREHOUSE",
-    "WORKFLOW_ARCHITECT",
-    "WRITE_SERVICE"
-  ],
+  "roles": [],
   "routes": [
-    "DELETE /common/files/:id",
-    "DELETE /community/blocks",
-    "DELETE /community/bookmarks",
-    "DELETE /community/conversations/:conversationId/messages/:messageId",
-    "DELETE /community/conversations/:conversationId/pin",
-    "DELETE /community/follows",
-    "DELETE /community/groups/:groupId/members/:member",
-    "DELETE /prescription-favorites/:id",
-    "DELETE /profiles/patients/me/photo",
-    "DELETE /profiles/practitioners/:profileId/photo",
-    "DELETE /profiles/practitioners/me/affiliations/:affiliationId",
-    "DELETE /profiles/practitioners/me/credentials/:credentialId",
-    "DELETE /profiles/practitioners/me/jurisdiction-authorizations/:licenseId",
-    "DELETE /profiles/practitioners/me/specialties/:specialtyId",
-    "GET /",
-    "GET /audio-assets/:assetId/content",
-    "GET /billing/service-catalog",
-    "GET /billing/service-catalog/procedure-specialties",
-    "GET /billing/service-catalog/procedures",
-    "GET /billing/simulated/catalogs",
-    "GET /billing/simulated/charges",
-    "GET /billing/simulated/invoices/:invoiceId",
-    "GET /billing/simulated/my-invoices",
-    "GET /billing/simulated/my-invoices/:invoiceId",
-    "GET /billing/simulated/outbox",
-    "GET /billing/simulated/status",
-    "GET /charts/me/documents",
-    "GET /charts/me/documents/:documentId/files/:fileId/content",
-    "GET /charts/me/encounters/:id/pdf",
-    "GET /charts/me/notes",
-    "GET /clinical/me/medical-aspects",
-    "GET /common/files/:id/content",
-    "GET /common/files/links",
-    "GET /community/blocks",
-    "GET /community/bookmarks",
-    "GET /community/comments/media/:fileId/content",
-    "GET /community/conversations",
-    "GET /community/conversations/:conversationId/attachments/:fileId/content",
-    "GET /community/conversations/:conversationId/messages",
-    "GET /community/conversations/:conversationId/presence",
-    "GET /community/feed",
-    "GET /community/follows",
-    "GET /community/groups",
-    "GET /community/groups/:groupId",
-    "GET /community/groups/:groupId/members",
-    "GET /community/groups/:groupId/posts",
-    "GET /community/moderation/decisions/mine",
-    "GET /community/notifications",
-    "GET /community/polls/:pollId",
-    "GET /community/posts/:postId",
-    "GET /community/posts/:postId/comments",
-    "GET /community/posts/:postId/reactions",
-    "GET /community/profiles/:profileId",
-    "GET /community/profiles/:profileId/auto-reply",
-    "GET /community/profiles/:profileId/posts",
-    "GET /community/profiles/:profileId/reviews",
-    "GET /community/profiles/by-slug/:slug",
-    "GET /community/profiles/me",
-    "GET /community/profiles/me/stats",
-    "GET /community/ratings",
-    "GET /community/ratings/mine",
-    "GET /community/ratings/summary",
-    "GET /community/topics",
-    "GET /diagnostic-units",
-    "GET /diagnostic-units/:id",
-    "GET /diagnostic-units/search",
-    "GET /diagnostics/accessions/:id",
-    "GET /diagnostics/specimens/:id",
-    "GET /diagnostics/work-orders",
-    "GET /forms/me/instances",
-    "GET /forms/me/instances/:id",
-    "GET /health/data-sources",
-    "GET /health/data-sources/metrics",
-    "GET /iam/me/sessions",
-    "GET /identity/me/verification-cases",
-    "GET /identity/me/verification-cases/:caseId",
-    "GET /identity/me/verification-types",
-    "GET /insurance-brokers",
-    "GET /insurance-brokers/:id",
-    "GET /insurance-brokers/:id/clients",
-    "GET /insurance-campaigns",
-    "GET /insurance-campaigns/:id",
-    "GET /insurance-campaigns/my-benefits",
-    "GET /insurance-campaigns/patient/:patientProfileId",
-    "GET /insurance-carriers",
-    "GET /insurance-carriers/:id",
-    "GET /insurance/analytics/loss-ratio",
-    "GET /insurance/campaigns",
-    "GET /insurance/campaigns/:id",
-    "GET /insurance/campaigns/my-benefits",
-    "GET /insurance/campaigns/patient/:patientProfileId",
-    "GET /insurance/my-claims",
-    "GET /insurance/patients/options",
-    "GET /insurance/portability/certificates/:certificateId/json",
-    "GET /insurance/portability/certificates/:certificateId/pdf",
-    "GET /insurance/received-claims",
-    "GET /pharma-labs/notices/mine",
-    "GET /pharma-labs/reference/concepts",
-    "GET /pharmacy-inventory/availability",
-    "GET /pharmacy-inventory/sites/:siteId/stock",
-    "GET /pharmacy/catalog-products",
-    "GET /pharmacy/orders/:id",
-    "GET /pharmacy/pharmacies",
-    "GET /pharmacy/pharmacies/:id",
-    "GET /pharmacy/pharmacies/:id/contacts",
-    "GET /pharmacy/pharmacies/:id/licenses",
-    "GET /pharmacy/pharmacies/:id/summary",
-    "GET /pharmacy/products",
-    "GET /pharmacy/sites",
-    "GET /pharmacy/sites/:siteId/prices",
-    "GET /portals/:portalCode/routes/:routeCode/views/:viewCode/actions",
-    "GET /portals/:portalCode/routes/:routeCode/views/:viewCode/data",
-    "GET /practitioner-settlement-batches",
-    "GET /practitioner-settlement-batches/:id",
-    "GET /prescription-favorites",
-    "GET /prior-authorization-requests/:id",
-    "GET /prior-authorization-requests/inbox",
-    "GET /profiles/patients/me",
-    "GET /profiles/patients/me/dependent-candidates",
-    "GET /profiles/patients/me/dependent-requests/incoming",
-    "GET /profiles/patients/me/dependents",
-    "GET /profiles/patients/me/summary",
-    "GET /profiles/practitioners",
-    "GET /profiles/practitioners/:profileId/summary",
-    "GET /profiles/practitioners/me/affiliations",
-    "GET /profiles/practitioners/me/linkable-organizations",
-    "GET /profiles/practitioners/me/onboarding",
-    "GET /profiles/practitioners/me/signature-assets",
-    "GET /profiles/practitioners/me/summary",
-    "GET /profiles/practitioners/specialty-counts",
-    "GET /quotations",
-    "GET /quotations/:id",
-    "GET /surveys/me/invitations",
-    "GET /surveys/me/invitations/:id",
-    "GET /system-context/dynamic-enums/bindings",
-    "GET /telemetry/tracking-consents/me",
-    "GET /tenants/:tenantId",
-    "GET /tenants/:tenantId/agenda",
-    "GET /tenants/:tenantId/branches",
-    "GET /tenants/:tenantId/child-tenants",
-    "GET /tenants/:tenantId/logo",
-    "GET /tenants/:tenantId/logo/content",
-    "GET /tenants/:tenantId/memberships",
-    "GET /tenants/:tenantId/memberships/:membershipId/branch-assignments",
-    "GET /tenants/:tenantId/practitioner-requests",
-    "GET /tenants/me",
-    "GET /terminology/CodeSystem/$lookup",
-    "GET /terminology/concepts",
-    "GET /terminology/concepts/:conceptId",
-    "GET /terminology/concepts/:conceptId/glossary-article",
-    "GET /terminology/concepts/:conceptId/glossary-neighborhood",
-    "GET /terminology/concepts/glossary-graph",
-    "PATCH /community/conversations/:conversationId/messages/:messageId",
-    "PATCH /community/conversations/:conversationId/participant",
-    "PATCH /community/groups/:groupId/members/:member",
-    "PATCH /insurance-campaigns/:id",
-    "PATCH /insurance-campaigns/:id/status",
-    "PATCH /insurance/campaigns/:id",
-    "PATCH /insurance/campaigns/:id/status",
-    "PATCH /profiles/patients/me",
-    "PATCH /profiles/practitioners/me",
-    "PATCH /profiles/practitioners/me/affiliations/:affiliationId",
-    "PATCH /profiles/practitioners/me/credentials/:credentialId",
-    "PATCH /profiles/practitioners/me/jurisdiction-authorizations/:licenseId",
-    "PATCH /profiles/practitioners/me/specialties/:specialtyId",
-    "PATCH /profiles/practitioners/me/specialties/:specialtyId/primary",
-    "PATCH /tenants/:tenantId",
-    "PATCH /tenants/:tenantId/branches/:branchId",
-    "PATCH /tenants/:tenantId/memberships/:membershipId/role",
-    "POST /audio-assets/resolve",
-    "POST /billing/simulated/charges/:chargeId/instances/:instanceId/payments",
-    "POST /billing/simulated/charges/:chargeId/invoices",
-    "POST /billing/simulated/charges/:chargeId/payment",
-    "POST /billing/simulated/invoices/:invoiceId/annulment",
-    "POST /billing/simulated/invoices/:invoiceId/annulment-reversal",
-    "POST /billing/simulated/invoices/:invoiceId/email",
-    "POST /common/addresses",
-    "POST /common/contact-points",
-    "POST /common/contact-points/:id/verify",
-    "POST /common/files",
-    "POST /common/files/:id/download-url",
-    "POST /common/files/:id/links",
-    "POST /common/files/:id/versions",
-    "POST /common/files/:id/versions/:vid/derivatives",
-    "POST /common/files/upload",
-    "POST /common/identifiers",
-    "POST /community/blocks",
-    "POST /community/bookmarks",
-    "POST /community/comments",
-    "POST /community/conversations",
-    "POST /community/conversations/:conversationId/messages",
-    "POST /community/conversations/:conversationId/pin",
-    "POST /community/conversations/:conversationId/read",
-    "POST /community/conversations/contacts/search",
-    "POST /community/follows",
-    "POST /community/groups",
-    "POST /community/groups/:groupId/members",
-    "POST /community/groups/:groupId/posts",
-    "POST /community/moderation/decisions/:decisionId/appeal",
-    "POST /community/polls/:pollId/votes",
-    "POST /community/posts/:postId/polls",
-    "POST /community/profiles/:profileId/posts",
-    "POST /community/profiles/:profileId/reviews",
-    "POST /community/profiles/:profileId/reviews/:reviewId/responses",
-    "POST /community/reports",
-    "POST /diagnostics/accessions",
-    "POST /diagnostics/analyzer-runs",
-    "POST /diagnostics/analyzer-runs/:id/messages",
-    "POST /diagnostics/containers/:id/custody-events",
-    "POST /diagnostics/results/:observationId/verifications",
-    "POST /diagnostics/service-requests/inbox",
-    "POST /diagnostics/specimens",
-    "POST /diagnostics/specimens/:id/containers",
-    "POST /diagnostics/specimens/:id/rejection",
-    "POST /diagnostics/work-orders",
-    "POST /iam/auth/change-password",
-    "POST /iam/auth/logout",
-    "POST /iam/auth/logout-all",
-    "POST /iam/me/sessions/:id/revoke",
-    "POST /iam/users/:id/devices",
-    "POST /iam/users/:id/mfa-factors",
-    "POST /identity/me/identity-verification",
-    "POST /identity/me/practitioner/identity-verification",
-    "POST /identity/me/practitioner/license-verification",
-    "POST /identity/me/tenants/:tenantId/verification",
-    "POST /insurance-campaigns",
-    "POST /insurance-claims",
-    "POST /insurance-claims/:id/adjudications",
-    "POST /insurance-claims/:id/eob",
-    "POST /insurance-claims/:id/patient-invoice",
-    "POST /insurance-claims/:id/reversals",
-    "POST /insurance-claims/quote",
-    "POST /insurance-plans/:planId/benefits",
-    "POST /insurance-products/:productId/plans",
-    "POST /insurance/campaigns",
-    "POST /insurance/patients/conversation",
-    "POST /insurance/patients/search",
-    "POST /insurance/portability/export",
-    "POST /insurance/received-claims/:id/decision",
-    "POST /integrations/messages\\:outbound",
-    "POST /pharma-labs/notices/:noticeId/read",
-    "POST /practitioner-settlement-batches",
-    "POST /prescription-favorites",
-    "POST /prior-authorization-requests",
-    "POST /prior-authorization-requests/:id/determinations",
-    "POST /profiles/patients/:profileId/related-persons",
-    "POST /profiles/patients/me/dependent-requests",
-    "POST /profiles/patients/me/dependent-requests/:id/accept",
-    "POST /profiles/patients/me/dependent-requests/:id/reject",
-    "POST /profiles/patients/me/dependents",
-    "POST /profiles/practitioners/:profileId/jurisdiction-authorizations",
-    "POST /profiles/practitioners/:profileId/specialties",
-    "POST /profiles/practitioners/me/affiliations",
-    "POST /profiles/practitioners/me/credentials",
-    "POST /surveys/me/invitations/:id/responses",
-    "POST /telemetry/activity-events",
-    "POST /telemetry/client-contexts",
-    "POST /telemetry/conversion-events",
-    "POST /telemetry/disclosure-acceptances",
-    "POST /telemetry/session-journeys/:id/close",
-    "POST /telemetry/tracking-consents",
-    "POST /telemetry/tracking-consents/:id/withdraw",
-    "POST /telemetry/web-vitals",
-    "POST /tenants/:tenantId/branches",
-    "POST /tenants/:tenantId/memberships",
-    "POST /tenants/:tenantId/memberships/:membershipId/branch-assignments",
-    "POST /tenants/:tenantId/memberships/:membershipId/offboard",
-    "POST /tenants/:tenantId/memberships/:membershipId/transfer",
-    "POST /tenants/:tenantId/practitioner-requests/:affiliationId/approve",
-    "POST /tenants/:tenantId/practitioner-requests/:affiliationId/reject",
-    "POST /tenants/:tenantId/practitioner-requests/:affiliationId/revoke",
-    "POST /terminology/ConceptMap/$translate",
-    "PUT /clinical/me/medical-aspects",
-    "PUT /community/profiles/:profileId/auto-reply",
-    "PUT /community/profiles/me",
-    "PUT /community/ratings",
-    "PUT /community/reactions",
-    "PUT /insurance-carriers/:id/contact-channels",
-    "PUT /insurance-plans/:planId/benefits/:benefitId",
-    "PUT /insurance-plans/:planId/benefits/:benefitId/rules",
-    "PUT /insurance-plans/:planId/premium",
-    "PUT /profiles/patients/me/photo",
-    "PUT /profiles/practitioners/:profileId/photo",
-    "PUT /profiles/practitioners/me/signature-assets",
-    "PUT /tenants/:tenantId/logo",
-    "PUT /views/:frontendPageViewId/preferences"
+    "POST /integrations/messages\\:outbound"
+  ],
+  "reviewed": [
+    {
+      "reason": "Respuesta fija de saludo: no lee ni escribe datos.",
+      "evidence": [
+        "src/app.controller.ts#getHello",
+        "src/app.service.ts#getHello"
+      ],
+      "routes": [
+        "GET /"
+      ]
+    },
+    {
+      "reason": "Audio generado desde plantillas del catálogo (`templateKey`), no desde texto libre; la caché y el contenido por id se acotan al tenant del activo (404 si es de otro) y la generación pasa por la política de presupuesto.",
+      "evidence": [
+        "src/modules/audio_assets/audio-content.service.ts#get",
+        "src/modules/audio_assets/application/resolve-audio-asset.use-case.ts#requiresTenantScope"
+      ],
+      "routes": [
+        "GET /audio-assets/:assetId/content",
+        "POST /audio-assets/resolve"
+      ]
+    },
+    {
+      "reason": "Lectura del catálogo de servicios de la práctica y de la nomenclatura de procedimientos: la necesita cualquier profesional que cotice y no hay un rol de facturación que los cubra. Se acota por tenant (RLS); el alta y la edición del catálogo sí exigen rol o titularidad de la práctica.",
+      "evidence": [
+        "src/modules/billing/controllers/billing-service-catalog.controller.ts",
+        "src/modules/billing/services/billing-service-catalog.service.ts#assertRegistrationCanRegister",
+        "src/modules/billing/services/billing-service-catalog.service.ts#assertCanEdit"
+      ],
+      "routes": [
+        "GET /billing/service-catalog",
+        "GET /billing/service-catalog/procedure-specialties",
+        "GET /billing/service-catalog/procedures"
+      ]
+    },
+    {
+      "reason": "Facturación simulada: el permiso lo decide `billing-simulated.access.ts` (administración todo, médico sólo sus consultas, paciente sólo «Mis facturas»); fuera de alcance responde 404 y sin rol operativo 403. Un rol global dejaría fuera al paciente y al médico, que sí tienen qué mirar.",
+      "evidence": [
+        "src/modules/billing/billing-simulated.access.ts",
+        "src/modules/billing/services/billing-simulated.service.ts#ensureEnabled",
+        "src/modules/billing/services/billing-simulated.service.ts#myInvoicesScope"
+      ],
+      "routes": [
+        "GET /billing/simulated/catalogs",
+        "GET /billing/simulated/charges",
+        "GET /billing/simulated/invoices/:invoiceId",
+        "GET /billing/simulated/my-invoices",
+        "GET /billing/simulated/my-invoices/:invoiceId",
+        "GET /billing/simulated/outbox",
+        "GET /billing/simulated/status",
+        "POST /billing/simulated/charges/:chargeId/instances/:instanceId/payments",
+        "POST /billing/simulated/charges/:chargeId/invoices",
+        "POST /billing/simulated/charges/:chargeId/payment",
+        "POST /billing/simulated/invoices/:invoiceId/annulment",
+        "POST /billing/simulated/invoices/:invoiceId/annulment-reversal",
+        "POST /billing/simulated/invoices/:invoiceId/email"
+      ]
+    },
+    {
+      "reason": "Autoservicio del paciente en `/charts/me`, `/clinical/me` y `/forms/me`: las rutas no reciben el identificador del sujeto, el servicio lo resuelve desde la sesión (`actor.patientProfileId` / vínculo de la cuenta) y un encuentro o documento ajeno responde 404.",
+      "evidence": [
+        "src/modules/chart/services/encounter-pdf.service.ts#renderForPatient",
+        "src/modules/clinical/services/medical-aspects.service.ts#resolveOwnPatientProfileId"
+      ],
+      "routes": [
+        "GET /charts/me/documents",
+        "GET /charts/me/documents/:documentId/files/:fileId/content",
+        "GET /charts/me/encounters/:id/pdf",
+        "GET /charts/me/notes",
+        "GET /clinical/me/medical-aspects",
+        "GET /forms/me/instances",
+        "GET /forms/me/instances/:id",
+        "PUT /clinical/me/medical-aspects"
+      ]
+    },
+    {
+      "reason": "Autoservicio del profesional y del paciente: el sujeto sale del vínculo activo de la cuenta (`requireOwnPractitionerProfileId`, `assertOwnsPractitionerProfile`, `assertOwnsPatientProfile`), nunca de un parámetro; sólo la plataforma (SECURITY_ADMIN/SUPERADMIN) opera sobre el perfil de otro. El directorio de profesionales (listado, conteo por especialidad, ficha) publica datos profesionales de presentación, no PHI, sin contacto.",
+      "evidence": [
+        "src/modules/profiles/application/services/profile-ownership.service.ts#assertOwnsPractitionerProfile",
+        "src/modules/profiles/application/services/profile-ownership.service.ts#requireOwnPractitionerProfileId",
+        "src/modules/profiles/application/services/profiles-patients.service.ts#addRelatedPerson",
+        "src/modules/profiles/application/services/profiles-practitioners.service.ts#getPractitionerSummary"
+      ],
+      "routes": [
+        "DELETE /profiles/patients/me/photo",
+        "DELETE /profiles/practitioners/:profileId/photo",
+        "DELETE /profiles/practitioners/me/affiliations/:affiliationId",
+        "DELETE /profiles/practitioners/me/credentials/:credentialId",
+        "DELETE /profiles/practitioners/me/jurisdiction-authorizations/:licenseId",
+        "DELETE /profiles/practitioners/me/specialties/:specialtyId",
+        "GET /profiles/patients/me",
+        "GET /profiles/patients/me/dependents",
+        "GET /profiles/patients/me/summary",
+        "GET /profiles/practitioners",
+        "GET /profiles/practitioners/:profileId/summary",
+        "GET /profiles/practitioners/me/affiliations",
+        "GET /profiles/practitioners/me/linkable-organizations",
+        "GET /profiles/practitioners/me/onboarding",
+        "GET /profiles/practitioners/me/signature-assets",
+        "GET /profiles/practitioners/me/summary",
+        "GET /profiles/practitioners/specialty-counts",
+        "PATCH /profiles/patients/me",
+        "PATCH /profiles/practitioners/me",
+        "PATCH /profiles/practitioners/me/affiliations/:affiliationId",
+        "PATCH /profiles/practitioners/me/credentials/:credentialId",
+        "PATCH /profiles/practitioners/me/jurisdiction-authorizations/:licenseId",
+        "PATCH /profiles/practitioners/me/specialties/:specialtyId",
+        "PATCH /profiles/practitioners/me/specialties/:specialtyId/primary",
+        "POST /profiles/patients/:profileId/related-persons",
+        "POST /profiles/patients/me/dependents",
+        "POST /profiles/practitioners/:profileId/jurisdiction-authorizations",
+        "POST /profiles/practitioners/:profileId/specialties",
+        "POST /profiles/practitioners/me/affiliations",
+        "POST /profiles/practitioners/me/credentials",
+        "PUT /profiles/patients/me/photo",
+        "PUT /profiles/practitioners/:profileId/photo",
+        "PUT /profiles/practitioners/me/signature-assets"
+      ]
+    },
+    {
+      "reason": "Favoritos de receta del profesional de la sesión: el servicio resuelve el perfil con `requireOwnPractitionerProfileId` y un favorito ajeno responde 404.",
+      "evidence": [
+        "src/modules/clinical_ext/services/prescription-favorites.service.ts#remove"
+      ],
+      "routes": [
+        "DELETE /prescription-favorites/:id",
+        "GET /prescription-favorites",
+        "POST /prescription-favorites"
+      ]
+    },
+    {
+      "reason": "Solicitudes de vínculo de dependientes: la ruta es del paciente de la sesión; `pendingRequest` exige que la solicitud sea del perfil propio y que no la haya generado la misma cuenta.",
+      "evidence": [
+        "src/modules/profiles/application/services/dependent-link-requests.service.ts#pendingRequest"
+      ],
+      "routes": [
+        "GET /profiles/patients/me/dependent-candidates",
+        "GET /profiles/patients/me/dependent-requests/incoming",
+        "POST /profiles/patients/me/dependent-requests",
+        "POST /profiles/patients/me/dependent-requests/:id/accept",
+        "POST /profiles/patients/me/dependent-requests/:id/reject"
+      ]
+    },
+    {
+      "reason": "Solicitudes de afiliación de profesionales a una organización: `assertCanAdminister` sobre el tenant del path (titular o administrador de esa organización, o la plataforma). Un rol global no distingue de qué organización es.",
+      "evidence": [
+        "src/modules/profiles/application/services/profiles-affiliations.service.ts#listRequests",
+        "src/modules/profiles/application/services/profiles-affiliations.service.ts#decide"
+      ],
+      "routes": [
+        "GET /tenants/:tenantId/practitioner-requests",
+        "POST /tenants/:tenantId/practitioner-requests/:affiliationId/approve",
+        "POST /tenants/:tenantId/practitioner-requests/:affiliationId/reject",
+        "POST /tenants/:tenantId/practitioner-requests/:affiliationId/revoke"
+      ]
+    },
+    {
+      "reason": "Administración de la organización por membresía: `TenantAdministrationService.assertCanAdminister` / `assertCanRead` deciden si el actor es titular, administrador o miembro **de ese** tenant (o plataforma). Un `@Roles` global no distingue de qué organización es el actor, que es lo que hay que decidir.",
+      "evidence": [
+        "src/modules/directory/services/directory-tenants.service.ts#updateTenant",
+        "src/modules/directory/services/directory-branches.service.ts",
+        "src/modules/directory/services/directory-memberships.service.ts",
+        "src/modules/directory/services/directory-read.service.ts#forkForReadableTenant",
+        "src/modules/directory/services/organization-logo.service.ts"
+      ],
+      "routes": [
+        "GET /tenants/:tenantId",
+        "GET /tenants/:tenantId/branches",
+        "GET /tenants/:tenantId/child-tenants",
+        "GET /tenants/:tenantId/logo",
+        "GET /tenants/:tenantId/logo/content",
+        "GET /tenants/:tenantId/memberships",
+        "GET /tenants/:tenantId/memberships/:membershipId/branch-assignments",
+        "GET /tenants/me",
+        "PATCH /tenants/:tenantId",
+        "PATCH /tenants/:tenantId/branches/:branchId",
+        "PATCH /tenants/:tenantId/memberships/:membershipId/role",
+        "POST /tenants/:tenantId/branches",
+        "POST /tenants/:tenantId/memberships",
+        "POST /tenants/:tenantId/memberships/:membershipId/branch-assignments",
+        "POST /tenants/:tenantId/memberships/:membershipId/offboard",
+        "POST /tenants/:tenantId/memberships/:membershipId/transfer",
+        "PUT /tenants/:tenantId/logo"
+      ]
+    },
+    {
+      "reason": "Agenda de la organización: `assertCanRead` exige pertenecer al tenant del path; exigir administrarla dejaría fuera a la recepción, para quien existe la pantalla.",
+      "evidence": [
+        "src/modules/scheduling/application/agenda/scheduling-tenant-agenda.service.ts#list"
+      ],
+      "routes": [
+        "GET /tenants/:tenantId/agenda"
+      ]
+    },
+    {
+      "reason": "Archivos propios: leer y escribir un archivo exige haberlo subido (`canActorReadOwnFile` / `canActorMutateOwnFile`) o un rol de revisión (SECURITY_ADMIN lee, SUPERADMIN escribe); la descarga por URL firmada valida la firma.",
+      "evidence": [
+        "src/modules/common/services/file-access.ts#canActorMutateOwnFile",
+        "src/modules/common/services/files.service.ts#assertCanMutateFile",
+        "src/modules/common/services/file-upload.service.ts"
+      ],
+      "routes": [
+        "DELETE /common/files/:id",
+        "GET /common/files/:id/content",
+        "GET /common/files/links",
+        "POST /common/files",
+        "POST /common/files/:id/download-url",
+        "POST /common/files/:id/links",
+        "POST /common/files/:id/versions",
+        "POST /common/files/:id/versions/:vid/derivatives",
+        "POST /common/files/upload"
+      ]
+    },
+    {
+      "reason": "Red social y mensajería: leer contenido privado exige ser titular del perfil (`assertOwnProfile`), escribir exige actuar como ese perfil sin atajo de plataforma (`assertActsAsProfile`) y los grupos usan `CommunityGroupAccessService`. Las lecturas públicas heredan la visibilidad de la publicación (`canViewPost`).",
+      "evidence": [
+        "src/modules/community/services/community-visibility.service.ts#assertActsAsProfile",
+        "src/modules/community/services/community-visibility.service.ts#assertOwnProfile",
+        "src/modules/community/services/community-group-access.service.ts",
+        "src/modules/community/services/community-messaging.service.ts"
+      ],
+      "routes": [
+        "DELETE /community/blocks",
+        "DELETE /community/bookmarks",
+        "DELETE /community/conversations/:conversationId/messages/:messageId",
+        "DELETE /community/conversations/:conversationId/pin",
+        "DELETE /community/follows",
+        "DELETE /community/groups/:groupId/members/:member",
+        "GET /community/blocks",
+        "GET /community/bookmarks",
+        "GET /community/comments/media/:fileId/content",
+        "GET /community/conversations",
+        "GET /community/conversations/:conversationId/attachments/:fileId/content",
+        "GET /community/conversations/:conversationId/messages",
+        "GET /community/conversations/:conversationId/presence",
+        "GET /community/feed",
+        "GET /community/follows",
+        "GET /community/groups",
+        "GET /community/groups/:groupId",
+        "GET /community/groups/:groupId/members",
+        "GET /community/groups/:groupId/posts",
+        "GET /community/moderation/decisions/mine",
+        "GET /community/notifications",
+        "GET /community/posts/:postId",
+        "GET /community/posts/:postId/comments",
+        "GET /community/posts/:postId/reactions",
+        "GET /community/profiles/:profileId",
+        "GET /community/profiles/:profileId/auto-reply",
+        "GET /community/profiles/:profileId/posts",
+        "GET /community/profiles/:profileId/reviews",
+        "GET /community/profiles/by-slug/:slug",
+        "GET /community/profiles/me",
+        "GET /community/profiles/me/stats",
+        "GET /community/ratings",
+        "GET /community/ratings/mine",
+        "GET /community/ratings/summary",
+        "PATCH /community/conversations/:conversationId/messages/:messageId",
+        "PATCH /community/conversations/:conversationId/participant",
+        "PATCH /community/groups/:groupId/members/:member",
+        "POST /community/blocks",
+        "POST /community/bookmarks",
+        "POST /community/comments",
+        "POST /community/conversations",
+        "POST /community/conversations/:conversationId/messages",
+        "POST /community/conversations/:conversationId/pin",
+        "POST /community/conversations/:conversationId/read",
+        "POST /community/conversations/contacts/search",
+        "POST /community/follows",
+        "POST /community/groups",
+        "POST /community/groups/:groupId/members",
+        "POST /community/groups/:groupId/posts",
+        "POST /community/moderation/decisions/:decisionId/appeal",
+        "POST /community/profiles/:profileId/posts",
+        "POST /community/profiles/:profileId/reviews",
+        "POST /community/profiles/:profileId/reviews/:reviewId/responses",
+        "POST /community/reports",
+        "PUT /community/profiles/:profileId/auto-reply",
+        "PUT /community/profiles/me",
+        "PUT /community/ratings",
+        "PUT /community/reactions"
+      ]
+    },
+    {
+      "reason": "Encuestas de la comunidad: colgar una encuesta exige firmar la publicación (`assertActsAsProfile` sobre su autor), votar exige actuar como el perfil votante y ver la publicación (`canViewPost`), y leerla hereda la visibilidad del post.",
+      "evidence": [
+        "src/modules/community/services/community-polls.service.ts#vote",
+        "src/modules/community/services/community-polls.service.ts#createPoll",
+        "src/modules/community/services/community-polls-read.service.ts#getPoll"
+      ],
+      "routes": [
+        "GET /community/polls/:pollId",
+        "POST /community/polls/:pollId/votes",
+        "POST /community/posts/:postId/polls"
+      ]
+    },
+    {
+      "reason": "Temas de la comunidad: catálogo de referencia de sólo lectura, el mismo para toda sesión.",
+      "evidence": [
+        "src/modules/community/services/community-groups-read.service.ts#listTopics"
+      ],
+      "routes": [
+        "GET /community/topics"
+      ]
+    },
+    {
+      "reason": "Recepción de muestras y laboratorio: `LabStaffGuard` (guard de clase) exige ser personal del laboratorio del tenant activo —SUPERADMIN, un rol clínico con ámbito en ese tenant o una membresía activa en un tenant `DIAGNOSTIC_CENTER`—. Un `@Roles` global dejaría fuera al personal del laboratorio, que no tiene rol clínico.",
+      "evidence": [
+        "src/modules/diagnostics/guards/lab-staff.guard.ts#LabStaffGuard"
+      ],
+      "routes": [
+        "GET /diagnostics/accessions/:id",
+        "GET /diagnostics/specimens/:id",
+        "GET /diagnostics/work-orders",
+        "POST /diagnostics/accessions",
+        "POST /diagnostics/analyzer-runs",
+        "POST /diagnostics/analyzer-runs/:id/messages",
+        "POST /diagnostics/containers/:id/custody-events",
+        "POST /diagnostics/results/:observationId/verifications",
+        "POST /diagnostics/service-requests/inbox",
+        "POST /diagnostics/specimens",
+        "POST /diagnostics/specimens/:id/containers",
+        "POST /diagnostics/specimens/:id/rejection",
+        "POST /diagnostics/work-orders"
+      ]
+    },
+    {
+      "reason": "Directorio de unidades diagnósticas: catálogo publicado de lectura abierta, igual que el de farmacias.",
+      "evidence": [
+        "src/modules/diagnostic_units/controllers/diagnostic-units.controller.ts"
+      ],
+      "routes": [
+        "GET /diagnostic-units",
+        "GET /diagnostic-units/:id",
+        "GET /diagnostic-units/search"
+      ]
+    },
+    {
+      "reason": "Cuenta propia: cambiar la contraseña, listar y revocar las sesiones y cerrar sesión operan sobre el `actor` de la sesión; no reciben el identificador de otra cuenta.",
+      "evidence": [
+        "src/modules/iam/application/services/iam-account-security.service.ts",
+        "src/modules/iam/application/services/iam-auth.service.ts#logout"
+      ],
+      "routes": [
+        "GET /iam/me/sessions",
+        "POST /iam/auth/change-password",
+        "POST /iam/auth/logout",
+        "POST /iam/auth/logout-all",
+        "POST /iam/me/sessions/:id/revoke"
+      ]
+    },
+    {
+      "reason": "Factores MFA sobre `/iam/users/:id`: `IamMfaService.enrollOrVerify` exige ser el titular de la cuenta o SECURITY_ADMIN/SUPERADMIN (403 genérico para cualquier otro). El registro de dispositivos aplica la misma regla (`IamDevicesService.register`).",
+      "evidence": [
+        "src/modules/iam/application/services/iam-mfa.service.ts#enrollOrVerify",
+        "src/modules/iam/application/services/iam-devices.service.ts#register"
+      ],
+      "routes": [
+        "POST /iam/users/:id/devices",
+        "POST /iam/users/:id/mfa-factors"
+      ]
+    },
+    {
+      "reason": "Verificación de identidad propia: la persona sale de la cuenta de la sesión (`resolvePersonId`); un caso ajeno responde 404 uniforme y la verificación de una institución exige ser titular o administrador de ella.",
+      "evidence": [
+        "src/modules/identity_assurance/services/identity-self-service.service.ts#getOwnCaseStatus",
+        "src/modules/identity_assurance/services/identity-self-service.service.ts#requestTenantVerification"
+      ],
+      "routes": [
+        "GET /identity/me/verification-cases",
+        "GET /identity/me/verification-cases/:caseId",
+        "GET /identity/me/verification-types",
+        "POST /identity/me/identity-verification",
+        "POST /identity/me/practitioner/identity-verification",
+        "POST /identity/me/practitioner/license-verification",
+        "POST /identity/me/tenants/:tenantId/verification"
+      ]
+    },
+    {
+      "reason": "Vistas del frontend: `ViewContractAuthorizer.authorizeView` decide por contrato de vista qué ve el usuario (campos y acciones autorizados); las preferencias son del usuario de la sesión.",
+      "evidence": [
+        "src/modules/read_models/services/frontend-views.service.ts#serveData",
+        "src/modules/read_models/services/frontend-views.service.ts#upsertPreferences"
+      ],
+      "routes": [
+        "GET /portals/:portalCode/routes/:routeCode/views/:viewCode/actions",
+        "GET /portals/:portalCode/routes/:routeCode/views/:viewCode/data",
+        "PUT /views/:frontendPageViewId/preferences"
+      ]
+    },
+    {
+      "reason": "Telemetría del titular: eventos, contextos, consentimientos y recorridos se atan al usuario de la sesión (`assertOwned*`, `consent.userId !== actor.id` responde 404 uniforme).",
+      "evidence": [
+        "src/modules/telemetry/services/telemetry-events.service.ts#assertOwnedJourney",
+        "src/modules/telemetry/services/telemetry-consent.service.ts#withdrawConsent"
+      ],
+      "routes": [
+        "GET /telemetry/tracking-consents/me",
+        "POST /telemetry/activity-events",
+        "POST /telemetry/client-contexts",
+        "POST /telemetry/conversion-events",
+        "POST /telemetry/disclosure-acceptances",
+        "POST /telemetry/session-journeys/:id/close",
+        "POST /telemetry/tracking-consents",
+        "POST /telemetry/tracking-consents/:id/withdraw",
+        "POST /telemetry/web-vitals"
+      ]
+    },
+    {
+      "reason": "Cuestionarios del paciente: `requirePatientProfile` + `loadOwnInvitation` acotan la invitación al perfil del paciente y al tenant activo.",
+      "evidence": [
+        "src/modules/surveys/services/surveys-responses.service.ts#loadOwnInvitation"
+      ],
+      "routes": [
+        "GET /surveys/me/invitations",
+        "GET /surveys/me/invitations/:id",
+        "POST /surveys/me/invitations/:id/responses"
+      ]
+    },
+    {
+      "reason": "Avisos de laboratorios farmacéuticos: se leen y se marcan sólo los dirigidos al usuario de la sesión (`recipientUserId`); el catálogo de conceptos es una lista fija del módulo.",
+      "evidence": [
+        "src/modules/pharma_lab/services/pharma-lab-notifications.service.ts#markRead"
+      ],
+      "routes": [
+        "GET /pharma-labs/notices/mine",
+        "GET /pharma-labs/reference/concepts",
+        "POST /pharma-labs/notices/:noticeId/read"
+      ]
+    },
+    {
+      "reason": "Directorio de farmacias y su inventario: lecturas publicadas del tenant activo (activa + verificada), igual que el directorio de unidades diagnósticas. La carpeta de licencias, el resumen y los contactos exigen pertenecer a la organización dueña (`assertCanRead`) y responden 404 si no. El pedido por id es del paciente dueño o del personal de la farmacia.",
+      "evidence": [
+        "src/modules/pharmacy/controllers/pharmacy-read.controller.ts",
+        "src/modules/pharmacy/services/pharmacy-staff-read.service.ts",
+        "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts",
+        "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts#getOrder"
+      ],
+      "routes": [
+        "GET /pharmacy-inventory/availability",
+        "GET /pharmacy-inventory/sites/:siteId/stock",
+        "GET /pharmacy/catalog-products",
+        "GET /pharmacy/orders/:id",
+        "GET /pharmacy/pharmacies",
+        "GET /pharmacy/pharmacies/:id",
+        "GET /pharmacy/pharmacies/:id/contacts",
+        "GET /pharmacy/pharmacies/:id/licenses",
+        "GET /pharmacy/pharmacies/:id/summary",
+        "GET /pharmacy/products",
+        "GET /pharmacy/sites",
+        "GET /pharmacy/sites/:siteId/prices"
+      ]
+    },
+    {
+      "reason": "Cotizaciones: se acotan a las prácticas que el actor alcanza (`reachesPractice`, `reachablePracticesForPatient`); una cotización fuera de alcance responde 404.",
+      "evidence": [
+        "src/modules/quotations/services/quotations.service.ts#getQuotation"
+      ],
+      "routes": [
+        "GET /quotations",
+        "GET /quotations/:id"
+      ]
+    },
+    {
+      "reason": "Reclamos, autorizaciones previas, liquidaciones, portabilidad y campañas del módulo de seguros: cada servicio decide por pertenencia a la aseguradora o al prestador (`LinkedClaimAccessService.assertAdministrator/assertProvider/assertInsurer`, `InsurerContextService.resolve`), por titularidad del paciente (`assertOwnership`) o por membresía OWNER/ADMIN del tenant activo; un rol global no distingue de qué aseguradora o prestador es el actor. El 403 de un rol clínico o de paciente lo da el servicio.",
+      "evidence": [
+        "src/modules/insurance/application/services/linked-claim-access.service.ts",
+        "src/modules/insurance/application/services/insurer-context.service.ts#resolve",
+        "src/modules/insurance/application/services/claims.service.ts#assertProviderClaimScope",
+        "src/modules/insurance/application/services/insurance-campaigns.service.ts",
+        "src/modules/insurance/application/services/insurance-portability.service.ts#assertOwnership",
+        "src/modules/insurance/application/services/insurance-analytics.service.ts#getLossRatioAnalytics",
+        "src/modules/insurance/application/services/my-claims.service.ts"
+      ],
+      "routes": [
+        "GET /insurance-campaigns",
+        "GET /insurance-campaigns/:id",
+        "GET /insurance-campaigns/my-benefits",
+        "GET /insurance-campaigns/patient/:patientProfileId",
+        "GET /insurance/analytics/loss-ratio",
+        "GET /insurance/campaigns",
+        "GET /insurance/campaigns/:id",
+        "GET /insurance/campaigns/my-benefits",
+        "GET /insurance/campaigns/patient/:patientProfileId",
+        "GET /insurance/my-claims",
+        "GET /insurance/patients/options",
+        "GET /insurance/portability/certificates/:certificateId/json",
+        "GET /insurance/portability/certificates/:certificateId/pdf",
+        "GET /insurance/received-claims",
+        "GET /practitioner-settlement-batches",
+        "GET /practitioner-settlement-batches/:id",
+        "GET /prior-authorization-requests/:id",
+        "GET /prior-authorization-requests/inbox",
+        "PATCH /insurance-campaigns/:id",
+        "PATCH /insurance-campaigns/:id/status",
+        "PATCH /insurance/campaigns/:id",
+        "PATCH /insurance/campaigns/:id/status",
+        "POST /insurance-campaigns",
+        "POST /insurance-claims",
+        "POST /insurance-claims/:id/adjudications",
+        "POST /insurance-claims/:id/eob",
+        "POST /insurance-claims/:id/patient-invoice",
+        "POST /insurance-claims/:id/reversals",
+        "POST /insurance-claims/quote",
+        "POST /insurance/campaigns",
+        "POST /insurance/patients/conversation",
+        "POST /insurance/patients/search",
+        "POST /insurance/portability/export",
+        "POST /insurance/received-claims/:id/decision",
+        "POST /practitioner-settlement-batches",
+        "POST /prior-authorization-requests",
+        "POST /prior-authorization-requests/:id/determinations"
+      ]
+    },
+    {
+      "reason": "Alta y edición del catálogo de la aseguradora: `administrableCarrier` exige administrar el tenant dueño (`assertCanAdminister`), no un rol global; quien administra una aseguradora no es un administrador de la plataforma.",
+      "evidence": [
+        "src/modules/insurance/application/services/insurance-backbone.service.ts#administrableCarrier"
+      ],
+      "routes": [
+        "POST /insurance-plans/:planId/benefits",
+        "POST /insurance-products/:productId/plans",
+        "PUT /insurance-carriers/:id/contact-channels",
+        "PUT /insurance-plans/:planId/benefits/:benefitId",
+        "PUT /insurance-plans/:planId/benefits/:benefitId/rules",
+        "PUT /insurance-plans/:planId/premium"
+      ]
+    },
+    {
+      "reason": "Lecturas de aseguradoras y brokers del tenant activo: el aislamiento lo da el tenant del contexto, que el interceptor sólo fija para quien pertenece a él (el controlador documenta por qué no pide un rol global); un id de otra organización responde 404. El listado de aseguradoras marca `canAdminister` con la membresía del actor. La cartera de un broker devuelve sólo la relación comercial, sin datos clínicos.",
+      "evidence": [
+        "src/modules/insurance/presentation/controllers/insurance-read.controller.ts",
+        "src/modules/insurance/application/services/insurance-read.service.ts#listCarriers"
+      ],
+      "routes": [
+        "GET /insurance-brokers",
+        "GET /insurance-brokers/:id",
+        "GET /insurance-brokers/:id/clients",
+        "GET /insurance-carriers",
+        "GET /insurance-carriers/:id"
+      ]
+    },
+    {
+      "reason": "Tablas de referencia de lectura abierta: la terminología publicada (conceptos, glosario, `$lookup`) y los amarres de enumerados dinámicos son catálogo común a toda sesión (la lista hermana `GET /system-context/dynamic-enums` y los value sets son `@Public`). Todas las escrituras de terminología llevan `@Roles`; curar un mapeo por `$translate` exige un rol de terminología en el servicio.",
+      "evidence": [
+        "src/modules/terminology/controllers/terminology-concepts.controller.ts",
+        "src/modules/terminology/controllers/terminology-fhir.controller.ts",
+        "src/modules/terminology/services/concept-maps.service.ts#curate",
+        "src/modules/system_context/controllers/system-context.controller.ts"
+      ],
+      "routes": [
+        "GET /system-context/dynamic-enums/bindings",
+        "GET /terminology/CodeSystem/$lookup",
+        "GET /terminology/concepts",
+        "GET /terminology/concepts/:conceptId",
+        "GET /terminology/concepts/:conceptId/glossary-article",
+        "GET /terminology/concepts/:conceptId/glossary-neighborhood",
+        "GET /terminology/concepts/glossary-graph",
+        "POST /terminology/ConceptMap/$translate"
+      ]
+    },
+    {
+      "reason": "Administración de la organización por membresía: la regla es «quien administra ESA organización» (A-6) o la plataforma, no un rol global — un `SECURITY_ADMIN` global dejaría a la clínica recién registrada sin poder abrir su práctica ni gestionar su oferta, plantilla e invitaciones. El servicio autoriza con `assertCanAdministerPractice` / `assertCanAdminister` (404 si la práctica no existe, 403 si el actor administra otra) antes de leer o escribir.",
+      "evidence": [
+        "src/modules/practice/services/practice-administration.service.ts#assertCanAdministerPractice",
+        "src/modules/practice/services/healthcare-service-offers.service.ts#listOffers",
+        "src/modules/practice/services/clinical-structure.service.ts#publishHealthcareService",
+        "src/modules/practice/services/practice-workforce.service.ts#listPracticeAssignments",
+        "src/modules/practice/services/practice-workforce.service.ts#approveAssignment",
+        "src/modules/practice/services/practice-affiliation-invitations.service.ts#invite",
+        "src/modules/practice/services/organization-practice-provisioning.service.ts#provision"
+      ],
+      "routes": [
+        "GET /practices/:practiceId/healthcare-services",
+        "GET /practices/:practiceId/role-assignments",
+        "PATCH /practices/:practiceId/healthcare-services/:id",
+        "POST /practices/:practiceId/healthcare-services",
+        "POST /practices/:practiceId/role-assignments/invitations",
+        "POST /role-assignments/:roleId/approve",
+        "POST /role-assignments/:roleId/reject",
+        "POST /tenants/:tenantId/practices"
+      ]
+    },
+    {
+      "reason": "Directorio de centros médicos por procedimiento: lista prestadores y precios que ellos mismos publicaron (solo aparecen los que fijaron precio), no datos de ningún paciente. Exige sesión válida (no es `@Public`) y es `@TenantAgnostic` porque busca entre organizaciones; la variante que cruza las órdenes de un paciente (`search/for-my-orders`) sí declara `@Roles('PATIENT')`.",
+      "evidence": [
+        "src/modules/medical_centers/controllers/medical-centers.controller.ts",
+        "src/modules/medical_centers/services/medical-centers-search.service.ts"
+      ],
+      "routes": [
+        "GET /medical-centers/search"
+      ]
+    },
+    {
+      "reason": "Imagen de un servicio del catálogo (decisión P-22-8): sesión autenticada y autorización por contexto en el servicio — el servicio debe existir, estar activo y ser de una práctica del tenant activo; en cualquier otro caso responde el mismo 404 uniforme, y el archivo se valida con `assertUsableForAuthorizedContext`.",
+      "evidence": [
+        "src/modules/billing/services/billing-service-catalog.service.ts#getImageContent"
+      ],
+      "routes": [
+        "GET /billing/service-catalog/:id/image"
+      ]
+    }
   ]
 }

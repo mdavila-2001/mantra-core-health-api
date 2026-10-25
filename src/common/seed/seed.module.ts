@@ -68,6 +68,7 @@ import { BoliviaFacilitiesSeedService } from './bolivia-facilities-seed.service'
 import { BoliviaFeeScheduleSeedService } from './bolivia-fee-schedule-seed.service';
 import { BoliviaInsuranceSeedService } from './bolivia-insurance-seed.service';
 import { SeedBootstrapService } from './seed-bootstrap.service';
+import { SeedCoreState } from './seed-core.state';
 import { SpecialtyChartTemplates } from '../../modules/chart/entities';
 import {
   DynamicFieldDefinitions,
@@ -178,6 +179,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
     QaFlowsSeedService,
     ProviderAccountsSeedService,
     SeedBootstrapService,
+    SeedCoreState,
     ClinicalFormsSeedService,
     PracticeDefaultServicesSeedService,
     PeopleSeedService,
@@ -186,6 +188,7 @@ import { Files, FileVersions } from '../../modules/common/entities';
   ],
   exports: [
     SeedBootstrapService,
+    SeedCoreState,
     TerminologySeedService,
     DynamicEnumSeedService,
     PatientPortalProxySeedService,

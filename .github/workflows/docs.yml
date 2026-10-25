@@ -278,16 +278,11 @@ jobs:
           FRONT_ROOT: ${{ github.workspace }}/_frontend
         run: yarn inventario:verificar
 
-      # NO bloqueante por ahora: sobre `dev` limpio y con el inventario ya regenerado,
-      # 8 de 121 pruebas están rojas por expectativas que el código dejó atrás (no por
-      # el inventario escrito, que `inventario:verificar` ya cubre): el controlador con
-      # ruta en arreglo `InsuranceCampaignsController` (`@Controller([...])`) que el
-      # generador no resuelve, el check-in de la cita, `PUT /scheduling/bookings/{id}/payment-state`
-      # y el límite global de validación. Ponerlas en rojo bloquearía todo PR por
-      # una deuda ajena. Cuando se arreglen (generador o expectativas), quitar la
-      # línea `continue-on-error` y el paso pasa a bloquear.
+      # Las pruebas de los generadores del inventario (121+ casos: árboles de decisión,
+      # máquinas de estado, requerimientos, catálogo) corren contra el código real y el
+      # modelo fijado arriba. Bloquean: una expectativa que el código dejó atrás se
+      # actualiza en el mismo PR que mueve el código.
       - name: Pruebas del inventario
-        continue-on-error: true
         env:
           MODEL_ROOT: ${{ github.workspace }}/_modelo
           FRONT_ROOT: ${{ github.workspace }}/_frontend

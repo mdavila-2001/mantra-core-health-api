@@ -886,7 +886,7 @@ Corregir el nombre o el tipo de un campo propio
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo se pueden corregir los campos propios de la organización; los del estándar no se editan desde acá |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Campo no encontrado |
 | 409 | `CONFLICT` | ConflictException: El campo ya tiene valores capturados: cambiar su tipo reescribiría la historia |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: `options` sólo aplica a dataType "code"; PreconditionFailedException: `allowOther` sólo aplica a dataType "code"; PreconditionFailedException: Un campo "code" declara valueSetId u options, no los dos; PreconditionFailedException: `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología; PreconditionFailedException: Un campo "code" sin valueSetId necesita al menos dos opciones; PreconditionFailedException: Una opción no puede estar vacía; PreconditionFailedException: Las opciones no pueden repetirse; PreconditionFailedException: No se puede quitar una opción que ya tiene respuestas capturadas |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: `options` sólo aplica a dataType "code"; PreconditionFailedException: `allowOther` sólo aplica a dataType "code"; PreconditionFailedException: Un campo "code" declara valueSetId u options, no los dos; PreconditionFailedException: `allowOther` no aplica sobre un valueSetId: ese catálogo lo administra terminología; PreconditionFailedException: Un campo "code" sin valueSetId necesita al menos dos opciones; PreconditionFailedException: Una opción no puede estar vacía; PreconditionFailedException: Las opciones no pueden repetirse; PreconditionFailedException: No se puede quitar una opción que ya tiene respuestas capturadas; PreconditionFailedException: Los topes de respuestas sólo aplican a un campo de elección que admite varias; PreconditionFailedException: El mínimo de respuestas no puede superar al máximo; PreconditionFailedException: El tope de respuestas no puede superar la cantidad de opciones |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -981,35 +981,54 @@ flowchart TD
   n41 -->|"sí"| n42
   n43[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
   n41 -->|"no"| n43
-  n44[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n44["Llama a FormsFieldsService.applyCardinality"]:::llamada
   n43 --> n44
   n38 -->|"no"| n44
-  n45{"dto.name !== undefined"}:::decision
+  n45{"min !== undefined || max !== undefined"}:::decision
   n44 --> n45
-  n46[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n46{"field.dataType !== 'code' || multiple !== true"}:::decision
   n45 -->|"sí"| n46
-  n47[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
-  n46 --> n47
-  n45 -->|"no"| n47
-  n48{"dto.multiple !== undefined"}:::decision
-  n47 --> n48
-  n49[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n47(["422 PRECONDITION_FAILED Los topes de respuestas sólo aplican a un campo de elección que admite varias"]):::error
+  n46 -->|"sí"| n47
+  n48{"min !== undefined && max !== undefined && min › max"}:::decision
+  n46 -->|"no"| n48
+  n45 -->|"no"| n48
+  n49(["422 PRECONDITION_FAILED El mínimo de respuestas no puede superar al máximo"]):::error
   n48 -->|"sí"| n49
-  n50[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
-  n49 --> n50
+  n50{"offered !== undefined && highest !== undefined && highest › offered"}:::decision
   n48 -->|"no"| n50
-  n51{"dto.allowOther !== undefined"}:::decision
-  n50 --> n51
-  n52[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
-  n51 -->|"sí"| n52
-  n53{"dto.description !== undefined"}:::decision
+  n51(["422 PRECONDITION_FAILED El tope de respuestas no puede superar la cantidad de opciones"]):::error
+  n50 -->|"sí"| n51
+  n52[("ACTUALIZA forms.dynamic_field_definitions · ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n50 -->|"no"| n52
+  n53[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
   n52 --> n53
-  n51 -->|"no"| n53
-  n54[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
-  n53 -->|"sí"| n54
-  n55(("200 Responde con éxito")):::ok
-  n54 --> n55
-  n53 -->|"no"| n55
+  n54{"dto.name !== undefined"}:::decision
+  n53 --> n54
+  n55[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n54 -->|"sí"| n55
+  n56[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n55 --> n56
+  n54 -->|"no"| n56
+  n57{"dto.multiple !== undefined"}:::decision
+  n56 --> n57
+  n58[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n57 -->|"sí"| n58
+  n59[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n58 --> n59
+  n57 -->|"no"| n59
+  n60{"dto.allowOther !== undefined"}:::decision
+  n59 --> n60
+  n61[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n60 -->|"sí"| n61
+  n62{"dto.description !== undefined"}:::decision
+  n61 --> n62
+  n60 -->|"no"| n62
+  n63[("ACTUALIZA forms.dynamic_field_definitions")]:::efecto
+  n62 -->|"sí"| n63
+  n64(("200 Responde con éxito")):::ok
+  n63 --> n64
+  n62 -->|"no"| n64
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

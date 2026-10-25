@@ -136,11 +136,68 @@ export function computePermissionDrift(
 /** Clave `VERBO /plantilla` de una ruta, la que usa una lista de excepciones aceptadas. */
 export const routeKey = (r: RouteRef): string => `${r.method} ${r.template}`;
 
+/**
+ * Un grupo de rutas sin `@Roles` cuya autorización se revisó y se decide en otro lugar (el servicio,
+ * un guard propio, el sujeto de la sesión). Una ruta sin `@Roles` la pasa cualquier sesión
+ * autenticada; que figure acá dice **quién** la autoriza de verdad y dónde se comprueba.
+ */
+export interface ReviewedRoutes {
+  /** Por qué la ruta no necesita `@Roles`: qué la autoriza en su lugar. */
+  reason: string;
+  /** Dónde se comprueba (`ruta/del/archivo.ts#símbolo`), para poder auditar la afirmación. */
+  evidence: readonly string[];
+  /** Rutas del grupo (`VERBO /plantilla`). */
+  routes: readonly string[];
+}
+
 export interface DriftAllowlist {
   /** Roles usados sin sembrar que se aceptan por ahora. */
   roles?: readonly string[];
-  /** Rutas sin `@Roles` que se aceptan por ahora (`VERBO /plantilla`). */
+  /**
+   * Rutas sin `@Roles` que **no se revisaron** (`VERBO /plantilla`): deriva heredada, sin motivo.
+   * Una ruta revisada pasa a {@link DriftAllowlist.reviewed}; la que se corrige sale de la lista.
+   */
   routes?: readonly string[];
+  /** Rutas sin `@Roles` revisadas, con el motivo y la evidencia de quién las autoriza. */
+  reviewed?: readonly ReviewedRoutes[];
+}
+
+/** Longitud mínima del motivo de un grupo revisado: una palabra suelta no es un motivo. */
+export const MIN_REASON_LENGTH = 20;
+
+/** Todas las rutas aceptadas sin `@Roles`, revisadas o no. */
+function acceptedRoutes(allow: DriftAllowlist): string[] {
+  return [
+    ...(allow.routes ?? []),
+    ...(allow.reviewed ?? []).flatMap((group) => group.routes),
+  ];
+}
+
+/**
+ * Defectos de la propia lista de excepciones: un grupo revisado sin motivo o sin evidencia no
+ * revisó nada, y una ruta repetida (o a la vez revisada y sin revisar) esconde cuál de las dos
+ * afirmaciones vale.
+ */
+export function invalidAllowlist(allow: DriftAllowlist = {}): string[] {
+  const problemas: string[] = [];
+  for (const [i, group] of (allow.reviewed ?? []).entries()) {
+    if (!group.reason || group.reason.trim().length < MIN_REASON_LENGTH)
+      problemas.push(
+        `grupo revisado #${i + 1} sin motivo (mínimo ${MIN_REASON_LENGTH} caracteres)`,
+      );
+    if (!group.evidence?.length || group.evidence.some((e) => !e.trim()))
+      problemas.push(
+        `grupo revisado #${i + 1} sin evidencia: ${group.reason?.slice(0, 40) ?? ''}`,
+      );
+    if (!group.routes?.length)
+      problemas.push(`grupo revisado #${i + 1} sin rutas`);
+  }
+  const vistas = new Set<string>();
+  for (const ruta of acceptedRoutes(allow)) {
+    if (vistas.has(ruta)) problemas.push(`ruta repetida en la lista: ${ruta}`);
+    vistas.add(ruta);
+  }
+  return problemas;
 }
 
 /**
@@ -153,7 +210,7 @@ export function blockingDrift(
   allow: DriftAllowlist = {},
 ): string[] {
   const rolesOk = new Set(allow.roles ?? []);
-  const rutasOk = new Set(allow.routes ?? []);
+  const rutasOk = new Set(acceptedRoutes(allow));
   return [
     ...report.usedNotSeeded
       .filter((u) => !rolesOk.has(u.role))
@@ -181,7 +238,7 @@ export function staleAllowlist(
       .map(
         (rol) => `excepción obsoleta, el rol ya no está sin sembrar: ${rol}`,
       ),
-    ...(allow.routes ?? [])
+    ...acceptedRoutes(allow)
       .filter((ruta) => !rutasConDeriva.has(ruta))
       .map(
         (ruta) =>

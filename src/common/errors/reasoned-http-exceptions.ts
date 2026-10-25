@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  InternalServerErrorException,
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -74,5 +75,22 @@ export function serviceUnavailableWithReason(
 ): ServiceUnavailableException {
   return new ServiceUnavailableException(
     body(ErrorCode.DEPENDENCY_UNAVAILABLE, message, reason, details),
+  );
+}
+
+/**
+ * 500 `INTERNAL` con `reason` de sistema.
+ *
+ * Es para errores de programación del núcleo, no para condiciones del request:
+ * el filtro global no expone el cuerpo de un 500 salvo los `reason` de su lista
+ * cerrada, así que el `reason` sirve al log y a soporte, no al cliente.
+ */
+export function internalWithReason(
+  message: string,
+  reason: SystemErrorReason,
+  details?: Record<string, unknown>,
+): InternalServerErrorException {
+  return new InternalServerErrorException(
+    body(ErrorCode.INTERNAL, message, reason, details),
   );
 }

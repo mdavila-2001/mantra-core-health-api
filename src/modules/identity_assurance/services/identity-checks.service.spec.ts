@@ -683,5 +683,59 @@ describe('IdentityChecksService', () => {
       expect(d.scope.filterToTenant).not.toHaveBeenCalled();
       expect(res.checks.map((c) => c.id)).toEqual(['ch1', 'ch2']);
     });
+
+    it('listDispatchable no deja que los checks más antiguos de otro tenant llenen el lote del actor', async () => {
+      const d = build();
+      const row = (id: string, caseId: string) => ({
+        ...ownCheck(),
+        id,
+        identityVerificationCaseId: caseId,
+        checkTypeConceptId: IDA.CHECK_TYPE_IDENTITY_CARD,
+      });
+      // Lote de 2: la primera página es toda de otro tenant, la segunda trae
+      // los dos checks propios.
+      d.checksRepo.findDispatchable.mockImplementation(
+        async (_em: any, _s: any, _limit: number, offset = 0) =>
+          offset === 0
+            ? [row('x1', 'kx1'), row('x2', 'kx2')]
+            : [row('m1', 'k1'), row('m2', 'k2')],
+      );
+      d.casesRepo.findById.mockImplementation(async (_tx: any, id: string) => ({
+        id,
+      }));
+      d.scope.filterToTenant.mockImplementation(
+        async (_tx: any, cases: any[]) =>
+          cases.filter((k) => !k.id.startsWith('kx')),
+      );
+
+      const res = await d.service.listDispatchable(actor, 2);
+
+      expect(res.checks.map((c) => c.id)).toEqual(['m1', 'm2']);
+      expect(d.checksRepo.findDispatchable).toHaveBeenCalledTimes(2);
+    });
+
+    it('un SYSTEM acotado a un tenant (scopedRoles) no barre entre tenants', async () => {
+      const d = build();
+      d.checksRepo.findDispatchable.mockResolvedValue([]);
+      const scopedSystem = {
+        id: 'worker-2',
+        roles: ['SYSTEM'],
+        scopedRoles: { [T1]: ['SYSTEM'] },
+      } as any;
+
+      await d.service.listDispatchable(scopedSystem);
+
+      // Pasó por el filtro de tenant en vez de saltarlo como el SYSTEM global.
+      expect(d.checksRepo.findDispatchable).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        50,
+        0,
+      );
+      const noTenant = d.rawService.listDispatchable(scopedSystem);
+      await expect(noTenant).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+    });
   });
 });

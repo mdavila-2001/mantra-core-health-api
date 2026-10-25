@@ -299,7 +299,7 @@ stateDiagram-v2
 
 | Operación | Estados de destino que nombra | A través de |
 |---|---|---|
-| PATCH /graph/rule-hits/{id} | dismissed, resolved | GraphAnalyticsService.triageRuleHit |
+| PATCH /graph/rule-hits/{id} | dismissed, resolved | GraphQueryController.triageRuleHit → GraphAnalyticsService.triageRuleHit |
 
 ## Árbol de decisión por operación
 
