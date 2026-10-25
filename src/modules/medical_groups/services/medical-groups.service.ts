@@ -513,6 +513,10 @@ export class MedicalGroupsService {
         decision === 'ACCEPTED' &&
         group.status === MEDICAL_GROUP_STATUS.PENDING_TEAM
       ) {
+        // `hasPendingInvites` cuenta en la base: sin este flush todavía ve
+        // como PENDING la invitación que se está aceptando, y el grupo nunca
+        // pasaba a SCHEDULED aunque todo el equipo hubiera aceptado.
+        await tx.flush();
         const stillPending = await this.membersRepo.hasPendingInvites(
           tx,
           groupId,
