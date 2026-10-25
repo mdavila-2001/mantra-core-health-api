@@ -471,10 +471,18 @@ describe('EducationLearningService', () => {
           });
         });
 
-        it('no exige moneda si el curso no la fija', async () => {
+        it('un curso con precio y sin moneda rechaza la compra (falla cerrada)', async () => {
+          const { d, result } = run(ok(), publishedCourse({ price: '120.00' }));
+          await expect(result).rejects.toMatchObject({
+            reason: EducationErrorReason.COURSE_PRICE_WITHOUT_CURRENCY,
+          });
+          expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+        });
+
+        it('un curso sin precio no compara moneda', async () => {
           const { result } = run(
-            ok({ currencyConceptId: 'cur-2' }),
-            publishedCourse({ price: '120.00' }),
+            ok({ amount: '0', currencyConceptId: 'cur-2' }),
+            publishedCourse({ price: '0' }),
           );
           await expect(result).resolves.toBeDefined();
         });

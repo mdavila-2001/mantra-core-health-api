@@ -31,6 +31,12 @@ export enum EducationErrorReason {
    * Un único motivo para los cuatro casos: no es un oráculo de qué falló.
    */
   ENROLLMENT_PAYMENT_MISMATCH = 'ENROLLMENT_PAYMENT_MISMATCH',
+  /**
+   * El curso tiene precio pero no moneda: no hay con qué comparar el pago y la
+   * compra se rechaza (falla cerrada); nunca se comparan montos de monedas
+   * distintas.
+   */
+  COURSE_PRICE_WITHOUT_CURRENCY = 'COURSE_PRICE_WITHOUT_CURRENCY',
   /** El intento de pago ya respalda otra inscripción. */
   ENROLLMENT_PAYMENT_ALREADY_USED = 'ENROLLMENT_PAYMENT_ALREADY_USED',
 }

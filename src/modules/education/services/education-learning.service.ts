@@ -287,8 +287,9 @@ export class EducationLearningService {
    *
    * - **Pagador**: lo creó el actor, o es el usuario aprendiz (`learnerType`
    *   `USER`). Para inscribir a un tercero con otro pago existe `ASSIGNED`.
-   * - **Importe**: monto no menor al precio del curso y, si el curso fija
-   *   moneda, la misma moneda.
+   * - **Importe**: monto no menor al precio del curso y en la misma moneda. Un
+   *   curso con precio y sin moneda rechaza la compra
+   *   (`COURSE_PRICE_WITHOUT_CURRENCY`): no hay con qué comparar.
    * - **Curso**: si el intento declara un recurso de origen
    *   (`source_ref_type`/`source_ref_id`) o una factura, tiene que ser este
    *   curso ({@link COURSE_PAYMENT_SOURCE_REF}). Un intento sin referencia no se
@@ -376,10 +377,18 @@ export class EducationLearningService {
       (intent.createdByUserId === actor.id ||
         (learnerType === 'USER' && intent.createdByUserId === learnerRefId));
     const price = Number(course.price ?? '0');
+    if (price > 0 && !course.currencyConceptId) {
+      throw new PreconditionFailedException(
+        'El curso tiene precio pero no moneda: no se puede verificar el pago',
+        { courseId: course.id },
+        EducationErrorReason.COURSE_PRICE_WITHOUT_CURRENCY,
+      );
+    }
     const amountOk = Number(intent.amount) >= price;
+    // Con precio, la moneda del pago tiene que ser la del curso: un monto en
+    // otra moneda no se compara.
     const currencyOk =
-      !course.currencyConceptId ||
-      intent.currencyConceptId === course.currencyConceptId;
+      price <= 0 || intent.currencyConceptId === course.currencyConceptId;
 
     if ((references && !sameCourse) || !payerOk || !amountOk || !currencyOk) {
       throw new PreconditionFailedException(
