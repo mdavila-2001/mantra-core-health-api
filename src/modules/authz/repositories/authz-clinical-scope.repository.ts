@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS } from '../../../common';
-import {
-  Appointments,
-  CareEpisodes,
-  Encounters,
-} from '../../clinical/entities';
+import { Encounters } from '../../clinical/entities';
 import { Consents } from '../../consent/entities';
 import { DIR } from '../../directory/directory.concepts';
 import { TenantMemberships } from '../../directory/entities';
@@ -49,37 +45,56 @@ export class AuthzClinicalScopeRepository {
    * ¿Hay evidencia de que el paciente pertenece al tenant?
    *
    * El modelo no guarda el tenant del paciente: el padrón de personas es único
-   * para toda la plataforma. La pertenencia se prueba con lo que sí es de un
-   * tenant, de más específico a más general: un encuentro, un turno, una reserva
-   * o un episodio de atención de ese tenant con el paciente, o la membresía activa
-   * de la cuenta del paciente en ese tenant (el autorregistro la crea).
+   * para toda la plataforma. La pertenencia se prueba sólo con huellas que **el
+   * propio paciente** deja y que un actor del tenant no puede fabricar por sí
+   * solo, ambas a través de la cuenta vinculada al paciente:
    *
-   * No cuentan las relaciones asistenciales, los accesos clínicos ni las
+   * 1. una reserva del tenant hecha por esa cuenta (`booked_by_user_id`), sea cual
+   *    sea su estado: reservar, aunque luego se cancele, es un acto del paciente;
+   * 2. la membresía activa de esa cuenta en el tenant que no la incorporó un
+   *    tercero: la crea el autorregistro del propio paciente (`invited_by_user_id`
+   *    nulo) o la cuenta misma. Una membresía que un administrador del tenant dio
+   *    de alta con `POST /directory/tenants/:id/memberships` lleva su id en
+   *    `invited_by_user_id` y no cuenta.
+   *
+   * **No cuentan** los encuentros, turnos, reservas hechas por el personal ni los
+   * episodios de atención, aunque sean del tenant y del paciente: los crea el
+   * personal para cualquier paciente existente, sin autorización previa
+   * (`POST /clinical/encounters/check-in`, `POST /clinical/care-episodes`,
+   * `POST /scheduling/appointments/direct`, confirmación de retenciones del
+   * mostrador), y en cualquier estado —incluido «confirmada» o «atendida»—.
+   * Aceptarlos dejaría que un tenant ajeno se fabricara el vínculo y luego
+   * concediera accesos sobre una historia que no es suya.
+   *
+   * Tampoco cuentan las relaciones asistenciales, los accesos clínicos ni las
    * representaciones legales: son justo lo que esta comprobación protege, y
    * aceptarlas dejaría que una fila indebida se justificara a sí misma.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param patientProfileId - Perfil de paciente.
    * @param tenantId - Tenant activo.
-   * @returns `true` si hay al menos una huella del paciente en el tenant.
+   * @returns `true` si hay al menos una huella del propio paciente en el tenant.
    */
   async patientHasFootprintInTenant(
     em: EntityManager,
     patientProfileId: string,
     tenantId: string,
   ): Promise<boolean> {
-    const filter = { patientProfileId, tenantId };
-    if ((await em.count(Encounters, filter)) > 0) return true;
-    if ((await em.count(Appointments, filter)) > 0) return true;
-    if ((await em.count(AppointmentBookings, filter)) > 0) return true;
-    if ((await em.count(CareEpisodes, filter)) > 0) return true;
-
     // `patient_profiles.profile_id` es el id de la persona: de ahí a su cuenta.
+    // Sin cuenta el paciente no ha hecho nada por sí mismo: no hay huella propia.
     const link = await em.findOne(PersonAccountLinks, {
       personId: patientProfileId,
       statusConceptId: PROF.ACCOUNT_LINK_ACTIVE,
     });
     if (!link) return false;
+
+    const bookedBySelf = await em.count(AppointmentBookings, {
+      patientProfileId,
+      tenantId,
+      bookedByUserId: link.userId,
+    });
+    if (bookedBySelf > 0) return true;
+
     return (
       (await em.count(TenantMemberships, {
         userId: link.userId,
@@ -87,6 +102,7 @@ export class AuthzClinicalScopeRepository {
         statusConceptId: {
           $in: [DIR.MEMBERSHIP_ACTIVE, CONCEPTS.MEMBERSHIP_ACTIVE],
         },
+        $or: [{ invitedByUserId: null }, { invitedByUserId: link.userId }],
       })) > 0
     );
   }

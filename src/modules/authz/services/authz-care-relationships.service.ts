@@ -133,26 +133,29 @@ export class AuthzCareRelationshipsService {
       const tenantId = this.scope.resolveTenant(dto.tenantId);
       await this.scope.assertPatientExists(tx, dto.patientProfileId);
 
-      const active = await this.careRepo.findActive(
+      // Los duplicados se buscan sólo en el tenant activo: una relación o una
+      // solicitud de otra organización no es duplicado de ésta, y un 409 por ella
+      // delataría que el vínculo existe allí. Sin `details`: ni ids de vuelta.
+      const active = await this.careRepo.findActiveInTenant(
         tx,
         dto.patientProfileId,
         practitionerProfileId,
+        tenantId,
       );
       if (active) {
         throw new ConflictException(
           'Ya existe una relación asistencial activa con ese paciente',
-          { patientProfileId: dto.patientProfileId, practitionerProfileId },
         );
       }
-      const pending = await this.careRepo.findPending(
+      const pending = await this.careRepo.findPendingInTenant(
         tx,
         dto.patientProfileId,
         practitionerProfileId,
+        tenantId,
       );
       if (pending) {
         throw new ConflictException(
           'Ya hay una solicitud pendiente de respuesta para ese paciente',
-          { patientProfileId: dto.patientProfileId, practitionerProfileId },
         );
       }
 
@@ -345,18 +348,19 @@ export class AuthzCareRelationshipsService {
         tenantId,
       );
 
-      const existing = await this.careRepo.findActive(
+      // El duplicado se busca sólo en el tenant activo (como en los accesos
+      // clínicos): una relación de otra organización no bloquea ésta ni se delata
+      // con un 409. La respuesta no lleva `details`: no devuelve ids.
+      const existing = await this.careRepo.findActiveInTenant(
         tx,
         dto.patientProfileId,
         dto.practitionerProfileId,
+        tenantId,
       );
       if (existing) {
         throw new ConflictException(
           'Ya existe una relación asistencial activa para ese practicante',
-          {
-            patientProfileId: dto.patientProfileId,
-            practitionerProfileId: dto.practitionerProfileId,
-          },
+          undefined,
           AuthzErrorReason.CARE_RELATIONSHIP_ALREADY_ACTIVE,
         );
       }
@@ -508,18 +512,17 @@ export class AuthzCareRelationshipsService {
         tenantId,
       );
 
-      const existing = await this.legalRepo.findActive(
+      // Sólo en el tenant activo y sin `details`, igual que la relación asistencial.
+      const existing = await this.legalRepo.findActiveInTenant(
         tx,
         dto.patientProfileId,
         dto.representativeUserId,
+        tenantId,
       );
       if (existing) {
         throw new ConflictException(
           'Ya existe una representación legal activa para ese usuario',
-          {
-            patientProfileId: dto.patientProfileId,
-            representativeUserId: dto.representativeUserId,
-          },
+          undefined,
           AuthzErrorReason.LEGAL_REPRESENTATION_ALREADY_ACTIVE,
         );
       }

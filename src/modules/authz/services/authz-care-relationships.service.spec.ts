@@ -37,15 +37,15 @@ function build() {
     fork: mockFn(() => forkEm),
   };
   const careRepo = {
-    findActive: mockFn(),
-    findPending: mockFn().mockResolvedValue(null),
+    findActiveInTenant: mockFn(),
+    findPendingInTenant: mockFn().mockResolvedValue(null),
     findById: mockFn(),
     findByPatient: mockFn().mockResolvedValue([]),
     findPendingByPatient: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
   const legalRepo = {
-    findActive: mockFn(),
+    findActiveInTenant: mockFn(),
     findById: mockFn(),
     findByPatient: mockFn().mockResolvedValue([]),
     create: mockFn(),
@@ -91,7 +91,7 @@ describe('AuthzCareRelationshipsService', () => {
   describe('establishCareRelationship (C-06)', () => {
     it('establishes an active care relationship', async () => {
       const d = build();
-      d.careRepo.findActive.mockResolvedValue(null);
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
       d.careRepo.create.mockReturnValue({ id: 'cr-1', createdAt: new Date() });
       const res = await d.service.establishCareRelationship(
         {
@@ -108,7 +108,7 @@ describe('AuthzCareRelationshipsService', () => {
 
     it('rejects a duplicate active care relationship', async () => {
       const d = build();
-      d.careRepo.findActive.mockResolvedValue({ id: 'existing' });
+      d.careRepo.findActiveInTenant.mockResolvedValue({ id: 'existing' });
       await expect(
         d.service.establishCareRelationship(
           {
@@ -205,8 +205,8 @@ describe('AuthzCareRelationshipsService', () => {
 
     it('crea la solicitud en PENDING y notifica al paciente', async () => {
       const d = build();
-      d.careRepo.findActive.mockResolvedValue(null);
-      d.careRepo.findPending.mockResolvedValue(null);
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.findPendingInTenant.mockResolvedValue(null);
       d.careRepo.create.mockReturnValue({ id: 'cr-1', createdAt: new Date() });
       d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
         userId: 'u-pat-1',
@@ -235,8 +235,8 @@ describe('AuthzCareRelationshipsService', () => {
 
     it('no falla si el paciente no tiene cuenta activa: sólo omite la notificación', async () => {
       const d = build();
-      d.careRepo.findActive.mockResolvedValue(null);
-      d.careRepo.findPending.mockResolvedValue(null);
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.findPendingInTenant.mockResolvedValue(null);
       d.careRepo.create.mockReturnValue({ id: 'cr-1', createdAt: new Date() });
       d.accountLinksRepo.findActiveByPerson.mockResolvedValue(null);
 
@@ -261,7 +261,7 @@ describe('AuthzCareRelationshipsService', () => {
 
     it('rechaza si ya hay una relación activa con ese paciente', async () => {
       const d = build();
-      d.careRepo.findActive.mockResolvedValue({ id: 'existing' });
+      d.careRepo.findActiveInTenant.mockResolvedValue({ id: 'existing' });
       await expect(
         d.service.requestCareRelationship(
           { tenantId: 't1', patientProfileId: 'pat-1' } as any,
@@ -272,8 +272,8 @@ describe('AuthzCareRelationshipsService', () => {
 
     it('rechaza una segunda solicitud mientras la primera sigue pendiente', async () => {
       const d = build();
-      d.careRepo.findActive.mockResolvedValue(null);
-      d.careRepo.findPending.mockResolvedValue({ id: 'cr-pending' });
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.findPendingInTenant.mockResolvedValue({ id: 'cr-pending' });
       await expect(
         d.service.requestCareRelationship(
           { tenantId: 't1', patientProfileId: 'pat-1' } as any,
@@ -440,7 +440,7 @@ describe('AuthzCareRelationshipsService', () => {
   describe('legal representation (C-07/A-03)', () => {
     it('registers an active legal representation', async () => {
       const d = build();
-      d.legalRepo.findActive.mockResolvedValue(null);
+      d.legalRepo.findActiveInTenant.mockResolvedValue(null);
       d.legalRepo.create.mockReturnValue({ id: 'lr-1', createdAt: new Date() });
       const res = await d.service.establishLegalRepresentation(
         {
@@ -457,7 +457,7 @@ describe('AuthzCareRelationshipsService', () => {
 
     it('rejects a duplicate active representation', async () => {
       const d = build();
-      d.legalRepo.findActive.mockResolvedValue({ id: 'existing' });
+      d.legalRepo.findActiveInTenant.mockResolvedValue({ id: 'existing' });
       await expect(
         d.service.establishLegalRepresentation(
           {
@@ -498,7 +498,7 @@ describe('AuthzCareRelationshipsService', () => {
 
     it('persiste el tenant del contexto y no consulta si el paciente es de otro', async () => {
       const d = build();
-      d.careRepo.findActive.mockResolvedValue(null);
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
       d.careRepo.create.mockReturnValue({ id: 'cr-1', createdAt: new Date() });
       await d.service.establishCareRelationship(
         missingPatient('pat-1') as any,
@@ -529,7 +529,7 @@ describe('AuthzCareRelationshipsService', () => {
       expect(error).toBeInstanceOf(ResourceNotFoundException);
       expect(error.reason).toBe(AuthzErrorReason.AUTHZ_PATIENT_OUT_OF_SCOPE);
       expect(error.details).toBeUndefined();
-      expect(d.careRepo.findActive).not.toHaveBeenCalled();
+      expect(d.careRepo.findActiveInTenant).not.toHaveBeenCalled();
       expect(d.careRepo.create).not.toHaveBeenCalled();
       expect(d.tx.flush).not.toHaveBeenCalled();
     });
@@ -584,7 +584,7 @@ describe('AuthzCareRelationshipsService', () => {
         ),
       );
       expect(error.reason).toBe(AuthzErrorReason.AUTHZ_PATIENT_OUT_OF_SCOPE);
-      expect(d.legalRepo.findActive).not.toHaveBeenCalled();
+      expect(d.legalRepo.findActiveInTenant).not.toHaveBeenCalled();
       expect(d.legalRepo.create).not.toHaveBeenCalled();
     });
 
@@ -592,8 +592,8 @@ describe('AuthzCareRelationshipsService', () => {
       const d = build();
       d.scopeRepo.patientExists.mockResolvedValue(true);
       d.scopeRepo.patientHasFootprintInTenant.mockResolvedValue(false);
-      d.careRepo.findActive.mockResolvedValue(null);
-      d.careRepo.findPending.mockResolvedValue(null);
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.findPendingInTenant.mockResolvedValue(null);
       d.careRepo.create.mockReturnValue({ id: 'cr-1', createdAt: new Date() });
       const res = await d.service.requestCareRelationship(
         { tenantId: ACTIVE_TENANT, patientProfileId: 'pat-nuevo' } as any,
@@ -719,6 +719,103 @@ describe('AuthzCareRelationshipsService', () => {
         ).rejects.toBeInstanceOf(PreconditionFailedException);
         expect(d.tx.flush).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('duplicados acotados al tenant: el 409 no sondea otras organizaciones', () => {
+    const rel = {
+      tenantId: ACTIVE_TENANT,
+      patientProfileId: 'pat-1',
+      practitionerProfileId: 'prac-1',
+      relationshipType: 'TREATING',
+    } as any;
+    const practitioner = {
+      id: 'u-doc-1',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: 'prac-1',
+    } as any;
+
+    it('el alta directa busca el duplicado sólo en el tenant activo', async () => {
+      const d = build();
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.create.mockReturnValue({ id: 'cr-1', createdAt: new Date() });
+      await d.service.establishCareRelationship(rel, actor);
+      expect(d.careRepo.findActiveInTenant).toHaveBeenCalledWith(
+        d.tx,
+        'pat-1',
+        'prac-1',
+        ACTIVE_TENANT,
+      );
+    });
+
+    it('el 409 del alta directa no devuelve ids de paciente ni de profesional', async () => {
+      const d = build();
+      d.careRepo.findActiveInTenant.mockResolvedValue({ id: 'existing' });
+      const error = await thrown(
+        d.service.establishCareRelationship(rel, actor),
+      );
+      expect(error.getStatus()).toBe(409);
+      expect(error.details).toBeUndefined();
+      expect(error.reason).toBe(
+        AuthzErrorReason.CARE_RELATIONSHIP_ALREADY_ACTIVE,
+      );
+    });
+
+    it('la solicitud busca activa y pendiente sólo en el tenant activo y su 409 no lleva details', async () => {
+      const d = build();
+      d.careRepo.findActiveInTenant.mockResolvedValue({ id: 'existing' });
+      const active = await thrown(
+        d.service.requestCareRelationship(rel, practitioner),
+      );
+      expect(active.getStatus()).toBe(409);
+      expect(active.details).toBeUndefined();
+      expect(d.careRepo.findActiveInTenant).toHaveBeenCalledWith(
+        d.tx,
+        'pat-1',
+        'prac-1',
+        ACTIVE_TENANT,
+      );
+
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.findPendingInTenant.mockResolvedValue({ id: 'cr-pending' });
+      const pending = await thrown(
+        d.service.requestCareRelationship(rel, practitioner),
+      );
+      expect(pending.getStatus()).toBe(409);
+      expect(pending.details).toBeUndefined();
+      expect(d.careRepo.findPendingInTenant).toHaveBeenCalledWith(
+        d.tx,
+        'pat-1',
+        'prac-1',
+        ACTIVE_TENANT,
+      );
+    });
+
+    it('la representación legal busca el duplicado sólo en el tenant activo y su 409 no lleva details', async () => {
+      const d = build();
+      d.legalRepo.findActiveInTenant.mockResolvedValue({ id: 'existing' });
+      const error = await thrown(
+        d.service.establishLegalRepresentation(
+          {
+            tenantId: ACTIVE_TENANT,
+            patientProfileId: 'pat-1',
+            representativeUserId: 'u9',
+            representationType: 'PARENT',
+          } as any,
+          actor,
+        ),
+      );
+      expect(error.getStatus()).toBe(409);
+      expect(error.details).toBeUndefined();
+      expect(error.reason).toBe(
+        AuthzErrorReason.LEGAL_REPRESENTATION_ALREADY_ACTIVE,
+      );
+      expect(d.legalRepo.findActiveInTenant).toHaveBeenCalledWith(
+        d.tx,
+        'pat-1',
+        'u9',
+        ACTIVE_TENANT,
+      );
     });
   });
 });

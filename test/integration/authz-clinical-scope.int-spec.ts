@@ -13,7 +13,7 @@ import { SEED } from '../../src/common';
  * AUTHZ-M01 · los accesos clínicos no enlazan un paciente ajeno al tenant del actor.
  *
  * Contra la base real: un paciente sin vínculo con el tenant activo (su cuenta no
- * es miembro de él y no tiene encuentros, turnos ni episodios) responde 404
+ * es miembro de él por autorregistro ni reservó turno por sí misma allí) responde 404
  * `AUTHZ_PATIENT_OUT_OF_SCOPE` en el acceso clínico, en el break-the-glass y en la
  * relación asistencial, y no deja ni grant, ni sesión de emergencia, ni relación.
  * Un paciente con vínculo (el autorregistro crea la membresía) sigue funcionando.
@@ -25,8 +25,11 @@ describe('AUTHZ-M01 · alcance de tenant de las bases de acceso (integración)',
   const marca = randomUUID().slice(0, 8);
   const http = () => request(ctx.app.getHttpServer());
   const admin = () => bearer(ctx.adminToken);
-  const sql = <T>(text: string, params: unknown[]) =>
-    ctx.orm.em.getConnection().execute<T>(text, params);
+  const sql = <T = Record<string, unknown>>(
+    text: string,
+    params: unknown[] = [],
+  ): Promise<T[]> =>
+    ctx.orm.em.fork().getConnection().execute<T[]>(text, params);
 
   function claims(bruto: string): Record<string, unknown> {
     const [, cuerpo] = bruto.split('.');
@@ -78,15 +81,15 @@ describe('AUTHZ-M01 · alcance de tenant de las bases de acceso (integración)',
   });
 
   async function conteos(patientProfileId: string) {
-    const [grants] = await sql<{ n: string }[]>(
+    const [grants] = await sql<{ n: string }>(
       'select count(*)::text as n from authz.clinical_access_grants where patient_profile_id = ?',
       [patientProfileId],
     );
-    const [sesiones] = await sql<{ n: string }[]>(
+    const [sesiones] = await sql<{ n: string }>(
       'select count(*)::text as n from authz.break_glass_sessions where patient_ref_id = ?',
       [patientProfileId],
     );
-    const [relaciones] = await sql<{ n: string }[]>(
+    const [relaciones] = await sql<{ n: string }>(
       'select count(*)::text as n from authz.care_relationships where patient_profile_id = ?',
       [patientProfileId],
     );

@@ -26,23 +26,21 @@ function build(
 }
 
 describe('AuthzClinicalScopeRepository.patientHasFootprintInTenant', () => {
-  it.each([
-    ['un encuentro', Encounters],
-    ['un turno', Appointments],
-    ['una reserva', AppointmentBookings],
-    ['un episodio de atención', CareEpisodes],
-  ])('reconoce %s del paciente en el tenant', async (_name, entity) => {
-    const d = build(new Map([[entity, 1]]));
+  it('reconoce la reserva que la cuenta del paciente hizo en el tenant', async () => {
+    const d = build(new Map([[AppointmentBookings, 1]]), { userId: 'u-pat' });
     await expect(
       d.repo.patientHasFootprintInTenant(d.em as any, 'pat-1', 't1'),
     ).resolves.toBe(true);
-    expect(d.em.count).toHaveBeenCalledWith(entity, {
+    // Sólo cuenta si la reservó la propia cuenta del paciente: el personal también
+    // reserva a nombre de cualquier paciente y eso no prueba nada.
+    expect(d.em.count).toHaveBeenCalledWith(AppointmentBookings, {
       patientProfileId: 'pat-1',
       tenantId: 't1',
+      bookedByUserId: 'u-pat',
     });
   });
 
-  it('reconoce la membresía activa de la cuenta del paciente en el tenant', async () => {
+  it('reconoce la membresía activa que la cuenta del paciente tiene por sí misma', async () => {
     const d = build(new Map([[TenantMemberships, 1]]), { userId: 'u-pat' });
     await expect(
       d.repo.patientHasFootprintInTenant(d.em as any, 'pat-1', 't1'),
@@ -57,6 +55,58 @@ describe('AuthzClinicalScopeRepository.patientHasFootprintInTenant', () => {
     );
   });
 
+  it('la membresía que dio de alta un tercero (invitación de un administrador) no cuenta', async () => {
+    const d = build(new Map([[TenantMemberships, 1]]), { userId: 'u-pat' });
+    await d.repo.patientHasFootprintInTenant(d.em as any, 'pat-1', 't1');
+    // `POST /directory/tenants/:id/memberships` guarda el id del administrador en
+    // `invited_by_user_id`; sólo se acepta el autorregistro (nulo) o la propia cuenta.
+    expect(d.em.count).toHaveBeenCalledWith(
+      TenantMemberships,
+      expect.objectContaining({
+        $or: [{ invitedByUserId: null }, { invitedByUserId: 'u-pat' }],
+      }),
+    );
+  });
+
+  it.each([
+    ['un encuentro', Encounters],
+    ['un turno', Appointments],
+    ['un episodio de atención', CareEpisodes],
+  ])(
+    '%s del tenant con el paciente no es huella: el personal lo crea sin autorización previa',
+    async (_name, entity) => {
+      // El personal abre encuentros, episodios y turnos para cualquier paciente
+      // existente: aceptarlos dejaría que otro tenant se fabricara el vínculo.
+      const d = build(new Map([[entity, 3]]), { userId: 'u-pat' });
+      await expect(
+        d.repo.patientHasFootprintInTenant(d.em as any, 'pat-B', 't1'),
+      ).resolves.toBe(false);
+      expect(d.em.count).not.toHaveBeenCalledWith(entity, expect.anything());
+    },
+  );
+
+  it('una reserva del paciente que no hizo su cuenta (la hizo el personal) no es huella', async () => {
+    // La base sólo tiene reservas del personal: responde 1 a cualquier consulta que
+    // no se restrinja a la cuenta del propio paciente.
+    const em = {
+      count: mockFn((entity: unknown, where: any) =>
+        Promise.resolve(
+          entity === AppointmentBookings && where.bookedByUserId !== 'u-pat'
+            ? 1
+            : 0,
+        ),
+      ),
+      findOne: mockFn(() => Promise.resolve({ userId: 'u-pat' })),
+    };
+    await expect(
+      new AuthzClinicalScopeRepository().patientHasFootprintInTenant(
+        em as any,
+        'pat-B',
+        't1',
+      ),
+    ).resolves.toBe(false);
+  });
+
   it('sin ninguna huella en el tenant no hay vínculo', async () => {
     const d = build(new Map(), { userId: 'u-pat' });
     await expect(
@@ -64,14 +114,18 @@ describe('AuthzClinicalScopeRepository.patientHasFootprintInTenant', () => {
     ).resolves.toBe(false);
   });
 
-  it('sin cuenta vinculada y sin huella clínica no hay vínculo ni se consulta la membresía', async () => {
-    const d = build(new Map(), null);
+  it('sin cuenta vinculada no hay huella propia: ni se consulta nada más', async () => {
+    const d = build(
+      new Map<unknown, number>([
+        [AppointmentBookings, 1],
+        [Encounters, 1],
+        [TenantMemberships, 1],
+      ]),
+      null,
+    );
     await expect(
       d.repo.patientHasFootprintInTenant(d.em as any, 'pat-B', 't1'),
     ).resolves.toBe(false);
-    expect(d.em.count).not.toHaveBeenCalledWith(
-      TenantMemberships,
-      expect.anything(),
-    );
+    expect(d.em.count).not.toHaveBeenCalled();
   });
 });
