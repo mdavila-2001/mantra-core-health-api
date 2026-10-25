@@ -33,6 +33,7 @@ import {
   ClinicalReadController,
   ClinicalPrescriptionsController,
   ClinicalPrescriptionsPublicController,
+  ClinicalPrescriptionExpiryController,
 } from './controllers';
 import { ClinicalRecordAccessGuard } from './guards';
 import {
@@ -54,6 +55,7 @@ import {
   ReceivedServicesReadService,
   ClinicalReadService,
   ClinicalNotificationsService,
+  PrescriptionExpiryNoticesService,
   PrescriptionPdfService,
   // Antiduplicación de estudios (subtarea 3.2, T-26): clase sin estado, mismo
   // criterio que `DeclaredCoveragesReader` — se provee acá Y directo en
@@ -80,6 +82,7 @@ import {
   ProceduresRepository,
   ImmunizationsRepository,
   ReceivedServicesRepository,
+  PrescriptionExpiryRepository,
 } from './repositories';
 // Los dos repositorios con los que la lectura comprueba que una historia es de
 // quien la pide (carril 09). Se proveen acá —y no se importa el módulo de
@@ -174,6 +177,9 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ClinicalReadController,
     ClinicalPrescriptionsController,
     ClinicalPrescriptionsPublicController,
+    // PAC-REC-002: `POST /clinical/internal/prescription-expiry-notices` (SYSTEM), el
+    // disparador que llama el worker de `messaging`.
+    ClinicalPrescriptionExpiryController,
   ],
   providers: [
     // Repositorios
@@ -201,6 +207,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ProceduresRepository,
     ImmunizationsRepository,
     ReceivedServicesRepository,
+    PrescriptionExpiryRepository,
     ClinicalNotesRepository,
     CarePlansRepository,
     DocumentsRepository,
@@ -231,6 +238,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ReceivedServicesReadService,
     ClinicalReadService,
     ClinicalNotificationsService,
+    PrescriptionExpiryNoticesService,
     ClinicalRecordAccessGuard,
     PrescriptionPdfService,
     DuplicateStudyDetector,

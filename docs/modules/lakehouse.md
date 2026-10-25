@@ -213,18 +213,43 @@ pacientes. No se loguean valores de partición, contratos ni expresiones de coho
 corepack yarn test src/modules/lakehouse --runInBand --silent
 ```
 
-Revisión 2026-10-05: 4 suites y 73 pruebas aprobadas. La cobertura actual verifica reglas de
-estado, idempotencia y delegación de controladores; no cubre aislamiento entre tenants ni la
-persistencia real de los payloads mínimos frente al DDL.
+La cobertura verifica reglas de estado, idempotencia, delegación de controladores, el aislamiento
+entre tenants y el contrato mínimo de cada payload. Son pruebas con dobles de repositorio y
+EntityManager: no persisten contra PostgreSQL.
 
-## Límites conocidos de la implementación revisada
+## Alcance por tenant
 
-- Las consultas por UUID de producto, dataset, definición, proyecto y release no reciben el tenant
-  resuelto ni lo filtran. Los roles y el interceptor que compara `tenantId` de entrada no sustituyen
-  esa comprobación.
-- Varios DTO permiten omitir campos que las tablas del lakehouse declaran `NOT NULL`; el payload
-  aceptado por validación puede fallar al persistir.
-- Las respuestas de error usan códigos genéricos sin `reason` estable.
+- **El tenant sale del contexto.** `tenantId` en el cuerpo es opcional en la práctica: si llega debe
+  coincidir con el activo (`412 LAKEHOUSE_TENANT_MISMATCH`); sin tenant activo se responde
+  `412 TENANT_REQUIRED`.
+- **Consultas por `id + tenantId`.** Producto, dataset, definición de transformación, corrida,
+  proyecto y solicitud de release se buscan (y se bloquean) dentro del tenant. La versión de producto
+  y la cohorte se resuelven por su producto y su proyecto. Los datasets de origen, las particiones de
+  origen, las particiones de un hallazgo y los perfiles de de-identificación deben ser del mismo
+  tenant antes de crear relaciones o mutar estado.
+- **404 uniforme.** Un recurso de otro tenant responde igual que uno inexistente: `404`, mismo
+  mensaje y `reason` `LAKEHOUSE_RESOURCE_OUTSIDE_TENANT`, sin `details`. En los upserts por id
+  (`data-products/:id/versions`, `projects/:id/cohorts`) un id ocupado por otro tenant responde del
+  mismo modo.
+- **Cierre y descubrimiento de vencidos.** Con tenant en el contexto sólo alcanzan las solicitudes de
+  ese tenant. Sin tenant, sólo el worker `SYSTEM` revoca y lista los vencidos de todas las
+  organizaciones.
+
+## Contrato mínimo de los payloads
+
+La tabla exige estos valores y no tienen default de negocio, así que el servicio responde
+`400 VALIDATION_FAILED` con `reason` `LAKEHOUSE_REQUIRED_FIELD_MISSING` (y `details.fields`) antes de
+persistir: zona (`namespaceId`, `encryptionProfileCode`, `retentionPolicyCode`), contrato de la
+versión (`contractSchemaJson`), alta de producto (`ownerTeamId`, `businessPurpose`,
+`classificationCode`), cohorte (`inclusionExpression`), partición nueva (`minEventAt`, `maxEventAt`),
+archivo nuevo (`objectManifestId`), linaje (`sourcePartitionIds` cuando la definición tiene
+orígenes), corrida de calidad (`transformationRunId`), hallazgo (`partitionId`,
+`sampleObjectManifestId`) y aprobación (`objectManifestId`, `schemaVersion`).
+
+Tienen default de negocio: formato `parquet` y compresión `snappy` del catálogo,
+`partitionSpecJson` y `partitionValuesJson` `{}` (tabla sin particionar), `sourceDatasetCode` `''`,
+`qualitySloJson` `{}`, `expression` `''` y `threshold` `'0'` de la regla, `sourceCheckpoint` `''`,
+`minMaxStatisticsJson` `{}` y `exclusionExpression` `''`.
 
 ## Divergencias con el caso de uso v3.9
 

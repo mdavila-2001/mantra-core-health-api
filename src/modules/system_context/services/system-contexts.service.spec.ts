@@ -15,6 +15,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { SystemContextErrorReason } from '../system_context.error-reasons';
 
 const actor = { id: 'user-1', roles: ['PLATFORM_ADMIN'] };
 const CONTEXT = '11111111-1111-1111-1111-111111111111';
@@ -73,6 +74,13 @@ function activeContext(overrides: Record<string, unknown> = {}): any {
     ...overrides,
   };
 }
+
+const PROVENANCE = {
+  sourceSchemaName: 'finance',
+  sourceEntityName: 'tax_rates',
+  sourceRecordId: '88888888-8888-8888-8888-888888888888',
+  sourceContentHash: 'sha256:abc',
+};
 
 describe('SystemContextsService', () => {
   describe('createContext (UC-45-06)', () => {
@@ -149,7 +157,7 @@ describe('SystemContextsService', () => {
           inputs: [
             {
               sourceTypeConceptId: SOURCE_TYPE,
-              sourceEntityName: 'tax_rates',
+              ...PROVENANCE,
               required: true,
             },
           ],
@@ -200,6 +208,7 @@ describe('SystemContextsService', () => {
 
     it('returns the previous run when the idempotency key repeats', async () => {
       const d = build();
+      d.contextRepo.findContextForUpdate.mockResolvedValue(activeContext());
       d.contextRepo.findRefreshRunByKey.mockResolvedValue({
         id: 'run-prev',
         statusConceptId: CONCEPTS.REFRESH_RUN_SUCCEEDED,
@@ -217,6 +226,11 @@ describe('SystemContextsService', () => {
         inputCount: 2,
         duplicate: true,
       });
+      expect(d.contextRepo.findRefreshRunByKey).toHaveBeenCalledWith(
+        d.tx,
+        CONTEXT,
+        dto.idempotencyKey,
+      );
       expect(d.contextRepo.createRefreshRun).not.toHaveBeenCalled();
     });
 
@@ -268,6 +282,132 @@ describe('SystemContextsService', () => {
       );
 
       expect(res.statusConceptId).toBe(CONCEPTS.REFRESH_RUN_SUCCEEDED);
+    });
+
+    it('keeps runs of two contexts with the same key independent', async () => {
+      const d = build();
+      const OTHER = '99999999-9999-9999-9999-999999999999';
+      d.contextRepo.findContextForUpdate.mockResolvedValue(activeContext());
+      d.contextRepo.findLatestContextVersion.mockResolvedValue({
+        versionNumber: 1,
+        contentHash: 'otro-hash',
+      });
+
+      await d.service.refreshContext(CONTEXT, dto, actor);
+      d.contextRepo.findContextForUpdate.mockResolvedValue(
+        activeContext({ id: OTHER }),
+      );
+      const second = await d.service.refreshContext(OTHER, dto, actor);
+
+      expect(d.contextRepo.findRefreshRunByKey).toHaveBeenNthCalledWith(
+        2,
+        d.tx,
+        OTHER,
+        dto.idempotencyKey,
+      );
+      expect(second.duplicate).toBe(false);
+      expect(d.contextRepo.createRefreshRun).toHaveBeenCalledTimes(2);
+    });
+
+    it('answers 404 for an unknown context even if the key was used elsewhere, creating no run', async () => {
+      const d = build();
+      d.contextRepo.findContextForUpdate.mockResolvedValue(null);
+      d.contextRepo.findRefreshRunByKey.mockResolvedValue({ id: 'run-other' });
+
+      await expect(
+        d.service.refreshContext(CONTEXT, dto, actor as any),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.contextRepo.findRefreshRunByKey).not.toHaveBeenCalled();
+      expect(d.contextRepo.createRefreshRun).not.toHaveBeenCalled();
+    });
+
+    it('locks the context row before looking up the key so parallel refreshes serialize', async () => {
+      const d = build();
+      d.contextRepo.findContextForUpdate.mockResolvedValue(activeContext());
+      const order: string[] = [];
+      d.contextRepo.findContextForUpdate.mockImplementation(async () => {
+        order.push('lock');
+        return activeContext();
+      });
+      d.contextRepo.findRefreshRunByKey.mockImplementation(async () => {
+        order.push('lookup');
+        return null;
+      });
+
+      await d.service.refreshContext(CONTEXT, dto, actor);
+
+      expect(order).toEqual(['lock', 'lookup']);
+    });
+
+    it.each([
+      ['sourceSchemaName'],
+      ['sourceEntityName'],
+      ['sourceRecordId'],
+      ['sourceContentHash'],
+    ])(
+      'rejects a non-missing input without %s before opening the run',
+      async (field) => {
+        const d = build();
+        d.contextRepo.findContextForUpdate.mockResolvedValue(activeContext());
+        const input: any = { sourceTypeConceptId: SOURCE_TYPE, ...PROVENANCE };
+        delete input[field];
+
+        const attempt = d.service.refreshContext(
+          CONTEXT,
+          { ...dto, inputs: [input] },
+          actor as any,
+        );
+
+        await expect(attempt).rejects.toMatchObject({
+          reason:
+            SystemContextErrorReason.SYSTEM_CONTEXT_INPUT_PROVENANCE_REQUIRED,
+        });
+        expect(d.contextRepo.createRefreshRun).not.toHaveBeenCalled();
+        expect(d.contextRepo.createContextInput).not.toHaveBeenCalled();
+      },
+    );
+
+    it('a missing optional input drafts the version without persisting an incomplete row', async () => {
+      const d = build();
+      d.contextRepo.findContextForUpdate.mockResolvedValue(activeContext());
+
+      const res = await d.service.refreshContext(
+        CONTEXT,
+        {
+          ...dto,
+          inputs: [
+            {
+              sourceTypeConceptId: SOURCE_TYPE,
+              required: false,
+              missing: true,
+            },
+            { sourceTypeConceptId: SOURCE_TYPE, ...PROVENANCE },
+          ],
+        },
+        actor,
+      );
+
+      expect(res.statusConceptId).toBe(CONCEPTS.REFRESH_RUN_SUCCEEDED);
+      expect(d.contextRepo.createContextInput).toHaveBeenCalledTimes(1);
+      expect(d.contextRepo.createContextInput).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ precedence: 2, ...PROVENANCE }),
+      );
+    });
+
+    it('rejects a context JSON above the size limit', async () => {
+      const d = build();
+
+      await expect(
+        d.service.refreshContext(
+          CONTEXT,
+          { ...dto, contextJson: { blob: 'x'.repeat(1_048_577) } },
+          actor as any,
+        ),
+      ).rejects.toMatchObject({
+        reason: SystemContextErrorReason.SYSTEM_CONTEXT_PAYLOAD_TOO_LARGE,
+      });
+      expect(d.contextRepo.findContextForUpdate).not.toHaveBeenCalled();
     });
 
     it('refuses refreshing a context that is not active', async () => {
@@ -426,7 +566,7 @@ describe('SystemContextsService', () => {
 
     it('binds the context to the consumer', async () => {
       const d = build();
-      d.contextRepo.findContextById.mockResolvedValue(activeContext());
+      d.contextRepo.findContextForUpdate.mockResolvedValue(activeContext());
 
       const res = await d.service.createBinding(CONTEXT, dto, actor);
 
@@ -452,7 +592,7 @@ describe('SystemContextsService', () => {
 
     it('rejects a binding overlapping another of the same consumer', async () => {
       const d = build();
-      d.contextRepo.findContextById.mockResolvedValue(activeContext());
+      d.contextRepo.findContextForUpdate.mockResolvedValue(activeContext());
       d.contextRepo.findContextBindingsForConsumer.mockResolvedValue([
         {
           id: 'binding-prev',
@@ -461,14 +601,37 @@ describe('SystemContextsService', () => {
         },
       ]);
 
-      await expect(
-        d.service.createBinding(CONTEXT, dto, actor as any),
-      ).rejects.toBeInstanceOf(ConflictException);
+      const attempt = d.service.createBinding(CONTEXT, dto, actor as any);
+      await expect(attempt).rejects.toBeInstanceOf(ConflictException);
+      await expect(attempt).rejects.toMatchObject({
+        reason: SystemContextErrorReason.SYSTEM_CONTEXT_BINDING_CONFLICT,
+      });
+      expect(d.contextRepo.createContextBinding).not.toHaveBeenCalled();
+    });
+
+    it('locks the context row before checking overlaps (parallel bindings serialize)', async () => {
+      const d = build();
+      const order: string[] = [];
+      d.contextRepo.findContextForUpdate.mockImplementation(async () => {
+        order.push('lock');
+        return activeContext();
+      });
+      d.contextRepo.findContextBindingsForConsumer.mockImplementation(
+        async () => {
+          order.push('overlap-check');
+          return [];
+        },
+      );
+
+      await d.service.createBinding(CONTEXT, dto, actor);
+
+      expect(order).toEqual(['lock', 'overlap-check']);
+      expect(d.contextRepo.findContextById).not.toHaveBeenCalled();
     });
 
     it('accepts a binding that starts when the previous one ends', async () => {
       const d = build();
-      d.contextRepo.findContextById.mockResolvedValue(activeContext());
+      d.contextRepo.findContextForUpdate.mockResolvedValue(activeContext());
       d.contextRepo.findContextBindingsForConsumer.mockResolvedValue([
         {
           id: 'binding-prev',
@@ -484,7 +647,7 @@ describe('SystemContextsService', () => {
 
     it('refuses binding a context that is not active', async () => {
       const d = build();
-      d.contextRepo.findContextById.mockResolvedValue(
+      d.contextRepo.findContextForUpdate.mockResolvedValue(
         activeContext({ statusConceptId: CONCEPTS.SYSCTX_RETIRED }),
       );
 
@@ -495,7 +658,7 @@ describe('SystemContextsService', () => {
 
     it('fails when the context does not exist', async () => {
       const d = build();
-      d.contextRepo.findContextById.mockResolvedValue(null);
+      d.contextRepo.findContextForUpdate.mockResolvedValue(null);
 
       await expect(
         d.service.createBinding(CONTEXT, dto, actor as any),

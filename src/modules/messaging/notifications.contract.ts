@@ -136,7 +136,15 @@ export type NotificationDestinationType =
    * Aditivo, mismo criterio que `PHARMACY_ORDER`: el `switch` del front suma su
    * ruta al conectar.
    */
-  | 'INSURANCE_CLAIM';
+  | 'INSURANCE_CLAIM'
+  /**
+   * Una receta próxima a vencer (PAC-REC-002). El `id` es el de la receta, el
+   * mismo que `PRESCRIPTION`; es otro literal para que el rebote por «aviso sin
+   * leer sobre el mismo objeto» no confunda este aviso con el de «receta
+   * lista». Aditivo, mismo criterio que `PHARMACY_ORDER`: el `switch` del front
+   * lo enruta a la misma pantalla que `PRESCRIPTION`.
+   */
+  | 'PRESCRIPTION_EXPIRING';
 
 /**
  * A dónde lleva la notificación al abrirla.

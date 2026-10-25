@@ -14,6 +14,7 @@ import {
   PractitionerDelegatesService,
   AccessRequestsService,
   DelegatedAccessEvaluationService,
+  DelegationScopeService,
 } from './services';
 import {
   OrganizationUserAssignmentsRepository,
@@ -23,6 +24,7 @@ import {
   DelegatedAccessApprovalRequestsRepository,
   DelegatedAccessGrantsRepository,
   DelegationEventsRepository,
+  DelegationScopeRepository,
 } from './repositories';
 
 /**
@@ -50,7 +52,9 @@ import {
     DelegatedAccessApprovalRequestsRepository,
     DelegatedAccessGrantsRepository,
     DelegationEventsRepository,
+    DelegationScopeRepository,
     // Servicios
+    DelegationScopeService,
     OrgUserAssignmentsService,
     PermissionSetsService,
     PractitionerDelegatesService,

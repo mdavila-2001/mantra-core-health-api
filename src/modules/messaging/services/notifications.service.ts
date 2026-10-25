@@ -17,6 +17,8 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { NotificationsRepository } from '../repositories';
+import { MessagingErrorReason } from '../messaging.error-reasons';
+import { providerReceiptSignedString } from '../provider-receipt-signature';
 import { NotificationsGateway } from '../gateways';
 import {
   safeRoute,
@@ -131,11 +133,18 @@ export class NotificationsService implements InAppNotificationEmitter {
       'Creating notification request',
     );
 
-    // Un canal externo necesita a dónde escribir; uno interno, a quién.
-    if (!dto.recipientUserId && !dto.recipientAddress) {
+    // `notification_requests.recipient_user_id` es NOT NULL: toda solicitud se
+    // liga a un usuario de la plataforma. `recipientAddress` sólo complementa
+    // al usuario (dirección de canal externo); sin usuario se rechaza aquí, con
+    // razón estable, y no se deja que la violación llegue como error de base.
+    const recipientUserId = dto.recipientUserId;
+    if (!recipientUserId) {
       throw new PreconditionFailedException(
-        'La notificación necesita destinatario interno o dirección de destino',
+        dto.recipientAddress
+          ? 'La notificación a una dirección externa también necesita el usuario destinatario'
+          : 'La notificación necesita el usuario destinatario',
         { channelId: dto.channelId },
+        MessagingErrorReason.NOTIFICATION_RECIPIENT_INVALID,
       );
     }
 
@@ -145,9 +154,11 @@ export class NotificationsService implements InAppNotificationEmitter {
         dto.channelId,
       );
       if (!channel) {
-        throw new ResourceNotFoundException('Canal no encontrado', {
-          channelId: dto.channelId,
-        });
+        throw new ResourceNotFoundException(
+          'Canal no encontrado',
+          { channelId: dto.channelId },
+          MessagingErrorReason.MESSAGE_CHANNEL_NOT_FOUND,
+        );
       }
       if (channel.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException('El canal no está activo', {
@@ -226,7 +237,7 @@ export class NotificationsService implements InAppNotificationEmitter {
 
       const request = this.notificationsRepo.createNotificationRequest(tx, {
         tenantId: dto.tenantId,
-        recipientUserId: dto.recipientUserId,
+        recipientUserId,
         recipientAddress: dto.recipientAddress,
         channelId: dto.channelId,
         templateId: dto.templateId,
@@ -244,9 +255,7 @@ export class NotificationsService implements InAppNotificationEmitter {
         // se aporta, cada solicitud es única por definición.
         idempotencyKey: dto.debounceKey ?? `notif-${randomUUID()}`,
         recipientTypeConceptId: CONCEPTS.NOTIF_RECIPIENT_USER,
-        // Un canal externo puede no tener destinatario interno; en ese caso la
-        // referencia es el propio actor que solicitó el envío.
-        recipientRefId: dto.recipientUserId ?? actor.id,
+        recipientRefId: recipientUserId,
         sourceConceptId: CONCEPTS.NOTIF_SOURCE_SYSTEM,
         authorizedByUserId: actor.id,
         authorizationSnapshotJson,
@@ -561,10 +570,12 @@ export class NotificationsService implements InAppNotificationEmitter {
 
       // Verificación de firma HMAC del proveedor ANTES de conciliar nada
       // (fail-closed): sin firma válida contra el secreto del proveedor se
-      // rechaza el acuse. Esta es la única superficie pública del módulo.
+      // rechaza el acuse. Esta es la única superficie pública del módulo. La
+      // firma cubre todos los campos que deciden qué se concilia (entrega,
+      // tipo de acuse, estado, fecha y cuerpo original), no sólo el cuerpo.
       const secret = deriveWebhookSecret('provider', provider.id);
-      const rawBody = canonicalJson(dto.rawPayloadJson);
-      if (!verifySignature(secret, rawBody, dto.signature)) {
+      const signedBody = providerReceiptSignedString(providerCode, dto);
+      if (!verifySignature(secret, signedBody, dto.signature)) {
         throw new UnauthorizedException(
           'Firma del acuse del proveedor inválida',
           { providerCode },

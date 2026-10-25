@@ -38,7 +38,10 @@ import {
  * Módulo 55 — Document Store. CRUD gobernado de documentos flexibles
  * (JSON/semiestructurados) sobre MongoDB, complementario a Postgres. La
  * colección viaja en la ruta y la valida `CollectionNameGuard`; todas las
- * operaciones se acotan por `tenantId`. El borrado es lógico (`deletedAt`).
+ * operaciones se acotan al tenant del contexto. Las lecturas, igual que las
+ * escrituras, las hacen solo los roles de almacenamiento: un documento flexible
+ * puede traer material clínico y no hay política por tipo o paciente que
+ * habilite a otro usuario del tenant. El borrado es lógico (`deletedAt`).
  */
 @ApiTags('document-store')
 @ApiBearerAuth()
@@ -87,6 +90,7 @@ export class DocumentStoreController {
    * @returns Resultado de find one conforme al contrato `Promise<DocumentResponseDto>`.
    */
   @Get(':id')
+  @Roles('STORAGE_ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Leer un documento por id (acotado por tenant)' })
   findOne(
     @Param('collection') collection: string,
@@ -104,6 +108,7 @@ export class DocumentStoreController {
    * @returns Resultado de list conforme al contrato `Promise<PageResponseDto<DocumentResponseDto>>`.
    */
   @Get()
+  @Roles('STORAGE_ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Listar documentos del tenant (paginado)' })
   list(
     @Param('collection') collection: string,

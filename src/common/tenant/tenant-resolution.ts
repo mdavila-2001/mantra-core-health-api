@@ -1,7 +1,8 @@
-import { ForbiddenException } from '@nestjs/common';
 import type { Request } from 'express';
 import { listTenantScopeDeclarations } from './tenant-scope';
 import type { AuthenticatedUser } from '../auth/authenticated-user.interface';
+import { forbiddenWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 
 /**
  * Roles cuyo alcance es la plataforma entera, no un tenant: operan sin cabecera
@@ -22,7 +23,7 @@ export function hasPrivilegedTenantRole(user: AuthenticatedUser): boolean {
  * rol con ámbito de tenant sólo se puede comparar contra un tenant ya resuelto,
  * y antes ese cómputo vivía en un interceptor, que corre después de los guards.
  *
- * @throws ForbiddenException si el tenant declarado no es una membresía del
+ * @throws ForbiddenException (`TENANT_MEMBERSHIP_REQUIRED`) si el tenant declarado no es una membresía del
  *   actor, o si no hay forma de resolver uno sin ambigüedad.
  */
 export function resolveOrdinaryTenantId(
@@ -35,8 +36,9 @@ export function resolveOrdinaryTenantId(
 
   if (declared) {
     if (!memberships.includes(declared)) {
-      throw new ForbiddenException(
+      throw forbiddenWithReason(
         'El actor no pertenece al tenant indicado en X-Tenant-Id',
+        SystemErrorReason.TENANT_MEMBERSHIP_REQUIRED,
       );
     }
     return declared;
@@ -46,17 +48,21 @@ export function resolveOrdinaryTenantId(
     return memberships[0];
   }
 
-  // El status no cambia (403); `details.reason` le deja al cliente distinguir
-  // «falta elegir organización» de un rechazo por permisos y abrir el selector.
-  throw new ForbiddenException({
-    message:
-      memberships.length === 0
-        ? 'El actor no pertenece a ningún tenant: indique X-Tenant-Id.'
-        : 'El actor pertenece a varios tenants: indique cuál en X-Tenant-Id.',
-    details: {
-      reason: memberships.length === 0 ? 'TENANT_REQUIRED' : 'TENANT_AMBIGUOUS',
-    },
-  });
+  // El status no cambia (403); `reason` le deja al cliente distinguir «falta
+  // elegir organización» de un rechazo por permisos y abrir el selector.
+  // `details.reason` repite el mismo valor para los clientes que ya lo leían
+  // de ahí (TX-16); el canónico es el de primer nivel.
+  const reason =
+    memberships.length === 0
+      ? SystemErrorReason.TENANT_REQUIRED
+      : SystemErrorReason.TENANT_AMBIGUOUS;
+  throw forbiddenWithReason(
+    memberships.length === 0
+      ? 'El actor no pertenece a ningún tenant: indique X-Tenant-Id.'
+      : 'El actor pertenece a varios tenants: indique cuál en X-Tenant-Id.',
+    reason,
+    { reason },
+  );
 }
 
 /**
@@ -80,8 +86,9 @@ export function resolvePrivilegedTenantId(
   ];
   const distinct = [...new Set(declarations.map(({ declared }) => declared))];
   if (distinct.length > 1) {
-    throw new ForbiddenException(
+    throw forbiddenWithReason(
       'La solicitud privilegiada declara tenants propietarios contradictorios',
+      SystemErrorReason.TENANT_DECLARATION_CONFLICT,
     );
   }
   return distinct[0];

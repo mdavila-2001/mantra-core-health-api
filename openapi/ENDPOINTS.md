@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1529 de 1529 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1533 de 1533 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -10,13 +10,13 @@ Se documentan **1529 de 1529 endpoints** en **72 módulos**. La referencia compl
 | `ads` | 18 | [Abrir referencia](endpoints/ads.md) |
 | `app` | 6 | [Abrir referencia](endpoints/app.md) |
 | `audio_assets` | 10 | [Abrir referencia](endpoints/audio-assets.md) |
-| `audit` | 13 | [Abrir referencia](endpoints/audit.md) |
+| `audit` | 14 | [Abrir referencia](endpoints/audit.md) |
 | `auth_providers` | 12 | [Abrir referencia](endpoints/auth-providers.md) |
 | `authz` | 32 | [Abrir referencia](endpoints/authz.md) |
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
 | `billing` | 34 | [Abrir referencia](endpoints/billing.md) |
 | `chart` | 23 | [Abrir referencia](endpoints/chart.md) |
-| `clinical` | 39 | [Abrir referencia](endpoints/clinical.md) |
+| `clinical` | 40 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 27 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 19 | [Abrir referencia](endpoints/common.md) |
 | `community` | 98 | [Abrir referencia](endpoints/community.md) |
@@ -24,7 +24,7 @@ Se documentan **1529 de 1529 endpoints** en **72 módulos**. La referencia compl
 | `content_packs` | 2 | [Abrir referencia](endpoints/content-packs.md) |
 | `crm` | 16 | [Abrir referencia](endpoints/crm.md) |
 | `cross_store_consistency` | 16 | [Abrir referencia](endpoints/cross-store-consistency.md) |
-| `data_catalog` | 37 | [Abrir referencia](endpoints/data-catalog.md) |
+| `data_catalog` | 38 | [Abrir referencia](endpoints/data-catalog.md) |
 | `delegated_access` | 12 | [Abrir referencia](endpoints/delegated-access.md) |
 | `diagnostic_units` | 21 | [Abrir referencia](endpoints/diagnostic-units.md) |
 | `diagnostics` | 31 | [Abrir referencia](endpoints/diagnostics.md) |
@@ -44,7 +44,7 @@ Se documentan **1529 de 1529 endpoints** en **72 módulos**. La referencia compl
 | `integration_contracts` | 12 | [Abrir referencia](endpoints/integration-contracts.md) |
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |
 | `lakehouse` | 13 | [Abrir referencia](endpoints/lakehouse.md) |
-| `marketing` | 14 | [Abrir referencia](endpoints/marketing.md) |
+| `marketing` | 15 | [Abrir referencia](endpoints/marketing.md) |
 | `medical_groups` | 8 | [Abrir referencia](endpoints/medical-groups.md) |
 | `messaging` | 20 | [Abrir referencia](endpoints/messaging.md) |
 | `object_storage` | 14 | [Abrir referencia](endpoints/object-storage.md) |

@@ -8,10 +8,50 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
+import { ResourceNotFoundException, runWithTenant } from '../../../common';
 import { GraphAnalyticsService } from './graph-analytics.service';
 
 const actor = { id: 'user-1', roles: ['COMPLIANCE_OFFICER'] } as any;
 const TENANT_ID = '11111111-1111-1111-1111-111111111111';
+
+const OTHER_TENANT = '99999999-9999-9999-9999-999999999999';
+
+/**
+ * Afirma que la promesa falla como "no existe": 404, `GRAPH_RESOURCE_OUT_OF_SCOPE` y sin `details`.
+ *
+ * @param promise - Operación bajo prueba.
+ */
+async function expectOutOfScope(promise: Promise<unknown>): Promise<void> {
+  const error: any = await promise.then(
+    () => undefined,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  expect(error.getStatus()).toBe(404);
+  expect(error.code).toBe('NOT_FOUND');
+  expect(error.reason).toBe('GRAPH_RESOURCE_OUT_OF_SCOPE');
+  expect(error.details).toBeUndefined();
+}
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant, como lo hace
+ * `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant activo del contexto.
+ * @returns Proxy que fija el tenant en cada llamada.
+ */
+function scoped<S extends object>(service: S, tenantId: string): S {
+  return new Proxy(service, {
+    get(target, key) {
+      const value = (target as any)[key];
+      return typeof value === 'function'
+        ? (...args: unknown[]) =>
+            runWithTenant(tenantId, () => value.apply(target, args))
+        : value;
+    },
+  });
+}
 const NODE_A = '22222222-2222-2222-2222-222222222222';
 const RULE_ID = '33333333-3333-3333-3333-333333333333';
 const HIT_ID = '44444444-4444-4444-4444-444444444444';
@@ -40,6 +80,7 @@ function build() {
     deleteRiskScoresByNodes: mockFn(async () => 0),
     findRuleDefinitionById: mockFn(async () => ({
       id: RULE_ID,
+      tenantId: TENANT_ID,
       state: 'active',
       ruleType: 'ring',
       severity: 'high',
@@ -83,7 +124,15 @@ function build() {
     outbox as any,
     logger as any,
   );
-  return { service, em, tx, analyticsRepo, projectionRepo, outbox, logger };
+  return {
+    service: scoped(service, TENANT_ID),
+    em,
+    tx,
+    analyticsRepo,
+    projectionRepo,
+    outbox,
+    logger,
+  };
 }
 
 describe('GraphAnalyticsService', () => {
@@ -275,6 +324,7 @@ describe('GraphAnalyticsService', () => {
       const d = build();
       d.analyticsRepo.findRuleDefinitionById.mockResolvedValue({
         id: RULE_ID,
+        tenantId: TENANT_ID,
         state: 'draft',
       });
 
@@ -478,6 +528,62 @@ describe('GraphAnalyticsService', () => {
         d.tx,
         expect.objectContaining({ eventType: 'GraphEntityPurged' }),
       );
+    });
+  });
+
+  describe('alcance por tenant (GRAPH-01)', () => {
+    it('analista de A no evalúa la regla de B ni abre hallazgos', async () => {
+      const d = build();
+      d.analyticsRepo.findRuleDefinitionById.mockResolvedValue({
+        id: RULE_ID,
+        tenantId: OTHER_TENANT,
+        state: 'active',
+        ruleType: 'ring',
+        severity: 'high',
+      });
+      await expectOutOfScope(
+        d.service.evaluateRule(
+          RULE_ID,
+          { tenantId: TENANT_ID, scopeCode: 'fraude', matches: [] } as any,
+          actor,
+        ),
+      );
+      expect(d.analyticsRepo.findScopeByCodeForUpdate).not.toHaveBeenCalled();
+      expect(d.analyticsRepo.createHit).not.toHaveBeenCalled();
+    });
+
+    it('analista de A no mueve el hallazgo de B y su trazabilidad no cambia', async () => {
+      const d = build();
+      const hit = {
+        id: HIT_ID,
+        tenantId: OTHER_TENANT,
+        status: 'open',
+        primaryNodeId: NODE_A,
+      };
+      d.analyticsRepo.findHitForUpdate.mockResolvedValue(hit);
+      await expectOutOfScope(
+        d.service.triageRuleHit(HIT_ID, { status: 'in_review' }, actor),
+      );
+      expect(hit.status).toBe('open');
+      expect(d.outbox.publishDomainEvent).not.toHaveBeenCalled();
+    });
+
+    it('un hallazgo inexistente responde igual que uno de otro tenant', async () => {
+      const foreign = build();
+      foreign.analyticsRepo.findHitForUpdate.mockResolvedValue({
+        id: HIT_ID,
+        tenantId: OTHER_TENANT,
+        status: 'open',
+      });
+      const missing = build();
+      missing.analyticsRepo.findHitForUpdate.mockResolvedValue(null);
+      const a: any = await foreign.service
+        .triageRuleHit(HIT_ID, { status: 'in_review' }, actor)
+        .catch((e: unknown) => e);
+      const b: any = await missing.service
+        .triageRuleHit(HIT_ID, { status: 'in_review' }, actor)
+        .catch((e: unknown) => e);
+      expect(a.getResponse()).toEqual(b.getResponse());
     });
   });
 });

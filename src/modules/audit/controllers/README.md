@@ -10,3 +10,5 @@ devuelven un DTO de respuesta.
 | `ComplianceController` | `/compliance` | `audit-export` |
 | `PrivacyController` | `/privacy` | `dsar` (POST), `dsar/{id}` (PATCH) |
 | `ModerationController` | `/moderation` | `decisions` |
+| `AuditQueryController` | `/audit` | `log`, `data-access` (GET, roles de auditoría) |
+| `AuditMeController` | `/audit/me` | `data-access` (GET, `PATIENT`; sólo el registro de la propia historia) |

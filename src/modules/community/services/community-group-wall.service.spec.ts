@@ -52,6 +52,7 @@ function build() {
     }),
     assertCanPost: mockFn(),
     assertCanRead: mockFn(),
+    assertOrganizationMayStartForums: mockFn().mockResolvedValue(undefined),
   };
   const notifications = {
     notifyNewPost: mockFn().mockResolvedValue(undefined),
@@ -106,6 +107,53 @@ describe('CommunityGroupWallService (P7)', () => {
           tenantId: 't1',
         }),
       );
+    });
+
+    it('una publicación raíz pasa por la guarda de la aseguradora, una respuesta no', async () => {
+      const d = build();
+      d.commentsRepo.create.mockReturnValue(comment());
+      await d.service.createPost(
+        'g1',
+        { authorProfileId: 'p1', bodyText: 'hola' },
+        actor,
+      );
+      expect(d.access.assertOrganizationMayStartForums).toHaveBeenCalledWith(
+        expect.anything(),
+        undefined,
+        'START_DEBATE',
+      );
+
+      const r = build();
+      r.commentsRepo.findById.mockResolvedValue({
+        id: 'c0',
+        commentableTypeConceptId: COMM.CONTENT_TYPE_GROUP,
+        commentableRefId: 'g1',
+        threadDepth: 0,
+        updatedAt: new Date(),
+      });
+      r.commentsRepo.create.mockReturnValue(comment());
+      await r.service.createPost(
+        'g1',
+        { authorProfileId: 'p1', bodyText: 'hola', parentCommentId: 'c0' },
+        actor,
+      );
+      expect(r.access.assertOrganizationMayStartForums).not.toHaveBeenCalled();
+    });
+
+    it('si la aseguradora no puede iniciar el debate, no se publica nada', async () => {
+      const d = build();
+      d.access.assertOrganizationMayStartForums.mockRejectedValue(
+        new Error('aseguradora'),
+      );
+
+      await expect(
+        d.service.createPost(
+          'g1',
+          { authorProfileId: 'p1', bodyText: 'hola' },
+          actor,
+        ),
+      ).rejects.toThrow('aseguradora');
+      expect(d.commentsRepo.create).not.toHaveBeenCalled();
     });
 
     it('exige ser integrante activo', async () => {

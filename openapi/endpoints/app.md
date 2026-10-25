@@ -272,6 +272,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<DataSourcesReport>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DataSourcesReport>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DataSourcesReport>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DataSourcesReport>` | No |
 
 El controlador declara `DataSourcesReport`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -360,6 +361,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `PersistenceMetricsSnapshot` | No |
 | 429 | Consulta completada correctamente. | `PersistenceMetricsSnapshot` | No |
 | 500 | Consulta completada correctamente. | `PersistenceMetricsSnapshot` | No |
+| 504 | Consulta completada correctamente. | `PersistenceMetricsSnapshot` | No |
 
 El controlador declara `PersistenceMetricsSnapshot`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 

@@ -1,13 +1,19 @@
 import {
   Body,
   Controller,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   Audited,
   CurrentUser,
@@ -17,6 +23,10 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { TrackingService } from '../services';
+import {
+  CARRIER_SIGNATURE_HEADER,
+  CARRIER_TIMESTAMP_HEADER,
+} from '../tracking-webhook-auth';
 import {
   OpenSubjectDto,
   SubjectResponseDto,
@@ -146,13 +156,30 @@ export class TrackingController {
   @ApiOperation({
     summary: 'Ingerir el webhook del transportista',
     description:
-      'Ruta pública: el transportista no presenta sesión. Idempotente por identificador del evento externo.',
+      'Ruta pública: el transportista no presenta sesión, se autentica con una firma HMAC-SHA256 ' +
+      'sobre `[timestamp, carrierCode, trackingNumber, externalStatusCode, externalEventId, occurredAt, locationText]` ' +
+      '(arreglo JSON; los opcionales ausentes van como `null`) con su secreto propio, dentro de una ventana de 5 minutos. ' +
+      'Idempotente por identificador del evento externo.',
+  })
+  @ApiHeader({
+    name: CARRIER_SIGNATURE_HEADER,
+    description: 'HMAC-SHA256 en hexadecimal (prefijo `sha256=` opcional)',
+  })
+  @ApiHeader({
+    name: CARRIER_TIMESTAMP_HEADER,
+    description:
+      'Segundos desde la época o ISO-8601 con zona; es parte de lo firmado',
   })
   ingestCarrierWebhook(
     @Param('carrierCode') carrierCode: string,
     @Body() dto: CarrierWebhookDto,
+    @Headers(CARRIER_SIGNATURE_HEADER) signature?: string,
+    @Headers(CARRIER_TIMESTAMP_HEADER) timestamp?: string,
   ): Promise<WebhookResponseDto> {
-    return this.trackingService.ingestCarrierWebhook(carrierCode, dto);
+    return this.trackingService.ingestCarrierWebhook(carrierCode, dto, {
+      signature,
+      timestamp,
+    });
   }
 
   /** UC-37-06. */

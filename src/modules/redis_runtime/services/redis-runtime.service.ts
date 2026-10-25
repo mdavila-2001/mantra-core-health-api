@@ -21,12 +21,14 @@ export interface LockAcquisition {
 }
 
 /**
- * Script Lua de liberación de lock con CAS: sólo borra la clave si su valor
- * coincide con el token del titular, evitando que un proceso libere el lock de
- * otro tras una expiración. Es un script fijo e interno: el módulo NO expone
- * `EVAL` arbitrario a los clientes.
+ * Script Lua de borrado con CAS: sólo borra la clave si su valor coincide con
+ * el esperado. Sirve para liberar un lock (el valor es el token del titular,
+ * evitando que un proceso libere el lock de otro tras una expiración) y para
+ * consumir un challenge (el valor es el digest ya validado, de modo que sólo
+ * una de varias verificaciones concurrentes lo borra). Es un script fijo e
+ * interno: el módulo NO expone `EVAL` arbitrario a los clientes.
  */
-const RELEASE_LOCK_LUA = `
+const COMPARE_AND_DELETE_LUA = `
 if redis.call('get', KEYS[1]) == ARGV[1] then
   return redis.call('del', KEYS[1])
 else
@@ -183,7 +185,7 @@ export class RedisRuntimeService {
   ): Promise<boolean> {
     const fullKey = this.keyFor(tenant, 'lock', key);
     const removed = (await this.redis.eval(
-      RELEASE_LOCK_LUA,
+      COMPARE_AND_DELETE_LUA,
       1,
       fullKey,
       token,
@@ -218,6 +220,12 @@ export class RedisRuntimeService {
    * (single-use). Devuelve `false` si no existe, expiró o no coincide. La
    * comparación es de tiempo constante para no filtrar el hash por temporización.
    *
+   * El consumo es atómico: tras validar el digest, el borrado se hace con CAS
+   * en Redis (`COMPARE_AND_DELETE_LUA`) y sólo quien lo borra devuelve `true`.
+   * Dos verificaciones simultáneas con el mismo OTP leen el mismo digest, pero
+   * una sola logra borrarlo; la otra recibe `false`. Un challenge reemplazado
+   * entre la lectura y el borrado (otro `putChallenge`) tampoco se consume.
+   *
    * Gancho de integración: `common/services/contact-points.service.ts` puede
    * llamar aquí para dejar de marcar `verified=true` a ciegas y exigir un OTP
    * previamente emitido con `putChallenge`.
@@ -236,9 +244,15 @@ export class RedisRuntimeService {
       return false;
     }
     // Consumo single-use: sólo se borra si acertó (permite reintentos válidos
-    // hasta el TTL, pero un acierto invalida el challenge).
-    await this.redis.del(fullKey);
-    return true;
+    // hasta el TTL, pero un acierto invalida el challenge). El CAS decide quién
+    // consume: el que no borra la clave perdió la carrera y no valida.
+    const consumed = (await this.redis.eval(
+      COMPARE_AND_DELETE_LUA,
+      1,
+      fullKey,
+      stored,
+    )) as number;
+    return consumed === 1;
   }
 
   /**

@@ -17,6 +17,8 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
+import { CommunityErrorReason } from '../community.error-reasons';
 import { COMM } from '../community.concepts';
 
 const actor = { id: 'u1', roles: [] } as any;
@@ -46,6 +48,10 @@ function build() {
     assertCanAdminister: mockFn(),
     assertCanPost: mockFn(),
     assertCanRead: mockFn(),
+    // API#837: por defecto la organización puede abrir foros y el actor
+    // pertenece a cualquier público.
+    assertOrganizationMayStartForums: mockFn().mockResolvedValue(undefined),
+    assertActorBelongsToAudience: mockFn().mockResolvedValue(undefined),
   };
   const visibility = {
     resolveActorProfileId: mockFn().mockResolvedValue('owner-profile'),
@@ -219,6 +225,140 @@ describe('CommunityGroupsService', () => {
       );
       expect(res.joinStatus).toBe(COMM.GROUP_JOIN_PENDING);
       expect(group.memberCount).toBe(0);
+    });
+  });
+
+  describe('createGroup · aseguradora y público autorizado (API#837)', () => {
+    it('una aseguradora no crea el foro: se corta antes de tocar nada', async () => {
+      const d = build();
+      d.access.assertOrganizationMayStartForums.mockRejectedValue(
+        new InsufficientRoleException(
+          'Una aseguradora no puede crear foros',
+          undefined,
+          CommunityErrorReason.INSURER_CANNOT_CREATE_GROUP,
+        ),
+      );
+
+      await expect(
+        d.service.createGroup({ slug: 's', name: 'N' }, actor),
+      ).rejects.toBeInstanceOf(InsufficientRoleException);
+      expect(d.groupsRepo.findBySlug).not.toHaveBeenCalled();
+      expect(d.groupsRepo.create).not.toHaveBeenCalled();
+      expect(d.access.assertOrganizationMayStartForums).toHaveBeenCalledWith(
+        expect.anything(),
+        undefined,
+        'CREATE_GROUP',
+      );
+    });
+
+    it.each([
+      ['VERIFIED_DOCTORS', COMM.GROUP_VISIBILITY_VERIFIED_DOCTORS],
+      ['ORGANIZATION_STAFF', COMM.GROUP_VISIBILITY_ORGANIZATION_STAFF],
+      ['ATTENDED_PATIENTS', COMM.GROUP_VISIBILITY_ATTENDED_PATIENTS],
+    ] as const)(
+      'declara el público %s y exige que el creador pertenezca a él',
+      async (code, concept) => {
+        const d = build();
+        d.groupsRepo.create.mockReturnValue({ id: 'g1' });
+        d.groupsRepo.createMember.mockReturnValue({ id: 'm' });
+
+        await d.service.createGroup(
+          { slug: 's', name: 'N', visibility: code },
+          actor,
+        );
+
+        expect(d.access.assertActorBelongsToAudience).toHaveBeenCalledWith(
+          expect.anything(),
+          concept,
+          undefined,
+          actor,
+        );
+        expect(d.groupsRepo.create).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({ visibilityConceptId: concept }),
+        );
+        // Un público autorizado no es un grupo público: no exige perfil completo.
+        expect(d.publicProfilesRepo.findById).not.toHaveBeenCalled();
+      },
+    );
+
+    it('si el creador no es del público, el foro no se crea', async () => {
+      const d = build();
+      d.access.assertActorBelongsToAudience.mockRejectedValue(
+        new InsufficientRoleException('no es del público'),
+      );
+
+      await expect(
+        d.service.createGroup(
+          { slug: 's', name: 'N', visibility: 'VERIFIED_DOCTORS' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(InsufficientRoleException);
+      expect(d.groupsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('joinGroup · público autorizado (API#837)', () => {
+    it('el público entra activo, tras verificar sesión y perfil con resolve', async () => {
+      const d = build();
+      const group = {
+        id: 'g1',
+        visibilityConceptId: COMM.GROUP_VISIBILITY_ATTENDED_PATIENTS,
+        memberCount: 4,
+        updatedAt: new Date(),
+      };
+      d.groupsRepo.findById.mockResolvedValue(group);
+      d.groupsRepo.findMember.mockResolvedValue(null);
+      d.groupsRepo.createMember.mockReturnValue({ id: 'm9' });
+
+      const res = await d.service.joinGroup(
+        'g1',
+        { memberProfileId: 'p1' },
+        actor,
+      );
+
+      expect(d.access.resolve).toHaveBeenCalledWith(
+        expect.anything(),
+        'g1',
+        actor,
+        'p1',
+      );
+      expect(res).toEqual({ id: 'm9', joinStatus: COMM.GROUP_JOIN_ACTIVE });
+      expect(group.memberCount).toBe(5);
+    });
+
+    it('quien no es del público recibe el 404 de resolve y no queda inscripto', async () => {
+      const d = build();
+      d.groupsRepo.findById.mockResolvedValue({
+        id: 'g1',
+        visibilityConceptId: COMM.GROUP_VISIBILITY_VERIFIED_DOCTORS,
+        memberCount: 0,
+        updatedAt: new Date(),
+      });
+      d.access.resolve.mockRejectedValue(
+        new ResourceNotFoundException('Grupo no encontrado'),
+      );
+
+      await expect(
+        d.service.joinGroup('g1', { memberProfileId: 'p1' }, actor),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.groupsRepo.createMember).not.toHaveBeenCalled();
+    });
+
+    it('un grupo común no consulta el público', async () => {
+      const d = build();
+      d.groupsRepo.findById.mockResolvedValue({
+        id: 'g1',
+        visibilityConceptId: COMM.GROUP_VISIBILITY_PUBLIC,
+        memberCount: 0,
+        updatedAt: new Date(),
+      });
+      d.groupsRepo.findMember.mockResolvedValue(null);
+      d.groupsRepo.createMember.mockReturnValue({ id: 'm1' });
+
+      await d.service.joinGroup('g1', { memberProfileId: 'p1' }, actor);
+
+      expect(d.access.resolve).not.toHaveBeenCalled();
     });
   });
 

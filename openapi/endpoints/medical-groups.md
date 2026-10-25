@@ -88,6 +88,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MedicalGroupPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MedicalGroupPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MedicalGroupPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MedicalGroupPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -265,6 +266,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupDto`. Ejemplo completo derivado de ese DTO:
 
@@ -349,9 +351,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | WITHOUT_ACCESS_TO_HISTORY | Excepción explícita en src/modules/clinical/services/clinical-read.service.ts |
 | 404 | `NOT_FOUND` | Servicio médico no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
-| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
 | 404 | `NOT_FOUND` | Diagnóstico no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
-| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
 | 409 | `CONFLICT` | Un mismo profesional no puede repetirse (ni ser también el creador) | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Seleccione primero el paciente para poder elegir un diagnóstico | Excepción explícita en src/modules/medical_groups/services/medical-groups.service.ts |
@@ -437,6 +437,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MedicalGroupDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupDto`. Ejemplo completo derivado de ese DTO:
 
@@ -618,6 +619,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupDto`. Ejemplo completo derivado de ese DTO:
 
@@ -804,6 +806,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupDto`. Ejemplo completo derivado de ese DTO:
 
@@ -989,6 +992,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1175,6 +1179,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicalGroupDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1344,6 +1349,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<MedicalGroupConditionOptionDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MedicalGroupConditionOptionDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MedicalGroupConditionOptionDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MedicalGroupConditionOptionDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalGroupConditionOptionDto[]`. Ejemplo completo derivado de ese DTO:
 

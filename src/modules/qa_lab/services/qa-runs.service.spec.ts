@@ -14,7 +14,31 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { QaLabErrorReason } from '../qa_lab.error-reasons';
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Devuelve el servicio de modo que cada llamada corra con `tenantId` como
+ * tenant activo, igual que lo deja el `TenantContextInterceptor`.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
 
 const actor = { id: 'user-1', roles: ['QA_ENGINEER'] };
 const SUITE = '11111111-1111-1111-1111-111111111111';
@@ -58,6 +82,11 @@ function build() {
   };
   const catalogRepo = {
     findSuiteForUpdate: mockFn(),
+    // Por defecto la suite del caso es del tenant activo.
+    findSuiteById: mockFn().mockResolvedValue({
+      id: SUITE,
+      tenantId: TENANT_A,
+    }),
     findEnvironmentById: mockFn(),
     countActiveCases: mockFn(),
     findCaseById: mockFn(),
@@ -70,7 +99,14 @@ function build() {
     catalogRepo as any,
     logger as any,
   );
-  return { service, tx, runsRepo, catalogRepo, logger };
+  return {
+    service: inTenant(service, TENANT_A),
+    raw: service,
+    tx,
+    runsRepo,
+    catalogRepo,
+    logger,
+  };
 }
 
 describe('QaRunsService', () => {
@@ -90,11 +126,13 @@ describe('QaRunsService', () => {
     function wire(d: ReturnType<typeof build>) {
       d.catalogRepo.findSuiteForUpdate.mockResolvedValue({
         id: SUITE,
+        tenantId: TENANT_A,
         code: 'SUITE-A',
         stateConceptId: CONCEPTS.SUITE_ACTIVE,
       });
       d.catalogRepo.findEnvironmentById.mockResolvedValue({
         id: ENVIRONMENT,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       });
       d.catalogRepo.countActiveCases.mockResolvedValue(5);
@@ -168,6 +206,7 @@ describe('QaRunsService', () => {
       wire(d);
       d.catalogRepo.findSuiteForUpdate.mockResolvedValue({
         id: SUITE,
+        tenantId: TENANT_A,
         code: 'SUITE-A',
         stateConceptId: CONCEPTS.SUITE_DRAFT,
       });
@@ -196,6 +235,7 @@ describe('QaRunsService', () => {
     function wire(d: ReturnType<typeof build>, isProductionSafe = true) {
       const run: any = {
         id: RUN,
+        tenantId: TENANT_A,
         suiteId: SUITE,
         environmentId: ENVIRONMENT,
         statusConceptId: CONCEPTS.RUN_QUEUED,
@@ -208,6 +248,7 @@ describe('QaRunsService', () => {
       d.runsRepo.findCaseResult.mockResolvedValue(null);
       d.catalogRepo.findEnvironmentById.mockResolvedValue({
         id: ENVIRONMENT,
+        tenantId: TENANT_A,
         isProductionSafe,
       });
       d.runsRepo.createCaseResult.mockReturnValue({ id: RESULT });
@@ -284,6 +325,10 @@ describe('QaRunsService', () => {
         id: CASE,
         suiteId: 'other-suite',
       });
+      d.catalogRepo.findSuiteById.mockResolvedValue({
+        id: 'other-suite',
+        tenantId: TENANT_A,
+      });
 
       await expect(
         d.service.executeCase(RUN, CASE, dto, actor as any),
@@ -294,6 +339,7 @@ describe('QaRunsService', () => {
       const d = build();
       d.runsRepo.findRunForUpdate.mockResolvedValue({
         id: RUN,
+        tenantId: TENANT_A,
         statusConceptId: CONCEPTS.RUN_PASSED,
       });
 
@@ -312,7 +358,10 @@ describe('QaRunsService', () => {
      * @returns Resultado de wire.
      */
     function wire(d: ReturnType<typeof build>, assertions: any[]) {
-      const result: any = { id: RESULT, testCaseId: CASE };
+      const result: any = { id: RESULT, testRunId: RUN, testCaseId: CASE };
+      // El resultado no lleva tenant: su alcance es el de su corrida.
+      d.runsRepo.findCaseResultById.mockResolvedValue(result);
+      d.runsRepo.findRunById.mockResolvedValue({ id: RUN, tenantId: TENANT_A });
       d.runsRepo.findCaseResultForUpdate.mockResolvedValue(result);
       d.runsRepo.countAssertionResults.mockResolvedValue(0);
       d.catalogRepo.findAssertionsByCase.mockResolvedValue(assertions);
@@ -380,11 +429,15 @@ describe('QaRunsService', () => {
 
     it('refuses to evaluate a case that failed in transport', async () => {
       const d = build();
-      d.runsRepo.findCaseResultForUpdate.mockResolvedValue({
+      const transportFailure = {
         id: RESULT,
+        testRunId: RUN,
         testCaseId: CASE,
         errorTypeConceptId: CONCEPTS.ERROR_TRANSPORT,
-      });
+      };
+      d.runsRepo.findCaseResultById.mockResolvedValue(transportFailure);
+      d.runsRepo.findRunById.mockResolvedValue({ id: RUN, tenantId: TENANT_A });
+      d.runsRepo.findCaseResultForUpdate.mockResolvedValue(transportFailure);
       d.runsRepo.countAssertionResults.mockResolvedValue(0);
 
       await expect(
@@ -414,6 +467,7 @@ describe('QaRunsService', () => {
     function wire(d: ReturnType<typeof build>, results: any[], totalCases = 3) {
       const run: any = {
         id: RUN,
+        tenantId: TENANT_A,
         statusConceptId: CONCEPTS.RUN_STATUS_RUNNING,
         totalCases,
         startedAt: new Date(Date.now() - 5000),
@@ -493,6 +547,7 @@ describe('QaRunsService', () => {
       const d = build();
       d.runsRepo.findRunForUpdate.mockResolvedValue({
         id: RUN,
+        tenantId: TENANT_A,
         statusConceptId: CONCEPTS.RUN_PASSED,
       });
 
@@ -507,7 +562,7 @@ describe('QaRunsService', () => {
 
     it('attaches the artifact to the run', async () => {
       const d = build();
-      d.runsRepo.findRunById.mockResolvedValue({ id: RUN });
+      d.runsRepo.findRunById.mockResolvedValue({ id: RUN, tenantId: TENANT_A });
       d.runsRepo.createArtifact.mockReturnValue({ id: 'art-1' });
 
       const res = await d.service.attachArtifact(RUN, dto, actor);
@@ -517,7 +572,7 @@ describe('QaRunsService', () => {
 
     it('refuses a case result from another run', async () => {
       const d = build();
-      d.runsRepo.findRunById.mockResolvedValue({ id: RUN });
+      d.runsRepo.findRunById.mockResolvedValue({ id: RUN, tenantId: TENANT_A });
       d.runsRepo.findCaseResultById.mockResolvedValue({
         id: RESULT,
         testRunId: 'other-run',
@@ -553,7 +608,10 @@ describe('QaRunsService', () => {
 
     it('opens a new defect when the signature is unseen', async () => {
       const d = build();
-      d.catalogRepo.findCaseById.mockResolvedValue({ id: CASE });
+      d.catalogRepo.findCaseById.mockResolvedValue({
+        id: CASE,
+        suiteId: SUITE,
+      });
       d.runsRepo.findDefectBySignatureForUpdate.mockResolvedValue(null);
       d.runsRepo.countDefects.mockResolvedValue(3);
       d.runsRepo.findDefectByNumber.mockResolvedValue(null);
@@ -572,9 +630,13 @@ describe('QaRunsService', () => {
 
     it('bumps the counter instead of opening a duplicate', async () => {
       const d = build();
-      d.catalogRepo.findCaseById.mockResolvedValue({ id: CASE });
+      d.catalogRepo.findCaseById.mockResolvedValue({
+        id: CASE,
+        suiteId: SUITE,
+      });
       const existing: any = {
         id: DEFECT,
+        tenantId: TENANT_A,
         defectNumber: 'DEF-00001',
         statusConceptId: CONCEPTS.DEFECT_TRIAGED,
         occurrencesCount: 4,
@@ -589,9 +651,13 @@ describe('QaRunsService', () => {
 
     it('reopens a defect that had been resolved', async () => {
       const d = build();
-      d.catalogRepo.findCaseById.mockResolvedValue({ id: CASE });
+      d.catalogRepo.findCaseById.mockResolvedValue({
+        id: CASE,
+        suiteId: SUITE,
+      });
       const existing: any = {
         id: DEFECT,
+        tenantId: TENANT_A,
         defectNumber: 'DEF-00001',
         statusConceptId: CONCEPTS.DEFECT_RESOLVED,
         occurrencesCount: 1,
@@ -624,6 +690,7 @@ describe('QaRunsService', () => {
     function openDefect(overrides: Record<string, unknown> = {}): any {
       return {
         id: DEFECT,
+        tenantId: TENANT_A,
         statusConceptId: CONCEPTS.DEFECT_OPEN,
         severityConceptId: CONCEPTS.DEFECT_SEVERITY_HIGH,
         ...overrides,
@@ -722,7 +789,11 @@ describe('QaRunsService', () => {
 
     it('links the evidence and seals it with a hash', async () => {
       const d = build();
-      const run: any = { id: RUN, statusConceptId: CONCEPTS.RUN_PASSED };
+      const run: any = {
+        id: RUN,
+        tenantId: TENANT_A,
+        statusConceptId: CONCEPTS.RUN_PASSED,
+      };
       d.runsRepo.findRunForUpdate.mockResolvedValue(run);
       d.runsRepo.findArtifactsByRun.mockResolvedValue([
         { id: 'art-1' },
@@ -740,6 +811,7 @@ describe('QaRunsService', () => {
       const d = build();
       d.runsRepo.findRunForUpdate.mockResolvedValue({
         id: RUN,
+        tenantId: TENANT_A,
         statusConceptId: CONCEPTS.RUN_FAILED_STATUS,
       });
 
@@ -752,6 +824,7 @@ describe('QaRunsService', () => {
       const d = build();
       d.runsRepo.findRunForUpdate.mockResolvedValue({
         id: RUN,
+        tenantId: TENANT_A,
         statusConceptId: CONCEPTS.RUN_PASSED,
       });
       d.runsRepo.findArtifactsByRun.mockResolvedValue([]);
@@ -759,6 +832,481 @@ describe('QaRunsService', () => {
       await expect(
         d.service.linkRelease(RUN, dto, actor as any),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+});
+
+/** Aserciones del 404 uniforme de QALAB-01. */
+async function expectOutOfScope(promise: Promise<unknown>, message: string) {
+  const error = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  const exception = error as ResourceNotFoundException;
+  expect(exception.getStatus()).toBe(404);
+  expect(exception.message).toBe(message);
+  expect(exception.reason).toBe(QaLabErrorReason.QA_LAB_RESOURCE_OUT_OF_SCOPE);
+  expect(exception.details).toBeUndefined();
+  return exception;
+}
+
+describe('QaRunsService · alcance de tenant (QALAB-01)', () => {
+  const system = { id: 'worker-1', roles: ['SYSTEM'] };
+  const foreignRun = (overrides: Record<string, unknown> = {}): any => ({
+    id: RUN,
+    tenantId: TENANT_B,
+    suiteId: SUITE,
+    environmentId: ENVIRONMENT,
+    statusConceptId: CONCEPTS.RUN_QUEUED,
+    ...overrides,
+  });
+
+  describe('createRun', () => {
+    const dto = {
+      suiteId: SUITE,
+      environmentId: ENVIRONMENT,
+      trigger: 'MANUAL' as const,
+      tenantId: TENANT_B,
+    };
+
+    it('la corrida hereda el tenant de la suite acotada e ignora el del cuerpo', async () => {
+      const d = build();
+      d.catalogRepo.findSuiteForUpdate.mockResolvedValue({
+        id: SUITE,
+        tenantId: TENANT_A,
+        code: 'SUITE-A',
+        stateConceptId: CONCEPTS.SUITE_ACTIVE,
+      });
+      d.catalogRepo.findEnvironmentById.mockResolvedValue({
+        id: ENVIRONMENT,
+        tenantId: TENANT_A,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+      d.catalogRepo.countActiveCases.mockResolvedValue(2);
+      d.runsRepo.findLastRun.mockResolvedValue(null);
+      d.runsRepo.findRunByNumber.mockResolvedValue(null);
+      d.runsRepo.createRun.mockReturnValue({ id: RUN });
+
+      await d.service.createRun(dto as any, actor);
+
+      expect(d.catalogRepo.findSuiteForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        SUITE,
+        TENANT_A,
+      );
+      expect(d.runsRepo.createRun.mock.calls[0][1].tenantId).toBe(TENANT_A);
+    });
+
+    it('suite de otro tenant: 404 uniforme, igual que inexistente, sin corrida', async () => {
+      const d = build();
+      d.catalogRepo.findSuiteForUpdate.mockResolvedValue({
+        id: SUITE,
+        tenantId: TENANT_B,
+        code: 'SUITE-B',
+        stateConceptId: CONCEPTS.SUITE_ACTIVE,
+      });
+      const foreign = await expectOutOfScope(
+        d.service.createRun(dto as any, actor),
+        'Suite no encontrada',
+      );
+      d.catalogRepo.findSuiteForUpdate.mockResolvedValue(null);
+      const missing = await expectOutOfScope(
+        d.service.createRun(dto as any, actor),
+        'Suite no encontrada',
+      );
+
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(d.runsRepo.createRun).not.toHaveBeenCalled();
+    });
+
+    it('entorno de otro tenant colgado de una suite propia: 404 uniforme, sin corrida', async () => {
+      const d = build();
+      d.catalogRepo.findSuiteForUpdate.mockResolvedValue({
+        id: SUITE,
+        tenantId: TENANT_A,
+        code: 'SUITE-A',
+        stateConceptId: CONCEPTS.SUITE_ACTIVE,
+      });
+      d.catalogRepo.findEnvironmentById.mockResolvedValue({
+        id: ENVIRONMENT,
+        tenantId: TENANT_B,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+
+      await expectOutOfScope(
+        d.service.createRun(dto as any, actor),
+        'Entorno no encontrado',
+      );
+      expect(d.runsRepo.createRun).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto un actor de tenant se rechaza antes de tocar la base', async () => {
+      const d = build();
+
+      await expect(d.raw.createRun(dto as any, actor)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      expect(d.catalogRepo.findSuiteForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('el worker SYSTEM sin tenant en contexto crea la corrida de cualquier suite, pero no mezcla entornos de otro tenant', async () => {
+      const d = build();
+      d.catalogRepo.findSuiteForUpdate.mockResolvedValue({
+        id: SUITE,
+        tenantId: TENANT_B,
+        code: 'SUITE-B',
+        stateConceptId: CONCEPTS.SUITE_ACTIVE,
+      });
+      d.catalogRepo.findEnvironmentById.mockResolvedValue({
+        id: ENVIRONMENT,
+        tenantId: TENANT_A,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+
+      await expectOutOfScope(
+        d.raw.createRun(dto as any, system),
+        'Entorno no encontrado',
+      );
+      expect(d.catalogRepo.findSuiteForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        SUITE,
+        undefined,
+      );
+      expect(d.runsRepo.createRun).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('operaciones por UUID de corrida / resultado / defecto', () => {
+    it('finalizar la corrida de otro tenant: 404 uniforme; el estado de B no cambia', async () => {
+      const d = build();
+      const run = foreignRun();
+      d.runsRepo.findRunForUpdate.mockResolvedValue(run);
+
+      await expectOutOfScope(
+        d.service.finalizeRun(RUN, actor),
+        'Corrida no encontrada',
+      );
+
+      expect(run.statusConceptId).toBe(CONCEPTS.RUN_QUEUED);
+      expect(d.runsRepo.findResultsByRun).not.toHaveBeenCalled();
+      expect(d.runsRepo.findRunForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        RUN,
+        TENANT_A,
+      );
+    });
+
+    it('adjuntar un artefacto a la corrida de otro tenant: 404 uniforme y no persiste', async () => {
+      const d = build();
+      d.runsRepo.findRunById.mockResolvedValue(foreignRun());
+
+      await expectOutOfScope(
+        d.service.attachArtifact(
+          RUN,
+          { artifactType: 'LOG' as const, fileId: FILE },
+          actor,
+        ),
+        'Corrida no encontrada',
+      );
+
+      expect(d.runsRepo.createArtifact).not.toHaveBeenCalled();
+    });
+
+    it('adjuntar el resultado de la corrida de otro tenant a una corrida propia: 404, no «es de otra corrida»', async () => {
+      const d = build();
+      d.runsRepo.findRunById.mockImplementation((_tx: unknown, id: string) =>
+        Promise.resolve(
+          id === RUN
+            ? { id: RUN, tenantId: TENANT_A }
+            : { id, tenantId: TENANT_B },
+        ),
+      );
+      d.runsRepo.findCaseResultById.mockResolvedValue({
+        id: RESULT,
+        testRunId: 'run-de-b',
+      });
+
+      await expectOutOfScope(
+        d.service.attachArtifact(
+          RUN,
+          {
+            artifactType: 'LOG' as const,
+            fileId: FILE,
+            testCaseResultId: RESULT,
+          },
+          actor,
+        ),
+        'Resultado no encontrado',
+      );
+
+      expect(d.runsRepo.createArtifact).not.toHaveBeenCalled();
+    });
+
+    it('enlazar a un release la corrida de otro tenant: 404 uniforme', async () => {
+      const d = build();
+      d.runsRepo.findRunForUpdate.mockResolvedValue(
+        foreignRun({ statusConceptId: CONCEPTS.RUN_PASSED }),
+      );
+
+      await expectOutOfScope(
+        d.service.linkRelease(
+          RUN,
+          { gitRef: 'abc', releaseRef: 'v1' } as any,
+          actor,
+        ),
+        'Corrida no encontrada',
+      );
+      expect(d.runsRepo.findArtifactsByRun).not.toHaveBeenCalled();
+    });
+
+    it('ejecutar un caso en la corrida de otro tenant: 404 uniforme, sin evidencia', async () => {
+      const d = build();
+      d.runsRepo.findRunForUpdate.mockResolvedValue(foreignRun());
+
+      await expectOutOfScope(
+        d.service.executeCase(
+          RUN,
+          CASE,
+          {
+            requestBodyJson: {},
+            responseBodyJson: {},
+            httpStatus: 200,
+            latencyMs: 1,
+          } as any,
+          actor,
+        ),
+        'Corrida no encontrada',
+      );
+
+      expect(d.runsRepo.createCaseResult).not.toHaveBeenCalled();
+      expect(d.runsRepo.createRequestPayload).not.toHaveBeenCalled();
+    });
+
+    it('un caso de la suite de otro tenant no se revela como «de otra suite»: 404 uniforme', async () => {
+      const d = build();
+      d.runsRepo.findRunForUpdate.mockResolvedValue({
+        id: RUN,
+        tenantId: TENANT_A,
+        suiteId: SUITE,
+        statusConceptId: CONCEPTS.RUN_QUEUED,
+      });
+      d.catalogRepo.findCaseById.mockResolvedValue({
+        id: CASE,
+        suiteId: 'suite-de-b',
+      });
+      d.catalogRepo.findSuiteById.mockResolvedValue({
+        id: 'suite-de-b',
+        tenantId: TENANT_B,
+      });
+
+      await expectOutOfScope(
+        d.service.executeCase(
+          RUN,
+          CASE,
+          {
+            requestBodyJson: {},
+            responseBodyJson: {},
+            httpStatus: 200,
+            latencyMs: 1,
+          } as any,
+          actor,
+        ),
+        'Caso no encontrado',
+      );
+    });
+
+    it('evaluar el resultado de la corrida de otro tenant: 404 uniforme; no se bloquea ni se evalúa', async () => {
+      const d = build();
+      d.runsRepo.findCaseResultById.mockResolvedValue({
+        id: RESULT,
+        testRunId: RUN,
+        testCaseId: CASE,
+      });
+      d.runsRepo.findRunById.mockResolvedValue(foreignRun());
+
+      await expectOutOfScope(
+        d.service.evaluateResult(RESULT, actor),
+        'Resultado no encontrado',
+      );
+
+      expect(d.runsRepo.findCaseResultForUpdate).not.toHaveBeenCalled();
+      expect(d.runsRepo.createAssertionResult).not.toHaveBeenCalled();
+    });
+
+    it('evaluar un resultado inexistente responde igual que uno ajeno', async () => {
+      const d = build();
+      d.runsRepo.findCaseResultById.mockResolvedValue({
+        id: RESULT,
+        testRunId: RUN,
+      });
+      d.runsRepo.findRunById.mockResolvedValue(foreignRun());
+      const foreign = await expectOutOfScope(
+        d.service.evaluateResult(RESULT, actor),
+        'Resultado no encontrado',
+      );
+
+      d.runsRepo.findCaseResultById.mockResolvedValue(null);
+      const missing = await expectOutOfScope(
+        d.service.evaluateResult(RESULT, actor),
+        'Resultado no encontrado',
+      );
+
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+    });
+
+    it('registrar un defecto sobre el caso de otro tenant: 404 uniforme y no persiste', async () => {
+      const d = build();
+      d.catalogRepo.findCaseById.mockResolvedValue({
+        id: CASE,
+        suiteId: 'suite-de-b',
+      });
+      d.catalogRepo.findSuiteById.mockResolvedValue({
+        id: 'suite-de-b',
+        tenantId: TENANT_B,
+      });
+
+      await expectOutOfScope(
+        d.service.registerDefect(
+          {
+            testCaseId: CASE,
+            failureSignatureHash: 'sig',
+            defectType: 'BUG' as const,
+            severity: 'HIGH' as const,
+            title: 'x',
+            tenantId: TENANT_B,
+          } as any,
+          actor,
+        ),
+        'Caso no encontrado',
+      );
+
+      expect(d.runsRepo.findDefectBySignatureForUpdate).not.toHaveBeenCalled();
+      expect(d.runsRepo.createDefect).not.toHaveBeenCalled();
+    });
+
+    it('el defecto nuevo hereda el tenant de la suite, no el del cuerpo', async () => {
+      const d = build();
+      d.catalogRepo.findCaseById.mockResolvedValue({
+        id: CASE,
+        suiteId: SUITE,
+      });
+      d.runsRepo.findDefectBySignatureForUpdate.mockResolvedValue(null);
+      d.runsRepo.countDefects.mockResolvedValue(0);
+      d.runsRepo.findDefectByNumber.mockResolvedValue(null);
+      d.runsRepo.createDefect.mockReturnValue({ id: DEFECT });
+
+      await d.service.registerDefect(
+        {
+          testCaseId: CASE,
+          failureSignatureHash: 'sig',
+          defectType: 'BUG' as const,
+          severity: 'HIGH' as const,
+          title: 'x',
+          tenantId: TENANT_B,
+        } as any,
+        actor,
+      );
+
+      expect(d.runsRepo.createDefect.mock.calls[0][1].tenantId).toBe(TENANT_A);
+    });
+
+    it('enlazar al defecto el resultado de una corrida de otro tenant: 404 uniforme', async () => {
+      const d = build();
+      d.catalogRepo.findCaseById.mockResolvedValue({
+        id: CASE,
+        suiteId: SUITE,
+      });
+      d.runsRepo.findCaseResultById.mockResolvedValue({
+        id: RESULT,
+        testRunId: RUN,
+        testCaseId: CASE,
+      });
+      d.runsRepo.findRunById.mockResolvedValue(foreignRun());
+
+      await expectOutOfScope(
+        d.service.registerDefect(
+          {
+            testCaseId: CASE,
+            testCaseResultId: RESULT,
+            failureSignatureHash: 'sig',
+            defectType: 'BUG' as const,
+            severity: 'HIGH' as const,
+            title: 'x',
+          } as any,
+          actor,
+        ),
+        'Resultado no encontrado',
+      );
+      expect(d.runsRepo.createDefect).not.toHaveBeenCalled();
+    });
+
+    it('triage del defecto de otro tenant: 404 uniforme; estado y asignación de B no cambian', async () => {
+      const d = build();
+      const defect: any = {
+        id: DEFECT,
+        tenantId: TENANT_B,
+        statusConceptId: CONCEPTS.DEFECT_OPEN,
+      };
+      d.runsRepo.findDefectForUpdate.mockResolvedValue(defect);
+
+      const foreign = await expectOutOfScope(
+        d.service.triageDefect(
+          DEFECT,
+          { status: 'TRIAGED' as const, assignedToUserId: 'u-1' } as any,
+          actor,
+        ),
+        'Defecto no encontrado',
+      );
+      d.runsRepo.findDefectForUpdate.mockResolvedValue(null);
+      const missing = await expectOutOfScope(
+        d.service.triageDefect(
+          DEFECT,
+          { status: 'TRIAGED' as const } as any,
+          actor,
+        ),
+        'Defecto no encontrado',
+      );
+
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(defect.statusConceptId).toBe(CONCEPTS.DEFECT_OPEN);
+      expect(defect.assignedToUserId).toBeUndefined();
+      expect(d.runsRepo.findDefectForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        DEFECT,
+        TENANT_A,
+      );
+    });
+
+    it('el worker SYSTEM sin tenant en contexto opera sobre cualquier corrida (barrido global explícito)', async () => {
+      const d = build();
+      const run = foreignRun({
+        statusConceptId: CONCEPTS.RUN_STATUS_RUNNING,
+        totalCases: 1,
+      });
+      d.runsRepo.findRunForUpdate.mockResolvedValue(run);
+      d.runsRepo.findResultsByRun.mockResolvedValue([
+        { statusConceptId: CONCEPTS.CASE_RESULT_PASSED },
+      ]);
+
+      const res = await d.raw.finalizeRun(RUN, system);
+
+      expect(res.statusConceptId).toBe(CONCEPTS.RUN_PASSED);
+      expect(d.runsRepo.findRunForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        RUN,
+        undefined,
+      );
+    });
+
+    it('el worker SYSTEM que declara tenant queda acotado a él', async () => {
+      const d = build();
+      d.runsRepo.findRunForUpdate.mockResolvedValue(foreignRun());
+
+      await expectOutOfScope(
+        inTenant(d.raw, TENANT_A).finalizeRun(RUN, system),
+        'Corrida no encontrada',
+      );
     });
   });
 });

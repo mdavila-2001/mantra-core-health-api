@@ -25,6 +25,7 @@ export * from './community-search-index.service';
 export * from './community-verification.service';
 export * from './community-profile-stats.service';
 export * from './community-group-access.service';
+export * from './community-group-audience.service';
 export * from './community-group-wall.service';
 export * from './community-group-notifications.service';
 // Carril P2: el enganche con el contrato de notificaciones de P1.

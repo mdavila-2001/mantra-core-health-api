@@ -4,10 +4,11 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../practice.concepts';
+import { loadPracticeInScope, loadSiteInScope } from './practice-scope';
 import {
   PracticesRepository,
   PracticeSitesRepository,
@@ -59,14 +60,21 @@ export class ClinicalStructureService {
     dto: CreateClinicalUnitDto,
     actor: AuthenticatedUser,
   ): Promise<ClinicalUnitResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.unit.create', siteId },
       'Creating clinical unit',
     );
     return this.em.transactional(async (tx) => {
-      const site = await this.sitesRepo.findById(tx, siteId);
-      if (!site)
-        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      // La sede se resuelve hasta su práctica y se compara con el tenant activo
+      // antes de crear nada debajo.
+      const { site } = await loadSiteInScope(
+        this.sitesRepo,
+        this.practicesRepo,
+        tx,
+        siteId,
+        tenantId,
+      );
       if (site.statusConceptId !== PRAC.SITE_ACTIVE) {
         throw new PreconditionFailedException('El sitio no está activo', {
           siteId,
@@ -127,14 +135,19 @@ export class ClinicalStructureService {
     dto: CreateCareSpaceDto,
     actor: AuthenticatedUser,
   ): Promise<CareSpaceResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.space.create', siteId },
       'Creating care space',
     );
     return this.em.transactional(async (tx) => {
-      const site = await this.sitesRepo.findById(tx, siteId);
-      if (!site)
-        throw new ResourceNotFoundException('Sitio no encontrado', { siteId });
+      const { site } = await loadSiteInScope(
+        this.sitesRepo,
+        this.practicesRepo,
+        tx,
+        siteId,
+        tenantId,
+      );
       if (site.statusConceptId !== PRAC.SITE_ACTIVE) {
         throw new PreconditionFailedException('El sitio no está activo', {
           siteId,
@@ -209,16 +222,18 @@ export class ClinicalStructureService {
     dto: CreateHealthcareServiceDto,
     actor: AuthenticatedUser,
   ): Promise<HealthcareServiceResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.service.publish', practiceId },
       'Publishing healthcare service',
     );
     return this.em.transactional(async (tx) => {
-      const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice)
-        throw new ResourceNotFoundException('Práctica no encontrada', {
-          practiceId,
-        });
+      const practice = await loadPracticeInScope(
+        this.practicesRepo,
+        tx,
+        practiceId,
+        tenantId,
+      );
       if (practice.statusConceptId !== PRAC.PRACTICE_ACTIVE) {
         throw new PreconditionFailedException('La práctica no está activa', {
           practiceId,
@@ -239,7 +254,12 @@ export class ClinicalStructureService {
       }
       if (dto.clinicalUnitId) {
         const unit = await this.unitsRepo.findById(tx, dto.clinicalUnitId);
-        if (!unit) {
+        // La unidad debe colgar de una sede de ESTA práctica: una unidad de otra
+        // práctica (o de otro tenant) responde igual que una inexistente.
+        const unitSite = unit
+          ? await this.sitesRepo.findById(tx, unit.practiceSiteId)
+          : null;
+        if (!unit || !unitSite || unitSite.practiceId !== practiceId) {
           throw new PreconditionFailedException('La unidad clínica no existe', {
             clinicalUnitId: dto.clinicalUnitId,
           });

@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { IntegrationContracts } from '../entities';
 import { createdBy } from '../../../common';
 
 /** Datos mínimos para definir un contrato de integración (UC-31-01). */
 export interface CreateContractData {
+  /**
+   * Tenant propietario del contrato (el del contexto autenticado).
+   */
+  tenantId: string;
   /**
    * Identificador asociado a external provider.
    */
@@ -52,21 +57,43 @@ export interface CreateContractData {
  */
 @Injectable()
 export class ContractsRepository {
-  /** Busca un contrato por id; `null` si no existe. */
-  findById(
+  /**
+   * Busca un contrato por `id + tenantId`; `null` si no existe o es de otro
+   * tenant (ambos casos son indistinguibles para el llamador).
+   */
+  findByIdInTenant(
     em: EntityManager,
+    tenantId: string,
     id: string,
   ): Promise<IntegrationContracts | null> {
-    return em.findOne(IntegrationContracts, { id });
+    return em.findOne(IntegrationContracts, { id, tenantId });
   }
 
-  /** Busca un contrato por (código, proveedor) para garantizar unicidad. */
+  /**
+   * Igual que {@link findByIdInTenant} pero bloquea la fila: serializa las
+   * transiciones del contrato y los avances de cursor concurrentes.
+   */
+  findByIdInTenantForUpdate(
+    em: EntityManager,
+    tenantId: string,
+    id: string,
+  ): Promise<IntegrationContracts | null> {
+    return em.findOne(
+      IntegrationContracts,
+      { id, tenantId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /** Busca un contrato por (tenant, código, proveedor) para garantizar unicidad. */
   findByCodeAndProvider(
     em: EntityManager,
+    tenantId: string,
     contractCode: string,
     externalProviderId: string,
   ): Promise<IntegrationContracts | null> {
     return em.findOne(IntegrationContracts, {
+      tenantId,
       contractCode,
       externalProviderId,
     });
@@ -77,6 +104,7 @@ export class ContractsRepository {
     return em.create(
       IntegrationContracts,
       {
+        tenantId: data.tenantId,
         externalProviderId: data.externalProviderId,
         contractCode: data.contractCode,
         capabilityConceptId: data.capabilityConceptId,

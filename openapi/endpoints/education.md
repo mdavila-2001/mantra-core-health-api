@@ -109,6 +109,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AttemptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AttemptResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -139,8 +140,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: LEARNER, EDUCATION_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Evaluación no encontrada | Excepción explícita en src/modules/education/services/education-learning.service.ts |
-| 404 | `NOT_FOUND` | Inscripción no encontrada | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/education/services/education-scope.service.ts |
 | 409 | `CONFLICT` | Ya hay un intento en curso | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La inscripción es de otro curso | Excepción explícita en src/modules/education/services/education-learning.service.ts |
@@ -244,6 +244,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<GradedAttemptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<GradedAttemptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<GradedAttemptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GradedAttemptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GradedAttemptResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -278,8 +279,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: LEARNER, EDUCATION_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Intento no encontrado | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 404 | `NOT_FOUND` | Evaluación no encontrada | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/education/services/education-scope.service.ts |
 | 409 | `CONFLICT` | El intento ya fue corregido | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El tiempo del intento venció | Excepción explícita en src/modules/education/services/education-learning.service.ts |
@@ -387,6 +388,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CmeCreditResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CmeCreditResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CmeCreditResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CmeCreditResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CmeCreditResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -419,7 +421,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, EDUCATION_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Certificado no encontrado | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/education/services/education-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El certificado no está vigente | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 422 | `PRECONDITION_FAILED` | El certificado no otorga créditos CME | Excepción explícita en src/modules/education/services/education-learning.service.ts |
@@ -522,6 +524,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RevokeCertificateResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RevokeCertificateResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RevokeCertificateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RevokeCertificateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RevokeCertificateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -550,7 +553,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: EDUCATION_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Certificado no encontrado | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/education/services/education-scope.service.ts |
 | 409 | `CONFLICT` | El certificado ya está revocado | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -685,6 +688,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssessmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssessmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssessmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssessmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssessmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -717,7 +721,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: EDUCATION_ADMIN, COURSE_AUTHOR. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Curso no encontrado | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Una evaluación puntuable necesita respuesta correcta en cada pregunta | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 422 | `PRECONDITION_FAILED` | El módulo no pertenece al curso | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
@@ -828,6 +831,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CohortResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CohortResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CohortResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CohortResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CohortResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -860,7 +864,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: EDUCATION_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Curso no encontrado | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 409 | `CONFLICT` | Ya existe una cohorte con ese código en el curso | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La cohorte debe terminar después de empezar | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
@@ -974,6 +977,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<InstructorAssignmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<InstructorAssignmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<InstructorAssignmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<InstructorAssignmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InstructorAssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1004,7 +1008,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: EDUCATION_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Curso no encontrado | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 409 | `CONFLICT` | El instructor ya está asignado al curso | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 409 | `CONFLICT` | El curso ya tiene instructor titular | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -1108,6 +1111,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReviewResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1138,7 +1142,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: LEARNER, EDUCATION_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Curso no encontrado | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 409 | `CONFLICT` | El usuario ya reseñó este curso | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1237,6 +1240,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CourseVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CourseVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CourseVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CourseVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CourseVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1265,7 +1269,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: EDUCATION_ADMIN, COURSE_AUTHOR. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Curso no encontrado | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 409 | `CONFLICT` | Esa versión del curso ya existe | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Un curso archivado no admite versiones | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
@@ -1426,6 +1429,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CourseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CourseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CourseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CourseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CourseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1464,6 +1468,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: EDUCATION_ADMIN, COURSE_AUTHOR. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/education/services/education-scope.service.ts |
 | 409 | `CONFLICT` | Ya existe un curso con ese código | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Un curso acreditado necesita declarar sus horas CME | Excepción explícita en src/modules/education/services/education-catalog.service.ts |
@@ -1519,7 +1524,6 @@ Content-Type: application/json
 {
   "courseId": "00000000-0000-4000-8000-000000000001",
   "learnerType": "PRACTITIONER",
-  "learnerRefId": "00000000-0000-4000-8000-000000000001",
   "source": "SELF"
 }
 ```
@@ -1537,7 +1541,7 @@ Content-Type: application/json
 | `courseId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `cohortId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `learnerType` | Sí | `string` | valores: `PRACTITIONER`, `STAFF`, `PATIENT`, `USER` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
-| `learnerRefId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `learnerRefId` | No | `string` | formato `uuid` | Aprendiz que se inscribe. Un LEARNER no lo declara: se deriva de su sesión y uno ajeno responde 403 (LEARNER_ENROLLMENT_OWNER_REQUIRED). Un administrador debe indicarlo | `00000000-0000-4000-8000-000000000001` |
 | `source` | Sí | `string` | valores: `SELF`, `ASSIGNED`, `PURCHASED`, `PARTNER` | Sin descripción específica en el contrato OpenAPI. | `SELF` |
 | `paymentIntentId` | No | `string` | formato `uuid` | Intento de pago; obligatorio si la inscripción es PURCHASED | `00000000-0000-4000-8000-000000000001` |
 | `expiresAt` | No | `string` | formato `date-time` | Caducidad del acceso | `2026-07-31T12:00:00.000Z` |
@@ -1576,6 +1580,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EnrollmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EnrollmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EnrollmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EnrollmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EnrollmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1606,12 +1611,12 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: EDUCATION_ADMIN, LEARNER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Curso no encontrado | Excepción explícita en src/modules/education/services/education-learning.service.ts |
-| 404 | `NOT_FOUND` | Cohorte no encontrada | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/education/services/education-scope.service.ts |
 | 409 | `CONFLICT` | El aprendiz ya está inscrito en el curso | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 409 | `CONFLICT` | La cohorte no tiene plazas disponibles | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Una inscripción comprada necesita su intento de pago | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 422 | `PRECONDITION_FAILED` | Indique el aprendiz que se inscribe | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 422 | `PRECONDITION_FAILED` | El curso no está publicado | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cohorte pertenece a otro curso | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cohorte no está abierta | Excepción explícita en src/modules/education/services/education-learning.service.ts |
@@ -1713,6 +1718,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CertificateResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CertificateResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CertificateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CertificateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CertificateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1747,8 +1753,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, EDUCATION_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Inscripción no encontrada | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 404 | `NOT_FOUND` | Curso no encontrado | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/education/services/education-scope.service.ts |
 | 409 | `CONFLICT` | No se pudo generar un número de certificado libre | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 409 | `CONFLICT` | No se pudo generar un código de verificación libre | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -1837,6 +1843,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<CompleteEnrollmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CompleteEnrollmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CompleteEnrollmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CompleteEnrollmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CompleteEnrollmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1867,7 +1874,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, EDUCATION_ADMIN, LEARNER. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Inscripción no encontrada | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/education/services/education-scope.service.ts |
 | 422 | `PRECONDITION_FAILED` | La inscripción no está activa | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 422 | `PRECONDITION_FAILED` | El curso no está completo | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 422 | `PRECONDITION_FAILED` | Quedan evaluaciones sin aprobar | Excepción explícita en src/modules/education/services/education-learning.service.ts |
@@ -1978,6 +1985,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProgressResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProgressResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProgressResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProgressResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProgressResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2010,8 +2018,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: LEARNER, EDUCATION_ADMIN, SYSTEM. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Inscripción no encontrada | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 404 | `NOT_FOUND` | Lección no encontrada | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/education/services/education-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La inscripción está cancelada | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 422 | `PRECONDITION_FAILED` | El acceso a la inscripción ha caducado | Excepción explícita en src/modules/education/services/education-learning.service.ts |

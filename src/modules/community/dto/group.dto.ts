@@ -44,12 +44,36 @@ export class CreateGroupDto {
    * Valor de visibility mantenido por la instancia.
    */
   @ApiPropertyOptional({
-    description: 'Visibilidad',
-    enum: ['PUBLIC', 'PRIVATE', 'SECRET'],
+    description:
+      'Visibilidad y público autorizado. `PUBLIC` es el público general y ' +
+      '`PRIVATE` el ingreso por invitación o aprobación; `VERIFIED_DOCTORS`, ' +
+      '`ORGANIZATION_STAFF` y `ATTENDED_PATIENTS` restringen el foro a ese ' +
+      'público: quien no pertenece a él no lo ve (404).',
+    enum: [
+      'PUBLIC',
+      'PRIVATE',
+      'SECRET',
+      'VERIFIED_DOCTORS',
+      'ORGANIZATION_STAFF',
+      'ATTENDED_PATIENTS',
+    ],
   })
   @IsOptional()
-  @IsIn(['PUBLIC', 'PRIVATE', 'SECRET'])
-  visibility?: 'PUBLIC' | 'PRIVATE' | 'SECRET';
+  @IsIn([
+    'PUBLIC',
+    'PRIVATE',
+    'SECRET',
+    'VERIFIED_DOCTORS',
+    'ORGANIZATION_STAFF',
+    'ATTENDED_PATIENTS',
+  ])
+  visibility?:
+    | 'PUBLIC'
+    | 'PRIVATE'
+    | 'SECRET'
+    | 'VERIFIED_DOCTORS'
+    | 'ORGANIZATION_STAFF'
+    | 'ATTENDED_PATIENTS';
 
   /**
    * Valor de group type mantenido por la instancia.

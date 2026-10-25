@@ -74,9 +74,10 @@ export class IntegrationsMessagesController {
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @ApiOperation({ summary: 'Listar mensajes QUEUED listos para despachar' })
   listPendingDispatch(
-    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('limit', new ParseOptionalLimitPipe()) limit: number | undefined,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PendingDispatchResponseDto> {
-    return this.messagingService.listQueuedForDispatch(limit);
+    return this.messagingService.listQueuedForDispatch(actor, limit);
   }
 
   /** UC-12-06. Worker de envío: el rol `SYSTEM` sólo lo firma `SystemApiClient`. */
@@ -108,9 +109,10 @@ export class IntegrationsMessagesController {
     summary: 'Listar mensajes FAILED candidatos a reintento o dead-letter',
   })
   listPendingRetry(
-    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('limit', new ParseOptionalLimitPipe()) limit: number | undefined,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PendingRetryResponseDto> {
-    return this.messagingService.listFailedForRetry(limit);
+    return this.messagingService.listFailedForRetry(actor, limit);
   }
 
   /** UC-12-07. Worker de reintentos. */
@@ -157,9 +159,10 @@ export class IntegrationsMessagesController {
     summary: 'Listar mensajes entrantes RECEIVED listos para correlacionar',
   })
   listPendingCorrelation(
-    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('limit', new ParseOptionalLimitPipe()) limit: number | undefined,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PendingCorrelationResponseDto> {
-    return this.messagingService.listReceivedForCorrelation(limit);
+    return this.messagingService.listReceivedForCorrelation(actor, limit);
   }
 
   /** UC-12-10. Worker de correlación ({id} = mensaje entrante). */

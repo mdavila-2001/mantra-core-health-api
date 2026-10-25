@@ -117,6 +117,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EventDeliveryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EventDeliveryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EventDeliveryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EventDeliveryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EventDeliveryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -245,6 +246,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DispatchEventResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DispatchEventResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DispatchEventResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DispatchEventResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DispatchEventResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -391,6 +393,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -525,6 +528,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FailJobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FailJobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FailJobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FailJobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FailJobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -676,6 +680,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeliverNotificationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeliverNotificationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeliverNotificationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeliverNotificationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeliverNotificationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -798,6 +803,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PendingNotificationsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PendingNotificationsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PendingNotificationsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PendingNotificationsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PendingNotificationsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -939,6 +945,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OutboxRelayResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OutboxRelayResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OutboxRelayResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OutboxRelayResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OutboxRelayResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1082,6 +1089,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ClaimJobsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ClaimJobsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ClaimJobsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ClaimJobsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClaimJobsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1213,6 +1221,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<InAppReadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<InAppReadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<InAppReadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<InAppReadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InAppReadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1326,6 +1335,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MarkAllInAppReadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MarkAllInAppReadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1434,6 +1444,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<InAppNotificationPageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InAppNotificationPageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1573,6 +1584,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyPreferencesDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyPreferencesDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1718,6 +1730,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MyPreferencesDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyPreferencesDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1823,8 +1836,8 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `channelId` | Sí | `string` | formato `uuid` | Canal por el que se notifica | `00000000-0000-4000-8000-000000000001` |
-| `recipientUserId` | No | `string` | formato `uuid` | Destinatario interno | `00000000-0000-4000-8000-000000000001` |
-| `recipientAddress` | No | `string` | longitud máxima 300 | Dirección de destino si el canal es externo | `valor-ejemplo` |
+| `recipientUserId` | No | `string` | formato `uuid` | Usuario destinatario. Obligatorio: sin él la solicitud se rechaza con 422 NOTIFICATION_RECIPIENT_INVALID | `00000000-0000-4000-8000-000000000001` |
+| `recipientAddress` | No | `string` | longitud máxima 300 | Dirección de destino del canal externo; complementa a `recipientUserId`, no lo sustituye | `valor-ejemplo` |
 | `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `templateId` | No | `string` | formato `uuid` | Plantilla publicada a usar | `00000000-0000-4000-8000-000000000001` |
 | `domainEventId` | No | `string` | formato `uuid` | Evento de dominio que la origina | `00000000-0000-4000-8000-000000000001` |
@@ -1878,6 +1891,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NotificationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NotificationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NotificationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NotificationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NotificationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1913,7 +1927,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1995,6 +2009,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `WebPushConfigDto` | No |
 | 429 | Consulta completada correctamente. | `WebPushConfigDto` | No |
 | 500 | Consulta completada correctamente. | `WebPushConfigDto` | No |
+| 504 | Consulta completada correctamente. | `WebPushConfigDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `WebPushConfigDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2114,6 +2129,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -2232,6 +2248,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<void>` | No |
 | 429 | Operación completada correctamente. | `Promise<void>` | No |
 | 500 | Operación completada correctamente. | `Promise<void>` | No |
+| 504 | Operación completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -2357,6 +2374,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<JobResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `JobResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2489,6 +2507,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RedriveResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RedriveResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RedriveResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RedriveResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RedriveResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2627,6 +2646,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProviderReceiptResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProviderReceiptResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProviderReceiptResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProviderReceiptResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProviderReceiptResponseDto`. Ejemplo completo derivado de ese DTO:
 

@@ -14,7 +14,31 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { QaLabErrorReason } from '../qa_lab.error-reasons';
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Devuelve el servicio de modo que cada llamada corra con `tenantId` como
+ * tenant activo, igual que lo deja el `TenantContextInterceptor`.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
 
 const actor = { id: 'user-1', roles: ['QA_ADMIN'] };
 const SUITE = '11111111-1111-1111-1111-111111111111';
@@ -58,7 +82,13 @@ function build() {
     runsRepo as any,
     logger as any,
   );
-  return { service, tx, catalogRepo, runsRepo };
+  return {
+    service: inTenant(service, TENANT_A),
+    raw: service,
+    tx,
+    catalogRepo,
+    runsRepo,
+  };
 }
 
 describe('QaCatalogService', () => {
@@ -148,7 +178,10 @@ describe('QaCatalogService', () => {
      * @returns Resultado de wire.
      */
     function wire(d: ReturnType<typeof build>, existingCases: any[] = []) {
-      d.catalogRepo.findSuiteForUpdate.mockResolvedValue({ id: SUITE });
+      d.catalogRepo.findSuiteForUpdate.mockResolvedValue({
+        id: SUITE,
+        tenantId: TENANT_A,
+      });
       d.catalogRepo.findCaseByCode.mockResolvedValue(null);
       d.catalogRepo.findCasesBySuite.mockResolvedValue(existingCases);
       d.catalogRepo.createCase.mockReturnValue({ id: 'case-1' });
@@ -252,6 +285,7 @@ describe('QaCatalogService', () => {
       const d = build();
       const suite: any = {
         id: SUITE,
+        tenantId: TENANT_A,
         version: 2,
         stateConceptId: CONCEPTS.SUITE_DRAFT,
       };
@@ -277,6 +311,7 @@ describe('QaCatalogService', () => {
       const d = build();
       d.catalogRepo.findSuiteForUpdate.mockResolvedValue({
         id: SUITE,
+        tenantId: TENANT_A,
         version: 1,
         stateConceptId: CONCEPTS.SUITE_ACTIVE,
       });
@@ -293,6 +328,7 @@ describe('QaCatalogService', () => {
       const d = build();
       d.catalogRepo.findSuiteForUpdate.mockResolvedValue({
         id: SUITE,
+        tenantId: TENANT_A,
         version: 1,
       });
       d.catalogRepo.findCasesBySuiteForUpdate.mockResolvedValue([]);
@@ -322,10 +358,12 @@ describe('QaCatalogService', () => {
     function wire(d: ReturnType<typeof build>) {
       d.catalogRepo.findSuiteById.mockResolvedValue({
         id: SUITE,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.SUITE_ACTIVE,
       });
       d.catalogRepo.findEnvironmentById.mockResolvedValue({
         id: ENVIRONMENT,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       });
       d.catalogRepo.findScheduleByCode.mockResolvedValue(null);
@@ -364,6 +402,7 @@ describe('QaCatalogService', () => {
       wire(d);
       d.catalogRepo.findSuiteById.mockResolvedValue({
         id: SUITE,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.SUITE_DRAFT,
       });
 
@@ -407,7 +446,7 @@ describe('QaCatalogService', () => {
         id: 'sched-1',
         suiteId: SUITE,
         environmentId: ENVIRONMENT,
-        tenantId: undefined,
+        tenantId: TENANT_A,
         cronExpression: '0 2 * * *',
         timezone: 'UTC',
         concurrencyPolicyConceptId: CONCEPTS.CONCURRENCY_FORBID,
@@ -426,11 +465,13 @@ describe('QaCatalogService', () => {
     function wire(d: ReturnType<typeof build>) {
       d.catalogRepo.findSuiteById.mockResolvedValue({
         id: SUITE,
+        tenantId: TENANT_A,
         code: 'SMOKE',
         stateConceptId: CONCEPTS.SUITE_ACTIVE,
       });
       d.catalogRepo.findEnvironmentById.mockResolvedValue({
         id: ENVIRONMENT,
+        tenantId: TENANT_A,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       });
       d.runsRepo.findRunsInProgress.mockResolvedValue([]);
@@ -473,6 +514,7 @@ describe('QaCatalogService', () => {
       wire(d);
       d.catalogRepo.findSuiteById.mockResolvedValue({
         id: SUITE,
+        tenantId: TENANT_A,
         code: 'SMOKE',
         stateConceptId: CONCEPTS.SUITE_DRAFT,
       });
@@ -542,6 +584,244 @@ describe('QaCatalogService', () => {
         expect.any(Date),
         CONCEPTS.STATE_ACTIVE,
         5,
+        TENANT_A,
+      );
+    });
+  });
+});
+
+/** Aserciones del 404 uniforme de QALAB-01. */
+async function expectOutOfScope(promise: Promise<unknown>, message: string) {
+  const error = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  const exception = error as ResourceNotFoundException;
+  expect(exception.getStatus()).toBe(404);
+  expect(exception.message).toBe(message);
+  expect(exception.reason).toBe(QaLabErrorReason.QA_LAB_RESOURCE_OUT_OF_SCOPE);
+  expect(exception.details).toBeUndefined();
+  return exception;
+}
+
+describe('QaCatalogService · alcance de tenant (QALAB-01)', () => {
+  const foreignSuite = (overrides: Record<string, unknown> = {}): any => ({
+    id: SUITE,
+    tenantId: TENANT_B,
+    version: 1,
+    stateConceptId: CONCEPTS.SUITE_ACTIVE,
+    ...overrides,
+  });
+
+  it('el entorno nuevo toma el tenant del contexto e ignora el del cuerpo', async () => {
+    const d = build();
+    d.catalogRepo.findEnvironmentByCode.mockResolvedValue(null);
+    d.catalogRepo.createEnvironment.mockReturnValue({ id: ENVIRONMENT });
+
+    await d.service.createEnvironment(
+      {
+        code: 'ENV-X',
+        name: 'X',
+        environment: 'STAGING' as const,
+        tenantId: TENANT_B,
+      },
+      actor,
+    );
+
+    expect(d.catalogRepo.createEnvironment.mock.calls[0][1].tenantId).toBe(
+      TENANT_A,
+    );
+  });
+
+  it('sin tenant en el contexto no se crea el entorno', async () => {
+    const d = build();
+
+    await expect(
+      d.raw.createEnvironment(
+        { code: 'ENV-X', name: 'X', environment: 'STAGING' as const },
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.catalogRepo.createEnvironment).not.toHaveBeenCalled();
+  });
+
+  it('agregar un caso a la suite de otro tenant: 404 uniforme, igual que inexistente; no se persiste el hijo', async () => {
+    const d = build();
+    d.catalogRepo.findSuiteForUpdate.mockResolvedValue(foreignSuite());
+    const dto: any = {
+      code: 'CASE-1',
+      name: 'Caso',
+      assertions: [
+        {
+          assertionType: 'STATUS_CODE',
+          operator: 'EQUALS',
+          expectedValue: '200',
+        },
+      ],
+    };
+
+    const foreign = await expectOutOfScope(
+      d.service.createTestCase(SUITE, dto, actor),
+      'Suite no encontrada',
+    );
+    d.catalogRepo.findSuiteForUpdate.mockResolvedValue(null);
+    const missing = await expectOutOfScope(
+      d.service.createTestCase(SUITE, dto, actor),
+      'Suite no encontrada',
+    );
+
+    expect(foreign.getResponse()).toEqual(missing.getResponse());
+    expect(d.catalogRepo.createCase).not.toHaveBeenCalled();
+    expect(d.catalogRepo.createAssertion).not.toHaveBeenCalled();
+    expect(d.catalogRepo.findSuiteForUpdate).toHaveBeenCalledWith(
+      d.tx,
+      SUITE,
+      TENANT_A,
+    );
+  });
+
+  it('publicar la suite de otro tenant: 404 uniforme; versión y estado de B no cambian', async () => {
+    const d = build();
+    const suite = foreignSuite({ stateConceptId: CONCEPTS.SUITE_DRAFT });
+    d.catalogRepo.findSuiteForUpdate.mockResolvedValue(suite);
+
+    await expectOutOfScope(
+      d.service.publishSuite(SUITE, {}, actor),
+      'Suite no encontrada',
+    );
+
+    expect(suite.version).toBe(1);
+    expect(suite.stateConceptId).toBe(CONCEPTS.SUITE_DRAFT);
+    expect(d.catalogRepo.findCasesBySuiteForUpdate).not.toHaveBeenCalled();
+  });
+
+  it('programar la suite de otro tenant: 404 uniforme y no crea programación', async () => {
+    const d = build();
+    d.catalogRepo.findSuiteById.mockResolvedValue(foreignSuite());
+
+    await expectOutOfScope(
+      d.service.createSchedule(
+        {
+          suiteId: SUITE,
+          environmentId: ENVIRONMENT,
+          code: 'S-1',
+          name: 'S',
+          cronExpression: '0 2 * * *',
+          firstRunAt: '2026-12-01T02:00:00.000Z',
+        } as any,
+        actor,
+      ),
+      'Suite no encontrada',
+    );
+    expect(d.catalogRepo.createSchedule).not.toHaveBeenCalled();
+  });
+
+  it('programar con un entorno de otro tenant sobre una suite propia: 404 uniforme', async () => {
+    const d = build();
+    d.catalogRepo.findSuiteById.mockResolvedValue(
+      foreignSuite({ tenantId: TENANT_A }),
+    );
+    d.catalogRepo.findEnvironmentById.mockResolvedValue({
+      id: ENVIRONMENT,
+      tenantId: TENANT_B,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+
+    await expectOutOfScope(
+      d.service.createSchedule(
+        {
+          suiteId: SUITE,
+          environmentId: ENVIRONMENT,
+          code: 'S-1',
+          name: 'S',
+          cronExpression: '0 2 * * *',
+          firstRunAt: '2026-12-01T02:00:00.000Z',
+        } as any,
+        actor,
+      ),
+      'Entorno no encontrado',
+    );
+    expect(d.catalogRepo.createSchedule).not.toHaveBeenCalled();
+  });
+
+  it('la programación nueva hereda el tenant de la suite, no el del cuerpo', async () => {
+    const d = build();
+    d.catalogRepo.findSuiteById.mockResolvedValue(
+      foreignSuite({ tenantId: TENANT_A }),
+    );
+    d.catalogRepo.findEnvironmentById.mockResolvedValue({
+      id: ENVIRONMENT,
+      tenantId: TENANT_A,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+    d.catalogRepo.findScheduleByCode.mockResolvedValue(null);
+    d.catalogRepo.createSchedule.mockReturnValue({ id: 'sched-1' });
+
+    await d.service.createSchedule(
+      {
+        suiteId: SUITE,
+        environmentId: ENVIRONMENT,
+        code: 'S-1',
+        name: 'S',
+        cronExpression: '0 2 * * *',
+        firstRunAt: '2026-12-01T02:00:00.000Z',
+        tenantId: TENANT_B,
+      } as any,
+      actor,
+    );
+
+    expect(d.catalogRepo.createSchedule.mock.calls[0][1].tenantId).toBe(
+      TENANT_A,
+    );
+  });
+
+  describe('tick de programaciones', () => {
+    const system = { id: 'worker-1', roles: ['SYSTEM'] };
+
+    it('SYSTEM sin tenant en contexto es el barrido global: no filtra por tenant', async () => {
+      const d = build();
+      d.catalogRepo.claimDueSchedules.mockResolvedValue([]);
+
+      await d.raw.runDueSchedules({ limit: 5 }, system);
+
+      expect(d.catalogRepo.claimDueSchedules).toHaveBeenCalledWith(
+        d.tx,
+        expect.any(Date),
+        CONCEPTS.STATE_ACTIVE,
+        5,
+        undefined,
+      );
+    });
+
+    it('una programación de A nunca ejecuta la suite de B: se salta y avanza su ventana', async () => {
+      const d = build();
+      const due: any = {
+        id: 'sched-1',
+        suiteId: SUITE,
+        environmentId: ENVIRONMENT,
+        tenantId: TENANT_A,
+        cronExpression: '0 2 * * *',
+        timezone: 'UTC',
+        concurrencyPolicyConceptId: CONCEPTS.CONCURRENCY_ALLOW,
+        nextRunAt: new Date('2026-08-01T02:00:00Z'),
+        isEnabled: true,
+      };
+      d.catalogRepo.claimDueSchedules.mockResolvedValue([due]);
+      d.catalogRepo.findSuiteById.mockResolvedValue(foreignSuite());
+      d.catalogRepo.findEnvironmentById.mockResolvedValue({
+        id: ENVIRONMENT,
+        tenantId: TENANT_A,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+
+      const res = await d.raw.runDueSchedules({ limit: 5 }, system);
+
+      expect(res.queued).toBe(0);
+      expect(res.results[0].skippedReason).toBe('SCHEDULE_OUT_OF_SCOPE');
+      expect(d.runsRepo.createRun).not.toHaveBeenCalled();
+      expect(due.nextRunAt.getTime()).toBeGreaterThan(
+        new Date('2026-08-01T02:00:00Z').getTime(),
       );
     });
   });

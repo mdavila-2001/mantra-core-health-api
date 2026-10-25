@@ -8,6 +8,7 @@ import { loadOrmEnv, type SchemaSyncMode } from '../config/orm.env';
 import { SchemaFidelityService } from '../fidelity/schema-fidelity.service';
 import { acquireBootstrapLock } from './advisory-lock';
 import { ddlLayers } from './layers';
+import { SchemaIntegrityState } from './schema-integrity.state';
 import type { DdlLayerContext, DdlLayerResult } from './ddl-layer.contract';
 
 /**
@@ -42,10 +43,12 @@ export class SchemaBootstrapService implements OnApplicationBootstrap {
    *
    * @param orm - Valor de orm requerido por la operación.
    * @param fidelity - Valor de fidelity requerido por la operación.
+   * @param integrity - Estado de integridad que consulta la readiness (ORMN-01).
    */
   constructor(
     private readonly orm: MikroORM,
     private readonly fidelity: SchemaFidelityService,
+    private readonly integrity: SchemaIntegrityState,
   ) {}
 
   /**
@@ -114,6 +117,16 @@ export class SchemaBootstrapService implements OnApplicationBootstrap {
 
     this.report(results, Date.now() - startedAt, mode);
 
+    // En `dry-run` nada se ejecutó, así que las «incidencias» no describen la base.
+    if (mode === 'safe') {
+      const blocking = results.reduce(
+        (sum, r) => sum + (r.blocking?.length ?? 0),
+        0,
+      );
+      const total = results.reduce((sum, r) => sum + r.failures.length, 0);
+      this.integrity.record(blocking, total - blocking);
+    }
+
     if (verifyFidelity) {
       await this.fidelity.verifyAndReport();
     }
@@ -167,13 +180,26 @@ export class SchemaBootstrapService implements OnApplicationBootstrap {
     );
 
     if (failures.length > 0) {
-      // No se lanza: son fallos tolerados por diseño (extensión opcional sin
-      // permisos, FK con datos huérfanos). Se agrupan para que una alerta pueda
-      // engancharse a esta única línea en vez de a los avisos dispersos.
-      this.logger.warn(
-        `Incidencias no bloqueantes durante la materialización (${failures.length}):\n` +
-          failures.map((failure) => `  - ${failure}`).join('\n'),
+      // No se lanza: el proceso arranca para que se pueda diagnosticar, pero
+      // las incidencias de integridad (FKs y únicos, ORMN-01) niegan la
+      // readiness hasta resolverse. Se agrupan para que una alerta pueda
+      // engancharse a estas líneas en vez de a los avisos dispersos.
+      const blocking = results.flatMap((r) => r.blocking ?? []);
+      const degraded = failures.filter(
+        (failure) => !blocking.includes(failure),
       );
+      if (blocking.length > 0) {
+        this.logger.error(
+          `Incidencias de integridad que niegan la readiness (${blocking.length}):\n` +
+            blocking.map((failure) => `  - ${failure}`).join('\n'),
+        );
+      }
+      if (degraded.length > 0) {
+        this.logger.warn(
+          `Incidencias no bloqueantes durante la materialización (${degraded.length}):\n` +
+            degraded.map((failure) => `  - ${failure}`).join('\n'),
+        );
+      }
     }
   }
 }

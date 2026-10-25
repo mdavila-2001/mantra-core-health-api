@@ -125,6 +125,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ActivationResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ActivationResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ActivationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ActivationResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ActivationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -252,6 +253,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ChangePasswordResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChangePasswordResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -370,6 +372,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ForgotPasswordResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ForgotPasswordResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -395,7 +398,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -494,6 +497,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TokenResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -604,6 +608,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LogoutResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LogoutResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -706,6 +711,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<LogoutAllResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<LogoutAllResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<LogoutAllResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LogoutAllResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LogoutAllResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1130,6 +1136,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RegisterOrganizationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RegisterOrganizationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RegisterOrganizationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegisterOrganizationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegisterOrganizationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1173,7 +1180,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | El código de organización ya existe | Excepción explícita en src/modules/iam/application/services/iam-organization-self-registration.service.ts |
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/application/services/iam-organization-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1378,6 +1385,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RegisterPatientResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RegisterPatientResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RegisterPatientResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegisterPatientResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegisterPatientResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1412,7 +1420,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya existe una cuenta con ese documento de identidad | Excepción explícita en src/modules/iam/application/services/iam-patient-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1649,6 +1657,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RegisterPractitionerResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RegisterPractitionerResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RegisterPractitionerResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegisterPractitionerResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegisterPractitionerResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1718,7 +1727,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1814,6 +1823,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResendVerificationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResendVerificationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1839,7 +1849,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -1936,6 +1946,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResetPasswordResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResetPasswordResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2044,6 +2055,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<PurgeResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PurgeResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PurgeResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PurgeResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PurgeResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2156,6 +2168,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TokenResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TokenResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2277,6 +2290,7 @@ Content-Type: multipart/form-data
 | 422 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegistrationDocumentUploadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2399,6 +2413,7 @@ Content-Type: multipart/form-data
 | 422 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RegistrationDocumentUploadResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RegistrationDocumentUploadResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2521,6 +2536,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<VerifyEmailResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<VerifyEmailResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<VerifyEmailResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<VerifyEmailResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `VerifyEmailResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2627,6 +2643,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MySessionDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MySessionDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2738,6 +2755,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RevokeMySessionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RevokeMySessionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2847,6 +2865,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchUsersResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3002,6 +3021,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<UserResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<UserResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<UserResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<UserResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UserResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3117,6 +3137,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<UserDetailResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UserDetailResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3244,6 +3265,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3352,6 +3374,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListCredentialsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListCredentialsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3483,6 +3506,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3609,6 +3633,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CredentialResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CredentialResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3725,6 +3750,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListDevicesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListDevicesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3870,6 +3896,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeviceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeviceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeviceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeviceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeviceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3983,6 +4010,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListGlobalRolesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListGlobalRolesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4122,6 +4150,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4246,6 +4275,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4355,6 +4385,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListMfaFactorsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListMfaFactorsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4498,6 +4529,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MfaFactorResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4624,6 +4656,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListSessionsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSessionsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4907,6 +4940,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssistedPractitionerRegistrationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssistedPractitionerRegistrationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4960,7 +4994,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | La notificación necesita destinatario interno o dirección de destino | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
@@ -5080,6 +5114,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssistedRegistrationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssistedRegistrationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssistedRegistrationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssistedRegistrationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssistedRegistrationResponseDto`. Ejemplo completo derivado de ese DTO:
 

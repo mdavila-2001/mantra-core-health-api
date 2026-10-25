@@ -166,12 +166,18 @@ export class QaRunsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Si viene, el filtro por tenant va en la consulta: no se
+   * bloquea una corrida de otro tenant.
    * @returns Resultado de find run for update conforme al contrato `Promise<TestRuns | null>`.
    */
-  findRunForUpdate(em: EntityManager, id: string): Promise<TestRuns | null> {
+  findRunForUpdate(
+    em: EntityManager,
+    id: string,
+    tenantId?: string,
+  ): Promise<TestRuns | null> {
     return em.findOne(
       TestRuns,
-      { id },
+      tenantId === undefined ? { id } : { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -624,15 +630,18 @@ export class QaRunsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Si viene, el filtro por tenant va en la consulta: no se
+   * bloquea un defecto de otro tenant.
    * @returns Resultado de find defect for update conforme al contrato `Promise<TestDefects | null>`.
    */
   findDefectForUpdate(
     em: EntityManager,
     id: string,
+    tenantId?: string,
   ): Promise<TestDefects | null> {
     return em.findOne(
       TestDefects,
-      { id },
+      tenantId === undefined ? { id } : { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }

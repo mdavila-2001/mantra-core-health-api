@@ -111,6 +111,13 @@ procedencia; segunda corrida, 0 filas nuevas. Sin la tabla (DDL canónico tal cu
 13 391 propiedades, 0 relaciones, segunda corrida 0 (medido en la pasada 1; con OHD el plan sube a 2 004
 conceptos y 13 964 propiedades).
 
+**Corpus completo (pasadas 1 a 10)** sobre el DDL vendorizado de `database/SQL` (Postgres 16.15 local, la
+tabla de arriba aplicada, enfermedades de MONDO, MeSH, DOID, OMIM, Orphanet y DECIPHER simuladas solo con
+los códigos que citan las relaciones de síntomas): `load.mjs --apply` carga 84 961 conceptos y 594 615
+propiedades, 111 824 relaciones y 111 867 filas de procedencia; 155 201 extremos quedan sin resolver porque
+esa base no tiene los MeSH de condición del corpus. Segunda corrida: 0 en todo. El plan completo (con los
+extremos resueltos) es de 267 025 relaciones y 267 502 filas de procedencia.
+
 ## Red del entorno
 
 Pasadas 1–4: la política de red solo alcanzaba GitHub, npm y PyPI (403 al CONNECT para todo lo demás).

@@ -17,6 +17,7 @@ import {
 import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
 import { SystemErrorReason } from '../errors/system-error-reasons';
+import { SecretCipherError } from '../errors/secret-cipher.error';
 import {
   APP_ATTR,
   TracingService,
@@ -26,6 +27,7 @@ import {
   describeForDiagnostics,
   errorDiagnosticsEnabled,
   violationsForLog,
+  safeErrorForLog,
   type ErrorDiagnostics,
 } from './error-diagnostics';
 
@@ -48,6 +50,18 @@ const EXPOSABLE_5XX_CODES: ReadonlySet<string> = new Set<string>([
   ErrorCode.TIMEOUT,
   ErrorCode.CIRCUIT_OPEN,
   ErrorCode.CONCURRENCY_LIMIT,
+]);
+
+/**
+ * `reason` que sobreviven a la censura de un 5xx `INTERNAL`.
+ *
+ * Un 500 opaco no dice nada a propósito, pero una causa estable y sin datos
+ * le permite a soporte y al front separar «el servidor se rompió» de «un
+ * secreto guardado no se puede leer» sin abrir el log. Lista cerrada: un
+ * `reason` nuevo no se filtra al cliente por llegar en una excepción.
+ */
+const EXPOSABLE_5XX_REASONS: ReadonlySet<string> = new Set<string>([
+  SystemErrorReason.SECRET_CIPHER_INVALID,
 ]);
 
 /** Forma estable del cuerpo de error que ve el cliente. */
@@ -217,7 +231,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
       // Error no anticipado: log completo (con stack), respuesta genérica.
       this.logger.error(
         {
-          err: exception,
+          // Nunca `err: exception`: pino volcaría `detail`, parámetros y el SQL
+          // con valores. Ver `safeErrorForLog`.
+          err: safeErrorForLog(exception, internals),
+          code,
+          reason,
           correlationId,
           path: request.url,
           method: request.method,
@@ -229,7 +247,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         body.message = 'Error interno del servidor';
         body.code = ErrorCode.INTERNAL;
         body.details = undefined;
-        body.reason = undefined;
+        body.reason =
+          reason !== undefined && EXPOSABLE_5XX_REASONS.has(reason)
+            ? reason
+            : undefined;
       }
     } else {
       this.logger.warn(
@@ -284,13 +305,34 @@ export class AllExceptionsFilter implements ExceptionFilter {
   ): void {
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
       this.tracing.setAttribute(APP_ATTR.ERROR_CODE, code);
-      this.tracing.recordException(exception);
+      // Una `HttpException` lleva un mensaje escrito para el cliente. Cualquier
+      // otra —un error del driver, un `TypeError`— puede traer el SQL con
+      // valores o datos del request en `message`, y OpenTelemetry lo copia al
+      // span: se adjunta sólo su tipo y sus marcos.
+      this.tracing.recordException(
+        exception instanceof HttpException
+          ? exception
+          : this.scrubbedForTrace(exception),
+      );
       return;
     }
     this.tracing.addEvent('http.business_error', {
       [APP_ATTR.ERROR_CODE]: code,
       'http.response.status_code': status,
     });
+  }
+
+  /** Copia de una excepción sin su mensaje: tipo y marcos del stack. */
+  private scrubbedForTrace(exception: unknown): Error {
+    const safe = safeErrorForLog(exception);
+    const type = typeof safe.type === 'string' ? safe.type : 'Error';
+    const scrubbed = new Error(type);
+    scrubbed.name = type;
+    scrubbed.stack = [
+      type,
+      ...(Array.isArray(safe.stack) ? (safe.stack as string[]) : []),
+    ].join('\n');
+    return scrubbed;
   }
 
   /** Traduce cualquier excepción a la tupla estable (status, code, message, details). */
@@ -334,12 +376,24 @@ export class AllExceptionsFilter implements ExceptionFilter {
           reason:
             typeof obj.reason === 'string'
               ? obj.reason
-              : Array.isArray(obj.message)
-                ? SystemErrorReason.VALIDATION_PIPE_REJECTED
-                : undefined,
+              : (this.reasonFromDetails(obj.details) ??
+                (Array.isArray(obj.message)
+                  ? SystemErrorReason.VALIDATION_PIPE_REJECTED
+                  : undefined)),
         };
       }
       return { status, code: this.defaultCode(status), message: String(res) };
+    }
+
+    // Un secreto cifrado ilegible es un 500 (dato o configuración dañados), pero
+    // con causa estable: ver `EXPOSABLE_5XX_REASONS`.
+    if (exception instanceof SecretCipherError) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        code: ErrorCode.INTERNAL,
+        message: 'Error interno del servidor',
+        reason: exception.reason,
+      };
     }
 
     // Colisión de versión optimista de MikroORM: se mapea a 409 estable.
@@ -454,6 +508,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return 'El cuerpo de la petición no es un JSON válido';
     }
     return 'La petición no pudo procesarse';
+  }
+
+  /**
+   * `details.reason` declarado por el módulo que lanzó la excepción, si lo es.
+   *
+   * Hay catálogos que lo escribieron ahí antes de existir el `reason` de primer
+   * nivel (p. ej. `TENANT_REQUIRED`). Se promueve **tal cual está declarado**:
+   * el filtro no infiere nada desde el texto del mensaje, y `details` queda
+   * intacto para los clientes que ya lo leían.
+   */
+  private reasonFromDetails(details: unknown): string | undefined {
+    if (typeof details !== 'object' || details === null) return undefined;
+    const declared = (details as { reason?: unknown }).reason;
+    return typeof declared === 'string' && declared !== ''
+      ? declared
+      : undefined;
   }
 
   /** El ValidationPipe de Nest emite `message: string[]`; se preserva como detalle. */
@@ -629,11 +699,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
       return undefined;
     }
 
+    // Sin `detail`: PostgreSQL escribe ahí el valor de la clave que falló.
     const internals = {
+      sqlstate: cause.sqlstate,
       constraint: cause.constraint,
       table: cause.table,
       column: cause.column,
-      detail: cause.detail,
     };
 
     switch (cause.sqlstate) {
@@ -750,7 +821,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
         constraint?: unknown;
         table?: unknown;
         column?: unknown;
-        detail?: unknown;
       }
     | undefined {
     let current: unknown = exception;
@@ -761,7 +831,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
         constraint?: unknown;
         table?: unknown;
         column?: unknown;
-        detail?: unknown;
         cause?: unknown;
       };
 
@@ -777,7 +846,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
           constraint: candidate.constraint,
           table: candidate.table,
           column: candidate.column,
-          detail: candidate.detail,
         };
       }
 
@@ -788,19 +856,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
   }
 
   /**
-   * Columna, tabla y restricción que reporta el driver, si las trae.
+   * SQLSTATE, columna, tabla y restricción que reporta el driver, si las trae.
    *
-   * Va al log, nunca a la respuesta: el `detail` de PostgreSQL incluye el valor
-   * de la clave que falló, y el nombre de la restricción describe el esquema.
+   * Va al log, nunca a la respuesta: el nombre de la restricción describe el
+   * esquema. El `detail` del driver —que incluye el valor de la clave que
+   * falló— no se copia en ningún caso: ni al log ni a la respuesta.
    */
   private constraintInternals(exception: unknown): unknown {
     const found = this.findSqlState(exception);
     if (!found) return undefined;
     return {
+      sqlstate: found.sqlstate,
       constraint: found.constraint,
       table: found.table,
       column: found.column,
-      detail: found.detail,
     };
   }
 }

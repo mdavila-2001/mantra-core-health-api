@@ -2,7 +2,11 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { ErpController } from './controllers';
-import { ErpContractsService, ErpOperationsService } from './services';
+import {
+  ErpContractsService,
+  ErpOperationsService,
+  ErpScopeService,
+} from './services';
 import {
   ErpContractsRepository,
   ErpOperationsRepository,
@@ -20,6 +24,7 @@ import {
     ErpContractsRepository,
     ErpOperationsRepository,
     ErpContractsExtRepository,
+    ErpScopeService,
     ErpContractsService,
     ErpOperationsService,
   ],

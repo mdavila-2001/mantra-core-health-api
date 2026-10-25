@@ -64,6 +64,10 @@ RUN groupadd --gid 1001 nodeapp \
 COPY --chown=nodeapp:nodeapp package.json ./
 COPY --chown=nodeapp:nodeapp --from=prod-deps /app/node_modules ./node_modules
 COPY --chown=nodeapp:nodeapp --from=build /app/dist ./dist
+# El inventario del portal (`/admin/portal/*`) son archivos que genera
+# `tools/inventario/*.mjs` y que se leen de `process.cwd()/inventario`. Sin esta
+# copia la imagen no los trae y todas las rutas del portal responden 503.
+COPY --chown=nodeapp:nodeapp --from=build /app/inventario ./inventario
 
 # `FILE_STORAGE_LOCAL_DIR` (default ./storage/uploads) y la cache de MikroORM
 # (node_modules/.cache) se escriben en tiempo de ejecución: sin este mkdir

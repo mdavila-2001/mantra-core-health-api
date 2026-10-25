@@ -295,6 +295,39 @@ jobs:
           MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
         run: node tools/openapi/generate-openapi.mjs
 
+      # Deriva de permisos (`computePermissionDrift`, la misma lógica de la consola
+      # `GET /admin/catalog/permission-drift`): lo que las rutas exigen con `@Roles`
+      # contra lo que la API siembra. Es un trinquete: la deriva que ya existe está en
+      # `tools/catalog/permission-drift-allowlist.json` y no bloquea; una ruta
+      # autenticada nueva sin `@Roles`, o un rol nuevo que nadie siembra, sí. Una
+      # excepción que dejó de hacer falta también falla, para que la lista sólo se
+      # encoja. Arranca AppModule, igual que el paso anterior: mismo entorno.
+      - name: Deriva de permisos — sin rutas ni roles nuevos fuera de la lista
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: mantra
+          DB_PASSWORD: mantra
+          DB_NAME: mantra_redesa_health
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: "5432"
+          POSTGRES_USER: mantra
+          POSTGRES_PASSWORD: mantra
+          POSTGRES_DB: mantra_redesa_health
+          MONGODB_URI: mongodb://localhost:27017/mantra_redesa_health_document_store
+          MONGO_DB: mantra_redesa_health_document_store
+          REDIS_HOST: localhost
+          REDIS_PORT: "6379"
+          OPENSEARCH_NODE: http://localhost:9200
+          MINIO_ENDPOINT: localhost
+          MINIO_PORT: "9000"
+          MINIO_ACCESS_KEY: mantra
+          MINIO_SECRET_KEY: mantra12345678
+          MINIO_BUCKET: mantra-redesa-health-files-ci
+          JWT_SECRET: ci-only-secret-not-a-real-credential
+          MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
+        run: yarn catalog:permission-drift
+
       # El Postgres de `services:` arranca vacío, y nada lo llenaba: "Generar
       # contrato" corre con ORM_SCHEMA_SYNC=off (tools/openapi/generate-openapi.mjs
       # lo fuerza), así que no crea una sola tabla. Por eso la suite de
@@ -403,6 +436,10 @@ jobs:
           MINIO_BUCKET: mantra-redesa-health-files-ci
           JWT_SECRET: ci-only-secret-not-a-real-credential
           MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
+          # El Postgres de `services:` es efímero aunque se llame como el de
+          # desarrollo; sin esto `lane16-patient-invoice-flow` se niega a correr
+          # (deja historial de sólo inserción: ver test/integration/disposable-database.ts).
+          ALLOW_PERMANENT_TEST_RESIDUE: "yes"
         run: yarn test:integration --ci
 
       - name: Generar documentación detallada de endpoints
