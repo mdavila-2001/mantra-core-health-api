@@ -5361,6 +5361,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | No puede ver los bloqueos de esta agenda | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-exceptions.use-case.ts |
 | 403 | `FORBIDDEN` | Esta agenda es de otro profesional: solo la administra quien atiende ' +           'en ella. | Excepción explícita en src/modules/scheduling/application/catalog/support/catalog-access.ts |
 | 404 | `NOT_FOUND` | Recurso no encontrado | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-exceptions.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana no es una fecha válida | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-exceptions.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar | Excepción explícita en src/modules/scheduling/application/catalog/use-cases/list-exceptions.use-case.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
