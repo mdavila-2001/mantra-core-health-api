@@ -8,8 +8,8 @@ import { HttpSliFlushService } from '../../src/observability/http-sli/http-sli-f
 import type { RouteIndexService } from '../../src/observability/route-index/route-index.service';
 import * as seriesEntities from '../../src/modules/time_series/entities';
 import { SeriesIngestRepository } from '../../src/modules/time_series/repositories';
-import { OpsTrafficRepository } from '../../src/modules/ops_console/ops-traffic.repository';
-import { OpsTrafficService } from '../../src/modules/ops_console/ops-traffic.service';
+import { OpsTrafficRepository } from '../../src/modules/ops_console/infrastructure/repositories/ops-traffic.repository';
+import { OpsTrafficService } from '../../src/modules/ops_console/application/ops-traffic.service';
 
 /**
  * Tráfico HTTP (consola de operación) contra PostgreSQL real: lo que escribe

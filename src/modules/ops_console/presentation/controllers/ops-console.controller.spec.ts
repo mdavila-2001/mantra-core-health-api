@@ -1,4 +1,4 @@
-import { ROLES_KEY } from '../../common/auth/roles.decorator';
+import { ROLES_KEY } from '../../../../common/auth/roles.decorator';
 import { OPS_READ_ROLES, OpsConsoleController } from './ops-console.controller';
 
 describe('autorización de /admin/ops', () => {

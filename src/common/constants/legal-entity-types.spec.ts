@@ -1,5 +1,5 @@
-import { CONCEPT_DEFS, deterministicId } from '../../common/constants/concepts';
-import { DYNAMIC_ENUM_CATALOG } from '../../common/seed/dynamic-enum-catalog';
+import { CONCEPT_DEFS, deterministicId } from './concepts';
+import { DYNAMIC_ENUM_CATALOG } from '../seed/dynamic-enum-catalog';
 import {
   CANONICAL_LEGAL_CATEGORIES,
   LEGAL_ENTITY_TYPES,

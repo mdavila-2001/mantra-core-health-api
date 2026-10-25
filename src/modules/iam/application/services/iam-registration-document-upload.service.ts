@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import { FileCategory, FileSensitivity } from '../../../common/dto';
 import {
-  FileUploadService,
-  type UploadedFileBytes,
-} from '../../../common/services';
+  REGISTRATION_FILES_PORT,
+  type RegistrationFilesPort,
+  type RegistrationUploadedFile,
+} from '../ports/registration-files.port';
 import { RegistrationDocumentUploadResponseDto } from '../../presentation/dto';
 import { PreconditionFailedException } from '../../../../common';
 
@@ -15,7 +15,7 @@ const REGISTRATION_DOCUMENT_ALLOWED_MIME_TYPES = ['application/pdf'] as const;
  * Pre-carga pública de un PDF para un registro —documento legal de
  * organización o credencial profesional—: `POST /iam/auth/upload-registration-document`.
  *
- * Delega en `FileUploadService.uploadAnonymous` con una política más
+ * Delega en la subida anónima de archivos con una política más
  * estricta que la de `/common/files/upload` (sólo PDF, no toda la categoría
  * `DOCUMENT`) y sin actor: quien sube todavía no tiene cuenta. El archivo
  * queda sin dueño hasta que el alta correspondiente lo reclama por su
@@ -25,7 +25,8 @@ const REGISTRATION_DOCUMENT_ALLOWED_MIME_TYPES = ['application/pdf'] as const;
 @Injectable()
 export class IamRegistrationDocumentUploadService {
   constructor(
-    private readonly fileUploadService: FileUploadService,
+    @Inject(REGISTRATION_FILES_PORT)
+    private readonly files: RegistrationFilesPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IamRegistrationDocumentUploadService.name);
@@ -39,16 +40,14 @@ export class IamRegistrationDocumentUploadService {
    *   `Content-Type` declarado).
    */
   async upload(
-    file: UploadedFileBytes | undefined,
+    file: RegistrationUploadedFile | undefined,
   ): Promise<RegistrationDocumentUploadResponseDto> {
-    const uploaded = await this.fileUploadService.uploadAnonymous(
-      file,
-      { category: FileCategory.DOCUMENT, sensitivity: FileSensitivity.NORMAL },
-      {
-        allowedMimeTypes: REGISTRATION_DOCUMENT_ALLOWED_MIME_TYPES,
-        operation: 'iam.auth.upload-registration-document',
-      },
-    );
+    const uploaded = await this.files.uploadAnonymous(file, {
+      category: 'DOCUMENT',
+      sensitivity: 'NORMAL',
+      allowedMimeTypes: REGISTRATION_DOCUMENT_ALLOWED_MIME_TYPES,
+      operation: 'iam.auth.upload-registration-document',
+    });
     this.logger.info(
       {
         operation: 'iam.auth.upload-registration-document',
@@ -68,21 +67,19 @@ export class IamRegistrationDocumentUploadService {
 
   /** Precarga privada de firma/sello; la cuenta aún no existe. */
   async uploadSignatureImage(
-    file: UploadedFileBytes | undefined,
+    file: RegistrationUploadedFile | undefined,
   ): Promise<RegistrationDocumentUploadResponseDto> {
     if (file && file.buffer.byteLength > 2 * 1024 * 1024) {
       throw new PreconditionFailedException(
         'La imagen supera el límite de 2 MB',
       );
     }
-    const uploaded = await this.fileUploadService.uploadAnonymous(
-      file,
-      { category: FileCategory.IMAGE, sensitivity: FileSensitivity.PHI },
-      {
-        allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
-        operation: 'iam.auth.upload-registration-signature-image',
-      },
-    );
+    const uploaded = await this.files.uploadAnonymous(file, {
+      category: 'IMAGE',
+      sensitivity: 'PHI',
+      allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+      operation: 'iam.auth.upload-registration-signature-image',
+    });
     return {
       fileId: uploaded.id,
       originalName: file?.originalname ?? uploaded.originalName ?? '',
