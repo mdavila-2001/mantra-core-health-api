@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1539 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1539 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1541 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1541 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -1751,7 +1751,7 @@
       ]
     },
     {
-      "name": "accounting (45)",
+      "name": "accounting (46)",
       "item": [
         {
           "name": "accounting-accruals",
@@ -4336,6 +4336,63 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.progressId);",
                       "  if (id) pm.environment.set('progressId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/practitioner/assets/{id}/depreciations · Histórico de depreciación de un activo propio",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/assets/:id/depreciations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "assets",
+                    ":id",
+                    "depreciations"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{assetId}}",
+                      "description": "Identificador de ruta · variable `{{assetId}}`"
+                    }
+                  ]
+                },
+                "description": "Una fila por período fiscal depreciado, en orden de registro, con el valor en libros que dejó. Sólo el profesional vinculado a la práctica del activo; un activo ajeno responde 422 y uno de otra organización, 404.\n\n`GET /accounting/practitioner/assets/{id}/depreciations`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `AccountingPractitionerController_readAssetDepreciations`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.depreciations || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('depreciationId', first.id);",
                       "}"
                     ]
                   }
@@ -18846,7 +18903,7 @@
                 "description": "Corregir un servicio del catálogo de mi práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /billing/service-catalog/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `BillingServiceCatalogController_update`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"defaultPrice\": \"150.00\",\n  \"isActive\": true\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"defaultPrice\": \"150.00\",\n  \"isActive\": true,\n  \"termsText\": \"termsText-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -57899,7 +57956,7 @@
       ]
     },
     {
-      "name": "medical-groups (8)",
+      "name": "medical-groups (9)",
       "item": [
         {
           "name": "GET /medical-groups · Listar grupos médicos (histórico/enviadas/recibidas)",
@@ -57961,6 +58018,61 @@
                   "  const list = Array.isArray(body) ? body : (body.medicalGroups || body.items || body.data || body.results);",
                   "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                   "  if (first && first.id) pm.environment.set('medicalGroupId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /medical-groups/eligible-members · Colegas que se pueden invitar a un grupo de este servicio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medical-groups/eligible-members?serviceCatalogId=serviceCatalogId-ejemplo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medical-groups",
+                "eligible-members"
+              ],
+              "query": [
+                {
+                  "key": "serviceCatalogId",
+                  "value": "serviceCatalogId-ejemplo",
+                  "description": "",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Colegas que se pueden invitar a un grupo de este servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /medical-groups/eligible-members`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `MedicalGroupsController_listEligibleMembers`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.eligibleMembers || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('eligibleMemberId', first.id);",
                   "}"
                 ]
               }
