@@ -8,6 +8,7 @@ import {
   PaymentCheckoutSessions,
   CashierPaymentContexts,
   PaymentDebts,
+  PaymentIntents,
 } from '../entities';
 import { createdBy } from '../../../common';
 
@@ -412,15 +413,51 @@ export class PaymentFlowRepository {
     );
   }
 
-  /** Bloquea la deuda antes de moverla a `in_checkout` (UC-42-02). */
+  /**
+   * Bloquea la deuda antes de moverla a `in_checkout` (UC-42-02).
+   *
+   * La deuda se busca por `{ id, tenantId, gatewayConnectionId }`: el UUID por
+   * sí solo no prueba pertenencia, y una deuda de otro tenant o de otra
+   * conexión debe ser indistinguible de una inexistente (`null`).
+   */
   findDebtForUpdate(
     em: EntityManager,
-    id: string,
+    scope: {
+      /** Identificador de la deuda. */
+      id: string;
+      /** Tenant activo de la petición. */
+      tenantId: string;
+      /** Conexión del gateway declarada para la sesión. */
+      gatewayConnectionId: string;
+    },
   ): Promise<PaymentDebts | null> {
-    return em.findOne(
-      PaymentDebts,
-      { id },
-      { lockMode: LockMode.PESSIMISTIC_WRITE },
-    );
+    return em.findOne(PaymentDebts, scope, {
+      lockMode: LockMode.PESSIMISTIC_WRITE,
+    });
+  }
+
+  /**
+   * Intención que se asocia a una sesión de checkout, sólo si es del tenant y
+   * (cuando declara una) de la conexión de la sesión.
+   */
+  findIntentForCheckout(
+    em: EntityManager,
+    scope: {
+      /** Identificador de la intención. */
+      id: string;
+      /** Tenant activo de la petición. */
+      tenantId: string;
+      /** Conexión del gateway de la sesión. */
+      gatewayConnectionId: string;
+    },
+  ): Promise<PaymentIntents | null> {
+    return em.findOne(PaymentIntents, {
+      id: scope.id,
+      tenantId: scope.tenantId,
+      $or: [
+        { gatewayConnectionId: null },
+        { gatewayConnectionId: scope.gatewayConnectionId },
+      ],
+    });
   }
 }

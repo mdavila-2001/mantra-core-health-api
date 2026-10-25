@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { DynamicEnumsService } from './dynamic-enums.service';
+import { SystemContextErrorReason } from '../system_context.error-reasons';
 import {
   CONCEPTS,
   ConflictException,
@@ -50,6 +51,7 @@ function build() {
     findSpanishDisplays: mockFn(() => Promise.resolve(new Map())),
     countEnabledOptions: mockFn(() => Promise.resolve(1)),
     createEnumBinding: mockFn(() => ({ id: 'binding-1' })),
+    lockEnumTarget: mockFn(() => Promise.resolve()),
     findEnumBindingByTarget: mockFn(() => Promise.resolve(null)),
     findEnumBindingsForUpdate: mockFn(() => Promise.resolve([])),
     findActiveEnumBindings: mockFn(() => Promise.resolve([])),
@@ -481,9 +483,78 @@ describe('DynamicEnumsService', () => {
         id: 'binding-prev',
       });
 
-      await expect(
-        d.service.createBinding(DEFINITION, dto, actor as any),
-      ).rejects.toBeInstanceOf(ConflictException);
+      const attempt = d.service.createBinding(DEFINITION, dto, actor as any);
+      await expect(attempt).rejects.toBeInstanceOf(ConflictException);
+      await expect(attempt).rejects.toMatchObject({
+        reason: SystemContextErrorReason.SYSTEM_CONTEXT_BINDING_CONFLICT,
+      });
+      expect(d.contextRepo.createEnumBinding).not.toHaveBeenCalled();
+    });
+
+    it('takes the target lock before reading the current binding', async () => {
+      const d = build();
+      d.contextRepo.findEnumDefinitionById.mockResolvedValue(draftDefinition());
+      const order: string[] = [];
+      d.contextRepo.lockEnumTarget.mockImplementation(async () => {
+        order.push('lock');
+      });
+      d.contextRepo.findEnumBindingByTarget.mockImplementation(async () => {
+        order.push('read');
+        return null;
+      });
+
+      await d.service.createBinding(DEFINITION, dto, actor);
+
+      expect(order).toEqual(['lock', 'read']);
+      expect(d.contextRepo.lockEnumTarget).toHaveBeenCalledWith(
+        d.tx,
+        'clinical',
+        'encounters',
+        'triage_level_concept_id',
+      );
+    });
+
+    it('two parallel requests for the same target: one binding, one conflict', async () => {
+      const d = build();
+      d.contextRepo.findEnumDefinitionById.mockResolvedValue(draftDefinition());
+      // Modela el cerrojo advisory: se libera al terminar la transacción.
+      let tail: Promise<void> = Promise.resolve();
+      const bindings: string[] = [];
+      (d.service as any).em.transactional = mockFn(async (cb: any) => {
+        const tx: { release?: () => void } = {};
+        try {
+          return await cb(tx);
+        } finally {
+          tx.release?.();
+        }
+      });
+      d.contextRepo.lockEnumTarget.mockImplementation(
+        async (tx: { release?: () => void }) => {
+          const previous = tail;
+          tail = new Promise<void>((resolve) => (tx.release = resolve));
+          await previous;
+        },
+      );
+      d.contextRepo.findEnumBindingByTarget.mockImplementation(async () => {
+        // Cede el turno: sin el cerrojo, ambas llamadas verían el campo libre.
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        return bindings.length ? { id: bindings[0] } : null;
+      });
+      d.contextRepo.createEnumBinding.mockImplementation(() => {
+        bindings.push(`binding-${bindings.length + 1}`);
+        return { id: bindings[bindings.length - 1] };
+      });
+
+      const results = await Promise.allSettled([
+        d.service.createBinding(DEFINITION, dto, actor),
+        d.service.createBinding(DEFINITION, dto, actor),
+      ]);
+
+      expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1);
+      const rejected = results.find((r) => r.status === 'rejected') as
+        PromiseRejectedResult | undefined;
+      expect(rejected?.reason).toBeInstanceOf(ConflictException);
+      expect(bindings).toHaveLength(1);
     });
 
     it('refuses binding a retired definition', async () => {

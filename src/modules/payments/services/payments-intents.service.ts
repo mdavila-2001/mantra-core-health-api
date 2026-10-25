@@ -26,6 +26,13 @@ import {
   type RiskDecision,
 } from '../dto';
 import { PaymentsErrorReason } from '../payments.error-reasons';
+import {
+  addAmounts,
+  compareAmounts,
+  isPositiveAmount,
+  multiplyAmount,
+  percentageOfAmount,
+} from './payment-money';
 
 const PURPOSE_CONCEPT: Readonly<Record<PaymentPurpose, string>> = {
   INVOICE: CONCEPTS.PAY_PURPOSE_INVOICE,
@@ -332,12 +339,19 @@ export class PaymentsIntentsService {
           ? (dto.amount as string)
           : this.percentageOf(intent.amount, dto.percentage as string);
 
+      if (!isPositiveAmount(amount)) {
+        throw new PreconditionFailedException(
+          'El reparto debe ser un importe positivo',
+          { intentId },
+          PaymentsErrorReason.SPLIT_AMOUNT_NOT_POSITIVE,
+        );
+      }
+
+      // Aritmética decimal exacta: con `Number`, 0.10 + 0.20 > 0.30 y se
+      // rechazaba un reparto que cabe exactamente en la intención.
       const existing = await this.flowRepo.findSplitsByIntent(tx, intentId);
-      const allocated = existing.reduce(
-        (sum, s) => sum + Number(s.amount ?? 0),
-        0,
-      );
-      if (allocated + Number(amount) > Number(intent.amount)) {
+      const allocated = addAmounts(existing.map((s) => s.amount ?? '0'));
+      if (compareAmounts(addAmounts([allocated, amount]), intent.amount) > 0) {
         throw new ConflictException(
           'Los repartos superan el importe de la intención',
           {
@@ -442,7 +456,7 @@ export class PaymentsIntentsService {
 
   /** Importes con 2 decimales: el modelo los persiste como `numeric`, no como float. */
   private multiply(amount: string, rate: string): string {
-    return (Number(amount) * Number(rate)).toFixed(2);
+    return multiplyAmount(amount, rate);
   }
 
   /**
@@ -453,6 +467,6 @@ export class PaymentsIntentsService {
    * @returns Resultado de percentage of conforme al contrato `string`.
    */
   private percentageOf(amount: string, percentage: string): string {
-    return ((Number(amount) * Number(percentage)) / 100).toFixed(2);
+    return percentageOfAmount(amount, percentage);
   }
 }

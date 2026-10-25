@@ -6,6 +6,7 @@ import {
   PaymentWebhookEvents,
   Refunds,
   PaymentCancellationRequests,
+  ProviderCallbackEndpoints,
 } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
 
@@ -308,6 +309,21 @@ export class PaymentTransactionsRepository {
       open[0] ??
       null
     );
+  }
+
+  /**
+   * Endpoints de callback registrados para la conexión del gateway
+   * (`provider_callback_endpoints`).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param gatewayConnectionId - Conexión de la transacción.
+   * @returns Sus endpoints, de cualquier estado.
+   */
+  findCallbackEndpoints(
+    em: EntityManager,
+    gatewayConnectionId: string,
+  ): Promise<ProviderCallbackEndpoints[]> {
+    return em.find(ProviderCallbackEndpoints, { gatewayConnectionId });
   }
 
   /**
