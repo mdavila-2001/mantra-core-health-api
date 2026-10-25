@@ -59,9 +59,19 @@ function build() {
     persist: mockFn(),
     flush: mockFn().mockResolvedValue(undefined),
     find: mockFn(async (entity: any, where: any) => {
-      const ids: string[] = where.id.$in;
+      const ids: string[] = where.id?.$in ?? [];
       if (entity.name === 'ServiceCatalog') {
         return ids.map((id) => ({ id, name: `Servicio ${id}` }));
+      }
+      if (entity.name === 'PractitionerRoleAssignments') {
+        // Vinculaciones activas: el creador y el invitado en la práctica A,
+        // el ajeno en la B. Se filtra por las prácticas que pide el servicio.
+        const all = [
+          { practitionerProfileId: 'pract-creator', practiceId: PRACTICE_A },
+          { practitionerProfileId: 'pract-invitee', practiceId: PRACTICE_A },
+          { practitionerProfileId: 'pract-foreign', practiceId: PRACTICE_B },
+        ];
+        return all.filter((a) => where.practiceId.$in.includes(a.practiceId));
       }
       if (entity.name === 'PersonProfiles') {
         return ids.map((id) => ({ id, personId: `person-${id}` }));
@@ -457,6 +467,29 @@ describe('MedicalGroupsService', () => {
           roles: ['PRACTITIONER'],
         } as any),
       ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+  });
+
+  describe('colegas que se pueden invitar', () => {
+    it('ofrece a los de la misma organización del servicio, sin quien pregunta', async () => {
+      const d = build();
+      const eligible = await d.service.listEligibleMembers(
+        'service-a',
+        creator,
+      );
+      expect(eligible).toEqual([
+        {
+          practitionerProfileId: 'pract-invitee',
+          name: 'Nombre de person-pract-invitee',
+        },
+      ]);
+    });
+
+    it('un servicio de otra práctica responde 404, como al crear', async () => {
+      const d = build();
+      await expect(
+        d.service.listEligibleMembers('service-b', creator),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 
