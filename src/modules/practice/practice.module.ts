@@ -21,6 +21,7 @@ import {
   OwnSiteProvisioningService,
   PracticeOrganizationReadService,
   PracticeAccessService,
+  PracticeAdministrationService,
 } from './services';
 import {
   PracticesRepository,
@@ -37,6 +38,7 @@ import {
   PracticeOrganizationReadRepository,
 } from './repositories';
 import { ServiceCatalogRepository } from '../billing/repositories';
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { AddressesRepository } from '../common/repositories';
 // ALV-005/006: `PractitionerSitesService.createOwnSite` necesita saber de
 // quién es la sesión (`ProfileOwnershipService`); `OwnSiteProvisioningService`
@@ -57,7 +59,12 @@ import {
  * ajustes e inventario. Implementa UC-14-01..12 (más un bootstrap de práctica).
  */
 @Module({
-  imports: [MikroOrmModule.forFeature(Object.values(entities))],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    // Regla de administración por organización (A-6), sin importar
+    // `DirectoryModule` entero.
+    DirectoryAuthorizationModule,
+  ],
   controllers: [
     PracticesController,
     SitesController,
@@ -103,6 +110,7 @@ import {
     OwnSiteProvisioningService,
     PracticeOrganizationReadService,
     PracticeAccessService,
+    PracticeAdministrationService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que
