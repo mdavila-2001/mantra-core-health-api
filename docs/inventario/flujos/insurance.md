@@ -3,12 +3,12 @@
 # Flujos del módulo `insurance`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 63 (54 con decisiones propias, 9 sin ellas)
+- **Operaciones:** 71 (61 con decisiones propias, 10 sin ellas)
 - Inventario de endpoints del módulo: [insurance](../endpoints/insurance.md)
 
 ## Proceso: src / modules / insurance
 
-- **Código:** `insurance` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 63
+- **Código:** `insurance` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 71
 - **Actores:** BILLING · BILLING_OPERATOR · CLINICIAN · Cualquier sesión válida · FINANCE · PATIENT · PRACTITIONER · Público (sin sesión) · SCHEDULING_ADMIN · SCHEDULING_AGENT · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/insurance/README.md`
@@ -52,14 +52,22 @@ _Fuente: `src/modules/insurance/README.md:3`_
 |  |  | POST /insurance-products/{productId}/plans | Cualquier sesión válida | ALTO | 4 |
 |  |  | POST /provider-networks | SECURITY_ADMIN | MEDIO | 2 |
 |  |  | POST /provider-networks/{id}/memberships | SECURITY_ADMIN | MEDIO | 2 |
-| `ctrl:InsuranceCampaignsController` | Operaciones de InsuranceCampaignsController que el README no asigna a un caso de uso | GET /['insurance/campaigns', 'insurance-campaigns'] | Cualquier sesión válida | ALTO | 8 |
-|  |  | POST /['insurance/campaigns', 'insurance-campaigns'] | Cualquier sesión válida | ALTO | 14 |
-|  |  | GET /['insurance/campaigns', 'insurance-campaigns']/{id} | Cualquier sesión válida | ALTO | 8 |
-|  |  | PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | Cualquier sesión válida | ALTO | 15 |
-|  |  | PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | Cualquier sesión válida | ALTO | 9 |
-|  |  | GET /['insurance/campaigns', 'insurance-campaigns']/active | Público (sin sesión) | BAJO | 4 |
-|  |  | GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | Cualquier sesión válida | ALTO | 12 |
-|  |  | GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | Cualquier sesión válida | ALTO | 12 |
+| `ctrl:InsuranceCampaignsController` | Operaciones de InsuranceCampaignsController que el README no asigna a un caso de uso | GET /insurance-campaigns | Cualquier sesión válida | ALTO | 8 |
+|  |  | POST /insurance-campaigns | Cualquier sesión válida | ALTO | 14 |
+|  |  | GET /insurance-campaigns/{id} | Cualquier sesión válida | ALTO | 8 |
+|  |  | PATCH /insurance-campaigns/{id} | Cualquier sesión válida | ALTO | 15 |
+|  |  | PATCH /insurance-campaigns/{id}/status | Cualquier sesión válida | ALTO | 9 |
+|  |  | GET /insurance-campaigns/active | Público (sin sesión) | BAJO | 4 |
+|  |  | GET /insurance-campaigns/my-benefits | Cualquier sesión válida | ALTO | 12 |
+|  |  | GET /insurance-campaigns/patient/{patientProfileId} | Cualquier sesión válida | ALTO | 12 |
+|  |  | GET /insurance/campaigns | Cualquier sesión válida | ALTO | 8 |
+|  |  | POST /insurance/campaigns | Cualquier sesión válida | ALTO | 14 |
+|  |  | GET /insurance/campaigns/{id} | Cualquier sesión válida | ALTO | 8 |
+|  |  | PATCH /insurance/campaigns/{id} | Cualquier sesión válida | ALTO | 15 |
+|  |  | PATCH /insurance/campaigns/{id}/status | Cualquier sesión válida | ALTO | 9 |
+|  |  | GET /insurance/campaigns/active | Público (sin sesión) | BAJO | 4 |
+|  |  | GET /insurance/campaigns/my-benefits | Cualquier sesión válida | ALTO | 12 |
+|  |  | GET /insurance/campaigns/patient/{patientProfileId} | Cualquier sesión válida | ALTO | 12 |
 | `ctrl:InsuranceCatalogController` | Operaciones de InsuranceCatalogController que el README no asigna a un caso de uso | GET /insurance-carrier-catalog | Público (sin sesión) | BAJO | 3 |
 | `ctrl:InsurancePortabilityController` | Operaciones de InsurancePortabilityController que el README no asigna a un caso de uso | GET /insurance/portability/certificates/{certificateId}/json | Cualquier sesión válida | ALTO | 9 |
 |  |  | GET /insurance/portability/certificates/{certificateId}/pdf | Cualquier sesión válida | ALTO | 9 |
@@ -87,7 +95,7 @@ _Fuente: `src/modules/insurance/README.md:3`_
 | `ctrl:ReconciliationController` | Operaciones de ReconciliationController que el README no asigna a un caso de uso | POST /reconciliation-batches | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /reconciliation-batches/{id}/items | SECURITY_ADMIN | MEDIO | 6 |
 
-### Diagrama 1 de 3 — etapas `ctrl:AppealsController`, `ctrl:BrokerCommissionController`, `ctrl:ClaimsController`…
+### Diagrama 1 de 4 — etapas `ctrl:AppealsController`, `ctrl:BrokerCommissionController`, `ctrl:ClaimsController`…
 
 ```mermaid
 flowchart LR
@@ -292,13 +300,12 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 3 — etapas `ctrl:InsuranceBackboneController`, `ctrl:InsuranceCampaignsController`, `ctrl:InsuranceCatalogController`…
+### Diagrama 2 de 4 — etapas `ctrl:InsuranceBackboneController`
 
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a11(["Cualquier sesión válida"]):::actor
-  a41(["Público (sin sesión)"]):::actor
   t3[("insurance.employer_groups")]:::tabla
   t5[("insurance.insurance_brokers")]:::tabla
   t7[("insurance.broker_carrier_agreements")]:::tabla
@@ -309,19 +316,6 @@ flowchart LR
   t17[("insurance.insurance_plans")]:::tabla
   t23[("insurance.provider_networks")]:::tabla
   t25[("insurance.network_provider_memberships")]:::tabla
-  t27[("audit.audit_log")]:::tabla
-  t28[("iam.sessions")]:::tabla
-  t29[("insurance.insurance_campaign_partners")]:::tabla
-  t30[("insurance.insurance_campaigns")]:::tabla
-  t42[("terminology.catalog_concepts")]:::tabla
-  t49[("common.file_versions")]:::tabla
-  t50[("common.files")]:::tabla
-  t51[("health_data.health_export_jobs")]:::tabla
-  t52[("health_data.health_export_manifests")]:::tabla
-  t57[("audit.data_access_log")]:::tabla
-  t58[("audit.dsar_requests")]:::tabla
-  t59[("clinical.conditions")]:::tabla
-  t60[("clinical.encounters")]:::tabla
   subgraph s0["ctrl:InsuranceBackboneController · Operaciones de InsuranceBackboneController q…"]
     o1["POST /employer-groups"]:::op
     o4["POST /insurance-brokers"]:::op
@@ -336,37 +330,6 @@ flowchart LR
     o21["POST /insurance-products/{productId}/plans"]:::op
     o22["POST /provider-networks"]:::op
     o24["POST /provider-networks/{id}/memberships"]:::op
-  end
-  t31[("+2 tablas más")]
-  t33[("+8 tablas más")]
-  t35[("+2 tablas más")]
-  t37[("+9 tablas más")]
-  t39[("+3 tablas más")]
-  t44[("+6 tablas más")]
-  t46[("+6 tablas más")]
-  subgraph s1["ctrl:InsuranceCampaignsController · Operaciones de InsuranceCampaignsController…"]
-    o26["GET /['insurance/campaigns', 'insurance-campaigns']"]:::op
-    o32["POST /['insurance/campaigns', 'insurance-campaigns']"]:::op
-    o34["GET /['insurance/campaigns', 'insurance-campaigns']/{id}"]:::op
-    o36["PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}"]:::op
-    o38["PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status"]:::op
-    o40["GET /['insurance/campaigns', 'insurance-campaigns']/active"]:::op
-    o43["GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits"]:::op
-    o45["GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientP…"]:::op
-  end
-  subgraph s2["ctrl:InsuranceCatalogController · Operaciones de InsuranceCatalogController que…"]
-    o47["GET /insurance-carrier-catalog"]:::op
-  end
-  t53[("+3 tablas más")]
-  t55[("+3 tablas más")]
-  t61[("+31 tablas más")]
-  subgraph s3["ctrl:InsurancePortabilityController · Operaciones de InsurancePortabilityContro…"]
-    o48["GET /insurance/portability/certificates/{certificateId}/json"]:::op
-    o54["GET /insurance/portability/certificates/{certificateId}/pdf"]:::op
-    o56["POST /insurance/portability/export"]:::op
-  end
-  subgraph s4["ctrl:InsurancePortabilityPublicController · Operaciones de InsurancePortability…"]
-    o62["GET /public/portability/verify/{manifestHash}"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -422,338 +385,475 @@ flowchart LR
   a2 --> o24
   o24 -->|"CREA"| t25
   o24 -->|"LEE"| t23
-  a11 --> o26
-  o26 -->|"CREA"| t27
-  o26 -->|"LEE"| t27
-  o26 -->|"LEE"| t12
-  o26 -->|"LEE"| t28
-  o26 -->|"LEE"| t29
-  o26 -->|"LEE"| t30
-  o26 -.-> t31
-  a11 --> o32
-  o32 -->|"CREA"| t27
-  o32 -->|"LEE"| t27
-  o32 -->|"LEE"| t12
-  o32 -->|"LEE"| t28
-  o32 -->|"CREA"| t29
-  o32 -->|"LEE"| t29
-  o32 -.-> t33
-  a11 --> o34
-  o34 -->|"CREA"| t27
-  o34 -->|"LEE"| t27
-  o34 -->|"LEE"| t12
-  o34 -->|"LEE"| t28
-  o34 -->|"LEE"| t29
-  o34 -->|"LEE"| t30
-  o34 -.-> t35
-  a11 --> o36
-  o36 -->|"CREA"| t27
-  o36 -->|"LEE"| t27
-  o36 -->|"LEE"| t12
-  o36 -->|"LEE"| t28
-  o36 -->|"BORRA"| t29
-  o36 -->|"CREA"| t29
-  o36 -.-> t37
-  a11 --> o38
-  o38 -->|"CREA"| t27
-  o38 -->|"LEE"| t27
-  o38 -->|"LEE"| t12
-  o38 -->|"LEE"| t28
-  o38 -->|"LEE"| t29
-  o38 -->|"ACTUALIZA"| t30
-  o38 -.-> t39
-  a41 --> o40
-  o40 -->|"LEE"| t29
-  o40 -->|"LEE"| t30
-  o40 -->|"LEE"| t8
-  o40 -->|"LEE"| t42
-  a11 --> o43
-  o43 -->|"CREA"| t27
-  o43 -->|"LEE"| t27
-  o43 -->|"LEE"| t28
-  o43 -->|"LEE"| t29
-  o43 -->|"LEE"| t30
-  o43 -->|"LEE"| t8
-  o43 -.-> t44
-  a11 --> o45
-  o45 -->|"CREA"| t27
-  o45 -->|"LEE"| t27
-  o45 -->|"LEE"| t28
-  o45 -->|"LEE"| t29
-  o45 -->|"LEE"| t30
-  o45 -->|"LEE"| t8
-  o45 -.-> t46
-  a41 --> o47
-  o47 -->|"LEE"| t8
-  o47 -->|"LEE"| t17
-  o47 -->|"LEE"| t14
-  a11 --> o48
-  o48 -->|"CREA"| t27
-  o48 -->|"LEE"| t27
-  o48 -->|"LEE"| t49
-  o48 -->|"LEE"| t50
-  o48 -->|"LEE"| t51
-  o48 -->|"LEE"| t52
-  o48 -.-> t53
-  a11 --> o54
-  o54 -->|"CREA"| t27
-  o54 -->|"LEE"| t27
-  o54 -->|"LEE"| t49
-  o54 -->|"LEE"| t50
-  o54 -->|"LEE"| t51
-  o54 -->|"LEE"| t52
-  o54 -.-> t55
-  a11 --> o56
-  o56 -->|"CREA"| t27
-  o56 -->|"LEE"| t27
-  o56 -->|"CREA"| t57
-  o56 -->|"CREA"| t58
-  o56 -->|"LEE"| t59
-  o56 -->|"LEE"| t60
-  o56 -.-> t61
-  a41 --> o62
-  o62 -->|"LEE"| t51
-  o62 -->|"LEE"| t52
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 3 de 3 — etapas `ctrl:InsuranceReadController`, `ctrl:InsurerPatientsController`, `ctrl:InsurerReceivedClaimsController`…
+### Diagrama 3 de 4 — etapas `ctrl:InsuranceCampaignsController`, `ctrl:InsuranceCatalogController`, `ctrl:InsurancePortabilityController`…
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a44(["SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRAC…"]):::actor
-  a58(["BILLING · FINANCE"]):::actor
-  a68(["SECURITY_ADMIN"]):::actor
-  t3[("insurance.broker_carrier_agreements")]:::tabla
-  t4[("insurance.insurance_brokers")]:::tabla
-  t5[("terminology.catalog_concepts")]:::tabla
-  t7[("insurance.insurance_carriers")]:::tabla
-  t9[("insurance.broker_clients")]:::tabla
-  t11[("directory.tenant_memberships")]:::tabla
-  t12[("insurance.insurance_plans")]:::tabla
-  t13[("insurance.insurance_products")]:::tabla
-  t14[("insurance.provider_networks")]:::tabla
-  t16[("insurance.insurance_plan_benefits")]:::tabla
-  t17[("insurance.network_provider_memberships")]:::tabla
-  t20[("audit.data_access_log")]:::tabla
-  t21[("common.contact_points")]:::tabla
-  t22[("community.conversation_participants")]:::tabla
-  t23[("community.conversations")]:::tabla
-  t27[("community.public_profiles")]:::tabla
-  t28[("iam.users")]:::tabla
-  t31[("clinical.encounters")]:::tabla
-  t32[("diagnostic_units.diagnostic_units")]:::tabla
-  t33[("insurance.claim_adjudication_versions")]:::tabla
-  t36[("clinical.service_requests")]:::tabla
-  t37[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  e39>"~null"]:::evento
-  t41[("insurance.insurance_claim_lines")]:::tabla
-  t45[("practice.practitioner_role_assignments")]:::tabla
-  t47[("insurance.insurance_claims")]:::tabla
-  t48[("insurance.insurance_reconciliation_batches")]:::tabla
-  t49[("insurance.insurance_reconciliation_items")]:::tabla
-  t52[("insurance.claim_line_adjudications")]:::tabla
-  t53[("insurance.claim_reversals")]:::tabla
-  t61[("insurance.patient_coverages")]:::tabla
-  t69[("practice.practices")]:::tabla
-  t18[("+2 tablas más")]
-  subgraph s0["ctrl:InsuranceReadController · Operaciones de InsuranceReadController que el RE…"]
-    o1["GET /insurance-brokers"]:::op
-    o6["GET /insurance-brokers/{id}"]:::op
-    o8["GET /insurance-brokers/{id}/clients"]:::op
-    o10["GET /insurance-carriers"]:::op
-    o15["GET /insurance-carriers/{id}"]:::op
+  a18(["Público (sin sesión)"]):::actor
+  t3[("audit.audit_log")]:::tabla
+  t4[("directory.tenant_memberships")]:::tabla
+  t5[("iam.sessions")]:::tabla
+  t6[("insurance.insurance_campaign_partners")]:::tabla
+  t7[("insurance.insurance_campaigns")]:::tabla
+  t19[("insurance.insurance_carriers")]:::tabla
+  t20[("terminology.catalog_concepts")]:::tabla
+  t41[("insurance.insurance_plans")]:::tabla
+  t42[("insurance.insurance_products")]:::tabla
+  t44[("common.file_versions")]:::tabla
+  t45[("common.files")]:::tabla
+  t46[("health_data.health_export_jobs")]:::tabla
+  t47[("health_data.health_export_manifests")]:::tabla
+  t52[("audit.data_access_log")]:::tabla
+  t53[("audit.dsar_requests")]:::tabla
+  t54[("clinical.conditions")]:::tabla
+  t55[("clinical.encounters")]:::tabla
+  t59[("insurance.broker_carrier_agreements")]:::tabla
+  t60[("insurance.insurance_brokers")]:::tabla
+  t63[("insurance.broker_clients")]:::tabla
+  t65[("insurance.provider_networks")]:::tabla
+  t67[("insurance.insurance_plan_benefits")]:::tabla
+  t68[("insurance.network_provider_memberships")]:::tabla
+  t8[("+2 tablas más")]
+  t10[("+8 tablas más")]
+  t12[("+2 tablas más")]
+  t14[("+9 tablas más")]
+  t16[("+3 tablas más")]
+  t22[("+6 tablas más")]
+  t24[("+6 tablas más")]
+  t26[("+2 tablas más")]
+  t28[("+8 tablas más")]
+  t30[("+2 tablas más")]
+  t32[("+9 tablas más")]
+  t34[("+3 tablas más")]
+  t37[("+6 tablas más")]
+  t39[("+6 tablas más")]
+  subgraph s0["ctrl:InsuranceCampaignsController · Operaciones de InsuranceCampaignsController…"]
+    o1["GET /insurance-campaigns"]:::op
+    o9["POST /insurance-campaigns"]:::op
+    o11["GET /insurance-campaigns/{id}"]:::op
+    o13["PATCH /insurance-campaigns/{id}"]:::op
+    o15["PATCH /insurance-campaigns/{id}/status"]:::op
+    o17["GET /insurance-campaigns/active"]:::op
+    o21["GET /insurance-campaigns/my-benefits"]:::op
+    o23["GET /insurance-campaigns/patient/{patientProfileId}"]:::op
+    o25["GET /insurance/campaigns"]:::op
+    o27["POST /insurance/campaigns"]:::op
+    o29["GET /insurance/campaigns/{id}"]:::op
+    o31["PATCH /insurance/campaigns/{id}"]:::op
+    o33["PATCH /insurance/campaigns/{id}/status"]:::op
+    o35["GET /insurance/campaigns/active"]:::op
+    o36["GET /insurance/campaigns/my-benefits"]:::op
+    o38["GET /insurance/campaigns/patient/{patientProfileId}"]:::op
   end
-  t24[("+9 tablas más")]
-  t29[("+7 tablas más")]
-  subgraph s1["ctrl:InsurerPatientsController · Operaciones de InsurerPatientsController que e…"]
-    o19["POST /insurance/patients/conversation"]:::op
-    o25["GET /insurance/patients/options"]:::op
-    o26["POST /insurance/patients/search"]:::op
+  subgraph s1["ctrl:InsuranceCatalogController · Operaciones de InsuranceCatalogController que…"]
+    o40["GET /insurance-carrier-catalog"]:::op
   end
-  t34[("+9 tablas más")]
-  t38[("+22 tablas más")]
-  subgraph s2["ctrl:InsurerReceivedClaimsController · Operaciones de InsurerReceivedClaimsCont…"]
-    o30["GET /insurance/received-claims"]:::op
-    o35["POST /insurance/received-claims/{id}/decision"]:::op
+  t48[("+3 tablas más")]
+  t50[("+3 tablas más")]
+  t56[("+31 tablas más")]
+  subgraph s2["ctrl:InsurancePortabilityController · Operaciones de InsurancePortabilityContro…"]
+    o43["GET /insurance/portability/certificates/{certificateId}/json"]:::op
+    o49["GET /insurance/portability/certificates/{certificateId}/pdf"]:::op
+    o51["POST /insurance/portability/export"]:::op
   end
-  t42[("+8 tablas más")]
-  subgraph s3["ctrl:MyClaimsController · Operaciones de MyClaimsController que el README no as…"]
-    o40["GET /insurance/my-claims"]:::op
+  subgraph s3["ctrl:InsurancePortabilityPublicController · Operaciones de InsurancePortability…"]
+    o57["GET /public/portability/verify/{manifestHash}"]:::op
   end
-  subgraph s4["ctrl:PractitionerInsuranceNetworksController · Operaciones de PractitionerInsur…"]
-    o43["GET /practitioners/{profileId}/insurance-networks"]:::op
-  end
-  t50[("+4 tablas más")]
-  t54[("+7 tablas más")]
-  t56[("+5 tablas más")]
-  subgraph s5["ctrl:PractitionerSettlementBatchesController · Operaciones de PractitionerSettl…"]
-    o46["GET /practitioner-settlement-batches"]:::op
-    o51["POST /practitioner-settlement-batches"]:::op
-    o55["GET /practitioner-settlement-batches/{id}"]:::op
-  end
-  t59[("+8 tablas más")]
-  t62[("+7 tablas más")]
-  t64[("+12 tablas más")]
-  t66[("+7 tablas más")]
-  subgraph s6["ctrl:PriorAuthController · Operaciones de PriorAuthController que el README no…"]
-    o57["POST /prior-authorization-requests"]:::op
-    o60["GET /prior-authorization-requests/{id}"]:::op
-    o63["POST /prior-authorization-requests/{id}/determinations"]:::op
-    o65["GET /prior-authorization-requests/inbox"]:::op
-  end
-  subgraph s7["ctrl:ReconciliationController · Operaciones de ReconciliationController que el…"]
-    o67["POST /reconciliation-batches"]:::op
-    o70["POST /reconciliation-batches/{id}/items"]:::op
+  t69[("+2 tablas más")]
+  subgraph s4["ctrl:InsuranceReadController · Operaciones de InsuranceReadController que el RE…"]
+    o58["GET /insurance-brokers"]:::op
+    o61["GET /insurance-brokers/{id}"]:::op
+    o62["GET /insurance-brokers/{id}/clients"]:::op
+    o64["GET /insurance-carriers"]:::op
+    o66["GET /insurance-carriers/{id}"]:::op
   end
   a2 --> o1
+  o1 -->|"CREA"| t3
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
   o1 -->|"LEE"| t5
-  a2 --> o6
-  o6 -->|"LEE"| t3
-  o6 -->|"LEE"| t4
-  o6 -->|"LEE"| t7
-  o6 -->|"LEE"| t5
+  o1 -->|"LEE"| t6
+  o1 -->|"LEE"| t7
+  o1 -.-> t8
+  a2 --> o9
+  o9 -->|"CREA"| t3
+  o9 -->|"LEE"| t3
+  o9 -->|"LEE"| t4
+  o9 -->|"LEE"| t5
+  o9 -->|"CREA"| t6
+  o9 -->|"LEE"| t6
+  o9 -.-> t10
+  a2 --> o11
+  o11 -->|"CREA"| t3
+  o11 -->|"LEE"| t3
+  o11 -->|"LEE"| t4
+  o11 -->|"LEE"| t5
+  o11 -->|"LEE"| t6
+  o11 -->|"LEE"| t7
+  o11 -.-> t12
+  a2 --> o13
+  o13 -->|"CREA"| t3
+  o13 -->|"LEE"| t3
+  o13 -->|"LEE"| t4
+  o13 -->|"LEE"| t5
+  o13 -->|"BORRA"| t6
+  o13 -->|"CREA"| t6
+  o13 -.-> t14
+  a2 --> o15
+  o15 -->|"CREA"| t3
+  o15 -->|"LEE"| t3
+  o15 -->|"LEE"| t4
+  o15 -->|"LEE"| t5
+  o15 -->|"LEE"| t6
+  o15 -->|"ACTUALIZA"| t7
+  o15 -.-> t16
+  a18 --> o17
+  o17 -->|"LEE"| t6
+  o17 -->|"LEE"| t7
+  o17 -->|"LEE"| t19
+  o17 -->|"LEE"| t20
+  a2 --> o21
+  o21 -->|"CREA"| t3
+  o21 -->|"LEE"| t3
+  o21 -->|"LEE"| t5
+  o21 -->|"LEE"| t6
+  o21 -->|"LEE"| t7
+  o21 -->|"LEE"| t19
+  o21 -.-> t22
+  a2 --> o23
+  o23 -->|"CREA"| t3
+  o23 -->|"LEE"| t3
+  o23 -->|"LEE"| t5
+  o23 -->|"LEE"| t6
+  o23 -->|"LEE"| t7
+  o23 -->|"LEE"| t19
+  o23 -.-> t24
+  a2 --> o25
+  o25 -->|"CREA"| t3
+  o25 -->|"LEE"| t3
+  o25 -->|"LEE"| t4
+  o25 -->|"LEE"| t5
+  o25 -->|"LEE"| t6
+  o25 -->|"LEE"| t7
+  o25 -.-> t26
+  a2 --> o27
+  o27 -->|"CREA"| t3
+  o27 -->|"LEE"| t3
+  o27 -->|"LEE"| t4
+  o27 -->|"LEE"| t5
+  o27 -->|"CREA"| t6
+  o27 -->|"LEE"| t6
+  o27 -.-> t28
+  a2 --> o29
+  o29 -->|"CREA"| t3
+  o29 -->|"LEE"| t3
+  o29 -->|"LEE"| t4
+  o29 -->|"LEE"| t5
+  o29 -->|"LEE"| t6
+  o29 -->|"LEE"| t7
+  o29 -.-> t30
+  a2 --> o31
+  o31 -->|"CREA"| t3
+  o31 -->|"LEE"| t3
+  o31 -->|"LEE"| t4
+  o31 -->|"LEE"| t5
+  o31 -->|"BORRA"| t6
+  o31 -->|"CREA"| t6
+  o31 -.-> t32
+  a2 --> o33
+  o33 -->|"CREA"| t3
+  o33 -->|"LEE"| t3
+  o33 -->|"LEE"| t4
+  o33 -->|"LEE"| t5
+  o33 -->|"LEE"| t6
+  o33 -->|"ACTUALIZA"| t7
+  o33 -.-> t34
+  a18 --> o35
+  o35 -->|"LEE"| t6
+  o35 -->|"LEE"| t7
+  o35 -->|"LEE"| t19
+  o35 -->|"LEE"| t20
+  a2 --> o36
+  o36 -->|"CREA"| t3
+  o36 -->|"LEE"| t3
+  o36 -->|"LEE"| t5
+  o36 -->|"LEE"| t6
+  o36 -->|"LEE"| t7
+  o36 -->|"LEE"| t19
+  o36 -.-> t37
+  a2 --> o38
+  o38 -->|"CREA"| t3
+  o38 -->|"LEE"| t3
+  o38 -->|"LEE"| t5
+  o38 -->|"LEE"| t6
+  o38 -->|"LEE"| t7
+  o38 -->|"LEE"| t19
+  o38 -.-> t39
+  a18 --> o40
+  o40 -->|"LEE"| t19
+  o40 -->|"LEE"| t41
+  o40 -->|"LEE"| t42
+  a2 --> o43
+  o43 -->|"CREA"| t3
+  o43 -->|"LEE"| t3
+  o43 -->|"LEE"| t44
+  o43 -->|"LEE"| t45
+  o43 -->|"LEE"| t46
+  o43 -->|"LEE"| t47
+  o43 -.-> t48
+  a2 --> o49
+  o49 -->|"CREA"| t3
+  o49 -->|"LEE"| t3
+  o49 -->|"LEE"| t44
+  o49 -->|"LEE"| t45
+  o49 -->|"LEE"| t46
+  o49 -->|"LEE"| t47
+  o49 -.-> t50
+  a2 --> o51
+  o51 -->|"CREA"| t3
+  o51 -->|"LEE"| t3
+  o51 -->|"CREA"| t52
+  o51 -->|"CREA"| t53
+  o51 -->|"LEE"| t54
+  o51 -->|"LEE"| t55
+  o51 -.-> t56
+  a18 --> o57
+  o57 -->|"LEE"| t46
+  o57 -->|"LEE"| t47
+  a2 --> o58
+  o58 -->|"LEE"| t59
+  o58 -->|"LEE"| t60
+  o58 -->|"LEE"| t20
+  a2 --> o61
+  o61 -->|"LEE"| t59
+  o61 -->|"LEE"| t60
+  o61 -->|"LEE"| t19
+  o61 -->|"LEE"| t20
+  a2 --> o62
+  o62 -->|"LEE"| t63
+  o62 -->|"LEE"| t60
+  o62 -->|"LEE"| t20
+  a2 --> o64
+  o64 -->|"LEE"| t4
+  o64 -->|"LEE"| t19
+  o64 -->|"LEE"| t41
+  o64 -->|"LEE"| t42
+  o64 -->|"LEE"| t65
+  o64 -->|"LEE"| t20
+  a2 --> o66
+  o66 -->|"LEE"| t4
+  o66 -->|"LEE"| t19
+  o66 -->|"LEE"| t67
+  o66 -->|"LEE"| t41
+  o66 -->|"LEE"| t42
+  o66 -->|"LEE"| t68
+  o66 -.-> t69
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+### Diagrama 4 de 4 — etapas `ctrl:InsurerPatientsController`, `ctrl:InsurerReceivedClaimsController`, `ctrl:MyClaimsController`…
+
+```mermaid
+flowchart LR
+  a2(["Cualquier sesión válida"]):::actor
+  a29(["SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRAC…"]):::actor
+  a45(["BILLING · FINANCE"]):::actor
+  a57(["SECURITY_ADMIN"]):::actor
+  t3[("audit.data_access_log")]:::tabla
+  t4[("common.contact_points")]:::tabla
+  t5[("community.conversation_participants")]:::tabla
+  t6[("community.conversations")]:::tabla
+  t9[("directory.tenant_memberships")]:::tabla
+  t10[("insurance.insurance_carriers")]:::tabla
+  t12[("community.public_profiles")]:::tabla
+  t13[("iam.users")]:::tabla
+  t16[("clinical.encounters")]:::tabla
+  t17[("diagnostic_units.diagnostic_units")]:::tabla
+  t18[("insurance.claim_adjudication_versions")]:::tabla
+  t21[("clinical.service_requests")]:::tabla
+  t22[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  e24>"~null"]:::evento
+  t26[("insurance.insurance_claim_lines")]:::tabla
+  t30[("insurance.network_provider_memberships")]:::tabla
+  t31[("insurance.provider_networks")]:::tabla
+  t32[("practice.practitioner_role_assignments")]:::tabla
+  t34[("insurance.insurance_claims")]:::tabla
+  t35[("insurance.insurance_reconciliation_batches")]:::tabla
+  t36[("insurance.insurance_reconciliation_items")]:::tabla
+  t39[("insurance.claim_line_adjudications")]:::tabla
+  t40[("insurance.claim_reversals")]:::tabla
+  t46[("insurance.insurance_plans")]:::tabla
+  t47[("insurance.insurance_products")]:::tabla
+  t50[("insurance.patient_coverages")]:::tabla
+  t58[("practice.practices")]:::tabla
+  t7[("+9 tablas más")]
+  t14[("+7 tablas más")]
+  subgraph s0["ctrl:InsurerPatientsController · Operaciones de InsurerPatientsController que e…"]
+    o1["POST /insurance/patients/conversation"]:::op
+    o8["GET /insurance/patients/options"]:::op
+    o11["POST /insurance/patients/search"]:::op
+  end
+  t19[("+9 tablas más")]
+  t23[("+22 tablas más")]
+  subgraph s1["ctrl:InsurerReceivedClaimsController · Operaciones de InsurerReceivedClaimsCont…"]
+    o15["GET /insurance/received-claims"]:::op
+    o20["POST /insurance/received-claims/{id}/decision"]:::op
+  end
+  t27[("+8 tablas más")]
+  subgraph s2["ctrl:MyClaimsController · Operaciones de MyClaimsController que el README no as…"]
+    o25["GET /insurance/my-claims"]:::op
+  end
+  subgraph s3["ctrl:PractitionerInsuranceNetworksController · Operaciones de PractitionerInsur…"]
+    o28["GET /practitioners/{profileId}/insurance-networks"]:::op
+  end
+  t37[("+4 tablas más")]
+  t41[("+7 tablas más")]
+  t43[("+5 tablas más")]
+  subgraph s4["ctrl:PractitionerSettlementBatchesController · Operaciones de PractitionerSettl…"]
+    o33["GET /practitioner-settlement-batches"]:::op
+    o38["POST /practitioner-settlement-batches"]:::op
+    o42["GET /practitioner-settlement-batches/{id}"]:::op
+  end
+  t48[("+8 tablas más")]
+  t51[("+7 tablas más")]
+  t53[("+12 tablas más")]
+  t55[("+7 tablas más")]
+  subgraph s5["ctrl:PriorAuthController · Operaciones de PriorAuthController que el README no…"]
+    o44["POST /prior-authorization-requests"]:::op
+    o49["GET /prior-authorization-requests/{id}"]:::op
+    o52["POST /prior-authorization-requests/{id}/determinations"]:::op
+    o54["GET /prior-authorization-requests/inbox"]:::op
+  end
+  subgraph s6["ctrl:ReconciliationController · Operaciones de ReconciliationController que el…"]
+    o56["POST /reconciliation-batches"]:::op
+    o59["POST /reconciliation-batches/{id}/items"]:::op
+  end
+  a2 --> o1
+  o1 -->|"CREA"| t3
+  o1 -->|"LEE"| t4
+  o1 -->|"CREA"| t5
+  o1 -->|"LEE"| t5
+  o1 -->|"CREA"| t6
+  o1 -->|"LEE"| t6
+  o1 -.-> t7
   a2 --> o8
   o8 -->|"LEE"| t9
-  o8 -->|"LEE"| t4
-  o8 -->|"LEE"| t5
-  a2 --> o10
-  o10 -->|"LEE"| t11
-  o10 -->|"LEE"| t7
-  o10 -->|"LEE"| t12
-  o10 -->|"LEE"| t13
-  o10 -->|"LEE"| t14
-  o10 -->|"LEE"| t5
+  o8 -->|"LEE"| t10
+  a2 --> o11
+  o11 -->|"CREA"| t3
+  o11 -->|"LEE"| t4
+  o11 -->|"LEE"| t12
+  o11 -->|"LEE"| t9
+  o11 -->|"LEE"| t13
+  o11 -->|"LEE"| t10
+  o11 -.-> t14
   a2 --> o15
-  o15 -->|"LEE"| t11
-  o15 -->|"LEE"| t7
   o15 -->|"LEE"| t16
-  o15 -->|"LEE"| t12
-  o15 -->|"LEE"| t13
   o15 -->|"LEE"| t17
-  o15 -.-> t18
-  a2 --> o19
-  o19 -->|"CREA"| t20
-  o19 -->|"LEE"| t21
-  o19 -->|"CREA"| t22
-  o19 -->|"LEE"| t22
-  o19 -->|"CREA"| t23
-  o19 -->|"LEE"| t23
-  o19 -.-> t24
+  o15 -->|"LEE"| t9
+  o15 -->|"LEE"| t13
+  o15 -->|"LEE"| t18
+  o15 -->|"LEE"| t10
+  o15 -.-> t19
+  a2 --> o20
+  o20 -->|"LEE"| t16
+  o20 -->|"LEE"| t21
+  o20 -->|"LEE"| t22
+  o20 -->|"LEE"| t17
+  o20 -->|"LEE"| t9
+  o20 -->|"LEE"| t13
+  o20 -.-> t23
+  o20 -->|"evento"| e24
   a2 --> o25
-  o25 -->|"LEE"| t11
-  o25 -->|"LEE"| t7
-  a2 --> o26
-  o26 -->|"CREA"| t20
-  o26 -->|"LEE"| t21
-  o26 -->|"LEE"| t27
-  o26 -->|"LEE"| t11
-  o26 -->|"LEE"| t28
-  o26 -->|"LEE"| t7
-  o26 -.-> t29
-  a2 --> o30
-  o30 -->|"LEE"| t31
-  o30 -->|"LEE"| t32
-  o30 -->|"LEE"| t11
-  o30 -->|"LEE"| t28
-  o30 -->|"LEE"| t33
-  o30 -->|"LEE"| t7
-  o30 -.-> t34
-  a2 --> o35
-  o35 -->|"LEE"| t31
-  o35 -->|"LEE"| t36
-  o35 -->|"LEE"| t37
-  o35 -->|"LEE"| t32
-  o35 -->|"LEE"| t11
-  o35 -->|"LEE"| t28
-  o35 -.-> t38
-  o35 -->|"evento"| e39
-  a2 --> o40
-  o40 -->|"LEE"| t31
-  o40 -->|"LEE"| t32
-  o40 -->|"LEE"| t28
-  o40 -->|"LEE"| t33
-  o40 -->|"LEE"| t7
-  o40 -->|"LEE"| t41
-  o40 -.-> t42
-  a44 --> o43
-  o43 -->|"LEE"| t7
-  o43 -->|"LEE"| t17
-  o43 -->|"LEE"| t14
-  o43 -->|"LEE"| t45
-  a2 --> o46
-  o46 -->|"LEE"| t32
-  o46 -->|"LEE"| t33
-  o46 -->|"LEE"| t7
-  o46 -->|"LEE"| t47
-  o46 -->|"LEE"| t48
-  o46 -->|"LEE"| t49
-  o46 -.-> t50
-  a2 --> o51
-  o51 -->|"LEE"| t11
-  o51 -->|"LEE"| t33
-  o51 -->|"LEE"| t52
-  o51 -->|"LEE"| t53
-  o51 -->|"LEE"| t7
-  o51 -->|"LEE"| t41
-  o51 -.-> t54
-  a2 --> o55
-  o55 -->|"LEE"| t32
-  o55 -->|"LEE"| t11
-  o55 -->|"LEE"| t33
-  o55 -->|"LEE"| t7
-  o55 -->|"LEE"| t47
-  o55 -->|"LEE"| t48
-  o55 -.-> t56
-  a58 --> o57
-  o57 -->|"LEE"| t36
-  o57 -->|"LEE"| t37
-  o57 -->|"LEE"| t32
-  o57 -->|"LEE"| t11
-  o57 -->|"LEE"| t12
-  o57 -->|"LEE"| t13
-  o57 -.-> t59
-  a58 --> o60
-  o60 -->|"LEE"| t37
-  o60 -->|"LEE"| t11
-  o60 -->|"LEE"| t7
-  o60 -->|"LEE"| t12
-  o60 -->|"LEE"| t13
-  o60 -->|"LEE"| t61
-  o60 -.-> t62
-  a58 --> o63
-  o63 -->|"LEE"| t36
-  o63 -->|"LEE"| t37
-  o63 -->|"LEE"| t32
-  o63 -->|"LEE"| t11
-  o63 -->|"LEE"| t7
-  o63 -->|"LEE"| t12
-  o63 -.-> t64
-  a58 --> o65
-  o65 -->|"LEE"| t37
-  o65 -->|"LEE"| t11
-  o65 -->|"LEE"| t7
-  o65 -->|"LEE"| t12
-  o65 -->|"LEE"| t13
-  o65 -->|"LEE"| t61
-  o65 -.-> t66
-  a68 --> o67
-  o67 -->|"LEE"| t7
-  o67 -->|"CREA"| t48
-  o67 -->|"LEE"| t69
-  a68 --> o70
-  o70 -->|"LEE"| t33
-  o70 -->|"LEE"| t7
-  o70 -->|"LEE"| t47
-  o70 -->|"LEE"| t48
-  o70 -->|"CREA"| t49
-  o70 -->|"LEE"| t69
+  o25 -->|"LEE"| t16
+  o25 -->|"LEE"| t17
+  o25 -->|"LEE"| t13
+  o25 -->|"LEE"| t18
+  o25 -->|"LEE"| t10
+  o25 -->|"LEE"| t26
+  o25 -.-> t27
+  a29 --> o28
+  o28 -->|"LEE"| t10
+  o28 -->|"LEE"| t30
+  o28 -->|"LEE"| t31
+  o28 -->|"LEE"| t32
+  a2 --> o33
+  o33 -->|"LEE"| t17
+  o33 -->|"LEE"| t18
+  o33 -->|"LEE"| t10
+  o33 -->|"LEE"| t34
+  o33 -->|"LEE"| t35
+  o33 -->|"LEE"| t36
+  o33 -.-> t37
+  a2 --> o38
+  o38 -->|"LEE"| t9
+  o38 -->|"LEE"| t18
+  o38 -->|"LEE"| t39
+  o38 -->|"LEE"| t40
+  o38 -->|"LEE"| t10
+  o38 -->|"LEE"| t26
+  o38 -.-> t41
+  a2 --> o42
+  o42 -->|"LEE"| t17
+  o42 -->|"LEE"| t9
+  o42 -->|"LEE"| t18
+  o42 -->|"LEE"| t10
+  o42 -->|"LEE"| t34
+  o42 -->|"LEE"| t35
+  o42 -.-> t43
+  a45 --> o44
+  o44 -->|"LEE"| t21
+  o44 -->|"LEE"| t22
+  o44 -->|"LEE"| t17
+  o44 -->|"LEE"| t9
+  o44 -->|"LEE"| t46
+  o44 -->|"LEE"| t47
+  o44 -.-> t48
+  a45 --> o49
+  o49 -->|"LEE"| t22
+  o49 -->|"LEE"| t9
+  o49 -->|"LEE"| t10
+  o49 -->|"LEE"| t46
+  o49 -->|"LEE"| t47
+  o49 -->|"LEE"| t50
+  o49 -.-> t51
+  a45 --> o52
+  o52 -->|"LEE"| t21
+  o52 -->|"LEE"| t22
+  o52 -->|"LEE"| t17
+  o52 -->|"LEE"| t9
+  o52 -->|"LEE"| t10
+  o52 -->|"LEE"| t46
+  o52 -.-> t53
+  a45 --> o54
+  o54 -->|"LEE"| t22
+  o54 -->|"LEE"| t9
+  o54 -->|"LEE"| t10
+  o54 -->|"LEE"| t46
+  o54 -->|"LEE"| t47
+  o54 -->|"LEE"| t50
+  o54 -.-> t55
+  a57 --> o56
+  o56 -->|"LEE"| t10
+  o56 -->|"CREA"| t35
+  o56 -->|"LEE"| t58
+  a57 --> o59
+  o59 -->|"LEE"| t18
+  o59 -->|"LEE"| t10
+  o59 -->|"LEE"| t34
+  o59 -->|"LEE"| t35
+  o59 -->|"CREA"| t36
+  o59 -->|"LEE"| t58
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -781,7 +881,8 @@ stateDiagram-v2
 
 | Operación | Estados de destino que nombra | A través de |
 |---|---|---|
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | ACTIVE | InsuranceCampaignsService.changeStatus |
+| PATCH /insurance-campaigns/{id}/status | ACTIVE | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus |
+| PATCH /insurance/campaigns/{id}/status | ACTIVE | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus |
 
 ## Árbol de decisión por operación
 
@@ -789,9 +890,402 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. GET /['insurance/campaigns', 'insurance-campaigns']
+#### 1. POST /broker-commission-statements
 
+Generar liquidación de comisión de broker
 
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado; ResourceNotFoundException: Acuerdo broker–aseguradora no encontrado |
+| 409 | `CONFLICT` | ConflictException: Ya existe liquidación para el periodo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El acuerdo no está activo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a BrokerCommissionService.generate"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CatalogRepository.findBroker"]:::llamada
+  n4 --> n5
+  n6[("LEE insurance.insurance_brokers")]:::efecto
+  n5 --> n6
+  n7{"!broker"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Broker no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a CatalogRepository.findAgreement"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE insurance.broker_carrier_agreements")]:::efecto
+  n9 --> n10
+  n11{"!agreement"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Acuerdo broker–aseguradora no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13{"agreement.statusConceptId !== INS.AGREEMENT_ACTIVE"}:::decision
+  n11 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED El acuerdo no está activo"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a SettlementRepository.findStatementByUnique"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE insurance.broker_commission_statements")]:::efecto
+  n15 --> n16
+  n17{"clash"}:::decision
+  n16 --> n17
+  n18(["409 CONFLICT Ya existe liquidación para el periodo"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a SettlementRepository.createStatement"]:::llamada
+  n17 -->|"no"| n19
+  n20[("CREA insurance.broker_commission_statements")]:::efecto
+  n19 --> n20
+  n21(("201 Responde con éxito")):::ok
+  n20 --> n21
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. POST /claim-disputes/{id}/appeal-decisions
+
+Emitir decisión de apelación (inmutable)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Disputa no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La disputa no admite decisión en su estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a AppealsService.decide"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a DisputeRepository.findDispute"]:::llamada
+  n4 --> n5
+  n6[("LEE insurance.claim_disputes")]:::efecto
+  n5 --> n6
+  n7{"!dispute"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Disputa no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9{"![INS.DISPUTE_OPEN, INS.DISPUTE_IN_REVIEW].includes( dispute.statusConceptId, )"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED La disputa no admite decisión en su estado actual"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a DisputeRepository.latestDecision"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE insurance.claim_appeal_decisions")]:::efecto
+  n11 --> n12
+  n13["Llama a DisputeRepository.createAppealDecision"]:::llamada
+  n12 --> n13
+  n14[("CREA insurance.claim_appeal_decisions")]:::efecto
+  n13 --> n14
+  n15[("ACTUALIZA insurance.claim_disputes")]:::efecto
+  n14 --> n15
+  n16(("201 Responde con éxito")):::ok
+  n15 --> n16
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. POST /coordination-of-benefits
+
+Determinar coordinación de beneficios (COB)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cobertura primaria no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: COB requiere al menos una cobertura secundaria |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CoverageService.determineCob"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CoverageRepository.findCoverage"]:::llamada
+  n4 --> n5
+  n6[("LEE insurance.patient_coverages")]:::efecto
+  n5 --> n6
+  n7{"!primary"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Cobertura primaria no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9{"!dto.secondaryPatientCoverageId"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED COB requiere al menos una cobertura secundaria"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a CoverageRepository.latestActiveCob"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE insurance.coordination_of_benefits")]:::efecto
+  n11 --> n12
+  n13{"previous"}:::decision
+  n12 --> n13
+  n14[("ACTUALIZA insurance.coordination_of_benefits")]:::efecto
+  n13 -->|"sí"| n14
+  n15["Llama a CoverageRepository.createCob"]:::llamada
+  n14 --> n15
+  n13 -->|"no"| n15
+  n16[("CREA insurance.coordination_of_benefits")]:::efecto
+  n15 --> n16
+  n17(("201 Responde con éxito")):::ok
+  n16 --> n17
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. POST /coverage-eligibility-requests
+
+Solicitar y resolver elegibilidad (270/271)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Cobertura no encontrada |
+| 409 | `CONFLICT` | ConflictException: Solicitud de elegibilidad duplicada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CoverageService.requestEligibility"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CoverageRepository.findCoverage"]:::llamada
+  n4 --> n5
+  n6[("LEE insurance.patient_coverages")]:::efecto
+  n5 --> n6
+  n7{"!coverage"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Cobertura no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9{"dto.idempotencyKey"}:::decision
+  n7 -->|"no"| n9
+  n10["Llama a CoverageRepository.findRequestByIdempotency"]:::llamada
+  n9 -->|"sí"| n10
+  n11[("LEE insurance.coverage_eligibility_requests")]:::efecto
+  n10 --> n11
+  n12{"existing"}:::decision
+  n11 --> n12
+  n13(["409 CONFLICT Solicitud de elegibilidad duplicada"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a CoverageRepository.createEligibilityRequest"]:::llamada
+  n12 -->|"no"| n14
+  n9 -->|"no"| n14
+  n15[("CREA insurance.coverage_eligibility_requests")]:::efecto
+  n14 --> n15
+  n16["Llama a CoverageRepository.createEligibilityResponse"]:::llamada
+  n15 --> n16
+  n17[("CREA insurance.coverage_eligibility_responses")]:::efecto
+  n16 --> n17
+  n18[("ACTUALIZA insurance.coverage_eligibility_requests")]:::efecto
+  n17 --> n18
+  n19(("201 Responde con éxito")):::ok
+  n18 --> n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. GET /insurance-brokers/{id}
+
+Consultar el perfil y las vinculaciones de un broker
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsuranceReadService.getBroker"]:::llamada
+  n2 --> n3
+  n4["Llama a InsuranceReadRepository.findBrokerByTenant"]:::llamada
+  n3 --> n4
+  n5[("LEE insurance.insurance_brokers")]:::efecto
+  n4 --> n5
+  n6{"!broker"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Broker no encontrado"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a InsuranceReadRepository.findAgreements"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE insurance.broker_carrier_agreements")]:::efecto
+  n8 --> n9
+  n10["Llama a InsuranceReadRepository.findCarriersByIds"]:::llamada
+  n9 --> n10
+  n11[("LEE insurance.insurance_carriers")]:::efecto
+  n10 --> n11
+  n12["Llama a InsuranceReadService.conceptMap"]:::llamada
+  n11 --> n12
+  n13["Llama a InsuranceReadRepository.findConcepts"]:::llamada
+  n12 --> n13
+  n14[("LEE terminology.catalog_concepts")]:::efecto
+  n13 --> n14
+  n15(("200 Responde con éxito")):::ok
+  n14 --> n15
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 6. POST /insurance-brokers/{id}/agreements
+
+Alta de acuerdo broker–aseguradora (soporte)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado; ResourceNotFoundException: Aseguradora no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsuranceBackboneService.createAgreement"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CatalogRepository.findBroker"]:::llamada
+  n4 --> n5
+  n6[("LEE insurance.insurance_brokers")]:::efecto
+  n5 --> n6
+  n7{"!broker"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Broker no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a CatalogRepository.findCarrier"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE insurance.insurance_carriers")]:::efecto
+  n9 --> n10
+  n11{"!carrier"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Aseguradora no encontrada"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a CatalogRepository.createAgreement"]:::llamada
+  n11 -->|"no"| n13
+  n14[("CREA insurance.broker_carrier_agreements")]:::efecto
+  n13 --> n14
+  n15(("201 Responde con éxito")):::ok
+  n14 --> n15
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. GET /insurance-brokers/{id}/clients
+
+Listar la cartera comercial de un broker (sin datos clínicos)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsuranceReadService.listBrokerClients"]:::llamada
+  n2 --> n3
+  n4["Llama a InsuranceReadRepository.findBrokerByTenant"]:::llamada
+  n3 --> n4
+  n5[("LEE insurance.insurance_brokers")]:::efecto
+  n4 --> n5
+  n6{"!broker"}:::decision
+  n5 --> n6
+  n7(["404 NOT_FOUND Broker no encontrado"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a InsuranceReadRepository.findBrokerClients"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE insurance.broker_clients")]:::efecto
+  n8 --> n9
+  n10["Llama a InsuranceReadService.conceptMap"]:::llamada
+  n9 --> n10
+  n11["Llama a InsuranceReadRepository.findConcepts"]:::llamada
+  n10 --> n11
+  n12[("LEE terminology.catalog_concepts")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 8. GET /insurance-campaigns
+
+Listar las campañas de la aseguradora activa
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -849,14 +1343,14 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. POST /['insurance/campaigns', 'insurance-campaigns']
+#### 9. POST /insurance-campaigns
 
-
+Crear una campaña preventiva de la aseguradora
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: No se puede activar una campaña cuya vigencia ya terminó; BadRequestException: El código CIE-10 {code} no está en el catálogo |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: No se puede activar una campaña cuya vigencia ya terminó; BadRequestException: El código CIE-10 {code} no está en el catálogo |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
@@ -867,7 +1361,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
   n1 --> n2
   n3["Llama a InsuranceCampaignsService.create"]:::llamada
   n2 --> n3
@@ -983,9 +1477,9 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. GET /['insurance/campaigns', 'insurance-campaigns']/{id}
+#### 10. GET /insurance-campaigns/{id}
 
-
+Consultar una campaña de la aseguradora activa
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1052,14 +1546,14 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}
+#### 11. PATCH /insurance-campaigns/{id}
 
-
+Editar una campaña en borrador o pausada (422 si está activa o vencida)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: El código CIE-10 {code} no está en el catálogo |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: El código CIE-10 {code} no está en el catálogo |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora; ForbiddenException: La campaña pertenece a otra aseguradora |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
@@ -1069,7 +1563,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a InsuranceCampaignsService.update"]:::llamada
   n2 --> n3
@@ -1225,14 +1719,14 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status
+#### 12. PATCH /insurance-campaigns/{id}/status
 
-
+Activar, pausar o finalizar una campaña (transiciones cerradas)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora; ForbiddenException: La campaña pertenece a otra aseguradora |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
@@ -1242,7 +1736,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
   n1 --> n2
   n3["Llama a InsuranceCampaignsService.changeStatus"]:::llamada
   n2 --> n3
@@ -1343,9 +1837,9 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits
+#### 13. GET /insurance-campaigns/my-benefits
 
-El perfil sale del JWT (`pid`): el paciente nunca lo pone en la URL.
+Campañas vigentes de mi aseguradora, para el afiliado autenticado
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1391,9 +1885,9 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId}
+#### 14. GET /insurance-campaigns/patient/{patientProfileId}
 
-Debe declararse ANTES de `GET :id`: si no, `patient` se leería como un id. El perfil viaja en la URL para que un intento sobre el de otro afiliado sea verificable y auditable. Se conserva junto a `my-benefits` para el caso de IDOR con un perfil ajeno explícito.
+Campañas vigentes de la aseguradora del afiliado (sólo el titular)
 
 | HTTP | Código | Cuándo |
 |---|---|---|
@@ -1431,399 +1925,6 @@ flowchart TD
   n12 --> n13
   n14(("200 Responde con éxito")):::ok
   n13 --> n14
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 8. POST /broker-commission-statements
-
-Generar liquidación de comisión de broker
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado; ResourceNotFoundException: Acuerdo broker–aseguradora no encontrado |
-| 409 | `CONFLICT` | ConflictException: Ya existe liquidación para el periodo |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El acuerdo no está activo |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a BrokerCommissionService.generate"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a CatalogRepository.findBroker"]:::llamada
-  n4 --> n5
-  n6[("LEE insurance.insurance_brokers")]:::efecto
-  n5 --> n6
-  n7{"!broker"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Broker no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a CatalogRepository.findAgreement"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE insurance.broker_carrier_agreements")]:::efecto
-  n9 --> n10
-  n11{"!agreement"}:::decision
-  n10 --> n11
-  n12(["404 NOT_FOUND Acuerdo broker–aseguradora no encontrado"]):::error
-  n11 -->|"sí"| n12
-  n13{"agreement.statusConceptId !== INS.AGREEMENT_ACTIVE"}:::decision
-  n11 -->|"no"| n13
-  n14(["422 PRECONDITION_FAILED El acuerdo no está activo"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a SettlementRepository.findStatementByUnique"]:::llamada
-  n13 -->|"no"| n15
-  n16[("LEE insurance.broker_commission_statements")]:::efecto
-  n15 --> n16
-  n17{"clash"}:::decision
-  n16 --> n17
-  n18(["409 CONFLICT Ya existe liquidación para el periodo"]):::error
-  n17 -->|"sí"| n18
-  n19["Llama a SettlementRepository.createStatement"]:::llamada
-  n17 -->|"no"| n19
-  n20[("CREA insurance.broker_commission_statements")]:::efecto
-  n19 --> n20
-  n21(("201 Responde con éxito")):::ok
-  n20 --> n21
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 9. POST /claim-disputes/{id}/appeal-decisions
-
-Emitir decisión de apelación (inmutable)
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Disputa no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La disputa no admite decisión en su estado actual |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
-  n1 --> n2
-  n3["Llama a AppealsService.decide"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a DisputeRepository.findDispute"]:::llamada
-  n4 --> n5
-  n6[("LEE insurance.claim_disputes")]:::efecto
-  n5 --> n6
-  n7{"!dispute"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Disputa no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"![INS.DISPUTE_OPEN, INS.DISPUTE_IN_REVIEW].includes( dispute.statusConceptId, )"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La disputa no admite decisión en su estado actual"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a DisputeRepository.latestDecision"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE insurance.claim_appeal_decisions")]:::efecto
-  n11 --> n12
-  n13["Llama a DisputeRepository.createAppealDecision"]:::llamada
-  n12 --> n13
-  n14[("CREA insurance.claim_appeal_decisions")]:::efecto
-  n13 --> n14
-  n15[("ACTUALIZA insurance.claim_disputes")]:::efecto
-  n14 --> n15
-  n16(("201 Responde con éxito")):::ok
-  n15 --> n16
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 10. POST /coordination-of-benefits
-
-Determinar coordinación de beneficios (COB)
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cobertura primaria no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: COB requiere al menos una cobertura secundaria |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a CoverageService.determineCob"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a CoverageRepository.findCoverage"]:::llamada
-  n4 --> n5
-  n6[("LEE insurance.patient_coverages")]:::efecto
-  n5 --> n6
-  n7{"!primary"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Cobertura primaria no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"!dto.secondaryPatientCoverageId"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED COB requiere al menos una cobertura secundaria"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a CoverageRepository.latestActiveCob"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE insurance.coordination_of_benefits")]:::efecto
-  n11 --> n12
-  n13{"previous"}:::decision
-  n12 --> n13
-  n14[("ACTUALIZA insurance.coordination_of_benefits")]:::efecto
-  n13 -->|"sí"| n14
-  n15["Llama a CoverageRepository.createCob"]:::llamada
-  n14 --> n15
-  n13 -->|"no"| n15
-  n16[("CREA insurance.coordination_of_benefits")]:::efecto
-  n15 --> n16
-  n17(("201 Responde con éxito")):::ok
-  n16 --> n17
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 11. POST /coverage-eligibility-requests
-
-Solicitar y resolver elegibilidad (270/271)
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Cobertura no encontrada |
-| 409 | `CONFLICT` | ConflictException: Solicitud de elegibilidad duplicada |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a CoverageService.requestEligibility"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a CoverageRepository.findCoverage"]:::llamada
-  n4 --> n5
-  n6[("LEE insurance.patient_coverages")]:::efecto
-  n5 --> n6
-  n7{"!coverage"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Cobertura no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"dto.idempotencyKey"}:::decision
-  n7 -->|"no"| n9
-  n10["Llama a CoverageRepository.findRequestByIdempotency"]:::llamada
-  n9 -->|"sí"| n10
-  n11[("LEE insurance.coverage_eligibility_requests")]:::efecto
-  n10 --> n11
-  n12{"existing"}:::decision
-  n11 --> n12
-  n13(["409 CONFLICT Solicitud de elegibilidad duplicada"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a CoverageRepository.createEligibilityRequest"]:::llamada
-  n12 -->|"no"| n14
-  n9 -->|"no"| n14
-  n15[("CREA insurance.coverage_eligibility_requests")]:::efecto
-  n14 --> n15
-  n16["Llama a CoverageRepository.createEligibilityResponse"]:::llamada
-  n15 --> n16
-  n17[("CREA insurance.coverage_eligibility_responses")]:::efecto
-  n16 --> n17
-  n18[("ACTUALIZA insurance.coverage_eligibility_requests")]:::efecto
-  n17 --> n18
-  n19(("201 Responde con éxito")):::ok
-  n18 --> n19
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 12. GET /insurance-brokers/{id}
-
-Consultar el perfil y las vinculaciones de un broker
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a InsuranceReadService.getBroker"]:::llamada
-  n2 --> n3
-  n4["Llama a InsuranceReadRepository.findBrokerByTenant"]:::llamada
-  n3 --> n4
-  n5[("LEE insurance.insurance_brokers")]:::efecto
-  n4 --> n5
-  n6{"!broker"}:::decision
-  n5 --> n6
-  n7(["404 NOT_FOUND Broker no encontrado"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a InsuranceReadRepository.findAgreements"]:::llamada
-  n6 -->|"no"| n8
-  n9[("LEE insurance.broker_carrier_agreements")]:::efecto
-  n8 --> n9
-  n10["Llama a InsuranceReadRepository.findCarriersByIds"]:::llamada
-  n9 --> n10
-  n11[("LEE insurance.insurance_carriers")]:::efecto
-  n10 --> n11
-  n12["Llama a InsuranceReadService.conceptMap"]:::llamada
-  n11 --> n12
-  n13["Llama a InsuranceReadRepository.findConcepts"]:::llamada
-  n12 --> n13
-  n14[("LEE terminology.catalog_concepts")]:::efecto
-  n13 --> n14
-  n15(("200 Responde con éxito")):::ok
-  n14 --> n15
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 13. POST /insurance-brokers/{id}/agreements
-
-Alta de acuerdo broker–aseguradora (soporte)
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 201 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado; ResourceNotFoundException: Aseguradora no encontrada |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
-  n1 --> n2
-  n3["Llama a InsuranceBackboneService.createAgreement"]:::llamada
-  n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
-  n3 --> n4
-  n5["Llama a CatalogRepository.findBroker"]:::llamada
-  n4 --> n5
-  n6[("LEE insurance.insurance_brokers")]:::efecto
-  n5 --> n6
-  n7{"!broker"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Broker no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a CatalogRepository.findCarrier"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE insurance.insurance_carriers")]:::efecto
-  n9 --> n10
-  n11{"!carrier"}:::decision
-  n10 --> n11
-  n12(["404 NOT_FOUND Aseguradora no encontrada"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a CatalogRepository.createAgreement"]:::llamada
-  n11 -->|"no"| n13
-  n14[("CREA insurance.broker_carrier_agreements")]:::efecto
-  n13 --> n14
-  n15(("201 Responde con éxito")):::ok
-  n14 --> n15
-  classDef acceso fill:#eef,stroke:#66a
-  classDef error fill:#fee,stroke:#c33
-  classDef ok fill:#efe,stroke:#3a3
-  classDef efecto fill:#ffd,stroke:#aa3
-  classDef decision fill:#fff,stroke:#555
-  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
-```
-
-#### 14. GET /insurance-brokers/{id}/clients
-
-Listar la cartera comercial de un broker (sin datos clínicos)
-
-| HTTP | Código | Cuándo |
-|---|---|---|
-| 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
-| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Broker no encontrado |
-| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-
-```mermaid
-flowchart TD
-  n1(("Solicitud")):::inicio
-  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
-  n1 --> n2
-  n3["Llama a InsuranceReadService.listBrokerClients"]:::llamada
-  n2 --> n3
-  n4["Llama a InsuranceReadRepository.findBrokerByTenant"]:::llamada
-  n3 --> n4
-  n5[("LEE insurance.insurance_brokers")]:::efecto
-  n4 --> n5
-  n6{"!broker"}:::decision
-  n5 --> n6
-  n7(["404 NOT_FOUND Broker no encontrado"]):::error
-  n6 -->|"sí"| n7
-  n8["Llama a InsuranceReadRepository.findBrokerClients"]:::llamada
-  n6 -->|"no"| n8
-  n9[("LEE insurance.broker_clients")]:::efecto
-  n8 --> n9
-  n10["Llama a InsuranceReadService.conceptMap"]:::llamada
-  n9 --> n10
-  n11["Llama a InsuranceReadRepository.findConcepts"]:::llamada
-  n10 --> n11
-  n12[("LEE terminology.catalog_concepts")]:::efecto
-  n11 --> n12
-  n13(("200 Responde con éxito")):::ok
-  n12 --> n13
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3718,7 +3819,657 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. GET /insurance/my-claims
+#### 33. GET /insurance/campaigns
+
+Listar las campañas de la aseguradora activa
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: Cursor inválido |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsuranceCampaignsService.list"]:::llamada
+  n2 --> n3
+  n4["Llama a InsuranceCampaignsService.readableCarrier"]:::llamada
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 --> n5
+  n6["Llama a InsuranceCampaignsService.tenantOf"]:::llamada
+  n5 --> n6
+  n7(["403 FORBIDDEN Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización"]):::error
+  n6 --> n7
+  n8["Llama a DirectoryTenantAdministrationAdapter.assertCanRead"]:::llamada
+  n9["Llama a TenantAdministrationService.assertCanRead"]:::llamada
+  n8 --> n9
+  n10(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
+  n9 --> n10
+  n11["Llama a InsuranceCampaignsService.carrierOf"]:::llamada
+  n12["Llama a CatalogRepository.findCarrierByTenantId"]:::llamada
+  n11 --> n12
+  n13[("LEE insurance.insurance_carriers")]:::efecto
+  n12 --> n13
+  n14{"!carrier"}:::decision
+  n13 --> n14
+  n15(["403 FORBIDDEN La organización activa no es una aseguradora"]):::error
+  n14 -->|"sí"| n15
+  n16(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"si falla"| n16
+  n17["Llama a InsuranceCampaignsRepository.listRowsByCarrier"]:::llamada
+  n14 -->|"no"| n17
+  n18[("LEE insurance.insurance_campaign_partners · LEE insurance.insurance_campaigns · LEE terminology.catalog_conce…")]:::efecto
+  n17 --> n18
+  n19["Llama a InsuranceCampaignsService.decodeCursor"]:::llamada
+  n18 --> n19
+  n20(["400 VALIDATION_FAILED Cursor inválido"]):::error
+  n19 --> n20
+  n21(("200 Responde con éxito")):::ok
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 34. POST /insurance/campaigns
+
+Crear una campaña preventiva de la aseguradora
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: No se puede activar una campaña cuya vigencia ya terminó; BadRequestException: El código CIE-10 {code} no está en el catálogo |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
+| 409 | `CONFLICT` | ConflictException: Ya existe una campaña con ese código en la aseguradora |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La membresía de red del aliado no pertenece a esta aseguradora |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsuranceCampaignsService.create"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a InsuranceCampaignsService.administrableCarrier"]:::llamada
+  n4 --> n5
+  n6["Intenta"]:::intento
+  n5 --> n6
+  n7["Llama a InsuranceCampaignsService.tenantOf"]:::llamada
+  n6 --> n7
+  n8(["403 FORBIDDEN Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización"]):::error
+  n7 --> n8
+  n9{"!canAdminister"}:::decision
+  n10{"!actor.roles.includes(INSURANCE_OPERATOR_ROLE)"}:::decision
+  n9 -->|"sí"| n10
+  n11(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o ad…"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a DirectoryTenantAdministrationAdapter.assertCanRead"]:::llamada
+  n10 -->|"no"| n12
+  n13["Llama a TenantAdministrationService.assertCanRead"]:::llamada
+  n12 --> n13
+  n14(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
+  n13 --> n14
+  n15["Llama a InsuranceCampaignsService.carrierOf"]:::llamada
+  n9 -->|"no"| n15
+  n16["Llama a CatalogRepository.findCarrierByTenantId"]:::llamada
+  n15 --> n16
+  n17[("LEE insurance.insurance_carriers")]:::efecto
+  n16 --> n17
+  n18{"!carrier"}:::decision
+  n17 --> n18
+  n19(["403 FORBIDDEN La organización activa no es una aseguradora"]):::error
+  n18 -->|"sí"| n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"si falla"| n20
+  n21{"dto.validTo ‹ dto.validFrom"}:::decision
+  n18 -->|"no"| n21
+  n22(["400 VALIDATION_FAILED validTo debe ser igual o posterior a validFrom"]):::error
+  n21 -->|"sí"| n22
+  n23{"dto.activate === true && dto.validTo ‹ today"}:::decision
+  n21 -->|"no"| n23
+  n24(["400 VALIDATION_FAILED No se puede activar una campaña cuya vigencia ya terminó"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a InsuranceCampaignsRepository.findByCarrierAndCode"]:::llamada
+  n23 -->|"no"| n25
+  n26[("LEE insurance.insurance_campaigns")]:::efecto
+  n25 --> n26
+  n27{"existing"}:::decision
+  n26 --> n27
+  n28(["409 CONFLICT Ya existe una campaña con ese código en la aseguradora"]):::error
+  n27 -->|"sí"| n28
+  n29{"dto.targetConditionCode !== undefined"}:::decision
+  n27 -->|"no"| n29
+  n30["Llama a InsuranceCampaignsRepository.resolveIcd10ConceptId"]:::llamada
+  n29 -->|"sí"| n30
+  n31[("LEE terminology.catalog_concepts · LEE terminology.code_system_versions · LEE terminology.code_systems")]:::efecto
+  n30 --> n31
+  n32{"!conceptId"}:::decision
+  n31 --> n32
+  n33(["400 VALIDATION_FAILED El código CIE-10 {code} no está en el catálogo"]):::error
+  n32 -->|"sí"| n33
+  n34["Llama a InsuranceCampaignsService.assertPartnersBelongToCarrier"]:::llamada
+  n32 -->|"no"| n34
+  n29 -->|"no"| n34
+  n35["Repite: por cada const partner de partners"]:::bucle
+  n34 --> n35
+  n36["Llama a InsuranceCampaignsRepository.membershipBelongsToCarrier"]:::llamada
+  n35 -->|"cada elemento"| n36
+  n37[("LEE insurance.network_provider_memberships · LEE insurance.provider_networks")]:::efecto
+  n36 --> n37
+  n38{"!belongs"}:::decision
+  n37 --> n38
+  n39(["422 PRECONDITION_FAILED La membresía de red del aliado no pertenece a esta aseguradora"]):::error
+  n38 -->|"sí"| n39
+  n40["Llama a InsuranceCampaignsRepository.createCampaign"]:::llamada
+  n38 -->|"no"| n40
+  n35 -->|"al terminar"| n40
+  n41[("CREA insurance.insurance_campaigns")]:::efecto
+  n40 --> n41
+  n42["Repite: por cada const partner de dto.partners"]:::bucle
+  n41 --> n42
+  n43["Llama a InsuranceCampaignsRepository.createPartner"]:::llamada
+  n42 -->|"cada elemento"| n43
+  n44[("CREA insurance.insurance_campaign_partners")]:::efecto
+  n43 --> n44
+  n45["Llama a AuditTrailAdapter.record"]:::llamada
+  n44 --> n45
+  n42 -->|"al terminar"| n45
+  n46["Llama a AuditTrailService.record"]:::llamada
+  n45 --> n46
+  n47["Llama a AuditLogRepository.append"]:::llamada
+  n46 --> n47
+  n48[("CREA audit.audit_log")]:::efecto
+  n47 --> n48
+  n49["Llama a InsuranceCampaignsService.detail"]:::llamada
+  n48 --> n49
+  n50["Llama a InsuranceCampaignsRepository.getRowForCarrier"]:::llamada
+  n49 --> n50
+  n51[("LEE insurance.insurance_campaign_partners · LEE insurance.insurance_campaigns · LEE terminology.catalog_conce…")]:::efecto
+  n50 --> n51
+  n52{"!row"}:::decision
+  n51 --> n52
+  n53(["404 NOT_FOUND Campaña no encontrada"]):::error
+  n52 -->|"sí"| n53
+  n54(("201 Responde con éxito")):::ok
+  n52 -->|"no"| n54
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 35. GET /insurance/campaigns/{id}
+
+Consultar una campaña de la aseguradora activa
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora; ForbiddenException: La campaña pertenece a otra aseguradora |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsuranceCampaignsService.getById"]:::llamada
+  n2 --> n3
+  n4["Llama a InsuranceCampaignsService.readableCarrier"]:::llamada
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 --> n5
+  n6["Llama a InsuranceCampaignsService.tenantOf"]:::llamada
+  n5 --> n6
+  n7(["403 FORBIDDEN Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización"]):::error
+  n6 --> n7
+  n8["Llama a DirectoryTenantAdministrationAdapter.assertCanRead"]:::llamada
+  n9["Llama a TenantAdministrationService.assertCanRead"]:::llamada
+  n8 --> n9
+  n10(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
+  n9 --> n10
+  n11["Llama a InsuranceCampaignsService.carrierOf"]:::llamada
+  n12["Llama a CatalogRepository.findCarrierByTenantId"]:::llamada
+  n11 --> n12
+  n13[("LEE insurance.insurance_carriers")]:::efecto
+  n12 --> n13
+  n14{"!carrier"}:::decision
+  n13 --> n14
+  n15(["403 FORBIDDEN La organización activa no es una aseguradora"]):::error
+  n14 -->|"sí"| n15
+  n16(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"si falla"| n16
+  n17["Llama a InsuranceCampaignsRepository.getRowForCarrier"]:::llamada
+  n14 -->|"no"| n17
+  n18[("LEE insurance.insurance_campaign_partners · LEE insurance.insurance_campaigns · LEE terminology.catalog_conce…")]:::efecto
+  n17 --> n18
+  n19{"!row"}:::decision
+  n18 --> n19
+  n20["Llama a InsuranceCampaignsService.assertNotCrossTenant"]:::llamada
+  n19 -->|"sí"| n20
+  n21["Llama a InsuranceCampaignsRepository.findAnyById"]:::llamada
+  n20 --> n21
+  n22[("LEE insurance.insurance_campaigns")]:::efecto
+  n21 --> n22
+  n23(["403 FORBIDDEN La campaña pertenece a otra aseguradora"]):::error
+  n22 --> n23
+  n24(["404 NOT_FOUND Campaña no encontrada"]):::error
+  n25(("200 Responde con éxito")):::ok
+  n19 -->|"no"| n25
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 36. PATCH /insurance/campaigns/{id}
+
+Editar una campaña en borrador o pausada (422 si está activa o vencida)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: validTo debe ser igual o posterior a validFrom; BadRequestException: El código CIE-10 {code} no está en el catálogo |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora; ForbiddenException: La campaña pertenece a otra aseguradora |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una campaña en estado {current} no se puede editar; pausela primero; PreconditionFailedException: La membresía de red del aliado no pertenece a esta aseguradora |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsuranceCampaignsService.update"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a InsuranceCampaignsService.administrableCarrier"]:::llamada
+  n4 --> n5
+  n6["Intenta"]:::intento
+  n5 --> n6
+  n7["Llama a InsuranceCampaignsService.tenantOf"]:::llamada
+  n6 --> n7
+  n8(["403 FORBIDDEN Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización"]):::error
+  n7 --> n8
+  n9{"!canAdminister"}:::decision
+  n10{"!actor.roles.includes(INSURANCE_OPERATOR_ROLE)"}:::decision
+  n9 -->|"sí"| n10
+  n11(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o ad…"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a DirectoryTenantAdministrationAdapter.assertCanRead"]:::llamada
+  n10 -->|"no"| n12
+  n13["Llama a TenantAdministrationService.assertCanRead"]:::llamada
+  n12 --> n13
+  n14(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
+  n13 --> n14
+  n15["Llama a InsuranceCampaignsService.carrierOf"]:::llamada
+  n9 -->|"no"| n15
+  n16["Llama a CatalogRepository.findCarrierByTenantId"]:::llamada
+  n15 --> n16
+  n17[("LEE insurance.insurance_carriers")]:::efecto
+  n16 --> n17
+  n18{"!carrier"}:::decision
+  n17 --> n18
+  n19(["403 FORBIDDEN La organización activa no es una aseguradora"]):::error
+  n18 -->|"sí"| n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"si falla"| n20
+  n21["Llama a InsuranceCampaignsService.requireOwnedEntity"]:::llamada
+  n18 -->|"no"| n21
+  n22["Llama a InsuranceCampaignsRepository.findEntityForCarrier"]:::llamada
+  n21 --> n22
+  n23[("LEE insurance.insurance_campaigns")]:::efecto
+  n22 --> n23
+  n24["Llama a InsuranceCampaignsService.assertNotCrossTenant"]:::llamada
+  n23 --> n24
+  n25["Llama a InsuranceCampaignsRepository.findAnyById"]:::llamada
+  n24 --> n25
+  n26[("LEE insurance.insurance_campaigns")]:::efecto
+  n25 --> n26
+  n27(["403 FORBIDDEN La campaña pertenece a otra aseguradora"]):::error
+  n26 --> n27
+  n28(["404 NOT_FOUND Campaña no encontrada"]):::error
+  n29{"current !== 'DRAFT' && current !== 'PAUSED'"}:::decision
+  n30(["422 PRECONDITION_FAILED Una campaña en estado {current} no se puede editar; pausela primero"]):::error
+  n29 -->|"sí"| n30
+  n31{"validTo ‹ validFrom"}:::decision
+  n29 -->|"no"| n31
+  n32(["400 VALIDATION_FAILED validTo debe ser igual o posterior a validFrom"]):::error
+  n31 -->|"sí"| n32
+  n33{"dto.targetConditionCode !== undefined"}:::decision
+  n31 -->|"no"| n33
+  n34["Llama a InsuranceCampaignsRepository.resolveIcd10ConceptId"]:::llamada
+  n33 -->|"sí"| n34
+  n35[("LEE terminology.catalog_concepts · LEE terminology.code_system_versions · LEE terminology.code_systems")]:::efecto
+  n34 --> n35
+  n36{"!conceptId"}:::decision
+  n35 --> n36
+  n37(["400 VALIDATION_FAILED El código CIE-10 {code} no está en el catálogo"]):::error
+  n36 -->|"sí"| n37
+  n38[("ACTUALIZA insurance.insurance_campaigns")]:::efecto
+  n36 -->|"no"| n38
+  n39{"dto.partners"}:::decision
+  n38 --> n39
+  n33 -->|"no"| n39
+  n40["Llama a InsuranceCampaignsService.assertPartnersBelongToCarrier"]:::llamada
+  n39 -->|"sí"| n40
+  n41["Repite: por cada const partner de partners"]:::bucle
+  n40 --> n41
+  n42["Llama a InsuranceCampaignsRepository.membershipBelongsToCarrier"]:::llamada
+  n41 -->|"cada elemento"| n42
+  n43[("LEE insurance.network_provider_memberships · LEE insurance.provider_networks")]:::efecto
+  n42 --> n43
+  n44{"!belongs"}:::decision
+  n43 --> n44
+  n45(["422 PRECONDITION_FAILED La membresía de red del aliado no pertenece a esta aseguradora"]):::error
+  n44 -->|"sí"| n45
+  n46[("ACTUALIZA insurance.insurance_campaigns")]:::efecto
+  n44 -->|"no"| n46
+  n41 -->|"al terminar"| n46
+  n39 -->|"no"| n46
+  n47{"dto.title !== undefined"}:::decision
+  n46 --> n47
+  n48[("ACTUALIZA insurance.insurance_campaigns")]:::efecto
+  n47 -->|"sí"| n48
+  n49{"dto.description !== undefined"}:::decision
+  n48 --> n49
+  n47 -->|"no"| n49
+  n50[("ACTUALIZA insurance.insurance_campaigns")]:::efecto
+  n49 -->|"sí"| n50
+  n51{"dto.campaignType !== undefined"}:::decision
+  n50 --> n51
+  n49 -->|"no"| n51
+  n52[("ACTUALIZA insurance.insurance_campaigns")]:::efecto
+  n51 -->|"sí"| n52
+  n53{"dto.validFrom !== undefined"}:::decision
+  n52 --> n53
+  n51 -->|"no"| n53
+  n54[("ACTUALIZA insurance.insurance_campaigns")]:::efecto
+  n53 -->|"sí"| n54
+  n55{"dto.validTo !== undefined"}:::decision
+  n54 --> n55
+  n53 -->|"no"| n55
+  n56[("ACTUALIZA insurance.insurance_campaigns")]:::efecto
+  n55 -->|"sí"| n56
+  n57{"dto.copayBonusPercentage !== undefined"}:::decision
+  n56 --> n57
+  n55 -->|"no"| n57
+  n58[("ACTUALIZA insurance.insurance_campaigns")]:::efecto
+  n57 -->|"sí"| n58
+  n59{"dto.partners"}:::decision
+  n58 --> n59
+  n57 -->|"no"| n59
+  n60["Llama a InsuranceCampaignsRepository.deletePartners"]:::llamada
+  n59 -->|"sí"| n60
+  n61[("BORRA insurance.insurance_campaign_partners")]:::efecto
+  n60 --> n61
+  n62["Repite: por cada const partner de dto.partners"]:::bucle
+  n61 --> n62
+  n63["Llama a InsuranceCampaignsRepository.createPartner"]:::llamada
+  n62 -->|"cada elemento"| n63
+  n64[("CREA insurance.insurance_campaign_partners")]:::efecto
+  n63 --> n64
+  n65["Llama a AuditTrailAdapter.record"]:::llamada
+  n64 --> n65
+  n62 -->|"al terminar"| n65
+  n59 -->|"no"| n65
+  n66["Llama a AuditTrailService.record"]:::llamada
+  n65 --> n66
+  n67["Llama a AuditLogRepository.append"]:::llamada
+  n66 --> n67
+  n68[("CREA audit.audit_log")]:::efecto
+  n67 --> n68
+  n69["Llama a InsuranceCampaignsService.detail"]:::llamada
+  n68 --> n69
+  n70["Llama a InsuranceCampaignsRepository.getRowForCarrier"]:::llamada
+  n69 --> n70
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 37. PATCH /insurance/campaigns/{id}/status
+
+Activar, pausar o finalizar una campaña (transiciones cerradas)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o administrador de la plataforma; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma; ForbiddenException: La organización activa no es una aseguradora; ForbiddenException: La campaña pertenece a otra aseguradora |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Campaña no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una campaña en estado {current} no puede pasar a {target}; PreconditionFailedException: La campaña ya venció: no se puede activar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsuranceCampaignsService.changeStatus"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a InsuranceCampaignsService.administrableCarrier"]:::llamada
+  n4 --> n5
+  n6["Intenta"]:::intento
+  n5 --> n6
+  n7["Llama a InsuranceCampaignsService.tenantOf"]:::llamada
+  n6 --> n7
+  n8(["403 FORBIDDEN Se requiere operar dentro de una aseguradora: indique el X-Tenant-Id de su organización"]):::error
+  n7 --> n8
+  n9{"!canAdminister"}:::decision
+  n10{"!actor.roles.includes(INSURANCE_OPERATOR_ROLE)"}:::decision
+  n9 -->|"sí"| n10
+  n11(["403 FORBIDDEN Se requiere ser OWNER o ADMIN de la organización, INSURANCE_OPERATOR con membresía activa, o ad…"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a DirectoryTenantAdministrationAdapter.assertCanRead"]:::llamada
+  n10 -->|"no"| n12
+  n13["Llama a TenantAdministrationService.assertCanRead"]:::llamada
+  n12 --> n13
+  n14(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
+  n13 --> n14
+  n15["Llama a InsuranceCampaignsService.carrierOf"]:::llamada
+  n9 -->|"no"| n15
+  n16["Llama a CatalogRepository.findCarrierByTenantId"]:::llamada
+  n15 --> n16
+  n17[("LEE insurance.insurance_carriers")]:::efecto
+  n16 --> n17
+  n18{"!carrier"}:::decision
+  n17 --> n18
+  n19(["403 FORBIDDEN La organización activa no es una aseguradora"]):::error
+  n18 -->|"sí"| n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"si falla"| n20
+  n21["Llama a InsuranceCampaignsService.requireOwnedEntity"]:::llamada
+  n18 -->|"no"| n21
+  n22["Llama a InsuranceCampaignsRepository.findEntityForCarrier"]:::llamada
+  n21 --> n22
+  n23[("LEE insurance.insurance_campaigns")]:::efecto
+  n22 --> n23
+  n24["Llama a InsuranceCampaignsService.assertNotCrossTenant"]:::llamada
+  n23 --> n24
+  n25["Llama a InsuranceCampaignsRepository.findAnyById"]:::llamada
+  n24 --> n25
+  n26[("LEE insurance.insurance_campaigns")]:::efecto
+  n25 --> n26
+  n27(["403 FORBIDDEN La campaña pertenece a otra aseguradora"]):::error
+  n26 --> n27
+  n28(["404 NOT_FOUND Campaña no encontrada"]):::error
+  n29{"current !== target"}:::decision
+  n30{"!TRANSITIONS[current].includes(target)"}:::decision
+  n29 -->|"sí"| n30
+  n31(["422 PRECONDITION_FAILED Una campaña en estado {current} no puede pasar a {target}"]):::error
+  n30 -->|"sí"| n31
+  n32{"target === 'ACTIVE'"}:::decision
+  n30 -->|"no"| n32
+  n33["Llama a InsuranceCampaignsRepository.getRowForCarrier"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("LEE insurance.insurance_campaign_partners · LEE insurance.insurance_campaigns · LEE terminology.catalog_conce…")]:::efecto
+  n33 --> n34
+  n35{"row && row.valid_to ‹ coverageReferenceDate()"}:::decision
+  n34 --> n35
+  n36(["422 PRECONDITION_FAILED La campaña ya venció: no se puede activar"]):::error
+  n35 -->|"sí"| n36
+  n37[("ACTUALIZA insurance.insurance_campaigns")]:::efecto
+  n35 -->|"no"| n37
+  n38[("ACTUALIZA insurance.insurance_campaigns")]:::efecto
+  n37 --> n38
+  n32 -->|"no"| n38
+  n39["Llama a AuditTrailAdapter.record"]:::llamada
+  n38 --> n39
+  n40["Llama a AuditTrailService.record"]:::llamada
+  n39 --> n40
+  n41["Llama a AuditLogRepository.append"]:::llamada
+  n40 --> n41
+  n42[("CREA audit.audit_log")]:::efecto
+  n41 --> n42
+  n43["Llama a InsuranceCampaignsService.detail"]:::llamada
+  n42 --> n43
+  n29 -->|"no"| n43
+  n44["Llama a InsuranceCampaignsRepository.getRowForCarrier"]:::llamada
+  n43 --> n44
+  n45[("LEE insurance.insurance_campaign_partners · LEE insurance.insurance_campaigns · LEE terminology.catalog_conce…")]:::efecto
+  n44 --> n45
+  n46{"!row"}:::decision
+  n45 --> n46
+  n47(["404 NOT_FOUND Campaña no encontrada"]):::error
+  n46 -->|"sí"| n47
+  n48(("200 Responde con éxito")):::ok
+  n46 -->|"no"| n48
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 38. GET /insurance/campaigns/my-benefits
+
+Campañas vigentes de mi aseguradora, para el afiliado autenticado
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: La cuenta no tiene un perfil de paciente asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsuranceCampaignsService.listMyBenefits"]:::llamada
+  n2 --> n3
+  n4{"!actor.patientProfileId"}:::decision
+  n3 --> n4
+  n5(["403 FORBIDDEN La cuenta no tiene un perfil de paciente asociado"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a InsuranceCampaignsService.listActiveForPatient"]:::llamada
+  n4 -->|"no"| n6
+  n7["Llama a InsuranceCampaignsService.assertOwnership"]:::llamada
+  n6 --> n7
+  n8["Intenta"]:::intento
+  n7 --> n8
+  n9(["↩ (relanza el error capturado)"]):::error
+  n8 -->|"si falla"| n9
+  n10["Llama a InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient"]:::llamada
+  n8 --> n10
+  n11[("LEE insurance.patient_coverages · LEE insurance.insurance_plans · LEE insurance.insurance_products · LEE insu…")]:::efecto
+  n10 --> n11
+  n12["Llama a InsuranceCampaignsRepository.listActiveRowsForCarriers"]:::llamada
+  n11 --> n12
+  n13[("LEE insurance.insurance_campaign_partners · LEE insurance.insurance_campaigns · LEE insurance.insurance_carri…")]:::efecto
+  n12 --> n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 39. GET /insurance/campaigns/patient/{patientProfileId}
+
+Campañas vigentes de la aseguradora del afiliado (sólo el titular)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil o la plataforma pueden modificarlo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InsuranceCampaignsService.listActiveForPatient"]:::llamada
+  n2 --> n3
+  n4["Llama a InsuranceCampaignsService.assertOwnership"]:::llamada
+  n3 --> n4
+  n5["Intenta"]:::intento
+  n4 --> n5
+  n6["Llama a PatientOwnershipAdapter.assertOwnsPatientProfile"]:::llamada
+  n5 --> n6
+  n7["Llama a ProfileOwnershipService.assertOwnsPatientProfile"]:::llamada
+  n6 --> n7
+  n8(["403 FORBIDDEN Sólo el titular del perfil o la plataforma pueden modificarlo"]):::error
+  n7 --> n8
+  n9(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"si falla"| n9
+  n10["Llama a InsuranceCampaignsRepository.findCurrentCarrierIdsForPatient"]:::llamada
+  n11[("LEE insurance.patient_coverages · LEE insurance.insurance_plans · LEE insurance.insurance_products · LEE insu…")]:::efecto
+  n10 --> n11
+  n12["Llama a InsuranceCampaignsRepository.listActiveRowsForCarriers"]:::llamada
+  n11 --> n12
+  n13[("LEE insurance.insurance_campaign_partners · LEE insurance.insurance_campaigns · LEE insurance.insurance_carri…")]:::efecto
+  n12 --> n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 40. GET /insurance/my-claims
 
 Solicitudes de seguro propias, con su dictamen vigente
 
@@ -3822,7 +4573,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. POST /insurance/patients/conversation
+#### 41. POST /insurance/patients/conversation
 
 Abrir o reutilizar la conversación interna con un paciente autorizado
 
@@ -3928,7 +4679,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. GET /insurance/patients/options
+#### 42. GET /insurance/patients/options
 
 Aseguradoras disponibles en el alcance autorizado
 
@@ -3980,7 +4731,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. POST /insurance/patients/search
+#### 43. POST /insurance/patients/search
 
 Consultar directorio de pacientes autorizado
 
@@ -4050,7 +4801,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. GET /insurance/portability/certificates/{certificateId}/json
+#### 44. GET /insurance/portability/certificates/{certificateId}/json
 
 Descargar el certificado de portabilidad en JSON interoperable
 
@@ -4120,7 +4871,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. GET /insurance/portability/certificates/{certificateId}/pdf
+#### 45. GET /insurance/portability/certificates/{certificateId}/pdf
 
 Descargar el certificado de portabilidad en PDF
 
@@ -4190,7 +4941,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. POST /insurance/portability/export
+#### 46. POST /insurance/portability/export
 
 Exportar el historial de póliza y siniestralidad del titular a 1 clic
 
@@ -4338,7 +5089,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 40. GET /insurance/received-claims
+#### 47. GET /insurance/received-claims
 
 Solicitudes de seguro recibidas por la aseguradora activa
 
@@ -4434,7 +5185,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 41. POST /insurance/received-claims/{id}/decision
+#### 48. POST /insurance/received-claims/{id}/decision
 
 Dictaminar una solicitud recibida (definitivo)
 
@@ -4606,7 +5357,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. POST /patient-coverages
+#### 49. POST /patient-coverages
 
 Registrar cobertura de paciente y dependientes
 
@@ -4678,7 +5429,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 43. GET /practitioner-settlement-batches
+#### 50. GET /practitioner-settlement-batches
 
 Listar los lotes de liquidación del alcance del actor
 
@@ -4752,7 +5503,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 44. POST /practitioner-settlement-batches
+#### 51. POST /practitioner-settlement-batches
 
 Generar (o repetir) el lote de liquidación del período
 
@@ -4862,7 +5613,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 45. GET /practitioner-settlement-batches/{id}
+#### 52. GET /practitioner-settlement-batches/{id}
 
 Consultar un lote de liquidación
 
@@ -4950,7 +5701,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 46. POST /prior-authorization-requests
+#### 53. POST /prior-authorization-requests
 
 Solicitar autorización previa con items
 
@@ -5121,7 +5872,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 47. GET /prior-authorization-requests/{id}
+#### 54. GET /prior-authorization-requests/{id}
 
 Detalle de una solicitud de aprobación (aseguradora)
 
@@ -5218,7 +5969,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 48. POST /prior-authorization-requests/{id}/determinations
+#### 55. POST /prior-authorization-requests/{id}/determinations
 
 Emitir determinación de autorización previa
 
@@ -5374,7 +6125,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 49. GET /prior-authorization-requests/inbox
+#### 56. GET /prior-authorization-requests/inbox
 
 Bandeja de solicitudes de aprobación (aseguradora)
 
@@ -5456,7 +6207,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 50. POST /provider-networks
+#### 57. POST /provider-networks
 
 Alta de red de prestadores (soporte)
 
@@ -5500,7 +6251,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 51. POST /provider-networks/{id}/memberships
+#### 58. POST /provider-networks/{id}/memberships
 
 Alta de membresía de prestador en la red
 
@@ -5553,7 +6304,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 52. GET /public/portability/verify/{manifestHash}
+#### 59. GET /public/portability/verify/{manifestHash}
 
 Verificar la autenticidad de un certificado de portabilidad por su sello
 
@@ -5601,7 +6352,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 53. POST /reconciliation-batches
+#### 60. POST /reconciliation-batches
 
 Abrir lote de conciliación
 
@@ -5646,7 +6397,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 54. POST /reconciliation-batches/{id}/items
+#### 61. POST /reconciliation-batches/{id}/items
 
 Agregar ítem de conciliación al lote
 
@@ -5721,12 +6472,13 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
-| GET /['insurance/campaigns', 'insurance-campaigns']/active | 200, 401, 429 | 4 |
 | POST /employer-groups | 201, 400, 401, 403, 429 | 1 |
 | GET /insurance-brokers | 200, 401, 403, 429 | 3 |
 | POST /insurance-brokers | 201, 400, 401, 403, 429 | 1 |
+| GET /insurance-campaigns/active | 200, 401, 429 | 4 |
 | GET /insurance-carrier-catalog | 200, 401, 429 | 3 |
 | GET /insurance-carriers | 200, 401, 403, 429 | 6 |
 | POST /insurance-carriers | 201, 400, 401, 403, 429 | 1 |
+| GET /insurance/campaigns/active | 200, 401, 429 | 4 |
 | GET /patient-coverages/me | 200, 401, 403, 429 | 3 |
 | GET /practitioners/{profileId}/insurance-networks | 200, 400, 401, 403, 429 | 4 |

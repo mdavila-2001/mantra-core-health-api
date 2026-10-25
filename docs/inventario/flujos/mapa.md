@@ -2,7 +2,7 @@
 
 # Mapa de operaciones
 
-1551 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
+1550 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
 
 «Quién la llama» sale del inventario de clientes del frontend (`docs/reports/generated/api-inventory.md`). Una operación sin cliente puede ser interna, móvil o deuda: la columna informa, no concluye.
 
@@ -251,7 +251,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/clinical/medication-requests/{id}/sign` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalRecordsController) | clinical | MEDIO | CLINICIAN · PRACTITIONER | ClinicalClient | ESCRIBE · CON_DECISIONES |
 | POST `/clinical/observations` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalObservationsController) | clinical | MEDIO | CLINICIAN · PRACTITIONER | ClinicalClient | ESCRIBE · CON_DECISIONES |
 | PATCH `/clinical/observations/{id}/amend` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalObservationsController) | clinical | MEDIO | CLINICIAN · PRACTITIONER | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| GET `/clinical/patients/{patientProfileId}/received-services` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalReadController) | clinical | BAJO | CLINICIAN · PRACTITIONER · PATIENT | — | CONTRATO_AUSENTE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
+| GET `/clinical/patients/{patientProfileId}/received-services` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalReadController) | clinical | BAJO | CLINICIAN · PRACTITIONER · PATIENT | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
 | GET `/clinical/patients/{patientProfileId}/summary` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalReadController) | clinical | MEDIO | CLINICIAN · PRACTITIONER · PATIENT | ClinicalClient | ESCRIBE |
 | GET `/clinical/prescription-signature-policies` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalPrescriptionPoliciesController) | clinical | BAJO | CLINICIAN · SECURITY_ADMIN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
 | POST `/clinical/prescription-signature-policies` | Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics (ctrl:ClinicalPrescriptionPoliciesController) | clinical | MEDIO | CLINICIAN · SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
@@ -725,6 +725,9 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/iam/auth/verify-email` | IAM (ctrl:IamAuthController) | iam | ALTO | Pública | IamClient | PUBLICA · ESCRIBE · SIN_INTEGRACION · CON_DECISIONES |
 | GET `/iam/me/sessions` | IAM (ctrl:IamAccountSecurityController) | iam | BAJO | Sesión sin roles | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
 | POST `/iam/me/sessions/{id}/revoke` | IAM (ctrl:IamAccountSecurityController) | iam | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| DELETE `/iam/onboarding-drafts/{formType}/{draftId}` | IAM (ctrl:IamOnboardingDraftsController) | iam | BAJO | Pública | — | PUBLICA · SIN_TABLAS · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT |
+| GET `/iam/onboarding-drafts/{formType}/{draftId}` | IAM (ctrl:IamOnboardingDraftsController) | iam | BAJO | Pública | — | PUBLICA · SIN_TABLAS · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT |
+| PUT `/iam/onboarding-drafts/{formType}/{draftId}` | IAM (ctrl:IamOnboardingDraftsController) | iam | BAJO | Pública | — | PUBLICA · SIN_TABLAS · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT |
 | GET `/iam/users` | IAM (ctrl:IamUsersController) | iam | BAJO | SECURITY_ADMIN | IamClient | SIN_INTEGRACION |
 | POST `/iam/users` | IAM (ctrl:IamUsersController) | iam | MEDIO | SECURITY_ADMIN | IamClient | ESCRIBE · CON_DECISIONES |
 | GET `/iam/users/{id}` | IAM (ctrl:IamUsersController) | iam | BAJO | SECURITY_ADMIN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -770,14 +773,6 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/internal/identity/checks/dispatchable` | src / modules / identity assurance (ctrl:IdentityWorkerController) | identity_assurance | BAJO | SYSTEM · SECURITY_ADMIN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/internal/identity/evidence/lifecycle-scan` | src / modules / identity assurance (ctrl:IdentityWorkerController) | identity_assurance | ALTO | SYSTEM | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/internal/identity/evidence/storage-purge-review` | src / modules / identity assurance (ctrl:IdentityWorkerController) | identity_assurance | MEDIO | SYSTEM | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| GET `/['insurance/campaigns', 'insurance-campaigns']` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | CONTRATO_AUSENTE · ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| POST `/['insurance/campaigns', 'insurance-campaigns']` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | CONTRATO_AUSENTE · ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| GET `/['insurance/campaigns', 'insurance-campaigns']/{id}` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | CONTRATO_AUSENTE · ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| PATCH `/['insurance/campaigns', 'insurance-campaigns']/{id}` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | CONTRATO_AUSENTE · ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| PATCH `/['insurance/campaigns', 'insurance-campaigns']/{id}/status` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | CONTRATO_AUSENTE · ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · MAQUINA_DE_ESTADOS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| GET `/['insurance/campaigns', 'insurance-campaigns']/active` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | BAJO | Pública | — | CONTRATO_AUSENTE · PUBLICA · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
-| GET `/['insurance/campaigns', 'insurance-campaigns']/my-benefits` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | CONTRATO_AUSENTE · ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| GET `/['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId}` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | CONTRATO_AUSENTE · ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/broker-commission-statements` | src / modules / insurance (ctrl:BrokerCommissionController) | insurance | MEDIO | BILLING · FINANCE | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/claim-disputes/{id}/appeal-decisions` | src / modules / insurance (ctrl:AppealsController) | insurance | MEDIO | BILLING · FINANCE | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/coordination-of-benefits` | src / modules / insurance (ctrl:CoverageController) | insurance | MEDIO | BILLING · FINANCE | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -788,6 +783,14 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/insurance-brokers/{id}` | src / modules / insurance (ctrl:InsuranceReadController) | insurance | BAJO | Sesión sin roles | InsuranceClient | SIN_PRUEBAS · CON_DECISIONES |
 | POST `/insurance-brokers/{id}/agreements` | src / modules / insurance (ctrl:InsuranceBackboneController) | insurance | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/insurance-brokers/{id}/clients` | src / modules / insurance (ctrl:InsuranceReadController) | insurance | BAJO | Sesión sin roles | InsuranceClient | SIN_PRUEBAS · CON_DECISIONES |
+| GET `/insurance-campaigns` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/insurance-campaigns` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/insurance-campaigns/{id}` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PATCH `/insurance-campaigns/{id}` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PATCH `/insurance-campaigns/{id}/status` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · MAQUINA_DE_ESTADOS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/insurance-campaigns/active` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | BAJO | Pública | — | PUBLICA · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
+| GET `/insurance-campaigns/my-benefits` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/insurance-campaigns/patient/{patientProfileId}` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/insurance-carrier-catalog` | src / modules / insurance (ctrl:InsuranceCatalogController) | insurance | BAJO | Pública | InsuranceClient | PUBLICA · SIN_PRUEBAS |
 | GET `/insurance-carriers` | src / modules / insurance (ctrl:InsuranceReadController) | insurance | BAJO | Sesión sin roles | InsuranceClient | — |
 | POST `/insurance-carriers` | src / modules / insurance (ctrl:InsuranceBackboneController) | insurance | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
@@ -809,6 +812,14 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | PUT `/insurance-plans/{planId}/premium` | src / modules / insurance (ctrl:InsuranceBackboneController) | insurance | ALTO | Sesión sin roles | InsuranceClient | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | POST `/insurance-products/{productId}/plans` | src / modules / insurance (ctrl:InsuranceBackboneController) | insurance | ALTO | Sesión sin roles | InsuranceClient | ESCRIBE_SIN_ROLES · ESCRIBE · CON_DECISIONES |
 | GET `/insurance/analytics/loss-ratio` | src / modules / insurance (ctrl:InsuranceAnalyticsController) | insurance | BAJO | Sesión sin roles | InsuranceAnalyticsClient | SIN_PRUEBAS · CON_DECISIONES |
+| GET `/insurance/campaigns` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/insurance/campaigns` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/insurance/campaigns/{id}` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PATCH `/insurance/campaigns/{id}` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| PATCH `/insurance/campaigns/{id}/status` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · MAQUINA_DE_ESTADOS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/insurance/campaigns/active` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | BAJO | Pública | — | PUBLICA · SIN_CONSUMIDOR_FRONT |
+| GET `/insurance/campaigns/my-benefits` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/insurance/campaigns/patient/{patientProfileId}` | src / modules / insurance (ctrl:InsuranceCampaignsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/insurance/my-claims` | src / modules / insurance (ctrl:MyClaimsController) | insurance | BAJO | Sesión sin roles | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/insurance/patients/conversation` | src / modules / insurance (ctrl:InsurerPatientsController) | insurance | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/insurance/patients/options` | src / modules / insurance (ctrl:InsurerPatientsController) | insurance | BAJO | Sesión sin roles | — | SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -833,22 +844,6 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/public/portability/verify/{manifestHash}` | src / modules / insurance (ctrl:InsurancePortabilityPublicController) | insurance | BAJO | Pública | InsurancePortabilityClient | PUBLICA · CON_DECISIONES |
 | POST `/reconciliation-batches` | src / modules / insurance (ctrl:ReconciliationController) | insurance | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/reconciliation-batches/{id}/items` | src / modules / insurance (ctrl:ReconciliationController) | insurance | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| GET `/insurance-campaigns` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
-| POST `/insurance-campaigns` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
-| GET `/insurance-campaigns/{id}` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
-| PATCH `/insurance-campaigns/{id}` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
-| PATCH `/insurance-campaigns/{id}/status` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
-| GET `/insurance-campaigns/active` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
-| GET `/insurance-campaigns/my-benefits` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
-| GET `/insurance-campaigns/patient/{patientProfileId}` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
-| GET `/insurance/campaigns` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_CONSUMIDOR_FRONT |
-| POST `/insurance/campaigns` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_CONSUMIDOR_FRONT |
-| GET `/insurance/campaigns/{id}` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_CONSUMIDOR_FRONT |
-| PATCH `/insurance/campaigns/{id}` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_CONSUMIDOR_FRONT |
-| PATCH `/insurance/campaigns/{id}/status` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_CONSUMIDOR_FRONT |
-| GET `/insurance/campaigns/active` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_CONSUMIDOR_FRONT |
-| GET `/insurance/campaigns/my-benefits` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
-| GET `/insurance/campaigns/patient/{patientProfileId}` | insurance-campaigns (ctrl:sin controlador) | insurance-campaigns | BAJO | Sesión sin roles | — | SIN_TABLAS · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT |
 | POST `/integration/contracts` | Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) (UC-31-01) | integration_contracts | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/integration/contracts/{id}/auth-profiles` | Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) (UC-31-03) | integration_contracts | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT |
 | POST `/integration/contracts/{id}/auth-profiles/{apId}/rotate` | Módulo 31 — Governed Backend-to-Backend Contracts (`integration_contracts`) (UC-31-11) | integration_contracts | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -911,6 +906,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/medical-groups/{id}/members/{memberId}/respond` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/medical-groups/{id}/reschedule-requests` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/medical-groups/{id}/reschedule-requests/respond` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | MEDIO | PRACTITIONER · CLINICIAN | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| GET `/medical-groups/eligible-members` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | BAJO | PRACTITIONER · CLINICIAN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/medical-groups/patients/{patientProfileId}/conditions` | Módulo Medical Groups — Grupos médicos (FT-21) (ctrl:MedicalGroupsController) | medical_groups | BAJO | PRACTITIONER · CLINICIAN | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/internal/event-deliveries/{id}/ack` | Módulo 35 — Mensajería (outbox, colas y notificación multicanal) (UC-35-04) | messaging | MEDIO | SYSTEM · MESSAGING_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/internal/events/{domainEventId}/dispatch` | Módulo 35 — Mensajería (outbox, colas y notificación multicanal) (UC-35-03) | messaging | MEDIO | SYSTEM · MESSAGING_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -1464,6 +1460,8 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/internal/ops/restore-test-runs` | Módulo `system_ops` (11) — Data Governance & System Operations (UC-11-10) | system_ops | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/admin/analytics/funnels` | Módulo Telemetry (28) (ctrl:TelemetryAnalyticsController) | telemetry | BAJO | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | WebAnalyticsClient | SIN_PRUEBAS |
 | GET `/admin/analytics/funnels/{funnelId}/report` | Módulo Telemetry (28) (ctrl:TelemetryAnalyticsController) | telemetry | BAJO | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | WebAnalyticsClient | SIN_INTEGRACION · CON_DECISIONES |
+| GET `/admin/analytics/onboarding/funnel` | Módulo Telemetry (28) (ctrl:TelemetryOnboardingAnalyticsController) | telemetry | BAJO | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | — | SIN_TABLAS · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT |
+| GET `/admin/analytics/onboarding/heatmap` | Módulo Telemetry (28) (ctrl:TelemetryOnboardingAnalyticsController) | telemetry | BAJO | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | — | SIN_TABLAS · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT |
 | GET `/admin/analytics/overview` | Módulo Telemetry (28) (ctrl:TelemetryAnalyticsController) | telemetry | BAJO | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | WebAnalyticsClient | SIN_INTEGRACION · CON_DECISIONES |
 | GET `/admin/analytics/pipeline-health` | Módulo Telemetry (28) (ctrl:TelemetryAnalyticsController) | telemetry | BAJO | PLATFORM_ADMIN · SECURITY_ADMIN · DATA_PLATFORM_ADMIN · MARKETING_MANAGER · DPO | WebAnalyticsClient | SIN_INTEGRACION · CON_DECISIONES |
 | GET `/admin/analytics/sessions` | Módulo Telemetry (28) (ctrl:TelemetryAnalyticsController) | telemetry | BAJO | PLATFORM_ADMIN · SECURITY_ADMIN · DPO | WebAnalyticsClient | SIN_INTEGRACION · CON_DECISIONES |
@@ -1478,6 +1476,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/telemetry/disclosure-versions` | Módulo Telemetry (28) (ctrl:TelemetryGovernanceController) | telemetry | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/telemetry/event-schemas` | Módulo Telemetry (28) (ctrl:TelemetryGovernanceController) | telemetry | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/telemetry/funnels` | Módulo Telemetry (28) (ctrl:TelemetryGovernanceController) | telemetry | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/telemetry/onboarding-events` | Módulo Telemetry (28) (ctrl:TelemetryOnboardingAnalyticsController) | telemetry | BAJO | Pública | — | PUBLICA · SIN_TABLAS · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT |
 | POST `/telemetry/session-journeys/{id}/close` | Módulo Telemetry (28) (ctrl:TelemetryEventsController) | telemetry | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/telemetry/tracking-consents` | Módulo Telemetry (28) (ctrl:TelemetryConsentController) | telemetry | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/telemetry/tracking-consents/{id}/withdraw` | Módulo Telemetry (28) (ctrl:TelemetryConsentController) | telemetry | ALTO | Sesión sin roles | — | ESCRIBE_SIN_ROLES · ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |

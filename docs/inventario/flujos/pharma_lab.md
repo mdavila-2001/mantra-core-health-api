@@ -858,7 +858,7 @@ stateDiagram-v2
 
 | Operación | Estados de destino que nombra | A través de |
 |---|---|---|
-| POST /pharma-labs/{pharmaLabId}/products/{productId}/status | sin destino nombrado | PharmaCatalogService.changeProductStatus |
+| POST /pharma-labs/{pharmaLabId}/products/{productId}/status | sin destino nombrado | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus |
 
 ### Máquina de estados `REPORT_TRANSITIONS`
 
@@ -884,7 +884,7 @@ stateDiagram-v2
 
 | Operación | Estados de destino que nombra | A través de |
 |---|---|---|
-| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions | PV_CLOSED | PharmacovigilanceService.addAction |
+| POST /pharma-labs/{pharmaLabId}/pharmacovigilance/reports/{reportId}/actions | PV_CLOSED | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction |
 
 ## Árbol de decisión por operación
 

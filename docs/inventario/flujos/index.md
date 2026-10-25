@@ -2,11 +2,11 @@
 
 # Inventario de flujos
 
-**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1551 árboles de decisión**.
+**73 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 71 de módulo), **12 máquinas de estado** y **1550 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1384 · sin ellas: 167
+- Operaciones con decisiones propias: 1392 · sin ellas: 158
 - Operaciones sin proceso asignado: 0
-- Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 32 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
+- Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 31 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
 
 Método y límites: [README del inventario](../README.md). Los procesos de módulo se construyen del README de cada módulo (tabla UC → ruta); lo que el README no asigna a un caso de uso se agrupa por controlador y se marca `AGRUPACION_POR_CONTROLADOR`.
 
@@ -43,15 +43,14 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `graph_intelligence` | 1 | 15 | 1 | [graph_intelligence.md](graph_intelligence.md) |
 | `health_context` | 1 | 13 | 0 | [health_context.md](health_context.md) |
 | `health_data` | 1 | 16 | 0 | [health_data.md](health_data.md) |
-| `iam` | 1 | 36 | 0 | [iam.md](iam.md) |
+| `iam` | 1 | 39 | 0 | [iam.md](iam.md) |
 | `identity_assurance` | 1 | 28 | 0 | [identity_assurance.md](identity_assurance.md) |
-| `insurance` | 1 | 63 | 1 | [insurance.md](insurance.md) |
-| `insurance-campaigns` | 1 | 16 | 0 | [insurance-campaigns.md](insurance-campaigns.md) |
+| `insurance` | 1 | 71 | 1 | [insurance.md](insurance.md) |
 | `integration_contracts` | 1 | 12 | 0 | [integration_contracts.md](integration_contracts.md) |
 | `integrations` | 1 | 15 | 0 | [integrations.md](integrations.md) |
 | `lakehouse` | 1 | 13 | 0 | [lakehouse.md](lakehouse.md) |
 | `marketing` | 1 | 15 | 0 | [marketing.md](marketing.md) |
-| `medical_groups` | 1 | 8 | 0 | [medical_groups.md](medical_groups.md) |
+| `medical_groups` | 1 | 9 | 0 | [medical_groups.md](medical_groups.md) |
 | `messaging` | 1 | 21 | 0 | [messaging.md](messaging.md) |
 | `object_storage` | 1 | 14 | 0 | [object_storage.md](object_storage.md) |
 | `ops_console` | 1 | 9 | 0 | [ops_console.md](ops_console.md) |
@@ -78,7 +77,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `surveys` | 1 | 17 | 0 | [surveys.md](surveys.md) |
 | `system_context` | 1 | 13 | 0 | [system_context.md](system_context.md) |
 | `system_ops` | 1 | 24 | 0 | [system_ops.md](system_ops.md) |
-| `telemetry` | 1 | 22 | 0 | [telemetry.md](telemetry.md) |
+| `telemetry` | 1 | 25 | 0 | [telemetry.md](telemetry.md) |
 | `terminology` | 1 | 25 | 0 | [terminology.md](terminology.md) |
 | `time_series` | 1 | 14 | 0 | [time_series.md](time_series.md) |
 | `tracking` | 1 | 11 | 0 | [tracking.md](tracking.md) |

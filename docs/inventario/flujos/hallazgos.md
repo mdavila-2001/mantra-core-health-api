@@ -7,13 +7,13 @@ Cada hallazgo sale de cruzar los datos del inventario. Ninguno corrige código: 
 | ID | Severidad | Hallazgo | Cuenta |
 |---|---|---|---|
 | [FLU-01](#flu-01) | ALTA | Operaciones sin proceso asignado | 0 |
-| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 139 |
+| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 146 |
 | [FLU-03](#flu-03) | ALTA | Ruta pública que escribe en la base | 17 |
-| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 121 |
+| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 123 |
 | [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 13 |
 | [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 4 |
-| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1055 |
-| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 18 |
+| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1054 |
+| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 9 |
 | [FLU-09](#flu-09) | BAJA | Máquinas de estado sin ninguna operación que las ejerza | 0 |
 | [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 107 |
 
@@ -27,7 +27,7 @@ _Ninguno._
 
 ## FLU-02
 
-**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 139 caso(s).
+**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 146 caso(s).
 
 **Qué hacer:** Confirmar que la regla de acceso vive en el servicio o declarar los roles en el controlador. Hoy la API no las distingue de una sesión cualquiera.
 
@@ -113,19 +113,26 @@ _Ninguno._
 | POST /identity/me/practitioner/identity-verification | identity_assurance | escribe y el controlador no declara roles | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:60` |
 | POST /identity/me/practitioner/license-verification | identity_assurance | escribe y el controlador no declara roles | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78` |
 | POST /identity/me/tenants/{tenantId}/verification | identity_assurance | escribe y el controlador no declara roles | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:94` |
-| GET /['insurance/campaigns', 'insurance-campaigns'] | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77` |
-| POST /['insurance/campaigns', 'insurance-campaigns'] | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61` |
-| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
-| GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
-| GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
+| GET /insurance-campaigns | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77` |
+| POST /insurance-campaigns | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61` |
+| GET /insurance-campaigns/{id} | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
+| PATCH /insurance-campaigns/{id} | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
+| PATCH /insurance-campaigns/{id}/status | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
+| GET /insurance-campaigns/my-benefits | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
+| GET /insurance-campaigns/patient/{patientProfileId} | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
 | PUT /insurance-carriers/{id}/contact-channels | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:98` |
 | POST /insurance-plans/{planId}/benefits | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:174` |
 | PUT /insurance-plans/{planId}/benefits/{benefitId} | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:191` |
 | PUT /insurance-plans/{planId}/benefits/{benefitId}/rules | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:208` |
 | PUT /insurance-plans/{planId}/premium | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:230` |
 | POST /insurance-products/{productId}/plans | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:150` |
+| GET /insurance/campaigns | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77` |
+| POST /insurance/campaigns | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61` |
+| GET /insurance/campaigns/{id} | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
+| PATCH /insurance/campaigns/{id} | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
+| PATCH /insurance/campaigns/{id}/status | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
+| GET /insurance/campaigns/my-benefits | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
+| GET /insurance/campaigns/patient/{patientProfileId} | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
 | POST /insurance/patients/conversation | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:74` |
 | POST /insurance/patients/search | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurer-patients.controller.ts:35` |
 | GET /insurance/portability/certificates/{certificateId}/json | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:122` |
@@ -201,7 +208,7 @@ _Ninguno._
 
 ## FLU-04
 
-**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 121 caso(s).
+**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 123 caso(s).
 
 **Qué hacer:** Escribir la prueba de integración contra PostgreSQL real (regla 80.2.4). Las sin prueba alguna van primero.
 
@@ -273,15 +280,17 @@ _Ninguno._
 | POST /identity/me/practitioner/license-verification | identity_assurance | ninguna prueba la menciona | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78` |
 | POST /identity/me/tenants/{tenantId}/verification | identity_assurance | ninguna prueba la menciona | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:94` |
 | POST /internal/identity/evidence/lifecycle-scan | identity_assurance | ninguna prueba la menciona | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:79` |
-| GET /['insurance/campaigns', 'insurance-campaigns'] | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77` |
-| POST /['insurance/campaigns', 'insurance-campaigns'] | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61` |
-| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
-| GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
-| GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
+| GET /insurance-campaigns | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77` |
+| POST /insurance-campaigns | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61` |
+| GET /insurance-campaigns/{id} | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
+| PATCH /insurance-campaigns/{id} | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
+| PATCH /insurance-campaigns/{id}/status | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
+| GET /insurance-campaigns/my-benefits | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
+| GET /insurance-campaigns/patient/{patientProfileId} | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
 | PUT /insurance-carriers/{id}/contact-channels | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:98` |
 | PUT /insurance-plans/{planId}/premium | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-backbone.controller.ts:230` |
+| GET /insurance/campaigns/my-benefits | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
+| GET /insurance/campaigns/patient/{patientProfileId} | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
 | GET /insurance/portability/certificates/{certificateId}/pdf | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:84` |
 | POST /insurance/received-claims/{id}/decision | insurance | sólo prueba de controlador | `src/modules/insurance/presentation/controllers/insurer-received-claims.controller.ts:96` |
 | POST /practitioner-settlement-batches | insurance | ninguna prueba la menciona | `src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts:49` |
@@ -366,7 +375,7 @@ _Ninguno._
 
 ## FLU-07
 
-**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1055 caso(s).
+**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1054 caso(s).
 
 **Qué hacer:** Informativo: pueden ser internas (workers), de otros consumidores (móvil, integraciones) o deuda. Confirmar con el responsable antes de retirar nada.
 
@@ -573,30 +582,21 @@ _Ninguno._
 | POST /common/files/{id}/versions/{vid}/derivatives | common | ningún cliente del frontend la declara | — |
 | POST /common/identifiers | common | ningún cliente del frontend la declara | — |
 
-_Se muestran 200 de 1055; la lista completa está en `inventario/flujos/hallazgos.json`._
+_Se muestran 200 de 1054; la lista completa está en `inventario/flujos/hallazgos.json`._
 
 ## FLU-08
 
-**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 18 caso(s).
+**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 9 caso(s).
 
 **Qué hacer:** Regenerar el contrato o decidir si deben dejar de existir. Los clientes generados no las ven.
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
-| GET /clinical/patients/{patientProfileId}/received-services | clinical | handler sin operación en openapi.json | `src/modules/clinical/controllers/clinical-read.controller.ts:110` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:582` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:589` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:602` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:607` |
 | DESCONOCIDO /iam/auth | iam | handler sin operación en openapi.json | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:428` |
-| GET /['insurance/campaigns', 'insurance-campaigns'] | insurance | handler sin operación en openapi.json | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:77` |
-| POST /['insurance/campaigns', 'insurance-campaigns'] | insurance | handler sin operación en openapi.json | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:61` |
-| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | insurance | handler sin operación en openapi.json | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:148` |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | insurance | handler sin operación en openapi.json | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:178` |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | insurance | handler sin operación en openapi.json | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:159` |
-| GET /['insurance/campaigns', 'insurance-campaigns']/active | insurance | handler sin operación en openapi.json | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:93` |
-| GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | insurance | handler sin operación en openapi.json | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:108` |
-| GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | insurance | handler sin operación en openapi.json | `src/modules/insurance/presentation/controllers/insurance-campaigns.controller.ts:129` |
 | DESCONOCIDO /notifications/web-push | messaging | handler sin operación en openapi.json | `src/modules/messaging/controllers/web-push.controller.ts:78` |
 | DESCONOCIDO / | promotions | handler sin operación en openapi.json | `src/modules/promotions/controllers/loyalty.controller.ts:185` |
 | DESCONOCIDO /redis-runtime | redis_runtime | handler sin operación en openapi.json | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:44` |
