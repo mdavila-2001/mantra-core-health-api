@@ -161,6 +161,151 @@ describe('FormsFieldsService', () => {
       expect(d.assignmentsRepo.findAssignmentsByField).not.toHaveBeenCalled();
     });
 
+    it('pasa a un tipo de elección aunque la base devuelva valueSetId en null', async () => {
+      const d = build();
+      const field = {
+        ...fieldRecord(),
+        valueSetId: null,
+        options: null,
+        allowOther: null,
+      };
+      d.fieldsRepo.findFieldById.mockResolvedValue(field);
+      d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+        { id: 'as1', tenantId: 'tenant-a' },
+      ]);
+      await inTenantA(() =>
+        d.service.updateFieldDefinition(
+          'f1',
+          { dataType: 'code', options: ['Sí', 'No'], multiple: false } as any,
+          doctor,
+        ),
+      );
+      expect(field.dataType).toBe('code');
+      expect(field.options).toEqual(['Sí', 'No']);
+    });
+
+    describe('topes de respuestas (REQ-27-007)', () => {
+      const casillas = () => ({
+        id: 'f1',
+        name: 'Síntomas',
+        dataType: 'code',
+        multiple: true,
+        options: ['Fiebre', 'Tos', 'Disnea'],
+        cardinalityMin: undefined as number | undefined,
+        cardinalityMax: undefined as number | undefined,
+        updatedAt: new Date(0),
+      });
+
+      function conCampo(field: ReturnType<typeof casillas>) {
+        const d = build();
+        d.fieldsRepo.findFieldById.mockResolvedValue(field);
+        d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+          { id: 'as1', tenantId: 'tenant-a' },
+        ]);
+        return d;
+      }
+
+      it('«exactamente 2» guarda mínimo y máximo iguales', async () => {
+        const field = casillas();
+        const d = conCampo(field);
+        await inTenantA(() =>
+          d.service.updateFieldDefinition(
+            'f1',
+            { cardinalityMin: 2, cardinalityMax: 2 },
+            doctor,
+          ),
+        );
+        expect(field.cardinalityMin).toBe(2);
+        expect(field.cardinalityMax).toBe(2);
+      });
+
+      it('null quita el tope y ausente no toca el otro', async () => {
+        const field = { ...casillas(), cardinalityMin: 1, cardinalityMax: 2 };
+        const d = conCampo(field);
+        await inTenantA(() =>
+          d.service.updateFieldDefinition(
+            'f1',
+            { cardinalityMax: null },
+            doctor,
+          ),
+        );
+        expect(field.cardinalityMin).toBe(1);
+        expect(field.cardinalityMax).toBeUndefined();
+      });
+
+      it('valida el par resultante: bajar el máximo debajo del mínimo guardado da 422', async () => {
+        const field = { ...casillas(), cardinalityMin: 2 };
+        const d = conCampo(field);
+        await expect(
+          inTenantA(() =>
+            d.service.updateFieldDefinition(
+              'f1',
+              { cardinalityMax: 1 },
+              doctor,
+            ),
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(field.cardinalityMax).toBeUndefined();
+      });
+
+      it('lo guardado en null cuenta como sin tope, no como cero', async () => {
+        const field = {
+          ...casillas(),
+          cardinalityMin: null as unknown as number,
+          cardinalityMax: null as unknown as number,
+        };
+        const d = conCampo(field);
+        await inTenantA(() =>
+          d.service.updateFieldDefinition('f1', { cardinalityMin: 2 }, doctor),
+        );
+        expect(field.cardinalityMin).toBe(2);
+        expect(field.cardinalityMax).toBeUndefined();
+      });
+
+      it('no deja pedir más respuestas que opciones ofrecidas', async () => {
+        const d = conCampo(casillas());
+        await expect(
+          inTenantA(() =>
+            d.service.updateFieldDefinition(
+              'f1',
+              { cardinalityMin: 4 },
+              doctor,
+            ),
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('en un campo de una sola respuesta el tope no aplica', async () => {
+        const d = conCampo({ ...casillas(), multiple: false });
+        await expect(
+          inTenantA(() =>
+            d.service.updateFieldDefinition(
+              'f1',
+              { cardinalityMin: 1 },
+              doctor,
+            ),
+          ),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      it('el tope de otro tenant sigue siendo 403 antes que cualquier validación', async () => {
+        const d = build();
+        d.fieldsRepo.findFieldById.mockResolvedValue(casillas());
+        d.assignmentsRepo.findAssignmentsByField.mockResolvedValue([
+          { id: 'as2', tenantId: 'tenant-b' },
+        ]);
+        await expect(
+          inTenantA(() =>
+            d.service.updateFieldDefinition(
+              'f1',
+              { cardinalityMin: 1 },
+              doctor,
+            ),
+          ),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+      });
+    });
+
     it('responde 404 cuando el campo no existe', async () => {
       const d = build();
       d.fieldsRepo.findFieldById.mockResolvedValue(null);
