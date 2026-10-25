@@ -1,0 +1,47 @@
+# Datos personales en la salida (sobre out/*.gz y out/actors/*.gz)
+$ zcat … | grep -oE '<regex de correo con dominio>' | wc -l  → 0
+$ zcat out/actors/*.gz | grep -ciE 'prrc|email|phone'  → 1   (la única coincidencia es la razón social «vitaphone GmbH»)
+$ zcat out/it-salute-bdrdm-*.gz | grep -cE '"it-cf:[A-Z0-9]{16}"'  (código fiscal de persona física)  → 0
+$ zcat out/*.gz | grep -c redactedFields  → 32   (32 UDI de un fabricante que cargó dirección y correo de su representante en modelo/referencia; contenido enmascarado, no se reproduce)
+
+$ node --test tools/terminology-import/diagnostic-devices/eu/test/*.test.mjs
+ok 1 - makeDeviceRecord: todos los campos presentes, vacíos → null, extra compacto
+ok 2 - makeDeviceRecord: aplica las reglas del formato común
+ok 3 - dedupe: exacto por fila, UDI-DI y fabricante+modelo; nunca difuso
+ok 4 - writeNdjsonGzParts: <base>-0001…, orden determinista, sha256, borra partes viejas
+ok 5 - parseCsv: comillas, separador y BOM
+ok 6 - resolveHeaders: alias exactos; si falta uno muestra los encabezados reales
+ok 7 - EMDN: nivel y padre salen de la estructura del código
+ok 8 - EMDN: parsea jerarquía, deduce terminal si falta y marca el alcance
+ok 9 - EMDN: huérfanos, nivel incoherente y repetidos fallan
+ok 10 - EMDN: descubre enlaces a Excel en la página oficial
+ok 11 - alcance: W entera; fuera de W solo tipos explícitos; excluidas con motivo
+ok 12 - Data Lake: URL con parámetros ordenados, format y api-version
+ok 13 - Data Lake: sobre {value,nextLink} validado y nextLink sin cambiar la consulta
+ok 14 - Data Lake: fila /udi → formato común (srn:, decodificación, país por actor o SRN)
+ok 15 - Data Lake: clase con esquema solo si legislación y etiqueta encajan exactamente
+ok 16 - portal: certificados deduplicados por número+revisión y enriquecimiento
+ok 17 - swissdamed: un registro por UDI-DI, EMDN del detalle, marca en inglés; desactivado
+ok 18 - BD/RDM: sin mapeo verificado no normaliza y muestra el encabezado real
+ok 19 - buildCorpus: exporta solo lo que está en alcance, excluye el resto, deduplica y rechaza sin fabricante
+ok 20 - plan de carga: ids estables y propiedades sin nulos
+ok 21 - fuentes: cada una declara términos y los hosts requeridos incluyen EUDAMED
+ok 22 - firstbase: unidad base anidada en el empaque y GTIN de los niveles superiores
+ok 23 - firstbase: documento → fila común con EMDN 88, clase con esquema, certificado y réplica citada
+ok 24 - firstbase: clases MDR/IVDR/legado con esquema; clase I marcada como posible defecto del convertidor
+ok 25 - DLinRT: UUID del UDI-DI desde detail_url, clase verbatim sin legislación
+ok 26 - actores: SRN con estado pegado, versión vigente por SRN, país exacto o por prefijo
+ok 27 - réplicas: cada una fija commit completo, licencia y fuente oficial
+ok 28 - dedupe: dos UDI-DI distintos con el mismo modelo se conservan los dos
+ok 29 - Data Lake: el filtro NOMENCLATURE_CODE conserva el espacio inicial y $after no rompe nextLink
+ok 30 - Data Lake: sourceUrl de cada UDI es la ficha pública por UUID
+ok 31 - Data Lake: actor → solo datos de la organización; nunca PRRC, correo ni teléfono
+ok 32 - withCertificates: copia el certificado de la réplica por UUID sin pisar uno propio
+ok 33 - EMDN: el Excel oficial con fila de título y sufijo de versión se lee
+ok 34 - BD/RDM: el mapeo verificado coincide con el encabezado oficial y normaliza fechas y ids
+ok 35 - BD/RDM: el código fiscal de persona física (16 caracteres) nunca se publica
+ok 36 - BD/RDM: lectura en streaming por lotes, con BOM, `;` final y comillas multilínea
+ok 37 - makeDeviceRecord: un correo en un campo descriptivo no se publica; «Easy@Home» sí
+# tests 37
+# pass 37
+# fail 0
