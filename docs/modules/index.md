@@ -35,7 +35,7 @@
 | [`messaging`](messaging.md) | 4 | 4 | 4 | 22 | 3 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 6 | 6 | 8 |
 | [`telemetry`](telemetry.md) | 4 | 5 | 16 | 14 | 12 |
-| [`data_catalog`](data_catalog.md) | 3 | 6 | 2 | 8 | 4 |
+| [`data_catalog`](data_catalog.md) | 3 | 7 | 3 | 13 | 4 |
 | [`directory`](directory.md) | 3 | 10 | 5 | 7 | 20 |
 | [`iam`](iam.md) | 3 | 15 | 13 | 14 | 24 |
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
@@ -77,4 +77,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **281** | **451** | **427** | **1265** | **526** |
+| **Total** | **281** | **452** | **428** | **1270** | **526** |
