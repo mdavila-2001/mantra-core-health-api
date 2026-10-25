@@ -156,6 +156,13 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
       code: 'ROLE_ASG_SUSPENDED',
       display: 'Role assignment suspended by organization',
     },
+    // Centros médicos — la organización invita al profesional y la fila queda
+    // `INVITED` hasta que él la acepte o la decline. Solo el profesional la saca
+    // de ese estado: ninguna vinculación llega a `ACTIVE` sin la otra parte.
+    ROLE_ASSIGNMENT_INVITED: {
+      code: 'ROLE_ASG_INVITED',
+      display: 'Role assignment invited by organization',
+    },
 
     // --- practitioner_support_assignments --------------------------------------
     SUPPORT_ROLE_SECRETARY: {
