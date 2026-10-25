@@ -252,6 +252,29 @@ describe('SubledgerService', () => {
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
+    it('rechaza repetir la misma partida si la suma excede lo pendiente', async () => {
+      const d = build();
+      d.subledgerRepo.findOpenItemById.mockResolvedValue(
+        openItemOf(TENANT_A, { outstandingAmount: '100.00' }),
+      );
+      d.subledgerRepo.findSubledgerById.mockResolvedValue(
+        subledgerOf(TENANT_A),
+      );
+      const repeated = {
+        ...dto,
+        items: [
+          { openItemId: 'oi1', clearedAmount: '60.00' },
+          { openItemId: 'oi1', clearedAmount: '60.00' },
+        ],
+      };
+      await expect(
+        d.service.clearOpenItems(repeated as any, actor),
+      ).rejects.toMatchObject({
+        reason: AccountingErrorReason.OPEN_ITEM_INVALID_CLEARED_AMOUNT,
+      });
+      expect(d.posting.post).not.toHaveBeenCalled();
+    });
+
     it('compensa la partida y postea el asiento de banco', async () => {
       const d = build();
       const openItem = openItemOf(TENANT_A);

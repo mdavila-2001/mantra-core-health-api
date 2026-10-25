@@ -123,3 +123,35 @@ export async function isCaseInScope(
   const surgicalCase = await casesRepo.findCaseById(tx, caseId, tenantId);
   return surgicalCase?.custodianTenantId === tenantId;
 }
+
+/**
+ * Exige que un procedimiento que mandó el cliente sea del paciente y del tenant
+ * custodio del caso. Sin esto, el id de un procedimiento de otro paciente quedaría
+ * enlazado al caso.
+ *
+ * @param casesRepo - Repositorio de casos.
+ * @param tx - Transacción activa.
+ * @param procedureId - Procedimiento pedido por el cliente.
+ * @param owner - Paciente y tenant custodio del caso.
+ * @throws ResourceNotFoundException (`PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT`) si no existe, es de otro paciente o de otro tenant.
+ */
+export async function assertProcedureOfCasePatient(
+  casesRepo: PeriopCasesRepository,
+  tx: EntityManager,
+  procedureId: string,
+  owner: { patientProfileId: string; custodianTenantId: string },
+): Promise<void> {
+  const procedure = await casesRepo.findProcedureOfPatient(
+    tx,
+    procedureId,
+    owner.patientProfileId,
+    owner.custodianTenantId,
+  );
+  if (!procedure) {
+    throw new ResourceNotFoundException(
+      'Procedimiento no encontrado para el paciente del caso',
+      undefined,
+      ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT,
+    );
+  }
+}

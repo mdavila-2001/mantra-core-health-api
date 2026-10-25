@@ -63,6 +63,7 @@ import {
   assertCaseInScope,
   loadCaseForUpdateInScope,
   periopCaseNotFound,
+  assertProcedureOfCasePatient,
 } from './periop-scope';
 import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 
@@ -269,6 +270,19 @@ export class PeriopCasesService {
     const custodianTenantId = requireTenantId();
 
     return this.em.transactional(async (tx) => {
+      // El id del procedimiento viene del cliente: tiene que ser del paciente
+      // del caso y de este tenant antes de enlazarlo.
+      if (dto.primaryProcedureId) {
+        await assertProcedureOfCasePatient(
+          this.casesRepo,
+          tx,
+          dto.primaryProcedureId,
+          {
+            patientProfileId: dto.patientProfileId,
+            custodianTenantId,
+          },
+        );
+      }
       const overlapping = await this.casesRepo.findOverlappingCases(
         tx,
         dto.operatingRoomId,

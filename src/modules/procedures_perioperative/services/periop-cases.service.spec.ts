@@ -26,6 +26,7 @@ const TENANT = '11111111-1111-1111-1111-111111111111';
 const PATIENT = '22222222-2222-2222-2222-222222222222';
 const SURGEON = '33333333-3333-3333-3333-333333333333';
 const ROOM = '44444444-4444-4444-4444-444444444444';
+const PROCEDURE = '77777777-7777-7777-7777-777777777777';
 const CASE = '55555555-5555-5555-5555-555555555555';
 const CONDITION = '66666666-6666-6666-6666-666666666666';
 const REASON = '77777777-7777-7777-7777-777777777777';
@@ -84,6 +85,8 @@ function build() {
     findCaseByNumber: mockFn(),
     countCases: mockFn(),
     findOverlappingCases: mockFn(),
+    // Por defecto el procedimiento es del paciente del caso.
+    findProcedureOfPatient: mockFn().mockResolvedValue({ id: 'procedure' }),
     createStatusHistory: mockFn(),
     createMilestone: mockFn(),
     findMilestone: mockFn(),
@@ -227,6 +230,53 @@ describe('PeriopCasesService', () => {
           teamRoleConceptId: CONCEPTS.TEAM_ROLE_SURGEON,
         }),
       );
+    });
+
+    it('links the primary procedure only after proving it belongs to the case patient', async () => {
+      const d = build();
+      wire(d);
+
+      await d.service.scheduleCase(
+        scheduleDto({ primaryProcedureId: PROCEDURE }),
+        actor,
+      );
+
+      expect(d.casesRepo.findProcedureOfPatient).toHaveBeenCalledWith(
+        d.tx,
+        PROCEDURE,
+        PATIENT,
+        TENANT,
+      );
+      expect(d.casesRepo.createCase).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ primaryProcedureId: PROCEDURE }),
+      );
+    });
+
+    it('refuses a primary procedure of another patient and creates nothing', async () => {
+      const d = build();
+      wire(d);
+      d.casesRepo.findProcedureOfPatient.mockResolvedValue(null);
+
+      await expect(
+        d.service.scheduleCase(
+          scheduleDto({ primaryProcedureId: PROCEDURE }),
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason:
+          ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT,
+      });
+      expect(d.casesRepo.createCase).not.toHaveBeenCalled();
+    });
+
+    it('does not look up a procedure when none is sent', async () => {
+      const d = build();
+      wire(d);
+
+      await d.service.scheduleCase(scheduleDto(), actor);
+
+      expect(d.casesRepo.findProcedureOfPatient).not.toHaveBeenCalled();
     });
 
     it('records the first status transition with the case', async () => {
