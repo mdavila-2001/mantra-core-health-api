@@ -906,6 +906,82 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'REL_SPECIALTY',
     'Associated health specialty',
   ),
+  // 2026-10-25 · TAREA-41 F1.1: relaciones de la red de conocimiento con
+  // evidencia (terminology.concept_relationship_evidence). Aditivas; la
+  // semántica es la de la tabla de tipos de la ficha. «Subclase de» NO se
+  // agrega: es `REL_IS_A`.
+  //  - DIAGNOSTIC_CRITERION: enfermedad → hallazgo que la norma exige.
+  //  - RED_FLAG: enfermedad o síntoma → signo de alarma.
+  //  - DIFFERENTIAL_DIAGNOSIS: enfermedad ↔ enfermedad a descartar.
+  //  - REQUIRED_TEST: enfermedad → estudio que la norma exige (por nivel).
+  //  - CONTRAINDICATED_IN: fármaco → enfermedad o estado.
+  //  - ADVERSE_EFFECT: fármaco → hallazgo.
+  //  - PREGNANCY_LACTATION_CAUTION: fármaco → estado (embarazo, lactancia).
+  //  - RISK_FACTOR: factor → enfermedad.
+  //  - COMPLICATION: enfermedad → enfermedad que puede complicarla.
+  //  - CAUSED_BY: enfermedad → agente o causa.
+  //  - REFERRAL_CRITERION: enfermedad → hallazgo que obliga a derivar.
+  //  - CARE_LEVEL: enfermedad → nivel de atención I, II o III.
+  REL_DIAGNOSTIC_CRITERION: def(
+    'terminology:relationship:diagnostic-criterion',
+    'REL_DIAGNOSTIC_CRITERION',
+    'Diagnostic criterion required by the standard',
+  ),
+  REL_RED_FLAG: def(
+    'terminology:relationship:red-flag',
+    'REL_RED_FLAG',
+    'Red flag sign',
+  ),
+  REL_DIFFERENTIAL_DIAGNOSIS: def(
+    'terminology:relationship:differential-diagnosis',
+    'REL_DIFFERENTIAL_DIAGNOSIS',
+    'Differential diagnosis',
+  ),
+  REL_REQUIRED_TEST: def(
+    'terminology:relationship:required-test',
+    'REL_REQUIRED_TEST',
+    'Diagnostic test required by the standard',
+  ),
+  REL_CONTRAINDICATED_IN: def(
+    'terminology:relationship:contraindicated-in',
+    'REL_CONTRAINDICATED_IN',
+    'Contraindicated in',
+  ),
+  REL_ADVERSE_EFFECT: def(
+    'terminology:relationship:adverse-effect',
+    'REL_ADVERSE_EFFECT',
+    'Adverse effect',
+  ),
+  REL_PREGNANCY_LACTATION_CAUTION: def(
+    'terminology:relationship:pregnancy-lactation-caution',
+    'REL_PREGNANCY_LACTATION_CAUTION',
+    'Pregnancy or lactation caution',
+  ),
+  REL_RISK_FACTOR: def(
+    'terminology:relationship:risk-factor',
+    'REL_RISK_FACTOR',
+    'Risk factor',
+  ),
+  REL_COMPLICATION: def(
+    'terminology:relationship:complication',
+    'REL_COMPLICATION',
+    'Complication',
+  ),
+  REL_CAUSED_BY: def(
+    'terminology:relationship:caused-by',
+    'REL_CAUSED_BY',
+    'Caused by',
+  ),
+  REL_REFERRAL_CRITERION: def(
+    'terminology:relationship:referral-criterion',
+    'REL_REFERRAL_CRITERION',
+    'Referral criterion',
+  ),
+  REL_CARE_LEVEL: def(
+    'terminology:relationship:care-level',
+    'REL_CARE_LEVEL',
+    'Level of care',
+  ),
   VS_OP_IN: def('terminology:vs-operator:in', 'IN', 'In'),
   VS_OP_IS_A: def(
     'terminology:vs-operator:is-a',
