@@ -98,6 +98,20 @@ FKs como columnas `uuid` planas.
   activo único (409).
 - **Propósito de uso**: acceso clínico exige consentimiento salvo `TREATMENT`
   directo; break-the-glass usa `EMERGENCY`, sin consentimiento y ventana corta.
+- **Alcance de tenant de las bases de acceso** (`AuthzClinicalScopeService`): acceso
+  clínico, break-the-glass, relación asistencial y representación legal toman el
+  tenant de `requireTenantId()`; el `tenantId` del cuerpo sólo se contrasta (403
+  `AUTHZ_TENANT_SCOPE_REQUIRED`). El paciente tiene que existir y tener un vínculo
+  comprobable con el tenant (encuentro, turno, reserva o episodio del tenant, o la
+  membresía activa de su cuenta; el modelo no guarda el tenant del paciente), y el
+  encuentro y el consentimiento citados, ser del tenant y del mismo paciente. Todo lo
+  ajeno responde igual que lo inexistente (404, mismo mensaje y `reason`, sin
+  `details`): `AUTHZ_PATIENT_OUT_OF_SCOPE`, `AUTHZ_ENCOUNTER_PATIENT_MISMATCH`,
+  `AUTHZ_CONSENT_PATIENT_MISMATCH`. La solicitud de relación del profesional
+  (`POST /authz/care-relationships/request`) sólo exige que el paciente exista: nace
+  `PENDING` y no concede nada hasta que el paciente la acepte. Revocar por id queda
+  acotado al tenant activo; el paciente titular revoca lo suyo en cualquier
+  organización y un actor de plataforma (`SUPERADMIN`/`SYSTEM`) sin tenant revoca por id.
 - **Masking**: `field_permissions` con check `canWrite ⇒ canRead` (412 si no).
 - **Vigencia**: `valid_from < valid_to`; la revocación distingue `revoked` de
   `expired` según `valid_to`.
