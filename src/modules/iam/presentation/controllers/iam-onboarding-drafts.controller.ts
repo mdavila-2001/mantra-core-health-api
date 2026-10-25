@@ -71,7 +71,7 @@ export class IamOnboardingDraftsController {
   @ApiOperation({
     summary: 'Guarda o actualiza el avance del formulario de alta en borrador',
     description:
-      'Sin cabecera de secreto crea el borrador y devuelve `draftSecret` una sola vez; con el secreto correcto lo actualiza. Cuerpo máximo 64 KiB; hay topes de borradores totales y por origen.',
+      'Sin cabecera de secreto crea el borrador y devuelve `draftSecret` una sola vez; con el secreto correcto lo actualiza. Cuerpo máximo 64 KiB; hay topes de borradores totales y por origen (IPv6 por prefijo /64). Un borrador recién creado vive 1 hora; la primera escritura posterior con el secreto la extiende a 30 días.',
   })
   saveDraft(
     @Param('formType') formType: string,

@@ -5,6 +5,8 @@ import {
   MAX_DRAFTS_PER_ORIGIN,
   MAX_DRAFTS_TOTAL,
   MAX_DRAFT_BYTES,
+  UNCONFIRMED_TTL_MS,
+  normalizeOrigin,
   type OnboardingDraftPayload,
 } from '../../application/services/iam-onboarding-drafts.service';
 
@@ -150,7 +152,7 @@ describe('IamOnboardingDraftsController', () => {
     expect(service.size).toBe(0);
   });
 
-  it('topa los borradores por origen (429) y en total (503)', () => {
+  it('topa los borradores por origen (429) y otro origen sigue pudiendo crear', () => {
     for (let i = 0; i < MAX_DRAFTS_PER_ORIGIN; i += 1) {
       create(`borrador-origen-${String(i).padStart(4, '0')}`);
     }
@@ -164,7 +166,6 @@ describe('IamOnboardingDraftsController', () => {
         ),
       ).status,
     ).toBe(429);
-    // otro origen sigue pudiendo crear
     expect(
       controller.saveDraft(
         'patient',
@@ -173,57 +174,210 @@ describe('IamOnboardingDraftsController', () => {
         '198.51.100.1',
       ).ok,
     ).toBe(true);
+  });
 
-    const total = new IamOnboardingDraftsService();
-    for (let i = 0; i < MAX_DRAFTS_TOTAL; i += 1) {
-      total.saveDraft(
-        'patient',
-        `borrador-total-${String(i).padStart(6, '0')}`,
-        payload(),
-        undefined,
-        `ip-${i}`,
+  describe('origen IPv6', () => {
+    it('normaliza al prefijo /64 y deja IPv4 (también la mapeada) igual', () => {
+      expect(normalizeOrigin('2001:db8:1:2:aaaa:bbbb:cccc:dddd')).toBe(
+        '2001:0db8:0001:0002::/64',
       );
-    }
-    expect(
-      failure(() =>
-        total.saveDraft(
+      expect(normalizeOrigin('2001:db8:1:2::1')).toBe(
+        '2001:0db8:0001:0002::/64',
+      );
+      expect(normalizeOrigin('2001:DB8::ff')).toBe('2001:0db8:0000:0000::/64');
+      expect(normalizeOrigin('::1')).toBe('0000:0000:0000:0000::/64');
+      expect(normalizeOrigin('::ffff:203.0.113.7')).toBe('203.0.113.7');
+      expect(normalizeOrigin('203.0.113.7')).toBe('203.0.113.7');
+    });
+
+    it('llenar desde un mismo /64 cuenta como un solo origen', () => {
+      for (let i = 0; i < MAX_DRAFTS_PER_ORIGIN; i += 1) {
+        controller.saveDraft(
           'patient',
-          'borrador-total-extra',
+          `borrador-v6-${String(i).padStart(6, '0')}`,
           payload(),
-          undefined,
-          'ip-nueva',
-        ),
-      ).status,
-    ).toBe(503);
-  });
-
-  it('el barrido libera vencidos que nadie vuelve a leer y devuelve la cuota del origen', () => {
-    create(ID_A);
-    create(ID_B);
-    expect(service.size).toBe(2);
-    expect(service.sweepExpired(Date.now() + 29 * DAY)).toBe(0);
-    expect(service.sweepExpired(Date.now() + 31 * DAY)).toBe(2);
-    expect(service.size).toBe(0);
-    for (let i = 0; i < MAX_DRAFTS_PER_ORIGIN; i += 1) {
-      create(`borrador-liberado-${String(i).padStart(4, '0')}`);
-    }
-  });
-
-  it('un borrador vencido no se lee ni se actualiza con su secreto', () => {
-    const secret = create();
-    jest.useFakeTimers().setSystemTime(Date.now() + 31 * DAY);
-    try {
-      expect(
-        failure(() => controller.getDraft('patient', ID_A, secret)).status,
-      ).toBe(404);
+          `2001:db8:1:2:${i.toString(16)}::${i.toString(16)}`,
+        );
+      }
       expect(
         failure(() =>
-          controller.saveDraft('patient', ID_A, payload(), IP, secret),
+          controller.saveDraft(
+            'patient',
+            'borrador-v6-extra000',
+            payload(),
+            '2001:db8:1:2:ffff:ffff:ffff:ffff',
+          ),
+        ).status,
+      ).toBe(429);
+      // Otro /64 distinto sí puede crear.
+      expect(
+        controller.saveDraft(
+          'patient',
+          'borrador-v6-otro-64',
+          payload(),
+          '2001:db8:1:3::1',
+        ).ok,
+      ).toBe(true);
+    });
+  });
+
+  describe('almacén lleno', () => {
+    function fill(
+      store: IamOnboardingDraftsService,
+      confirmed: boolean,
+    ): string[] {
+      const secrets: string[] = [];
+      for (let i = 0; i < MAX_DRAFTS_TOTAL; i += 1) {
+        const id = `borrador-total-${String(i).padStart(6, '0')}`;
+        const res = store.saveDraft(
+          'patient',
+          id,
+          payload({ draftId: id }),
+          undefined,
+          `ip-${i}`,
+        );
+        secrets.push(res.draftSecret as string);
+        if (confirmed) {
+          store.saveDraft(
+            'patient',
+            id,
+            payload({ draftId: id }),
+            res.draftSecret,
+            `ip-${i}`,
+          );
+        }
+      }
+      return secrets;
+    }
+
+    it('con borradores nunca actualizados, un alta legítima entra desalojando el más viejo', () => {
+      const store = new IamOnboardingDraftsService();
+      const secrets = fill(store, false);
+      expect(store.size).toBe(MAX_DRAFTS_TOTAL);
+
+      const res = store.saveDraft(
+        'patient',
+        'borrador-legitimo-1',
+        payload(),
+        undefined,
+        'ip-legitima',
+      );
+
+      expect(res.draftSecret).toBeDefined();
+      expect(store.size).toBe(MAX_DRAFTS_TOTAL);
+      // El más viejo fue desalojado; el siguiente sigue ahí.
+      expect(
+        failure(() =>
+          store.getDraft('patient', 'borrador-total-000000', secrets[0]),
         ).status,
       ).toBe(404);
-    } finally {
-      jest.useRealTimers();
-    }
+      expect(
+        store.getDraft('patient', 'borrador-total-000001', secrets[1]).formType,
+      ).toBe('patient');
+    });
+
+    it('el desalojo respeta la cuota por origen: quien la agotó no desaloja a nadie', () => {
+      const store = new IamOnboardingDraftsService();
+      fill(store, false);
+      for (let i = 0; i < MAX_DRAFTS_PER_ORIGIN; i += 1) {
+        store.saveDraft(
+          'patient',
+          `borrador-atacante-${String(i).padStart(4, '0')}`,
+          payload(),
+          undefined,
+          'ip-atacante',
+        );
+      }
+      const before = store.size;
+      expect(
+        failure(() =>
+          store.saveDraft(
+            'patient',
+            'borrador-atacante-fin0',
+            payload(),
+            undefined,
+            'ip-atacante',
+          ),
+        ).status,
+      ).toBe(429);
+      expect(store.size).toBe(before);
+    });
+
+    it('un borrador confirmado no se desaloja: con todos confirmados responde 503', () => {
+      const store = new IamOnboardingDraftsService();
+      const secrets = fill(store, true);
+
+      expect(
+        failure(() =>
+          store.saveDraft(
+            'patient',
+            'borrador-sin-lugar-0',
+            payload(),
+            undefined,
+            'ip-nueva',
+          ),
+        ).status,
+      ).toBe(503);
+      expect(
+        store.getDraft('patient', 'borrador-total-000000', secrets[0]).formType,
+      ).toBe('patient');
+    });
+  });
+
+  describe('vigencia', () => {
+    it('un borrador sin segunda escritura vence rápido y su cuota vuelve al origen', () => {
+      const secret = create();
+      jest
+        .useFakeTimers()
+        .setSystemTime(Date.now() + UNCONFIRMED_TTL_MS + 1000);
+      try {
+        expect(
+          failure(() => controller.getDraft('patient', ID_A, secret)).status,
+        ).toBe(404);
+        expect(service.size).toBe(0);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('una segunda escritura del dueño extiende la vida a 30 días', () => {
+      const secret = create();
+      controller.saveDraft('patient', ID_A, payload(), IP, secret);
+      jest
+        .useFakeTimers()
+        .setSystemTime(Date.now() + UNCONFIRMED_TTL_MS + 60_000);
+      try {
+        expect(controller.getDraft('patient', ID_A, secret).formType).toBe(
+          'patient',
+        );
+        jest.setSystemTime(Date.now() + 31 * DAY);
+        expect(
+          failure(() => controller.getDraft('patient', ID_A, secret)).status,
+        ).toBe(404);
+        expect(
+          failure(() =>
+            controller.saveDraft('patient', ID_A, payload(), IP, secret),
+          ).status,
+        ).toBe(404);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('el barrido libera vencidos que nadie vuelve a leer y devuelve la cuota del origen', () => {
+      const secretA = create(ID_A);
+      controller.saveDraft('patient', ID_A, payload(), IP, secretA);
+      create(ID_B);
+      expect(service.size).toBe(2);
+      // El no confirmado vence a la hora; el confirmado, a los 30 días.
+      expect(service.sweepExpired(Date.now() + 2 * UNCONFIRMED_TTL_MS)).toBe(1);
+      expect(service.sweepExpired(Date.now() + 29 * DAY)).toBe(0);
+      expect(service.sweepExpired(Date.now() + 31 * DAY)).toBe(1);
+      expect(service.size).toBe(0);
+      for (let i = 0; i < MAX_DRAFTS_PER_ORIGIN; i += 1) {
+        create(`borrador-liberado-${String(i).padStart(4, '0')}`);
+      }
+    });
   });
 
   it('el temporizador de barrido arranca y se detiene con el módulo', () => {

@@ -5,6 +5,7 @@ import {
   type OnModuleInit,
 } from '@nestjs/common';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { isIPv4, isIPv6 } from 'node:net';
 import {
   DomainException,
   ErrorCode,
@@ -35,7 +36,10 @@ interface DraftEntry {
   readonly payload: OnboardingDraftPayload;
   /** SHA-256 del secreto; el secreto en claro nunca se guarda. */
   readonly secretHash: Buffer;
+  /** Origen normalizado (IPv4, o prefijo /64 en IPv6). */
   readonly origin: string;
+  /** Si el dueño del secreto volvió a guardar: sólo entonces vive el TTL largo. */
+  readonly confirmed: boolean;
   expiresAt: number;
 }
 
@@ -51,10 +55,44 @@ const SECRET_BYTES = 32;
 export const MAX_DRAFT_BYTES = 64 * 1024;
 /** Tope de borradores vivos en el proceso: acota la memoria a ~128 MB. */
 export const MAX_DRAFTS_TOTAL = 2000;
-/** Tope de borradores vivos creados desde un mismo origen (IP). */
+/** Tope de borradores vivos creados desde un mismo origen (IPv4, o /64 en IPv6). */
 export const MAX_DRAFTS_PER_ORIGIN = 25;
-const TTL_MS = 30 * 24 * 60 * 60 * 1000;
+/** Vida de un borrador confirmado: el dueño del secreto volvió a guardar. */
+export const CONFIRMED_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+/**
+ * Vida de un borrador recién creado y nunca actualizado. Es corta a propósito:
+ * quien llena el almacén con altas anónimas que no vuelve a tocar no puede
+ * retener el cupo más de esto.
+ */
+export const UNCONFIRMED_TTL_MS = 60 * 60 * 1000;
 const SWEEP_INTERVAL_MS = 10 * 60 * 1000;
+
+/**
+ * Origen sobre el que se aplica la cuota por origen.
+ *
+ * IPv4 tal cual (y las IPv4 mapeadas en IPv6 como IPv4). En IPv6 se usa el
+ * prefijo /64: un solo bloque /64 son 2^64 direcciones y contarlas por separado
+ * dejaría la cuota sin efecto.
+ */
+export function normalizeOrigin(ip: string | undefined): string {
+  const raw = (ip ?? '').trim().toLowerCase();
+  const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(raw);
+  if (mapped) return mapped[1];
+  if (isIPv4(raw)) return raw;
+  if (!isIPv6(raw)) return raw === '' ? 'desconocido' : raw;
+  const [zone] = raw.split('%');
+  const [head, tail = ''] = zone.split('::');
+  const headParts = head === '' ? [] : head.split(':');
+  const tailParts = tail === '' ? [] : tail.split(':');
+  const hasGap = zone.includes('::');
+  const fill = hasGap ? 8 - headParts.length - tailParts.length : 0;
+  const groups = [
+    ...headParts,
+    ...Array.from({ length: Math.max(fill, 0) }, () => '0'),
+    ...tailParts,
+  ].map((group) => group.padStart(4, '0'));
+  return `${groups.slice(0, 4).join(':')}::/64`;
+}
 
 function hashSecret(secret: string): Buffer {
   return createHash('sha256').update(secret, 'utf8').digest();
@@ -123,7 +161,7 @@ export class IamOnboardingDraftsService
     draftId: string,
     payload: OnboardingDraftPayload,
     secret: string | undefined,
-    origin: string,
+    rawOrigin: string,
   ): SaveOnboardingDraftResult {
     if (!this.validKey(formType, draftId)) throw this.notFound();
     this.assertPayloadShape(payload);
@@ -138,6 +176,7 @@ export class IamOnboardingDraftsService
       // recibe el mismo 404 que ante un secreto erróneo.
       if (existing) throw this.notFound();
       const draftSecret = randomBytes(SECRET_BYTES).toString('base64url');
+      const origin = normalizeOrigin(rawOrigin);
       this.assertCapacity(origin, now);
       this.drafts.set(key, {
         payload: this.buildPayload(
@@ -149,7 +188,8 @@ export class IamOnboardingDraftsService
         ),
         secretHash: hashSecret(draftSecret),
         origin,
-        expiresAt: now + TTL_MS,
+        confirmed: false,
+        expiresAt: now + UNCONFIRMED_TTL_MS,
       });
       this.perOrigin.set(origin, (this.perOrigin.get(origin) ?? 0) + 1);
       return { ok: true, savedAt, draftSecret };
@@ -165,7 +205,8 @@ export class IamOnboardingDraftsService
         entry.payload.createdAt,
         savedAt,
       ),
-      expiresAt: now + TTL_MS,
+      confirmed: true,
+      expiresAt: now + CONFIRMED_TTL_MS,
     });
     return { ok: true, savedAt };
   }
@@ -220,15 +261,15 @@ export class IamOnboardingDraftsService
     else this.perOrigin.set(entry.origin, left);
   }
 
+  /**
+   * Hace lugar para un borrador nuevo.
+   *
+   * La cuota por origen va primero: quien la agotó no desaloja a nadie. Con el
+   * almacén lleno se barren los vencidos y, si no alcanza, se desaloja el
+   * borrador nunca actualizado más antiguo (el `Map` conserva el orden de
+   * creación). Sólo si todos son confirmados no hay lugar y responde 503.
+   */
   private assertCapacity(origin: string, now: number): void {
-    if (this.drafts.size >= MAX_DRAFTS_TOTAL) this.sweepExpired(now);
-    if (this.drafts.size >= MAX_DRAFTS_TOTAL) {
-      throw new DomainException(
-        HttpStatus.SERVICE_UNAVAILABLE,
-        ErrorCode.DEPENDENCY_UNAVAILABLE,
-        'No hay capacidad para nuevos borradores en este momento',
-      );
-    }
     if ((this.perOrigin.get(origin) ?? 0) >= MAX_DRAFTS_PER_ORIGIN) {
       throw new DomainException(
         HttpStatus.TOO_MANY_REQUESTS,
@@ -236,6 +277,20 @@ export class IamOnboardingDraftsService
         'Se alcanzó el máximo de borradores abiertos desde este origen',
       );
     }
+    if (this.drafts.size < MAX_DRAFTS_TOTAL) return;
+    this.sweepExpired(now);
+    if (this.drafts.size < MAX_DRAFTS_TOTAL) return;
+    for (const [key, entry] of this.drafts) {
+      if (!entry.confirmed) {
+        this.removeEntry(key, entry);
+        return;
+      }
+    }
+    throw new DomainException(
+      HttpStatus.SERVICE_UNAVAILABLE,
+      ErrorCode.DEPENDENCY_UNAVAILABLE,
+      'No hay capacidad para nuevos borradores en este momento',
+    );
   }
 
   private assertPayloadShape(payload: OnboardingDraftPayload): void {
