@@ -1032,3 +1032,272 @@ describe('PeriopIntraopService · alcance de tenant (PERIOP-01)', () => {
     });
   });
 });
+
+describe('PeriopIntraopService · procedureId del cliente (#892)', () => {
+  const OTHER_PATIENT = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+  const OWN_PROCEDURE = '10000000-0000-0000-0000-000000000001';
+  const OTHER_PATIENT_PROCEDURE = '10000000-0000-0000-0000-000000000002';
+  const OTHER_TENANT_PROCEDURE = '10000000-0000-0000-0000-000000000003';
+  const MISSING_PROCEDURE = '10000000-0000-0000-0000-000000000004';
+
+  /** Historia clínica simulada: la consulta del repositorio filtra por paciente y tenant. */
+  const clinicalProcedures = [
+    {
+      id: OWN_PROCEDURE,
+      patientProfileId: PATIENT,
+      custodianTenantId: TENANT_A,
+    },
+    {
+      id: OTHER_PATIENT_PROCEDURE,
+      patientProfileId: OTHER_PATIENT,
+      custodianTenantId: TENANT_A,
+    },
+    {
+      id: OTHER_TENANT_PROCEDURE,
+      patientProfileId: PATIENT,
+      custodianTenantId: TENANT_B,
+    },
+  ];
+
+  /**
+   * Arma el sistema bajo prueba con un caso en curso y la historia simulada.
+   *
+   * @returns El sistema bajo prueba.
+   */
+  function wired() {
+    const d = build();
+    d.casesRepo.findCaseForUpdate.mockResolvedValue(caseInProgress());
+    d.casesRepo.findProcedureOfPatient.mockImplementation(
+      (_tx: unknown, id: string, patientId: string, tenantId: string) =>
+        Promise.resolve(
+          clinicalProcedures.find(
+            (p) =>
+              p.id === id &&
+              p.patientProfileId === patientId &&
+              p.custodianTenantId === tenantId,
+          ) ?? null,
+        ),
+    );
+    d.intraopRepo.findStepsByCase.mockResolvedValue([]);
+    d.intraopRepo.createStep.mockReturnValue({ id: STEP });
+    d.intraopRepo.createImplant.mockReturnValue({ id: 'implant-1' });
+    d.intraopRepo.createImplantIdentifier.mockReturnValue({ id: 'ident-1' });
+    d.intraopRepo.createDevice.mockReturnValue({ id: 'device-use-1' });
+    d.intraopRepo.createMedicationUse.mockReturnValue({ id: 'use-1' });
+    d.intraopRepo.createSpecimen.mockReturnValue({ id: 'spec-1' });
+    d.intraopRepo.findLastReport.mockResolvedValue(null);
+    d.intraopRepo.createReport.mockReturnValue({ id: REPORT });
+    return d;
+  }
+
+  type Wired = ReturnType<typeof wired>;
+  interface Endpoint {
+    readonly name: string;
+    /** El `procedureId` es obligatorio en el cuerpo. */
+    readonly required: boolean;
+    readonly call: (
+      service: Wired['service'],
+      procedureId?: string,
+    ) => Promise<unknown>;
+    /** Lo que el servicio escribe: no puede haberse llamado si se rechaza. */
+    readonly writes: (d: Wired) => any[];
+  }
+
+  const endpoints: readonly Endpoint[] = [
+    {
+      name: 'createStep (POST operative-steps)',
+      required: false,
+      call: (service, procedureId) =>
+        service.createStep(
+          CASE,
+          { stepCodeConceptId: SITE, description: 'Incisión', procedureId },
+          actor,
+        ),
+      writes: (d) => [d.intraopRepo.createStep],
+    },
+    {
+      name: 'recordImplant (POST implants)',
+      required: true,
+      call: (service, procedureId) =>
+        service.recordImplant(
+          CASE,
+          {
+            procedureId: procedureId as string,
+            implantDeviceId: DEVICE,
+            implantRole: 'PRIMARY',
+            identifiers: [
+              {
+                identifierType: 'UDI_DI',
+                identifierValue: '0123456789',
+                lotNumber: 'L-42',
+              },
+            ],
+          },
+          actor,
+        ),
+      writes: (d) => [
+        d.intraopRepo.createImplant,
+        d.intraopRepo.createImplantIdentifier,
+        d.intraopRepo.createDevice,
+      ],
+    },
+    {
+      name: 'recordMedicationUse (POST medication-uses)',
+      required: false,
+      call: (service, procedureId) =>
+        service.recordMedicationUse(
+          CASE,
+          {
+            medicationAdministrationId: DEVICE,
+            useRole: 'ANTIBIOTIC',
+            procedureId,
+          },
+          actor,
+        ),
+      writes: (d) => [d.intraopRepo.createMedicationUse],
+    },
+    {
+      name: 'recordSpecimen (POST specimens)',
+      required: true,
+      call: (service, procedureId) =>
+        service.recordSpecimen(
+          CASE,
+          {
+            procedureId: procedureId as string,
+            specimenId: DEVICE,
+            specimenRole: 'BIOPSY',
+          },
+          actor,
+        ),
+      writes: (d) => [d.intraopRepo.createSpecimen],
+    },
+    {
+      name: 'draftReport (POST operative-reports)',
+      // Sin `procedureId` exige `procedureCodeConceptId` (cubierto en #864).
+      required: true,
+      call: (service, procedureId) =>
+        service.draftReport(
+          CASE,
+          {
+            procedureId,
+            authorProfileId: PROFILE,
+            procedureDescription: 'Colecistectomía',
+            disposition: 'PACU',
+          } as any,
+          actor,
+        ),
+      writes: (d) => [d.intraopRepo.createReport],
+    },
+  ];
+
+  describe.each(endpoints)('$name', (endpoint) => {
+    it('acepta un procedimiento del paciente del caso y del tenant activo', async () => {
+      const d = wired();
+
+      await expect(
+        endpoint.call(d.service, OWN_PROCEDURE),
+      ).resolves.toBeDefined();
+
+      expect(d.casesRepo.findProcedureOfPatient).toHaveBeenCalledWith(
+        d.tx,
+        OWN_PROCEDURE,
+        PATIENT,
+        TENANT_A,
+      );
+      expect(endpoint.writes(d)[0]).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['de otro paciente', OTHER_PATIENT_PROCEDURE],
+      ['de otro tenant', OTHER_TENANT_PROCEDURE],
+      ['inexistente', MISSING_PROCEDURE],
+    ])(
+      'rechaza con 404 uniforme un procedimiento %s y no escribe nada',
+      async (_label, procedureId) => {
+        const d = wired();
+
+        const error: any = await endpoint
+          .call(d.service, procedureId)
+          .catch((e: unknown) => e);
+
+        expect(error).toBeInstanceOf(ResourceNotFoundException);
+        expect(error.getStatus()).toBe(404);
+        expect(error.message).toBe('Procedimiento no encontrado');
+        expect(error.reason).toBe(
+          ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND,
+        );
+        expect(error.details).toBeUndefined();
+        for (const write of endpoint.writes(d)) {
+          expect(write).not.toHaveBeenCalled();
+        }
+      },
+    );
+
+    it('el procedimiento ajeno responde idéntico al inexistente', async () => {
+      const responses: unknown[] = [];
+      for (const procedureId of [
+        OTHER_PATIENT_PROCEDURE,
+        OTHER_TENANT_PROCEDURE,
+        MISSING_PROCEDURE,
+      ]) {
+        const d = wired();
+        const error: any = await endpoint
+          .call(d.service, procedureId)
+          .catch((e: unknown) => e);
+        responses.push(error.getResponse());
+      }
+      expect(responses[0]).toEqual(responses[2]);
+      expect(responses[1]).toEqual(responses[2]);
+    });
+
+    it('no se fía del filtro de la consulta: una fila ajena que vuelva también es 404', async () => {
+      for (const foreign of [
+        { patientProfileId: OTHER_PATIENT, custodianTenantId: TENANT_A },
+        { patientProfileId: PATIENT, custodianTenantId: TENANT_B },
+      ]) {
+        const d = wired();
+        d.casesRepo.findProcedureOfPatient.mockResolvedValue({
+          id: OWN_PROCEDURE,
+          ...foreign,
+        });
+
+        await expect(
+          endpoint.call(d.service, OWN_PROCEDURE),
+        ).rejects.toMatchObject({
+          reason: ProceduresPerioperativeErrorReason.PROCEDURE_NOT_FOUND,
+        });
+        for (const write of endpoint.writes(d)) {
+          expect(write).not.toHaveBeenCalled();
+        }
+      }
+    });
+
+    it('sin tenant en el contexto no consulta ni escribe', async () => {
+      const d = wired();
+
+      await expect(endpoint.call(d.raw, OWN_PROCEDURE)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+
+      expect(d.casesRepo.findProcedureOfPatient).not.toHaveBeenCalled();
+      for (const write of endpoint.writes(d)) {
+        expect(write).not.toHaveBeenCalled();
+      }
+    });
+  });
+
+  describe.each(endpoints.filter((e) => !e.required))(
+    '$name · procedureId omitido',
+    (endpoint) => {
+      it('no consulta ningún procedimiento y sigue funcionando', async () => {
+        const d = wired();
+
+        await expect(
+          endpoint.call(d.service, undefined),
+        ).resolves.toBeDefined();
+
+        expect(d.casesRepo.findProcedureOfPatient).not.toHaveBeenCalled();
+      });
+    },
+  );
+});

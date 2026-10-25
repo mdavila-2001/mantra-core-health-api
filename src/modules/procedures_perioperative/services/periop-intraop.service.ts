@@ -157,6 +157,7 @@ export class PeriopIntraopService {
 
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.assertCaseInProgress(tx, caseId);
+      await this.assertClientProcedure(tx, surgicalCase, dto.procedureId);
 
       const steps = await this.intraopRepo.findStepsByCase(tx, caseId);
       const stepNumber = steps.length + 1;
@@ -298,7 +299,8 @@ export class PeriopIntraopService {
     );
 
     return this.em.transactional(async (tx) => {
-      await this.assertCaseInProgress(tx, caseId);
+      const surgicalCase = await this.assertCaseInProgress(tx, caseId);
+      await this.assertClientProcedure(tx, surgicalCase, dto.procedureId);
 
       const implant = this.intraopRepo.createImplant(tx, {
         procedureCaseId: caseId,
@@ -367,6 +369,7 @@ export class PeriopIntraopService {
 
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.assertCaseInProgress(tx, caseId);
+      await this.assertClientProcedure(tx, surgicalCase, dto.procedureId);
 
       if (dto.operativeStepId) {
         const step = await this.intraopRepo.findStepById(
@@ -413,7 +416,8 @@ export class PeriopIntraopService {
     );
 
     return this.em.transactional(async (tx) => {
-      await this.assertCaseInProgress(tx, caseId);
+      const surgicalCase = await this.assertCaseInProgress(tx, caseId);
+      await this.assertClientProcedure(tx, surgicalCase, dto.procedureId);
 
       if (dto.operativeStepId) {
         const step = await this.intraopRepo.findStepById(
@@ -480,14 +484,7 @@ export class PeriopIntraopService {
 
       // El procedimiento que cita el informe lo manda el cliente: tiene que ser
       // del paciente del caso y del tenant (404 uniforme si no lo es).
-      if (dto.procedureId) {
-        await assertProcedureOfCasePatient(
-          this.casesRepo,
-          tx,
-          dto.procedureId,
-          surgicalCase.patientProfileId,
-        );
-      }
+      await this.assertClientProcedure(tx, surgicalCase, dto.procedureId);
 
       const last = await this.intraopRepo.findLastReport(tx, caseId);
       // Un reporte firmado no se edita: la corrección es una versión nueva.
@@ -933,6 +930,29 @@ export class PeriopIntraopService {
     const stay = await this.intraopRepo.findPacuStayForUpdate(tx, stayId);
     if (!stay) throw notFound();
     return stay;
+  }
+
+  /**
+   * Exige que el procedimiento que manda el cliente —si lo manda— sea del
+   * paciente del caso y del tenant activo (#864, #892).
+   *
+   * @param tx - Transacción activa.
+   * @param surgicalCase - Caso ya cargado y acotado al tenant.
+   * @param procedureId - `procedureId` del cuerpo, opcional.
+   * @throws ResourceNotFoundException (`PROCEDURE_NOT_FOUND`) si no existe, es de otro paciente o de otro tenant.
+   */
+  private async assertClientProcedure(
+    tx: EntityManager,
+    surgicalCase: { patientProfileId: string },
+    procedureId: string | undefined,
+  ): Promise<void> {
+    if (!procedureId) return;
+    await assertProcedureOfCasePatient(
+      this.casesRepo,
+      tx,
+      procedureId,
+      surgicalCase.patientProfileId,
+    );
   }
 
   /**
