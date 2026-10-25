@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import * as argon2 from 'argon2';
@@ -7,10 +7,11 @@ import {
   TokenService,
   UnauthorizedException,
   touch,
-  type AuthenticatedUser,
 } from '../../../../common';
-import { MESSAGING_SEED } from '../../../../common/seed/messaging-seed.service';
-import { NotificationsService } from '../../../messaging/services';
+import {
+  EMAIL_NOTICE_PORT,
+  type EmailNoticePort,
+} from '../ports/email-notice.port';
 import { IamErrorReason } from '../../iam.error-reasons';
 import {
   CredentialsRepository,
@@ -76,7 +77,7 @@ export class IamPasswordResetService {
    * @param refreshRepo - Refresh tokens a revocar tras el cambio.
    * @param eventsRepo - Registro de eventos de seguridad.
    * @param tokenService - Emisión y hasheo del token de un solo uso.
-   * @param notificationsService - Envío del correo con el token.
+   * @param emailNotice - Envío del correo con el token.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -89,7 +90,8 @@ export class IamPasswordResetService {
     private readonly refreshRepo: RefreshTokensRepository,
     private readonly eventsRepo: SecurityEventsRepository,
     private readonly tokenService: TokenService,
-    private readonly notificationsService: NotificationsService,
+    @Inject(EMAIL_NOTICE_PORT)
+    private readonly emailNotice: EmailNoticePort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IamPasswordResetService.name);
@@ -335,23 +337,16 @@ export class IamPasswordResetService {
     email: string,
     token: string,
   ): Promise<void> {
-    const actor: AuthenticatedUser = { id: userId, roles: [] };
     try {
-      await this.notificationsService.createRequest(
-        {
-          channelId: MESSAGING_SEED.emailChannelId,
-          recipientUserId: userId,
-          recipientAddress: email,
-          payloadJson: {
-            subject: 'Restablezca su contraseña',
-            bodyText:
-              'Para elegir una contraseña nueva, use este código: ' +
-              `${token}\n\nVence en una hora. Si no pidió este cambio, ` +
-              'ignore este mensaje: su contraseña actual sigue funcionando.',
-          },
-        },
-        actor,
-      );
+      await this.emailNotice.enqueueEmail({
+        recipientUserId: userId,
+        recipientAddress: email,
+        subject: 'Restablezca su contraseña',
+        bodyText:
+          'Para elegir una contraseña nueva, use este código: ' +
+          `${token}\n\nVence en una hora. Si no pidió este cambio, ` +
+          'ignore este mensaje: su contraseña actual sigue funcionando.',
+      });
     } catch (error) {
       this.logger.warn(
         { operation: 'iam.auth.forgot-password', userId, err: error },

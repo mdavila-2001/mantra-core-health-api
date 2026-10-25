@@ -17,3 +17,4 @@ export * from './immunizations.repository';
 export * from './received-services.repository';
 export * from './prescription-expiry.repository';
 export * from './received-services.repository';
+export * from './procedure-centers-read.repository';

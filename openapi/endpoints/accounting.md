@@ -2654,6 +2654,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "transactionDate": "2026-07-31",
       "fiscalPeriodId": "00000000-0000-4000-8000-000000000001",
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "status": "DRAFT",
       "transactionTypeConceptId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001",
       "totalAmount": "valor-ejemplo",
@@ -2669,12 +2670,13 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<JournalTransactionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","transactionNumber":"valor-ejemplo","transactionDate":"2026-07-31","fiscalPeriodId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","totalAmount":"valor-ejemplo","postedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<JournalTransactionItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","transactionNumber":"valor-ejemplo","transactionDate":"2026-07-31","fiscalPeriodId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","status":"DRAFT","transactionTypeConceptId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","totalAmount":"valor-ejemplo","postedAt":"2026-07-31T12:00:00.000Z"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].transactionNumber` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].transactionDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `items[].fiscalPeriodId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].status` | No | `string` | valores: `DRAFT`, `AUTO_CLASSIFIED`, `PENDING_REVIEW`, `APPROVED`, `POSTED`, `REVERSED`; admite null | Código del estado en la máquina C-17 (borrador, posteado, reversado…) | `DRAFT` |
 | `items[].transactionTypeConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].currencyConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].totalAmount` | No | `string` | admite null | Importe total, decimal como texto | `valor-ejemplo` |
@@ -2779,12 +2781,13 @@ Content-Type: application/json
 | `reference` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `sourceDocumentType` | No | `string` | longitud máxima 40 | Tipo del documento origen (p. ej. INVOICE, APPOINTMENT, EXPENSE) | `valor-ejemplo` |
 | `sourceDocumentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `lines` | Sí | `array<LedgerLineDto>` | mínimo 2 elemento(s) | Líneas balanceadas (>=2) | `[{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"},{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"}]` |
+| `lines` | Sí | `array<LedgerLineDto>` | mínimo 2 elemento(s) | Líneas balanceadas (>=2) | `[{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","assetId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"},{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","assetId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"}]` |
 | `lines[].accountId` | Sí | `string` | formato `uuid` | Cuenta contable postable | `00000000-0000-4000-8000-000000000001` |
 | `lines[].direction` | Sí | `string` | valores: `DEBIT`, `CREDIT` | Dirección de la partida | `DEBIT` |
 | `lines[].amount` | Sí | `string` | patrón runtime `POSITIVE_AMOUNT_REGEX` | Importe positivo de la línea | `100.00` |
 | `lines[].costCenterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].profitCenterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].assetId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].fxRate` | No | `string` | Sin restricción adicional declarada | Tipo de cambio a moneda base | `3.75` |
 | `lines[].amountBase` | No | `string` | Sin restricción adicional declarada | Importe convertido a moneda base | `375.00` |
@@ -2817,6 +2820,7 @@ Content-Type: application/json
       "amount": "100.00",
       "costCenterId": "00000000-0000-4000-8000-000000000001",
       "profitCenterId": "00000000-0000-4000-8000-000000000001",
+      "assetId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001",
       "fxRate": "3.75",
       "amountBase": "375.00",
@@ -2828,6 +2832,7 @@ Content-Type: application/json
       "amount": "100.00",
       "costCenterId": "00000000-0000-4000-8000-000000000001",
       "profitCenterId": "00000000-0000-4000-8000-000000000001",
+      "assetId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001",
       "fxRate": "3.75",
       "amountBase": "375.00",
@@ -2994,6 +2999,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "transactionDate": "2026-07-31",
   "fiscalPeriodId": "00000000-0000-4000-8000-000000000001",
   "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "status": "DRAFT",
   "currencyConceptId": "00000000-0000-4000-8000-000000000001",
   "totalAmount": "valor-ejemplo",
   "postedAt": "2026-07-31T12:00:00.000Z",
@@ -3005,6 +3011,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "directionConceptId": "00000000-0000-4000-8000-000000000001",
       "amountBase": "valor-ejemplo",
       "costCenterId": "00000000-0000-4000-8000-000000000001",
+      "profitCenterId": "00000000-0000-4000-8000-000000000001",
+      "assetId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001"
     }
   ]
@@ -3021,16 +3029,19 @@ Campos de la respuesta:
 | `transactionDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `fiscalPeriodId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | No | `string` | valores: `DRAFT`, `AUTO_CLASSIFIED`, `PENDING_REVIEW`, `APPROVED`, `POSTED`, `REVERSED`; admite null | Código del estado en la máquina C-17 (borrador, posteado, reversado…) | `DRAFT` |
 | `currencyConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `totalAmount` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `postedAt` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
-| `lines` | Sí | `array<LedgerEntryItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","lineNo":1,"accountId":"00000000-0000-4000-8000-000000000001","directionConceptId":"00000000-0000-4000-8000-000000000001","amountBase":"valor-ejemplo","costCenterId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `lines` | Sí | `array<LedgerEntryItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","lineNo":1,"accountId":"00000000-0000-4000-8000-000000000001","directionConceptId":"00000000-0000-4000-8000-000000000001","amountBase":"valor-ejemplo","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","assetId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001"}]` |
 | `lines[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].lineNo` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `lines[].accountId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].directionConceptId` | Sí | `string` | formato `uuid` | Debe o haber. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].amountBase` | Sí | `string` | Sin restricción adicional declarada | Importe en moneda base, decimal como texto | `valor-ejemplo` |
 | `lines[].costCenterId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].profitCenterId` | No | `string` | formato `uuid`; admite null | Centro de beneficio imputado a la línea, si lo tiene. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].assetId` | No | `string` | formato `uuid`; admite null | Activo fijo imputado a la línea, si lo tiene. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].currencyConceptId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -4125,12 +4136,13 @@ Content-Type: application/json
 | `reference` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `sourceDocumentType` | No | `string` | longitud máxima 40 | Tipo del documento origen (p. ej. INVOICE, APPOINTMENT, EXPENSE) | `valor-ejemplo` |
 | `sourceDocumentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `lines` | Sí | `array<LedgerLineDto>` | mínimo 2 elemento(s) | Líneas balanceadas (>=2) | `[{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"},{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"}]` |
+| `lines` | Sí | `array<LedgerLineDto>` | mínimo 2 elemento(s) | Líneas balanceadas (>=2) | `[{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","assetId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"},{"accountId":"00000000-0000-4000-8000-000000000001","direction":"DEBIT","amount":"100.00","costCenterId":"00000000-0000-4000-8000-000000000001","profitCenterId":"00000000-0000-4000-8000-000000000001","assetId":"00000000-0000-4000-8000-000000000001","currencyConceptId":"00000000-0000-4000-8000-000000000001","fxRate":"3.75","amountBase":"375.00","memo":"valor-ejemplo"}]` |
 | `lines[].accountId` | Sí | `string` | formato `uuid` | Cuenta contable postable | `00000000-0000-4000-8000-000000000001` |
 | `lines[].direction` | Sí | `string` | valores: `DEBIT`, `CREDIT` | Dirección de la partida | `DEBIT` |
 | `lines[].amount` | Sí | `string` | patrón runtime `POSITIVE_AMOUNT_REGEX` | Importe positivo de la línea | `100.00` |
 | `lines[].costCenterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].profitCenterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines[].assetId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].currencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines[].fxRate` | No | `string` | Sin restricción adicional declarada | Tipo de cambio a moneda base | `3.75` |
 | `lines[].amountBase` | No | `string` | Sin restricción adicional declarada | Importe convertido a moneda base | `375.00` |
@@ -4163,6 +4175,7 @@ Content-Type: application/json
       "amount": "100.00",
       "costCenterId": "00000000-0000-4000-8000-000000000001",
       "profitCenterId": "00000000-0000-4000-8000-000000000001",
+      "assetId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001",
       "fxRate": "3.75",
       "amountBase": "375.00",
@@ -4174,6 +4187,7 @@ Content-Type: application/json
       "amount": "100.00",
       "costCenterId": "00000000-0000-4000-8000-000000000001",
       "profitCenterId": "00000000-0000-4000-8000-000000000001",
+      "assetId": "00000000-0000-4000-8000-000000000001",
       "currencyConceptId": "00000000-0000-4000-8000-000000000001",
       "fxRate": "3.75",
       "amountBase": "375.00",

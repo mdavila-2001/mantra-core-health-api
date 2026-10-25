@@ -91,6 +91,22 @@ const SIN_ROLES_AUTORIZADOS = [
     endpoints: ['POST :noticeId/read'],
   },
   {
+    file: 'src/modules/practice/controllers/practices.controller.ts',
+    why: 'Membresía administrativa en la organización de la ruta: `ClinicalStructureService.publishHealthcareService` y `HealthcareServiceOffersService.updateOffer` llaman a `PracticeAdministrationService.assertCanAdministerPractice` antes de leer o escribir nada (404 si la práctica no existe, 403 si el actor administra otra organización; pasan los roles de plataforma).',
+    endpoints: [
+      'POST :practiceId/healthcare-services',
+      'PATCH :practiceId/healthcare-services/:id',
+    ],
+    file: 'src/modules/practice/controllers/practice-invitations.controller.ts',
+    why: 'Membresía administrativa en la organización de la ruta: `PracticeAffiliationInvitationsService.invite` llama a `PracticeAdministrationService.assertCanAdministerPractice` antes de leer nada (403 si el actor administra otra organización; pasan los roles de plataforma). Un rol global dejaría invitar al administrador de otro centro.',
+    endpoints: ['POST :practiceId/role-assignments/invitations'],
+  },
+  {
+    file: 'src/modules/practice/controllers/role-assignments.controller.ts',
+    why: 'Membresía administrativa en la organización dueña de la vinculación: `PracticeWorkforceService.approveAssignment`/`rejectAssignment` cargan la fila y llaman a `PracticeAdministrationService.assertCanAdministerPractice` (404 si no existe, 403 si el actor administra otra organización; pasan los roles de plataforma) antes de cambiar el estado.',
+    endpoints: ['POST :roleId/approve', 'POST :roleId/reject'],
+  },
+  {
     file: 'src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts',
     why: 'Autoservicio del profesional: `PractitionerSignatureAssetsService.setOwn` resuelve el perfil con `requireOwnPractitionerProfileId` y valida que los archivos sean utilizables por el actor.',
     endpoints: ['PUT '],

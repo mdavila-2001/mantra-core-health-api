@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1542 de 1542 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1549 de 1549 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -45,6 +45,7 @@ Se documentan **1542 de 1542 endpoints** en **72 módulos**. La referencia compl
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |
 | `lakehouse` | 13 | [Abrir referencia](endpoints/lakehouse.md) |
 | `marketing` | 15 | [Abrir referencia](endpoints/marketing.md) |
+| `medical_centers` | 2 | [Abrir referencia](endpoints/medical-centers.md) |
 | `medical_groups` | 9 | [Abrir referencia](endpoints/medical-groups.md) |
 | `messaging` | 20 | [Abrir referencia](endpoints/messaging.md) |
 | `object_storage` | 14 | [Abrir referencia](endpoints/object-storage.md) |
@@ -56,7 +57,7 @@ Se documentan **1542 de 1542 endpoints** en **72 módulos**. La referencia compl
 | `pharmacy_inventory` | 29 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
-| `practice` | 30 | [Abrir referencia](endpoints/practice.md) |
+| `practice` | 35 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 32 | [Abrir referencia](endpoints/procedures-perioperative.md) |
 | `profiles` | 57 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 19 | [Abrir referencia](endpoints/promotions.md) |

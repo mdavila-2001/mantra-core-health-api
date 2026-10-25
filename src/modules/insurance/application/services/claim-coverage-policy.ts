@@ -9,6 +9,7 @@ import {
   InsuranceClaimLines,
   InsuranceClaims,
   InsurancePlanBenefits,
+  PatientCoverages,
   PriorAuthorizationDeterminations,
   PriorAuthorizationItems,
   PriorAuthorizationRequests,
@@ -37,6 +38,7 @@ export const CLAIM_COVERAGE_REASON = {
   PRIOR_AUTH_EXPIRED: 'PRIOR_AUTHORIZATION_EXPIRED',
   PRIOR_AUTH_AMOUNT_EXCEEDED: 'PRIOR_AUTHORIZATION_AMOUNT_EXCEEDED',
   PATIENT_SHARE_MISMATCH: 'PATIENT_SHARE_MISMATCH',
+  COVERAGE_PLAN_MISMATCH: 'COVERAGE_PLAN_MISMATCH',
 } as const;
 
 /** Lo que el cobro declara de cada línea. */
@@ -142,6 +144,7 @@ export class ClaimCoveragePolicy {
     tx: EntityManager,
     claim: ClaimToEvaluate,
   ): Promise<EvaluatedClaimLine[]> {
+    await this.assertCoverageOfPlan(tx, claim);
     const evaluated: EvaluatedClaimLine[] = [];
     // Lo que este mismo cobro ya cargó contra cada ítem de la aprobación: dos
     // líneas no pueden repartirse un tope que cada una por separado no supera.
@@ -207,6 +210,7 @@ export class ClaimCoveragePolicy {
   ): Promise<QuotedCoverageLine> {
     let benefit: InsurancePlanBenefits;
     try {
+      await this.assertCoverageOfPlan(em, claim);
       benefit = await this.benefitFor(em, claim, line);
     } catch (error) {
       const rejection = asRejection(error);
@@ -273,6 +277,31 @@ export class ClaimCoveragePolicy {
       reason: rejection?.reason ?? null,
       message: rejection?.message ?? null,
     };
+  }
+
+  /**
+   * La cobertura existe y es de este plan.
+   *
+   * La política no confía en que quien la llama haya emparejado bien el plan y
+   * la cobertura: los beneficios que reparten el monto salen de `planId`, y la
+   * aprobación previa se ata a `patientCoverageId`. Si fueran de planes
+   * distintos, el reparto se calcularía con las condiciones de un plan ajeno al
+   * paciente (y a la cadena aseguradora → organización que lo respalda). El
+   * paciente no se compara aparte: lo fija la cobertura, que es suya.
+   */
+  private async assertCoverageOfPlan(
+    tx: EntityManager,
+    claim: ClaimToEvaluate,
+  ): Promise<void> {
+    const coverage = await tx.findOne(PatientCoverages, {
+      id: claim.patientCoverageId,
+    });
+    if (!coverage || coverage.insurancePlanId !== claim.planId) {
+      throw new PreconditionFailedException(
+        'La cobertura del paciente no corresponde al plan del cobro',
+        { reason: CLAIM_COVERAGE_REASON.COVERAGE_PLAN_MISMATCH },
+      );
+    }
   }
 
   /** El único beneficio vigente del plan para el servicio de la línea. */

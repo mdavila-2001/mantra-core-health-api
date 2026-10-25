@@ -1,3 +1,4 @@
+import { SuggestedSiteNamesReader } from '../../clinical/services/suggested-site-names.reader';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -27,11 +28,13 @@ export class DiagnosticsOrdersService {
    *
    * @param em - Contexto de persistencia.
    * @param ordersRepo - Acceso a órdenes e informes diagnósticos.
+   * @param siteNames - Nombre de la sede sugerida en cada orden.
    * @param logger - Registro estructurado.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly ordersRepo: DiagnosticOrdersRepository,
+    private readonly siteNames: SuggestedSiteNamesReader,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DiagnosticsOrdersService.name);
@@ -77,10 +80,15 @@ export class DiagnosticsOrdersService {
     ]);
 
     const truncated: string[] = [];
+    const visibleOrders = this.cut(orders, limit, 'orders', truncated);
+    const suggestedSiteNames = await this.siteNames.namesFor(
+      em,
+      visibleOrders.map((row) => row.suggestedPracticeSiteId),
+    );
 
     return {
       patientProfileId,
-      orders: this.cut(orders, limit, 'orders', truncated).map((row) => ({
+      orders: visibleOrders.map((row) => ({
         id: row.id,
         patientProfileId: row.patientProfileId,
         encounterId: row.encounterId,
@@ -90,6 +98,13 @@ export class DiagnosticsOrdersService {
         statusConceptId: row.statusConceptId,
         priorityConceptId: row.priorityConceptId,
         requesterProfileId: row.requesterProfileId,
+        performerSelectionConceptId: row.performerSelectionConceptId ?? null,
+        performerPractitionerProfileId:
+          row.performerPractitionerProfileId ?? null,
+        suggestedPracticeSiteId: row.suggestedPracticeSiteId ?? null,
+        suggestedPracticeSiteName: row.suggestedPracticeSiteId
+          ? (suggestedSiteNames.get(row.suggestedPracticeSiteId) ?? null)
+          : null,
         createdAt: row.createdAt,
         previousDiagnosticReportId: row.previousDiagnosticReportId,
         duplicateOverrideReason: row.duplicateOverrideReason,

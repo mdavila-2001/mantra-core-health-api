@@ -2019,6 +2019,29 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    CLIN.SERVICE_REQUEST_PERFORMER_SELF,
+    {
+      display: 'Lo realiza quien indica',
+      definition:
+        'El profesional que ordena es quien realiza el estudio o procedimiento.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_PERFORMER_ORGANIZATION,
+    {
+      display: 'Lo realiza un centro médico recomendado',
+      definition:
+        'El profesional recomienda un centro para realizarlo; el paciente puede elegir otro.',
+    },
+  ],
+  [
+    CLIN.SERVICE_REQUEST_PERFORMER_PATIENT_CHOICE,
+    {
+      display: 'Lo elige el paciente',
+      definition: 'El paciente decide dónde realizarlo.',
+    },
+  ],
+  [
     CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
     {
       display: 'Estudio por imagen',
