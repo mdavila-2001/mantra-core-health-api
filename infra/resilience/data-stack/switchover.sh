@@ -6,7 +6,9 @@
 #   switchover.sh test rollback   vuelve a las bases de Coolify
 #
 # Qué hace, en orden:
-#   1. Se niega si hay un despliegue de la API en curso o si el stack ya existe.
+#   1. Se niega si hay un despliegue de la API EN EJECUCIÓN o si el stack ya existe.
+#      Uno en cola no molesta: construye primero (~10 min) y el cambio tarda
+#      menos; además es el despliegue que tiene que correr después.
 #   2. Apaga el autodeploy de la API de ese entorno (lo reenciende quien mergea
 #      el compose con el perfil `embedded-data`; ver README).
 #   3. Anota conteos de control en postgres y mongo.
@@ -71,7 +73,7 @@ rollback() {
 [ -f "$ENVF" ] || { echo "falta $ENVF" >&2; exit 3; }
 [ -f "$MARK" ] && { echo "ya está hecho ($MARK existe)" >&2; exit 4; }
 [ -z "$(compose ps -aq 2>/dev/null)" ] || { echo "el stack $PROJECT ya tiene contenedores" >&2; exit 4; }
-busy="$(db "select count(*) from application_deployment_queues q join applications a on a.id::text=q.application_id where a.uuid='$UUID' and q.status in ('queued','in_progress')")"
+busy="$(db "select count(*) from application_deployment_queues q join applications a on a.id::text=q.application_id where a.uuid='$UUID' and q.status = 'in_progress'")"
 [ "$busy" = "0" ] || { echo "hay un despliegue de la API en curso: esperar" >&2; exit 5; }
 PG_OLD="$(coolify_container postgres)"; MONGO_OLD="$(coolify_container mongodb)"
 [ -n "$PG_OLD" ] && [ -n "$MONGO_OLD" ] || { echo "no encuentro las bases de Coolify" >&2; exit 6; }
