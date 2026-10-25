@@ -31,6 +31,7 @@ import {
   ClinicalPrescriptionPoliciesController,
   ClinicalRecordsController,
   ClinicalReadController,
+  ClinicalProcedureCentersController,
   ClinicalPrescriptionsController,
   ClinicalPrescriptionsPublicController,
   ClinicalPrescriptionExpiryController,
@@ -54,6 +55,7 @@ import {
   ReceivedServicesProjector,
   ReceivedServicesReadService,
   ClinicalReadService,
+  ProcedureCentersService,
   ClinicalNotificationsService,
   PrescriptionExpiryNoticesService,
   PrescriptionPdfService,
@@ -62,7 +64,11 @@ import {
   // `InsuranceModule` para que el detalle del reclamo la use sin importar
   // este módulo entero.
   DuplicateStudyDetector,
+  PerformerSelectionValidator,
+  PerformerSiteReader,
+  SuggestedSiteNamesReader,
 } from './services';
+import { PerformerSiteDbReader } from './services/performer-site-db.reader';
 import {
   CareEpisodesRepository,
   AppointmentsRepository,
@@ -80,9 +86,9 @@ import {
   PatientReportedHealthStatementsRepository,
   PrescriptionSignaturePoliciesRepository,
   ProceduresRepository,
+  ProcedureCentersReadRepository,
   ImmunizationsRepository,
   PrescriptionExpiryRepository,
-  ReceivedServicesRepository,
 } from './repositories';
 // Los dos repositorios con los que la lectura comprueba que una historia es de
 // quien la pide (carril 09). Se proveen acá —y no se importa el módulo de
@@ -175,6 +181,9 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ClinicalPrescriptionPoliciesController,
     ClinicalRecordsController,
     ClinicalReadController,
+    // Carril 19: `GET /clinical/me/procedure-centers`, la pestaña «Centros
+    // médicos» de la pantalla de la receta.
+    ClinicalProcedureCentersController,
     ClinicalPrescriptionsController,
     ClinicalPrescriptionsPublicController,
     // PAC-REC-002: `POST /clinical/internal/prescription-expiry-notices` (SYSTEM), el
@@ -184,6 +193,11 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
   providers: [
     // Repositorios
     FormInstanceOriginValidator,
+    // Recomendación de ejecutor de la orden: lee ofertas y afiliaciones de las
+    // sedes por el EntityManager, sin importar `PracticeModule`.
+    { provide: PerformerSiteReader, useClass: PerformerSiteDbReader },
+    PerformerSelectionValidator,
+    SuggestedSiteNamesReader,
     PersonAccountLinksRepository,
     PatientProfilesRepository,
     PatientPortalProxiesRepository,
@@ -205,9 +219,9 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     PatientReportedHealthStatementsRepository,
     PrescriptionSignaturePoliciesRepository,
     ProceduresRepository,
+    ProcedureCentersReadRepository,
     ImmunizationsRepository,
     PrescriptionExpiryRepository,
-    ReceivedServicesRepository,
     ClinicalNotesRepository,
     CarePlansRepository,
     DocumentsRepository,
@@ -237,6 +251,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     ReceivedServicesProjector,
     ReceivedServicesReadService,
     ClinicalReadService,
+    ProcedureCentersService,
     ClinicalNotificationsService,
     PrescriptionExpiryNoticesService,
     ClinicalRecordAccessGuard,

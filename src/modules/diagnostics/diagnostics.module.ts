@@ -39,6 +39,7 @@ import {
   DiagnosticsScopeService,
   DiagnosticsPatientAccessService,
 } from './services';
+import { SuggestedSiteNamesReader } from '../clinical/services/suggested-site-names.reader';
 import {
   SpecimensRepository,
   LabWorkRepository,
@@ -91,6 +92,8 @@ import {
     DiagnosticOrdersRepository,
     LabReceptionRepository,
     ClinicalRefsRepository,
+    // Nombre de la sede sugerida en la orden: lectura sin estado, se registra la clase.
+    SuggestedSiteNamesReader,
     // Servicios
     DiagnosticsSpecimensService,
     DiagnosticsLabService,

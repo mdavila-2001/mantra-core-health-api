@@ -825,19 +825,19 @@ Declarada en `src/modules/scheduling/domain/booking/booking-state-machine.ts:33`
 ```mermaid
 stateDiagram-v2
   [*] --> BOOKING_REQUESTED
-  BOOKING_REQUESTED --> BOOKING_PENDING_CONFIRMATION
-  BOOKING_REQUESTED --> BOOKING_CONFIRMED
-  BOOKING_REQUESTED --> BOOKING_CANCELLED
-  BOOKING_PENDING_CONFIRMATION --> BOOKING_CONFIRMED
-  BOOKING_PENDING_CONFIRMATION --> BOOKING_CANCELLED
-  BOOKING_CONFIRMED --> BOOKING_CHECKED_IN
-  BOOKING_CONFIRMED --> BOOKING_IN_PROGRESS
-  BOOKING_CONFIRMED --> BOOKING_CANCELLED
+  BOOKING_REQUESTED --> BOOKING_PENDING_CONFIRMATION : POST …/{id}/propose-schedule, POST …/{id}/request-info
+  BOOKING_REQUESTED --> BOOKING_CONFIRMED : POST …/{id}/accept
+  BOOKING_REQUESTED --> BOOKING_CANCELLED : POST …/{id}/cancel, POST …/{id}/reject, POST …/{id}/close-slots +2
+  BOOKING_PENDING_CONFIRMATION --> BOOKING_CONFIRMED : POST …/{id}/accept
+  BOOKING_PENDING_CONFIRMATION --> BOOKING_CANCELLED : POST …/{id}/cancel, POST …/{id}/reject, POST …/{id}/close-slots +2
+  BOOKING_CONFIRMED --> BOOKING_CHECKED_IN : POST …/{id}/check-in
+  BOOKING_CONFIRMED --> BOOKING_IN_PROGRESS : POST …/appointments/walk-in, POST …/{id}/start
+  BOOKING_CONFIRMED --> BOOKING_CANCELLED : POST …/{id}/cancel, POST …/{id}/reject, POST …/{id}/close-slots +2
   BOOKING_CONFIRMED --> BOOKING_NO_SHOW
-  BOOKING_CHECKED_IN --> BOOKING_IN_PROGRESS
-  BOOKING_CHECKED_IN --> BOOKING_CANCELLED
+  BOOKING_CHECKED_IN --> BOOKING_IN_PROGRESS : POST …/appointments/walk-in, POST …/{id}/start
+  BOOKING_CHECKED_IN --> BOOKING_CANCELLED : POST …/{id}/cancel, POST …/{id}/reject, POST …/{id}/close-slots +2
   BOOKING_CHECKED_IN --> BOOKING_NO_SHOW
-  BOOKING_IN_PROGRESS --> BOOKING_COMPLETED
+  BOOKING_IN_PROGRESS --> BOOKING_COMPLETED : POST …/{id}/complete
   BOOKING_CANCELLED --> [*]
   BOOKING_NO_SHOW --> [*]
   BOOKING_COMPLETED --> [*]
@@ -847,18 +847,18 @@ stateDiagram-v2
 
 | Operación | Estados de destino que nombra | A través de |
 |---|---|---|
-| POST /scheduling/appointments/walk-in | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/accept | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/cancel | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/check-in | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/complete | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/propose-schedule | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/reject | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/request-info | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/bookings/{id}/start | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/resources/{id}/close-slots | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| POST /scheduling/resources/{id}/exceptions | sin destino nombrado | BookingTransitionRecorder.assertTransition |
-| DELETE /scheduling/templates/{id} | sin destino nombrado | BookingTransitionRecorder.assertTransition |
+| POST /scheduling/appointments/walk-in | BOOKING_IN_PROGRESS | StartAppointmentUseCase.executeInTransaction → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/accept | BOOKING_CONFIRMED | AcceptBookingUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/cancel | BOOKING_CANCELLED | CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/check-in | BOOKING_CHECKED_IN | CheckInBookingUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/complete | BOOKING_COMPLETED | CompleteAppointmentUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/propose-schedule | BOOKING_PENDING_CONFIRMATION | ProposeScheduleUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/reject | BOOKING_CANCELLED | CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/request-info | BOOKING_PENDING_CONFIRMATION | RequestBookingInfoUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/bookings/{id}/start | BOOKING_IN_PROGRESS | StartAppointmentUseCase.execute → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/resources/{id}/close-slots | BOOKING_CANCELLED | CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.assertTransition |
+| POST /scheduling/resources/{id}/exceptions | BOOKING_CANCELLED | CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.assertTransition |
+| DELETE /scheduling/templates/{id} | BOOKING_CANCELLED | CancelBookingUseCase.cancelInTransaction → BookingTransitionRecorder.assertTransition |
 
 ## Árbol de decisión por operación
 
@@ -3678,7 +3678,7 @@ Listar las excepciones de disponibilidad de un recurso
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta agenda es de otro profesional: solo la administra quien atiende en ella.; ForbiddenException: No puede ver los bloqueos de esta agenda |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Recurso no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana debe empezar antes de terminar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana no es una fecha válida; PreconditionFailedException: La ventana debe empezar antes de terminar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3690,45 +3690,49 @@ flowchart TD
   n2 --> n3
   n4["Llama a ListExceptionsUseCase.execute"]:::llamada
   n3 --> n4
-  n5{"!(from ‹ to)"}:::decision
+  n5{"Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())"}:::decision
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED La ventana debe empezar antes de terminar"]):::error
+  n6(["422 PRECONDITION_FAILED La ventana no es una fecha válida"]):::error
   n5 -->|"sí"| n6
-  n7["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n7{"!(from ‹ to)"}:::decision
   n5 -->|"no"| n7
-  n8[("LEE scheduling.schedulable_resources")]:::efecto
-  n7 --> n8
-  n9{"!resource"}:::decision
-  n8 --> n9
-  n10(["404 NOT_FOUND Recurso no encontrado"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a CatalogAccess.mayAdministerResource"]:::llamada
-  n9 -->|"no"| n11
-  n12["Intenta"]:::intento
-  n11 --> n12
-  n13["Llama a CatalogAccess.assertActorResource"]:::llamada
-  n12 --> n13
-  n14{"!isOwnAgenda"}:::decision
+  n8(["422 PRECONDITION_FAILED La ventana debe empezar antes de terminar"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n7 -->|"no"| n9
+  n10[("LEE scheduling.schedulable_resources")]:::efecto
+  n9 --> n10
+  n11{"!resource"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Recurso no encontrado"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a CatalogAccess.mayAdministerResource"]:::llamada
+  n11 -->|"no"| n13
+  n14["Intenta"]:::intento
   n13 --> n14
-  n15(["403 FORBIDDEN Esta agenda es de otro profesional: solo la administra quien atiende en ella."]):::error
-  n14 -->|"sí"| n15
-  n16{"!mayRead && actor.patientProfileId !== undefined"}:::decision
-  n14 -->|"no"| n16
-  n17["Llama a SchedulingCatalogRepository.patientHasBookingWithResource"]:::llamada
+  n15["Llama a CatalogAccess.assertActorResource"]:::llamada
+  n14 --> n15
+  n16{"!isOwnAgenda"}:::decision
+  n15 --> n16
+  n17(["403 FORBIDDEN Esta agenda es de otro profesional: solo la administra quien atiende en ella."]):::error
   n16 -->|"sí"| n17
-  n18[("LEE scheduling.appointment_bookings")]:::efecto
-  n17 --> n18
-  n19{"!mayRead"}:::decision
-  n18 --> n19
-  n16 -->|"no"| n19
-  n20(["403 FORBIDDEN No puede ver los bloqueos de esta agenda"]):::error
-  n19 -->|"sí"| n20
-  n21["Llama a SchedulingCatalogRepository.findExceptionsByResourceInRange"]:::llamada
-  n19 -->|"no"| n21
-  n22[("LEE scheduling.availability_exceptions")]:::efecto
-  n21 --> n22
-  n23(("200 Responde con éxito")):::ok
-  n22 --> n23
+  n18{"!mayRead && actor.patientProfileId !== undefined"}:::decision
+  n16 -->|"no"| n18
+  n19["Llama a SchedulingCatalogRepository.patientHasBookingWithResource"]:::llamada
+  n18 -->|"sí"| n19
+  n20[("LEE scheduling.appointment_bookings")]:::efecto
+  n19 --> n20
+  n21{"!mayRead"}:::decision
+  n20 --> n21
+  n18 -->|"no"| n21
+  n22(["403 FORBIDDEN No puede ver los bloqueos de esta agenda"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a SchedulingCatalogRepository.findExceptionsByResourceInRange"]:::llamada
+  n21 -->|"no"| n23
+  n24[("LEE scheduling.availability_exceptions")]:::efecto
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n24 --> n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

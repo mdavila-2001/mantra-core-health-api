@@ -7,6 +7,7 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -546,7 +547,7 @@ export class IdentityCasesService {
     );
     // El barrido global es del proceso interno con identidad de servicio
     // explícita (`SYSTEM`); un `SECURITY_ADMIN` barre sólo los casos de su tenant.
-    const systemSweep = actor.roles.includes('SYSTEM');
+    const systemSweep = roleAuthorizesInTenant(actor, 'SYSTEM', undefined);
     const tenantId = systemSweep ? undefined : requireTenantId();
     return this.em.transactional(async (tx) => {
       const now = new Date();

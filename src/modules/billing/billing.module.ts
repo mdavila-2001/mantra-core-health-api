@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
+import { CommonModule } from '../common/common.module';
 import { PracticeModule } from '../practice/practice.module';
 import { SurveysModule } from '../surveys/surveys.module';
 import {
@@ -55,6 +56,9 @@ import {
     // satisfacción por defecto de un servicio médico nuevo, en la misma
     // transacción que lo da de alta.
     SurveysModule,
+    // Bytes de la imagen de un servicio (P-22-8): la autorización por contexto
+    // la decide `billing`; `common` solo los sirve.
+    CommonModule,
   ],
   controllers: [
     BillingReceivablesController,

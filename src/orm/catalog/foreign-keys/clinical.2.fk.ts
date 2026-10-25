@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `clinical` (parte 2/2).
- * 46 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 49 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalForeignKeys2: readonly ForeignKeyTuple[] = [
@@ -39,10 +39,13 @@ export const clinicalForeignKeys2: readonly ForeignKeyTuple[] = [
   ['service_requests', 'form_instance_id', 'forms', 'form_instances', 'id'],
   ['service_requests', 'intent_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['service_requests', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['service_requests', 'performer_practitioner_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['service_requests', 'performer_selection_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['service_requests', 'performer_tenant_id', 'directory', 'tenants', 'id'],
   ['service_requests', 'priority_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['service_requests', 'requester_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
   ['service_requests', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['service_requests', 'suggested_practice_site_id', 'practice', 'practice_sites', 'id'],
   ['service_requests', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['social_history', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['social_history', 'created_by_user_id', 'iam', 'users', 'id'],

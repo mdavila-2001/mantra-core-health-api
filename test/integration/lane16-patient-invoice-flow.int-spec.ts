@@ -106,6 +106,9 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
   const coverageId = randomUUID();
   const benefitIds: string[] = [];
   const paymentIds: string[] = [];
+  // Plan y cobertura extra de las pruebas de alcance (se retiran al final).
+  const extraPlanIds: string[] = [];
+  const extraCoverageIds: string[] = [];
 
   // Colaboradores.
   const events: Array<{ eventType: string; payloadJson: any }> = [];
@@ -156,19 +159,23 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
     lines: Array<{ serviceConceptId: string; billedAmount: string }>,
     extra: Record<string, unknown> = {},
   ) {
-    const created = await claims.submitClaim(
-      {
-        insuranceCarrierId: carrier,
-        patientCoverageId: coverageId,
-        billingProviderEntityId: practice,
-        claimIdentifier: `${mark}-${randomUUID().slice(0, 6)}`,
-        lines: lines.map((line, index) => ({
-          lineSequence: index + 1,
-          ...line,
-        })),
-        ...extra,
-      } as never,
-      biller(),
+    // `assertProviderClaimScope` resuelve las prácticas del tenant del contexto: sin él
+    // (como en una petición sin `X-Tenant-Id`) el reclamo directo se rechaza con TENANT_REQUIRED.
+    const created = await inTenant(() =>
+      claims.submitClaim(
+        {
+          insuranceCarrierId: carrier,
+          patientCoverageId: coverageId,
+          billingProviderEntityId: practice,
+          claimIdentifier: `${mark}-${randomUUID().slice(0, 6)}`,
+          lines: lines.map((line, index) => ({
+            lineSequence: index + 1,
+            ...line,
+          })),
+          ...extra,
+        } as never,
+        biller(),
+      ),
     );
     const claimLines = await all<{ id: string; line_sequence: number }>(
       'select id, line_sequence from insurance.insurance_claim_lines where insurance_claim_id = ? order by line_sequence',
@@ -546,9 +553,19 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
           benefitIds,
         );
       }
+      for (const id of extraCoverageIds) {
+        await attempt('delete from insurance.patient_coverages where id = ?', [
+          id,
+        ]);
+      }
       await attempt('delete from insurance.patient_coverages where id = ?', [
         coverageId,
       ]);
+      for (const id of extraPlanIds) {
+        await attempt('delete from insurance.insurance_plans where id = ?', [
+          id,
+        ]);
+      }
       await attempt('delete from insurance.insurance_plans where id = ?', [
         ids.plan,
       ]);
@@ -594,6 +611,144 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
       );
     }
     await orm?.close(true);
+  });
+
+  describe('reparto paciente/aseguradora y alcance del cobro directo (REQ-16-023 a 025)', () => {
+    const claimsWith = async (identifier: string) =>
+      count(
+        'select count(*)::int as n from insurance.insurance_claims where claim_identifier = ?',
+        [identifier],
+      );
+    const partOfPatient = async (claimId: string) =>
+      (
+        await all<{ p: string; b: string }>(
+          `select patient_responsibility_amount::text as p, billed_amount::text as b
+             from insurance.insurance_claim_lines where insurance_claim_id = ?`,
+          [claimId],
+        )
+      )[0];
+    const lineOf = (extra: Record<string, unknown> = {}) => [
+      {
+        lineSequence: 1,
+        serviceConceptId: consultConcept,
+        billedAmount: '500.00',
+        ...extra,
+      },
+    ];
+
+    it('caso feliz: 500 Bs, copago 50, 80 % guarda 140 del paciente aunque el cliente no lo mande', async () => {
+      const { claimId } = await submitClaim([
+        { serviceConceptId: consultConcept, billedAmount: '500.00' },
+      ]);
+      expect(await partOfPatient(claimId)).toEqual({
+        p: '140.00',
+        b: '500.00',
+      });
+    });
+
+    it('caso feliz: el cliente declara 140.00, coincide con el plan y se guarda', async () => {
+      const { claimId } = await submitClaim([
+        {
+          serviceConceptId: consultConcept,
+          billedAmount: '500.00',
+          patientResponsibilityAmount: '140.00',
+        } as never,
+      ]);
+      expect((await partOfPatient(claimId)).p).toBe('140.00');
+    });
+
+    it('monto inflado: el cliente declara 300 y el servidor responde 422 PATIENT_SHARE_MISMATCH sin guardar nada', async () => {
+      const identifier = `${mark}-inflado`;
+      const error = await failureOf(
+        inTenant(() =>
+          claims.submitClaim(
+            {
+              insuranceCarrierId: carrier,
+              patientCoverageId: coverageId,
+              billingProviderEntityId: practice,
+              claimIdentifier: identifier,
+              lines: lineOf({ patientResponsibilityAmount: '300.00' }),
+            } as never,
+            biller(),
+          ),
+        ),
+      );
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(error.getStatus()).toBe(422);
+      expect(reasonOf(error)).toBe('PATIENT_SHARE_MISMATCH');
+      expect(error.details).toMatchObject({
+        declaredPatientAmount: '300.00',
+        expectedPatientAmount: '140.00',
+      });
+      expect(await claimsWith(identifier)).toBe(0);
+    });
+
+    it('la práctica de otra organización no puede cobrar: 403 y no se guarda nada', async () => {
+      const identifier = `${mark}-otra-organizacion`;
+      const error = await failureOf(
+        runWithTenant(randomUUID(), () =>
+          claims.submitClaim(
+            {
+              insuranceCarrierId: carrier,
+              patientCoverageId: coverageId,
+              billingProviderEntityId: practice,
+              claimIdentifier: identifier,
+              lines: lineOf(),
+            } as never,
+            biller(),
+          ),
+        ),
+      );
+      expect(error).toBeInstanceOf(ForbiddenException);
+      expect(await claimsWith(identifier)).toBe(0);
+    });
+
+    it('una cobertura de otro plan no se contrasta con los beneficios de este: 422 COVERAGE_PLAN_MISMATCH', async () => {
+      const otherPlan = randomUUID();
+      const otherCoverage = randomUUID();
+      extraPlanIds.push(otherPlan);
+      extraCoverageIds.push(otherCoverage);
+      await run(
+        `insert into insurance.insurance_plans
+           (id, insurance_product_id, plan_code, name, status_concept_id, created_at, updated_at)
+         values (?, ?, ?, ?, ?, now(), now())`,
+        [otherPlan, ids.product, `${mark}-2`, `${mark}-2`, INS.PLAN_ACTIVE],
+      );
+      await run(
+        `insert into insurance.patient_coverages
+           (id, patient_profile_id, insurance_plan_id, member_identifier,
+            verification_status_concept_id, status_concept_id, created_at, updated_at)
+         values (?, ?, ?, ?, ?, ?, now(), now())`,
+        [
+          otherCoverage,
+          patient,
+          otherPlan,
+          `${mark}-2`,
+          INS.VERIFY_VERIFIED,
+          INS.CARRIER_ACTIVE,
+        ],
+      );
+      const policy = new ClaimCoveragePolicy();
+      const evaluate = (planId: string, patientCoverageId: string) =>
+        orm.em.fork().transactional((tx) =>
+          policy.evaluate(tx, {
+            planId,
+            patientCoverageId,
+            lines: lineOf(),
+            at: new Date(),
+          }),
+        );
+
+      // El par correcto reparte con los beneficios del plan.
+      expect(await evaluate(plan, coverageId)).toHaveLength(1);
+      // La cobertura de OTRO plan, ni existe ni vale para este plan.
+      expect(reasonOf(await failureOf(evaluate(plan, otherCoverage)))).toBe(
+        'COVERAGE_PLAN_MISMATCH',
+      );
+      expect(reasonOf(await failureOf(evaluate(plan, randomUUID())))).toBe(
+        'COVERAGE_PLAN_MISMATCH',
+      );
+    });
   });
 
   describe('cotización previa (REQ-16-026)', () => {

@@ -60,10 +60,10 @@ _Fuente: `src/modules/time_series/README.md:78`_
 | `UC-58-03` | Normalizar y promover a clinical.observations | POST /ts/normalize/run | SYSTEM · PLATFORM_ADMIN | MEDIO | 9 |
 | `UC-58-04` | Hypertable y chunks | POST /ts/admin/hypertables | DATA_PLATFORM_ADMIN · PLATFORM_ADMIN | BAJO | 0 |
 |  |  | PATCH /ts/admin/hypertables/{table} | DATA_PLATFORM_ADMIN · PLATFORM_ADMIN | BAJO | 0 |
-| `UC-58-05` | Comprimir chunks antiguos | POST /ts/admin/compression/run | SYSTEM · DATA_PLATFORM_ADMIN · PLATFORM_ADMIN | MEDIO | 4 |
-| `UC-58-06` | Descartar chunks fuera de ventana | POST /ts/admin/retention/policies | SYSTEM · DATA_PLATFORM_ADMIN · PLATFORM_ADMIN | MEDIO | 4 |
-| `UC-58-07` | Materializar agregado continuo | POST /ts/admin/rollups/{name}/refresh | SYSTEM · DATA_PLATFORM_ADMIN · PLATFORM_ADMIN | MEDIO | 4 |
-| `UC-58-08` | Rollup de conteos de auditoría | POST /ts/admin/rollups/audit-daily/refresh | SYSTEM · DATA_PLATFORM_ADMIN · PLATFORM_ADMIN | MEDIO | 4 |
+| `UC-58-05` | Comprimir chunks antiguos | POST /ts/admin/compression/run | SYSTEM · DATA_PLATFORM_ADMIN · PLATFORM_ADMIN | MEDIO | 5 |
+| `UC-58-06` | Descartar chunks fuera de ventana | POST /ts/admin/retention/policies | SYSTEM · DATA_PLATFORM_ADMIN · PLATFORM_ADMIN | MEDIO | 5 |
+| `UC-58-07` | Materializar agregado continuo | POST /ts/admin/rollups/{name}/refresh | SYSTEM · DATA_PLATFORM_ADMIN · PLATFORM_ADMIN | MEDIO | 5 |
+| `UC-58-08` | Rollup de conteos de auditoría | POST /ts/admin/rollups/audit-daily/refresh | SYSTEM · DATA_PLATFORM_ADMIN · PLATFORM_ADMIN | MEDIO | 5 |
 | `UC-58-09` | Rango con downsampling | GET /ts/series/{seriesId}/query | ANALYST · DATA_PLATFORM_ADMIN · SYSTEM · PLATFORM_ADMIN | BAJO | 0 |
 | `UC-58-10` | Eventos de publicidad con dedupe | POST /ts/ads/events/batch-ingest | INGEST_GATEWAY · SYSTEM · PLATFORM_ADMIN | MEDIO | 6 |
 | `UC-58-11` | Métricas de runtime y pipeline | POST /ts/metrics/{dataset}/batch-ingest | INGEST_GATEWAY · SYSTEM · PLATFORM_ADMIN | MEDIO | 4 |
@@ -79,7 +79,7 @@ flowchart LR
   a12(["SYSTEM · PLATFORM_ADMIN"]):::actor
   a17(["DATA_PLATFORM_ADMIN · PLATFORM_ADMIN"]):::actor
   a20(["SYSTEM · DATA_PLATFORM_ADMIN · PLATFORM_ADMIN"]):::actor
-  a28(["ANALYST · DATA_PLATFORM_ADMIN · SYSTEM · PLATFORM_ADMIN"]):::actor
+  a29(["ANALYST · DATA_PLATFORM_ADMIN · SYSTEM · PLATFORM_ADMIN"]):::actor
   t3[("messaging.domain_events")]:::tabla
   t4[("messaging.outbox_messages")]:::tabla
   t5[("time_series.ingestion_pipeline_metric_series")]:::tabla
@@ -88,17 +88,18 @@ flowchart LR
   e10>"DeviceRawReadingReceived"]:::evento
   t13[("clinical.observations")]:::tabla
   e15>"VitalNormalizedAndPromoted"]:::evento
-  e21>"ChunksCompressed"]:::evento
-  e23>"ChunksDropped"]:::evento
-  e25>"~name === 'continuous_audit_daily' ? 'AuditDailyR…"]:::evento
-  t30[("time_series.ads_delivery_event_series")]:::tabla
-  e31>"AdsEventsIngested"]:::evento
-  e33>"RuntimeMetricsIngested"]:::evento
-  e35>"GovernedBackfillApplied"]:::evento
-  t37[("consent.consents")]:::tabla
-  t38[("consent.processing_purposes")]:::tabla
-  t39[("iam.devices")]:::tabla
-  e41>"LocationPingsIngested"]:::evento
+  t21[("directory.tenants")]:::tabla
+  e22>"ChunksCompressed"]:::evento
+  e24>"ChunksDropped"]:::evento
+  e26>"~name === 'continuous_audit_daily' ? 'AuditDailyR…"]:::evento
+  t31[("time_series.ads_delivery_event_series")]:::tabla
+  e32>"AdsEventsIngested"]:::evento
+  e34>"RuntimeMetricsIngested"]:::evento
+  e36>"GovernedBackfillApplied"]:::evento
+  t38[("consent.consents")]:::tabla
+  t39[("consent.processing_purposes")]:::tabla
+  t40[("iam.devices")]:::tabla
+  e42>"LocationPingsIngested"]:::evento
   subgraph s0["UC-58-01 · Lote append-only de puntos"]
     o1["POST /ts/series/{seriesId}/points/batch-ingest"]:::op
   end
@@ -117,29 +118,29 @@ flowchart LR
     o19["POST /ts/admin/compression/run"]:::op
   end
   subgraph s5["UC-58-06 · Descartar chunks fuera de ventana"]
-    o22["POST /ts/admin/retention/policies"]:::op
+    o23["POST /ts/admin/retention/policies"]:::op
   end
   subgraph s6["UC-58-07 · Materializar agregado continuo"]
-    o24["POST /ts/admin/rollups/{name}/refresh"]:::op
+    o25["POST /ts/admin/rollups/{name}/refresh"]:::op
   end
   subgraph s7["UC-58-08 · Rollup de conteos de auditoría"]
-    o26["POST /ts/admin/rollups/audit-daily/refresh"]:::op
+    o27["POST /ts/admin/rollups/audit-daily/refresh"]:::op
   end
   subgraph s8["UC-58-09 · Rango con downsampling"]
-    o27["GET /ts/series/{seriesId}/query"]:::op
+    o28["GET /ts/series/{seriesId}/query"]:::op
   end
   subgraph s9["UC-58-10 · Eventos de publicidad con dedupe"]
-    o29["POST /ts/ads/events/batch-ingest"]:::op
+    o30["POST /ts/ads/events/batch-ingest"]:::op
   end
   subgraph s10["UC-58-11 · Métricas de runtime y pipeline"]
-    o32["POST /ts/metrics/{dataset}/batch-ingest"]:::op
+    o33["POST /ts/metrics/{dataset}/batch-ingest"]:::op
   end
   subgraph s11["UC-58-12 · Corrección append-only gobernada"]
-    o34["POST /ts/series/{seriesId}/backfill/governed"]:::op
+    o35["POST /ts/series/{seriesId}/backfill/governed"]:::op
   end
-  t40[("+3 tablas más")]
+  t41[("+3 tablas más")]
   subgraph s12["UC-58-13 · Pings de ubicación con consentimiento"]
-    o36["POST /ts/location/pings/batch-ingest"]:::op
+    o37["POST /ts/location/pings/batch-ingest"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -167,59 +168,63 @@ flowchart LR
   a17 --> o16
   a17 --> o18
   a20 --> o19
+  o19 -->|"LEE"| t21
   o19 -->|"CREA"| t3
   o19 -->|"CREA"| t4
   o19 -->|"LEE"| t4
   o19 -->|"CREA"| t5
-  o19 -->|"evento"| e21
-  a20 --> o22
-  o22 -->|"CREA"| t3
-  o22 -->|"CREA"| t4
-  o22 -->|"LEE"| t4
-  o22 -->|"CREA"| t5
-  o22 -->|"evento"| e23
-  a20 --> o24
-  o24 -->|"CREA"| t3
-  o24 -->|"CREA"| t4
-  o24 -->|"LEE"| t4
-  o24 -->|"CREA"| t5
-  o24 -->|"evento"| e25
-  a20 --> o26
-  o26 -->|"CREA"| t3
-  o26 -->|"CREA"| t4
-  o26 -->|"LEE"| t4
-  o26 -->|"CREA"| t5
-  o26 -->|"evento"| e25
-  a28 --> o27
-  a2 --> o29
-  o29 -->|"CREA"| t3
-  o29 -->|"CREA"| t4
-  o29 -->|"LEE"| t4
-  o29 -->|"CREA"| t30
-  o29 -->|"LEE"| t30
-  o29 -->|"CREA"| t5
-  o29 -->|"evento"| e31
-  a2 --> o32
-  o32 -->|"CREA"| t3
-  o32 -->|"CREA"| t4
-  o32 -->|"LEE"| t4
-  o32 -->|"CREA"| t5
-  o32 -->|"evento"| e33
-  a17 --> o34
-  o34 -->|"CREA"| t3
-  o34 -->|"CREA"| t4
-  o34 -->|"LEE"| t4
-  o34 -->|"CREA"| t5
-  o34 -->|"evento"| e35
-  a2 --> o36
-  o36 -->|"LEE"| t37
-  o36 -->|"LEE"| t38
-  o36 -->|"LEE"| t39
-  o36 -->|"CREA"| t3
-  o36 -->|"CREA"| t4
-  o36 -->|"LEE"| t4
-  o36 -.-> t40
-  o36 -->|"evento"| e41
+  o19 -->|"evento"| e22
+  a20 --> o23
+  o23 -->|"LEE"| t21
+  o23 -->|"CREA"| t3
+  o23 -->|"CREA"| t4
+  o23 -->|"LEE"| t4
+  o23 -->|"CREA"| t5
+  o23 -->|"evento"| e24
+  a20 --> o25
+  o25 -->|"LEE"| t21
+  o25 -->|"CREA"| t3
+  o25 -->|"CREA"| t4
+  o25 -->|"LEE"| t4
+  o25 -->|"CREA"| t5
+  o25 -->|"evento"| e26
+  a20 --> o27
+  o27 -->|"LEE"| t21
+  o27 -->|"CREA"| t3
+  o27 -->|"CREA"| t4
+  o27 -->|"LEE"| t4
+  o27 -->|"CREA"| t5
+  o27 -->|"evento"| e26
+  a29 --> o28
+  a2 --> o30
+  o30 -->|"CREA"| t3
+  o30 -->|"CREA"| t4
+  o30 -->|"LEE"| t4
+  o30 -->|"CREA"| t31
+  o30 -->|"LEE"| t31
+  o30 -->|"CREA"| t5
+  o30 -->|"evento"| e32
+  a2 --> o33
+  o33 -->|"CREA"| t3
+  o33 -->|"CREA"| t4
+  o33 -->|"LEE"| t4
+  o33 -->|"CREA"| t5
+  o33 -->|"evento"| e34
+  a17 --> o35
+  o35 -->|"CREA"| t3
+  o35 -->|"CREA"| t4
+  o35 -->|"LEE"| t4
+  o35 -->|"CREA"| t5
+  o35 -->|"evento"| e36
+  a2 --> o37
+  o37 -->|"LEE"| t38
+  o37 -->|"LEE"| t39
+  o37 -->|"LEE"| t40
+  o37 -->|"CREA"| t3
+  o37 -->|"CREA"| t4
+  o37 -->|"LEE"| t4
+  o37 -.-> t41
+  o37 -->|"evento"| e42
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -242,6 +247,7 @@ Comprimir los chunks más antiguos que el umbral
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La serie no declara por qué columnas se segmenta al comprimir. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | — | InternalServerErrorException: La segmentación de compresión declara una columna que no es válida. |
@@ -255,54 +261,62 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5{"!segmentBy"}:::decision
+  n5["Llama a TimescaleAdminService.assertTenantExists"]:::llamada
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED La serie no declara por qué columnas se segmenta al comprimir."]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a TimescaleRepository.enableCompression"]:::llamada
-  n5 -->|"no"| n7
-  n8["Repite: por cada const column de segmentBy.split(',')"]:::bucle
-  n7 --> n8
-  n9{"!SAFE_COLUMN.test(column.trim())"}:::decision
-  n8 -->|"cada elemento"| n9
-  n10(["500 La segmentación de compresión declara una columna que no es válida."]):::error
+  n6[("LEE directory.tenants")]:::efecto
+  n5 --> n6
+  n7{"!tenant"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Tenant no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9{"!segmentBy"}:::decision
+  n7 -->|"no"| n9
+  n10(["422 PRECONDITION_FAILED La serie no declara por qué columnas se segmenta al comprimir."]):::error
   n9 -->|"sí"| n10
-  n11["Llama a SeriesIngestRepository.createPipelineMetric"]:::llamada
+  n11["Llama a TimescaleRepository.enableCompression"]:::llamada
   n9 -->|"no"| n11
-  n8 -->|"al terminar"| n11
-  n12[("CREA time_series.ingestion_pipeline_metric_series")]:::efecto
+  n12["Repite: por cada const column de segmentBy.split(',')"]:::bucle
   n11 --> n12
-  n13{"toCompress.length › 0"}:::decision
-  n12 --> n13
-  n14["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n13{"!SAFE_COLUMN.test(column.trim())"}:::decision
+  n12 -->|"cada elemento"| n13
+  n14(["500 La segmentación de compresión declara una columna que no es válida."]):::error
   n13 -->|"sí"| n14
-  n15["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
-  n14 --> n15
-  n16["Transacción: startActiveSpan(…)"]:::transaccion
+  n15["Llama a SeriesIngestRepository.createPipelineMetric"]:::llamada
+  n13 -->|"no"| n15
+  n12 -->|"al terminar"| n15
+  n16[("CREA time_series.ingestion_pipeline_metric_series")]:::efecto
   n15 --> n16
-  n17["Intenta"]:::intento
+  n17{"toCompress.length › 0"}:::decision
   n16 --> n17
-  n18(["↩ (relanza el error capturado)"]):::error
-  n17 -->|"si falla"| n18
-  n19["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n17 --> n19
-  n20["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n18["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n17 -->|"sí"| n18
+  n19["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n18 --> n19
+  n20["Transacción: startActiveSpan(…)"]:::transaccion
   n19 --> n20
-  n21[("LEE messaging.outbox_messages")]:::efecto
+  n21["Intenta"]:::intento
   n20 --> n21
-  n22["Llama a OutboxRepository.createDomainEvent"]:::llamada
-  n21 --> n22
-  n23[("CREA messaging.domain_events")]:::efecto
-  n22 --> n23
-  n24["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n22(["↩ (relanza el error capturado)"]):::error
+  n21 -->|"si falla"| n22
+  n23["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n21 --> n23
+  n24["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n23 --> n24
-  n25[("CREA messaging.outbox_messages")]:::efecto
+  n25[("LEE messaging.outbox_messages")]:::efecto
   n24 --> n25
-  n26>"Evento ChunksCompressed"]:::evento
+  n26["Llama a OutboxRepository.createDomainEvent"]:::llamada
   n25 --> n26
-  n27(("200 Responde con éxito")):::ok
+  n27[("CREA messaging.domain_events")]:::efecto
   n26 --> n27
-  n13 -->|"no"| n27
+  n28["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n27 --> n28
+  n29[("CREA messaging.outbox_messages")]:::efecto
+  n28 --> n29
+  n30>"Evento ChunksCompressed"]:::evento
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
+  n17 -->|"no"| n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -402,6 +416,7 @@ Aplicar la retención descartando chunks fuera de ventana
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -413,41 +428,49 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a SeriesIngestRepository.createPipelineMetric"]:::llamada
+  n5["Llama a TimescaleAdminService.assertTenantExists"]:::llamada
   n4 --> n5
-  n6[("CREA time_series.ingestion_pipeline_metric_series")]:::efecto
+  n6[("LEE directory.tenants")]:::efecto
   n5 --> n6
-  n7{"dropped.length › 0"}:::decision
+  n7{"!tenant"}:::decision
   n6 --> n7
-  n8["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n8(["404 NOT_FOUND Tenant no encontrado"]):::error
   n7 -->|"sí"| n8
-  n9["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
-  n8 --> n9
-  n10["Transacción: startActiveSpan(…)"]:::transaccion
+  n9["Llama a SeriesIngestRepository.createPipelineMetric"]:::llamada
+  n7 -->|"no"| n9
+  n10[("CREA time_series.ingestion_pipeline_metric_series")]:::efecto
   n9 --> n10
-  n11["Intenta"]:::intento
+  n11{"dropped.length › 0"}:::decision
   n10 --> n11
-  n12(["↩ (relanza el error capturado)"]):::error
-  n11 -->|"si falla"| n12
-  n13["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n11 --> n13
-  n14["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n12["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n11 -->|"sí"| n12
+  n13["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n12 --> n13
+  n14["Transacción: startActiveSpan(…)"]:::transaccion
   n13 --> n14
-  n15[("LEE messaging.outbox_messages")]:::efecto
+  n15["Intenta"]:::intento
   n14 --> n15
-  n16["Llama a OutboxRepository.createDomainEvent"]:::llamada
-  n15 --> n16
-  n17[("CREA messaging.domain_events")]:::efecto
-  n16 --> n17
-  n18["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n16(["↩ (relanza el error capturado)"]):::error
+  n15 -->|"si falla"| n16
+  n17["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n15 --> n17
+  n18["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n17 --> n18
-  n19[("CREA messaging.outbox_messages")]:::efecto
+  n19[("LEE messaging.outbox_messages")]:::efecto
   n18 --> n19
-  n20>"Evento ChunksDropped"]:::evento
+  n20["Llama a OutboxRepository.createDomainEvent"]:::llamada
   n19 --> n20
-  n21(("200 Responde con éxito")):::ok
+  n21[("CREA messaging.domain_events")]:::efecto
   n20 --> n21
-  n7 -->|"no"| n21
+  n22["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n21 --> n22
+  n23[("CREA messaging.outbox_messages")]:::efecto
+  n22 --> n23
+  n24>"Evento ChunksDropped"]:::evento
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n24 --> n25
+  n11 -->|"no"| n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -466,6 +489,7 @@ Materializar la ventana de un agregado continuo
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: El rollup debe ser uno de: {ROLLUP_NAMES.join(', ')}. |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana a materializar tiene que empezar antes de terminar. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -484,40 +508,48 @@ flowchart TD
   n5 --> n6
   n7(["422 PRECONDITION_FAILED La ventana a materializar tiene que empezar antes de terminar."]):::error
   n6 -->|"sí"| n7
-  n8["Transacción: transactional(…)"]:::transaccion
+  n8["Llama a TimescaleAdminService.assertTenantExists"]:::llamada
   n6 -->|"no"| n8
-  n9["Llama a SeriesIngestRepository.createPipelineMetric"]:::llamada
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10[("CREA time_series.ingestion_pipeline_metric_series")]:::efecto
+  n10{"!tenant"}:::decision
   n9 --> n10
-  n11["Llama a OutboxService.publishDomainEvent"]:::llamada
-  n10 --> n11
-  n12["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
-  n11 --> n12
-  n13["Transacción: startActiveSpan(…)"]:::transaccion
+  n11(["404 NOT_FOUND Tenant no encontrado"]):::error
+  n10 -->|"sí"| n11
+  n12["Transacción: transactional(…)"]:::transaccion
+  n10 -->|"no"| n12
+  n13["Llama a SeriesIngestRepository.createPipelineMetric"]:::llamada
   n12 --> n13
-  n14["Intenta"]:::intento
+  n14[("CREA time_series.ingestion_pipeline_metric_series")]:::efecto
   n13 --> n14
-  n15(["↩ (relanza el error capturado)"]):::error
-  n14 -->|"si falla"| n15
-  n16["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n14 --> n16
-  n17["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n15["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n14 --> n15
+  n16["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n15 --> n16
+  n17["Transacción: startActiveSpan(…)"]:::transaccion
   n16 --> n17
-  n18[("LEE messaging.outbox_messages")]:::efecto
+  n18["Intenta"]:::intento
   n17 --> n18
-  n19["Llama a OutboxRepository.createDomainEvent"]:::llamada
-  n18 --> n19
-  n20[("CREA messaging.domain_events")]:::efecto
-  n19 --> n20
-  n21["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n19(["↩ (relanza el error capturado)"]):::error
+  n18 -->|"si falla"| n19
+  n20["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n18 --> n20
+  n21["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n20 --> n21
-  n22[("CREA messaging.outbox_messages")]:::efecto
+  n22[("LEE messaging.outbox_messages")]:::efecto
   n21 --> n22
-  n23>"Evento ~name === 'continuous_audit_daily' ? 'AuditDailyRollupRefreshed' : 'SliRollupMaterialized'"]:::evento
+  n23["Llama a OutboxRepository.createDomainEvent"]:::llamada
   n22 --> n23
-  n24(("200 Responde con éxito")):::ok
+  n24[("CREA messaging.domain_events")]:::efecto
   n23 --> n24
+  n25["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n24 --> n25
+  n26[("CREA messaging.outbox_messages")]:::efecto
+  n25 --> n26
+  n27>"Evento ~name === 'continuous_audit_daily' ? 'AuditDailyRollupRefreshed' : 'SliRollupMaterialized'"]:::evento
+  n26 --> n27
+  n28(("200 Responde con éxito")):::ok
+  n27 --> n28
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -536,6 +568,7 @@ Refrescar el rollup de conteos diarios de auditoría
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Tenant no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana a materializar tiene que empezar antes de terminar. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -550,40 +583,48 @@ flowchart TD
   n3 --> n4
   n5(["422 PRECONDITION_FAILED La ventana a materializar tiene que empezar antes de terminar."]):::error
   n4 -->|"sí"| n5
-  n6["Transacción: transactional(…)"]:::transaccion
+  n6["Llama a TimescaleAdminService.assertTenantExists"]:::llamada
   n4 -->|"no"| n6
-  n7["Llama a SeriesIngestRepository.createPipelineMetric"]:::llamada
+  n7[("LEE directory.tenants")]:::efecto
   n6 --> n7
-  n8[("CREA time_series.ingestion_pipeline_metric_series")]:::efecto
+  n8{"!tenant"}:::decision
   n7 --> n8
-  n9["Llama a OutboxService.publishDomainEvent"]:::llamada
-  n8 --> n9
-  n10["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
-  n9 --> n10
-  n11["Transacción: startActiveSpan(…)"]:::transaccion
+  n9(["404 NOT_FOUND Tenant no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10["Transacción: transactional(…)"]:::transaccion
+  n8 -->|"no"| n10
+  n11["Llama a SeriesIngestRepository.createPipelineMetric"]:::llamada
   n10 --> n11
-  n12["Intenta"]:::intento
+  n12[("CREA time_series.ingestion_pipeline_metric_series")]:::efecto
   n11 --> n12
-  n13(["↩ (relanza el error capturado)"]):::error
-  n12 -->|"si falla"| n13
-  n14["Llama a OutboxService.persistDomainEvent"]:::llamada
-  n12 --> n14
-  n15["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
+  n13["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n12 --> n13
+  n14["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n13 --> n14
+  n15["Transacción: startActiveSpan(…)"]:::transaccion
   n14 --> n15
-  n16[("LEE messaging.outbox_messages")]:::efecto
+  n16["Intenta"]:::intento
   n15 --> n16
-  n17["Llama a OutboxRepository.createDomainEvent"]:::llamada
-  n16 --> n17
-  n18[("CREA messaging.domain_events")]:::efecto
-  n17 --> n18
-  n19["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n17(["↩ (relanza el error capturado)"]):::error
+  n16 -->|"si falla"| n17
+  n18["Llama a OutboxService.persistDomainEvent"]:::llamada
+  n16 --> n18
+  n19["Llama a OutboxRepository.findOutboxByIdempotencyKey"]:::llamada
   n18 --> n19
-  n20[("CREA messaging.outbox_messages")]:::efecto
+  n20[("LEE messaging.outbox_messages")]:::efecto
   n19 --> n20
-  n21>"Evento ~name === 'continuous_audit_daily' ? 'AuditDailyRollupRefreshed' : 'SliRollupMaterialized'"]:::evento
+  n21["Llama a OutboxRepository.createDomainEvent"]:::llamada
   n20 --> n21
-  n22(("200 Responde con éxito")):::ok
+  n22[("CREA messaging.domain_events")]:::efecto
   n21 --> n22
+  n23["Llama a OutboxRepository.createOutboxMessage"]:::llamada
+  n22 --> n23
+  n24[("CREA messaging.outbox_messages")]:::efecto
+  n23 --> n24
+  n25>"Evento ~name === 'continuous_audit_daily' ? 'AuditDailyRollupRefreshed' : 'SliRollupMaterialized'"]:::evento
+  n24 --> n25
+  n26(("200 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

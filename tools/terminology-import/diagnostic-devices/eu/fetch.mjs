@@ -12,7 +12,7 @@
 // en alcance (en paralelo, páginas gzip) → EUDAMED /actors (fabricantes) →
 // Italia.
 //
-// Verificado en vivo (2026-10-24, ver docs/trabajo/…/evidencia/): el Data Lake
+// Verificado en vivo (2026-10-24, evidencia en el historial de git, commit 6bed69e1): el Data Lake
 // guarda NOMENCLATURE_CODE con un espacio inicial (" Z11040101"); el filtro
 // exacto sin ese espacio devuelve 0 filas. Páginas de hasta 1000 filas con
 // nextLink `$after=…` que conserva los filtros.

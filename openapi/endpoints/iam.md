@@ -398,13 +398,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1178,36 +1172,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | El código de organización ya existe | Excepción explícita en src/modules/iam/application/services/iam-organization-self-registration.service.ts |
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/application/services/iam-organization-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un tenant de tipo PAYER exige el bloque `payer` | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un tenant de tipo BROKER exige el bloque `broker` | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un tenant de tipo ${tenantType} exige país y jurisdicción | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | El tipo societario pertenece al derecho de ${entry!.countryIso} y no coincide con el país declarado | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | El bloque `payer` sólo corresponde a un tenant de tipo PAYER | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | El bloque `broker` sólo corresponde a un tenant de tipo BROKER | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | El bloque `diagnosticUnit` sólo corresponde a un tenant de tipo ' +           'DIAGNOSTIC_CENTER | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | El tipo de unidad diagnóstica declarado no es válido | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | Las sucursales sólo se declaran en una unidad de laboratorio clínico | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | Alguna modalidad declarada no pertenece al catálogo de modalidades diagnósticas | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | Los conceptos declarados no existen en el catálogo de terminología | Excepción explícita en src/modules/directory/services/tenant-type-profile.service.ts |
-| 422 | `PRECONDITION_FAILED` | Un mismo archivo no puede respaldar dos documentos distintos | Excepción explícita en src/modules/directory/services/tenant-affiliation-documents.service.ts |
-| 422 | `PRECONDITION_FAILED` | El documento ${label} ya está vinculado a una organización | Excepción explícita en src/modules/directory/services/tenant-affiliation-documents.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code.toUpperCase()} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no está disponible | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1419,16 +1386,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya existe una cuenta con ese documento de identidad | Excepción explícita en src/modules/iam/application/services/iam-patient-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1707,8 +1666,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -1719,23 +1676,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | Solo se admiten documentos PDF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1849,13 +1790,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2323,9 +2258,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
-| 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | Solo se admiten documentos PDF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 30, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2447,9 +2379,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La imagen supera el límite de 2 MB | Excepción explícita en src/modules/iam/application/services/iam-registration-document-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | Solo se admiten documentos PDF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2825,6 +2754,7 @@ NestJS resuelve `DELETE /iam/onboarding-drafts/{formType}/{draftId}` en `IamOnbo
 |---|---|:---:|---|---|---|---|
 | `formType` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `draftId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `x-onboarding-draft-secret` | header | No | `string` | Sin restricción adicional declarada | Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea. | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -2838,7 +2768,7 @@ Host: localhost:3000
 ### Restricciones a considerar
 
 - Endpoint público: no exige JWT según el contrato y `@Public()` del código.
-- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- Rate limit particular: `Throttle({ default: { limit: 60, ttl: 60_000 } })`.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
 
@@ -2850,15 +2780,16 @@ No existe body para completar; se muestran todos los parámetros opcionales docu
 ```http
 DELETE /iam/onboarding-drafts/valor-ejemplo/00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
+x-onboarding-draft-secret: valor-ejemplo
 ```
 
 ### Respuestas generales esperadas
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `{ ok: boolean }` | No |
+| 200 | `{ ok: true }`. | `{ ok: boolean }` | No |
 | 400 | Operación completada correctamente. | `{ ok: boolean }` | No |
-| 404 | Operación completada correctamente. | `{ ok: boolean }` | No |
+| 404 | Borrador inexistente, vencido, id mal formado, o secreto ausente o erróneo (la respuesta es la misma en todos los casos). | `{ ok: boolean }` | No |
 | 409 | Operación completada correctamente. | `{ ok: boolean }` | No |
 | 422 | Operación completada correctamente. | `{ ok: boolean }` | No |
 | 429 | Operación completada correctamente. | `{ ok: boolean }` | No |
@@ -2886,7 +2817,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 60, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
 Ejemplo de error normalizado:
@@ -2919,7 +2850,7 @@ Recupera un borrador de alta guardado por identificador y tipo de formulario. Op
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /iam/onboarding-drafts/{formType}/{draftId}` en `IamOnboardingDraftsController_getDraft`. El controlador delega en `IamOnboardingDraftsService.getDraft`. No recibe body. El tipo de retorno estático es `OnboardingDraftPayload | null`.
+NestJS resuelve `GET /iam/onboarding-drafts/{formType}/{draftId}` en `IamOnboardingDraftsController_getDraft`. El controlador delega en `IamOnboardingDraftsService.getDraft`. No recibe body. El tipo de retorno estático es `OnboardingDraftPayload`.
 
 ### Parámetros
 
@@ -2927,6 +2858,7 @@ NestJS resuelve `GET /iam/onboarding-drafts/{formType}/{draftId}` en `IamOnboard
 |---|---|:---:|---|---|---|---|
 | `formType` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `draftId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `x-onboarding-draft-secret` | header | No | `string` | Sin restricción adicional declarada | Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea. | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -2940,7 +2872,7 @@ Host: localhost:3000
 ### Restricciones a considerar
 
 - Endpoint público: no exige JWT según el contrato y `@Public()` del código.
-- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- Rate limit particular: `Throttle({ default: { limit: 120, ttl: 60_000 } })`.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
 
@@ -2952,20 +2884,21 @@ No existe body para completar; se muestran todos los parámetros opcionales docu
 ```http
 GET /iam/onboarding-drafts/valor-ejemplo/00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
+x-onboarding-draft-secret: valor-ejemplo
 ```
 
 ### Respuestas generales esperadas
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `OnboardingDraftPayload | null` | No |
-| 400 | Consulta completada correctamente. | `OnboardingDraftPayload | null` | No |
-| 404 | Consulta completada correctamente. | `OnboardingDraftPayload | null` | No |
-| 429 | Consulta completada correctamente. | `OnboardingDraftPayload | null` | No |
-| 500 | Consulta completada correctamente. | `OnboardingDraftPayload | null` | No |
-| 504 | Consulta completada correctamente. | `OnboardingDraftPayload | null` | No |
+| 200 | El borrador guardado. | `OnboardingDraftPayload` | No |
+| 400 | Consulta completada correctamente. | `OnboardingDraftPayload` | No |
+| 404 | Borrador inexistente, vencido, id mal formado, o secreto ausente o erróneo (la respuesta es la misma en todos los casos). | `OnboardingDraftPayload` | No |
+| 429 | Consulta completada correctamente. | `OnboardingDraftPayload` | No |
+| 500 | Consulta completada correctamente. | `OnboardingDraftPayload` | No |
+| 504 | Consulta completada correctamente. | `OnboardingDraftPayload` | No |
 
-El controlador declara `OnboardingDraftPayload | null`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+El controlador declara `OnboardingDraftPayload`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2974,7 +2907,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 120, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
 Ejemplo de error normalizado:
@@ -3002,12 +2935,12 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Guarda o actualiza el avance del formulario de alta en borrador. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+Sin cabecera de secreto crea el borrador y devuelve `draftSecret` una sola vez; con el secreto correcto lo actualiza. Cuerpo máximo 64 KiB; hay topes de borradores totales y por origen (IPv6 por prefijo /64). Un borrador recién creado vive 1 hora; una segunda escritura con el secreto hecha al menos 60 s después de crearlo lo confirma y extiende su vida a 30 días. Con el almacén lleno, el origen sólo puede desalojar su propio borrador no confirmado; si no tiene, 503 con Retry-After.
 
 
 ### Descripción del sistema
 
-NestJS resuelve `PUT /iam/onboarding-drafts/{formType}/{draftId}` en `IamOnboardingDraftsController_saveDraft`. El controlador delega en `IamOnboardingDraftsService.saveDraft`. No recibe body. El tipo de retorno estático es `{ ok: boolean; savedAt: string }`.
+NestJS resuelve `PUT /iam/onboarding-drafts/{formType}/{draftId}` en `IamOnboardingDraftsController_saveDraft`. El controlador delega en `IamOnboardingDraftsService.saveDraft`. No recibe body. El tipo de retorno estático es `SaveOnboardingDraftResult`.
 
 ### Parámetros
 
@@ -3015,6 +2948,7 @@ NestJS resuelve `PUT /iam/onboarding-drafts/{formType}/{draftId}` en `IamOnboard
 |---|---|:---:|---|---|---|---|
 | `formType` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
 | `draftId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `x-onboarding-draft-secret` | header | No | `string` | Sin restricción adicional declarada | Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea. | `valor-ejemplo` |
 
 ### Payload mínimo aceptable
 
@@ -3028,7 +2962,7 @@ Host: localhost:3000
 ### Restricciones a considerar
 
 - Endpoint público: no exige JWT según el contrato y `@Public()` del código.
-- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- Rate limit particular: `Throttle({ default: { limit: 60, ttl: 60_000 } })`.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
 
@@ -3040,36 +2974,23 @@ No existe body para completar; se muestran todos los parámetros opcionales docu
 ```http
 PUT /iam/onboarding-drafts/valor-ejemplo/00000000-0000-4000-8000-000000000001 HTTP/1.1
 Host: localhost:3000
+x-onboarding-draft-secret: valor-ejemplo
 ```
 
 ### Respuestas generales esperadas
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
-| 400 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
-| 404 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
-| 409 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
-| 422 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
-| 429 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
-| 500 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
-| 504 | Operación completada correctamente. | `{ ok: boolean; savedAt: string }` | No |
+| 200 | `{ ok, savedAt }`; al crear el borrador agrega `draftSecret`, que no se vuelve a mostrar. | `SaveOnboardingDraftResult` | No |
+| 400 | Operación completada correctamente. | `SaveOnboardingDraftResult` | No |
+| 404 | Borrador inexistente, vencido, id mal formado, o secreto ausente o erróneo (la respuesta es la misma en todos los casos). | `SaveOnboardingDraftResult` | No |
+| 409 | Operación completada correctamente. | `SaveOnboardingDraftResult` | No |
+| 422 | Operación completada correctamente. | `SaveOnboardingDraftResult` | No |
+| 429 | Operación completada correctamente. | `SaveOnboardingDraftResult` | No |
+| 500 | Operación completada correctamente. | `SaveOnboardingDraftResult` | No |
+| 504 | Operación completada correctamente. | `SaveOnboardingDraftResult` | No |
 
-Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ ok: boolean; savedAt: string }`. Ejemplo completo derivado de ese DTO:
-
-```json
-{
-  "ok": true,
-  "savedAt": "valor-ejemplo"
-}
-```
-
-Campos de la respuesta:
-
-| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
-|---|:---:|---|---|---|---|
-| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `savedAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+El controlador declara `SaveOnboardingDraftResult`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3078,7 +2999,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
-| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 60, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
 Ejemplo de error normalizado:
@@ -4222,6 +4143,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No tiene acceso a los dispositivos de esta cuenta | Excepción explícita en src/modules/iam/application/services/iam-devices.service.ts |
 | 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-devices.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -5268,8 +5190,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 409 | `CONFLICT` | Ya existe una cuenta con ese correo | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -5280,23 +5200,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El número del título no puede estar vacío | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Esa profesión no está en la Clasificación de Ocupaciones de Bolivia | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Alguno de los roles indicados no existe o no es asignable | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | No se recibió contenido en el campo "file" | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | El archivo excede el tamaño máximo permitido | Excepción explícita en src/modules/common/services/file-upload.service.ts |
-| 422 | `PRECONDITION_FAILED` | Solo se admiten documentos PDF | Excepción explícita en src/modules/common/services/file-upload.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento emisor es obligatorio para el alta del profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
-| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
-| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
-| 422 | `PRECONDITION_FAILED` | La especialidad no pertenece al catálogo de especialidades médicas | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de especialidades médicas no está disponible | Excepción explícita en src/modules/profiles/application/services/medical-specialty-catalog.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

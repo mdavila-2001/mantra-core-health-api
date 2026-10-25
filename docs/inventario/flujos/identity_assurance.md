@@ -2438,48 +2438,55 @@ flowchart TD
   n1 --> n2
   n3["Llama a IdentityChecksService.listDispatchable"]:::llamada
   n2 --> n3
-  n4["Llama a IdentityChecksRepository.findDispatchable"]:::llamada
+  n4{"!tenantId"}:::decision
   n3 --> n4
-  n5[("LEE identity_assurance.identity_checks")]:::efecto
-  n4 --> n5
-  n6{"tenantId"}:::decision
+  n5["Llama a IdentityChecksRepository.findDispatchable"]:::llamada
+  n4 -->|"sí"| n5
+  n6[("LEE identity_assurance.identity_checks")]:::efecto
   n5 --> n6
-  n7["Llama a IdentityChecksService.filterChecksToTenant"]:::llamada
-  n6 -->|"sí"| n7
-  n8["Repite: por cada const caseId de new Set( checks.map((check) =› check.identityVeri…"]:::bucle
-  n7 --> n8
-  n9["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
-  n8 -->|"cada elemento"| n9
-  n10[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n7["Repite: ciclo for"]:::bucle
+  n4 -->|"no"| n7
+  n8["Llama a IdentityChecksRepository.findDispatchable"]:::llamada
+  n7 -->|"cada elemento"| n8
+  n9[("LEE identity_assurance.identity_checks")]:::efecto
+  n8 --> n9
+  n10["Llama a IdentityChecksService.filterChecksToTenant"]:::llamada
   n9 --> n10
-  n11["Llama a IdentityCaseScope.filterToTenant"]:::llamada
+  n11["Repite: por cada const caseId de new Set( checks.map((check) =› check.identityVeri…"]:::bucle
   n10 --> n11
-  n8 -->|"al terminar"| n11
-  n12["Repite: por cada const kase de cases"]:::bucle
-  n11 --> n12
-  n13{"owned === undefined"}:::decision
-  n12 -->|"cada elemento"| n13
-  n14["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
-  n13 -->|"sí"| n14
-  n15{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
+  n12["Llama a IdentityVerificationCasesRepository.findById"]:::llamada
+  n11 -->|"cada elemento"| n12
+  n13[("LEE identity_assurance.identity_verification_cases")]:::efecto
+  n12 --> n13
+  n14["Llama a IdentityCaseScope.filterToTenant"]:::llamada
+  n13 --> n14
+  n11 -->|"al terminar"| n14
+  n15["Repite: por cada const kase de cases"]:::bucle
   n14 --> n15
-  n16[("LEE profiles.jurisdiction_authorizations")]:::efecto
-  n15 -->|"sí"| n16
-  n17[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
-  n16 --> n17
-  n15 -->|"no"| n17
-  n18["Repite: por cada const check de checks"]:::bucle
+  n16{"owned === undefined"}:::decision
+  n15 -->|"cada elemento"| n16
+  n17["Llama a IdentityCaseScope.subjectInTenant"]:::llamada
+  n16 -->|"sí"| n17
+  n18{"subject.subjectTypeConceptId === IDA.SUBJECT_PRACTITIONER_LICENSE"}:::decision
   n17 --> n18
-  n13 -->|"no"| n18
-  n12 -->|"al terminar"| n18
-  n6 -->|"no"| n18
-  n19["Llama a IdentityVerificationAttemptsRepository.findLatestByCase"]:::llamada
-  n18 -->|"cada elemento"| n19
-  n20[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n19[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n18 -->|"sí"| n19
+  n20[("LEE profiles.person_account_links · LEE directory.tenant_memberships")]:::efecto
   n19 --> n20
-  n21(("200 Responde con éxito")):::ok
+  n18 -->|"no"| n20
+  n21["Repite: por cada const check de checks"]:::bucle
+  n6 --> n21
   n20 --> n21
-  n18 -->|"al terminar"| n21
+  n16 -->|"no"| n21
+  n15 -->|"al terminar"| n21
+  n7 -->|"al terminar"| n21
+  n22["Llama a IdentityVerificationAttemptsRepository.findLatestByCase"]:::llamada
+  n21 -->|"cada elemento"| n22
+  n23[("LEE identity_assurance.identity_verification_attempts")]:::efecto
+  n22 --> n23
+  n24(("200 Responde con éxito")):::ok
+  n23 --> n24
+  n21 -->|"al terminar"| n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

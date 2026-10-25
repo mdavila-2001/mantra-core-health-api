@@ -1,9 +1,0 @@
-{
-  "mode": "DRY-RUN",
-  "emdnConcepts": 0,
-  "emdnVersions": [],
-  "emdnProperties": 0,
-  "devicesNotLoaded": 0,
-  "devicesNotLoadedReason": "el modelo no tiene tabla de catálogo de equipos (fabricante/marca/modelo/UDI-DI); ver propuesta en docs/seed-research/diagnostic-devices-eu.md"
-}
-No hay EMDN en out/: nada que cargar (corra fetch.mjs y build.mjs con la fuente alcanzable).

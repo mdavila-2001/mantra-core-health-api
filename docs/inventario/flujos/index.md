@@ -2,9 +2,9 @@
 
 # Inventario de flujos
 
-**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1559 árboles de decisión**.
+**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1574 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1386 · sin ellas: 173
+- Operaciones con decisiones propias: 1418 · sin ellas: 156
 - Operaciones sin proceso asignado: 0
 - Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 32 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
 
@@ -12,7 +12,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 
 | Módulo | Procesos | Operaciones | Máquinas | Documento |
 |---|---|---|---|---|
-| `accounting` | 1 | 46 | 1 | [accounting.md](accounting.md) |
+| `accounting` | 1 | 59 | 1 | [accounting.md](accounting.md) |
 | `ads` | 1 | 18 | 0 | [ads.md](ads.md) |
 | `app` | 1 | 6 | 0 | [app.md](app.md) |
 | `audio_assets` | 1 | 10 | 0 | [audio_assets.md](audio_assets.md) |
@@ -20,9 +20,9 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `auth_providers` | 1 | 12 | 0 | [auth_providers.md](auth_providers.md) |
 | `authz` | 2 | 32 | 0 | [authz.md](authz.md) |
 | `automation` | 1 | 17 | 0 | [automation.md](automation.md) |
-| `billing` | 1 | 34 | 0 | [billing.md](billing.md) |
+| `billing` | 1 | 35 | 0 | [billing.md](billing.md) |
 | `chart` | 1 | 23 | 0 | [chart.md](chart.md) |
-| `clinical` | 1 | 41 | 1 | [clinical.md](clinical.md) |
+| `clinical` | 1 | 42 | 1 | [clinical.md](clinical.md) |
 | `clinical_ext` | 1 | 27 | 0 | [clinical_ext.md](clinical_ext.md) |
 | `common` | 1 | 19 | 0 | [common.md](common.md) |
 | `community` | 1 | 102 | 0 | [community.md](community.md) |
@@ -45,12 +45,12 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `health_data` | 1 | 16 | 0 | [health_data.md](health_data.md) |
 | `iam` | 1 | 39 | 0 | [iam.md](iam.md) |
 | `identity_assurance` | 1 | 28 | 0 | [identity_assurance.md](identity_assurance.md) |
-| `insurance` | 1 | 63 | 1 | [insurance.md](insurance.md) |
-| `insurance-campaigns` | 1 | 16 | 0 | [insurance-campaigns.md](insurance-campaigns.md) |
+| `insurance` | 1 | 71 | 1 | [insurance.md](insurance.md) |
 | `integration_contracts` | 1 | 12 | 0 | [integration_contracts.md](integration_contracts.md) |
 | `integrations` | 1 | 15 | 0 | [integrations.md](integrations.md) |
 | `lakehouse` | 1 | 13 | 0 | [lakehouse.md](lakehouse.md) |
 | `marketing` | 1 | 15 | 0 | [marketing.md](marketing.md) |
+| `medical_centers` | 1 | 2 | 0 | [medical_centers.md](medical_centers.md) |
 | `medical_groups` | 1 | 9 | 0 | [medical_groups.md](medical_groups.md) |
 | `messaging` | 1 | 21 | 0 | [messaging.md](messaging.md) |
 | `object_storage` | 1 | 14 | 0 | [object_storage.md](object_storage.md) |
@@ -62,7 +62,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `pharmacy_inventory` | 1 | 29 | 1 | [pharmacy_inventory.md](pharmacy_inventory.md) |
 | `platform_ops` | 1 | 15 | 0 | [platform_ops.md](platform_ops.md) |
 | `polyglot_storage` | 1 | 15 | 0 | [polyglot_storage.md](polyglot_storage.md) |
-| `practice` | 1 | 30 | 1 | [practice.md](practice.md) |
+| `practice` | 1 | 36 | 1 | [practice.md](practice.md) |
 | `procedures_perioperative` | 1 | 32 | 0 | [procedures_perioperative.md](procedures_perioperative.md) |
 | `profiles` | 1 | 57 | 0 | [profiles.md](profiles.md) |
 | `promotions` | 1 | 20 | 0 | [promotions.md](promotions.md) |

@@ -21,7 +21,7 @@
 | [password_resets](#password_resets) | Gestiona solicitudes de restablecimiento de credenciales para recuperar acceso de forma controlada. | 13 | 2 | 4 | COINCIDE |
 | [refresh_tokens](#refresh_tokens) | Gestiona tokens de renovación de sesión para mantener autenticación continua con trazabilidad y revocación. | 11 | 7 | 15 | COINCIDE |
 | [security_events](#security_events) | Conserva eventos de seguridad de identidad para investigar autenticaciones y cambios relevantes de cuenta. | 8 | 5 | 25 | COINCIDE |
-| [sessions](#sessions) | Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario y dispositivo. | 13 | 7 | 124 | COINCIDE |
+| [sessions](#sessions) | Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario y dispositivo. | 13 | 7 | 131 | COINCIDE |
 | [user_global_roles](#user_global_roles) | Asocia roles de alcance global a usuarios para resolver privilegios transversales de la plataforma. | 9 | 5 | 15 | COINCIDE |
 | [users](#users) | Representa cuentas de usuario autenticadas que operan en la plataforma médica. | 21 | 8 | 54 | COINCIDE |
 
@@ -1224,7 +1224,7 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_01_iam.puml: sessions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_01_iam.puml` · **DDL:** `SQL/01_iam/02_tables.sql`
 - **Entidad del ORM:** `Sessions` — `src/modules/iam/entities/sessions.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 5 entrantes · 124 operaciones
+- **Resumen:** 13 columnas · 7 índices · 5 FK salientes · 5 entrantes · 131 operaciones
 
 #### Columnas
 
@@ -1340,13 +1340,20 @@ Mantiene sesiones autenticadas para controlar su vigencia y vínculo con usuario
 | POST /iam/users/{id}/lock | ACTUALIZA | DIRECTA |
 | POST /iam/users/{id}/lock | LEE | DIRECTA |
 | GET /iam/users/{id}/sessions | LEE | DIRECTA |
-| GET /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
-| POST /['insurance/campaigns', 'insurance-campaigns'] | LEE | POR_SQL |
-| GET /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id} | LEE | POR_SQL |
-| PATCH /['insurance/campaigns', 'insurance-campaigns']/{id}/status | LEE | POR_SQL |
-| GET /['insurance/campaigns', 'insurance-campaigns']/my-benefits | LEE | POR_SQL |
-| GET /['insurance/campaigns', 'insurance-campaigns']/patient/{patientProfileId} | LEE | POR_SQL |
+| GET /insurance-campaigns | LEE | POR_SQL |
+| POST /insurance-campaigns | LEE | POR_SQL |
+| GET /insurance-campaigns/{id} | LEE | POR_SQL |
+| PATCH /insurance-campaigns/{id} | LEE | POR_SQL |
+| PATCH /insurance-campaigns/{id}/status | LEE | POR_SQL |
+| GET /insurance-campaigns/my-benefits | LEE | POR_SQL |
+| GET /insurance-campaigns/patient/{patientProfileId} | LEE | POR_SQL |
+| GET /insurance/campaigns | LEE | POR_SQL |
+| POST /insurance/campaigns | LEE | POR_SQL |
+| GET /insurance/campaigns/{id} | LEE | POR_SQL |
+| PATCH /insurance/campaigns/{id} | LEE | POR_SQL |
+| PATCH /insurance/campaigns/{id}/status | LEE | POR_SQL |
+| GET /insurance/campaigns/my-benefits | LEE | POR_SQL |
+| GET /insurance/campaigns/patient/{patientProfileId} | LEE | POR_SQL |
 | GET /insurance/portability/certificates/{certificateId}/json | LEE | POR_SQL |
 | GET /insurance/portability/certificates/{certificateId}/pdf | LEE | POR_SQL |
 | POST /insurance/portability/export | LEE | POR_SQL |

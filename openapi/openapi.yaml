@@ -2610,13 +2610,23 @@ paths:
           in: path
           schema:
             type: string
+        - name: x-onboarding-draft-secret
+          required: false
+          in: header
+          description: >-
+            Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y
+            DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.
+          schema:
+            type: string
       responses:
         '200':
-          description: ''
+          description: El borrador guardado.
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: >-
+            Borrador inexistente, vencido, id mal formado, o secreto ausente o erróneo (la respuesta es la misma en
+            todos los casos).
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -2631,6 +2641,12 @@ paths:
         Recupera un borrador de alta guardado por identificador y tipo de formulario. Operación pública; no requiere
         JWT. Todas las respuestas de error usan el envelope ErrorResponse.
     put:
+      description: >-
+        Sin cabecera de secreto crea el borrador y devuelve `draftSecret` una sola vez; con el secreto correcto lo
+        actualiza. Cuerpo máximo 64 KiB; hay topes de borradores totales y por origen (IPv6 por prefijo /64). Un
+        borrador recién creado vive 1 hora; una segunda escritura con el secreto hecha al menos 60 s después de crearlo
+        lo confirma y extiende su vida a 30 días. Con el almacén lleno, el origen sólo puede desalojar su propio
+        borrador no confirmado; si no tiene, 503 con Retry-After.
       operationId: IamOnboardingDraftsController_saveDraft
       parameters:
         - name: formType
@@ -2643,13 +2659,23 @@ paths:
           in: path
           schema:
             type: string
+        - name: x-onboarding-draft-secret
+          required: false
+          in: header
+          description: >-
+            Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y
+            DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.
+          schema:
+            type: string
       responses:
         '200':
-          description: ''
+          description: '`{ ok, savedAt }`; al crear el borrador agrega `draftSecret`, que no se vuelve a mostrar.'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: >-
+            Borrador inexistente, vencido, id mal formado, o secreto ausente o erróneo (la respuesta es la misma en
+            todos los casos).
         '409':
           $ref: '#/components/responses/Conflict'
         '422':
@@ -2664,9 +2690,6 @@ paths:
       tags:
         - iam-onboarding-drafts
       security: []
-      description: >-
-        Guarda o actualiza el avance del formulario de alta en borrador. Operación pública; no requiere JWT. Todas las
-        respuestas de error usan el envelope ErrorResponse.
     delete:
       operationId: IamOnboardingDraftsController_deleteDraft
       parameters:
@@ -2680,13 +2703,23 @@ paths:
           in: path
           schema:
             type: string
+        - name: x-onboarding-draft-secret
+          required: false
+          in: header
+          description: >-
+            Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y
+            DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.
+          schema:
+            type: string
       responses:
         '200':
-          description: ''
+          description: '`{ ok: true }`.'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: >-
+            Borrador inexistente, vencido, id mal formado, o secreto ausente o erróneo (la respuesta es la misma en
+            todos los casos).
         '409':
           $ref: '#/components/responses/Conflict'
         '422':
@@ -15298,6 +15331,58 @@ paths:
       description: >-
         Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas. Requiere JWT y los roles o
         alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /clinical/me/procedure-centers:
+    get:
+      description: >-
+        Las órdenes vigentes de procedimiento y cardiología del titular, y las sedes que declaran ofrecerlos: primero
+        las que tienen todos, después la más cercana en línea recta al origen elegido.
+      operationId: ClinicalProcedureCentersController_findOwn
+      parameters:
+        - name: lat
+          required: false
+          in: query
+          schema:
+            minimum: -90
+            maximum: 90
+            type: number
+        - name: lng
+          required: false
+          in: query
+          schema:
+            minimum: -180
+            maximum: 180
+            type: number
+        - name: limit
+          required: false
+          in: query
+          schema:
+            maximum: 50
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcedureCentersResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Dónde hacerme los procedimientos que me pidieron
+      tags:
+        - clinical-me
   /clinical/prescriptions/{id}/pdf:
     get:
       description: Autoriza al prescriptor y a quien puede leer la historia del paciente dueño de la receta.
@@ -19100,6 +19185,9 @@ paths:
         Todas las respuestas de error usan el envelope ErrorResponse.
   /practices/{practiceId}/healthcare-services:
     post:
+      description: >-
+        El concepto debe ser del nomenclador (`VS_BO_MEDICAL_PROCEDURE`) y coincidir con el del ítem de catálogo que
+        fija el precio. Una sede no puede ofrecer dos veces el mismo procedimiento (409).
       operationId: PracticesController_publishHealthcareService
       parameters:
         - name: practiceId
@@ -19138,12 +19226,107 @@ paths:
           $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
-      summary: Publicar un servicio de salud
+      summary: Publicar un procedimiento del nomenclador en una sede
+      tags:
+        - practice
+    get:
+      operationId: PracticesController_listHealthcareServices
+      parameters:
+        - name: practiceId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: practiceSiteId
+          required: false
+          in: query
+          description: Solo la oferta de esa sede
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthcareServiceOffersResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Listar los procedimientos que ofrecen las sedes de la práctica
       tags:
         - practice
       description: >-
-        Publicar un servicio de salud. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
-        respuestas de error usan el envelope ErrorResponse.
+        Listar los procedimientos que ofrecen las sedes de la práctica. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /practices/{practiceId}/healthcare-services/{id}:
+    patch:
+      operationId: PracticesController_updateHealthcareService
+      parameters:
+        - name: practiceId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHealthcareServiceDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthcareServiceOfferDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Actualizar el precio o el estado de un procedimiento de la sede
+      tags:
+        - practice
+      description: >-
+        Actualizar el precio o el estado de un procedimiento de la sede. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /practices/{practiceId}/settings/{settingKey}:
     put:
       operationId: PracticesController_upsertSetting
@@ -20005,6 +20188,172 @@ paths:
       description: >-
         Registrar un movimiento de inventario (ajuste de stock). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /tenants/{tenantId}/practices:
+    post:
+      description: >-
+        Exige que la organización esté verificada (422 si no) y que el actor administre esa organización (403 si no).
+        Dos prácticas con el mismo nombre en la misma organización responden 409.
+      operationId: OrganizationPracticesController_create
+      parameters:
+        - name: tenantId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationPracticeDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Crear la práctica y la primera sede de una organización
+      tags:
+        - practice
+  /practices/{practiceId}/role-assignments/invitations:
+    post:
+      description: Crea una vinculación INVITED por procedimiento. Ninguna llega a ACTIVE sin que el profesional la acepte.
+      operationId: PracticeInvitationsController_invite
+      parameters:
+        - name: practiceId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitePractitionerDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Invitar a un profesional a procedimientos de una sede
+      tags:
+        - practice
+  /practitioners/me/role-assignments/{roleId}/accept:
+    post:
+      operationId: PractitionerInvitationsController_accept
+      parameters:
+        - name: roleId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Aceptar una invitación de un centro
+      tags:
+        - practice
+      description: >-
+        Aceptar una invitación de un centro. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /practitioners/me/role-assignments/{roleId}/decline:
+    post:
+      operationId: PractitionerInvitationsController_decline
+      parameters:
+        - name: roleId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Declinar una invitación de un centro
+      tags:
+        - practice
+      description: >-
+        Declinar una invitación de un centro. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
   /diagnostic-units:
     get:
       operationId: DiagnosticUnitsController_list
@@ -23698,6 +24047,511 @@ paths:
       description: >-
         Registrar el avance (pago de cuota) de un pasivo. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /accounting/practitioner/simple/summary:
+    get:
+      description: >-
+        `patientsSeen`: personas distintas con consulta atendida en el período. `collected`: consultas pagadas del
+        período. `expectedFromInsurers`: a hoy, solicitudes enviadas sin dictamen (por lo facturado) más aprobadas sin
+        pagar (por lo aprobado).
+      operationId: AccountingPractitionerSimpleController_summary
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: period
+          required: false
+          in: query
+          schema:
+            default: month
+            type: string
+            enum:
+              - month
+              - year
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Pacientes atendidos, cobrado y esperado de las aseguradoras
+      tags:
+        - accounting-practitioner
+  /accounting/practitioner/simple/accounts:
+    get:
+      description: >-
+        Incluye las 26 generales (`seeded: true`), que se siembran por práctica al primer acceso, y las propias del
+        doctor.
+      operationId: AccountingPractitionerSimpleController_listAccounts
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Cuentas de la contabilidad simple de una práctica
+      tags:
+        - accounting-practitioner
+    post:
+      description: El código lo asigna el servidor. Nombre único por clase, sin distinguir tildes ni mayúsculas (409).
+      operationId: AccountingPractitionerSimpleController_createAccount
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSimpleAccountDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Crear una cuenta (o un tipo de gasto, activo o deuda)
+      tags:
+        - accounting-practitioner
+  /accounting/practitioner/simple/accounts/{id}:
+    put:
+      description: >-
+        Una cuenta general se renombra pero no cambia de clase; tampoco una que ya usa algún registro o transacción
+        (409).
+      operationId: AccountingPractitionerSimpleController_updateAccount
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleAccountInputDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Renombrar una cuenta
+      tags:
+        - accounting-practitioner
+    delete:
+      description: 409 si es una cuenta general o si la usa algún registro o transacción.
+      operationId: AccountingPractitionerSimpleController_deleteAccount
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Borrar una cuenta propia
+      tags:
+        - accounting-practitioner
+  /accounting/practitioner/simple/records:
+    get:
+      description: Con `kind` filtra por una de las tres; sin él, devuelve las tres. Más recientes primero.
+      operationId: AccountingPractitionerSimpleController_listRecords
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: kind
+          required: false
+          in: query
+          description: Sin `kind` devuelve los tres.
+          schema:
+            type: string
+            enum:
+              - EXPENSE
+              - ASSET
+              - DEBT
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Gastos, activos y deudas de una práctica
+      tags:
+        - accounting-practitioner
+    post:
+      description: >-
+        El tipo es una cuenta de la clase que corresponde: gasto → EXPENSE, activo → ASSET, deuda → LIABILITY. No genera
+        asiento.
+      operationId: AccountingPractitionerSimpleController_createRecord
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSimpleRecordDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Registrar un gasto, un activo o una deuda
+      tags:
+        - accounting-practitioner
+  /accounting/practitioner/simple/records/{id}:
+    put:
+      operationId: AccountingPractitionerSimpleController_updateRecord
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleRecordInputDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Editar un gasto, un activo o una deuda
+      tags:
+        - accounting-practitioner
+      description: >-
+        Editar un gasto, un activo o una deuda. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: AccountingPractitionerSimpleController_deleteRecord
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Borrar un gasto, un activo o una deuda
+      tags:
+        - accounting-practitioner
+      description: >-
+        Borrar un gasto, un activo o una deuda. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /accounting/practitioner/simple/transactions:
+    get:
+      description: Más recientes primero.
+      operationId: AccountingPractitionerSimpleController_listTransactions
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Transacciones debe/haber de una práctica
+      tags:
+        - accounting-practitioner
+    post:
+      description: Las cuentas del debe y del haber son distintas. No es un asiento del libro mayor.
+      operationId: AccountingPractitionerSimpleController_createTransaction
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSimpleTransactionDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Registrar una transacción debe/haber
+      tags:
+        - accounting-practitioner
+  /accounting/practitioner/simple/transactions/{id}:
+    put:
+      operationId: AccountingPractitionerSimpleController_updateTransaction
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleTransactionInputDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Editar una transacción debe/haber
+      tags:
+        - accounting-practitioner
+      description: >-
+        Editar una transacción debe/haber. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: AccountingPractitionerSimpleController_deleteTransaction
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Borrar una transacción debe/haber
+      tags:
+        - accounting-practitioner
+      description: >-
+        Borrar una transacción debe/haber. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /accounting/dimensions:
     get:
       description: >-
@@ -24548,6 +25402,38 @@ paths:
       security:
         - bearer: []
       summary: Dar de alta un servicio en el catálogo maestro
+      tags:
+        - billing-service-catalog
+  /billing/service-catalog/{id}/image:
+    get:
+      description: 'Autoriza por contexto: servicio activo de una práctica del tenant activo. 404 uniforme en cualquier otro caso.'
+      operationId: BillingServiceCatalogController_getImage
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Descargar la imagen de un servicio que el actor puede ver
       tags:
         - billing-service-catalog
   /billing/service-catalog/{id}:
@@ -32066,6 +32952,150 @@ paths:
       description: >-
         Evaluar actor efectivo por propósito (step-up). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /medical-centers/search:
+    get:
+      description: >-
+        Cada sede dice si ofrece todo lo pedido (`complete`) y cuáles le faltan. Completos primero, después por
+        distancia en línea recta desde `lat`/`lng`, después por precio total y por nombre. Solo aparecen los que
+        publicaron precio.
+      operationId: MedicalCentersController_search
+      parameters:
+        - name: lat
+          required: false
+          in: query
+          schema:
+            minimum: -90
+            maximum: 90
+            type: number
+        - name: lng
+          required: false
+          in: query
+          schema:
+            minimum: -180
+            maximum: 180
+            type: number
+        - name: includePartial
+          required: false
+          in: query
+          description: 'Por defecto solo los centros que ofrecen todo lo pedido (`complete: true`).'
+          schema:
+            default: false
+            type: boolean
+        - name: procedureConceptIds
+          required: true
+          in: query
+          description: Conceptos de procedimiento separados por coma (uuid).
+          schema:
+            example: 1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c,2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d
+            type: string
+        - name: specialty
+          required: false
+          in: query
+          schema:
+            maxLength: 120
+            type: string
+        - name: city
+          required: false
+          in: query
+          schema:
+            maxLength: 120
+            type: string
+        - name: offset
+          required: false
+          in: query
+          schema:
+            minimum: 0
+            type: number
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalCenterPageDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Buscar centros médicos por procedimientos
+      tags:
+        - medical-centers
+  /medical-centers/search/for-my-orders:
+    get:
+      description: >-
+        Los procedimientos salen de las órdenes. Marca si el médico trabaja en la sede y si la sugirió, sin cambiar qué
+        sedes aparecen ni su orden. Una orden ajena responde 404.
+      operationId: MedicalCentersController_searchForMyOrders
+      parameters:
+        - name: lat
+          required: false
+          in: query
+          schema:
+            minimum: -90
+            maximum: 90
+            type: number
+        - name: lng
+          required: false
+          in: query
+          schema:
+            minimum: -180
+            maximum: 180
+            type: number
+        - name: includePartial
+          required: false
+          in: query
+          description: 'Por defecto solo los centros que ofrecen todo lo pedido (`complete: true`).'
+          schema:
+            default: false
+            type: boolean
+        - name: serviceRequestIds
+          required: true
+          in: query
+          description: Ids de órdenes de servicio del titular, separados por coma.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalCenterPageDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Buscar centros médicos para mis órdenes
+      tags:
+        - medical-centers
   /diagnostics/specimens:
     post:
       operationId: DiagnosticsSpecimensController_createSpecimen
@@ -65085,6 +66115,10 @@ tags:
     description: >-
       Operaciones del dominio funcional marketing. Consulte el catálogo Markdown de endpoints para payloads mínimos,
       restricciones, ejemplos completos y semántica de negocio.
+  - name: medical-centers
+    description: >-
+      Operaciones del dominio funcional medical centers. Consulte el catálogo Markdown de endpoints para payloads
+      mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: medical-groups
     description: >-
       Operaciones del dominio funcional medical groups. Consulte el catálogo Markdown de endpoints para payloads
@@ -72824,6 +73858,23 @@ components:
           type: string
           description: Tenant ejecutante
           format: uuid
+        performerSelectionConceptId:
+          type: string
+          description: >-
+            Quién ejecuta la orden (concept id del conjunto `service-request-performer-selection`: SR_PERF_SELF,
+            SR_PERF_ORGANIZATION, SR_PERF_PATIENT_CHOICE). Es una recomendación, no un candado; omitido = que elija el
+            paciente
+          format: uuid
+        performerPractitionerProfileId:
+          type: string
+          description: Médico ejecutor. Obligatorio con SR_PERF_SELF (debe ser quien pide la orden); prohibido con los otros modos
+          format: uuid
+        suggestedPracticeSiteId:
+          type: string
+          description: >-
+            Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con
+            SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden
+          format: uuid
         previousDiagnosticReportId:
           type: string
           description: >-
@@ -73497,6 +74548,89 @@ components:
         - patientProfileId
         - vaccineConceptId
       additionalProperties: false
+    PendingProcedureDto:
+      type: object
+      properties:
+        serviceRequestId:
+          type: string
+          format: uuid
+        conceptId:
+          type: string
+          format: uuid
+        categoryConceptId:
+          type: string
+          format: uuid
+        requestedAt:
+          format: date-time
+          type: string
+      required:
+        - serviceRequestId
+        - conceptId
+        - categoryConceptId
+        - requestedAt
+    ProcedureCenterDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        practiceId:
+          type: string
+          format: uuid
+        practiceName:
+          type: string
+        siteName:
+          type: string
+        complete:
+          type: boolean
+        missingProcedureConceptIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        distanceKm:
+          type: number
+          nullable: true
+        addressText:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          nullable: true
+        longitude:
+          type: number
+          nullable: true
+      required:
+        - siteId
+        - practiceId
+        - practiceName
+        - siteName
+        - complete
+        - missingProcedureConceptIds
+        - distanceKm
+        - addressText
+        - latitude
+        - longitude
+    ProcedureCentersResponseDto:
+      type: object
+      properties:
+        procedures:
+          type: array
+          items:
+            $ref: '#/components/schemas/PendingProcedureDto'
+        centers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcedureCenterDto'
+        total:
+          type: number
+        limit:
+          type: number
+      required:
+        - procedures
+        - centers
+        - total
+        - limit
     PrescriberLicenseDto:
       type: object
       properties:
@@ -77237,7 +78371,11 @@ components:
           format: uuid
         serviceConceptId:
           type: string
-          description: Concepto de servicio
+          description: Procedimiento del nomenclador (`VS_BO_MEDICAL_PROCEDURE`) que se ofrece
+          format: uuid
+        serviceCatalogId:
+          type: string
+          description: Ítem del catálogo de precios de la práctica; su concepto debe ser el mismo `serviceConceptId`
           format: uuid
         specialtyConceptId:
           type: string
@@ -77252,6 +78390,84 @@ components:
         telehealthAvailable:
           type: boolean
           description: ¿Disponible por telesalud?
+      required:
+        - practiceSiteId
+        - serviceConceptId
+        - serviceCatalogId
+      additionalProperties: false
+    HealthcareServiceOfferDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        practiceSiteId:
+          type: string
+          format: uuid
+        serviceConceptId:
+          type: string
+          format: uuid
+        serviceDisplay:
+          type: string
+        serviceCatalogId:
+          type: string
+          format: uuid
+          nullable: true
+        price:
+          type: number
+          nullable: true
+        currencyConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        referencePrice:
+          type: number
+          nullable: true
+        referenceUnit:
+          type: string
+          enum:
+            - UMA
+            - USD
+          nullable: true
+        overMargin:
+          type: boolean
+          nullable: true
+        visibleInSearch:
+          type: boolean
+        active:
+          type: boolean
+      required:
+        - id
+        - practiceSiteId
+        - serviceConceptId
+        - serviceDisplay
+        - serviceCatalogId
+        - price
+        - currencyConceptId
+        - referencePrice
+        - referenceUnit
+        - overMargin
+        - visibleInSearch
+        - active
+    HealthcareServiceOffersResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthcareServiceOfferDto'
+      required:
+        - items
+    UpdateHealthcareServiceDto:
+      type: object
+      properties:
+        serviceCatalogId:
+          type: string
+          description: Nuevo ítem del catálogo de precios de la práctica; su concepto debe coincidir con el del servicio
+          format: uuid
+        active:
+          type: boolean
+          description: ¿El procedimiento está activo?
       additionalProperties: false
     UpsertSettingDto:
       type: object
@@ -77330,6 +78546,10 @@ components:
         validFrom:
           type: string
           description: Vigente desde (ISO date)
+        healthcareServiceId:
+          type: string
+          description: Servicio de salud (procedimiento) de la sede
+          format: uuid
         note:
           type: string
           maxLength: 500
@@ -77526,6 +78746,72 @@ components:
       required:
         - direction
         - quantity
+      additionalProperties: false
+    CreateOrganizationPracticeSiteDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre de la sede
+          maxLength: 200
+        addressText:
+          type: string
+          description: Dirección en una línea
+          maxLength: 500
+          example: Av. San Martín 123
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          example: -17.7833
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          example: -63.1821
+        cityText:
+          type: string
+          maxLength: 255
+          example: Santa Cruz de la Sierra
+      required:
+        - name
+        - addressText
+        - latitude
+        - longitude
+      additionalProperties: false
+    CreateOrganizationPracticeDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nombre del centro médico
+          maxLength: 200
+        site:
+          $ref: '#/components/schemas/CreateOrganizationPracticeSiteDto'
+      required:
+        - name
+        - site
+      additionalProperties: false
+    InvitePractitionerDto:
+      type: object
+      properties:
+        practitionerProfileId:
+          type: string
+          format: uuid
+        practiceSiteId:
+          type: string
+          format: uuid
+        healthcareServiceIds:
+          minItems: 1
+          maxItems: 50
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+        - practitionerProfileId
+        - practiceSiteId
+        - healthcareServiceIds
       additionalProperties: false
     DiagnosticConceptDto:
       type: object
@@ -79249,6 +80535,9 @@ components:
         profitCenterId:
           type: string
           format: uuid
+        assetId:
+          type: string
+          format: uuid
         currencyConceptId:
           type: string
           format: uuid
@@ -79933,6 +81222,164 @@ components:
       required:
         - bankAccountId
         - interestExpenseAccountId
+      additionalProperties: false
+    CreateSimpleAccountDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+        accountClass:
+          type: string
+          enum:
+            - ASSET
+            - LIABILITY
+            - EQUITY
+            - INCOME
+            - EXPENSE
+        practiceId:
+          type: string
+          format: uuid
+      required:
+        - name
+        - accountClass
+        - practiceId
+      additionalProperties: false
+    SimpleAccountInputDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+        accountClass:
+          type: string
+          enum:
+            - ASSET
+            - LIABILITY
+            - EQUITY
+            - INCOME
+            - EXPENSE
+      required:
+        - name
+        - accountClass
+      additionalProperties: false
+    CreateSimpleRecordDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+            - EXPENSE
+            - ASSET
+            - DEBT
+        date:
+          type: string
+          format: date
+        accountId:
+          type: string
+          format: uuid
+        description:
+          type: string
+          maxLength: 160
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+        practiceId:
+          type: string
+          format: uuid
+      required:
+        - kind
+        - date
+        - accountId
+        - description
+        - amount
+        - practiceId
+      additionalProperties: false
+    SimpleRecordInputDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+            - EXPENSE
+            - ASSET
+            - DEBT
+        date:
+          type: string
+          format: date
+        accountId:
+          type: string
+          format: uuid
+        description:
+          type: string
+          maxLength: 160
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+      required:
+        - kind
+        - date
+        - accountId
+        - description
+        - amount
+      additionalProperties: false
+    CreateSimpleTransactionDto:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+          maxLength: 160
+        debitAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del debe.
+        creditAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del haber; distinta de la del debe.
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+        practiceId:
+          type: string
+          format: uuid
+      required:
+        - date
+        - description
+        - debitAccountId
+        - creditAccountId
+        - amount
+        - practiceId
+      additionalProperties: false
+    SimpleTransactionInputDto:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+          maxLength: 160
+        debitAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del debe.
+        creditAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del haber; distinta de la del debe.
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+      required:
+        - date
+        - description
+        - debitAccountId
+        - creditAccountId
+        - amount
       additionalProperties: false
     CockpitFiscalPeriodDto:
       type: object
@@ -85252,6 +86699,110 @@ components:
         - practitionerDelegateAssignmentId
         - purpose
       additionalProperties: false
+    MedicalCenterOfferDto:
+      type: object
+      properties:
+        procedureConceptId:
+          type: string
+          format: uuid
+        procedureDisplay:
+          type: string
+        price:
+          type: number
+        currencyConceptId:
+          type: string
+          format: uuid
+        referencePrice:
+          type: number
+          nullable: true
+        referenceUnit:
+          type: string
+          enum:
+            - UMA
+            - USD
+          nullable: true
+        overMargin:
+          type: boolean
+          nullable: true
+      required:
+        - procedureConceptId
+        - procedureDisplay
+        - price
+        - currencyConceptId
+        - referencePrice
+        - referenceUnit
+        - overMargin
+    MedicalCenterItemDto:
+      type: object
+      properties:
+        practiceId:
+          type: string
+          format: uuid
+        practiceSiteId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        addressText:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          nullable: true
+        longitude:
+          type: number
+          nullable: true
+        distanceKm:
+          type: number
+          nullable: true
+        complete:
+          type: boolean
+        missingProcedureConceptIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        offers:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalCenterOfferDto'
+        totalPrice:
+          type: number
+          nullable: true
+        practitionerWorksHere:
+          type: boolean
+        suggestedByPractitioner:
+          type: boolean
+      required:
+        - practiceId
+        - practiceSiteId
+        - name
+        - addressText
+        - latitude
+        - longitude
+        - distanceKm
+        - complete
+        - missingProcedureConceptIds
+        - offers
+        - totalPrice
+    MedicalCenterPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalCenterItemDto'
+        total:
+          type: number
+        limit:
+          type: number
+        offset:
+          type: number
+      required:
+        - items
+        - total
+        - limit
+        - offset
     CreateSpecimenDto:
       type: object
       properties:
@@ -86062,6 +87613,21 @@ components:
         priorityConceptId:
           type: string
           format: uuid
+        performerSelectionConceptId:
+          type: string
+          format: uuid
+          nullable: true
+        performerPractitionerProfileId:
+          type: string
+          format: uuid
+          nullable: true
+        suggestedPracticeSiteId:
+          type: string
+          format: uuid
+          nullable: true
+        suggestedPracticeSiteName:
+          type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -86078,6 +87644,10 @@ components:
         - id
         - codeConceptId
         - statusConceptId
+        - performerSelectionConceptId
+        - performerPractitionerProfileId
+        - suggestedPracticeSiteId
+        - suggestedPracticeSiteName
         - createdAt
         - hasReleasedResult
     PatientOwnOrdersResponseDto:
@@ -87177,6 +88747,16 @@ components:
           type: object
           description: Ayuda bajo la pregunta; null la quita
           maxLength: 1000
+          nullable: true
+        cardinalityMin:
+          type: object
+          description: Mínimo de respuestas; null quita el tope
+          minimum: 0
+          nullable: true
+        cardinalityMax:
+          type: object
+          description: Máximo de respuestas; null quita el tope
+          minimum: 1
           nullable: true
       additionalProperties: false
     CreateFieldDependencyDto:

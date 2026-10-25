@@ -132,6 +132,17 @@ function toCorrelationId(value: unknown): string | undefined {
 }
 
 /**
+ * Ruta de la petición sin el *query string*.
+ *
+ * El cuerpo de error y el log hacían eco de `request.url` completo, y en el
+ * query viajan identificadores, correos y tokens de un solo uso: terminaban
+ * escritos en los logs y devueltos al cliente (y a cualquier proxy).
+ */
+function pathOf(request: { url?: string }): string {
+  return (request.url ?? '').split('?')[0];
+}
+
+/**
  * El usuario autenticado de la petición, si lo hay.
  *
  * Lo deja `JwtAuthGuard` en `request.user`, que Express tipa como `any`; se lee
@@ -217,7 +228,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       details,
       reason,
       timestamp: new Date().toISOString(),
-      path: request.url,
+      path: pathOf(request),
     };
 
     // La traza se marca ANTES de escribir la respuesta, mientras el span HTTP
@@ -237,7 +248,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           code,
           reason,
           correlationId,
-          path: request.url,
+          path: pathOf(request),
           method: request.method,
           userId,
         },
@@ -258,7 +269,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           correlationId,
           code,
           reason,
-          path: request.url,
+          path: pathOf(request),
           method: request.method,
           status,
           userId,

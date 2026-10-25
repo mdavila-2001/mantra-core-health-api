@@ -8,6 +8,7 @@
 
 import assert from 'node:assert/strict';
 import { mkdtempSync, readdirSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -1107,7 +1108,8 @@ test('withCertificates: copia el certificado de la réplica por UUID sin pisar u
 });
 
 test('EMDN: el Excel oficial con fila de título y sufijo de versión se lee', async () => {
-  const XLSX = (await import('xlsx')).default;
+  // El build CommonJS de `xlsx` trae `fs`; el ESM no y `writeFile` falla sin `set_fs`.
+  const XLSX = createRequire(import.meta.url)('xlsx');
   const dir = mkdtempSync(join(tmpdir(), 'emdn-'));
   const file = join(dir, 'EMDN_sintetico.xlsx');
   const ws = XLSX.utils.aoa_to_sheet([

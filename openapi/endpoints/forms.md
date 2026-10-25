@@ -1861,6 +1861,8 @@ Content-Type: application/json
 | `multiple` | No | `boolean` | Sin restricción adicional declarada | Admite varias respuestas | `true` |
 | `allowOther` | No | `boolean` | Sin restricción adicional declarada | Ofrece «Otro», con texto libre | `true` |
 | `description` | No | `object` | longitud máxima 1000; admite null | Ayuda bajo la pregunta; null la quita | `{}` |
+| `cardinalityMin` | No | `object` | mínimo 0; admite null | Mínimo de respuestas; null quita el tope | `{}` |
+| `cardinalityMax` | No | `object` | mínimo 1; admite null | Máximo de respuestas; null quita el tope | `{}` |
 
 ### Payload completo de ejemplo
 
@@ -1881,7 +1883,9 @@ Content-Type: application/json
   ],
   "multiple": true,
   "allowOther": true,
-  "description": {}
+  "description": {},
+  "cardinalityMin": {},
+  "cardinalityMax": {}
 }
 ```
 
@@ -1936,6 +1940,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Un campo "code" sin valueSetId necesita al menos dos opciones | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 422 | `PRECONDITION_FAILED` | Una opción no puede estar vacía | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 422 | `PRECONDITION_FAILED` | Las opciones no pueden repetirse | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los topes de respuestas sólo aplican a un campo de elección que admite varias | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | El mínimo de respuestas no puede superar al máximo | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
+| 422 | `PRECONDITION_FAILED` | El tope de respuestas no puede superar la cantidad de opciones | Excepción explícita en src/modules/forms/services/forms-fields.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

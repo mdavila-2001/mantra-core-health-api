@@ -1,9 +1,14 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   blockingDrift,
   computePermissionDrift,
+  invalidAllowlist,
+  MIN_REASON_LENGTH,
   routeKey,
   SAMPLE_SIZE,
   staleAllowlist,
+  type DriftAllowlist,
   type DriftRoute,
 } from './permission-drift';
 
@@ -176,5 +181,92 @@ describe('staleAllowlist (la lista de excepciones sólo puede encogerse)', () =>
 
   it('sin lista no hay nada obsoleto', () => {
     expect(staleAllowlist(informe)).toEqual([]);
+  });
+});
+
+describe('la lista de excepciones versionada', () => {
+  const lista = JSON.parse(
+    readFileSync(
+      join(process.cwd(), 'tools/catalog/permission-drift-allowlist.json'),
+      'utf8',
+    ),
+  ) as DriftAllowlist;
+
+  it('está bien formada: cada grupo revisado trae motivo, evidencia y rutas, sin repetidas', () => {
+    expect(invalidAllowlist(lista)).toEqual([]);
+  });
+
+  it('la evidencia de cada grupo apunta a un archivo que existe y nombra un símbolo que contiene', () => {
+    const rotas: string[] = [];
+    for (const grupo of lista.reviewed ?? [])
+      for (const evidencia of grupo.evidence) {
+        const [archivo, simbolo] = evidencia.split('#');
+        const ruta = join(process.cwd(), archivo);
+        if (!existsSync(ruta)) rotas.push(`${evidencia}: no existe el archivo`);
+        else if (simbolo && !readFileSync(ruta, 'utf8').includes(simbolo))
+          rotas.push(`${evidencia}: el archivo no menciona el símbolo`);
+      }
+    expect(rotas).toEqual([]);
+  });
+});
+
+describe('rutas revisadas (grupos con motivo y evidencia)', () => {
+  const informe = computePermissionDrift(entrada);
+  const revisado = {
+    reason: 'Autoservicio: el sujeto sale de la sesión, no de un parámetro',
+    evidence: ['src/x/x.service.ts#assertOwn'],
+    routes: ['GET /vacia', 'GET /whoami'],
+  };
+
+  it('una ruta revisada no bloquea igual que una de la lista heredada', () => {
+    expect(
+      blockingDrift(informe, {
+        roles: ['PLATFORM_ADMIN'],
+        reviewed: [revisado],
+      }),
+    ).toEqual([]);
+  });
+
+  it('una revisada que ya declara @Roles se señala como obsoleta', () => {
+    expect(
+      staleAllowlist(informe, {
+        roles: ['PLATFORM_ADMIN'],
+        reviewed: [{ ...revisado, routes: ['GET /vacia', 'GET /a'] }],
+      }),
+    ).toEqual([
+      'excepción obsoleta, la ruta ya declara @Roles o @Public: GET /a',
+    ]);
+  });
+
+  it('una lista bien formada no tiene defectos', () => {
+    expect(invalidAllowlist({ reviewed: [revisado] })).toEqual([]);
+    expect(invalidAllowlist()).toEqual([]);
+  });
+
+  it('un grupo sin motivo, sin evidencia o sin rutas es un defecto', () => {
+    const problemas = invalidAllowlist({
+      reviewed: [
+        { reason: 'ok', evidence: ['a.ts'], routes: ['GET /a'] },
+        { reason: revisado.reason, evidence: [], routes: ['GET /b'] },
+        { reason: revisado.reason, evidence: ['a.ts'], routes: [] },
+      ],
+    });
+    expect(problemas).toEqual([
+      `grupo revisado #1 sin motivo (mínimo ${MIN_REASON_LENGTH} caracteres)`,
+      `grupo revisado #2 sin evidencia: ${revisado.reason.slice(0, 40)}`,
+      'grupo revisado #3 sin rutas',
+    ]);
+  });
+
+  it('una ruta a la vez revisada y sin revisar, o repetida, es un defecto', () => {
+    expect(
+      invalidAllowlist({
+        routes: ['GET /whoami'],
+        reviewed: [revisado, { ...revisado, routes: ['GET /vacia'] }],
+      }),
+    ).toEqual([
+      'ruta repetida en la lista: GET /whoami',
+      'ruta repetida en la lista: GET /vacia',
+    ]);
   });
 });

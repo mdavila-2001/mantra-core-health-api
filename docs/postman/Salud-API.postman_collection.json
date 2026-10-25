@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1542 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1542 requests en 144 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1565 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1565 requests en 145 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -1751,7 +1751,7 @@
       ]
     },
     {
-      "name": "accounting (46)",
+      "name": "accounting (59)",
       "item": [
         {
           "name": "accounting-accruals",
@@ -3105,7 +3105,7 @@
                 "description": "Registrar y postear un asiento balanceado (partida doble). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /accounting/journal-transactions`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AccountingLedgerController_postJournal`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"practiceId\": \"{{practiceId}}\",\n  \"transactionNumber\": \"transactionNumber-ejemplo\",\n  \"transactionDate\": \"2026-01-31\",\n  \"fiscalPeriodId\": \"{{fiscalPeriodId}}\",\n  \"description\": \"description-ejemplo\",\n  \"reference\": \"reference-ejemplo\",\n  \"sourceDocumentType\": \"sourceDocumentType-ejemplo\",\n  \"lines\": [\n    {\n      \"accountId\": \"{{accountId}}\",\n      \"direction\": \"DEBIT\",\n      \"amount\": \"100.00\",\n      \"costCenterId\": \"<costCenterId: uuid existente>\",\n      \"profitCenterId\": \"<profitCenterId: uuid existente>\",\n      \"currencyConceptId\": \"<currencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"fxRate\": \"3.75\",\n      \"amountBase\": \"375.00\",\n      \"memo\": \"memo-ejemplo\"\n    }\n  ]\n}",
+                  "raw": "{\n  \"practiceId\": \"{{practiceId}}\",\n  \"transactionNumber\": \"transactionNumber-ejemplo\",\n  \"transactionDate\": \"2026-01-31\",\n  \"fiscalPeriodId\": \"{{fiscalPeriodId}}\",\n  \"description\": \"description-ejemplo\",\n  \"reference\": \"reference-ejemplo\",\n  \"sourceDocumentType\": \"sourceDocumentType-ejemplo\",\n  \"lines\": [\n    {\n      \"accountId\": \"{{accountId}}\",\n      \"direction\": \"DEBIT\",\n      \"amount\": \"100.00\",\n      \"costCenterId\": \"<costCenterId: uuid existente>\",\n      \"profitCenterId\": \"<profitCenterId: uuid existente>\",\n      \"assetId\": \"{{assetId}}\",\n      \"currencyConceptId\": \"<currencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"fxRate\": \"3.75\",\n      \"amountBase\": \"375.00\",\n      \"memo\": \"memo-ejemplo\"\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -3165,7 +3165,7 @@
                 "description": "Un PRACTITIONER solo puede crear borradores en una práctica a la que esté vinculado con una asignación de rol activa (Carril 18); el servicio lo verifica y responde 422 si no.\n\n`POST /accounting/journal-transactions/drafts`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AccountingLedgerController_createDraft`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"practiceId\": \"{{practiceId}}\",\n  \"transactionNumber\": \"transactionNumber-ejemplo\",\n  \"transactionDate\": \"2026-01-31\",\n  \"fiscalPeriodId\": \"{{fiscalPeriodId}}\",\n  \"description\": \"description-ejemplo\",\n  \"reference\": \"reference-ejemplo\",\n  \"sourceDocumentType\": \"sourceDocumentType-ejemplo\",\n  \"lines\": [\n    {\n      \"accountId\": \"{{accountId}}\",\n      \"direction\": \"DEBIT\",\n      \"amount\": \"100.00\",\n      \"costCenterId\": \"<costCenterId: uuid existente>\",\n      \"profitCenterId\": \"<profitCenterId: uuid existente>\",\n      \"currencyConceptId\": \"<currencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"fxRate\": \"3.75\",\n      \"amountBase\": \"375.00\",\n      \"memo\": \"memo-ejemplo\"\n    }\n  ]\n}",
+                  "raw": "{\n  \"practiceId\": \"{{practiceId}}\",\n  \"transactionNumber\": \"transactionNumber-ejemplo\",\n  \"transactionDate\": \"2026-01-31\",\n  \"fiscalPeriodId\": \"{{fiscalPeriodId}}\",\n  \"description\": \"description-ejemplo\",\n  \"reference\": \"reference-ejemplo\",\n  \"sourceDocumentType\": \"sourceDocumentType-ejemplo\",\n  \"lines\": [\n    {\n      \"accountId\": \"{{accountId}}\",\n      \"direction\": \"DEBIT\",\n      \"amount\": \"100.00\",\n      \"costCenterId\": \"<costCenterId: uuid existente>\",\n      \"profitCenterId\": \"<profitCenterId: uuid existente>\",\n      \"assetId\": \"{{assetId}}\",\n      \"currencyConceptId\": \"<currencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"fxRate\": \"3.75\",\n      \"amountBase\": \"375.00\",\n      \"memo\": \"memo-ejemplo\"\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -3965,6 +3965,246 @@
               ]
             },
             {
+              "name": "GET /accounting/practitioner/simple/accounts · Cuentas de la contabilidad simple de una práctica",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/accounts?practiceId={{practiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "accounts"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "{{practiceId}}",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Incluye las 26 generales (`seeded: true`), que se siembran por práctica al primer acceso, y las propias del doctor.\n\n`GET /accounting/practitioner/simple/accounts`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_listAccounts`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.accounts || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('accountId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/practitioner/simple/records · Gastos, activos y deudas de una práctica",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/records?practiceId={{practiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "records"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "{{practiceId}}",
+                      "description": "",
+                      "disabled": false
+                    },
+                    {
+                      "key": "kind",
+                      "value": "EXPENSE",
+                      "description": "Sin `kind` devuelve los tres.",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Con `kind` filtra por una de las tres; sin él, devuelve las tres. Más recientes primero.\n\n`GET /accounting/practitioner/simple/records`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_listRecords`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.records || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('recordId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/practitioner/simple/summary · Pacientes atendidos, cobrado y esperado de las aseguradoras",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/summary?practiceId={{practiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "summary"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "{{practiceId}}",
+                      "description": "",
+                      "disabled": false
+                    },
+                    {
+                      "key": "period",
+                      "value": "month",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "`patientsSeen`: personas distintas con consulta atendida en el período. `collected`: consultas pagadas del período. `expectedFromInsurers`: a hoy, solicitudes enviadas sin dictamen (por lo facturado) más aprobadas sin pagar (por lo aprobado).\n\n`GET /accounting/practitioner/simple/summary`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_summary`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('summaryId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /accounting/practitioner/simple/transactions · Transacciones debe/haber de una práctica",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/transactions?practiceId={{practiceId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "transactions"
+                  ],
+                  "query": [
+                    {
+                      "key": "practiceId",
+                      "value": "{{practiceId}}",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Más recientes primero.\n\n`GET /accounting/practitioner/simple/transactions`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_listTransactions`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.transactions || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('transactionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /accounting/practitioner/assets · Dar de alta un activo propio",
               "request": {
                 "method": "POST",
@@ -4198,6 +4438,189 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.liabilityId);",
                       "  if (id) pm.environment.set('liabilityId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /accounting/practitioner/simple/accounts · Crear una cuenta (o un tipo de gasto, activo o deuda)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/accounts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "accounts"
+                  ]
+                },
+                "description": "El código lo asigna el servidor. Nombre único por clase, sin distinguir tildes ni mayúsculas (409).\n\n`POST /accounting/practitioner/simple/accounts`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_createAccount`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"accountClass\": \"ASSET\",\n  \"practiceId\": \"{{practiceId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{accountId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.accountId);",
+                      "  if (id) pm.environment.set('accountId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /accounting/practitioner/simple/records · Registrar un gasto, un activo o una deuda",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/records",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "records"
+                  ]
+                },
+                "description": "El tipo es una cuenta de la clase que corresponde: gasto → EXPENSE, activo → ASSET, deuda → LIABILITY. No genera asiento.\n\n`POST /accounting/practitioner/simple/records`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_createRecord`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"kind\": \"EXPENSE\",\n  \"date\": \"2026-01-01\",\n  \"accountId\": \"{{accountId}}\",\n  \"description\": \"description-ejemplo\",\n  \"amount\": \"amount-ejemplo\",\n  \"practiceId\": \"{{practiceId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{recordId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.recordId);",
+                      "  if (id) pm.environment.set('recordId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /accounting/practitioner/simple/transactions · Registrar una transacción debe/haber",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/transactions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "transactions"
+                  ]
+                },
+                "description": "Las cuentas del debe y del haber son distintas. No es un asiento del libro mayor.\n\n`POST /accounting/practitioner/simple/transactions`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_createTransaction`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date\": \"2026-01-01\",\n  \"description\": \"description-ejemplo\",\n  \"debitAccountId\": \"<debitAccountId: uuid existente>\",\n  \"creditAccountId\": \"<creditAccountId: uuid existente>\",\n  \"amount\": \"amount-ejemplo\",\n  \"practiceId\": \"{{practiceId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{transactionId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.transactionId);",
+                      "  if (id) pm.environment.set('transactionId', id);",
                       "}"
                     ]
                   }
@@ -4574,6 +4997,339 @@
                     "exec": [
                       "pm.test('status 200', function () {",
                       "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /accounting/practitioner/simple/accounts/{id} · Renombrar una cuenta",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/accounts/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "accounts",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{accountId}}",
+                      "description": "Identificador de ruta · variable `{{accountId}}`"
+                    }
+                  ]
+                },
+                "description": "Una cuenta general se renombra pero no cambia de clase; tampoco una que ya usa algún registro o transacción (409).\n\n`PUT /accounting/practitioner/simple/accounts/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_updateAccount`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"accountClass\": \"ASSET\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /accounting/practitioner/simple/records/{id} · Editar un gasto, un activo o una deuda",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/records/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "records",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{recordId}}",
+                      "description": "Identificador de ruta · variable `{{recordId}}`"
+                    }
+                  ]
+                },
+                "description": "Editar un gasto, un activo o una deuda. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /accounting/practitioner/simple/records/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_updateRecord`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"kind\": \"EXPENSE\",\n  \"date\": \"2026-01-01\",\n  \"accountId\": \"{{accountId}}\",\n  \"description\": \"description-ejemplo\",\n  \"amount\": \"amount-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /accounting/practitioner/simple/transactions/{id} · Editar una transacción debe/haber",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/transactions/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "transactions",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{transactionId}}",
+                      "description": "Identificador de ruta · variable `{{transactionId}}`"
+                    }
+                  ]
+                },
+                "description": "Editar una transacción debe/haber. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /accounting/practitioner/simple/transactions/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_updateTransaction`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"date\": \"2026-01-01\",\n  \"description\": \"description-ejemplo\",\n  \"debitAccountId\": \"<debitAccountId: uuid existente>\",\n  \"creditAccountId\": \"<creditAccountId: uuid existente>\",\n  \"amount\": \"amount-ejemplo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /accounting/practitioner/simple/accounts/{id} · Borrar una cuenta propia",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/accounts/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "accounts",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{accountId}}",
+                      "description": "Identificador de ruta · variable `{{accountId}}`"
+                    }
+                  ]
+                },
+                "description": "409 si es una cuenta general o si la usa algún registro o transacción.\n\n`DELETE /accounting/practitioner/simple/accounts/{id}`\n\nRespuesta esperada: **204**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_deleteAccount`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 204', function () {",
+                      "  pm.response.to.have.status(204);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /accounting/practitioner/simple/records/{id} · Borrar un gasto, un activo o una deuda",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/records/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "records",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{recordId}}",
+                      "description": "Identificador de ruta · variable `{{recordId}}`"
+                    }
+                  ]
+                },
+                "description": "Borrar un gasto, un activo o una deuda. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /accounting/practitioner/simple/records/{id}`\n\nRespuesta esperada: **204**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_deleteRecord`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 204', function () {",
+                      "  pm.response.to.have.status(204);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /accounting/practitioner/simple/transactions/{id} · Borrar una transacción debe/haber",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounting/practitioner/simple/transactions/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounting",
+                    "practitioner",
+                    "simple",
+                    "transactions",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{transactionId}}",
+                      "description": "Identificador de ruta · variable `{{transactionId}}`"
+                    }
+                  ]
+                },
+                "description": "Borrar una transacción debe/haber. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /accounting/practitioner/simple/transactions/{id}`\n\nRespuesta esperada: **204**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `AccountingPractitionerSimpleController_deleteTransaction`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 204', function () {",
+                      "  pm.response.to.have.status(204);",
                       "});"
                     ]
                   }
@@ -17618,7 +18374,7 @@
       ]
     },
     {
-      "name": "billing (34)",
+      "name": "billing (35)",
       "item": [
         {
           "name": "billing-operations",
@@ -18860,6 +19616,62 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.serviceCatalogId);",
                       "  if (id) pm.environment.set('serviceCatalogId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /billing/service-catalog/{id}/image · Descargar la imagen de un servicio que el actor puede ver",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/billing/service-catalog/:id/image",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "billing",
+                    "service-catalog",
+                    ":id",
+                    "image"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{serviceCatalogId}}",
+                      "description": "Identificador de ruta · variable `{{serviceCatalogId}}`"
+                    }
+                  ]
+                },
+                "description": "Autoriza por contexto: servicio activo de una práctica del tenant activo. 404 uniforme en cualquier otro caso.\n\n`GET /billing/service-catalog/{id}/image`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `BillingServiceCatalogController_getImage`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('imageId', first.id);",
                       "}"
                     ]
                   }
@@ -22023,7 +22835,7 @@
       ]
     },
     {
-      "name": "clinical (40)",
+      "name": "clinical (41)",
       "item": [
         {
           "name": "clinical-encounters",
@@ -22386,6 +23198,74 @@
                       "  const list = Array.isArray(body) ? body : (body.medicalAspects || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('medicalAspectId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /clinical/me/procedure-centers · Dónde hacerme los procedimientos que me pidieron",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/clinical/me/procedure-centers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "clinical",
+                    "me",
+                    "procedure-centers"
+                  ],
+                  "query": [
+                    {
+                      "key": "lat",
+                      "value": "-90",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "lng",
+                      "value": "-180",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Las órdenes vigentes de procedimiento y cardiología del titular, y las sedes que declaran ofrecerlos: primero las que tienen todos, después la más cercana en línea recta al origen elegido.\n\n`GET /clinical/me/procedure-centers`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `ClinicalProcedureCentersController_findOwn`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.procedureCenters || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('procedureCenterId', first.id);",
                       "}"
                     ]
                   }
@@ -39880,7 +40760,7 @@
                 "description": "Corregir el nombre o el tipo de un campo propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /forms/field-definitions/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `FormsFieldsController_updateFieldDefinition`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"dataType\": \"string\",\n  \"options\": [\n    \"options-ejemplo\"\n  ],\n  \"multiple\": true,\n  \"allowOther\": true,\n  \"description\": {}\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"dataType\": \"string\",\n  \"options\": [\n    \"options-ejemplo\"\n  ],\n  \"multiple\": true,\n  \"allowOther\": true,\n  \"description\": {},\n  \"cardinalityMin\": {},\n  \"cardinalityMax\": {}\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -45658,7 +46538,14 @@
               "name": "GET /iam/onboarding-drafts/{formType}/{draftId} · Recupera un borrador de alta guardado por identificador y tipo de formulario",
               "request": {
                 "method": "GET",
-                "header": [],
+                "header": [
+                  {
+                    "key": "x-onboarding-draft-secret",
+                    "value": "{{x_onboarding_draft_secret}}",
+                    "description": "Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.",
+                    "disabled": true
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
                   "host": [
@@ -45715,7 +46602,14 @@
               "name": "PUT /iam/onboarding-drafts/{formType}/{draftId} · Guarda o actualiza el avance del formulario de alta en borrador",
               "request": {
                 "method": "PUT",
-                "header": [],
+                "header": [
+                  {
+                    "key": "x-onboarding-draft-secret",
+                    "value": "{{x_onboarding_draft_secret}}",
+                    "description": "Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.",
+                    "disabled": true
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
                   "host": [
@@ -45740,7 +46634,7 @@
                     }
                   ]
                 },
-                "description": "Guarda o actualiza el avance del formulario de alta en borrador. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /iam/onboarding-drafts/{formType}/{draftId}`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 409, 422, 429, 500, 504\n\noperationId: `IamOnboardingDraftsController_saveDraft`",
+                "description": "Sin cabecera de secreto crea el borrador y devuelve `draftSecret` una sola vez; con el secreto correcto lo actualiza. Cuerpo máximo 64 KiB; hay topes de borradores totales y por origen (IPv6 por prefijo /64). Un borrador recién creado vive 1 hora; una segunda escritura con el secreto hecha al menos 60 s después de crearlo lo confirma y extiende su vida a 30 días. Con el almacén lleno, el origen sólo puede desalojar su propio borrador no confirmado; si no tiene, 503 con Retry-After.\n\n`PUT /iam/onboarding-drafts/{formType}/{draftId}`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 404, 409, 422, 429, 500, 504\n\noperationId: `IamOnboardingDraftsController_saveDraft`",
                 "auth": {
                   "type": "noauth"
                 }
@@ -45764,7 +46658,14 @@
               "name": "DELETE /iam/onboarding-drafts/{formType}/{draftId} · Elimina el borrador al completar el alta exitosamente o por descarte del usuario",
               "request": {
                 "method": "DELETE",
-                "header": [],
+                "header": [
+                  {
+                    "key": "x-onboarding-draft-secret",
+                    "value": "{{x_onboarding_draft_secret}}",
+                    "description": "Secreto del borrador, devuelto una sola vez en `draftSecret` por el PUT que lo crea. Obligatorio en GET y DELETE, y en el PUT que actualiza; sin él, el PUT sólo crea.",
+                    "disabled": true
+                  }
+                ],
                 "url": {
                   "raw": "{{baseUrl}}/iam/onboarding-drafts/:formType/:draftId",
                   "host": [
@@ -58020,6 +58921,182 @@
       ]
     },
     {
+      "name": "medical-centers (2)",
+      "item": [
+        {
+          "name": "GET /medical-centers/search · Buscar centros médicos por procedimientos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medical-centers/search?procedureConceptIds=1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c,2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medical-centers",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "-90",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "lng",
+                  "value": "-180",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "includePartial",
+                  "value": "False",
+                  "description": "Por defecto solo los centros que ofrecen todo lo pedido (`complete: true`).",
+                  "disabled": true
+                },
+                {
+                  "key": "procedureConceptIds",
+                  "value": "1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c,2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+                  "description": "Conceptos de procedimiento separados por coma (uuid).",
+                  "disabled": false
+                },
+                {
+                  "key": "specialty",
+                  "value": "specialty-ejemplo",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "city",
+                  "value": "city-ejemplo",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Cada sede dice si ofrece todo lo pedido (`complete`) y cuáles le faltan. Completos primero, después por distancia en línea recta desde `lat`/`lng`, después por precio total y por nombre. Solo aparecen los que publicaron precio.\n\n`GET /medical-centers/search`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `MedicalCentersController_search`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.medicalCenters || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('medicalCenterId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /medical-centers/search/for-my-orders · Buscar centros médicos para mis órdenes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/medical-centers/search/for-my-orders?serviceRequestIds=serviceRequestIds-ejemplo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "medical-centers",
+                "search",
+                "for-my-orders"
+              ],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "-90",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "lng",
+                  "value": "-180",
+                  "description": "",
+                  "disabled": true
+                },
+                {
+                  "key": "includePartial",
+                  "value": "False",
+                  "description": "Por defecto solo los centros que ofrecen todo lo pedido (`complete: true`).",
+                  "disabled": true
+                },
+                {
+                  "key": "serviceRequestIds",
+                  "value": "serviceRequestIds-ejemplo",
+                  "description": "Ids de órdenes de servicio del titular, separados por coma.",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Los procedimientos salen de las órdenes. Marca si el médico trabaja en la sede y si la sugirió, sin cambiar qué sedes aparecen ni su orden. Una orden ajena responde 404.\n\n`GET /medical-centers/search/for-my-orders`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `MedicalCentersController_searchForMyOrders`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.forMyOrders || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('forMyOrderId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "medical-groups (9)",
       "item": [
         {
@@ -69730,7 +70807,7 @@
       ]
     },
     {
-      "name": "practices (13)",
+      "name": "practices (16)",
       "item": [
         {
           "name": "GET /practices · Listar las prácticas activas del tenant",
@@ -69904,7 +70981,7 @@
           ]
         },
         {
-          "name": "POST /practices/{practiceId}/healthcare-services · Publicar un servicio de salud",
+          "name": "POST /practices/{practiceId}/healthcare-services · Publicar un procedimiento del nomenclador en una sede",
           "request": {
             "method": "POST",
             "header": [
@@ -69937,10 +71014,10 @@
                 }
               ]
             },
-            "description": "Publicar un servicio de salud. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /practices/{practiceId}/healthcare-services`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PracticesController_publishHealthcareService`",
+            "description": "El concepto debe ser del nomenclador (`VS_BO_MEDICAL_PROCEDURE`) y coincidir con el del ítem de catálogo que fija el precio. Una sede no puede ofrecer dos veces el mismo procedimiento (409).\n\n`POST /practices/{practiceId}/healthcare-services`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PracticesController_publishHealthcareService`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"clinicalUnitId\": \"{{clinicalUnitId}}\",\n  \"referralRequired\": true,\n  \"appointmentRequired\": true,\n  \"telehealthAvailable\": true\n}",
+              "raw": "{\n  \"practiceSiteId\": \"<practiceSiteId: uuid existente>\",\n  \"clinicalUnitId\": \"{{clinicalUnitId}}\",\n  \"serviceConceptId\": \"<serviceConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"serviceCatalogId\": \"{{serviceCatalogId}}\",\n  \"referralRequired\": true,\n  \"appointmentRequired\": true,\n  \"telehealthAvailable\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -70105,6 +71182,74 @@
           ]
         },
         {
+          "name": "POST /practices/{practiceId}/role-assignments/invitations · Invitar a un profesional a procedimientos de una sede",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/practices/:practiceId/role-assignments/invitations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "practices",
+                ":practiceId",
+                "role-assignments",
+                "invitations"
+              ],
+              "variable": [
+                {
+                  "key": "practiceId",
+                  "value": "{{practiceId}}",
+                  "description": "Identificador de ruta · variable `{{practiceId}}`"
+                }
+              ]
+            },
+            "description": "Crea una vinculación INVITED por procedimiento. Ninguna llega a ACTIVE sin que el profesional la acepte.\n\n`POST /practices/{practiceId}/role-assignments/invitations`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PracticeInvitationsController_invite`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"practitionerProfileId\": \"{{practitionerProfileId}}\",\n  \"practiceSiteId\": \"<practiceSiteId: uuid existente>\",\n  \"healthcareServiceIds\": [\n    \"<healthcareServiceIds: uuid existente>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{invitationId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.invitationId);",
+                  "  if (id) pm.environment.set('invitationId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "POST /practices/{practiceId}/role-assignments/self-request · Solicitar la propia vinculación a una organización",
           "request": {
             "method": "POST",
@@ -70142,7 +71287,7 @@
             "description": "Autoservicio del profesional: queda PENDING hasta que la organización la apruebe, rechace, suspenda o finalice. No concede acceso a pacientes de la organización.\n\n`POST /practices/{practiceId}/role-assignments/self-request`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PracticesController_selfRequestRoleAssignment`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"note\": \"note-ejemplo\"\n}",
+              "raw": "{\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"healthcareServiceId\": \"{{healthcareServiceId}}\",\n  \"note\": \"note-ejemplo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -70233,6 +71378,69 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.siteId);",
                   "  if (id) pm.environment.set('siteId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /practices/{practiceId}/healthcare-services · Listar los procedimientos que ofrecen las sedes de la práctica",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/practices/:practiceId/healthcare-services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "practices",
+                ":practiceId",
+                "healthcare-services"
+              ],
+              "variable": [
+                {
+                  "key": "practiceId",
+                  "value": "{{practiceId}}",
+                  "description": "Identificador de ruta · variable `{{practiceId}}`"
+                }
+              ],
+              "query": [
+                {
+                  "key": "practiceSiteId",
+                  "value": "practiceSiteId-ejemplo",
+                  "description": "Solo la oferta de esa sede",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Listar los procedimientos que ofrecen las sedes de la práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /practices/{practiceId}/healthcare-services`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `PracticesController_listHealthcareServices`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.healthcareServices || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('healthcareServiceId', first.id);",
                   "}"
                 ]
               }
@@ -70419,6 +71627,72 @@
                   "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                   "  if (first && first.id) pm.environment.set('siteId', first.id);",
                   "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /practices/{practiceId}/healthcare-services/{id} · Actualizar el precio o el estado de un procedimiento de la sede",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/practices/:practiceId/healthcare-services/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "practices",
+                ":practiceId",
+                "healthcare-services",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "practiceId",
+                  "value": "{{practiceId}}",
+                  "description": "Identificador de ruta · variable `{{practiceId}}`"
+                },
+                {
+                  "key": "id",
+                  "value": "{{healthcareServiceId}}",
+                  "description": "Identificador de ruta · variable `{{healthcareServiceId}}`"
+                }
+              ]
+            },
+            "description": "Actualizar el precio o el estado de un procedimiento de la sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /practices/{practiceId}/healthcare-services/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PracticesController_updateHealthcareService`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceCatalogId\": \"{{serviceCatalogId}}\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
                 ]
               }
             }
@@ -70993,456 +72267,578 @@
       ]
     },
     {
-      "name": "practitioners (8)",
+      "name": "practitioners (10)",
       "item": [
         {
-          "name": "GET /practitioners/me/role-assignments · Mis vinculaciones con organizaciones",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/practitioners/me/role-assignments",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "practitioners",
-                "me",
-                "role-assignments"
-              ]
-            },
-            "description": "Incluye pendientes, activas, suspendidas, rechazadas y finalizadas. No implica acceso a pacientes de esas organizaciones.\n\n`GET /practitioners/me/role-assignments`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PractitionerSitesController_listMyAssignments`"
-          },
-          "response": [],
-          "event": [
+          "name": "insurance",
+          "item": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
-                  "if (pm.response.code === 200) {",
-                  "  const body = pm.response.json();",
-                  "  const list = Array.isArray(body) ? body : (body.roleAssignments || body.items || body.data || body.results);",
-                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
-                  "  if (first && first.id) pm.environment.set('roleAssignmentId', first.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /practitioners/me/sites · Registrar un consultorio propio",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+              "name": "GET /practitioners/{profileId}/insurance-networks · Aseguradoras con las que trabaja el profesional",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/:profileId/insurance-networks",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    ":profileId",
+                    "insurance-networks"
+                  ],
+                  "variable": [
+                    {
+                      "key": "profileId",
+                      "value": "{{profileId}}",
+                      "description": "Identificador de ruta · variable `{{profileId}}`"
+                    }
+                  ]
+                },
+                "description": "Una fila por membresía vigente en una red de prestadores, por la práctica donde atiende o individual. Vacía significa que ninguna aseguradora lo tiene en su red.\n\n`GET /practitioners/{profileId}/insurance-networks`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `PractitionerInsuranceNetworksController_list`"
               },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/practitioners/me/sites",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "practitioners",
-                "me",
-                "sites"
-              ]
-            },
-            "description": "Crea (o reutiliza) la práctica personal del profesional, la sede y la vinculación que la conecta con su agenda.\n\n`POST /practitioners/me/sites`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_createOwnSite`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  },\n  \"contactPhone\": \"+591 72123456\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 201', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "",
-                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{siteId}}.",
-                  "if (pm.response.code < 300) {",
-                  "  const body = pm.response.json();",
-                  "  const id = body && (body.id || body.siteId);",
-                  "  if (id) pm.environment.set('siteId', id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "GET /practitioners/{profileId}/insurance-networks · Aseguradoras con las que trabaja el profesional",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/practitioners/:profileId/insurance-networks",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "practitioners",
-                ":profileId",
-                "insurance-networks"
-              ],
-              "variable": [
+              "response": [],
+              "event": [
                 {
-                  "key": "profileId",
-                  "value": "{{profileId}}",
-                  "description": "Identificador de ruta · variable `{{profileId}}`"
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.insuranceNetworks || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('insuranceNetworkId', first.id);",
+                      "}"
+                    ]
+                  }
                 }
               ]
-            },
-            "description": "Una fila por membresía vigente en una red de prestadores, por la práctica donde atiende o individual. Vacía significa que ninguna aseguradora lo tiene en su red.\n\n`GET /practitioners/{profileId}/insurance-networks`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `PractitionerInsuranceNetworksController_list`"
-          },
-          "response": [],
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
-                  "if (pm.response.code === 200) {",
-                  "  const body = pm.response.json();",
-                  "  const list = Array.isArray(body) ? body : (body.insuranceNetworks || body.items || body.data || body.results);",
-                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
-                  "  if (first && first.id) pm.environment.set('insuranceNetworkId', first.id);",
-                  "}"
-                ]
-              }
             }
           ]
         },
         {
-          "name": "GET /practitioners/{profileId}/sites · Consultorios donde atiende el profesional",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/practitioners/:profileId/sites",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "practitioners",
-                ":profileId",
-                "sites"
-              ],
-              "variable": [
-                {
-                  "key": "profileId",
-                  "value": "{{profileId}}",
-                  "description": "Identificador de ruta · variable `{{profileId}}`"
-                }
-              ]
-            },
-            "description": "Sale de sus asignaciones de rol vigentes con sede. Una lista vacía significa que no tiene ninguna, no que el profesional no exista.\n\n`GET /practitioners/{profileId}/sites`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `PractitionerSitesController_listSites`"
-          },
-          "response": [],
-          "event": [
+          "name": "practice",
+          "item": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
-                  "if (pm.response.code === 200) {",
-                  "  const body = pm.response.json();",
-                  "  const list = Array.isArray(body) ? body : (body.sites || body.items || body.data || body.results);",
-                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
-                  "  if (first && first.id) pm.environment.set('siteId', first.id);",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "PATCH /practitioners/me/sites/{siteId} · Corregir un consultorio propio",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+              "name": "GET /practitioners/me/role-assignments · Mis vinculaciones con organizaciones",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/me/role-assignments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    "me",
+                    "role-assignments"
+                  ]
+                },
+                "description": "Incluye pendientes, activas, suspendidas, rechazadas y finalizadas. No implica acceso a pacientes de esas organizaciones.\n\n`GET /practitioners/me/role-assignments`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PractitionerSitesController_listMyAssignments`"
               },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/practitioners/me/sites/:siteId",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "practitioners",
-                "me",
-                "sites",
-                ":siteId"
-              ],
-              "variable": [
+              "response": [],
+              "event": [
                 {
-                  "key": "siteId",
-                  "value": "{{siteId}}",
-                  "description": "Identificador de ruta · variable `{{siteId}}`"
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.roleAssignments || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('roleAssignmentId', first.id);",
+                      "}"
+                    ]
+                  }
                 }
               ]
             },
-            "description": "Cambia nombre, huso horario o dirección sin retirar la sede: el id se conserva, y es el que la agenda referencia en cada turno.\n\n`PATCH /practitioners/me/sites/{siteId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_updateOwnSite`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  }\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "PUT /practitioners/me/sites/{siteId}/bank-qr · Fijar o quitar el QR bancario de una sede",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+              "name": "POST /practitioners/me/sites · Registrar un consultorio propio",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/me/sites",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    "me",
+                    "sites"
+                  ]
+                },
+                "description": "Crea (o reutiliza) la práctica personal del profesional, la sede y la vinculación que la conecta con su agenda.\n\n`POST /practitioners/me/sites`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_createOwnSite`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  },\n  \"contactPhone\": \"+591 72123456\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
               },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/practitioners/me/sites/:siteId/bank-qr",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "practitioners",
-                "me",
-                "sites",
-                ":siteId",
-                "bank-qr"
-              ],
-              "variable": [
+              "response": [],
+              "event": [
                 {
-                  "key": "siteId",
-                  "value": "{{siteId}}",
-                  "description": "Identificador de ruta · variable `{{siteId}}`"
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{siteId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.siteId);",
+                      "  if (id) pm.environment.set('siteId', id);",
+                      "}"
+                    ]
+                  }
                 }
               ]
             },
-            "description": "Asocia un archivo ya subido como QR de cobro de esa sede. `fileId: null` lo quita.\n\n`PUT /practitioners/me/sites/{siteId}/bank-qr`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_setSiteBankQr`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"fileId\": {}\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "PUT /practitioners/me/sites/{siteId}/contact-phone · Guardar o quitar mi teléfono en una sede",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+              "name": "POST /practitioners/me/role-assignments/{roleId}/accept · Aceptar una invitación de un centro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/me/role-assignments/:roleId/accept",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    "me",
+                    "role-assignments",
+                    ":roleId",
+                    "accept"
+                  ],
+                  "variable": [
+                    {
+                      "key": "roleId",
+                      "value": "{{roleId}}",
+                      "description": "Identificador de ruta · variable `{{roleId}}`"
+                    }
+                  ]
+                },
+                "description": "Aceptar una invitación de un centro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /practitioners/me/role-assignments/{roleId}/accept`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PractitionerInvitationsController_accept`"
               },
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/practitioners/me/sites/:siteId/contact-phone",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "practitioners",
-                "me",
-                "sites",
-                ":siteId",
-                "contact-phone"
-              ],
-              "variable": [
+              "response": [],
+              "event": [
                 {
-                  "key": "siteId",
-                  "value": "{{siteId}}",
-                  "description": "Identificador de ruta · variable `{{siteId}}`"
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{roleAssignmentId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.roleAssignmentId);",
+                      "  if (id) pm.environment.set('roleAssignmentId', id);",
+                      "}"
+                    ]
+                  }
                 }
               ]
             },
-            "description": "Guardar o quitar mi teléfono en una sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /practitioners/me/sites/{siteId}/contact-phone`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_setSiteContactPhone`",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"contactPhone\": \"+591 72123456\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [],
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "DELETE /practitioners/me/sites/{siteId} · Retirar un consultorio propio",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "X-Tenant-Id",
-                "value": "{{tenantId}}",
-                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
-                "disabled": false
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/practitioners/me/sites/:siteId",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "practitioners",
-                "me",
-                "sites",
-                ":siteId"
-              ],
-              "variable": [
+              "name": "POST /practitioners/me/role-assignments/{roleId}/decline · Declinar una invitación de un centro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/me/role-assignments/:roleId/decline",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    "me",
+                    "role-assignments",
+                    ":roleId",
+                    "decline"
+                  ],
+                  "variable": [
+                    {
+                      "key": "roleId",
+                      "value": "{{roleId}}",
+                      "description": "Identificador de ruta · variable `{{roleId}}`"
+                    }
+                  ]
+                },
+                "description": "Declinar una invitación de un centro. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /practitioners/me/role-assignments/{roleId}/decline`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PractitionerInvitationsController_decline`"
+              },
+              "response": [],
+              "event": [
                 {
-                  "key": "siteId",
-                  "value": "{{siteId}}",
-                  "description": "Identificador de ruta · variable `{{siteId}}`"
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{roleAssignmentId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.roleAssignmentId);",
+                      "  if (id) pm.environment.set('roleAssignmentId', id);",
+                      "}"
+                    ]
+                  }
                 }
               ]
             },
-            "description": "Retirar un consultorio propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /practitioners/me/sites/{siteId}`\n\nRespuesta esperada: **204**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_deleteOwnSite`"
-          },
-          "response": [],
-          "event": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status 204', function () {",
-                  "  pm.response.to.have.status(204);",
-                  "});"
-                ]
-              }
+              "name": "GET /practitioners/{profileId}/sites · Consultorios donde atiende el profesional",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/:profileId/sites",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    ":profileId",
+                    "sites"
+                  ],
+                  "variable": [
+                    {
+                      "key": "profileId",
+                      "value": "{{profileId}}",
+                      "description": "Identificador de ruta · variable `{{profileId}}`"
+                    }
+                  ]
+                },
+                "description": "Sale de sus asignaciones de rol vigentes con sede. Una lista vacía significa que no tiene ninguna, no que el profesional no exista.\n\n`GET /practitioners/{profileId}/sites`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `PractitionerSitesController_listSites`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.sites || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('siteId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /practitioners/me/sites/{siteId} · Corregir un consultorio propio",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/me/sites/:siteId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    "me",
+                    "sites",
+                    ":siteId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "siteId",
+                      "value": "{{siteId}}",
+                      "description": "Identificador de ruta · variable `{{siteId}}`"
+                    }
+                  ]
+                },
+                "description": "Cambia nombre, huso horario o dirección sin retirar la sede: el id se conserva, y es el que la agenda referencia en cada turno.\n\n`PATCH /practitioners/me/sites/{siteId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_updateOwnSite`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"timeZone\": \"America/La_Paz\",\n  \"address\": {\n    \"lines\": [\n      \"lines-ejemplo\"\n    ],\n    \"city\": \"city-ejemplo\",\n    \"latitude\": -90,\n    \"longitude\": -180\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /practitioners/me/sites/{siteId}/bank-qr · Fijar o quitar el QR bancario de una sede",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/me/sites/:siteId/bank-qr",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    "me",
+                    "sites",
+                    ":siteId",
+                    "bank-qr"
+                  ],
+                  "variable": [
+                    {
+                      "key": "siteId",
+                      "value": "{{siteId}}",
+                      "description": "Identificador de ruta · variable `{{siteId}}`"
+                    }
+                  ]
+                },
+                "description": "Asocia un archivo ya subido como QR de cobro de esa sede. `fileId: null` lo quita.\n\n`PUT /practitioners/me/sites/{siteId}/bank-qr`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_setSiteBankQr`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fileId\": {}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /practitioners/me/sites/{siteId}/contact-phone · Guardar o quitar mi teléfono en una sede",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/me/sites/:siteId/contact-phone",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    "me",
+                    "sites",
+                    ":siteId",
+                    "contact-phone"
+                  ],
+                  "variable": [
+                    {
+                      "key": "siteId",
+                      "value": "{{siteId}}",
+                      "description": "Identificador de ruta · variable `{{siteId}}`"
+                    }
+                  ]
+                },
+                "description": "Guardar o quitar mi teléfono en una sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /practitioners/me/sites/{siteId}/contact-phone`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_setSiteContactPhone`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contactPhone\": \"+591 72123456\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /practitioners/me/sites/{siteId} · Retirar un consultorio propio",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/me/sites/:siteId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    "me",
+                    "sites",
+                    ":siteId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "siteId",
+                      "value": "{{siteId}}",
+                      "description": "Identificador de ruta · variable `{{siteId}}`"
+                    }
+                  ]
+                },
+                "description": "Retirar un consultorio propio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /practitioners/me/sites/{siteId}`\n\nRespuesta esperada: **204**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_deleteOwnSite`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 204', function () {",
+                      "  pm.response.to.have.status(204);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
             }
           ]
         }
@@ -89851,7 +91247,7 @@
       ]
     },
     {
-      "name": "tenants (23)",
+      "name": "tenants (24)",
       "item": [
         {
           "name": "directory-tenants",
@@ -90986,6 +92382,78 @@
                       "pm.test('status 200', function () {",
                       "  pm.response.to.have.status(200);",
                       "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "practice",
+          "item": [
+            {
+              "name": "POST /tenants/{tenantId}/practices · Crear la práctica y la primera sede de una organización",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/tenants/:tenantId/practices",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tenants",
+                    ":tenantId",
+                    "practices"
+                  ],
+                  "variable": [
+                    {
+                      "key": "tenantId",
+                      "value": "{{tenantId}}",
+                      "description": "Identificador de ruta · variable `{{tenantId}}`"
+                    }
+                  ]
+                },
+                "description": "Exige que la organización esté verificada (422 si no) y que el actor administre esa organización (403 si no). Dos prácticas con el mismo nombre en la misma organización responden 409.\n\n`POST /tenants/{tenantId}/practices`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `OrganizationPracticesController_create`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"site\": {\n    \"name\": \"name-ejemplo\",\n    \"addressText\": \"Av. San Martín 123\",\n    \"latitude\": -17.7833,\n    \"longitude\": -63.1821,\n    \"cityText\": \"Santa Cruz de la Sierra\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{practiceId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.practiceId);",
+                      "  if (id) pm.environment.set('practiceId', id);",
+                      "}"
                     ]
                   }
                 }

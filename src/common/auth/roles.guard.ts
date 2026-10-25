@@ -78,11 +78,12 @@ export class RolesGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const roles = request.user?.roles ?? [];
 
     // SUPERADMIN es un comodín deliberado: evita tener que enumerar cada rol en
     // cada endpoint administrativo y concentra el privilegio total en un rol.
-    if (roles.includes('SUPERADMIN')) {
+    // Sólo lo es el de plataforma: una asignación `SUPERADMIN` acotada a un
+    // tenant (`scopedRoles`) no es comodín fuera de él.
+    if (roleAuthorizesInTenant(request.user, 'SUPERADMIN', undefined)) {
       return true;
     }
 

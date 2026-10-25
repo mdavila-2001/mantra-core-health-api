@@ -66,6 +66,11 @@ const SIN_ROLES_AUTORIZADOS = [
     endpoints: ['PUT '],
   },
   {
+    file: 'src/modules/practice/controllers/organization-practices.controller.ts',
+    why: 'Membresía administrativa en el tenant de la ruta: `OrganizationPracticeProvisioningService.provision` llama a `assertCanAdminister(tenantId, actor)` antes de tocar nada (403 al administrador de otra organización) y exige la organización verificada (422). Un rol global dejaría a la clínica recién registrada sin poder abrir su propia práctica.',
+    endpoints: ['POST :tenantId/practices'],
+  },
+  {
     file: 'src/modules/iam/presentation/controllers/iam-account-security.controller.ts',
     why: 'Sobre la propia cuenta: `IamAccountSecurityService` opera con `actor.id` (la credencial es la del token) y una sesión ajena responde 404 (`session.userId !== actor.id`). `@TenantAgnostic`: no toca datos de un tenant.',
     endpoints: ['POST auth/change-password', 'POST me/sessions/:id/revoke'],
@@ -89,6 +94,22 @@ const SIN_ROLES_AUTORIZADOS = [
     file: 'src/modules/pharma_lab/controllers/pharma-lab-notices.controller.ts',
     why: 'Buzón propio: `PharmaLabNotificationsService.markRead` busca el aviso con `recipientUserId = actor.id`; uno ajeno no se encuentra.',
     endpoints: ['POST :noticeId/read'],
+  },
+  {
+    file: 'src/modules/practice/controllers/practices.controller.ts',
+    why: 'Membresía administrativa en la organización de la ruta: `ClinicalStructureService.publishHealthcareService` y `HealthcareServiceOffersService.updateOffer` llaman a `PracticeAdministrationService.assertCanAdministerPractice` antes de leer o escribir nada (404 si la práctica no existe, 403 si el actor administra otra organización; pasan los roles de plataforma).',
+    endpoints: [
+      'POST :practiceId/healthcare-services',
+      'PATCH :practiceId/healthcare-services/:id',
+    ],
+    file: 'src/modules/practice/controllers/practice-invitations.controller.ts',
+    why: 'Membresía administrativa en la organización de la ruta: `PracticeAffiliationInvitationsService.invite` llama a `PracticeAdministrationService.assertCanAdministerPractice` antes de leer nada (403 si el actor administra otra organización; pasan los roles de plataforma). Un rol global dejaría invitar al administrador de otro centro.',
+    endpoints: ['POST :practiceId/role-assignments/invitations'],
+  },
+  {
+    file: 'src/modules/practice/controllers/role-assignments.controller.ts',
+    why: 'Membresía administrativa en la organización dueña de la vinculación: `PracticeWorkforceService.approveAssignment`/`rejectAssignment` cargan la fila y llaman a `PracticeAdministrationService.assertCanAdministerPractice` (404 si no existe, 403 si el actor administra otra organización; pasan los roles de plataforma) antes de cambiar el estado.',
+    endpoints: ['POST :roleId/approve', 'POST :roleId/reject'],
   },
   {
     file: 'src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts',
@@ -158,3 +179,32 @@ export const HUERFANAS_DOCUMENTADAS = new Map([
     'Propuesta v4.0.9 que cierra la FK colgante de `system_ops.assessment_control_results`; la tabla no está en ninguna fuente de DDL del modelo. Ningún servicio de `system_ops` la usa.',
   ],
 ]);
+
+/**
+ * Importes de entidades de otro módulo desde un repositorio que no son un cruce
+ * de dominio, con el porqué. Clave: `ruta del repositorio#Entidad`.
+ *
+ * Una entrada afirma algo que se puede comprobar en el código; si deja de ser
+ * cierto, la arista vuelve a contarse.
+ */
+const CRUCE_DOMINIO_DOCUMENTADO = new Map([
+  [
+    'src/modules/quotations/repositories/quotations.repository.ts#Quotations',
+    'Mismo schema, otro módulo Nest: `billing.quotations` es de `billing` en la base y `QuotationsModule` es la parte separada que la opera (decisión de FT-24, ver `quotations.module.ts`). No cruza un dominio de datos.',
+  ],
+  [
+    'src/modules/quotations/repositories/quotation-installments.repository.ts#QuotationInstallments',
+    'Mismo schema, otro módulo Nest: `billing.quotation_installments` es de `billing` en la base y `QuotationsModule` la opera (decisión de FT-24, ver `quotations.module.ts`). No cruza un dominio de datos.',
+  ],
+]);
+
+/**
+ * ¿Está documentado que importar esta entidad ajena no es un cruce de dominio?
+ *
+ * @param file - Repositorio relativo a la raíz, con `/`.
+ * @param entity - Nombre de la clase importada.
+ * @returns El porqué documentado, o `undefined`.
+ */
+export function cruceDominioDocumentado(file, entity) {
+  return CRUCE_DOMINIO_DOCUMENTADO.get(`${file}#${entity}`);
+}

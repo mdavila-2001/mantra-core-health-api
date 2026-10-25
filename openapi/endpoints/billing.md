@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `billing`
 
-Referencia exhaustiva de 34 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 35 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated`
 - **Controladores:** `BillingOperationsController`, `BillingPayablesController`, `BillingReceivablesController`, `BillingServiceCatalogController`, `BillingSimulatedController`
@@ -30,21 +30,22 @@ Referencia exhaustiva de 34 operación(es) del módulo `billing`, derivada del c
 17. [GET /billing/service-catalog](#17-get-billing-service-catalog) — Listar el catálogo de servicios de la práctica
 18. [POST /billing/service-catalog](#18-post-billing-service-catalog) — Dar de alta un servicio en el catálogo maestro
 19. [PATCH /billing/service-catalog/{id}](#19-patch-billing-service-catalog-id) — Corregir un servicio del catálogo de mi práctica
-20. [GET /billing/service-catalog/procedure-specialties](#20-get-billing-service-catalog-procedure-specialties) — Listar las especialidades del nomenclador de procedimientos
-21. [GET /billing/service-catalog/procedures](#21-get-billing-service-catalog-procedures) — Listar el nomenclador de procedimientos (arancel de referencia)
-22. [GET /billing/simulated/catalogs](#22-get-billing-simulated-catalogs) — Catálogos paramétricos del SIAT simulado
-23. [GET /billing/simulated/charges](#23-get-billing-simulated-charges) — Cobros de consultas (opcionalmente de una persona)
-24. [POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments](#24-post-billing-simulated-charges-chargeid-instances-instanceid-payments) — Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
-25. [POST /billing/simulated/charges/{chargeId}/invoices](#25-post-billing-simulated-charges-chargeid-invoices) — Emitir la factura SIAT simulada de un cobro pagado
-26. [POST /billing/simulated/charges/{chargeId}/payment](#26-post-billing-simulated-charges-chargeid-payment) — Registrar el pago real de un cobro
-27. [GET /billing/simulated/invoices/{invoiceId}](#27-get-billing-simulated-invoices-invoiceid) — Una factura simulada, dentro del alcance de quien la pide
-28. [POST /billing/simulated/invoices/{invoiceId}/annulment](#28-post-billing-simulated-invoices-invoiceid-annulment) — Anular la factura (sólo administración)
-29. [POST /billing/simulated/invoices/{invoiceId}/annulment-reversal](#29-post-billing-simulated-invoices-invoiceid-annulment-reversal) — Revertir la anulación (sólo administración)
-30. [POST /billing/simulated/invoices/{invoiceId}/email](#30-post-billing-simulated-invoices-invoiceid-email) — Encolar el envío (simulado, no se envía) de la factura
-31. [GET /billing/simulated/my-invoices](#31-get-billing-simulated-my-invoices) — Mis facturas: recibidas (paciente) o emitidas (quien factura)
-32. [GET /billing/simulated/my-invoices/{invoiceId}](#32-get-billing-simulated-my-invoices-invoiceid) — Una de mis facturas
-33. [GET /billing/simulated/outbox](#33-get-billing-simulated-outbox) — Bandeja de correo simulada (sólo administración)
-34. [GET /billing/simulated/status](#34-get-billing-simulated-status) — Estado fiscal simulado: emisores y credenciales sintéticas
+20. [GET /billing/service-catalog/{id}/image](#20-get-billing-service-catalog-id-image) — Descargar la imagen de un servicio que el actor puede ver
+21. [GET /billing/service-catalog/procedure-specialties](#21-get-billing-service-catalog-procedure-specialties) — Listar las especialidades del nomenclador de procedimientos
+22. [GET /billing/service-catalog/procedures](#22-get-billing-service-catalog-procedures) — Listar el nomenclador de procedimientos (arancel de referencia)
+23. [GET /billing/simulated/catalogs](#23-get-billing-simulated-catalogs) — Catálogos paramétricos del SIAT simulado
+24. [GET /billing/simulated/charges](#24-get-billing-simulated-charges) — Cobros de consultas (opcionalmente de una persona)
+25. [POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments](#25-post-billing-simulated-charges-chargeid-instances-instanceid-payments) — Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
+26. [POST /billing/simulated/charges/{chargeId}/invoices](#26-post-billing-simulated-charges-chargeid-invoices) — Emitir la factura SIAT simulada de un cobro pagado
+27. [POST /billing/simulated/charges/{chargeId}/payment](#27-post-billing-simulated-charges-chargeid-payment) — Registrar el pago real de un cobro
+28. [GET /billing/simulated/invoices/{invoiceId}](#28-get-billing-simulated-invoices-invoiceid) — Una factura simulada, dentro del alcance de quien la pide
+29. [POST /billing/simulated/invoices/{invoiceId}/annulment](#29-post-billing-simulated-invoices-invoiceid-annulment) — Anular la factura (sólo administración)
+30. [POST /billing/simulated/invoices/{invoiceId}/annulment-reversal](#30-post-billing-simulated-invoices-invoiceid-annulment-reversal) — Revertir la anulación (sólo administración)
+31. [POST /billing/simulated/invoices/{invoiceId}/email](#31-post-billing-simulated-invoices-invoiceid-email) — Encolar el envío (simulado, no se envía) de la factura
+32. [GET /billing/simulated/my-invoices](#32-get-billing-simulated-my-invoices) — Mis facturas: recibidas (paciente) o emitidas (quien factura)
+33. [GET /billing/simulated/my-invoices/{invoiceId}](#33-get-billing-simulated-my-invoices-invoiceid) — Una de mis facturas
+34. [GET /billing/simulated/outbox](#34-get-billing-simulated-outbox) — Bandeja de correo simulada (sólo administración)
+35. [GET /billing/simulated/status](#35-get-billing-simulated-status) — Estado fiscal simulado: emisores y credenciales sintéticas
 
 ---
 
@@ -2778,9 +2779,16 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
+| 404 | `NOT_FOUND` | Imagen no encontrada | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 409 | `CONFLICT` | Ya existe un servicio con ese código en el catálogo | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2956,7 +2964,109 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /billing/service-catalog/procedure-specialties
+## 20. GET /billing/service-catalog/{id}/image
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-service-catalog`
+- **Nombre:** Descargar la imagen de un servicio que el actor puede ver
+- **Operation ID:** `BillingServiceCatalogController_getImage`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingServiceCatalogController.getImage](../../src/modules/billing/controllers/billing-service-catalog.controller.ts)
+
+### Descripción de negocio
+
+Autoriza por contexto: servicio activo de una práctica del tenant activo. 404 uniforme en cualquier otro caso.
+
+Contexto declarado en el controlador: Imagen de un servicio del catálogo (decisión P-22-8, opción 1). Sesión autenticada y nada más: la autorización es por contexto, en el servicio (servicio activo de una práctica del tenant activo). Un servicio ajeno, inactivo, sin imagen o inexistente responde el mismo 404. `no-store` y `nosniff`, como en el resto de descargas autenticadas.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/service-catalog/{id}/image` en `BillingServiceCatalogController_getImage`. El controlador delega en `BillingServiceCatalogService.getImageContent`. No recibe body. El tipo de retorno estático es `Promise<void>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/service-catalog/00000000-0000-4000-8000-000000000001/image HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/service-catalog/00000000-0000-4000-8000-000000000001/image HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<void>` | No |
+| 400 | Consulta completada correctamente. | `Promise<void>` | No |
+| 401 | Consulta completada correctamente. | `Promise<void>` | No |
+| 403 | Consulta completada correctamente. | `Promise<void>` | No |
+| 404 | Consulta completada correctamente. | `Promise<void>` | No |
+| 429 | Consulta completada correctamente. | `Promise<void>` | No |
+| 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
+
+La operación no devuelve body según el tipo TypeScript del controlador.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | notVisible.message | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
+| 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/file-upload.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/service-catalog/{id}/image"
+}
+```
+
+---
+
+## 21. GET /billing/service-catalog/procedure-specialties
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -3065,7 +3175,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /billing/service-catalog/procedures
+## 22. GET /billing/service-catalog/procedures
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -3194,7 +3304,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /billing/simulated/catalogs
+## 23. GET /billing/simulated/catalogs
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3284,7 +3394,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /billing/simulated/charges
+## 24. GET /billing/simulated/charges
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3378,7 +3488,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+## 25. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3495,7 +3605,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /billing/simulated/charges/{chargeId}/invoices
+## 26. POST /billing/simulated/charges/{chargeId}/invoices
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3631,7 +3741,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /billing/simulated/charges/{chargeId}/payment
+## 27. POST /billing/simulated/charges/{chargeId}/payment
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3755,7 +3865,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /billing/simulated/invoices/{invoiceId}
+## 28. GET /billing/simulated/invoices/{invoiceId}
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3851,7 +3961,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /billing/simulated/invoices/{invoiceId}/annulment
+## 29. POST /billing/simulated/invoices/{invoiceId}/annulment
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3964,7 +4074,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+## 30. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4062,7 +4172,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /billing/simulated/invoices/{invoiceId}/email
+## 31. POST /billing/simulated/invoices/{invoiceId}/email
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4175,7 +4285,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /billing/simulated/my-invoices
+## 32. GET /billing/simulated/my-invoices
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4265,7 +4375,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /billing/simulated/my-invoices/{invoiceId}
+## 33. GET /billing/simulated/my-invoices/{invoiceId}
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4359,7 +4469,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /billing/simulated/outbox
+## 34. GET /billing/simulated/outbox
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4451,7 +4561,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /billing/simulated/status
+## 35. GET /billing/simulated/status
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`

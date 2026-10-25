@@ -9,3 +9,7 @@ export * from './practitioner-sites.service';
 export * from './own-site-provisioning.service';
 export * from './practice-organization-read.service';
 export * from './practice-access.service';
+export * from './organization-practice-provisioning.service';
+export * from './practice-administration.service';
+export * from './healthcare-service-offers.service';
+export * from './practice-affiliation-invitations.service';

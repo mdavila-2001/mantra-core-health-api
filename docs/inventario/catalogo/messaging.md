@@ -23,14 +23,14 @@
 | [event_subscriptions](#event_subscriptions) | Define suscripciones de consumidores a eventos de dominio para dirigir actualizaciones a módulos interesados. | 15 | 6 | 1 | COINCIDE |
 | [in_app_notifications](#in_app_notifications) | Registra notificaciones visibles dentro de la aplicación para comunicar eventos a pacientes y profesionales. | 31 | 8 | 69 | COINCIDE |
 | [message_channels](#message_channels) | Cataloga canales de comunicación disponibles para enviar mensajes transaccionales y asistenciales. | 11 | 5 | 61 | COINCIDE |
-| [message_queues](#message_queues) | Cataloga colas usadas para desacoplar procesos y administrar entregas asíncronas. | 13 | 5 | 16 | COINCIDE |
+| [message_queues](#message_queues) | Cataloga colas usadas para desacoplar procesos y administrar entregas asíncronas. | 13 | 5 | 15 | COINCIDE |
 | [message_templates](#message_templates) | Define plantillas reutilizables para comunicaciones con pacientes, profesionales y organizaciones. | 16 | 8 | 37 | COINCIDE |
 | [messaging_providers](#messaging_providers) | Identifica proveedores que transportan mensajes por los canales habilitados. | 22 | 6 | 44 | COINCIDE |
 | [notification_deliveries](#notification_deliveries) | Mantiene intentos y resultados de entrega de notificaciones para verificar comunicaciones enviadas. | 36 | 8 | 68 | COINCIDE |
 | [notification_requests](#notification_requests) | Registra solicitudes de notificación y su contexto antes de seleccionar canal y proveedor de entrega. | 35 | 11 | 123 | COINCIDE |
 | [outbox_messages](#outbox_messages) | Mantiene mensajes salientes en la misma frontera transaccional que cambios de negocio para publicarlos sin perder eventos. | 20 | 7 | 207 | COINCIDE |
 | [provider_channel_configs](#provider_channel_configs) | Configura la relación entre un proveedor de mensajería y un canal para dirigir entregas. | 26 | 8 | 43 | COINCIDE |
-| [queued_jobs](#queued_jobs) | Representa trabajos encolados para ejecutar operaciones diferidas del sistema médico. | 22 | 7 | 64 | COINCIDE |
+| [queued_jobs](#queued_jobs) | Representa trabajos encolados para ejecutar operaciones diferidas del sistema médico. | 22 | 7 | 62 | COINCIDE |
 | [recipient_preferences](#recipient_preferences) | Registra preferencias de destinatarios para respetar canales, horarios y elecciones de comunicación. | 13 | 8 | 60 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -1486,7 +1486,7 @@ Cataloga colas usadas para desacoplar procesos y administrar entregas asíncrona
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: message_queues`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `MessageQueues` — `src/modules/messaging/entities/message_queues.entity.ts`
-- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 3 entrantes · 16 operaciones
+- **Resumen:** 13 columnas · 5 índices · 4 FK salientes · 3 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -1545,7 +1545,6 @@ Cataloga colas usadas para desacoplar procesos y administrar entregas asíncrona
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-document | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-signature-image | LEE | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /insurance/portability/export | LEE | DIRECTA |
 | POST /internal/events/{domainEventId}/dispatch | LEE | DIRECTA |
@@ -2677,7 +2676,7 @@ Representa trabajos encolados para ejecutar operaciones diferidas del sistema m�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_35_messaging.puml: queued_jobs`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_35_messaging.puml` · **DDL:** `SQL/35_messaging/02_tables.sql`
 - **Entidad del ORM:** `QueuedJobs` — `src/modules/messaging/entities/queued_jobs.entity.ts`
-- **Resumen:** 22 columnas · 7 índices · 5 FK salientes · 1 entrantes · 64 operaciones
+- **Resumen:** 22 columnas · 7 índices · 5 FK salientes · 1 entrantes · 62 operaciones
 
 #### Columnas
 
@@ -2775,8 +2774,6 @@ Representa trabajos encolados para ejecutar operaciones diferidas del sistema m�
 | POST /iam/auth/upload-registration-signature-image | CREA | DIRECTA |
 | POST /iam/auth/upload-registration-signature-image | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/upload-registration-signature-image | LEE | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
-| POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/me/identity-verification | LEE | DIRECTA |
 | POST /identity/me/practitioner/identity-verification | LEE | DIRECTA |

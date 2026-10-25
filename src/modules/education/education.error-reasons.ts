@@ -17,4 +17,26 @@ export enum EducationErrorReason {
    * inscribe a sí mismo; inscribir a terceros es una vía administrativa.
    */
   LEARNER_ENROLLMENT_OWNER_REQUIRED = 'LEARNER_ENROLLMENT_OWNER_REQUIRED',
+  /** El intento de pago de una inscripción comprada no está confirmado (`PI_SUCCEEDED`). */
+  ENROLLMENT_PAYMENT_NOT_CONFIRMED = 'ENROLLMENT_PAYMENT_NOT_CONFIRMED',
+  /** Un aprendiz no puede inscribirse con una fuente administrativa (`ASSIGNED`, `PARTNER`). */
+  ENROLLMENT_SOURCE_NOT_ALLOWED = 'ENROLLMENT_SOURCE_NOT_ALLOWED',
+  /** El curso es de pago: el aprendiz sólo se inscribe con una compra confirmada. */
+  ENROLLMENT_PAYMENT_REQUIRED = 'ENROLLMENT_PAYMENT_REQUIRED',
+  /** Se envió un intento de pago en una inscripción que no es `PURCHASED`. */
+  ENROLLMENT_PAYMENT_NOT_APPLICABLE = 'ENROLLMENT_PAYMENT_NOT_APPLICABLE',
+  /**
+   * El intento de pago no corresponde a esta compra: es de otro curso o de otro
+   * recurso, lo creó otra persona, o su monto o moneda no cubren el precio.
+   * Un único motivo para los cuatro casos: no es un oráculo de qué falló.
+   */
+  ENROLLMENT_PAYMENT_MISMATCH = 'ENROLLMENT_PAYMENT_MISMATCH',
+  /**
+   * El curso tiene precio pero no moneda: no hay con qué comparar el pago y la
+   * compra se rechaza (falla cerrada); nunca se comparan montos de monedas
+   * distintas.
+   */
+  COURSE_PRICE_WITHOUT_CURRENCY = 'COURSE_PRICE_WITHOUT_CURRENCY',
+  /** El intento de pago ya respalda otra inscripción. */
+  ENROLLMENT_PAYMENT_ALREADY_USED = 'ENROLLMENT_PAYMENT_ALREADY_USED',
 }

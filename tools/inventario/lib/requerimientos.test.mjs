@@ -161,6 +161,37 @@ test('multipart no hereda el límite de 1 MB del JSON', () => {
   assert.doesNotMatch(reqs.find((r) => r.tipo === 'CUERPO').detalle, /máximo/);
 });
 
+test('si main.ts pide el ValidationPipe a una fábrica de src/common, se lee de la fábrica', () => {
+  const root = raiz(`
+  app.use(json({ limit: '2mb' }));
+  app.useGlobalPipes(createGlobalValidationPipe());
+`);
+  fs.mkdirSync(path.join(root, 'src/common/http'), { recursive: true });
+  fs.writeFileSync(
+    path.join(root, 'src/common/http/validation-pipe.ts'),
+    `export function createGlobalValidationPipe() {
+  return new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transformOptions: { enableImplicitConversion: true },
+    exceptionFactory: (errors) => validationFailed(errors),
+  });
+}`,
+  );
+  assert.deepEqual(leerGlobales(root).validacion, {
+    fuente: 'src/common/http/validation-pipe.ts:2',
+  });
+
+  // una fábrica que no cierra el mass-assignment no se da por buena
+  fs.writeFileSync(
+    path.join(root, 'src/common/http/validation-pipe.ts'),
+    `export function createGlobalValidationPipe() {
+  return new ValidationPipe({ whitelist: true });
+}`,
+  );
+  assert.equal(leerGlobales(root).validacion, null);
+});
+
 test('contra el código real: los límites globales se encuentran con su línea', () => {
   const g = leerGlobales(process.cwd());
   assert.ok(g.cuerpo && g.tasa && g.validacion && g.tenant, JSON.stringify(g));

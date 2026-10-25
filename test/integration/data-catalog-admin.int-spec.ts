@@ -17,9 +17,12 @@ import { TokenService } from '../../src/common/auth/token.service';
 import { AllExceptionsFilter } from '../../src/common/filters/all-exceptions.filter';
 import { AdminCatalogController } from '../../src/modules/data_catalog/controllers/admin-catalog.controller';
 import { CatalogRepository } from '../../src/modules/data_catalog/repositories/catalog.repository';
+import { CatalogClassificationService } from '../../src/modules/data_catalog/services/catalog-classification.service';
 import { CatalogGovernanceService } from '../../src/modules/data_catalog/services/catalog-governance.service';
 import { CatalogReadService } from '../../src/modules/data_catalog/services/catalog-read.service';
 import { CatalogScanService } from '../../src/modules/data_catalog/services/catalog-scan.service';
+import { PermissionDriftService } from '../../src/modules/data_catalog/services/permission-drift.service';
+import { RouteIndexModule } from '../../src/observability/route-index/route-index.module';
 import { TracingService } from '../../src/observability';
 
 /**
@@ -114,14 +117,16 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
     await sql(`create table public.${tabla} (id int primary key, ref int)`);
 
     const modulo = await Test.createTestingModule({
-      imports: [PassportModule, AuthTokenModule],
+      imports: [PassportModule, AuthTokenModule, RouteIndexModule],
       controllers: [AdminCatalogController],
       providers: [
         { provide: EntityManager, useValue: orm.em },
         CatalogRepository,
         CatalogReadService,
         CatalogGovernanceService,
+        CatalogClassificationService,
         CatalogScanService,
+        PermissionDriftService,
         JwtStrategy,
         // Lo que se prueba es el catálogo, no la sesión: se da por activa.
         {
@@ -289,7 +294,7 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
 
   // ------------------------------------------------------------------------------------------
   describe('contrato OpenAPI que describen los decoradores', () => {
-    it('declara las 15 operaciones con operationId único, los códigos de error y el esquema de cada respuesta', () => {
+    it('declara las 20 operaciones con operationId único, los códigos de error y el esquema de cada respuesta', () => {
       const doc = SwaggerModule.createDocument(
         app,
         new DocumentBuilder().build(),
@@ -308,14 +313,14 @@ describe('Catálogo de datos vivo /admin/catalog (DB real)', () => {
           >,
         ).map(([metodo, op]) => ({ ruta, metodo, op })),
       );
-      expect(operaciones).toHaveLength(15);
+      expect(operaciones).toHaveLength(20);
       const operationIds = operaciones.map((o) => o.op.operationId);
       expect(
         operationIds.every(
           (id) => id && id.startsWith('AdminCatalogController_'),
         ),
       ).toBe(true);
-      expect(new Set(operationIds).size).toBe(15);
+      expect(new Set(operationIds).size).toBe(20);
       const por = (m: string, r: string) =>
         operaciones.find((o) => o.metodo === m && o.ruta === r)!.op;
       expect(
