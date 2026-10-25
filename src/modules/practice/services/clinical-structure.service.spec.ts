@@ -211,7 +211,11 @@ describe('ClinicalStructureService', () => {
         createdAt: new Date(),
       };
       d.servicesRepo.create.mockReturnValue(created);
-      const res = await d.service.publishHealthcareService('p1', {}, actor);
+      const res = await d.service.publishHealthcareService(
+        'p1',
+        {} as any,
+        actor,
+      );
       expect(res.status).toBe(PRAC.SERVICE_ACTIVE);
     });
   });
