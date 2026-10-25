@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `clinical` (parte 2/2).
- * 29 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 46 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalForeignKeys2: readonly ForeignKeyTuple[] = [
@@ -14,6 +14,23 @@ export const clinicalForeignKeys2: readonly ForeignKeyTuple[] = [
   ['procedures', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['procedures', 'status_reason_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['procedures', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['received_services', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['received_services', 'custodian_tenant_id', 'directory', 'tenants', 'id'],
+  ['received_services', 'encounter_id', 'clinical', 'encounters', 'id'],
+  ['received_services', 'insurance_claim_line_id', 'insurance', 'insurance_claim_lines', 'id'],
+  ['received_services', 'invoice_line_id', 'billing', 'invoice_lines', 'id'],
+  ['received_services', 'outcome_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['received_services', 'patient_profile_id', 'profiles', 'patient_profiles', 'profile_id'],
+  ['received_services', 'performer_profile_id', 'profiles', 'health_practitioner_profiles', 'profile_id'],
+  ['received_services', 'practice_site_id', 'practice', 'practice_sites', 'id'],
+  ['received_services', 'procedure_case_id', 'procedures_perioperative', 'procedure_cases', 'id'],
+  ['received_services', 'service_catalog_id', 'billing', 'service_catalog', 'id'],
+  ['received_services', 'service_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['received_services', 'service_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['received_services', 'source_immunization_id', 'clinical', 'immunizations', 'id'],
+  ['received_services', 'source_procedure_id', 'clinical', 'procedures', 'id'],
+  ['received_services', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['received_services', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['service_requests', 'category_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['service_requests', 'code_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['service_requests', 'created_by_user_id', 'iam', 'users', 'id'],

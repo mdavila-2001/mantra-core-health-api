@@ -51,6 +51,8 @@ import {
   PrescriptionSignaturePoliciesService,
   ProceduresService,
   ImmunizationsService,
+  ReceivedServicesProjector,
+  ReceivedServicesReadService,
   ClinicalReadService,
   ClinicalNotificationsService,
   PrescriptionExpiryNoticesService,
@@ -79,6 +81,7 @@ import {
   PrescriptionSignaturePoliciesRepository,
   ProceduresRepository,
   ImmunizationsRepository,
+  ReceivedServicesRepository,
   PrescriptionExpiryRepository,
 } from './repositories';
 // Los dos repositorios con los que la lectura comprueba que una historia es de
@@ -203,6 +206,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     PrescriptionSignaturePoliciesRepository,
     ProceduresRepository,
     ImmunizationsRepository,
+    ReceivedServicesRepository,
     PrescriptionExpiryRepository,
     ClinicalNotesRepository,
     CarePlansRepository,
@@ -228,6 +232,10 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     PrescriptionSignaturePoliciesService,
     ProceduresService,
     ImmunizationsService,
+    // «Servicios recibidos» de la historia: el proyector lo llaman los servicios que
+    // registran el hecho de origen, en su misma transacción.
+    ReceivedServicesProjector,
+    ReceivedServicesReadService,
     ClinicalReadService,
     ClinicalNotificationsService,
     PrescriptionExpiryNoticesService,
@@ -259,9 +267,12 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
   // `EncounterSealGuardService` se exporta por lo mismo (BR-14/CL-07):
   // `ChartModule` la usa desde `chart-care-plans.service.ts` y
   // `chart-documents.service.ts`.
+  // `ReceivedServicesProjector` se exporta para que `procedures_perioperative` proyecte
+  // el cierre de un caso quirúrgico a la historia sin escribir esta tabla.
   exports: [
     ConditionsService,
     ProceduresService,
+    ReceivedServicesProjector,
     ServiceRequestsService,
     EncountersRepository,
     ClinicalReadService,
