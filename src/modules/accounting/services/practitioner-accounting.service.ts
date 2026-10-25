@@ -89,8 +89,13 @@ export class PractitionerAccountingService {
     this.logger.setContext(PractitionerAccountingService.name);
   }
 
-  /** Exige perfil profesional y vinculación activa con `practiceId`. */
-  private async assertOwnsPractice(
+  /**
+   * Exige perfil profesional y vinculación activa con `practiceId`.
+   *
+   * Público para que la contabilidad simple del doctor (P49) aplique la misma
+   * regla de pertenencia sin copiarla.
+   */
+  async assertOwnsPractice(
     actor: AuthenticatedUser,
     practiceId: string,
   ): Promise<string> {

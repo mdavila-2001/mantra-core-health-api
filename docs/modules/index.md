@@ -10,9 +10,9 @@
 | [`insurance`](insurance.md) | 19 | 27 | 14 | 31 | 23 |
 | [`community`](community.md) | 14 | 34 | 19 | 41 | 33 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
+| [`clinical`](clinical.md) | 11 | 20 | 18 | 24 | 18 |
 | [`consent`](consent.md) | 11 | 12 | 10 | 10 | 16 |
-| [`clinical`](clinical.md) | 10 | 19 | 17 | 24 | 17 |
-| [`accounting`](accounting.md) | 9 | 11 | 9 | 42 | 12 |
+| [`accounting`](accounting.md) | 10 | 12 | 10 | 45 | 13 |
 | [`authz`](authz.md) | 9 | 12 | 16 | 15 | 21 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 9 | 12 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 12 | 10 | 11 | 17 |
@@ -68,7 +68,7 @@
 | [`health_context`](health_context.md) | 1 | 2 | 1 | 10 | 1 |
 | [`medical_centers`](medical_centers.md) | 1 | 2 | 3 | 0 | 1 |
 | [`medical_groups`](medical_groups.md) | 1 | 1 | 2 | 2 | 1 |
-| [`ops_console`](ops_console.md) | 1 | 2 | 2 | 0 | 0 |
+| [`ops_console`](ops_console.md) | 1 | 2 | 2 | 0 | 1 |
 | [`platform_ops`](platform_ops.md) | 1 | 5 | 5 | 38 | 1 |
 | [`public`](public.md) | 1 | 1 | 1 | 0 | 1 |
 | [`qa_execution`](qa_execution.md) | 1 | 1 | 0 | 4 | 1 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **286** | **460** | **432** | **1271** | **531** |
+| **Total** | **288** | **462** | **434** | **1274** | **534** |
