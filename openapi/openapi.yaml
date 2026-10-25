@@ -23698,6 +23698,485 @@ paths:
       description: >-
         Registrar el avance (pago de cuota) de un pasivo. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /accounting/practitioner/simple/summary:
+    get:
+      description: >-
+        `patientsSeen`: personas distintas con consulta atendida en el período. `collected`: consultas pagadas del
+        período. `expectedFromInsurers`: a hoy, solicitudes enviadas sin dictamen (por lo facturado) más aprobadas sin
+        pagar (por lo aprobado).
+      operationId: AccountingPractitionerSimpleController_summary
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: period
+          required: false
+          in: query
+          schema:
+            default: month
+            type: string
+            enum:
+              - month
+              - year
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Pacientes atendidos, cobrado y esperado de las aseguradoras
+      tags:
+        - accounting-practitioner
+  /accounting/practitioner/simple/accounts:
+    get:
+      description: >-
+        Incluye las 26 generales (`seeded: true`), que se siembran por práctica al primer acceso, y las propias del
+        doctor.
+      operationId: AccountingPractitionerSimpleController_listAccounts
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Cuentas de la contabilidad simple de una práctica
+      tags:
+        - accounting-practitioner
+    post:
+      description: El código lo asigna el servidor. Nombre único por clase, sin distinguir tildes ni mayúsculas (409).
+      operationId: AccountingPractitionerSimpleController_createAccount
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSimpleAccountDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Crear una cuenta (o un tipo de gasto, activo o deuda)
+      tags:
+        - accounting-practitioner
+  /accounting/practitioner/simple/accounts/{id}:
+    put:
+      description: >-
+        Una cuenta general se renombra pero no cambia de clase; tampoco una que ya usa algún registro o transacción
+        (409).
+      operationId: AccountingPractitionerSimpleController_updateAccount
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleAccountInputDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Renombrar una cuenta
+      tags:
+        - accounting-practitioner
+    delete:
+      description: 409 si es una cuenta general o si la usa algún registro o transacción.
+      operationId: AccountingPractitionerSimpleController_deleteAccount
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Borrar una cuenta propia
+      tags:
+        - accounting-practitioner
+  /accounting/practitioner/simple/records:
+    get:
+      description: Con `kind` filtra por una de las tres; sin él, devuelve las tres. Más recientes primero.
+      operationId: AccountingPractitionerSimpleController_listRecords
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: kind
+          required: false
+          in: query
+          description: Sin `kind` devuelve los tres.
+          schema:
+            type: string
+            enum:
+              - EXPENSE
+              - ASSET
+              - DEBT
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Gastos, activos y deudas de una práctica
+      tags:
+        - accounting-practitioner
+    post:
+      description: >-
+        El tipo es una cuenta de la clase que corresponde: gasto → EXPENSE, activo → ASSET, deuda → LIABILITY. No genera
+        asiento.
+      operationId: AccountingPractitionerSimpleController_createRecord
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSimpleRecordDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Registrar un gasto, un activo o una deuda
+      tags:
+        - accounting-practitioner
+  /accounting/practitioner/simple/records/{id}:
+    put:
+      operationId: AccountingPractitionerSimpleController_updateRecord
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleRecordInputDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Editar un gasto, un activo o una deuda
+      tags:
+        - accounting-practitioner
+      description: >-
+        Editar un gasto, un activo o una deuda. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: AccountingPractitionerSimpleController_deleteRecord
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Borrar un gasto, un activo o una deuda
+      tags:
+        - accounting-practitioner
+      description: >-
+        Borrar un gasto, un activo o una deuda. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /accounting/practitioner/simple/transactions:
+    get:
+      description: Más recientes primero.
+      operationId: AccountingPractitionerSimpleController_listTransactions
+      parameters:
+        - name: practiceId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Transacciones debe/haber de una práctica
+      tags:
+        - accounting-practitioner
+    post:
+      description: Las cuentas del debe y del haber son distintas. No es un asiento del libro mayor.
+      operationId: AccountingPractitionerSimpleController_createTransaction
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSimpleTransactionDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Registrar una transacción debe/haber
+      tags:
+        - accounting-practitioner
+  /accounting/practitioner/simple/transactions/{id}:
+    put:
+      operationId: AccountingPractitionerSimpleController_updateTransaction
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimpleTransactionInputDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Editar una transacción debe/haber
+      tags:
+        - accounting-practitioner
+      description: >-
+        Editar una transacción debe/haber. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: AccountingPractitionerSimpleController_deleteTransaction
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Borrar una transacción debe/haber
+      tags:
+        - accounting-practitioner
+      description: >-
+        Borrar una transacción debe/haber. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
   /accounting/dimensions:
     get:
       description: >-
@@ -79936,6 +80415,164 @@ components:
       required:
         - bankAccountId
         - interestExpenseAccountId
+      additionalProperties: false
+    CreateSimpleAccountDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+        accountClass:
+          type: string
+          enum:
+            - ASSET
+            - LIABILITY
+            - EQUITY
+            - INCOME
+            - EXPENSE
+        practiceId:
+          type: string
+          format: uuid
+      required:
+        - name
+        - accountClass
+        - practiceId
+      additionalProperties: false
+    SimpleAccountInputDto:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+        accountClass:
+          type: string
+          enum:
+            - ASSET
+            - LIABILITY
+            - EQUITY
+            - INCOME
+            - EXPENSE
+      required:
+        - name
+        - accountClass
+      additionalProperties: false
+    CreateSimpleRecordDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+            - EXPENSE
+            - ASSET
+            - DEBT
+        date:
+          type: string
+          format: date
+        accountId:
+          type: string
+          format: uuid
+        description:
+          type: string
+          maxLength: 160
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+        practiceId:
+          type: string
+          format: uuid
+      required:
+        - kind
+        - date
+        - accountId
+        - description
+        - amount
+        - practiceId
+      additionalProperties: false
+    SimpleRecordInputDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+            - EXPENSE
+            - ASSET
+            - DEBT
+        date:
+          type: string
+          format: date
+        accountId:
+          type: string
+          format: uuid
+        description:
+          type: string
+          maxLength: 160
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+      required:
+        - kind
+        - date
+        - accountId
+        - description
+        - amount
+      additionalProperties: false
+    CreateSimpleTransactionDto:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+          maxLength: 160
+        debitAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del debe.
+        creditAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del haber; distinta de la del debe.
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+        practiceId:
+          type: string
+          format: uuid
+      required:
+        - date
+        - description
+        - debitAccountId
+        - creditAccountId
+        - amount
+        - practiceId
+      additionalProperties: false
+    SimpleTransactionInputDto:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+          maxLength: 160
+        debitAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del debe.
+        creditAccountId:
+          type: string
+          format: uuid
+          description: Cuenta del haber; distinta de la del debe.
+        amount:
+          type: string
+          description: Cadena decimal > 0, hasta dos decimales.
+      required:
+        - date
+        - description
+        - debitAccountId
+        - creditAccountId
+        - amount
       additionalProperties: false
     CockpitFiscalPeriodDto:
       type: object
