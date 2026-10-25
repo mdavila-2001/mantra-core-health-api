@@ -72,6 +72,27 @@ export class ServiceRequests {
   @Property({ fieldName: 'performer_tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants
   performerTenantId?: string;
 
+  @Property({
+    fieldName: 'performer_selection_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  performerSelectionConceptId?: string;
+
+  @Property({
+    fieldName: 'performer_practitioner_profile_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  performerPractitionerProfileId?: string;
+
+  @Property({
+    fieldName: 'suggested_practice_site_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  suggestedPracticeSiteId?: string;
+
   /**
    * El informe diagnóstico previo que satisface este pedido (antiduplicación,
    * v4.2.17). Presente cuando el motor de duplicidad encontró un informe
