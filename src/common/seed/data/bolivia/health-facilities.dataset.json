@@ -7,7 +7,9 @@
       "razonSocial": "Clínica Metropolitana de las Américas S.A.",
       "nit": "316258024",
       "direccion": "Av. Sexto Anillo esq. Beni # 5100",
-      "telefonos": ["800101055"],
+      "telefonos": [
+        "800101055"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -25,7 +27,9 @@
       "razonSocial": "Clínica Angel Foianini S.R.L.",
       "nit": "1028455022",
       "direccion": "Av. Irala # 468 / Calle Chuquisaca # 737",
-      "telefonos": ["3362211"],
+      "telefonos": [
+        "3362211"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -43,7 +47,9 @@
       "razonSocial": "Operadora Lativ Administración S.A.",
       "nit": "4010340662",
       "direccion": "Av. Noel Kempff Mercado (3er anillo interno)",
-      "telefonos": ["3180060"],
+      "telefonos": [
+        "3180060"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -61,7 +67,9 @@
       "razonSocial": "Clínica Incor S.R.L.",
       "nit": "1012499022",
       "direccion": "Av. 26 de Febrero, calle caranda",
-      "telefonos": ["3520444"],
+      "telefonos": [
+        "3520444"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -79,7 +87,9 @@
       "razonSocial": "CLINICA URBARÍ S.A.",
       "nit": "1028441025",
       "direccion": "Barrio Urbarí, Calle Igmiri # 555",
-      "telefonos": ["3534000"],
+      "telefonos": [
+        "3534000"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -97,7 +107,9 @@
       "razonSocial": "Clínica Privada de Asistencia Médica Niño Jesús S.A.",
       "nit": "1028557028",
       "direccion": "Av. Cañoto esq. Rafael Peña, primer anillo, zona central",
-      "telefonos": ["3366969"],
+      "telefonos": [
+        "3366969"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -115,7 +127,9 @@
       "razonSocial": "Clinica Privada De Asistencia Medica Niño Jesus S.A.",
       "nit": "1028557028",
       "direccion": "Calle Ballivián # 747",
-      "telefonos": ["78456019"],
+      "telefonos": [
+        "78456019"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -133,7 +147,9 @@
       "razonSocial": "Clínica Bioginecológica Montalvo S.R.L.",
       "nit": "1012565021",
       "direccion": "Barrio Urbarí, Av. Universo # 641.",
-      "telefonos": ["3581919"],
+      "telefonos": [
+        "3581919"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -151,7 +167,9 @@
       "razonSocial": "Clinica Medica Sirani Ltda.",
       "nit": "122079029",
       "direccion": "René Moreno # 667",
-      "telefonos": ["3352200"],
+      "telefonos": [
+        "3352200"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -169,7 +187,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "René Moreno # 352.",
-      "telefonos": ["3325518"],
+      "telefonos": [
+        "3325518"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -187,7 +207,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Calle Colón Nº 345, entre las calles Pari y Mercado, zona de las siete calles",
-      "telefonos": ["67718675"],
+      "telefonos": [
+        "67718675"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -205,7 +227,9 @@
       "razonSocial": "CLINICA SANTA MARIA",
       "nit": "1453397017",
       "direccion": "Av. Viedma # 754",
-      "telefonos": ["3352002"],
+      "telefonos": [
+        "3352002"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -223,7 +247,9 @@
       "razonSocial": "Clínica San Pedro S.R.L.",
       "nit": "1023211026",
       "direccion": "3er Anillo Externo Radial 15, # 37, zona Alto San Pedro",
-      "telefonos": ["70090283"],
+      "telefonos": [
+        "70090283"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -241,7 +267,9 @@
       "razonSocial": "Corporación de Salud Cosalud S.R.L.",
       "nit": "148758024",
       "direccion": "Oruro # 366",
-      "telefonos": ["3393960"],
+      "telefonos": [
+        "3393960"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -259,7 +287,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Av. Roca y Coronado calle Chilón # 2025",
-      "telefonos": ["3523841"],
+      "telefonos": [
+        "3523841"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -277,7 +307,9 @@
       "razonSocial": "CLINICA DE OJOS SANTA CRUZ LTDA.",
       "nit": "4035895",
       "direccion": "Av. Centenario, Pasillo A. Barbery",
-      "telefonos": ["3327327"],
+      "telefonos": [
+        "3327327"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -295,7 +327,9 @@
       "razonSocial": "Clínica Médica Quirúrgica El Trompillo",
       "nit": "3729982013",
       "direccion": "Barrio El Trompillo, calle Zoilo Flores # 164",
-      "telefonos": ["3590011"],
+      "telefonos": [
+        "3590011"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -313,7 +347,9 @@
       "razonSocial": "GRUPO MEDICO SOLIDARIO S.R.L.",
       "nit": "136935024",
       "direccion": "Av. Moscu 6to. Anillo, Zona de la Cuchilla (frente a la Universidad Evangélica Boliviana",
-      "telefonos": ["3584050"],
+      "telefonos": [
+        "3584050"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -331,7 +367,9 @@
       "razonSocial": "CLINICA KAMIYA S.R.L.",
       "nit": "1015047023",
       "direccion": "Av. Monseñor Rivero # 265.",
-      "telefonos": ["3363400"],
+      "telefonos": [
+        "3363400"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -349,7 +387,9 @@
       "razonSocial": "Clínica Médica Melendres S.R.L.",
       "nit": "136165029",
       "direccion": "Av. Grigotá # 2450 / 3er. Anillo.",
-      "telefonos": ["3520982"],
+      "telefonos": [
+        "3520982"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -367,7 +407,9 @@
       "razonSocial": "CLINICA SAN JOSE S.R.L.",
       "nit": "1013979025",
       "direccion": "Calle Ingavi # 720",
-      "telefonos": ["3521542"],
+      "telefonos": [
+        "3521542"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -385,7 +427,9 @@
       "razonSocial": null,
       "nit": "1026225020",
       "direccion": "Carretera al Norte, Km. 5",
-      "telefonos": ["3221317"],
+      "telefonos": [
+        "3221317"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CLINICA_PRIVADA",
@@ -403,7 +447,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Calle Cuéllar #474 esq. España, Zona Central",
-      "telefonos": ["3332222"],
+      "telefonos": [
+        "3332222"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "HOSPITAL",
@@ -422,7 +468,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Calle Santa Bárbara esq. Seoane, Zona Central",
-      "telefonos": ["3371110"],
+      "telefonos": [
+        "3371110"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "HOSPITAL",
@@ -441,7 +489,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "3er Anillo Interno Av. Japón, entre canal Cotoca y Av. Paragua",
-      "telefonos": ["3462032"],
+      "telefonos": [
+        "3462032"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "HOSPITAL",
@@ -460,7 +510,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Av. Noel Kempff Mercado #890 3er Anillo Interno entre Av. San Martín y Canal Isuto",
-      "telefonos": ["3425502"],
+      "telefonos": [
+        "3425502"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "HOSPITAL",
@@ -479,7 +531,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Calle Rafael Peña, cerca del Primer Anillo",
-      "telefonos": ["3363522"],
+      "telefonos": [
+        "3363522"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "HOSPITAL",
@@ -498,7 +552,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Av. Simón Bolívar dos cuadras del 6to anillo, zona norte/este",
-      "telefonos": ["3555008"],
+      "telefonos": [
+        "3555008"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "HOSPITAL",
@@ -517,7 +573,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Av Santos Dumont 6to anillo Urbanizacion Paititi Uv. 129, zona sur",
-      "telefonos": ["3555008", "3569090"],
+      "telefonos": [
+        "3555008",
+        "3569090"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "HOSPITAL",
@@ -536,7 +595,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Av. Montecristo, zona este",
-      "telefonos": ["3518973"],
+      "telefonos": [
+        "3518973"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "HOSPITAL",
@@ -555,7 +616,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Av. Prefectural, diagonal al mercado Los Pocitos, Zona Plan 3000, zona sureste",
-      "telefonos": ["3494008"],
+      "telefonos": [
+        "3494008"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "HOSPITAL",
@@ -574,7 +637,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "7mo anillo, entre Cumavi y Av. Tres Pasos al Frente, zona este",
-      "telefonos": ["3621402"],
+      "telefonos": [
+        "3621402"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "HOSPITAL",
@@ -593,7 +658,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Rafael Peña / España",
-      "telefonos": ["3339111"],
+      "telefonos": [
+        "3339111"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CAJA_SALUD",
@@ -612,7 +679,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Av. Irala entre Rene Moreno y MJ Santiestevan",
-      "telefonos": ["3362627"],
+      "telefonos": [
+        "3362627"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CAJA_SALUD",
@@ -631,7 +700,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Calle José Callaú Nº 192, Santa Cruz de la Sierra",
-      "telefonos": ["3324411"],
+      "telefonos": [
+        "3324411"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CAJA_SALUD",
@@ -650,7 +721,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Tte. Juan Humberto Rivero, santa cruz de la sierra",
-      "telefonos": ["3346167"],
+      "telefonos": [
+        "3346167"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CAJA_SALUD",
@@ -669,7 +742,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Av. Guapay, santa cruz de la sierra",
-      "telefonos": ["3461111"],
+      "telefonos": [
+        "3461111"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CAJA_SALUD",
@@ -688,7 +763,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Calle España Nº 688, entre Andrés Ibáñez y Rafael Peña.",
-      "telefonos": ["3373131"],
+      "telefonos": [
+        "3373131"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CAJA_SALUD",
@@ -707,7 +784,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Calle Colón #58",
-      "telefonos": ["3392816"],
+      "telefonos": [
+        "3392816"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "CAJA_SALUD",
@@ -9204,7 +9283,9 @@
       "razonSocial": "INSTITUTO BIO-CLÍNICO CRUCEÑO LTDA.",
       "nit": "189982028",
       "direccion": "Calle España esquina Andrés Ibáñez N° S/N, Zona Central (Casco Viejo), Santa Cruz de la Sierra",
-      "telefonos": ["3371222"],
+      "telefonos": [
+        "3371222"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "LABORATORIO",
@@ -9222,7 +9303,9 @@
       "razonSocial": "PALACIOS VEGA FLORINDA",
       "nit": "3209949014",
       "direccion": "Av. Cañoto #700, Esquina calle México (1er Anillo)",
-      "telefonos": ["3546281"],
+      "telefonos": [
+        "3546281"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "LABORATORIO",
@@ -9258,7 +9341,9 @@
       "razonSocial": "LABORATORIO DR. ZUNA S.R.L.",
       "nit": "1476497010",
       "direccion": "Av. Alemana #2065 (a dos cuadras del 2do Anillo)",
-      "telefonos": ["3441838"],
+      "telefonos": [
+        "3441838"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "LABORATORIO",
@@ -9276,7 +9361,9 @@
       "razonSocial": "ENDOGENETICA SANTA CRUZ S.R.L.",
       "nit": "1013877027",
       "direccion": "Calle Sara N° 439, entre Cuéllar y Seoane",
-      "telefonos": ["3364746"],
+      "telefonos": [
+        "3364746"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "LABORATORIO",
@@ -9294,7 +9381,9 @@
       "razonSocial": "BARRIOS ANTELO S.R.L.",
       "nit": "147446021",
       "direccion": "Calle Libertad N° 402, esquina Florida (Zona Central / Casco Viejo)",
-      "telefonos": ["3324546"],
+      "telefonos": [
+        "3324546"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "LABORATORIO",
@@ -9312,7 +9401,9 @@
       "razonSocial": "LABORATORIO DE GENÉTICA Y DIAGNÓSTICO MOLECULAR LABOGEN S.R.L.",
       "nit": "192916023",
       "direccion": "Calle Macororó N° 4 (casi Av. Alemana, entre 3er y 4to Anillo)",
-      "telefonos": ["77506494"],
+      "telefonos": [
+        "77506494"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "LABORATORIO",
@@ -9330,7 +9421,9 @@
       "razonSocial": "CLINICA SAN PEDRO S.R.L.",
       "nit": "1023211026",
       "direccion": "Tercer Anillo Externo #3105 (o N° 37), Radial 15, Zona Alto San Pedro, Santa Cruz de la Sierra",
-      "telefonos": ["3579232"],
+      "telefonos": [
+        "3579232"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "LABORATORIO",
@@ -9348,7 +9441,9 @@
       "razonSocial": "LABORATORIO CATEDRAL SEC. PAT. CLÍNICA S.R.L.",
       "nit": "1012539022",
       "direccion": "Calle Andrés Ibáñez N° 115 (Zona Central / Casco Viejo)",
-      "telefonos": ["3333305"],
+      "telefonos": [
+        "3333305"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "LABORATORIO",
@@ -9366,7 +9461,9 @@
       "razonSocial": "LABORATORIO DE ANÁLISIS CLÍNICOS OMEGA S.R.L.",
       "nit": null,
       "direccion": "Av. Cañoto N° 604, esquina calle Cuéllar, Santa Cruz de la Sierra.",
-      "telefonos": ["3327610"],
+      "telefonos": [
+        "3327610"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "LABORATORIO",
@@ -9384,7 +9481,10 @@
       "razonSocial": "FUTURE S.R.L.",
       "nit": null,
       "direccion": "Av. Cañoto N° 580, Planta Baja (dentro de las instalaciones del Centro Médico Niño Jesús).",
-      "telefonos": ["3143333", "72193615"],
+      "telefonos": [
+        "3143333",
+        "72193615"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "IMAGEN",
@@ -9402,7 +9502,9 @@
       "razonSocial": "DIACOR S.A.",
       "nit": null,
       "direccion": "Av. Irala N° 534",
-      "telefonos": ["3362244"],
+      "telefonos": [
+        "3362244"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "IMAGEN",
@@ -9420,7 +9522,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "Av. Landívar N° 456.",
-      "telefonos": ["3368811", "77047134"],
+      "telefonos": [
+        "3368811",
+        "77047134"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ DE LA SIERRA",
       "tipo": "IMAGEN",
@@ -9438,7 +9543,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE BARASEA NRO. 56 B. URBARI – ALIVIAR",
-      "telefonos": ["69297750"],
+      "telefonos": [
+        "69297750"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9456,7 +9563,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. BENI ENTRE 4TO Y 5TO ANILLO – ALTA MEDICA",
-      "telefonos": ["62002993", "62000888"],
+      "telefonos": [
+        "62002993",
+        "62000888"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9474,7 +9584,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. ROCA Y CORONADO ENTRE 4TO Y 5TO ANILLO – AREA DE MUJER",
-      "telefonos": ["70094193"],
+      "telefonos": [
+        "70094193"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9492,7 +9604,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE ARUMA NRO. 86 BARRIO URBARI – ATROCENTRO",
-      "telefonos": ["3535438", "78466576", "76803348"],
+      "telefonos": [
+        "3535438",
+        "78466576",
+        "76803348"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9510,7 +9626,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "SOBRE EL 4TO ANILLO Y CALLE LAS RAMBLAS CENTRO EMPRESARIAL EQUIPETROL – BEAUTY PLAZA",
-      "telefonos": ["3362211"],
+      "telefonos": [
+        "3362211"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9528,7 +9646,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE FLORIDA ESQUINA BUSTAMANTE NRO 900 BARRIO PALERMO – BIOCOR",
-      "telefonos": ["3336336", "76656449"],
+      "telefonos": [
+        "3336336",
+        "76656449"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9546,7 +9667,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. BENI NRO. 4250 CALLE CLEOTILDE PARADA – BLESS FITNES CLUB",
-      "telefonos": ["76602059"],
+      "telefonos": [
+        "76602059"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9589,7 +9712,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE ÑUNFLO DE CHAVEZ NRO.721 CASI 1ER ANILLO VIEDMAN – CEMED",
-      "telefonos": ["3354466"],
+      "telefonos": [
+        "3354466"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9607,7 +9732,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AVENIDA. BENI NRO. 2450 CASI 2DO ANILLO – CEMFYR",
-      "telefonos": ["3448154", "71340012"],
+      "telefonos": [
+        "3448154",
+        "71340012"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9625,7 +9753,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE PANAMA ESQ. CAÑOTO – CENDOR",
-      "telefonos": ["33324278"],
+      "telefonos": [
+        "33324278"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9643,7 +9773,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE COBIJA NRO 540 ENTRE CALLE MOLDES Y MANUEL IGNACIO – CENTRO BARJA",
-      "telefonos": ["3339129", "77315077"],
+      "telefonos": [
+        "3339129",
+        "77315077"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9661,7 +9794,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE ESPEÑA NRO 560 ENTRE CALLE LIBERTAD Y CUELLAR – CENTRO DE ESPECIALIDADES MEDICA ESPAÑA",
-      "telefonos": ["3325893", "77377717"],
+      "telefonos": [
+        "3325893",
+        "77377717"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9710,7 +9846,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE BALLIVIAN NRO. 763 EDIF. CENTRO DE ESPECIALISTAS MEDICOS PISO 5 – CENTRO DE ESPECIALISTAS",
-      "telefonos": ["73152191"],
+      "telefonos": [
+        "73152191"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9728,7 +9866,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. CAÑOTO ESQ. PANAMA SN – CENTRO DE TRAUMATOLOGIA Y ORTOPEDIA",
-      "telefonos": ["76688998", "65072225"],
+      "telefonos": [
+        "76688998",
+        "65072225"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9746,7 +9887,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE MEXICO ESQ. GUATEMALA NRO. 165 – CENTRO DERMATO REUMATOLOGICO",
-      "telefonos": ["33378202", "63555283"],
+      "telefonos": [
+        "33378202",
+        "63555283"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9764,7 +9908,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE BALLIVIAN NRO 763 CASI 1ER ANILLO VIEDMA – CENTRO ESPECIALIDADES MEDICA",
-      "telefonos": ["3391997", "62023003", "71630459"],
+      "telefonos": [
+        "3391997",
+        "62023003",
+        "71630459"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9782,7 +9930,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. SANTOS DUMONT ENTRE 2DO Y 3ER ANILLO – CENTRO MEDICO AERONAUTICO\"COLMILAV\"",
-      "telefonos": ["70207414"],
+      "telefonos": [
+        "70207414"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9800,7 +9950,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE REPUBLIQUETAS NRO 684 CASI CALLE COBIJA – CENTRO MEDICO CRECER",
-      "telefonos": ["3370808"],
+      "telefonos": [
+        "3370808"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9818,7 +9970,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE LOS TUCANES NRO 97 3ER ANILLO EXTERNO UV 061 ZONA ZOOLOGICO – CENTRO MEDICO NEOMEDIC S.R.L.",
-      "telefonos": ["3420041"],
+      "telefonos": [
+        "3420041"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9836,7 +9990,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. CAÑOTO ESQ. RAFAEL PEÑA LADO DE LA CLINICA NIÑO JESUS – CENTRO MEDICO NIÑO JESUS 3ER PISO",
-      "telefonos": ["70036373", "76095211"],
+      "telefonos": [
+        "70036373",
+        "76095211"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9854,7 +10011,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE GUAPOMO NRO. 21 AV. BENI ENTRE 2DO Y 3ER ANILLO – CENTRO MEDICO PEDIATRICS",
-      "telefonos": ["75665305"],
+      "telefonos": [
+        "75665305"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9872,7 +10031,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE PERU NRO.53 ESQUINA COSTA RICA – CENTRO MEDICO SANTA CRUZ",
-      "telefonos": ["3304212"],
+      "telefonos": [
+        "3304212"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9890,7 +10051,12 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE RENE MORENO ENTRE AV. IRALA Y C. DIEGO DE MENDOZA – CENTRO SUR",
-      "telefonos": ["76677358", "3332505", "68842834", "67783324"],
+      "telefonos": [
+        "76677358",
+        "3332505",
+        "68842834",
+        "67783324"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9908,7 +10074,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE ENRIQUE FINOT NRO. 260 EDIF. FINOT PLANTA BAJA ENTRE 2DO Y 3ER ANILLO – CENTROLASER OFTALMOLOGICO",
-      "telefonos": ["69202046", "72672675"],
+      "telefonos": [
+        "69202046",
+        "72672675"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9926,7 +10095,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. PEDRO RIBERA MENDEZ NRO. 610 ENTRE AV. ALEMANA Y BENI 3ER ANILLO INTERNO – CER",
-      "telefonos": ["76664811"],
+      "telefonos": [
+        "76664811"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9944,7 +10115,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE CHUQUISACA NRO. 737 ESQ. AV IRALA – CINICA FOIANINI",
-      "telefonos": ["33362211"],
+      "telefonos": [
+        "33362211"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9962,7 +10135,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. IRALA ESQUINA CALLE LA PAZ – CIRUJANO ASOCIADOS",
-      "telefonos": ["3322424", "77030854"],
+      "telefonos": [
+        "3322424",
+        "77030854"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9980,7 +10156,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. 26 DE FEBRERO NRO 510 ESQUINA CARANDA ENTRE AV. ROCA Y CORONADO Y AV. PIRAI. – CLINCA INCOR",
-      "telefonos": ["3520444", "71061324"],
+      "telefonos": [
+        "3520444",
+        "71061324"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -9998,7 +10177,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. PROLONGACION BENI NRO. 5100 ESQ. 6TO ANILLO – CLINCIA DE LAS AMERICAS",
-      "telefonos": ["800101055", "78181991"],
+      "telefonos": [
+        "800101055",
+        "78181991"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10016,7 +10198,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE CHUQUISACA NRO 737 – CLINCIA FOIANINI",
-      "telefonos": ["62100006"],
+      "telefonos": [
+        "62100006"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10034,7 +10218,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. IRALA ESQ. CHUQUISACA – CLINICA ANGEL FOIANIN",
-      "telefonos": ["62100006"],
+      "telefonos": [
+        "62100006"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10083,7 +10269,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "2DO ANILLO ENETRE AV. PIRAI Y AV. GRIGOTA – CLINICA AOD",
-      "telefonos": ["63331028"],
+      "telefonos": [
+        "63331028"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10101,7 +10289,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. EJERCITO NACIONAL NRO 487 – CLINICA BALDIVIESO",
-      "telefonos": ["3570707"],
+      "telefonos": [
+        "3570707"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10119,7 +10309,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE RIO VERDE ESQ. MADREJON – CLINICA CIGO",
-      "telefonos": ["78103033"],
+      "telefonos": [
+        "78103033"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10137,7 +10329,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. EJERCITO NACIONAL NRO. 487 – CLINICA DE OJOS BALDIVIESO",
-      "telefonos": ["33570707", "78415225"],
+      "telefonos": [
+        "33570707",
+        "78415225"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10155,7 +10350,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. CENTENARIO PASILLO BARBERY NRO. 138 – CLINICA DE OJOS VISION MUNDIAL",
-      "telefonos": ["3327327", "76395963"],
+      "telefonos": [
+        "3327327",
+        "76395963"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10173,7 +10371,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. JAPON NRO 3090 3ER ANILLO EXTERNO ENTRE AV. ALEMANA Y AV. BENI – CLINICA DEL OJO NORTE",
-      "telefonos": ["62003400", "62131702", "3441735"],
+      "telefonos": [
+        "62003400",
+        "62131702",
+        "3441735"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10191,7 +10393,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. NOEL KEMPFF MERCADO 3ER ANILLO INTERNO ENTRE AV. SAN MARTIN Y BUSCH – CLINICA DOCKWEILER",
-      "telefonos": ["62000314", "76112233"],
+      "telefonos": [
+        "62000314",
+        "76112233"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10209,7 +10414,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. MUTUALISTA 4TO ANILLO. – CLINICA FIGUEROA",
-      "telefonos": ["3483929", "76891135"],
+      "telefonos": [
+        "3483929",
+        "76891135"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10227,7 +10435,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE JAIME MENDOZA Y AV. LA SALLE – CLINICA GALENICA",
-      "telefonos": ["75102356", "33888500", "70899090"],
+      "telefonos": [
+        "75102356",
+        "33888500",
+        "70899090"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10245,7 +10457,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE JAIME MENDOZA NRO. 41 ENTRE AV. LA SALLE Y AV. OVIDIO BARBERY – CLINICA GALENICA S.R.L.",
-      "telefonos": ["3888500"],
+      "telefonos": [
+        "3888500"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10263,7 +10477,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "BARIO ESPAÑA, AV. PEDRO CASAL 6TO ANILLO – CLINICA GESTAR",
-      "telefonos": ["78009986", "76042213"],
+      "telefonos": [
+        "78009986",
+        "76042213"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10281,7 +10498,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. ALEMANA CALLE LUIS ARCE NRO. 3146 – CLINICA GOODCENTER",
-      "telefonos": ["63323303", "78124131"],
+      "telefonos": [
+        "63323303",
+        "78124131"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10299,7 +10519,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. BANZER NRO. 3730 ENTRE 4TO Y 5TO ANILLO – CLINICA MEDICAL CENTER",
-      "telefonos": ["800101055", "77688600", "77078919"],
+      "telefonos": [
+        "800101055",
+        "77688600",
+        "77078919"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10317,7 +10541,13 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. CAÑOTO ESQ. RAFAEL PEÑA 3ER PISO CONSULTORIO 301 – CLINICA NIÑO JESUS 1",
-      "telefonos": ["3365595", "71040855", "3366969", "70950435", "76664243"],
+      "telefonos": [
+        "3365595",
+        "71040855",
+        "3366969",
+        "70950435",
+        "76664243"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10335,7 +10565,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE RAFAEL PEÑA ESQUINA AV. CAÑOTO. – CLINICA NIÑO JESUS 2DO PISO",
-      "telefonos": ["3366969", "3366984"],
+      "telefonos": [
+        "3366969",
+        "3366984"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10381,7 +10614,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AVENIDA CAÑOTO ESQUINA RAFAEL PEÑA / CALLE ÑUFLO DE CHAVEZ NRO. 716 – CLINICA NIÑO JESUS I / GINEMAST",
-      "telefonos": ["3366969", "3304342"],
+      "telefonos": [
+        "3366969",
+        "3304342"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10399,7 +10635,12 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALE SARAH ENTRE FLORIDA Y JUNIN – CLINICA NUCLEAR",
-      "telefonos": ["71637128", "3322757", "77310581", "75004982"],
+      "telefonos": [
+        "71637128",
+        "3322757",
+        "77310581",
+        "75004982"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10417,7 +10658,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. SALVADOR ESQ. CALLE J – CLINICA OFTALMOLASER",
-      "telefonos": ["71391519"],
+      "telefonos": [
+        "71391519"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10435,7 +10678,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE BALLIVIAN NRO. 763 CASI ESQUINA 1ER ANILLO VIEDMAN – CLINICA RENGEL",
-      "telefonos": ["72697740", "76112233"],
+      "telefonos": [
+        "72697740",
+        "76112233"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10478,7 +10724,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. BENI ESQ. 6TO ANILLO – CLNICA DE LAS AMERICAS",
-      "telefonos": ["800101055"],
+      "telefonos": [
+        "800101055"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10496,7 +10744,12 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV, GRIGOTA ENTRE 2DO Y 3ER ANILLO ESQ. MENBIRAY LADO DEL BANCO ECONOMICO – CLUB DE LEONES",
-      "telefonos": ["3275700", "3298550", "70822166", "72615612"],
+      "telefonos": [
+        "3275700",
+        "3298550",
+        "70822166",
+        "72615612"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10514,7 +10767,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE GUILLERMO BURTON NRO. 19 – CM PERINAT",
-      "telefonos": ["77688600"],
+      "telefonos": [
+        "77688600"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10532,7 +10787,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE CUELLAR NRO 512 – CMEQ",
-      "telefonos": ["3375536", "70831226", "71331877"],
+      "telefonos": [
+        "3375536",
+        "70831226",
+        "71331877"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10550,7 +10809,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE GUATEMALA ESQ. SALVADOR 1ER ANILLO – CMO",
-      "telefonos": ["77695966"],
+      "telefonos": [
+        "77695966"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10568,7 +10829,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. CAÑOTO ESQ. RAFAEL PEÑA PISO 1 – CNJ I",
-      "telefonos": ["3366969", "63508889"],
+      "telefonos": [
+        "3366969",
+        "63508889"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10586,7 +10850,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE SAAVEDRA NRO. 453, EDIF. ALEGRANZA PLANTA BAJA OF. 4 – CONDOMINIO ALEGRANZA",
-      "telefonos": ["70007964"],
+      "telefonos": [
+        "70007964"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10604,7 +10870,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CANAL COTOCA ENTRE 2DO Y 3ER ANILLO NRO 2260 – CONDOMINIO GUAPAY",
-      "telefonos": ["70077108"],
+      "telefonos": [
+        "70077108"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10655,7 +10923,13 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE 21 DE MAYO NRO 270 ENTRE CALLE FLORIDA Y BUENOS AIRES – CONSULTORIO PARTICULAR",
-      "telefonos": ["3322658", "3330295", "71648735", "3433021", "77370165"],
+      "telefonos": [
+        "3322658",
+        "3330295",
+        "71648735",
+        "3433021",
+        "77370165"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10673,7 +10947,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. BENI Y CALLE GUAPOMO NRO. 21 ENTRE 2DO ANILLO Y AV. LOS CUSIS – CORTEZ MEDICAL CENTER",
-      "telefonos": ["75059670", "75500067"],
+      "telefonos": [
+        "75059670",
+        "75500067"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10691,7 +10968,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AVENIDA EJERCITO NACIONAL NRO 200 ESQUINA SOLIZ DE OLGUIN – DIAGNOSIS",
-      "telefonos": ["3570707", "77883550", "3538899"],
+      "telefonos": [
+        "3570707",
+        "77883550",
+        "3538899"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10709,7 +10990,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. ALEMANA ENTRE 3ER Y 4TO ANILLO – EDIF. MARVILL",
-      "telefonos": ["73090215"],
+      "telefonos": [
+        "73090215"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10727,7 +11010,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. 3ER ANILLO EXTERNO ESQ. RADIAL 23 – EDIFICIO EL ALFARERO",
-      "telefonos": ["78182664"],
+      "telefonos": [
+        "78182664"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10745,7 +11030,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE LEMOINE NRO 141 ESQUINA CALLE RENE MORENO – EDIFICIO LEMOINE PISO PB",
-      "telefonos": ["3305651", "78562000"],
+      "telefonos": [
+        "3305651",
+        "78562000"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10763,7 +11051,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. BENI 50MTRS ANTES DEL 2DO ANILLO – EDIFICIO OFICENTRO",
-      "telefonos": ["70983046", "65062228"],
+      "telefonos": [
+        "70983046",
+        "65062228"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10781,7 +11072,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE PEUBLIQUETA NRO 161 B ENTRE CHUQUISACA Y LA PAZ – EDIFICIO SAUSALITOS PLANTA BAJA NRO 161",
-      "telefonos": ["3707582", "75390152"],
+      "telefonos": [
+        "3707582",
+        "75390152"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10799,7 +11093,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "ENTRE 4TO Y 3ER ANILLO AV ALEMANA CALLE CUYO NRO 4 – ES SALUD",
-      "telefonos": ["3289852", "77028961"],
+      "telefonos": [
+        "3289852",
+        "77028961"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10817,7 +11114,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE TENIENTE ARTEAGA NRO 73 – FISIOCENTRO",
-      "telefonos": ["3340480", "76002339"],
+      "telefonos": [
+        "3340480",
+        "76002339"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10835,7 +11135,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. TRINIDAD NRO. 422 ENTRE 2DO Y 1ER ANILLO – FISIOMED",
-      "telefonos": ["3300887"],
+      "telefonos": [
+        "3300887"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10853,7 +11155,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE ÑUNFLO DE CHAVEZ NRO 670 ENTRE ORURO Y COBIJA – FISIOTERAPIA",
-      "telefonos": ["70001387", "3285888", "70834934"],
+      "telefonos": [
+        "70001387",
+        "3285888",
+        "70834934"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10871,7 +11177,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE TENIENTE MAMERTO CUELLAR NRO 140 ZONA PARQUE URBANO – FISIOVIDA",
-      "telefonos": ["3371202", "70018915"],
+      "telefonos": [
+        "3371202",
+        "70018915"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10889,7 +11198,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE EXALTACION NRO. 3600 ENTRE RIO BLANCO Y AV. ALEMANA – GLOBALPEDIATRICS",
-      "telefonos": ["76004567"],
+      "telefonos": [
+        "76004567"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10907,7 +11218,12 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE MOLDES NRO 207 ENTRE LA PAZ Y COCHABAMBA – GOOD CENTER",
-      "telefonos": ["3347259", "3709951", "79849905", "75555726"],
+      "telefonos": [
+        "3347259",
+        "3709951",
+        "79849905",
+        "75555726"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10951,7 +11267,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE BARRON NRO 193 \"FRENTE PLAZUELA DEL CEMENTERIO\". – HOSPITAL OFTAMOLOGICO SANTA LUCIA",
-      "telefonos": ["61323823"],
+      "telefonos": [
+        "61323823"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10969,7 +11287,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. NOEL KEMPF MERCADO CALLE LOS CALLE ENRIQUE FINOT – HOSPITAL U. MARTIN DOCKWEILER",
-      "telefonos": ["33180060"],
+      "telefonos": [
+        "33180060"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -10987,7 +11307,12 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. NOEL KEMPFF MERCADO 3ER ANILLO INTERNO ENTRE AV. SAN MARTIN Y BUSCH – HOSPITAL UNIVERSITARIO DOCKWEILER",
-      "telefonos": ["78016188", "33180060", "62000314", "70988865"],
+      "telefonos": [
+        "78016188",
+        "33180060",
+        "62000314",
+        "70988865"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11005,7 +11330,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "BA. EQUIPETROL AV. SAN MARTIN NRO 7 – HOTEL YOTAU",
-      "telefonos": ["60904343"],
+      "telefonos": [
+        "60904343"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11023,7 +11350,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE ÑUNFLO DE CHAVEZ NRO 136 – INMED SRL",
-      "telefonos": ["70823380"],
+      "telefonos": [
+        "70823380"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11041,7 +11370,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. EJERCITO NACIONAL NRO 200 – INSTITUTO MEDICINA DIAGNOSIS",
-      "telefonos": ["3538899", "3534779", "73989420"],
+      "telefonos": [
+        "3538899",
+        "3534779",
+        "73989420"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11059,7 +11392,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "BARRIO. EQUIPETROL NORTE CALLE H ESTE NRO 51 – INSTITUTO MEDICO DE LA MUJER EQUIPETROL",
-      "telefonos": ["3419898"],
+      "telefonos": [
+        "3419898"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11077,7 +11412,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. CANAL ISUTO NRO 800 ENTRE 2DO Y 3ER ANILLO – INSTITUTO NACIONAL OFTAMOLOGICO",
-      "telefonos": ["75678585", "77077037"],
+      "telefonos": [
+        "75678585",
+        "77077037"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11095,7 +11433,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. JAPON NRO3090 3ER ANILLO EXTERNO ENTRE AV ALEMANA Y AV BENI – INSTITUTO PRIVADO DE OFTAMOLOGIA NORTE",
-      "telefonos": ["3441735", "3429015"],
+      "telefonos": [
+        "3441735",
+        "3429015"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11113,7 +11454,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. OVIDIO BARBERY NRO 7 ESQUINA PADRE MELGAR – KINE INTEGRAL",
-      "telefonos": ["3324149", "3361186", "72609887"],
+      "telefonos": [
+        "3324149",
+        "3361186",
+        "72609887"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11131,7 +11476,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE ALAMEDA JUNIN NRO8 ESQUINA AVENIDA CAÑOTO 1ER ANILLO – KINECOR",
-      "telefonos": ["3325962", "72119191"],
+      "telefonos": [
+        "3325962",
+        "72119191"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11149,7 +11497,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. VELARDE 1ER ANILLO ZONA PLAZA BLACUT – KINESIS",
-      "telefonos": ["3370668"],
+      "telefonos": [
+        "3370668"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11193,7 +11543,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE ÑUNFLO DE CHAVEZ NRO 724 ESQUINA AV. IRALA – MEDICO CENTER",
-      "telefonos": ["3363535"],
+      "telefonos": [
+        "3363535"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11211,7 +11563,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. BENI ESQ. 6TO ANILLO – METROPOLITANA DE LAS AMERICAS",
-      "telefonos": ["800101055", "77047522", "77377277"],
+      "telefonos": [
+        "800101055",
+        "77047522",
+        "77377277"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11229,7 +11585,12 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "BA. MACDONAL AV. GENERAL MANUEL FRANCO NRO 7 – MITAI",
-      "telefonos": ["3435456", "75578385", "72111717", "70084272"],
+      "telefonos": [
+        "3435456",
+        "75578385",
+        "72111717",
+        "70084272"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11247,7 +11608,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. BUSCH CALLE PLATANILLOS NRO. 4 EDIF. MOTOYOE – MOTOYOE",
-      "telefonos": ["70864547", "70086639"],
+      "telefonos": [
+        "70864547",
+        "70086639"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11265,7 +11629,13 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. 3ER ANILLO EXTERNO ESQ. LOS TUCANES NRO 97 – NEOMEDIC",
-      "telefonos": ["3269264", "3400299", "79466485", "70988865", "3420041"],
+      "telefonos": [
+        "3269264",
+        "3400299",
+        "79466485",
+        "70988865",
+        "3420041"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11283,7 +11653,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. BANZER NRO. 3730 ENTRE 4TO Y 5TO ANILLO – NEUROCENTER",
-      "telefonos": ["75500067"],
+      "telefonos": [
+        "75500067"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11301,7 +11673,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. CAÑOTO ESQUINA 21 DE MAYO – NEUROCENTER NORTE",
-      "telefonos": ["3391331"],
+      "telefonos": [
+        "3391331"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11319,7 +11693,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "2DO ANILLO AV. 26 DE FEBRERO ENTRE AV. ROCA Y CORONADO Y AV. PIRAI – NUTRICOR",
-      "telefonos": ["3520444", "3585541", "77311935"],
+      "telefonos": [
+        "3520444",
+        "3585541",
+        "77311935"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11337,7 +11715,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE TARIJA ESQUINA ÑUNFLO DE CHAVEZ – ODONTOCENTER",
-      "telefonos": ["3295747", "77633631"],
+      "telefonos": [
+        "3295747",
+        "77633631"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11355,7 +11736,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. BENI 1ER Y 1DO ANILLO EDIF. OFICENTRO NRO. 147 PISO 7 OF 704B – OFICENTRO",
-      "telefonos": ["70983046", "65062228"],
+      "telefonos": [
+        "70983046",
+        "65062228"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11373,7 +11757,11 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. SALVADOR CALLE J ZONA EQUIPETROL NORTE – OFTALMOLASSER",
-      "telefonos": ["61323823", "69000500", "33453939"],
+      "telefonos": [
+        "61323823",
+        "69000500",
+        "33453939"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11391,7 +11779,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. SALVADOR ESQ. CALLE J EQUIPETROL NORTE – OFTAMOLASER",
-      "telefonos": ["69078007"],
+      "telefonos": [
+        "69078007"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11409,7 +11799,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. 4TO ANILLO ENTRE AV. BANZER Y AV BENI – ONCOCENTER",
-      "telefonos": ["3218494", "60661782"],
+      "telefonos": [
+        "3218494",
+        "60661782"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11427,7 +11820,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE CELIA SALMON ESQ. GUILLERMO BURTON – PERINAT",
-      "telefonos": ["78647111", "77600651"],
+      "telefonos": [
+        "78647111",
+        "77600651"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11445,7 +11841,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE YURACARE NRO. 180 Y AV 3ER ANILLO EXTERNO – PHYSIORUN",
-      "telefonos": ["76602059"],
+      "telefonos": [
+        "76602059"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11463,7 +11861,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE REPUBLIQUETA NRO 161 – REDES",
-      "telefonos": ["3707582"],
+      "telefonos": [
+        "3707582"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11481,7 +11881,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE SAAVEDRA ENTRE CALLE LA PAZ Y CHUQUISACA – \"REHABILTAR\"",
-      "telefonos": ["3301200"],
+      "telefonos": [
+        "3301200"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11499,7 +11901,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. RADIAL 17 1/2 6TO ANILLO – SENTIRCE UNICA",
-      "telefonos": ["75013150"],
+      "telefonos": [
+        "75013150"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11517,7 +11921,12 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. 4TO ANILLO VENTURA MALL – SPACIO MEDICO",
-      "telefonos": ["74937373", "76024345", "34023150", "34023151"],
+      "telefonos": [
+        "74937373",
+        "76024345",
+        "34023150",
+        "34023151"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11535,7 +11944,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "BA. URBARI CALLE PANANTI SUR NRO.15 – SPAPS",
-      "telefonos": ["3510600"],
+      "telefonos": [
+        "3510600"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11553,7 +11964,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. BENI NRO. 49 PISO 13 OF. B – TOP CENTER",
-      "telefonos": ["3286777", "75013150"],
+      "telefonos": [
+        "3286777",
+        "75013150"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11571,7 +11985,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE LAS BEGONIAS NRO. 32 BARRIO SIRARI – TORRE LA SALLE",
-      "telefonos": ["78018388", "74177737"],
+      "telefonos": [
+        "78018388",
+        "74177737"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11589,7 +12006,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE ÑUFLO DE CHAVEZ ESQ. AV. VIEDMA – UDIME",
-      "telefonos": ["73116641"],
+      "telefonos": [
+        "73116641"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11607,7 +12026,9 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. LANDIVAR NRO. 350 – UROCENTRO",
-      "telefonos": ["65013650"],
+      "telefonos": [
+        "65013650"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11625,7 +12046,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "CALLE BALLIVIAN NRO 763 ESQUINA AVENIDA VIEDMAN – UROLASER",
-      "telefonos": ["335434336", "72698385"],
+      "telefonos": [
+        "335434336",
+        "72698385"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
@@ -11643,7 +12067,10 @@
       "razonSocial": null,
       "nit": null,
       "direccion": "AV. CUARTO ANILLO NRO. 54 - 2DO NIVEL VENTURA MALL – VENTURA MALL",
-      "telefonos": ["74937373", "64496179"],
+      "telefonos": [
+        "74937373",
+        "64496179"
+      ],
       "departamento": "SC",
       "municipio": "SANTA CRUZ",
       "tipo": "CONSULTORIO",
