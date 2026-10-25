@@ -22,6 +22,11 @@ usuario → Traefik → failover ─┬─ principal: alovida-live-<app>    (con
   sigue siendo la versión anterior.
 - Traefik chequea el vivo cada 2 s; si falla, sirve el standby. Un middleware de
   reintento cubre el segundo que tarda en notarlo.
+- **API (modo `api`):** standby `alovida-api-standby-<app>` en la red de su app
+  (sin alias, para llegar a postgres/redis… por los suyos) y en la red del front
+  sólo como `alovida-api-standby` — nunca `api`, o recibiría tráfico normal. El
+  nginx del front lo declara `backup` (front, PRs #1329/#1330): sólo lo usa si
+  la API viva no responde.
 - `test` y `dev` son `proxy` (nginx) + `web`: su standby es un par en una red
   privada donde el único `web` es el standby, y la API viva se conecta a esa red
   con el alias `api`.
@@ -55,9 +60,10 @@ sudo rm /data/coolify/proxy/dynamic/alovida-failover.yaml
 
 ## Pendiente
 
-- **La API no tiene despliegue sin corte.** Cada despliegue recrea también las
-  bases del compose (postgres, mongo, redis, opensearch, minio), corre las init y
-  recién al final arranca la API: ~20–25 min de 502.
+- **La API se sigue cortando ~1 min por despliegue**: Coolify recrea también las
+  bases del compose (postgres, mongo, redis, opensearch, minio). El standby cubre
+  los ~20 min de init/migrate, no el reinicio de postgres. Sacar las bases a un
+  stack propio lo elimina, pero mueve volúmenes de datos: requiere ventana.
 - `dev` no está en el failover: su proxy estaba en bucle (`duplicate location`,
   arreglado en #1321) y no tiene standby todavía.
 - `app.alovidasalud.arauzsoftware.com` apunta en DNS al servidor viejo

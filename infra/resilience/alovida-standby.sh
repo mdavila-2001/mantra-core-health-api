@@ -108,15 +108,29 @@ write_env_file() {
       grep -vE '^(PATH|HOSTNAME|HOME|COOLIFY_CONTAINER_NAME)=' | grep -v '^$' >"$dest" )
 }
 
+# El healthcheck del vivo como una línea de shell. Coolify/compose lo declaran
+# de dos formas: ["CMD-SHELL", "<línea>"] o ["CMD", "arg1", "arg2"…] (la API).
 health_cmd_of() {
-  docker inspect -f '{{if .Config.Healthcheck}}{{range $i, $t := .Config.Healthcheck.Test}}{{if eq $i 1}}{{$t}}{{end}}{{end}}{{end}}' "$1"
+  docker inspect -f '{{json .Config.Healthcheck}}' "$1" | python3 -c '
+import json, shlex, sys
+hc = json.load(sys.stdin) or {}
+t = hc.get("Test") or []
+if t[:1] == ["CMD-SHELL"]: print(t[1])
+elif t[:1] == ["CMD"]: print(" ".join(shlex.quote(a) for a in t[1:]))
+'
 }
 
-# Arranca $name desde la imagen y el entorno de $src, en $net con $alias.
+# Los volúmenes con nombre del vivo, como argumentos de `docker run`.
+volume_args_of() {
+  docker inspect -f '{{range .Mounts}}{{if eq .Type "volume"}}-v {{.Name}}:{{.Destination}} {{end}}{{end}}' "$1"
+}
+
+# Arranca $name desde la imagen, el entorno y los volúmenes de $src, en $net
+# (con $alias si no está vacío) y, opcionalmente, también en $net2 con $alias2.
 # Si ya existía, levanta el nuevo con otro nombre, espera a que esté sano y
 # recién entonces retira el viejo: el standby nunca queda vacío.
 replace_from() {
-  local src="$1" name="$2" net="$3" alias="$4" mem="$5"
+  local src="$1" name="$2" net="$3" alias="$4" mem="$5" net2="${6:-}" alias2="${7:-}"
   local img envf hc tmp="$2-next" waited=0
   img="$(image_id "$src")"
   envf="$STATE/$name.env"
@@ -128,9 +142,14 @@ replace_from() {
     --restart unless-stopped --memory "$mem" \
     --label "alovida.standby=$name" --label "alovida.standby.source=$src" \
     --env-file "$envf" \
-    --network "$net" --network-alias "$alias" \
-    ${hc:+--health-cmd "$hc" --health-interval 10s --health-timeout 5s --health-retries 3 --health-start-period 30s} \
+    --network "$net" ${alias:+--network-alias "$alias"} \
+    $(volume_args_of "$src") \
+    ${hc:+--health-cmd "$hc" --health-interval 10s --health-timeout 5s --health-retries 3 --health-start-period 60s} \
     "$img" >/dev/null || { log "ERROR: no arrancó $tmp desde $src"; return 1; }
+  if [ -n "$net2" ]; then
+    docker network connect --alias "$alias2" "$net2" "$tmp" >/dev/null ||
+      { log "ERROR: no se conectó $tmp a $net2"; docker rm -f "$tmp" >/dev/null 2>&1; return 1; }
+  fi
 
   until [ "$(health_of "$tmp")" = "healthy" ]; do
     sleep 3; waited=$((waited + 3))
@@ -184,13 +203,36 @@ reconcile_pair() {
   fi
 }
 
+# La API: standby en la red de su app (para llegar a postgres, redis… por sus
+# alias) SIN alias propio, y en la red compartida con el front sólo como
+# `alovida-api-standby`. Nunca `api`: con ese alias el nginx del front le
+# mandaría tráfico también cuando la API viva está sana. El nginx lo usa como
+# `backup` (deploy/nginx.coolify.conf del front).
+reconcile_api() {
+  local app="$1" uuid="$2" front_net="$3" live standby="alovida-api-standby-$1"
+  live="$(live_container api "$uuid")"
+  [ -n "$live" ] || return 0
+  [ "$(healthy_for_seconds "$live")" -ge "$MIN_HEALTHY_SECONDS" ] || return 0
+  [ "$(image_id "$live")" = "$(image_id "$standby")" ] && return 0
+  replace_from "$live" "$standby" "$uuid" "" 1536m "$front_net" alovida-api-standby
+}
+
+# Una app apagada a propósito no se sigue sirviendo desde el standby.
+retire_standby() {
+  local c
+  for c in "alovida-standby-$1" "alovida-standby-$1-web" "alovida-api-standby-$1"; do
+    docker inspect "$c" >/dev/null 2>&1 && docker rm -f "$c" >/dev/null && log "standby $c retirado ($1 deshabilitada)"
+  done
+}
+
 pass() {
   docker network inspect "$EDGE_NET" >/dev/null 2>&1 || { log "ERROR: no existe la red de borde $EDGE_NET"; return 1; }
   local app uuid mode api_uuid
   while read -r app uuid mode api_uuid; do
     case "$app" in ''|'#'*) continue ;; esac
-    [ -f "$STATE/$app.disabled" ] && continue
+    if [ -f "$STATE/$app.disabled" ]; then retire_standby "$app"; continue; fi
     case "$mode" in
+      api) reconcile_api "$app" "$uuid" "$api_uuid" ;;  # 4.º campo: red compartida con el front
       single) reconcile_single "$app" "$uuid" ;;
       pair) reconcile_pair "$app" "$uuid" "$api_uuid" ;;  # 4.º campo: prefijo del contenedor de API
       *) log "ERROR: modo desconocido «$mode» para $app" ;;
@@ -199,19 +241,25 @@ pass() {
   # Los standby del par llegan a Traefik por la red de borde.
   while read -r app uuid mode _; do
     case "$app" in ''|'#'*) continue ;; esac
+    [ -f "$STATE/$app.disabled" ] && continue
     [ "$mode" = "pair" ] && docker inspect "alovida-standby-$app" >/dev/null 2>&1 &&
       ensure_attached "$EDGE_NET" "alovida-standby-$app" "alovida-standby-$app"
   done <"$CONF"
 }
 
 status() {
-  local app uuid mode api_uuid live
+  local app uuid mode api_uuid live sb
   while read -r app uuid mode api_uuid; do
     case "$app" in ''|'#'*) continue ;; esac
-    if [ "$mode" = "single" ]; then live="$(live_container web "$uuid")"; else live="$(live_container proxy "$uuid")"; fi
+    sb="alovida-standby-$app"
+    case "$mode" in
+      single) live="$(live_container web "$uuid")" ;;
+      api) live="$(live_container api "$uuid")"; sb="alovida-api-standby-$app" ;;
+      *) live="$(live_container proxy "$uuid")" ;;
+    esac
     printf '%-8s vivo=%-48s %-9s img=%-12s | standby=%-9s img=%-12s %s\n' "$app" \
       "${live:-(ninguno)}" "$( [ -n "$live" ] && health_of "$live")" "$( [ -n "$live" ] && image_id "$live" | cut -c8-19)" \
-      "$(health_of "alovida-standby-$app" || echo '-')" "$(image_id "alovida-standby-$app" | cut -c8-19)" \
+      "$(health_of "$sb" || echo '-')" "$(image_id "$sb" | cut -c8-19)" \
       "$( [ -f "$STATE/$app.disabled" ] && echo DESHABILITADA)"
   done <"$CONF"
 }
