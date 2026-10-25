@@ -28,7 +28,9 @@ export function fixturePagos(ctx: () => TestContext, etiqueta: string) {
   const connectionId = randomUUID();
   // El resolvedor lee el entorno del proceso al verificar, así que basta con
   // definirlo antes del primer callback. Nombre: sólo [A-Z0-9_]; valor: >= 32.
-  const secretEnvName = `WEBHOOK_SECRET_PAGOS_${etiqueta.toUpperCase().replace(/[^A-Z0-9]/g, '')}_${sufijo.toUpperCase().replace(/[^A-Z0-9]/g, '')}`;
+  // Las referencias valen sólo si nombran variables del tenant dueño de la
+  // conexión: `WEBHOOK_SECRET_<UUID sin guiones, en mayúsculas>_<NOMBRE>`.
+  const secretEnvName = `WEBHOOK_SECRET_${SEED.tenantId.replace(/-/g, '').toUpperCase()}_PAGOS_${etiqueta.toUpperCase().replace(/[^A-Z0-9]/g, '')}_${sufijo.toUpperCase().replace(/[^A-Z0-9]/g, '')}`;
   const webhookSecret = `secreto-fixture-pagos-${etiqueta}-${sufijo}-${randomUUID()}`;
   process.env[secretEnvName] = webhookSecret;
   let intenciones = 0;
