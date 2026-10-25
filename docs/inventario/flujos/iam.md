@@ -3,12 +3,12 @@
 # Flujos del módulo `iam`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 36 (30 con decisiones propias, 6 sin ellas)
+- **Operaciones:** 39 (30 con decisiones propias, 9 sin ellas)
 - Inventario de endpoints del módulo: [iam](../endpoints/iam.md)
 
 ## Proceso: IAM
 
-- **Código:** `iam` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 36
+- **Código:** `iam` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 39
 - **Actores:** CLINICIAN · Cualquier sesión válida · Público (sin sesión) · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/iam/README.md`
@@ -42,6 +42,9 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/auth/upload-registration-document | Público (sin sesión) | ALTO | 6 |
 |  |  | POST /iam/auth/upload-registration-signature-image | Público (sin sesión) | ALTO | 6 |
 |  |  | POST /iam/auth/verify-email | Público (sin sesión) | ALTO | 4 |
+| `ctrl:IamOnboardingDraftsController` | Operaciones de IamOnboardingDraftsController que el README no asigna a un caso de uso | DELETE /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
+|  |  | GET /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
+|  |  | PUT /iam/onboarding-drafts/{formType}/{draftId} | Público (sin sesión) | BAJO | 0 |
 | `ctrl:IamUsersController` | Operaciones de IamUsersController que el README no asigna a un caso de uso | GET /iam/users | SECURITY_ADMIN | BAJO | 2 |
 |  |  | POST /iam/users | SECURITY_ADMIN | MEDIO | 6 |
 |  |  | GET /iam/users/{id} | SECURITY_ADMIN | BAJO | 1 |
@@ -60,7 +63,7 @@ _Fuente: `src/modules/iam/README.md:3`_
 |  |  | POST /iam/users/assisted-practitioner-registration | SECURITY_ADMIN | MEDIO | 45 |
 |  |  | POST /iam/users/assisted-registration | CLINICIAN · SECURITY_ADMIN | MEDIO | 10 |
 
-### Diagrama 1 de 2 — etapas `ctrl:IamAccountSecurityController`, `ctrl:IamAuthController`
+### Diagrama 1 de 2 — etapas `ctrl:IamAccountSecurityController`, `ctrl:IamAuthController`, `ctrl:IamOnboardingDraftsController`
 
 ```mermaid
 flowchart LR
@@ -122,6 +125,11 @@ flowchart LR
     o51["POST /iam/auth/upload-registration-document"]:::op
     o54["POST /iam/auth/upload-registration-signature-image"]:::op
     o55["POST /iam/auth/verify-email"]:::op
+  end
+  subgraph s2["ctrl:IamOnboardingDraftsController · Operaciones de IamOnboardingDraftsControll…"]
+    o56["DELETE /iam/onboarding-drafts/{formType}/{draftId}"]:::op
+    o57["GET /iam/onboarding-drafts/{formType}/{draftId}"]:::op
+    o58["PUT /iam/onboarding-drafts/{formType}/{draftId}"]:::op
   end
   a2 --> o1
   o1 -->|"ACTUALIZA"| t3
@@ -243,6 +251,9 @@ flowchart LR
   o55 -->|"LEE"| t16
   o55 -->|"ACTUALIZA"| t13
   o55 -->|"LEE"| t13
+  a11 --> o56
+  a11 --> o57
+  a11 --> o58
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -3083,4 +3094,7 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | POST /iam/auth/logout-all | 200, 401, 403, 429 | 4 |
 | POST /iam/auth/sessions/purge | 200, 401, 403, 429 | 3 |
 | GET /iam/me/sessions | 200, 401, 403, 429 | 1 |
+| DELETE /iam/onboarding-drafts/{formType}/{draftId} | 200, 401, 429 | 0 |
+| GET /iam/onboarding-drafts/{formType}/{draftId} | 200, 401, 429 | 0 |
+| PUT /iam/onboarding-drafts/{formType}/{draftId} | 200, 401, 429 | 0 |
 | GET /iam/users | 200, 401, 403, 429 | 2 |

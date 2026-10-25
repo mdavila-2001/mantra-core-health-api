@@ -1532,14 +1532,19 @@ flowchart TD
   n22 --> n23
   n24[("ACTUALIZA billing.service_catalog")]:::efecto
   n23 -->|"sí"| n24
-  n25{"dto.defaultPrice !== undefined"}:::decision
+  n25{"dto.termsText !== undefined"}:::decision
   n24 --> n25
   n23 -->|"no"| n25
-  n26[("ACTUALIZA billing.service_catalog · ACTUALIZA billing.service_catalog")]:::efecto
+  n26[("ACTUALIZA billing.service_catalog")]:::efecto
   n25 -->|"sí"| n26
-  n27(("200 Responde con éxito")):::ok
+  n27{"dto.defaultPrice !== undefined"}:::decision
   n26 --> n27
   n25 -->|"no"| n27
+  n28[("ACTUALIZA billing.service_catalog · ACTUALIZA billing.service_catalog")]:::efecto
+  n27 -->|"sí"| n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
+  n27 -->|"no"| n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

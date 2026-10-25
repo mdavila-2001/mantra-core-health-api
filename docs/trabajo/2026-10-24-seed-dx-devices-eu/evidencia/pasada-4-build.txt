@@ -1,0 +1,11 @@
+{
+  "actors": 26583,
+  "devicesExported": 716,
+  "devicesInScope": 716,
+  "distinctManufacturers": 114,
+  "distinctBrands": 391,
+  "rejectedRows": 0,
+  "emdnConcepts": 8453,
+  "gaps": 12,
+  "files": 1
+}

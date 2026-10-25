@@ -1108,7 +1108,6 @@ test('withCertificates: copia el certificado de la réplica por UUID sin pisar u
 
 test('EMDN: el Excel oficial con fila de título y sufijo de versión se lee', async () => {
   const XLSX = (await import('xlsx')).default;
-  XLSX.set_fs(await import('node:fs'));
   const dir = mkdtempSync(join(tmpdir(), 'emdn-'));
   const file = join(dir, 'EMDN_sintetico.xlsx');
   const ws = XLSX.utils.aoa_to_sheet([

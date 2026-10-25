@@ -21,6 +21,7 @@ import {
   IamUsersController,
   IamAuthController,
   IamAccountSecurityController,
+  IamOnboardingDraftsController,
 } from './presentation/controllers';
 import {
   IamUsersService,
@@ -38,6 +39,7 @@ import {
   IamPasswordResetService,
   IamEmailVerificationService,
   IamAccountSecurityService,
+  IamOnboardingDraftsService,
 } from './application/services';
 import {
   UsersRepository,
@@ -106,6 +108,7 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     IamUsersController,
     IamAuthController,
     IamAccountSecurityController,
+    IamOnboardingDraftsController,
   ],
   providers: [
     // Repositorios
@@ -182,6 +185,7 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     IamPasswordResetService,
     IamEmailVerificationService,
     IamAccountSecurityService,
+    IamOnboardingDraftsService,
   ],
   // `IamUsersService` se exporta para el seed de arranque (`SeedModule`), que
   // necesita crear el primer `SECURITY_ADMIN` con el mismo hasheo que la API.
@@ -192,6 +196,7 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     IamUsersService,
     IamPractitionerSelfRegistrationService,
     IamPatientSelfRegistrationService,
+    IamOnboardingDraftsService,
   ],
 })
 export class IamModule {}
