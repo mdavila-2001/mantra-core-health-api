@@ -11,3 +11,4 @@ export * from './practice-organization-read.service';
 export * from './practice-access.service';
 export * from './practice-administration.service';
 export * from './healthcare-service-offers.service';
+export * from './practice-affiliation-invitations.service';

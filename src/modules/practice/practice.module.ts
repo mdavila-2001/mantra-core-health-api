@@ -8,6 +8,8 @@ import {
   PractitionerSitesController,
   RoleAssignmentsController,
   InventoryItemsController,
+  PracticeInvitationsController,
+  PractitionerInvitationsController,
 } from './controllers';
 import {
   PracticeSitesService,
@@ -23,6 +25,7 @@ import {
   PracticeAccessService,
   PracticeAdministrationService,
   HealthcareServiceOffersService,
+  PracticeAffiliationInvitationsService,
 } from './services';
 import {
   PracticesRepository,
@@ -74,6 +77,8 @@ import {
     PractitionerSitesController,
     RoleAssignmentsController,
     InventoryItemsController,
+    PracticeInvitationsController,
+    PractitionerInvitationsController,
   ],
   providers: [
     // Repositorios
@@ -116,6 +121,7 @@ import {
     PracticeAccessService,
     PracticeAdministrationService,
     HealthcareServiceOffersService,
+    PracticeAffiliationInvitationsService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que
