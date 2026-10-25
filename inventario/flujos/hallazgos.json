@@ -2497,6 +2497,14 @@
         "fuente": null
       },
       {
+        "operacion": "AccountingPractitionerController_readAssetDepreciations",
+        "metodo": "GET",
+        "ruta": "/accounting/practitioner/assets/{id}/depreciations",
+        "modulo": "accounting",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "AccountingPractitionerController_readLiabilitySchedule",
         "metodo": "GET",
         "ruta": "/accounting/practitioner/liabilities/{id}/schedule",
@@ -10881,7 +10889,7 @@
         "fuente": null
       }
     ],
-    "cuenta": 1062
+    "cuenta": 1063
   },
   {
     "id": "FLU-08",

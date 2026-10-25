@@ -2,7 +2,7 @@
 
 # Mapa de operaciones
 
-1558 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
+1559 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
 
 «Quién la llama» sale del inventario de clientes del frontend (`docs/reports/generated/api-inventory.md`). Una operación sin cliente puede ser interna, móvil o deuda: la columna informa, no concluye.
 
@@ -45,6 +45,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/accounting/practitioner/assets` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | BAJO | PRACTITIONER | AssetsLiabilitiesClient | SIN_PRUEBAS · CON_DECISIONES |
 | POST `/accounting/practitioner/assets` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | MEDIO | PRACTITIONER | AssetsLiabilitiesClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | PATCH `/accounting/practitioner/assets/{id}/automation` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | MEDIO | PRACTITIONER | AssetsLiabilitiesClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
+| GET `/accounting/practitioner/assets/{id}/depreciations` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | BAJO | PRACTITIONER | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/accounting/practitioner/assets/{id}/progress` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | MEDIO | PRACTITIONER | AssetsLiabilitiesClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | POST `/accounting/practitioner/consultation-income` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | MEDIO | PRACTITIONER | AccountingClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | POST `/accounting/practitioner/entries` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingPractitionerController) | accounting | MEDIO | PRACTITIONER | AccountingClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |

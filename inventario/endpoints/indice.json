@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1558,
+    "total": 1559,
     "porOrigen": {
-      "CONTRATO": 1541,
+      "CONTRATO": 1542,
       "CONTRATO_AUSENTE": 17
     },
     "porRiesgo": {
-      "BAJO": 504,
+      "BAJO": 505,
       "MEDIO": 875,
       "ALTO": 179
     },
-    "conTablas": 1480,
+    "conTablas": 1481,
     "sinTablasSinDeterminar": 25,
     "sinExplicacionDeNegocio": 0,
     "conPruebas": 888,
-    "conRequerimientos": 1558
+    "conRequerimientos": 1559
   },
   "endpoints": [
     {
@@ -672,6 +672,24 @@
         "PRACTITIONER"
       ],
       "tablas": 7,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AccountingPractitionerController_readAssetDepreciations",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/accounting/practitioner/assets/{id}/depreciations",
+      "modulo": "accounting",
+      "bloque": "Financiero y ERP",
+      "nombre": "Histórico de depreciación de un activo propio",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER"
+      ],
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"

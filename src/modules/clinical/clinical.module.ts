@@ -81,7 +81,6 @@ import {
   PrescriptionSignaturePoliciesRepository,
   ProceduresRepository,
   ImmunizationsRepository,
-  ReceivedServicesRepository,
   PrescriptionExpiryRepository,
   ReceivedServicesRepository,
 } from './repositories';
@@ -207,7 +206,6 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     PrescriptionSignaturePoliciesRepository,
     ProceduresRepository,
     ImmunizationsRepository,
-    ReceivedServicesRepository,
     PrescriptionExpiryRepository,
     ReceivedServicesRepository,
     ClinicalNotesRepository,
