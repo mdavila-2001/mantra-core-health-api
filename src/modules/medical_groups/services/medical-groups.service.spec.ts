@@ -232,6 +232,7 @@ function build() {
     members,
     tx,
     groupsRepo,
+    membersRepo,
     clinicalRead,
     practiceTenantLookup,
   };
@@ -506,6 +507,37 @@ describe('MedicalGroupsService', () => {
     expect(group.isClosed).toBe(false);
     expect(group.status).not.toBe('CLOSED');
     expect(group.patientName).toBeNull();
+  });
+
+  it('al aceptar, guarda la respuesta antes de contar las invitaciones pendientes en la base', async () => {
+    const d = build();
+    const created = await d.service.create(
+      baseDto({
+        members: [
+          {
+            practitionerProfileId: 'pract-invitee',
+            roleTitle: 'Anestesista',
+            agreedPaymentAmount: '100.00',
+          },
+        ],
+      }),
+      creator,
+    );
+    const memberId = created.members.find((m) => !m.isCreator)!.id;
+    d.tx.flush.mockClear();
+    const hasPending = (d as any).membersRepo.hasPendingInvites;
+    hasPending.mockClear();
+
+    await d.service.respondToInvitation(
+      created.id,
+      memberId,
+      'ACCEPTED',
+      invitee,
+    );
+
+    expect(d.tx.flush.mock.invocationCallOrder[0]).toBeLessThan(
+      hasPending.mock.invocationCallOrder[0],
+    );
   });
 
   describe('colegas que se pueden invitar', () => {
