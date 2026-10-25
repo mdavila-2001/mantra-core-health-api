@@ -53,9 +53,21 @@ function build() {
   const members = new Map<string, any>();
   let seq = 0;
 
+  // Los nombres que el DTO resuelve en lote: un servicio, un perfil y una
+  // persona por id, con el nombre derivado del id para poder aseverarlo.
   const tx = {
     persist: mockFn(),
     flush: mockFn().mockResolvedValue(undefined),
+    find: mockFn(async (entity: any, where: any) => {
+      const ids: string[] = where.id.$in;
+      if (entity.name === 'ServiceCatalog') {
+        return ids.map((id) => ({ id, name: `Servicio ${id}` }));
+      }
+      if (entity.name === 'PersonProfiles') {
+        return ids.map((id) => ({ id, personId: `person-${id}` }));
+      }
+      return ids.map((id) => ({ id, displayName: `Nombre de ${id}` }));
+    }),
   };
   const em: any = {
     transactional: mockFn((cb: any) => cb(tx)),
@@ -449,6 +461,53 @@ describe('MedicalGroupsService', () => {
   });
 
   describe('findOne y list', () => {
+    it('el grupo trae el nombre del servicio, de cada miembro y del paciente', async () => {
+      const d = build();
+      const created = await d.service.create(
+        baseDto({
+          patientProfileId: PATIENT_A,
+          members: [
+            {
+              practitionerProfileId: 'pract-invitee',
+              roleTitle: 'Anestesista',
+              agreedPaymentAmount: '100.00',
+            },
+          ],
+        }),
+        creator,
+      );
+
+      const group = await d.service.findOne(created.id, creator);
+      expect(group.serviceName).toBe(`Servicio ${group.serviceCatalogId}`);
+      expect(group.patientName).toBe(`Nombre de person-${PATIENT_A}`);
+      expect(
+        group.members.map((m) => [m.practitionerProfileId, m.practitionerName]),
+      ).toEqual(
+        expect.arrayContaining([
+          ['pract-creator', 'Nombre de person-pract-creator'],
+          ['pract-invitee', 'Nombre de person-pract-invitee'],
+        ]),
+      );
+
+      const page = await d.service.list('historico', creator, {});
+      expect(page.items[0]?.serviceName).toBe(
+        `Servicio ${group.serviceCatalogId}`,
+      );
+    });
+
+    it('sin nombre cargado el miembro viaja con null, no con el id', async () => {
+      const d = build();
+      // Ningún perfil resuelve a una persona: cuenta a medio crear.
+      d.tx.find.mockImplementation(async (entity: any, where: any) =>
+        entity.name === 'ServiceCatalog'
+          ? where.id.$in.map((id: string) => ({ id, name: 'Servicio' }))
+          : [],
+      );
+      const created = await d.service.create(baseDto(), creator);
+      expect(created.members[0]?.practitionerName).toBeNull();
+      expect(created.patientName).toBeNull();
+    });
+
     it('el creador y el invitado ven el grupo; un tercero recibe 404', async () => {
       const d = build();
       const created = await d.service.create(

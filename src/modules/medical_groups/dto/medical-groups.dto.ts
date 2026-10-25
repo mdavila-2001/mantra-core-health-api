@@ -147,6 +147,14 @@ export class MedicalGroupMemberDto {
   @ApiProperty({ format: 'uuid' })
   practitionerProfileId!: string;
 
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'Nombre del profesional; null si su persona no tiene nombre cargado',
+  })
+  practitionerName!: string | null;
+
   @ApiProperty()
   roleTitle!: string;
 
@@ -177,11 +185,26 @@ export class MedicalGroupDto {
   @ApiProperty({ format: 'uuid' })
   serviceCatalogId!: string;
 
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'Nombre del servicio del catálogo; null si ya no existe',
+  })
+  serviceName!: string | null;
+
   @ApiProperty({ format: 'uuid' })
   requestingPractitionerId!: string;
 
   @ApiPropertyOptional({ format: 'uuid' })
   patientProfileId?: string;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'Nombre del paciente asociado; null si no hay paciente o no tiene nombre',
+  })
+  patientName!: string | null;
 
   @ApiPropertyOptional({ format: 'uuid' })
   conditionId?: string;
@@ -241,6 +264,13 @@ export class MedicalGroupListItemDto {
 
   @ApiProperty({ format: 'uuid' })
   serviceCatalogId!: string;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'Nombre del servicio del catálogo; null si ya no existe',
+  })
+  serviceName!: string | null;
 
   @ApiProperty({ type: String, format: 'date-time' })
   scheduledAt!: Date;

@@ -18,6 +18,8 @@ import {
 import { ConditionsRepository } from '../../clinical/repositories';
 import { ClinicalReadService } from '../../clinical/services';
 import { CatalogConcepts } from '../../terminology/entities';
+import { ServiceCatalog } from '../../billing/entities';
+import { PersonProfiles, Persons } from '../../profiles/entities';
 import {
   MedicalGroupMembersRepository,
   MedicalGroupsRepository,
@@ -251,6 +253,7 @@ export class MedicalGroupsService {
         'Medical group created',
       );
       return this.toDto(
+        tx,
         group,
         await this.membersRepo.findByGroup(tx, group.id),
       );
@@ -271,7 +274,7 @@ export class MedicalGroupsService {
     const members = await this.membersRepo.findByGroup(em, id);
     this.assertActorSeesGroup(group, members, actor);
     await this.closeIfExpired(em, group);
-    return this.toDto(group, members);
+    return this.toDto(em, group, members);
   }
 
   async list(
@@ -304,6 +307,7 @@ export class MedicalGroupsService {
       membersByGroup.set(member.groupId, list);
     }
 
+    const names = await this.namesFor(em, page, []);
     const last = page.at(-1);
     return {
       items: page.map((row) => {
@@ -311,6 +315,7 @@ export class MedicalGroupsService {
         return {
           id: row.id,
           serviceCatalogId: row.serviceCatalogId,
+          serviceName: names.services.get(row.serviceCatalogId) ?? null,
           scheduledAt: row.scheduledAt,
           locationText: row.locationText,
           status: row.status,
@@ -449,7 +454,11 @@ export class MedicalGroupsService {
         }
       }
       await tx.flush();
-      return this.toDto(group, await this.membersRepo.findByGroup(tx, groupId));
+      return this.toDto(
+        tx,
+        group,
+        await this.membersRepo.findByGroup(tx, groupId),
+      );
     });
   }
 
@@ -500,7 +509,7 @@ export class MedicalGroupsService {
       }
       touch(group, actor.id);
       await tx.flush();
-      return this.toDto(group, members);
+      return this.toDto(tx, group, members);
     });
   }
 
@@ -535,7 +544,11 @@ export class MedicalGroupsService {
       group.proposedByPractitionerId = undefined;
       touch(group, actor.id);
       await tx.flush();
-      return this.toDto(group, await this.membersRepo.findByGroup(tx, groupId));
+      return this.toDto(
+        tx,
+        group,
+        await this.membersRepo.findByGroup(tx, groupId),
+      );
     });
   }
 
@@ -571,7 +584,7 @@ export class MedicalGroupsService {
       group.exerciseNotesUpdatedAt = new Date();
       touch(group, actor.id);
       await tx.flush();
-      return this.toDto(group, members);
+      return this.toDto(tx, group, members);
     });
   }
 
@@ -682,18 +695,78 @@ export class MedicalGroupsService {
     return true;
   }
 
-  private toDto(
+  /**
+   * Los nombres que el formulario de consulta muestra en vez de ids: el del
+   * servicio, el de cada miembro y el del paciente. Un invitado de otra
+   * práctica no puede leer el catálogo del creador ni el directorio del
+   * paciente por su cuenta, así que viajan con el grupo. El paciente ya se
+   * revela al equipo al asociarlo (ver `create`), así que nombrarlo no expone
+   * más de lo que el modelo del grupo ya expone.
+   */
+  private async namesFor(
+    em: EntityManager,
+    groups: readonly MedicalGroups[],
+    members: readonly MedicalGroupMembers[],
+  ): Promise<{ services: Map<string, string>; people: Map<string, string> }> {
+    const serviceIds = [...new Set(groups.map((g) => g.serviceCatalogId))];
+    const profileIds = [
+      ...new Set([
+        ...members.map((m) => m.practitionerProfileId),
+        ...groups
+          .map((g) => g.patientProfileId)
+          .filter((id): id is string => id !== undefined),
+      ]),
+    ];
+    const services =
+      serviceIds.length > 0
+        ? await em.find(ServiceCatalog, { id: { $in: serviceIds } })
+        : [];
+    const profiles =
+      profileIds.length > 0
+        ? await em.find(PersonProfiles, { id: { $in: profileIds } })
+        : [];
+    const personIds = [...new Set(profiles.map((p) => p.personId))];
+    const persons =
+      personIds.length > 0
+        ? await em.find(Persons, { id: { $in: personIds } })
+        : [];
+    const nameByPerson = new Map(
+      persons
+        .map((person) => [person.id, personName(person)] as const)
+        .filter(
+          (entry): entry is readonly [string, string] => entry[1] !== null,
+        ),
+    );
+    const people = new Map<string, string>();
+    for (const profile of profiles) {
+      const name = nameByPerson.get(profile.personId);
+      if (name !== undefined) people.set(profile.id, name);
+    }
+    return {
+      services: new Map(services.map((service) => [service.id, service.name])),
+      people,
+    };
+  }
+
+  private async toDto(
+    em: EntityManager,
     group: MedicalGroups,
     members: MedicalGroupMembers[],
-  ): MedicalGroupDto {
+  ): Promise<MedicalGroupDto> {
+    const names = await this.namesFor(em, [group], members);
     const isRealized = isRealizedNow(group);
     const isClosed =
       group.closedAt !== undefined || isPastCloseWindowNow(group);
     return {
       id: group.id,
       serviceCatalogId: group.serviceCatalogId,
+      serviceName: names.services.get(group.serviceCatalogId) ?? null,
       requestingPractitionerId: group.requestingPractitionerId,
       patientProfileId: group.patientProfileId,
+      patientName:
+        group.patientProfileId === undefined
+          ? null
+          : (names.people.get(group.patientProfileId) ?? null),
       conditionId: group.conditionId,
       scheduledAt: group.scheduledAt,
       locationText: group.locationText,
@@ -711,6 +784,7 @@ export class MedicalGroupsService {
       members: members.map((m) => ({
         id: m.id,
         practitionerProfileId: m.practitionerProfileId,
+        practitionerName: names.people.get(m.practitionerProfileId) ?? null,
         roleTitle: m.roleTitle,
         agreedPaymentAmount: m.agreedPaymentAmount,
         agreedPaymentCurrencyConceptId: m.agreedPaymentCurrencyConceptId,
@@ -728,6 +802,15 @@ export class MedicalGroupsService {
    entidades como bolsas de propiedades sin comportamiento (ver cualquier otra
    `*.entity.ts` — sólo `@PrimaryKey`/`@Property`), y este módulo sigue esa
    misma convención en vez de romperla. */
+
+/** `display_name`, o nombre y apellido; `null` si la persona no tiene ninguno. */
+function personName(person: Persons): string | null {
+  const composed = [person.name, person.lastName]
+    .filter((part): part is string => typeof part === 'string')
+    .join(' ')
+    .trim();
+  return person.displayName ?? (composed === '' ? null : composed);
+}
 
 function isRealizedNow(group: MedicalGroups, now: Date = new Date()): boolean {
   return now.getTime() >= group.scheduledAt.getTime();
