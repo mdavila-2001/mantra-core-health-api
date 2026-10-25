@@ -19,6 +19,8 @@ import { ConditionsRepository } from '../../clinical/repositories';
 import { ClinicalReadService } from '../../clinical/services';
 import { CatalogConcepts } from '../../terminology/entities';
 import { ServiceCatalog } from '../../billing/entities';
+import { PractitionerRoleAssignments } from '../../practice/entities';
+import { PRAC } from '../../practice/practice.concepts';
 import { PersonProfiles, Persons } from '../../profiles/entities';
 import {
   MedicalGroupMembersRepository,
@@ -36,6 +38,7 @@ import { MedicalGroupsErrorReason } from '../medical_groups.error-reasons';
 import type {
   CreateMedicalGroupDto,
   MedicalGroupConditionOptionDto,
+  MedicalGroupEligibleMemberDto,
   MedicalGroupDto,
   MedicalGroupPageDto,
 } from '../dto';
@@ -366,6 +369,67 @@ export class MedicalGroupsService {
       'ACCEPTED',
     );
     return [...new Set([...created, ...accepted])];
+  }
+
+  /**
+   * Los colegas que se pueden invitar a un grupo de este servicio: los
+   * vinculados (activos y vigentes) a alguna práctica de la misma
+   * organización que la práctica del servicio, sin quien pregunta.
+   *
+   * Es la misma regla que aplica `create` al validar cada invitado, expuesta
+   * como lectura para que el formulario no ofrezca a nadie que después la API
+   * rechazaría con 404. Un servicio ajeno responde 404, igual que en `create`.
+   */
+  async listEligibleMembers(
+    serviceCatalogId: string,
+    actor: AuthenticatedUser,
+  ): Promise<MedicalGroupEligibleMemberDto[]> {
+    const me = this.requirePractitioner(actor);
+    const em = this.em.fork();
+    const service = await this.serviceCatalogRepo.findById(
+      em,
+      serviceCatalogId,
+    );
+    const own =
+      await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(me);
+    if (
+      service === null ||
+      !service.isActive ||
+      !own.includes(service.practiceId)
+    ) {
+      throw new ResourceNotFoundException('Servicio médico no encontrado', {
+        serviceCatalogId,
+      });
+    }
+    const tenantId = await this.practiceTenantLookup.findTenantOfPractice(
+      service.practiceId,
+    );
+    if (tenantId === null) return [];
+    const practiceIds =
+      await this.practiceTenantLookup.findActivePracticeIdsForTenant(tenantId);
+    if (practiceIds.length === 0) return [];
+
+    const assignments = await em.find(PractitionerRoleAssignments, {
+      practiceId: { $in: practiceIds },
+      statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+      validTo: null,
+    });
+    const ids = [
+      ...new Set(assignments.map((a) => a.practitionerProfileId)),
+    ].filter((id) => id !== me);
+    if (ids.length === 0) return [];
+
+    const { people } = await this.namesFor(
+      em,
+      [],
+      ids.map((id) => ({ practitionerProfileId: id }) as MedicalGroupMembers),
+    );
+    return ids
+      .map((id) => ({
+        practitionerProfileId: id,
+        name: people.get(id) ?? null,
+      }))
+      .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', 'es'));
   }
 
   /** El selector de diagnóstico del formulario (AC-21-06/07). */

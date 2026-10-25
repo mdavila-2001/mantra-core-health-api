@@ -320,3 +320,17 @@ export class MedicalGroupConditionOptionDto {
   @ApiProperty()
   isMostRecent!: boolean;
 }
+
+/** Un colega que se puede invitar al grupo (misma organización del servicio). */
+export class MedicalGroupEligibleMemberDto {
+  @ApiProperty({ format: 'uuid' })
+  practitionerProfileId!: string;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description:
+      'Nombre del profesional; null si su persona no tiene nombre cargado',
+  })
+  name!: string | null;
+}
