@@ -778,7 +778,7 @@ flowchart LR
 
 ### Máquina de estados `ALLOWED_TRANSITIONS`
 
-Declarada en `src/modules/pharma_lab/services/visit-requests.service.ts:44`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+Declarada en `src/modules/pharma_lab/services/visit-requests.service.ts:45`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
 
 ```mermaid
 stateDiagram-v2
@@ -833,7 +833,7 @@ stateDiagram-v2
 
 ### Máquina de estados `PRODUCT_TRANSITIONS`
 
-Declarada en `src/modules/pharma_lab/services/pharma-catalog.service.ts:43`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+Declarada en `src/modules/pharma_lab/services/pharma-catalog.service.ts:44`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
 
 ```mermaid
 stateDiagram-v2
@@ -862,7 +862,7 @@ stateDiagram-v2
 
 ### Máquina de estados `REPORT_TRANSITIONS`
 
-Declarada en `src/modules/pharma_lab/services/pharmacovigilance.service.ts:38`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+Declarada en `src/modules/pharma_lab/services/pharmacovigilance.service.ts:39`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
 
 ```mermaid
 stateDiagram-v2
@@ -1930,7 +1930,7 @@ Registrar un visitador médico
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Cuenta no encontrada; ResourceNotFoundException: Rol no encontrado |
 | 409 | `CONFLICT` | ConflictException: La cuenta ya está registrada como visitador; ConflictException: El código interno ya está en uso en el laboratorio; ConflictException: El usuario ya tiene ese rol asignado y activo en ese ámbito |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: Algún producto no pertenece al catálogo del laboratorio; PreconditionFailedException: Indique el rol a asignar por `roleId` o por `roleCode`; PreconditionFailedException: El rol no es asignable; PreconditionFailedException: validFrom debe ser anterior a validTo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: Algún producto no pertenece al catálogo del laboratorio; PreconditionFailedException: Indique el rol a asignar por `roleId` o por `roleCode`; PreconditionFailedException: El rol no es asignable; PreconditionFailedException: Un rol de ámbito global se asigna sin tenant, sede ni consultorio; PreconditionFailedException: validFrom debe ser anterior a validTo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2048,36 +2048,38 @@ flowchart TD
   n52 -->|"no"| n54
   n55(["422 PRECONDITION_FAILED El rol no es asignable"]):::error
   n54 -->|"sí"| n55
-  n56{"dto.validFrom && dto.validTo && dto.validFrom ›= dto.validTo"}:::decision
+  n56{"role.scopeConceptId === AUTHZ.SCOPE_GLOBAL && (dto.tenantId || dto.branchId || dto.practiceId)"}:::decision
   n54 -->|"no"| n56
-  n57(["422 PRECONDITION_FAILED validFrom debe ser anterior a validTo"]):::error
+  n57(["422 PRECONDITION_FAILED Un rol de ámbito global se asigna sin tenant, sede ni consultorio"]):::error
   n56 -->|"sí"| n57
-  n58["Llama a UserRoleAssignmentsRepository.findActive"]:::llamada
+  n58{"dto.validFrom && dto.validTo && dto.validFrom ›= dto.validTo"}:::decision
   n56 -->|"no"| n58
-  n59[("LEE authz.user_role_assignments")]:::efecto
-  n58 --> n59
-  n60{"existing"}:::decision
-  n59 --> n60
-  n61(["409 CONFLICT El usuario ya tiene ese rol asignado y activo en ese ámbito"]):::error
-  n60 -->|"sí"| n61
-  n62["Llama a UserRoleAssignmentsRepository.create"]:::llamada
-  n60 -->|"no"| n62
-  n63[("CREA authz.user_role_assignments")]:::efecto
-  n62 --> n63
-  n64(["↩ (relanza el error capturado)"]):::error
-  n43 -->|"si falla"| n64
-  n65["Llama a AuditTrailService.record"]:::llamada
-  n63 --> n65
-  n66["Llama a AuditLogRepository.append"]:::llamada
-  n65 --> n66
-  n67["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n66 --> n67
-  n68[("LEE audit.audit_log")]:::efecto
+  n59(["422 PRECONDITION_FAILED validFrom debe ser anterior a validTo"]):::error
+  n58 -->|"sí"| n59
+  n60["Llama a UserRoleAssignmentsRepository.findActive"]:::llamada
+  n58 -->|"no"| n60
+  n61[("LEE authz.user_role_assignments")]:::efecto
+  n60 --> n61
+  n62{"existing"}:::decision
+  n61 --> n62
+  n63(["409 CONFLICT El usuario ya tiene ese rol asignado y activo en ese ámbito"]):::error
+  n62 -->|"sí"| n63
+  n64["Llama a UserRoleAssignmentsRepository.create"]:::llamada
+  n62 -->|"no"| n64
+  n65[("CREA authz.user_role_assignments")]:::efecto
+  n64 --> n65
+  n66(["↩ (relanza el error capturado)"]):::error
+  n43 -->|"si falla"| n66
+  n67["Llama a AuditTrailService.record"]:::llamada
+  n65 --> n67
+  n68["Llama a AuditLogRepository.append"]:::llamada
   n67 --> n68
-  n69[("CREA audit.audit_log")]:::efecto
+  n69["Llama a AuditLogRepository.findChainTip"]:::llamada
   n68 --> n69
-  n70(("201 Responde con éxito")):::ok
+  n70[("LEE audit.audit_log")]:::efecto
   n69 --> n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2180,7 +2182,7 @@ Revincular a un visitador con nueva autorización
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Laboratorio no encontrado; ResourceNotFoundException: Visitador no encontrado en el laboratorio; ResourceNotFoundException: Rol no encontrado |
 | 409 | `CONFLICT` | ConflictException: El visitador ya está vinculado; ConflictException: El usuario ya tiene ese rol asignado y activo en ese ámbito |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: Indique el rol a asignar por `roleId` o por `roleCode`; PreconditionFailedException: El rol no es asignable; PreconditionFailedException: validFrom debe ser anterior a validTo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El laboratorio no está activo; PreconditionFailedException: Indique el rol a asignar por `roleId` o por `roleCode`; PreconditionFailedException: El rol no es asignable; PreconditionFailedException: Un rol de ámbito global se asigna sin tenant, sede ni consultorio; PreconditionFailedException: validFrom debe ser anterior a validTo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2259,36 +2261,40 @@ flowchart TD
   n34 -->|"no"| n36
   n37(["422 PRECONDITION_FAILED El rol no es asignable"]):::error
   n36 -->|"sí"| n37
-  n38{"dto.validFrom && dto.validTo && dto.validFrom ›= dto.validTo"}:::decision
+  n38{"role.scopeConceptId === AUTHZ.SCOPE_GLOBAL && (dto.tenantId || dto.branchId || dto.practiceId)"}:::decision
   n36 -->|"no"| n38
-  n39(["422 PRECONDITION_FAILED validFrom debe ser anterior a validTo"]):::error
+  n39(["422 PRECONDITION_FAILED Un rol de ámbito global se asigna sin tenant, sede ni consultorio"]):::error
   n38 -->|"sí"| n39
-  n40["Llama a UserRoleAssignmentsRepository.findActive"]:::llamada
+  n40{"dto.validFrom && dto.validTo && dto.validFrom ›= dto.validTo"}:::decision
   n38 -->|"no"| n40
-  n41[("LEE authz.user_role_assignments")]:::efecto
-  n40 --> n41
-  n42{"existing"}:::decision
-  n41 --> n42
-  n43(["409 CONFLICT El usuario ya tiene ese rol asignado y activo en ese ámbito"]):::error
-  n42 -->|"sí"| n43
-  n44["Llama a UserRoleAssignmentsRepository.create"]:::llamada
-  n42 -->|"no"| n44
-  n45[("CREA authz.user_role_assignments")]:::efecto
-  n44 --> n45
-  n46(["↩ (relanza el error capturado)"]):::error
-  n25 -->|"si falla"| n46
-  n47["Llama a AuditTrailService.record"]:::llamada
-  n45 --> n47
-  n48["Llama a AuditLogRepository.append"]:::llamada
-  n47 --> n48
-  n49["Llama a AuditLogRepository.findChainTip"]:::llamada
-  n48 --> n49
-  n50[("LEE audit.audit_log")]:::efecto
+  n41(["422 PRECONDITION_FAILED validFrom debe ser anterior a validTo"]):::error
+  n40 -->|"sí"| n41
+  n42["Llama a UserRoleAssignmentsRepository.findActive"]:::llamada
+  n40 -->|"no"| n42
+  n43[("LEE authz.user_role_assignments")]:::efecto
+  n42 --> n43
+  n44{"existing"}:::decision
+  n43 --> n44
+  n45(["409 CONFLICT El usuario ya tiene ese rol asignado y activo en ese ámbito"]):::error
+  n44 -->|"sí"| n45
+  n46["Llama a UserRoleAssignmentsRepository.create"]:::llamada
+  n44 -->|"no"| n46
+  n47[("CREA authz.user_role_assignments")]:::efecto
+  n46 --> n47
+  n48(["↩ (relanza el error capturado)"]):::error
+  n25 -->|"si falla"| n48
+  n49["Llama a AuditTrailService.record"]:::llamada
+  n47 --> n49
+  n50["Llama a AuditLogRepository.append"]:::llamada
   n49 --> n50
-  n51[("CREA audit.audit_log")]:::efecto
+  n51["Llama a AuditLogRepository.findChainTip"]:::llamada
   n50 --> n51
-  n52(("201 Responde con éxito")):::ok
+  n52[("LEE audit.audit_log")]:::efecto
   n51 --> n52
+  n53[("CREA audit.audit_log")]:::efecto
+  n52 --> n53
+  n54(("201 Responde con éxito")):::ok
+  n53 --> n54
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

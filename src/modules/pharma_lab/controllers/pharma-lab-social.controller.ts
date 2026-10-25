@@ -16,7 +16,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   CreateCostAllocationDto,
   CreatedResourceDto,
@@ -57,6 +62,11 @@ export class PharmaLabSocialController {
   ) {}
 
   /** UC-17-35. */
+  @Audited({
+    action: 'VISITOR_POST_SUBMITTED',
+    entity: 'visitor_post_submission',
+    entityId: 'result.id',
+  })
   @Post('visitor-posts')
   @HttpCode(HttpStatus.CREATED)
   @Roles('MEDICAL_VISITOR')
@@ -79,6 +89,11 @@ export class PharmaLabSocialController {
   }
 
   /** UC-17-36. */
+  @Audited({
+    action: 'VISITOR_POST_DECIDED',
+    entity: 'visitor_post_submission',
+    entityId: 'param:submissionId',
+  })
   @Post(':pharmaLabId/visitor-posts/:submissionId/decision')
   @Roles('PHARMA_LAB_ADMIN', 'BUSINESS_ADMIN', 'PLATFORM_ADMIN')
   @ApiOperation({ summary: 'Aprobar o rechazar la publicación propuesta' })
@@ -92,6 +107,11 @@ export class PharmaLabSocialController {
   }
 
   /** UC-17-34. */
+  @Audited({
+    action: 'PHARMA_COST_ALLOCATED',
+    entity: 'pharma_cost_allocation',
+    entityId: 'result.id',
+  })
   @Post(':pharmaLabId/cost-allocations')
   @HttpCode(HttpStatus.CREATED)
   @Roles('PHARMA_LAB_ADMIN', 'ACCOUNTANT', 'FINANCE', 'PLATFORM_ADMIN')

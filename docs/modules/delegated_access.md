@@ -9,7 +9,7 @@
 # Módulo `delegated_access`
 
 **Fuente:** [`src/modules/delegated_access/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/delegated_access/README.md)
-· 5 controllers · 5 services · 7 repositories · 7 entidades · 12 DTO
+· 5 controllers · 6 services · 8 repositories · 7 entidades · 12 DTO
 
 ---
 
@@ -85,6 +85,16 @@ Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `delegated_access_approv
 - `PATCH` con `expectedRowVersion` → concurrencia optimista (409 si no coincide);
   suspender cascada a las delegaciones dependientes.
 - Revocación idempotente si ya está `REVOKED`; cascada a grants y solicitudes.
+- Alcance por tenant (`DelegationScopeService`): el tenant sale de `requireTenantId()` y el
+  `tenantId` del cuerpo sólo se contrasta (403 `DELEGATED_TENANT_SCOPE_REQUIRED`). La delegación
+  no tiene `tenant_id`: su tenant es el de su set. Crear una delegación exige que la asignación de
+  organización (por su membresía), la asignación de rol del profesional (por su práctica) y el set
+  sean del tenant activo; emitir un grant exige además que el encuentro sea del tenant y del
+  paciente indicado. Un eslabón ajeno responde igual que uno inexistente (404, mismo mensaje y
+  `reason`, sin `details`).
+- `POST /authz/effective-actor/evaluate` evalúa al usuario autenticado, o al declarado en
+  `effectiveUserId`; sólo el titular de la asignación del delegado (en el tenant activo) puede
+  recibir `allowed: true`, cualquier otro recibe `DELEGATED_SUBJECT_MISMATCH`.
 
 ## Conceptos
 

@@ -374,6 +374,12 @@ export class BillingServiceCatalogService {
 
       if (dto.name !== undefined) item.name = dto.name;
       if (dto.isActive !== undefined) item.isActive = dto.isActive;
+      if (dto.termsText !== undefined) {
+        // Vacío es lo mismo que null: «sin términos propios», no un contrato
+        // en blanco.
+        const terms = dto.termsText?.trim() ?? '';
+        item.termsText = terms === '' ? undefined : terms;
+      }
       if (dto.defaultPrice !== undefined) {
         item.defaultPrice = dto.defaultPrice;
         // Un importe sin moneda no es un precio. La fila puede venir de un alta
@@ -461,6 +467,7 @@ function toItemDto(row: {
   code: string;
   name: string;
   descriptionText?: string;
+  termsText?: string | null;
   imageFileId?: string;
   serviceConceptId?: string;
   defaultPrice: string;
@@ -475,6 +482,7 @@ function toItemDto(row: {
     code: row.code,
     name: row.name,
     descriptionText: row.descriptionText,
+    termsText: row.termsText ?? undefined,
     imageFileId: row.imageFileId,
     serviceConceptId: row.serviceConceptId,
     defaultPrice: row.defaultPrice,

@@ -24,6 +24,9 @@ import { SeedBootstrapService } from './common/seed/seed-bootstrap.service';
  */
 async function main(): Promise<void> {
   process.env.SEED_ON_BOOT = 'false';
+  // Migración y seed son el uso legítimo del rol dueño (DDL, catálogos): el
+  // guard de HZ-05 no debe tratarlo como un runtime que ignora RLS.
+  process.env.DB_ROLE_PURPOSE = 'migration';
 
   const app = await NestFactory.createApplicationContext(AppModule, {
     bufferLogs: true,

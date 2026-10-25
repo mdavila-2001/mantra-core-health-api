@@ -3,6 +3,9 @@
 // Equipos de diagnóstico · master · etapa 2: taxonomía (`out/taxonomy-*`) →
 // `terminology.*`. Sin DDL (ADR-0021), idempotente (ids deterministas +
 // `ON CONFLICT DO NOTHING`: la segunda corrida inserta 0) y sin truncar nada.
+// Las propiedades de conceptos ya cargados SÍ se actualizan cuando la fuente
+// cambia un atributo: el valor anterior queda en `<property_code>_previous`
+// con su versión del code system (issue #848); con la misma fuente, 0 cambios.
 //
 // Fabricantes, marcas y modelos quedan en `out/` hasta que el modelo tenga sus
 // tablas (propuesta en docs/seed-research/diagnostic-devices-master.md).
@@ -14,6 +17,7 @@
 
 import 'dotenv/config';
 import pg from 'pg';
+import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,7 +26,7 @@ import { INTERNAL, planTaxonomy } from './lib/load-plan.mjs';
 import { md5uuid } from '../../lib/glossary-es/load-plan.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const OUT = join(HERE, 'out');
+const OUT = process.env.DX_TAXONOMY_OUT ?? join(HERE, 'out');
 const DRY_RUN = process.argv.includes('--dry-run');
 const BATCH = 1000;
 
@@ -79,6 +83,69 @@ async function insertMany(
     }
   }
   return inserted;
+}
+
+/**
+ * `concept_properties`: inserta las nuevas y, si el valor de la fuente cambió
+ * respecto del cargado, lo actualiza. Antes deja el valor anterior en una fila
+ * `<property_code>_previous` (id derivado del valor anterior: reintentar no la
+ * duplica) con la versión del code system a la que pertenecía el concepto.
+ * No borra nada. Con la misma fuente no cambia ninguna fila.
+ */
+async function upsertProperties(client, tuples, version) {
+  const out = { inserted: 0, updated: 0, previous: 0 };
+  for (let i = 0; i < tuples.length; i += BATCH) {
+    const chunk = tuples.slice(i, i + BATCH);
+    const ids = chunk.map((t) => t[0]);
+    const values = chunk.map((t) => t[4]);
+    const { rows: changed } = await client.query(
+      `SELECT cp.id, cp.concept_id, cp.property_code, cp.value_json, cp.updated_at, v.version AS previous_version
+         FROM terminology.concept_properties cp
+         JOIN unnest($1::uuid[], $2::jsonb[]) AS n(id, value_json) ON n.id = cp.id
+         LEFT JOIN terminology.catalog_concepts c ON c.id = cp.concept_id
+         LEFT JOIN terminology.code_system_versions v ON v.id = c.code_system_version_id
+        WHERE cp.value_json IS DISTINCT FROM n.value_json`,
+      [ids, values],
+    );
+    out.previous += await insertMany(
+      client,
+      'concept_properties',
+      ['id', 'concept_id', 'property_code', 'data_type', 'value_json'],
+      changed.map((r) => [
+        md5uuid(
+          `mantra:dx-devices:property-previous:${r.id}:${createHash('sha256').update(JSON.stringify(r.value_json)).digest('hex')}`,
+        ),
+        r.concept_id,
+        `${r.property_code}_previous`,
+        'json',
+        JSON.stringify({
+          value: r.value_json,
+          version: r.previous_version,
+          supersededByVersion: version,
+          recordedAt: r.updated_at.toISOString(),
+        }),
+      ]),
+      ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb'],
+    );
+    out.inserted += await insertMany(
+      client,
+      'concept_properties',
+      ['id', 'concept_id', 'property_code', 'data_type', 'value_json'],
+      chunk,
+      ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb'],
+    );
+    if (changed.length) {
+      const res = await client.query(
+        `UPDATE terminology.concept_properties cp
+            SET value_json = n.value_json, updated_at = now(), row_version = cp.row_version + 1
+           FROM unnest($1::uuid[], $2::jsonb[]) AS n(id, value_json)
+          WHERE cp.id = n.id AND cp.value_json IS DISTINCT FROM n.value_json`,
+        [ids, values],
+      );
+      out.updated += res.rowCount;
+    }
+  }
+  return out;
 }
 
 async function assertPrerequisites(client) {
@@ -221,13 +288,14 @@ async function main() {
         p.designations,
         ['uuid', 'uuid', 'uuid', 'uuid', null, 'boolean'],
       );
-      r.properties = await insertMany(
+      const props = await upsertProperties(
         client,
-        'concept_properties',
-        ['id', 'concept_id', 'property_code', 'data_type', 'value_json'],
         p.properties,
-        ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb'],
+        p.version.version,
       );
+      r.properties = props.inserted;
+      r.propertiesPrevious = props.previous;
+      r.propertiesUpdated = props.updated;
       r.relationships = await insertMany(
         client,
         'concept_relationships',
@@ -253,7 +321,7 @@ async function main() {
           versionId,
           new Date(t0),
           p.concepts.length,
-          Object.values(r).reduce((a, b) => a + b, 0),
+          Object.values(r).reduce((a, b) => a + b, 0) - r.propertiesUpdated,
           p.checksum,
         ],
       );

@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  ResourceNotFoundException,
   ConflictException,
-  PreconditionFailedException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { SpecimensRepository, LabWorkRepository } from '../repositories';
 import { DIAG } from '../diagnostics.concepts';
+import type { LaboratoryWorkOrderTests } from '../entities';
+import { DiagnosticsScopeService } from './diagnostics-scope.service';
 import {
   CreateWorkOrderDto,
   CreateAnalyzerRunDto,
@@ -35,12 +35,14 @@ export class DiagnosticsLabService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param repo - Valor de repo requerido por la operación.
    * @param specimensRepo - Valor de specimens repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: LabWorkRepository,
     private readonly specimensRepo: SpecimensRepository,
+    private readonly scope: DiagnosticsScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DiagnosticsLabService.name);
@@ -92,19 +94,33 @@ export class DiagnosticsLabService {
       },
       'Opening work order',
     );
+    const tenantId = this.scope.activeTenantFor(dto.custodianTenantId);
     return this.em.transactional(async (tx) => {
-      const accession = await this.specimensRepo.findAccession(
+      const accession = await this.scope.accession(
         tx,
         dto.laboratoryAccessionId,
       );
-      if (!accession) {
-        throw new ResourceNotFoundException('Acesión no encontrada', {
-          laboratoryAccessionId: dto.laboratoryAccessionId,
-        });
+      // Órdenes y especímenes de las pruebas: del tenant y del paciente de la
+      // acesión, antes de escribir la primera fila.
+      for (const t of dto.tests) {
+        if (t.serviceRequestId) {
+          await this.scope.serviceRequest(
+            tx,
+            t.serviceRequestId,
+            accession.patientProfileId,
+          );
+        }
+        if (t.specimenId) {
+          await this.scope.specimenOfPatient(
+            tx,
+            t.specimenId,
+            accession.patientProfileId,
+          );
+        }
       }
 
       const order = this.repo.createWorkOrder(tx, {
-        custodianTenantId: dto.custodianTenantId ?? accession.custodianTenantId,
+        custodianTenantId: tenantId,
         laboratoryAccessionId: accession.id,
         workOrderNumber: dto.workOrderNumber ?? `WO-${Date.now()}`,
         priorityConceptId: dto.priorityConceptId ?? DIAG.PRIORITY_ROUTINE,
@@ -149,14 +165,8 @@ export class DiagnosticsLabService {
       },
       'Opening analyzer run',
     );
+    const tenantId = this.scope.activeTenantFor(dto.custodianTenantId);
     return this.em.transactional(async (tx) => {
-      const tenantId = dto.custodianTenantId;
-      if (!tenantId) {
-        throw new PreconditionFailedException(
-          'Falta el tenant custodio de la corrida',
-          {},
-        );
-      }
       const run = this.repo.createAnalyzerRun(tx, {
         custodianTenantId: tenantId,
         analyzerDeviceId: dto.analyzerDeviceId,
@@ -182,12 +192,36 @@ export class DiagnosticsLabService {
       'Ingesting analyzer result message',
     );
     return this.em.transactional(async (tx) => {
-      const run = await this.repo.findAnalyzerRun(tx, analyzerRunId);
-      if (!run)
-        throw new ResourceNotFoundException(
-          'Corrida de analizador no encontrada',
-          { analyzerRunId },
+      const found = await this.repo.findAnalyzerRun(tx, analyzerRunId);
+      this.scope.assertInTenant(
+        found,
+        found?.custodianTenantId,
+        'Corrida de analizador no encontrada',
+      );
+
+      // La prueba, la observación y el archivo que el mensaje enlaza son del
+      // mismo tenant; se comprueban antes de escribir el mensaje.
+      let test: LaboratoryWorkOrderTests | null = null;
+      if (dto.laboratoryWorkOrderTestId) {
+        test = await this.repo.findWorkOrderTest(
+          tx,
+          dto.laboratoryWorkOrderTestId,
         );
+        const workOrder = test
+          ? await this.repo.findWorkOrder(tx, test.laboratoryWorkOrderId)
+          : null;
+        this.scope.assertInTenant(
+          test,
+          workOrder?.custodianTenantId,
+          'Prueba de la orden de trabajo no encontrada',
+        );
+      }
+      if (dto.mappedObservationId) {
+        await this.scope.observation(tx, dto.mappedObservationId);
+      }
+      if (dto.rawMessageFileId) {
+        await this.scope.file(tx, dto.rawMessageFileId);
+      }
 
       // Idempotencia por (run, message_control_id).
       if (dto.messageControlId) {
@@ -221,18 +255,12 @@ export class DiagnosticsLabService {
       await tx.flush();
 
       // Si el mensaje mapea a una prueba, la marca con resultado preliminar.
-      if (dto.laboratoryWorkOrderTestId) {
-        const test = await this.repo.findWorkOrderTest(
-          tx,
-          dto.laboratoryWorkOrderTestId,
-        );
-        if (test) {
-          test.statusConceptId = DIAG.TEST_PRELIMINARY;
-          test.observationId = dto.mappedObservationId ?? test.observationId;
-          test.completedAt = new Date();
-          touch(test, actor.id);
-          await tx.flush();
-        }
+      if (test) {
+        test.statusConceptId = DIAG.TEST_PRELIMINARY;
+        test.observationId = dto.mappedObservationId ?? test.observationId;
+        test.completedAt = new Date();
+        touch(test, actor.id);
+        await tx.flush();
       }
 
       return { id: message.id, status: message.validationStatusConceptId };
@@ -243,7 +271,7 @@ export class DiagnosticsLabService {
   async verifyResult(
     observationId: string,
     dto: VerifyResultDto,
-    _actor: AuthenticatedUser,
+    actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
     this.logger.info(
       {
@@ -253,14 +281,10 @@ export class DiagnosticsLabService {
       },
       'Verifying result',
     );
+    const tenantId = this.scope.activeTenantFor(dto.custodianTenantId);
     return this.em.transactional(async (tx) => {
-      const tenantId = dto.custodianTenantId;
-      if (!tenantId) {
-        throw new PreconditionFailedException(
-          'Falta el tenant custodio de la verificación',
-          {},
-        );
-      }
+      // La observación verificada es del tenant activo.
+      await this.scope.observation(tx, observationId);
       const levelConceptId =
         dto.level === 'MEDICAL'
           ? DIAG.VERIFICATION_MEDICAL
@@ -272,7 +296,10 @@ export class DiagnosticsLabService {
         verifiableId: observationId,
         verificationLevelConceptId: levelConceptId,
         resultConceptId: dto.resultConceptId ?? DIAG.VERIFICATION_ACCEPTED,
-        verifiedByProfileId: dto.verifiedByProfileId,
+        verifiedByProfileId: this.scope.authorFor(
+          actor,
+          dto.verifiedByProfileId,
+        ),
         verifiedAt: new Date(),
         verificationComment: dto.verificationComment,
         previousVerificationId: dto.previousVerificationId,

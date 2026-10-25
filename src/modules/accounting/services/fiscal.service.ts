@@ -4,13 +4,13 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { ACCT } from '../accounting.concepts';
 import { AccountingErrorReason } from '../accounting.error-reasons';
 import { FiscalRepository } from '../repositories';
+import { AccountingScopeService } from './accounting-scope.service';
 import {
   CreateFiscalYearDto,
   LockPeriodDto,
@@ -30,11 +30,13 @@ export class FiscalService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param fiscalRepo - Valor de fiscal repo requerido por la operación.
+   * @param scope - Política de alcance de tenant (ACC-01).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly fiscalRepo: FiscalRepository,
+    private readonly scope: AccountingScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(FiscalService.name);
@@ -54,6 +56,7 @@ export class FiscalService {
       'Opening fiscal year',
     );
     return this.em.transactional(async (tx) => {
+      await this.scope.practice(dto.practiceId);
       const clash = await this.fiscalRepo.findYearByCode(
         tx,
         dto.practiceId,
@@ -118,16 +121,8 @@ export class FiscalService {
       'Locking fiscal period',
     );
     return this.em.transactional(async (tx) => {
-      const period = await this.fiscalRepo.findPeriodById(tx, periodId);
-      if (!period) {
-        throw new ResourceNotFoundException(
-          'Periodo fiscal no encontrado',
-          {
-            periodId,
-          },
-          AccountingErrorReason.FISCAL_PERIOD_NOT_FOUND,
-        );
-      }
+      // ACC-01: el periodo es de un ejercicio de una práctica del tenant activo.
+      const period = await this.scope.periodInTenant(tx, periodId);
       if (period.statusConceptId !== ACCT.PERIOD_OPEN) {
         throw new PreconditionFailedException(
           'El periodo no está ABIERTO',

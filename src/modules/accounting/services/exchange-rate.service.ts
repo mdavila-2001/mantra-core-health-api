@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { touch, type AuthenticatedUser } from '../../../common';
+import {
+  roleAuthorizesInTenant,
+  touch,
+  type AuthenticatedUser,
+} from '../../../common';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
+import { AccountingErrorReason } from '../accounting.error-reasons';
 import { ExchangeRateRepository } from '../repositories';
 import { RegisterExchangeRateDto, ExchangeRateResponseDto } from '../dto';
 
@@ -9,6 +15,12 @@ import { RegisterExchangeRateDto, ExchangeRateResponseDto } from '../dto';
  * UC-16-14: registra (upsert) el tipo de cambio de un par de monedas para una
  * fecha. Si ya existe una tasa para `(from, to, validOn)`, la actualiza; en caso
  * contrario la crea. La consume UC-16-01 para `fx_rate`/`amount_base`.
+ *
+ * `accounting.exchange_rates` no lleva `tenant_id` ni práctica: es una tabla de
+ * plataforma compartida por todas las organizaciones. Por eso sólo la escribe un
+ * actor de plataforma (`SUPERADMIN` o `SYSTEM`); un administrador de tenant
+ * sobrescribiría la tasa que usan los demás (ACC-01). Aislar la tasa por tenant
+ * exige una columna `tenant_id` en el modelo.
  */
 @Injectable()
 export class ExchangeRateService {
@@ -38,6 +50,7 @@ export class ExchangeRateService {
     dto: RegisterExchangeRateDto,
     actor: AuthenticatedUser,
   ): Promise<ExchangeRateResponseDto> {
+    this.assertPlatformActor(actor);
     this.logger.info(
       {
         operation: 'accounting.fx.register',
@@ -85,5 +98,25 @@ export class ExchangeRateService {
         created: true,
       };
     });
+  }
+
+  /**
+   * Exige un actor de plataforma: la tabla de tipos de cambio es global.
+   *
+   * @param actor - Usuario autenticado que registra la tasa.
+   * @throws InsufficientRoleException (403) si el actor está acotado a un tenant.
+   */
+  private assertPlatformActor(actor: AuthenticatedUser): void {
+    if (
+      actor.roles.includes('SUPERADMIN') ||
+      roleAuthorizesInTenant(actor, 'SYSTEM', undefined)
+    ) {
+      return;
+    }
+    throw new InsufficientRoleException(
+      'El tipo de cambio es un dato de plataforma',
+      undefined,
+      AccountingErrorReason.EXCHANGE_RATE_PLATFORM_ONLY,
+    );
   }
 }

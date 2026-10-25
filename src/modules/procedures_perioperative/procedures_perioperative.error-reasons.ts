@@ -8,6 +8,12 @@
 export enum ProceduresPerioperativeErrorReason {
   // --- Caso quirúrgico: existencia y estado ---
   CASE_NOT_FOUND = 'CASE_NOT_FOUND',
+  /**
+   * El caso pedido por uuid no existe o es de otro tenant. Los dos casos
+   * responden igual: distinguirlos confirmaría que el uuid existe en otra
+   * organización.
+   */
+  PERIOP_CASE_NOT_FOUND = 'PERIOP_CASE_NOT_FOUND',
   CASE_CANCELLED = 'CASE_CANCELLED',
   CASE_ALREADY_CANCELLED = 'CASE_ALREADY_CANCELLED',
   CASE_NOT_IN_PROGRESS = 'CASE_NOT_IN_PROGRESS',

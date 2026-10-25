@@ -3,18 +3,20 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { IDA } from '../identity_assurance.concepts';
 import {
   IdentityManualReviewCasesRepository,
-  IdentityVerificationCasesRepository,
   IdentityFraudSignalsRepository,
 } from '../repositories';
 import { ReviewDecisionDto, ReviewDecisionResponseDto } from '../dto';
 import { IdentityChecksService } from './identity-checks.service';
+import { IdentityCaseScope } from './identity-case-scope.service';
+import { IdentityAssuranceErrorReason } from '../identity_assurance.error-reasons';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 
 /**
  * UC-27-09: resolución de una revisión manual. La decisión del revisor lleva el
@@ -27,17 +29,17 @@ export class IdentityManualReviewService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param reviewRepo - Valor de review repo requerido por la operación.
-   * @param casesRepo - Valor de cases repo requerido por la operación.
    * @param fraudRepo - Valor de fraud repo requerido por la operación.
    * @param checksService - Cierra los checks y emite la aserción al aprobar.
+   * @param scope - Alcance por tenant de los casos.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly reviewRepo: IdentityManualReviewCasesRepository,
-    private readonly casesRepo: IdentityVerificationCasesRepository,
     private readonly fraudRepo: IdentityFraudSignalsRepository,
     private readonly checksService: IdentityChecksService,
+    private readonly scope: IdentityCaseScope,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IdentityManualReviewService.name);
@@ -58,12 +60,27 @@ export class IdentityManualReviewService {
       },
       'Deciding manual review',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const review = await this.reviewRepo.findById(tx, reviewId);
-      if (!review)
-        throw new ResourceNotFoundException('Revisión manual no encontrada', {
-          reviewId,
-        });
+      // La revisión no lleva tenant: lo hereda del sujeto de su caso. Ajena e
+      // inexistente responden igual y la decisión no se registra.
+      const found = await this.reviewRepo.findById(tx, reviewId);
+      const ownCase = found
+        ? await this.scope.findAuthorizedCase(
+            tx,
+            found.identityVerificationCaseId,
+            tenantId,
+          )
+        : null;
+      const review = assertResourceInTenant(
+        found,
+        ownCase ? tenantId : null,
+        tenantId,
+        {
+          message: 'Revisión manual no encontrada',
+          reason: IdentityAssuranceErrorReason.REVIEW_NOT_AVAILABLE,
+        },
+      );
       if (review.statusConceptId !== IDA.REVIEW_OPEN) {
         throw new PreconditionFailedException('La revisión ya fue decidida', {
           reviewId,
@@ -77,18 +94,10 @@ export class IdentityManualReviewService {
         );
       }
 
-      const kase = await this.casesRepo.findById(
-        tx,
-        review.identityVerificationCaseId,
-      );
-      if (!kase) {
-        throw new ResourceNotFoundException(
-          'Caso de verificación no encontrado',
-          {
-            caseId: review.identityVerificationCaseId,
-          },
-        );
-      }
+      const kase = assertResourceInTenant(ownCase, tenantId, tenantId, {
+        message: 'Caso de verificación no encontrado',
+        reason: IdentityAssuranceErrorReason.CASE_NOT_AVAILABLE,
+      });
 
       const approved = dto.decision === 'APPROVED';
       const now = new Date();

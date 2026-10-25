@@ -143,7 +143,11 @@ export async function bootstrapWorker(
   // instancia— y cerrarla ahí la dejaría sin respuesta en el peor momento.
   // Como el servidor está `unref`, no es motivo para que el proceso siga vivo:
   // muere cuando ya no queda nada más pendiente, que es lo correcto.
-  startWorkerHealthServer({ port: env.healthPort, logger });
+  startWorkerHealthServer({
+    port: env.healthPort,
+    host: env.healthHost,
+    logger,
+  });
 
   // Aviso explícito cuando el emulador está activo. En producción esto ya no se
   // alcanza (el proceso habría abortado antes), pero en desarrollo es fácil

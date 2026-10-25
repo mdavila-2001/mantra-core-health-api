@@ -216,6 +216,21 @@ export class JournalRepository {
   }
 
   /**
+   * Una línea del mayor por id, sin acotar: quien la usa la contrasta contra el
+   * tenant activo a través de la práctica de su asiento.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador de la línea.
+   * @returns La línea, o `null` si no existe.
+   */
+  findLedgerEntryById(
+    em: EntityManager,
+    id: string,
+  ): Promise<LedgerEntries | null> {
+    return em.findOne(LedgerEntries, { id });
+  }
+
+  /**
    * Obtiene find by transaction number.
    *
    * @param em - Contexto de persistencia o transacción activa.

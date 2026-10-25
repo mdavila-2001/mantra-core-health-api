@@ -9,7 +9,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { QaCatalogService, QaRunsService } from '../services';
 import {
   CreateEnvironmentDto,
@@ -53,6 +58,11 @@ export class QaLabController {
   ) {}
 
   /** UC-36-01. */
+  @Audited({
+    action: 'QA_TEST_ENVIRONMENT_CREATED',
+    entity: 'test_environment',
+    entityId: 'result.id',
+  })
   @Post('environments')
   @Roles('QA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -69,6 +79,11 @@ export class QaLabController {
   }
 
   /** UC-36-02. */
+  @Audited({
+    action: 'QA_TEST_CASE_CREATED',
+    entity: 'test_case',
+    entityId: 'result.id',
+  })
   @Post('suites/:suiteId/cases')
   @Roles('QA_ADMIN', 'QA_ENGINEER')
   @HttpCode(HttpStatus.CREATED)
@@ -85,6 +100,11 @@ export class QaLabController {
   }
 
   /** UC-36-03. */
+  @Audited({
+    action: 'QA_TEST_SUITE_PUBLISHED',
+    entity: 'test_suite',
+    entityId: 'param:suiteId',
+  })
   @Post('suites/:suiteId/publish')
   @Roles('QA_ADMIN', 'QA_ENGINEER')
   @HttpCode(HttpStatus.OK)
@@ -102,6 +122,11 @@ export class QaLabController {
   }
 
   /** UC-36-04. */
+  @Audited({
+    action: 'QA_TEST_RUN_CREATED',
+    entity: 'test_run',
+    entityId: 'result.id',
+  })
   @Post('runs')
   @Roles('QA_ADMIN', 'QA_ENGINEER', 'SYSTEM')
   @HttpCode(HttpStatus.CREATED)
@@ -118,6 +143,11 @@ export class QaLabController {
   }
 
   /** UC-36-05. */
+  @Audited({
+    action: 'QA_TEST_CASE_EXECUTED',
+    entity: 'test_case_result',
+    entityId: 'result.id',
+  })
   @Post('runs/:runId/cases/:caseId/execute')
   @Roles('SYSTEM', 'QA_ENGINEER')
   @HttpCode(HttpStatus.CREATED)
@@ -136,6 +166,11 @@ export class QaLabController {
   }
 
   /** UC-36-06. */
+  @Audited({
+    action: 'QA_CASE_RESULT_EVALUATED',
+    entity: 'test_case_result',
+    entityId: 'param:resultId',
+  })
   @Post('case-results/:resultId/evaluate')
   @Roles('SYSTEM', 'QA_ENGINEER')
   @HttpCode(HttpStatus.OK)
@@ -152,6 +187,11 @@ export class QaLabController {
   }
 
   /** UC-36-07. */
+  @Audited({
+    action: 'QA_TEST_RUN_FINALIZED',
+    entity: 'test_run',
+    entityId: 'param:runId',
+  })
   @Post('runs/:runId/finalize')
   @Roles('SYSTEM', 'QA_ENGINEER')
   @HttpCode(HttpStatus.OK)
@@ -167,6 +207,11 @@ export class QaLabController {
   }
 
   /** UC-36-08. */
+  @Audited({
+    action: 'QA_RUN_ARTIFACT_ATTACHED',
+    entity: 'run_artifact',
+    entityId: 'result.id',
+  })
   @Post('runs/:runId/artifacts')
   @Roles('SYSTEM', 'QA_ENGINEER')
   @HttpCode(HttpStatus.CREATED)
@@ -180,6 +225,11 @@ export class QaLabController {
   }
 
   /** UC-36-09. */
+  @Audited({
+    action: 'QA_DEFECT_REGISTERED',
+    entity: 'test_defect',
+    entityId: 'result.id',
+  })
   @Post('defects')
   @Roles('SYSTEM', 'QA_ENGINEER', 'QA_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -196,6 +246,11 @@ export class QaLabController {
   }
 
   /** UC-36-10. */
+  @Audited({
+    action: 'QA_DEFECT_TRIAGED',
+    entity: 'test_defect',
+    entityId: 'param:defectId',
+  })
   @Patch('defects/:defectId')
   @Roles('QA_ADMIN', 'QA_ENGINEER')
   @HttpCode(HttpStatus.OK)
@@ -212,6 +267,11 @@ export class QaLabController {
   }
 
   /** UC-36-11. */
+  @Audited({
+    action: 'QA_TEST_SCHEDULE_CREATED',
+    entity: 'test_schedule',
+    entityId: 'result.id',
+  })
   @Post('schedules')
   @Roles('QA_ADMIN', 'QA_ENGINEER')
   @HttpCode(HttpStatus.CREATED)
@@ -224,6 +284,11 @@ export class QaLabController {
   }
 
   /** UC-36-12. */
+  @Audited({
+    action: 'QA_TEST_RUN_RELEASE_LINKED',
+    entity: 'test_run',
+    entityId: 'param:runId',
+  })
   @Post('runs/:runId/link-release')
   @Roles('RELEASE_MANAGER', 'QA_ADMIN')
   @HttpCode(HttpStatus.OK)

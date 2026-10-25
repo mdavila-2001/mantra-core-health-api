@@ -115,6 +115,22 @@ export function parsePubmedArticle(xml) {
   };
 }
 
+/**
+ * Una página de efetch → artículos (con MeSH) y cantidad de libros de Bookshelf
+ * (`PubmedBookArticle`, sin indexación de artículo: se cuentan, no se guardan).
+ * `artículos + libros` debe igualar lo que prometió la búsqueda; si no, la
+ * respuesta llegó truncada (E-utilities responde 200 con el cuerpo cortado).
+ */
+export function parsePubmedPage(xml) {
+  const records = [
+    ...xml.matchAll(/<PubmedArticle>([\s\S]*?)<\/PubmedArticle>/g),
+  ]
+    .map((m) => parsePubmedArticle(m[1]))
+    .filter(Boolean);
+  const bookCount = (xml.match(/<PubmedBookArticle>/g) ?? []).length;
+  return { records, bookCount };
+}
+
 export function* pubmedRecords(dir) {
   for (const f of readdirSync(dir)
     .filter((x) => x.endsWith('.json.gz'))

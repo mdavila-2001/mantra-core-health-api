@@ -14,7 +14,9 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 
 const actor = { id: 'user-1', roles: ['SURGEON'] };
 const CASE = '11111111-1111-1111-1111-111111111111';
@@ -26,6 +28,45 @@ const REPORT = '66666666-6666-6666-6666-666666666666';
 const STAY = '77777777-7777-7777-7777-777777777777';
 const PROFILE = '88888888-8888-8888-8888-888888888888';
 const SPACE = '99999999-9999-9999-9999-999999999999';
+const TENANT_A = '11111111-1111-1111-1111-111111111111';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+/**
+ * Devuelve el servicio de modo que cada llamada corra con `tenantId` como
+ * tenant activo, igual que lo deja el `TenantContextInterceptor`.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenantId - Tenant del contexto de la petición.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenant<T extends object>(service: T, tenantId: string): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenantId, () => value.apply(target, args));
+    },
+  });
+}
+
+/**
+ * Mock de una consulta de casos por id. Los casos de prueba son del tenant
+ * activo (`TENANT_A`) salvo que el propio caso declare otro `custodianTenantId`.
+ *
+ * @returns Un `jest.fn` cuyo `mockResolvedValue` sella el tenant del caso.
+ */
+function caseLookupMock(): any {
+  const lookup = mockFn();
+  const resolve = lookup.mockResolvedValue.bind(lookup);
+  lookup.mockResolvedValue = (row: any) =>
+    resolve(
+      row && typeof row === 'object' && row.custodianTenantId === undefined
+        ? Object.assign(row, { custodianTenantId: TENANT_A })
+        : row,
+    );
+  return lookup;
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -34,7 +75,7 @@ const SPACE = '99999999-9999-9999-9999-999999999999';
 function build() {
   const tx = { flush: mockFn() };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const intraopRepo = {
+  const intraopRepo: Record<string, any> = {
     createStep: mockFn(),
     findStepById: mockFn(),
     findStepForUpdate: mockFn(),
@@ -56,6 +97,10 @@ function build() {
     findIdentifiersByImplants: mockFn().mockResolvedValue([]),
     createComplication: mockFn(),
     createPacuStay: mockFn(),
+    // Sin bloqueo: por defecto devuelve la misma estancia que la lectura bloqueada.
+    findPacuStayById: mockFn((...args: unknown[]) =>
+      intraopRepo.findPacuStayForUpdate(...args),
+    ),
     findPacuStayForUpdate: mockFn(),
     findPacuStayByCase: mockFn(),
     createPacuAssessment: mockFn(),
@@ -63,26 +108,46 @@ function build() {
     createPostoperativeOrder: mockFn(),
     createFollowup: mockFn(),
   };
-  const casesRepo = {
-    findCaseForUpdate: mockFn(),
+  const casesRepo: Record<string, any> = {
+    findCaseForUpdate: caseLookupMock(),
+    // Sin bloqueo: por defecto devuelve el mismo caso que la lectura bloqueada.
+    findCaseById: mockFn((...args: unknown[]) =>
+      casesRepo.findCaseForUpdate(...args),
+    ),
     createStatusHistory: mockFn(),
     createMilestone: mockFn(),
     createLocation: mockFn(),
     findOpenLocation: mockFn(),
   };
+  // Por defecto el caso existe y es del tenant activo; los tests que prueban su
+  // ausencia o un caso ajeno lo sobreescriben.
+  casesRepo.findCaseForUpdate.mockResolvedValue({ id: CASE });
   // El alta del procedimiento cuando el informe llega por código.
   const procedures = {
     create: mockFn().mockResolvedValue({ id: 'proc-nuevo' }),
   };
+  const receivedServices = {
+    projectCompletedCase: mockFn().mockResolvedValue(undefined),
+  };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new PeriopIntraopService(
     em as any,
-    intraopRepo,
+    intraopRepo as any,
     casesRepo as any,
     procedures as any,
+    receivedServices as any,
     logger as any,
   );
-  return { service, tx, intraopRepo, casesRepo, procedures, logger };
+  return {
+    service: inTenant(service, TENANT_A),
+    raw: service,
+    tx,
+    intraopRepo,
+    casesRepo,
+    procedures,
+    receivedServices,
+    logger,
+  };
 }
 
 /**
@@ -467,6 +532,43 @@ describe('PeriopIntraopService', () => {
       );
     });
 
+    it('signing the report projects the completed case to received services, with the reported procedure', async () => {
+      const d = build();
+      d.intraopRepo.findReportForUpdate.mockResolvedValue({
+        id: REPORT,
+        procedureCaseId: CASE,
+        procedureId: PROCEDURE,
+        statusConceptId: CONCEPTS.OPERATIVE_REPORT_DRAFT,
+      });
+      const surgicalCase = caseInProgress({ primaryProcedureId: undefined });
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(surgicalCase);
+
+      await d.service.signReport(CASE, REPORT, { signatureId: PROFILE }, actor);
+
+      expect(d.receivedServices.projectCompletedCase).toHaveBeenCalledWith(
+        d.tx,
+        surgicalCase,
+        actor.id,
+        PROCEDURE,
+      );
+    });
+
+    it('signing a report on an already completed case does not project it again', async () => {
+      const d = build();
+      d.intraopRepo.findReportForUpdate.mockResolvedValue({
+        id: REPORT,
+        procedureCaseId: CASE,
+        statusConceptId: CONCEPTS.OPERATIVE_REPORT_DRAFT,
+      });
+      d.casesRepo.findCaseForUpdate.mockResolvedValue(
+        caseInProgress({ statusConceptId: CONCEPTS.CASE_COMPLETED }),
+      );
+
+      await d.service.signReport(CASE, REPORT, { signatureId: PROFILE }, actor);
+
+      expect(d.receivedServices.projectCompletedCase).not.toHaveBeenCalled();
+    });
+
     it('rejects signing twice', async () => {
       const d = build();
       d.intraopRepo.findReportForUpdate.mockResolvedValue({
@@ -654,6 +756,193 @@ describe('PeriopIntraopService', () => {
           actor as any,
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+});
+
+/** Aserciones del 404 uniforme de PERIOP-01. */
+async function expectNotFound(
+  promise: Promise<unknown>,
+  message: string,
+  reason: string,
+) {
+  const error = await promise.then(
+    () => null,
+    (e: unknown) => e,
+  );
+  expect(error).toBeInstanceOf(ResourceNotFoundException);
+  const exception = error as ResourceNotFoundException;
+  expect(exception.getStatus()).toBe(404);
+  expect(exception.message).toBe(message);
+  expect(exception.reason).toBe(reason);
+  return exception;
+}
+
+describe('PeriopIntraopService · alcance de tenant (PERIOP-01)', () => {
+  const CASE_REASON = ProceduresPerioperativeErrorReason.PERIOP_CASE_NOT_FOUND;
+  const foreignCase = (): any => ({
+    id: CASE,
+    custodianTenantId: TENANT_B,
+    statusConceptId: CONCEPTS.SURGICAL_CASE_IN_PROGRESS,
+  });
+
+  it('registrar un paso operatorio en el caso de otro tenant: 404 uniforme, sin persistir', async () => {
+    const d = build();
+    d.casesRepo.findCaseForUpdate.mockResolvedValue(foreignCase());
+
+    const foreign = await expectNotFound(
+      d.service.createStep(
+        CASE,
+        { stepCodeConceptId: SITE, description: 'Incisión' } as any,
+        actor,
+      ),
+      'Caso quirúrgico no encontrado',
+      CASE_REASON,
+    );
+    d.casesRepo.findCaseForUpdate.mockResolvedValue(null);
+    const missing = await expectNotFound(
+      d.service.createStep(
+        CASE,
+        { stepCodeConceptId: SITE, description: 'Incisión' } as any,
+        actor,
+      ),
+      'Caso quirúrgico no encontrado',
+      CASE_REASON,
+    );
+
+    expect(foreign.getResponse()).toEqual(missing.getResponse());
+    expect(d.intraopRepo.createStep).not.toHaveBeenCalled();
+    expect(d.casesRepo.findCaseForUpdate).toHaveBeenCalledWith(
+      d.tx,
+      CASE,
+      TENANT_A,
+    );
+  });
+
+  it('sin tenant en el contexto no se registra nada', async () => {
+    const d = build();
+
+    await expect(
+      d.raw.createStep(
+        CASE,
+        { stepCodeConceptId: SITE, description: 'Incisión' } as any,
+        actor,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.casesRepo.findCaseForUpdate).not.toHaveBeenCalled();
+  });
+
+  it('firmar el informe de un caso de otro tenant: 404 uniforme; el informe de B no cambia', async () => {
+    const d = build();
+    const report: any = {
+      id: REPORT,
+      procedureCaseId: CASE,
+      statusConceptId: CONCEPTS.OPERATIVE_REPORT_DRAFT,
+    };
+    d.intraopRepo.findReportForUpdate.mockResolvedValue(report);
+    d.casesRepo.findCaseForUpdate.mockResolvedValue(foreignCase());
+
+    await expectNotFound(
+      d.service.signReport(CASE, REPORT, { signatureId: PROFILE }, actor),
+      'Caso quirúrgico no encontrado',
+      CASE_REASON,
+    );
+
+    expect(report.statusConceptId).toBe(CONCEPTS.OPERATIVE_REPORT_DRAFT);
+    expect(d.intraopRepo.findReportForUpdate).not.toHaveBeenCalled();
+  });
+
+  it('un informe de un caso de otro tenant no se revela como «de otro caso»: 404 del informe', async () => {
+    const d = build();
+    d.casesRepo.findCaseForUpdate.mockResolvedValue({ id: CASE });
+    d.casesRepo.findCaseById.mockResolvedValue(foreignCase());
+    d.intraopRepo.findReportForUpdate.mockResolvedValue({
+      id: REPORT,
+      procedureCaseId: 'caso-de-b',
+      statusConceptId: CONCEPTS.OPERATIVE_REPORT_DRAFT,
+    });
+
+    await expectNotFound(
+      d.service.signReport(CASE, REPORT, { signatureId: PROFILE }, actor),
+      'Reporte operatorio no encontrado',
+      ProceduresPerioperativeErrorReason.REPORT_NOT_FOUND,
+    );
+  });
+
+  describe('estancia en recuperación (PACU) por UUID', () => {
+    const stayOfCase = (caseId: string): any => ({
+      id: STAY,
+      procedureCaseId: caseId,
+      statusConceptId: CONCEPTS.PACU_IN_RECOVERY,
+    });
+
+    it('valorar la estancia de un caso de otro tenant: 404 uniforme, igual que inexistente; no bloquea ni persiste', async () => {
+      const d = build();
+      d.intraopRepo.findPacuStayById.mockResolvedValue(stayOfCase('caso-de-b'));
+      d.casesRepo.findCaseById.mockResolvedValue(foreignCase());
+
+      const foreign = await expectNotFound(
+        d.service.recordPacuAssessment(
+          STAY,
+          { assessedByProfileId: PROFILE, aldreteScore: 9 } as any,
+          actor,
+        ),
+        'Estancia en recuperación no encontrada',
+        ProceduresPerioperativeErrorReason.PACU_STAY_NOT_FOUND,
+      );
+      d.intraopRepo.findPacuStayById.mockResolvedValue(null);
+      const missing = await expectNotFound(
+        d.service.recordPacuAssessment(
+          STAY,
+          { assessedByProfileId: PROFILE, aldreteScore: 9 } as any,
+          actor,
+        ),
+        'Estancia en recuperación no encontrada',
+        ProceduresPerioperativeErrorReason.PACU_STAY_NOT_FOUND,
+      );
+
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(d.intraopRepo.findPacuStayForUpdate).not.toHaveBeenCalled();
+      expect(d.intraopRepo.createPacuAssessment).not.toHaveBeenCalled();
+    });
+
+    it('dar de alta la estancia de un caso de otro tenant: 404 uniforme; el estado de B no cambia', async () => {
+      const d = build();
+      const stay = stayOfCase('caso-de-b');
+      d.intraopRepo.findPacuStayById.mockResolvedValue(stay);
+      d.casesRepo.findCaseById.mockResolvedValue(foreignCase());
+
+      await expectNotFound(
+        d.service.dischargeFromPacu(
+          STAY,
+          { destination: 'WARD' } as any,
+          actor,
+        ),
+        'Estancia en recuperación no encontrada',
+        ProceduresPerioperativeErrorReason.PACU_STAY_NOT_FOUND,
+      );
+
+      expect(stay.statusConceptId).toBe(CONCEPTS.PACU_IN_RECOVERY);
+    });
+
+    it('la estancia de un caso propio sí se valora', async () => {
+      const d = build();
+      const stay = stayOfCase(CASE);
+      d.intraopRepo.findPacuStayById.mockResolvedValue(stay);
+      d.casesRepo.findCaseById.mockResolvedValue({
+        id: CASE,
+        custodianTenantId: TENANT_A,
+      });
+      d.intraopRepo.findPacuStayForUpdate.mockResolvedValue(stay);
+      d.intraopRepo.createPacuAssessment.mockReturnValue({ id: 'assess-1' });
+
+      const res = await d.service.recordPacuAssessment(
+        STAY,
+        { assessedByProfileId: PROFILE, aldreteScore: 9 } as any,
+        actor,
+      );
+
+      expect(res.meetsDischargeCriteria).toBe(true);
     });
   });
 });

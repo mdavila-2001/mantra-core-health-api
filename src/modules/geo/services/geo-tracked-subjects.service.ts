@@ -5,6 +5,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -26,6 +27,7 @@ import {
   SUBJECT_TYPE_CONCEPT_BY_CODE,
   NETWORK_CONCEPT_BY_CODE,
 } from '../geo.concepts';
+import { assertSubjectInTenant } from '../geo-scope';
 
 /** Convierte un número opcional a la representación `numeric` (string) del ORM. */
 const num = (v?: number): string | undefined =>
@@ -70,6 +72,9 @@ export class GeoTrackedSubjectsService {
       { operation: 'geo.subject.enroll', actorId: actor.id },
       'Enrolling tracked subject',
     );
+    // El tenant sale del contexto autenticado, nunca del cuerpo: el interceptor
+    // ya rechaza un `dto.tenantId` contradictorio y acá se ignora el declarado.
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
       const subjectTypeConceptId =
         SUBJECT_TYPE_CONCEPT_BY_CODE[dto.subjectType ?? 'PERSON'];
@@ -79,7 +84,7 @@ export class GeoTrackedSubjectsService {
         subjectTypeConceptId,
         dto.subjectId,
         GEO.SUBJECT_ACTIVE,
-        dto.tenantId,
+        tenantId,
       );
       if (clash) {
         this.logger.warn(
@@ -95,7 +100,7 @@ export class GeoTrackedSubjectsService {
         subjectTypeConceptId,
         subjectId: dto.subjectId,
         deviceId: dto.deviceId,
-        tenantId: dto.tenantId,
+        tenantId,
         stateConceptId: GEO.SUBJECT_ACTIVE,
         actorUserId: actor.id,
       });
@@ -129,12 +134,12 @@ export class GeoTrackedSubjectsService {
       },
       'Ingesting location pings',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const subject = await this.subjectsRepo.findById(tx, trackedSubjectId);
-      if (!subject)
-        throw new ResourceNotFoundException('Sujeto rastreado no encontrado', {
-          trackedSubjectId,
-        });
+      const subject = assertSubjectInTenant(
+        await this.subjectsRepo.findById(tx, trackedSubjectId),
+        tenantId,
+      );
 
       // Tras una revocación de consentimiento el sujeto queda SUSPENDED: rechaza ingesta.
       if (subject.stateConceptId !== GEO.SUBJECT_ACTIVE) {
@@ -191,13 +196,13 @@ export class GeoTrackedSubjectsService {
       { operation: 'geo.subject.last-position', trackedSubjectId },
       'Reading last known position',
     );
+    const tenantId = requireTenantId();
     const em = this.em.fork();
 
-    const subject = await this.subjectsRepo.findById(em, trackedSubjectId);
-    if (!subject)
-      throw new ResourceNotFoundException('Sujeto rastreado no encontrado', {
-        trackedSubjectId,
-      });
+    assertSubjectInTenant(
+      await this.subjectsRepo.findById(em, trackedSubjectId),
+      tenantId,
+    );
 
     const ping = await this.pingsRepo.findLastBySubject(em, trackedSubjectId);
     if (!ping) {
@@ -231,12 +236,12 @@ export class GeoTrackedSubjectsService {
       },
       'Revoking location consent',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const subject = await this.subjectsRepo.findById(tx, trackedSubjectId);
-      if (!subject)
-        throw new ResourceNotFoundException('Sujeto rastreado no encontrado', {
-          trackedSubjectId,
-        });
+      const subject = assertSubjectInTenant(
+        await this.subjectsRepo.findById(tx, trackedSubjectId),
+        tenantId,
+      );
 
       if (subject.stateConceptId === GEO.SUBJECT_SUSPENDED) {
         throw new PreconditionFailedException(

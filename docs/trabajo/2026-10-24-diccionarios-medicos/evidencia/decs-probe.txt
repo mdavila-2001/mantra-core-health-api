@@ -1,8 +1,0 @@
-000 https://decs.bvsalud.org/
-000 https://decs.bvsalud.org/es/
-000 https://decs.bvsalud.org/es/descarga/
-000 https://decs.bvsalud.org/en/download-decs/
-000 https://api.bvsalud.org/
-403 https://api.bvsalud.org/decs/v2/
-403 https://bvsalud.org/
-301 https://www.paho.org/

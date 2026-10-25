@@ -79,13 +79,16 @@ Solo criterios publicados, nunca palabras clave del nombre:
    fuente (CDC LIVD), clase de un esquema exclusivo de IVD (IVDR/IVDD, «Class
    N - IVD» de la TGA) y, en ANVISA, el área de interés del trámite cuando
    todas sus áreas son de diagnóstico in vitro («Dispositivos Médicos para
-   Diagnóstico in Vitro», «Produtos para diagnóstico de uso in vitro»).
+   Diagnóstico in Vitro», «Produtos para diagnóstico de uso in vitro»);
+   la lista IVD de CDSCO, la categoría 体外诊断试剂 de NMPA, los grupos de
+   reactivos de diagnóstico de INVIMA y fuentes que solo listan IVD (OMS PQ,
+   SAHPRA COVID-19).
 6. **Mismo modelo**: una fila sin decisión entra si es del mismo fabricante,
    marca y modelo (o UDI-DI) que una fila de diagnóstico.
 
 No son criterio: las categorías A, B y C de la TFDA (el 醫療器材分類分級管理辦法
-las agrupa por especialidad, art. 2, sin decir que sean IVD) ni el 類別 de la
-JMDN.
+las agrupa por especialidad, art. 2, sin decir que sean IVD), el 類別 de la
+JMDN ni las especialidades de HSA.
 
 Lo que no se puede decidir (`diagnostic: null`) queda en la taxonomía y en el
 reporte, fuera del catálogo, para revisión.

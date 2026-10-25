@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '../../../common';
+import { Audited, CurrentUser } from '../../../common';
 import type { AuthenticatedUser } from '../../../common';
 import { ContactPointsService } from '../services';
 import {
@@ -30,6 +30,11 @@ export class CommonContactPointsController {
   constructor(private readonly contactPointsService: ContactPointsService) {}
 
   /** UC-02-02: registra un punto de contacto. */
+  @Audited({
+    action: 'CONTACT_POINT_CREATED',
+    entity: 'contact_point',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un punto de contacto (UC-02-02)' })
@@ -41,6 +46,11 @@ export class CommonContactPointsController {
   }
 
   /** UC-02-03: verifica un punto de contacto. */
+  @Audited({
+    action: 'CONTACT_POINT_VERIFIED',
+    entity: 'contact_point',
+    entityId: 'param:id',
+  })
   @Post(':id/verify')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verificar un punto de contacto (UC-02-03)' })

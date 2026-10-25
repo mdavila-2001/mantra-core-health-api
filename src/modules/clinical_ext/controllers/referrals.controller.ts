@@ -85,8 +85,9 @@ export class ReferralsController {
   @ApiOperation({ summary: 'Listar derivaciones de un paciente' })
   listByPatient(
     @Query('patientProfileId', ParseUUIDPipe) patientProfileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ) {
-    return this.referralsService.listByPatient(patientProfileId);
+    return this.referralsService.listByPatient(patientProfileId, actor);
   }
 
   /**

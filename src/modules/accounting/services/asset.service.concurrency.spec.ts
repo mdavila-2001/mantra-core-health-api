@@ -9,6 +9,7 @@ import { AssetRepository } from '../repositories/asset.repository';
 import { ACCT } from '../accounting.concepts';
 import { Assets, AssetDepreciations } from '../entities';
 import { PreconditionFailedException } from '../../../common';
+import { buildScope, inTenant } from './accounting-scope.testing';
 
 /**
  * T26 · AC-26-5 — dos corridas de depreciación **concurrentes** sobre el mismo
@@ -151,11 +152,14 @@ function build(repo: AssetRepository) {
     generateNumber: mockFn(() => 'DEP-1'),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
-  const service = new AssetService(
-    { transactional: db.transactional } as any,
-    repo,
-    posting as any,
-    logger as any,
+  const service = inTenant(
+    new AssetService(
+      { transactional: db.transactional } as any,
+      repo,
+      posting as any,
+      buildScope().scope,
+      logger as any,
+    ),
   );
   return { db, posting, service };
 }

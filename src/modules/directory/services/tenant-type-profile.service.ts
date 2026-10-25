@@ -200,6 +200,16 @@ export class TenantTypeProfileService {
         );
       }
 
+      if (
+        (input.diagnosticUnit.branches?.length ?? 0) > 0 &&
+        unitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY
+      ) {
+        throw new PreconditionFailedException(
+          'Las sucursales sólo se declaran en una unidad de laboratorio clínico',
+          { diagnosticUnitTypeConceptId: unitTypeConceptId },
+        );
+      }
+
       const invalidModalities = (
         input.diagnosticUnit.modalityConceptIds ?? []
       ).filter((conceptId) => !isDiagnosticUnitModality(conceptId));

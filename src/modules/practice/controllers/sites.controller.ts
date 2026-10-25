@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   requireTenantId,
@@ -41,6 +42,11 @@ export class SitesController {
   ) {}
 
   /** UC-14-04. */
+  @Audited({
+    action: 'CLINICAL_UNIT_CREATED',
+    entity: 'clinical_unit',
+    entityId: 'result.id',
+  })
   @Post(':siteId/clinical-units')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -78,6 +84,11 @@ export class SitesController {
   }
 
   /** UC-14-05. */
+  @Audited({
+    action: 'CARE_SPACE_CREATED',
+    entity: 'care_space',
+    entityId: 'result.id',
+  })
   @Post(':siteId/care-spaces')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

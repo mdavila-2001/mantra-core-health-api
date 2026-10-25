@@ -1,13 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsIn,
   IsISO8601,
+  IsIn,
   IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
   MaxLength,
 } from 'class-validator';
+import {
+  BOUNDED_DECIMAL_MESSAGE,
+  BOUNDED_DECIMAL_REGEX,
+} from '../services/payment-money';
 
 /** Propósito del cobro; determina el `purpose_concept_id` del intent. */
 export type PaymentPurpose = 'INVOICE' | 'DEBT' | 'OTHER';
@@ -45,6 +50,7 @@ export class CreatePaymentIntentDto {
     example: '150.00',
   })
   @IsNumberString()
+  @Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })
   amount!: string;
 
   /**

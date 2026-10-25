@@ -16,7 +16,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import {
   ConceptMapsService,
   ConceptsService,
@@ -63,6 +68,11 @@ export class TerminologyFhirController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de expand value set conforme al contrato `Promise<ExpandValueSetResponseDto>`.
    */
+  @Audited({
+    action: 'VALUE_SET_EXPANDED',
+    entity: 'value_set',
+    entityId: 'param:id',
+  })
   @Post('ValueSet/:id/$expand')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -84,6 +94,10 @@ export class TerminologyFhirController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de translate conforme al contrato `Promise<TranslateResponseDto>`.
    */
+  @Audited({
+    action: 'CONCEPT_MAP_TRANSLATED',
+    entity: 'concept_map',
+  })
   @Post('ConceptMap/$translate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

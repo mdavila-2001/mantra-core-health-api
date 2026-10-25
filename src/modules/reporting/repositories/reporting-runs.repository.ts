@@ -158,15 +158,18 @@ export class ReportingRunsRepository {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param id - Identificador de id.
+   * @param tenantId - Si viene, el filtro por tenant va en la consulta: no se
+   * bloquea una ejecución de otro tenant.
    * @returns Resultado de find execution for update conforme al contrato `Promise<ReportExecutions | null>`.
    */
   findExecutionForUpdate(
     em: EntityManager,
     id: string,
+    tenantId?: string,
   ): Promise<ReportExecutions | null> {
     return em.findOne(
       ReportExecutions,
-      { id },
+      tenantId === undefined ? { id } : { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
@@ -297,12 +300,16 @@ export class ReportingRunsRepository {
    * Programaciones vencidas, tomadas con `FOR UPDATE SKIP LOCKED`: varios ticks
    * del cron pueden solaparse, y saltar lo que otro ya tiene tomado es lo que
    * da un disparo por ventana y no dos.
+   *
+   * @param tenantId - Si viene, sólo las programaciones de ese tenant; sin él
+   * es el barrido global del worker `SYSTEM`.
    */
   findDueSchedules(
     em: EntityManager,
     now: Date,
     activeStateConceptId: string,
     limit: number,
+    tenantId?: string,
   ): Promise<ReportSchedules[]> {
     return em.find(
       ReportSchedules,
@@ -310,6 +317,7 @@ export class ReportingRunsRepository {
         isEnabled: true,
         stateConceptId: activeStateConceptId,
         nextRunAt: { $ne: null, $lte: now },
+        ...(tenantId === undefined ? {} : { tenantId }),
       },
       {
         limit,

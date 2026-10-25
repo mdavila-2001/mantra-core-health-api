@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -10,6 +11,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { TemplatesRepository } from '../repositories';
+import { SurveysErrorReason } from '../surveys.error-reasons';
 import {
   AddQuestionDto,
   CreateTemplateDto,
@@ -148,47 +150,66 @@ export class SurveysTemplatesService {
     templateId: string,
     actor: AuthenticatedUser,
   ): Promise<TemplateCreatedDto> {
-    return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
-      const latest = await this.templatesRepo.findLatestVersion(
-        tx,
-        template.id,
-      );
-      if (!latest) {
-        throw new ResourceNotFoundException('La plantilla no tiene versiones', {
-          templateId,
-        });
-      }
-      if (latest.publicationStatusConceptId === SURVEYS.VERSION_DRAFT) {
-        throw new ConflictException(
-          'Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra',
-          { templateId, versionNumber: latest.versionNumber },
+    return this.em
+      .transactional(async (tx) => {
+        const template = await this.loadOwnedTemplate(tx, templateId, actor);
+        // Dos aperturas simultáneas leerían la misma «última versión» y
+        // numerarían igual: la plantilla se bloquea antes de leerla.
+        await this.templatesRepo.lockTemplate(tx, template.id);
+        const latest = await this.templatesRepo.findLatestVersion(
+          tx,
+          template.id,
         );
-      }
+        if (!latest) {
+          throw new ResourceNotFoundException(
+            'La plantilla no tiene versiones',
+            {
+              templateId,
+            },
+          );
+        }
+        if (latest.publicationStatusConceptId === SURVEYS.VERSION_DRAFT) {
+          throw new ConflictException(
+            'Ya hay una versión en borrador: termine de editarla o publíquela antes de abrir otra',
+            { templateId, versionNumber: latest.versionNumber },
+          );
+        }
 
-      const version = this.templatesRepo.createVersion(tx, {
-        surveyTemplateId: template.id,
-        versionNumber: latest.versionNumber + 1,
-        publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
-        responseWindowDays: latest.responseWindowDays,
-        actorUserId: actor.id,
-      });
-      await tx.flush();
+        const version = this.templatesRepo.createVersion(tx, {
+          surveyTemplateId: template.id,
+          versionNumber: latest.versionNumber + 1,
+          publicationStatusConceptId: SURVEYS.VERSION_DRAFT,
+          responseWindowDays: latest.responseWindowDays,
+          actorUserId: actor.id,
+        });
+        await tx.flush();
 
-      this.logger.info(
-        {
-          operation: 'surveys.version.createNext',
-          templateId,
+        this.logger.info(
+          {
+            operation: 'surveys.version.createNext',
+            templateId,
+            versionNumber: version.versionNumber,
+          },
+          'Survey next version opened as draft',
+        );
+        return {
+          id: template.id,
+          versionId: version.id,
           versionNumber: version.versionNumber,
-        },
-        'Survey next version opened as draft',
-      );
-      return {
-        id: template.id,
-        versionId: version.id,
-        versionNumber: version.versionNumber,
-      };
-    });
+        };
+      })
+      .catch((error: unknown) => {
+        // Si el modelo respalda `(plantilla, número de versión)`, la violación
+        // es que otra apertura ganó la carrera: un conflicto, no un 500.
+        if (error instanceof UniqueConstraintViolationException) {
+          throw new ConflictException(
+            'Otra solicitud abrió la versión siguiente; vuelva a consultar la plantilla',
+            { templateId },
+            SurveysErrorReason.VERSION_NUMBER_TAKEN,
+          );
+        }
+        throw error;
+      });
   }
 
   /** Agrega una pregunta a la versión en borrador de la plantilla. */

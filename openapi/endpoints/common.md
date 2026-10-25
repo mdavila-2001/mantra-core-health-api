@@ -136,6 +136,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AddressResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AddressResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AddressResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AddressResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AddressResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -292,6 +293,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ContactPointResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ContactPointResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ContactPointResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ContactPointResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContactPointResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -425,6 +427,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ContactPointResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ContactPointResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ContactPointResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ContactPointResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ContactPointResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -575,6 +578,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -700,6 +704,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<DeleteFileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeleteFileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeleteFileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeleteFileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeleteFileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -813,6 +818,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -917,6 +923,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<DownloadUrlResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DownloadUrlResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DownloadUrlResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DownloadUrlResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DownloadUrlResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -979,7 +986,7 @@ Ejemplo de error normalizado:
 
 Vincular un archivo a un propietario (UC-02-08). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: UC-02-08: vincula un archivo a un propietario.
+Contexto declarado en el controlador: UC-02-08: vincula un archivo a un propietario. El destino se autoriza en `FileLinkTargetGuard` (sólo `USER` propio y `TENANT` actual en la ruta genérica) y la propiedad del archivo, en el servicio; los recursos clínicos se vinculan por su ruta clínica.
 
 ### Descripción del sistema
 
@@ -1054,6 +1061,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileLinkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1195,6 +1203,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FileVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FileVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FileVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FileVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1346,6 +1355,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FileDerivativeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FileDerivativeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FileDerivativeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FileDerivativeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileDerivativeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1378,6 +1388,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Archivo no encontrado | Excepción explícita en src/modules/common/services/files.service.ts |
 | 404 | `NOT_FOUND` | Versión de archivo no encontrada | Excepción explícita en src/modules/common/services/files.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Solo se pueden generar derivados de versiones con escaneo limpio | Excepción explícita en src/modules/common/services/files.service.ts |
@@ -1462,6 +1473,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinkedFilePageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1622,6 +1634,7 @@ Content-Type: multipart/form-data
 | 422 | Operación completada correctamente. | `Promise<FileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1774,6 +1787,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdentifierResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdentifierResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdentifierResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdentifierResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdentifierResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1905,6 +1919,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FileVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FileVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FileVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FileVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2026,6 +2041,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PendingScanResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PendingScanResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PendingScanResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PendingScanResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PendingScanResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2155,6 +2171,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -2260,6 +2277,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -2365,6 +2383,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -2458,6 +2477,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 

@@ -12,7 +12,7 @@ parametrizadas con snapshot, programación y distribución periódica, suscripci
   find src/modules/reporting -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **1 controller, 12 rutas HTTP, 12 entidades y 2 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **1 controller, 12 rutas HTTP, 12 entidades y 2 servicios**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -20,37 +20,37 @@ Su `*.module.ts` no declara `imports` de otros módulos.
 
 Entidades (`tableName`, 12 de 12 archivos `*.entity.ts`): `dashboard_widgets`, `dashboards`, `report_columns`, `report_data_sources`, `report_definitions`, `report_distributions`, `report_executions`, `report_parameters`, `report_schedules`, `report_snapshots`, `report_subscriptions`, `report_versions`.
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `POST /reporting/data-sources` | REPORTING_ADMIN, DATA_STEWARD | `reporting` |
-| `POST /reporting/definitions` | REPORTING_ADMIN, REPORT_AUTHOR | `reporting` |
+| Método y ruta                                      | Acceso                         | Controller  |
+| -------------------------------------------------- | ------------------------------ | ----------- |
+| `POST /reporting/data-sources`                     | REPORTING_ADMIN, DATA_STEWARD  | `reporting` |
+| `POST /reporting/definitions`                      | REPORTING_ADMIN, REPORT_AUTHOR | `reporting` |
 | `POST /reporting/definitions/:id/versions/publish` | REPORTING_ADMIN, REPORT_AUTHOR | `reporting` |
-| `POST /reporting/definitions/:id/executions` | REPORTING_ADMIN, REPORT_VIEWER | `reporting` |
-| `POST /reporting/executions/:id/snapshot` | SYSTEM | `reporting` |
-| `POST /reporting/definitions/:id/schedules` | REPORTING_ADMIN, REPORT_AUTHOR | `reporting` |
-| `POST /reporting/scheduler/tick` | SYSTEM | `reporting` |
-| `POST /reporting/executions/:id/distributions` | SYSTEM, REPORTING_ADMIN | `reporting` |
-| `POST /reporting/schedules/:id/subscriptions` | REPORT_VIEWER, REPORTING_ADMIN | `reporting` |
-| `POST /reporting/dashboards` | REPORTING_ADMIN, REPORT_AUTHOR | `reporting` |
-| `POST /reporting/executions/:id/retry` | SYSTEM, REPORTING_ADMIN | `reporting` |
-| `POST /reporting/definitions/:id/deprecate` | REPORTING_ADMIN | `reporting` |
+| `POST /reporting/definitions/:id/executions`       | REPORTING_ADMIN, REPORT_VIEWER | `reporting` |
+| `POST /reporting/executions/:id/snapshot`          | SYSTEM                         | `reporting` |
+| `POST /reporting/definitions/:id/schedules`        | REPORTING_ADMIN, REPORT_AUTHOR | `reporting` |
+| `POST /reporting/scheduler/tick`                   | SYSTEM                         | `reporting` |
+| `POST /reporting/executions/:id/distributions`     | SYSTEM, REPORTING_ADMIN        | `reporting` |
+| `POST /reporting/schedules/:id/subscriptions`      | REPORT_VIEWER, REPORTING_ADMIN | `reporting` |
+| `POST /reporting/dashboards`                       | REPORTING_ADMIN, REPORT_AUTHOR | `reporting` |
+| `POST /reporting/executions/:id/retry`             | SYSTEM, REPORTING_ADMIN        | `reporting` |
+| `POST /reporting/definitions/:id/deprecate`        | REPORTING_ADMIN                | `reporting` |
 
 ## Casos de uso cubiertos (12)
 
-| UC | Endpoint | Descripción |
-| --- | --- | --- |
-| UC-39-01 | `POST /reporting/data-sources` | Registrar fuente gobernada |
-| UC-39-02 | `POST /reporting/definitions` | Autorar definición con parámetros y columnas |
-| UC-39-03 | `POST /reporting/definitions/:id/versions/publish` | Publicar versión |
-| UC-39-04 | `POST /reporting/definitions/:id/executions` | Encolar corrida parametrizada |
-| UC-39-05 | `POST /reporting/executions/:id/snapshot` | Materializar el artefacto |
-| UC-39-06 | `POST /reporting/definitions/:id/schedules` | Programar distribución |
-| UC-39-07 | `POST /reporting/scheduler/tick` | Disparar corridas vencidas |
-| UC-39-08 | `POST /reporting/executions/:id/distributions` | Crear distribuciones |
-| UC-39-09 | `POST /reporting/schedules/:id/subscriptions` | Suscribirse |
-| UC-39-10 | `POST /reporting/dashboards` | Componer tablero con widgets |
-| UC-39-11 | `POST /reporting/executions/:id/retry` | Reintentar corrida fallida |
-| UC-39-12 | `POST /reporting/definitions/:id/deprecate` | Deprecar definición |
+| UC       | Endpoint                                           | Descripción                                  |
+| -------- | -------------------------------------------------- | -------------------------------------------- |
+| UC-39-01 | `POST /reporting/data-sources`                     | Registrar fuente gobernada                   |
+| UC-39-02 | `POST /reporting/definitions`                      | Autorar definición con parámetros y columnas |
+| UC-39-03 | `POST /reporting/definitions/:id/versions/publish` | Publicar versión                             |
+| UC-39-04 | `POST /reporting/definitions/:id/executions`       | Encolar corrida parametrizada                |
+| UC-39-05 | `POST /reporting/executions/:id/snapshot`          | Materializar el artefacto                    |
+| UC-39-06 | `POST /reporting/definitions/:id/schedules`        | Programar distribución                       |
+| UC-39-07 | `POST /reporting/scheduler/tick`                   | Disparar corridas vencidas                   |
+| UC-39-08 | `POST /reporting/executions/:id/distributions`     | Crear distribuciones                         |
+| UC-39-09 | `POST /reporting/schedules/:id/subscriptions`      | Suscribirse                                  |
+| UC-39-10 | `POST /reporting/dashboards`                       | Componer tablero con widgets                 |
+| UC-39-11 | `POST /reporting/executions/:id/retry`             | Reintentar corrida fallida                   |
+| UC-39-12 | `POST /reporting/definitions/:id/deprecate`        | Deprecar definición                          |
 
 ## Entidades
 

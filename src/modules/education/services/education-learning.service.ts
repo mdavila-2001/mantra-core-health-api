@@ -15,6 +15,8 @@ import {
   EducationLearningRepository,
 } from '../repositories';
 import { AssessmentQuestions } from '../entities';
+import { EducationScopeService } from './education-scope.service';
+import { EducationErrorReason } from '../education.error-reasons';
 import {
   EnrollLearnerDto,
   EnrollmentResponseDto,
@@ -77,12 +79,14 @@ export class EducationLearningService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param learningRepo - Valor de learning repo requerido por la operación.
    * @param catalogRepo - Valor de catalog repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant y al aprendiz.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly learningRepo: EducationLearningRepository,
     private readonly catalogRepo: EducationCatalogRepository,
+    private readonly scope: EducationScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(EducationLearningService.name);
@@ -114,13 +118,22 @@ export class EducationLearningService {
       );
     }
 
+    // El aprendiz de la inscripción sale del servidor para un `LEARNER`: un
+    // identificador ajeno en el cuerpo se rechaza antes de abrir la transacción.
+    const learnerRefId = this.scope.resolveLearnerRef(
+      actor,
+      dto.learnerType,
+      dto.learnerRefId,
+    );
+    if (!learnerRefId) {
+      throw new PreconditionFailedException(
+        'Indique el aprendiz que se inscribe',
+        { courseId: dto.courseId },
+      );
+    }
+
     return this.em.transactional(async (tx) => {
-      const course = await this.catalogRepo.findCourseById(tx, dto.courseId);
-      if (!course) {
-        throw new ResourceNotFoundException('Curso no encontrado', {
-          courseId: dto.courseId,
-        });
-      }
+      const course = await this.scope.course(tx, dto.courseId);
       if (course.statusConceptId !== CONCEPTS.COURSE_PUBLISHED) {
         throw new PreconditionFailedException('El curso no está publicado', {
           courseId: dto.courseId,
@@ -132,7 +145,7 @@ export class EducationLearningService {
         tx,
         dto.courseId,
         learnerTypeConceptId,
-        dto.learnerRefId,
+        learnerRefId,
         [...LIVE_ENROLLMENT_STATES],
       );
       if (live) {
@@ -147,15 +160,9 @@ export class EducationLearningService {
 
       let cohortEnrolledCount: number | undefined;
       if (dto.cohortId) {
-        const cohort = await this.catalogRepo.findCohortForUpdate(
-          tx,
-          dto.cohortId,
-        );
-        if (!cohort) {
-          throw new ResourceNotFoundException('Cohorte no encontrada', {
-            cohortId: dto.cohortId,
-          });
-        }
+        const cohort = await this.scope.cohort(tx, dto.cohortId, {
+          lock: true,
+        });
         if (cohort.courseId !== dto.courseId) {
           throw new PreconditionFailedException(
             'La cohorte pertenece a otro curso',
@@ -192,7 +199,7 @@ export class EducationLearningService {
         courseId: dto.courseId,
         cohortId: dto.cohortId,
         learnerTypeConceptId,
-        learnerRefId: dto.learnerRefId,
+        learnerRefId,
         enrollmentSourceConceptId: ENROLLMENT_SOURCE_CONCEPT[dto.source],
         paymentIntentId: dto.paymentIntentId,
         statusConceptId: CONCEPTS.ENROLLMENT_STATE_ACTIVE,
@@ -229,15 +236,9 @@ export class EducationLearningService {
     );
 
     return this.em.transactional(async (tx) => {
-      const enrollment = await this.learningRepo.findEnrollmentForUpdate(
-        tx,
-        enrollmentId,
-      );
-      if (!enrollment) {
-        throw new ResourceNotFoundException('Inscripción no encontrada', {
-          enrollmentId,
-        });
-      }
+      const enrollment = await this.scope.enrollment(tx, enrollmentId, actor, {
+        lock: true,
+      });
       if (enrollment.statusConceptId === CONCEPTS.ENROLLMENT_STATE_CANCELLED) {
         throw new PreconditionFailedException('La inscripción está cancelada', {
           enrollmentId,
@@ -254,10 +255,21 @@ export class EducationLearningService {
       }
 
       const lesson = await this.catalogRepo.findLessonById(tx, dto.lessonId);
-      if (!lesson) {
-        throw new ResourceNotFoundException('Lección no encontrada', {
-          lessonId: dto.lessonId,
-        });
+      // La lección debe ser de un módulo del curso de la inscripción: una de otro
+      // curso (o de otro tenant) responde igual que una inexistente.
+      const courseModules = await this.catalogRepo.findModulesByCourse(
+        tx,
+        enrollment.courseId,
+      );
+      if (
+        !lesson ||
+        !courseModules.some((module) => module.id === lesson.courseModuleId)
+      ) {
+        throw new ResourceNotFoundException(
+          'Lección no encontrada',
+          undefined,
+          EducationErrorReason.EDUCATION_RESOURCE_OUT_OF_SCOPE,
+        );
       }
 
       const completed = dto.status === 'COMPLETED';
@@ -307,25 +319,12 @@ export class EducationLearningService {
     );
 
     return this.em.transactional(async (tx) => {
-      const assessment = await this.catalogRepo.findAssessmentById(
-        tx,
-        assessmentId,
-      );
-      if (!assessment) {
-        throw new ResourceNotFoundException('Evaluación no encontrada', {
-          assessmentId,
-        });
-      }
-
-      const enrollment = await this.learningRepo.findEnrollmentById(
+      const assessment = await this.scope.assessment(tx, assessmentId);
+      const enrollment = await this.scope.enrollment(
         tx,
         dto.enrollmentId,
+        actor,
       );
-      if (!enrollment) {
-        throw new ResourceNotFoundException('Inscripción no encontrada', {
-          enrollmentId: dto.enrollmentId,
-        });
-      }
       if (enrollment.courseId !== assessment.courseId) {
         throw new PreconditionFailedException(
           'La inscripción es de otro curso',
@@ -404,15 +403,7 @@ export class EducationLearningService {
     );
 
     return this.em.transactional(async (tx) => {
-      const attempt = await this.learningRepo.findAttemptForUpdate(
-        tx,
-        attemptId,
-      );
-      if (!attempt) {
-        throw new ResourceNotFoundException('Intento no encontrado', {
-          attemptId,
-        });
-      }
+      const attempt = await this.scope.attemptForUpdate(tx, attemptId, actor);
       if (attempt.statusConceptId !== CONCEPTS.ATTEMPT_IN_PROGRESS) {
         throw new ConflictException('El intento ya fue corregido', {
           attemptId,
@@ -489,15 +480,9 @@ export class EducationLearningService {
     );
 
     return this.em.transactional(async (tx) => {
-      const enrollment = await this.learningRepo.findEnrollmentForUpdate(
-        tx,
-        enrollmentId,
-      );
-      if (!enrollment) {
-        throw new ResourceNotFoundException('Inscripción no encontrada', {
-          enrollmentId,
-        });
-      }
+      const enrollment = await this.scope.enrollment(tx, enrollmentId, actor, {
+        lock: true,
+      });
       if (enrollment.statusConceptId === CONCEPTS.ENROLLMENT_STATE_COMPLETED) {
         return {
           id: enrollmentId,
@@ -576,15 +561,9 @@ export class EducationLearningService {
     );
 
     return this.em.transactional(async (tx) => {
-      const enrollment = await this.learningRepo.findEnrollmentForUpdate(
-        tx,
-        enrollmentId,
-      );
-      if (!enrollment) {
-        throw new ResourceNotFoundException('Inscripción no encontrada', {
-          enrollmentId,
-        });
-      }
+      const enrollment = await this.scope.enrollment(tx, enrollmentId, actor, {
+        lock: true,
+      });
       if (enrollment.statusConceptId !== CONCEPTS.ENROLLMENT_STATE_COMPLETED) {
         throw new PreconditionFailedException(
           'La inscripción no está completada',
@@ -671,15 +650,7 @@ export class EducationLearningService {
     );
 
     return this.em.transactional(async (tx) => {
-      const certificate = await this.learningRepo.findCertificateById(
-        tx,
-        certificateId,
-      );
-      if (!certificate) {
-        throw new ResourceNotFoundException('Certificado no encontrado', {
-          certificateId,
-        });
-      }
+      const certificate = await this.scope.certificate(tx, certificateId);
       if (certificate.statusConceptId !== CONCEPTS.CERTIFICATE_ISSUED) {
         throw new PreconditionFailedException(
           'El certificado no está vigente',
@@ -768,15 +739,9 @@ export class EducationLearningService {
     );
 
     return this.em.transactional(async (tx) => {
-      const certificate = await this.learningRepo.findCertificateForUpdate(
-        tx,
-        certificateId,
-      );
-      if (!certificate) {
-        throw new ResourceNotFoundException('Certificado no encontrado', {
-          certificateId,
-        });
-      }
+      const certificate = await this.scope.certificate(tx, certificateId, {
+        lock: true,
+      });
       if (certificate.statusConceptId === CONCEPTS.CERTIFICATE_REVOKED) {
         throw new ConflictException('El certificado ya está revocado', {
           certificateId,

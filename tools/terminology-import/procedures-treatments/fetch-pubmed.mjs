@@ -29,7 +29,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { gunzipSync, gzipSync } from 'node:zlib';
 import { cacheDir, ensureDir, nowIso, writeJson } from './lib/common.mjs';
-import { PUBMED_SUBSETS, parsePubmedArticle } from './lib/sources/pubmed.mjs';
+import { PUBMED_SUBSETS, parsePubmedPage } from './lib/sources/pubmed.mjs';
 
 const EUTILS = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils';
 const BATCH = 200;
@@ -131,38 +131,81 @@ if (sum !== total)
   throw new Error(
     `Los tramos suman ${sum} y la búsqueda completa ${total}: revisar los rangos`,
   );
-const retrievedAt = nowIso();
 let saved = 0;
+let booksSkipped = 0;
+let refetched = 0;
+// Páginas con libros de Bookshelf (`PubmedBookArticle`): se cuentan, no se guardan
+// (no traen indexación MeSH de artículo). Sin esto, una página corta por un
+// corte de E-utilities (HTTP 200 con el cuerpo truncado) pasa por «libros».
+const BOOKS_FILE = join(DIR, '..', 'books.json');
+const books = existsSync(BOOKS_FILE)
+  ? JSON.parse(readFileSync(BOOKS_FILE, 'utf8'))
+  : {};
+const countRecords = (file) =>
+  JSON.parse(gunzipSync(readFileSync(file)).toString('utf8')).length;
+
+function fetchPage(s, start, expected) {
+  for (let attempt = 1; ; attempt++) {
+    const xml = get(
+      `${EUTILS}/efetch.fcgi?db=pubmed&query_key=${s.querykey}&WebEnv=${s.webenv}&retstart=${start}&retmax=${BATCH}&retmode=xml`,
+    );
+    const { records, bookCount } = parsePubmedPage(xml);
+    if (records.length + bookCount === expected) return { records, bookCount };
+    if (attempt >= 5)
+      throw new Error(
+        `Página ${start} de ${expected} esperados: llegaron ${records.length} artículos y ${bookCount} libros tras ${attempt} intentos`,
+      );
+    execFileSync('sleep', [String(4 * attempt)]);
+  }
+}
+
 for (const part of parts) {
   const term = part.range ? `${subset.term} AND (${part.range})` : subset.term;
   const s = esearch(term, true);
   const n = Number(s.count);
   for (let start = 0; start < n; start += BATCH) {
-    const file = join(
-      DIR,
-      `${part.tag}-p${String(start / BATCH + 1).padStart(4, '0')}.json.gz`,
-    );
+    const expected = Math.min(BATCH, n - start);
+    const name = `${part.tag}-p${String(start / BATCH + 1).padStart(4, '0')}.json.gz`;
+    const file = join(DIR, name);
     if (existsSync(file)) {
-      saved += JSON.parse(
-        gunzipSync(readFileSync(file)).toString('utf8'),
-      ).length;
-      continue;
+      const have = countRecords(file);
+      if (have + (books[name] ?? 0) === expected) {
+        saved += have;
+        booksSkipped += books[name] ?? 0;
+        continue;
+      }
+      console.log(
+        `[pubmed-${subsetKey}] ${name}: ${have} guardados de ${expected}; se vuelve a pedir`,
+      );
     }
-    const xml = get(
-      `${EUTILS}/efetch.fcgi?db=pubmed&query_key=${s.querykey}&WebEnv=${s.webenv}&retstart=${start}&retmax=${BATCH}&retmode=xml`,
-    );
-    const records = [
-      ...xml.matchAll(/<PubmedArticle>([\s\S]*?)<\/PubmedArticle>/g),
-    ]
-      .map((m) => parsePubmedArticle(m[1]))
-      .filter(Boolean);
+    const { records, bookCount } = fetchPage(s, start, expected);
+    refetched += 1;
     writeFileSync(file, gzipSync(JSON.stringify(records)));
+    if (bookCount) books[name] = bookCount;
+    else delete books[name];
+    writeFileSync(BOOKS_FILE, JSON.stringify(books, null, 1));
     saved += records.length;
+    booksSkipped += bookCount;
   }
-  console.log(`[pubmed-${subsetKey}] ${part.tag}: ${saved}/${total}`);
+  console.log(
+    `[pubmed-${subsetKey}] ${part.tag}: ${saved + booksSkipped}/${total}`,
+  );
 }
+if (saved + booksSkipped !== total)
+  throw new Error(
+    `Guardados ${saved} + libros ${booksSkipped} = ${saved + booksSkipped}; la búsqueda completa dice ${total}`,
+  );
 
-writeJson(cacheDir(subset.cache, 'meta.json'), {
+// Si ninguna página hubo que volver a pedir, el corpus es el de la descarga
+// original: se conserva su fecha y la revalidación queda aparte.
+const metaPath = cacheDir(subset.cache, 'meta.json');
+const previous = existsSync(metaPath)
+  ? JSON.parse(readFileSync(metaPath, 'utf8'))
+  : null;
+const now = nowIso();
+const unchanged =
+  previous && refetched === 0 && previous.records === saved ? previous : null;
+writeJson(metaPath, {
   source: subset.cache,
   name: `${subset.name} (metadatos e indexación MeSH de NLM)`,
   publisher: 'U.S. National Library of Medicine (indexación MeSH de MEDLINE)',
@@ -175,8 +218,16 @@ writeJson(cacheDir(subset.cache, 'meta.json'), {
   partitions: parts.map((p) => p.range),
   esearchCount: total,
   records: saved,
-  retrievedAt,
+  booksSkipped,
+  retrievedAt: unchanged ? unchanged.retrievedAt : now,
+  ...(unchanged ? { revalidatedAt: now } : {}),
 });
 console.log(
-  JSON.stringify({ subset: subsetKey, total, saved, partitions: parts.length }),
+  JSON.stringify({
+    subset: subsetKey,
+    total,
+    saved,
+    booksSkipped,
+    partitions: parts.length,
+  }),
 );

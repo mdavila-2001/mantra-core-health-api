@@ -40,7 +40,7 @@
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.launchCampaign` — `src/modules/ads/controllers/ads.controller.ts:127`
+- **Implementación:** `AdsController.launchCampaign` — `src/modules/ads/controllers/ads.controller.ts:147`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -50,16 +50,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/ad-accounts/{id}/campaigns/launch` la atiende `AdsController.launchCampaign` (src/modules/ads/controllers/ads.controller.ts:127). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `LaunchCampaignDto` (34 campos, 11 obligatorios). Delega en `AdsCampaignsService.launchCampaign`. Crea filas en ads.ad_creatives, ads.ad_placements, ads.ad_sets, ads.ads, ads.campaigns, ads.creative_assets. Lee ads.ad_accounts, ads.targeting_specs.
+`POST /ads/ad-accounts/{id}/campaigns/launch` la atiende `AdsController.launchCampaign` (src/modules/ads/controllers/ads.controller.ts:147). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `LaunchCampaignDto` (34 campos, 11 obligatorios). Delega en `AdsCampaignsService.launchCampaign`. Crea filas en ads.ad_creatives, ads.ad_placements, ads.ad_sets, ads.ads, ads.campaigns, ads.creative_assets. Lee ads.ad_accounts, ads.targeting_specs.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:127` |
+| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:147` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:127` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:147` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -239,7 +239,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.createExperiment` — `src/modules/ads/controllers/ads.controller.ts:241`
+- **Implementación:** `AdsController.createExperiment` — `src/modules/ads/controllers/ads.controller.ts:295`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -249,16 +249,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/ad-accounts/{id}/experiments` la atiende `AdsController.createExperiment` (src/modules/ads/controllers/ads.controller.ts:241). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `CreateExperimentDto` (13 campos, 9 obligatorios). Delega en `AdsOptimizationService.createExperiment`. Crea filas en ads.ad_experiments, ads.experiment_variants. Actualiza ads.ad_experiments, ads.ad_sets, ads.campaigns. Lee ads.ad_accounts, ads.ad_sets, ads.campaigns.
+`POST /ads/ad-accounts/{id}/experiments` la atiende `AdsController.createExperiment` (src/modules/ads/controllers/ads.controller.ts:295). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `CreateExperimentDto` (13 campos, 9 obligatorios). Delega en `AdsOptimizationService.createExperiment`. Crea filas en ads.ad_experiments, ads.experiment_variants. Actualiza ads.ad_experiments, ads.ad_sets, ads.campaigns. Lee ads.ad_accounts, ads.ad_sets, ads.campaigns.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:241` |
+| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:295` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:241` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:295` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -268,11 +268,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `ads.ad_accounts` | LEE | LEE | DIRECTA | AdsController.createExperiment → AdsOptimizationService.createExperiment → AdsAccountsRepository.findAdAccountById | `src/modules/ads/repositories/ads-accounts.repository.ts:364` |
-| `ads.ad_experiments` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.createExperiment → AdsOptimizationService.createExperiment | `src/modules/ads/services/ads-optimization.service.ts:233` |
+| `ads.ad_experiments` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.createExperiment → AdsOptimizationService.createExperiment | `src/modules/ads/services/ads-optimization.service.ts:239` |
 | `ads.ad_experiments` | ESCRIBE | CREA | DIRECTA | AdsController.createExperiment → AdsOptimizationService.createExperiment → AdsOptimizationRepository.createExperiment | `src/modules/ads/repositories/ads-optimization.repository.ts:179` |
-| `ads.ad_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.createExperiment → AdsOptimizationService.createExperiment | `src/modules/ads/services/ads-optimization.service.ts:215` |
+| `ads.ad_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.createExperiment → AdsOptimizationService.createExperiment | `src/modules/ads/services/ads-optimization.service.ts:221` |
 | `ads.ad_sets` | LEE | LEE | DIRECTA | AdsController.createExperiment → AdsOptimizationService.createExperiment → AdsCampaignsRepository.findAdSetForUpdate | `src/modules/ads/repositories/ads-campaigns.repository.ts:396` |
-| `ads.campaigns` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.createExperiment → AdsOptimizationService.createExperiment | `src/modules/ads/services/ads-optimization.service.ts:197` |
+| `ads.campaigns` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.createExperiment → AdsOptimizationService.createExperiment | `src/modules/ads/services/ads-optimization.service.ts:202` |
 | `ads.campaigns` | LEE | LEE | DIRECTA | AdsController.createExperiment → AdsOptimizationService.createExperiment → AdsCampaignsRepository.findCampaignForUpdate | `src/modules/ads/repositories/ads-campaigns.repository.ts:342` |
 | `ads.experiment_variants` | ESCRIBE | CREA | DIRECTA | AdsController.createExperiment → AdsOptimizationService.createExperiment → AdsOptimizationRepository.createVariant | `src/modules/ads/repositories/ads-optimization.repository.ts:255` |
 
@@ -400,7 +400,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.issueInvoice` — `src/modules/ads/controllers/ads.controller.ts:321`
+- **Implementación:** `AdsController.issueInvoice` — `src/modules/ads/controllers/ads.controller.ts:400`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -410,16 +410,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/ad-accounts/{id}/invoices/issue` la atiende `AdsController.issueInvoice` (src/modules/ads/controllers/ads.controller.ts:321). Exige sesión con alguno de los roles FINANCE, ADS_ADMIN. Valida el cuerpo como `IssueAdInvoiceDto` (5 campos, 3 obligatorios). Delega en `AdsOptimizationService.issueInvoice`. Crea filas en ads.ad_billing_events, ads.ad_invoice_lines, ads.ad_invoices. Lee ads.ad_accounts, ads.ad_invoices, ads.insights_daily.
+`POST /ads/ad-accounts/{id}/invoices/issue` la atiende `AdsController.issueInvoice` (src/modules/ads/controllers/ads.controller.ts:400). Exige sesión con alguno de los roles FINANCE, ADS_ADMIN. Valida el cuerpo como `IssueAdInvoiceDto` (5 campos, 3 obligatorios). Delega en `AdsOptimizationService.issueInvoice`. Crea filas en ads.ad_billing_events, ads.ad_invoice_lines, ads.ad_invoices. Lee ads.ad_accounts, ads.ad_invoices, ads.insights_daily.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: FINANCE, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:321` |
+| ROL | Alguno de: FINANCE, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:400` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:321` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:400` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -521,7 +521,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.createTargeting` — `src/modules/ads/controllers/ads.controller.ts:143`
+- **Implementación:** `AdsController.createTargeting` — `src/modules/ads/controllers/ads.controller.ts:168`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -531,16 +531,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/ad-accounts/{id}/targeting` la atiende `AdsController.createTargeting` (src/modules/ads/controllers/ads.controller.ts:143). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `CreateTargetingDto` (14 campos, 0 obligatorios). Delega en `AdsCampaignsService.createTargeting`. Crea filas en ads.custom_audiences, ads.lookalike_specs, ads.targeting_specs. Lee ads.ad_accounts.
+`POST /ads/ad-accounts/{id}/targeting` la atiende `AdsController.createTargeting` (src/modules/ads/controllers/ads.controller.ts:168). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `CreateTargetingDto` (14 campos, 0 obligatorios). Delega en `AdsCampaignsService.createTargeting`. Crea filas en ads.custom_audiences, ads.lookalike_specs, ads.targeting_specs. Lee ads.ad_accounts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:143` |
+| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:168` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:143` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:168` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -650,7 +650,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.createBudgetSchedule` — `src/modules/ads/controllers/ads.controller.ts:355`
+- **Implementación:** `AdsController.createBudgetSchedule` — `src/modules/ads/controllers/ads.controller.ts:444`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -660,16 +660,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/ad-sets/{id}/budget-schedules` la atiende `AdsController.createBudgetSchedule` (src/modules/ads/controllers/ads.controller.ts:355). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `CreateBudgetScheduleDto` (8 campos, 4 obligatorios). Delega en `AdsCampaignsService.createBudgetSchedule`. Crea filas en ads.adset_learning_snapshots, ads.attribution_settings, ads.budget_schedules. Actualiza ads.ad_sets, ads.attribution_settings. Lee ads.ad_accounts, ads.ad_sets, ads.attribution_settings, ads.budget_schedules, ads.campaigns.
+`POST /ads/ad-sets/{id}/budget-schedules` la atiende `AdsController.createBudgetSchedule` (src/modules/ads/controllers/ads.controller.ts:444). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `CreateBudgetScheduleDto` (8 campos, 4 obligatorios). Delega en `AdsCampaignsService.createBudgetSchedule`. Crea filas en ads.adset_learning_snapshots, ads.attribution_settings, ads.budget_schedules. Actualiza ads.ad_sets, ads.attribution_settings. Lee ads.ad_accounts, ads.ad_sets, ads.attribution_settings, ads.budget_schedules, ads.campaigns.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:355` |
+| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:444` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:355` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:444` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -679,7 +679,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `ads.ad_accounts` | LEE | LEE | DIRECTA | AdsController.createBudgetSchedule → AdsCampaignsService.createBudgetSchedule → AdsAccountsRepository.findAdAccountById | `src/modules/ads/repositories/ads-accounts.repository.ts:364` |
-| `ads.ad_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.createBudgetSchedule → AdsCampaignsService.createBudgetSchedule | `src/modules/ads/services/ads-campaigns.service.ts:549` |
+| `ads.ad_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.createBudgetSchedule → AdsCampaignsService.createBudgetSchedule | `src/modules/ads/services/ads-campaigns.service.ts:582` |
 | `ads.ad_sets` | LEE | LEE | DIRECTA | AdsController.createBudgetSchedule → AdsCampaignsService.createBudgetSchedule → AdsCampaignsRepository.findAdSetForUpdate | `src/modules/ads/repositories/ads-campaigns.repository.ts:396` |
 | `ads.adset_learning_snapshots` | ESCRIBE | CREA | DIRECTA | AdsController.createBudgetSchedule → AdsCampaignsService.createBudgetSchedule → AdsCampaignsRepository.createLearningSnapshot | `src/modules/ads/repositories/ads-campaigns.repository.ts:1005` |
 | `ads.attribution_settings` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.createBudgetSchedule → AdsCampaignsService.createBudgetSchedule → AdsCampaignsRepository.upsertAttributionSettings | `src/modules/ads/repositories/ads-campaigns.repository.ts:946` |
@@ -780,7 +780,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.assignIdentity` — `src/modules/ads/controllers/ads.controller.ts:160`
+- **Implementación:** `AdsController.assignIdentity` — `src/modules/ads/controllers/ads.controller.ts:190`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -790,16 +790,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/ad-sets/{id}/identity` la atiende `AdsController.assignIdentity` (src/modules/ads/controllers/ads.controller.ts:160). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `AssignIdentityDto` (2 campos, 1 obligatorio). Delega en `AdsCampaignsService.assignIdentity`. Crea filas en ads.ad_identity_asset_assignments. Actualiza ads.ad_identity_asset_assignments. Lee ads.ad_identity_asset_assignments, ads.ad_identity_assets, ads.ad_sets.
+`POST /ads/ad-sets/{id}/identity` la atiende `AdsController.assignIdentity` (src/modules/ads/controllers/ads.controller.ts:190). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `AssignIdentityDto` (2 campos, 1 obligatorio). Delega en `AdsCampaignsService.assignIdentity`. Crea filas en ads.ad_identity_asset_assignments. Actualiza ads.ad_identity_asset_assignments. Lee ads.ad_identity_asset_assignments, ads.ad_identity_assets, ads.ad_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:160` |
+| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:190` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:160` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:190` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -808,7 +808,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `ads.ad_identity_asset_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.assignIdentity → AdsCampaignsService.assignIdentity | `src/modules/ads/services/ads-campaigns.service.ts:429` |
+| `ads.ad_identity_asset_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.assignIdentity → AdsCampaignsService.assignIdentity | `src/modules/ads/services/ads-campaigns.service.ts:454` |
 | `ads.ad_identity_asset_assignments` | ESCRIBE | CREA | DIRECTA | AdsController.assignIdentity → AdsCampaignsService.assignIdentity → AdsAccountsRepository.createIdentityAssignment | `src/modules/ads/repositories/ads-accounts.repository.ts:717` |
 | `ads.ad_identity_asset_assignments` | LEE | LEE | DIRECTA | AdsController.assignIdentity → AdsCampaignsService.assignIdentity → AdsAccountsRepository.findActiveAssignmentForUpdate | `src/modules/ads/repositories/ads-accounts.repository.ts:741` |
 | `ads.ad_identity_assets` | LEE | LEE | DIRECTA | AdsController.assignIdentity → AdsCampaignsService.assignIdentity → AdsAccountsRepository.findIdentityAssetById | `src/modules/ads/repositories/ads-accounts.repository.ts:682` |
@@ -887,7 +887,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.recordReviewEvent` — `src/modules/ads/controllers/ads.controller.ts:274`
+- **Implementación:** `AdsController.recordReviewEvent` — `src/modules/ads/controllers/ads.controller.ts:338`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -897,16 +897,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/ads/{id}/review-events` la atiende `AdsController.recordReviewEvent` (src/modules/ads/controllers/ads.controller.ts:274). Exige sesión con alguno de los roles POLICY_REVIEWER, SYSTEM, ADS_ADMIN. Valida el cuerpo como `RecordReviewEventDto` (9 campos, 2 obligatorios). Delega en `AdsOptimizationService.recordReviewEvent`. Crea filas en ads.ad_policy_violations, ads.ad_review_events, ads.delivery_status_snapshots. Actualiza ads.ad_policy_violations, ads.ads. Lee ads.ad_policy_violations, ads.ad_review_events, ads.ad_sets, ads.ads, ads.campaigns.
+`POST /ads/ads/{id}/review-events` la atiende `AdsController.recordReviewEvent` (src/modules/ads/controllers/ads.controller.ts:338). Exige sesión con alguno de los roles POLICY_REVIEWER, SYSTEM, ADS_ADMIN. Valida el cuerpo como `RecordReviewEventDto` (9 campos, 2 obligatorios). Delega en `AdsOptimizationService.recordReviewEvent`. Crea filas en ads.ad_policy_violations, ads.ad_review_events, ads.delivery_status_snapshots. Actualiza ads.ad_policy_violations, ads.ads. Lee ads.ad_policy_violations, ads.ad_review_events, ads.ad_sets, ads.ads, ads.campaigns.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: POLICY_REVIEWER, SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:274` |
+| ROL | Alguno de: POLICY_REVIEWER, SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:338` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:274` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:338` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -915,13 +915,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `ads.ad_policy_violations` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent | `src/modules/ads/services/ads-optimization.service.ts:399` |
+| `ads.ad_policy_violations` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent | `src/modules/ads/services/ads-optimization.service.ts:415` |
 | `ads.ad_policy_violations` | ESCRIBE | CREA | DIRECTA | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent → AdsOptimizationRepository.createViolation | `src/modules/ads/repositories/ads-optimization.repository.ts:461` |
 | `ads.ad_policy_violations` | LEE | LEE | DIRECTA | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent → AdsOptimizationRepository.findOpenViolations | `src/modules/ads/repositories/ads-optimization.repository.ts:502` |
 | `ads.ad_review_events` | ESCRIBE | CREA | DIRECTA | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent → AdsOptimizationRepository.createReviewEvent | `src/modules/ads/repositories/ads-optimization.repository.ts:393` |
 | `ads.ad_review_events` | LEE | LEE | DIRECTA | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent → AdsOptimizationRepository.findReviewEventByExternalId | `src/modules/ads/repositories/ads-optimization.repository.ts:414` |
 | `ads.ad_sets` | LEE | LEE | DIRECTA | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent → AdsCampaignsRepository.findAdSetById | `src/modules/ads/repositories/ads-campaigns.repository.ts:385` |
-| `ads.ads` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent | `src/modules/ads/services/ads-optimization.service.ts:406` |
+| `ads.ads` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent | `src/modules/ads/services/ads-optimization.service.ts:422` |
 | `ads.ads` | LEE | LEE | DIRECTA | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent → AdsCampaignsRepository.findAdById | `src/modules/ads/repositories/ads-campaigns.repository.ts:626` |
 | `ads.campaigns` | LEE | LEE | DIRECTA | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent → AdsCampaignsRepository.findCampaignById | `src/modules/ads/repositories/ads-campaigns.repository.ts:328` |
 | `ads.delivery_status_snapshots` | ESCRIBE | CREA | DIRECTA | AdsController.recordReviewEvent → AdsOptimizationService.recordReviewEvent → AdsDataRepository.createDeliverySnapshot | `src/modules/ads/repositories/ads-data.repository.ts:565` |
@@ -1015,7 +1015,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.evaluateRule` — `src/modules/ads/controllers/ads.controller.ts:257`
+- **Implementación:** `AdsController.evaluateRule` — `src/modules/ads/controllers/ads.controller.ts:316`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1025,16 +1025,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/automated-rules/{id}/evaluate` la atiende `AdsController.evaluateRule` (src/modules/ads/controllers/ads.controller.ts:257). Exige sesión con alguno de los roles SYSTEM, ADS_ADMIN. Valida el cuerpo como `AdsEvaluateRuleDto` (3 campos, 1 obligatorio). Delega en `AdsOptimizationService.evaluateRule`. Crea filas en ads.rule_executions. Actualiza ads.ad_sets, ads.automated_rules, ads.campaigns. Lee ads.ad_sets, ads.automated_rules, ads.campaigns.
+`POST /ads/automated-rules/{id}/evaluate` la atiende `AdsController.evaluateRule` (src/modules/ads/controllers/ads.controller.ts:316). Exige sesión con alguno de los roles SYSTEM, ADS_ADMIN. Valida el cuerpo como `AdsEvaluateRuleDto` (3 campos, 1 obligatorio). Delega en `AdsOptimizationService.evaluateRule`. Crea filas en ads.rule_executions. Actualiza ads.ad_sets, ads.automated_rules, ads.campaigns. Lee ads.ad_sets, ads.automated_rules, ads.campaigns.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:257` |
+| ROL | Alguno de: SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:316` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:257` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:316` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1043,11 +1043,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `ads.ad_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.evaluateRule → AdsOptimizationService.evaluateRule → AdsOptimizationService.applyRuleAction | `src/modules/ads/services/ads-optimization.service.ts:834` |
+| `ads.ad_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.evaluateRule → AdsOptimizationService.evaluateRule → AdsOptimizationService.applyRuleAction | `src/modules/ads/services/ads-optimization.service.ts:876` |
 | `ads.ad_sets` | LEE | LEE | DIRECTA | AdsController.evaluateRule → AdsOptimizationService.evaluateRule → AdsOptimizationService.applyRuleAction → AdsCampaignsRepository.findAdSetForUpdate | `src/modules/ads/repositories/ads-campaigns.repository.ts:396` |
-| `ads.automated_rules` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.evaluateRule → AdsOptimizationService.evaluateRule | `src/modules/ads/services/ads-optimization.service.ts:304` |
+| `ads.automated_rules` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.evaluateRule → AdsOptimizationService.evaluateRule | `src/modules/ads/services/ads-optimization.service.ts:315` |
 | `ads.automated_rules` | LEE | LEE | DIRECTA | AdsController.evaluateRule → AdsOptimizationService.evaluateRule → AdsOptimizationRepository.findRuleForUpdate | `src/modules/ads/repositories/ads-optimization.repository.ts:297` |
-| `ads.campaigns` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.evaluateRule → AdsOptimizationService.evaluateRule → AdsOptimizationService.applyRuleAction | `src/modules/ads/services/ads-optimization.service.ts:815` |
+| `ads.campaigns` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.evaluateRule → AdsOptimizationService.evaluateRule → AdsOptimizationService.applyRuleAction | `src/modules/ads/services/ads-optimization.service.ts:857` |
 | `ads.campaigns` | LEE | LEE | DIRECTA | AdsController.evaluateRule → AdsOptimizationService.evaluateRule → AdsOptimizationService.applyRuleAction → AdsCampaignsRepository.findCampaignForUpdate | `src/modules/ads/repositories/ads-campaigns.repository.ts:342` |
 | `ads.rule_executions` | ESCRIBE | CREA | DIRECTA | AdsController.evaluateRule → AdsOptimizationService.evaluateRule → AdsOptimizationRepository.createRuleExecution | `src/modules/ads/repositories/ads-optimization.repository.ts:338` |
 
@@ -1132,7 +1132,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.provisionAdAccount` — `src/modules/ads/controllers/ads.controller.ts:78`
+- **Implementación:** `AdsController.provisionAdAccount` — `src/modules/ads/controllers/ads.controller.ts:83`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1142,16 +1142,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/business-managers/{bmId}/ad-accounts` la atiende `AdsController.provisionAdAccount` (src/modules/ads/controllers/ads.controller.ts:78). Exige sesión con alguno de los roles ADS_ADMIN, BUSINESS_ADMIN. Valida el cuerpo como `ProvisionAdAccountDto` (10 campos, 5 obligatorios). Delega en `AdsAccountsService.provisionAdAccount`. Crea filas en ads.ad_account_users, ads.ad_accounts, ads.business_managers. Lee ads.ad_accounts, ads.business_managers.
+`POST /ads/business-managers/{bmId}/ad-accounts` la atiende `AdsController.provisionAdAccount` (src/modules/ads/controllers/ads.controller.ts:83). Exige sesión con alguno de los roles ADS_ADMIN, BUSINESS_ADMIN. Valida el cuerpo como `ProvisionAdAccountDto` (10 campos, 5 obligatorios). Delega en `AdsAccountsService.provisionAdAccount`. Crea filas en ads.ad_account_users, ads.ad_accounts, ads.business_managers. Lee ads.ad_accounts, ads.business_managers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ADS_ADMIN, BUSINESS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:78` |
+| ROL | Alguno de: ADS_ADMIN, BUSINESS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:83` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: bmId | `src/modules/ads/controllers/ads.controller.ts:78` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: bmId | `src/modules/ads/controllers/ads.controller.ts:83` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1262,7 +1262,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.linkPartner` — `src/modules/ads/controllers/ads.controller.ts:94`
+- **Implementación:** `AdsController.linkPartner` — `src/modules/ads/controllers/ads.controller.ts:104`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1272,16 +1272,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/business-managers/{bmId}/partners` la atiende `AdsController.linkPartner` (src/modules/ads/controllers/ads.controller.ts:94). Exige sesión con alguno de los roles ADS_ADMIN, BUSINESS_ADMIN. Valida el cuerpo como `LinkPartnerDto` (7 campos, 4 obligatorios). Delega en `AdsAccountsService.linkPartner`. Crea filas en ads.ad_account_users, ads.ad_partners, ads.partner_relationships. Actualiza ads.partner_relationships. Lee ads.ad_accounts, ads.ad_partners, ads.business_managers, ads.partner_relationships.
+`POST /ads/business-managers/{bmId}/partners` la atiende `AdsController.linkPartner` (src/modules/ads/controllers/ads.controller.ts:104). Exige sesión con alguno de los roles ADS_ADMIN, BUSINESS_ADMIN. Valida el cuerpo como `LinkPartnerDto` (7 campos, 4 obligatorios). Delega en `AdsAccountsService.linkPartner`. Crea filas en ads.ad_account_users, ads.ad_partners, ads.partner_relationships. Actualiza ads.partner_relationships. Lee ads.ad_accounts, ads.ad_partners, ads.business_managers, ads.partner_relationships.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ADS_ADMIN, BUSINESS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:94` |
+| ROL | Alguno de: ADS_ADMIN, BUSINESS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:104` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: bmId | `src/modules/ads/controllers/ads.controller.ts:94` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: bmId | `src/modules/ads/controllers/ads.controller.ts:104` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1295,7 +1295,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `ads.ad_partners` | ESCRIBE | CREA | DIRECTA | AdsController.linkPartner → AdsAccountsService.linkPartner → AdsAccountsRepository.createPartner | `src/modules/ads/repositories/ads-accounts.repository.ts:461` |
 | `ads.ad_partners` | LEE | LEE | DIRECTA | AdsController.linkPartner → AdsAccountsService.linkPartner → AdsAccountsRepository.findPartnerByRef | `src/modules/ads/repositories/ads-accounts.repository.ts:487` |
 | `ads.business_managers` | LEE | LEE | DIRECTA | AdsController.linkPartner → AdsAccountsService.linkPartner → AdsAccountsRepository.findBusinessManagerById | `src/modules/ads/repositories/ads-accounts.repository.ts:312` |
-| `ads.partner_relationships` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.linkPartner → AdsAccountsService.linkPartner | `src/modules/ads/services/ads-accounts.service.ts:232` |
+| `ads.partner_relationships` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.linkPartner → AdsAccountsService.linkPartner | `src/modules/ads/services/ads-accounts.service.ts:245` |
 | `ads.partner_relationships` | ESCRIBE | CREA | DIRECTA | AdsController.linkPartner → AdsAccountsService.linkPartner → AdsAccountsRepository.createPartnerRelationship | `src/modules/ads/repositories/ads-accounts.repository.ts:512` |
 | `ads.partner_relationships` | LEE | LEE | DIRECTA | AdsController.linkPartner → AdsAccountsService.linkPartner → AdsAccountsRepository.findActiveRelationshipForUpdate | `src/modules/ads/repositories/ads-accounts.repository.ts:539` |
 
@@ -1386,7 +1386,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.runFeed` — `src/modules/ads/controllers/ads.controller.ts:303`
+- **Implementación:** `AdsController.runFeed` — `src/modules/ads/controllers/ads.controller.ts:377`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1396,16 +1396,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/catalogs/{id}/feeds/{feedId}/run` la atiende `AdsController.runFeed` (src/modules/ads/controllers/ads.controller.ts:303). Exige sesión con alguno de los roles SYSTEM, ADS_ADMIN. Valida el cuerpo como `RunFeedDto` (12 campos, 4 obligatorios). Delega en `AdsDataService.runFeed`. Crea filas en ads.catalog_products, ads.feed_run_logs, ads.product_set_members. Actualiza ads.catalog_feeds, ads.catalog_products, ads.product_catalogs, ads.product_sets. Lee ads.catalog_feeds, ads.catalog_products, ads.product_catalogs, ads.product_set_members, ads.product_sets.
+`POST /ads/catalogs/{id}/feeds/{feedId}/run` la atiende `AdsController.runFeed` (src/modules/ads/controllers/ads.controller.ts:377). Exige sesión con alguno de los roles SYSTEM, ADS_ADMIN. Valida el cuerpo como `RunFeedDto` (12 campos, 4 obligatorios). Delega en `AdsDataService.runFeed`. Crea filas en ads.catalog_products, ads.feed_run_logs, ads.product_set_members. Actualiza ads.catalog_feeds, ads.catalog_products, ads.product_catalogs, ads.product_sets. Lee ads.catalog_feeds, ads.catalog_products, ads.product_catalogs, ads.product_set_members, ads.product_sets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:303` |
+| ROL | Alguno de: SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:377` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, feedId | `src/modules/ads/controllers/ads.controller.ts:303` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, feedId | `src/modules/ads/controllers/ads.controller.ts:377` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1414,17 +1414,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `ads.catalog_feeds` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.runFeed → AdsDataService.runFeed | `src/modules/ads/services/ads-data.service.ts:781` |
+| `ads.catalog_feeds` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.runFeed → AdsDataService.runFeed | `src/modules/ads/services/ads-data.service.ts:807` |
 | `ads.catalog_feeds` | LEE | LEE | DIRECTA | AdsController.runFeed → AdsDataService.runFeed → AdsDataRepository.findFeedForUpdate | `src/modules/ads/repositories/ads-data.repository.ts:1184` |
-| `ads.catalog_products` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.runFeed → AdsDataService.runFeed | `src/modules/ads/services/ads-data.service.ts:722` |
+| `ads.catalog_products` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.runFeed → AdsDataService.runFeed | `src/modules/ads/services/ads-data.service.ts:748` |
 | `ads.catalog_products` | ESCRIBE | CREA | DIRECTA | AdsController.runFeed → AdsDataService.runFeed → AdsDataRepository.createProduct | `src/modules/ads/repositories/ads-data.repository.ts:1275` |
 | `ads.catalog_products` | LEE | LEE | DIRECTA | AdsController.runFeed → AdsDataService.runFeed → AdsDataRepository.findProductByRetailerId | `src/modules/ads/repositories/ads-data.repository.ts:1204` |
 | `ads.feed_run_logs` | ESCRIBE | CREA | DIRECTA | AdsController.runFeed → AdsDataService.runFeed → AdsDataRepository.createFeedRunLog | `src/modules/ads/repositories/ads-data.repository.ts:1429` |
-| `ads.product_catalogs` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.runFeed → AdsDataService.runFeed | `src/modules/ads/services/ads-data.service.ts:778` |
+| `ads.product_catalogs` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.runFeed → AdsDataService.runFeed | `src/modules/ads/services/ads-data.service.ts:804` |
 | `ads.product_catalogs` | LEE | LEE | DIRECTA | AdsController.runFeed → AdsDataService.runFeed → AdsDataRepository.findCatalogForUpdate | `src/modules/ads/repositories/ads-data.repository.ts:1172` |
 | `ads.product_set_members` | ESCRIBE | CREA | DIRECTA | AdsController.runFeed → AdsDataService.runFeed → AdsDataRepository.createSetMember | `src/modules/ads/repositories/ads-data.repository.ts:1362` |
 | `ads.product_set_members` | LEE | LEE | DIRECTA | AdsController.runFeed → AdsDataService.runFeed → AdsDataRepository.findSetMember | `src/modules/ads/repositories/ads-data.repository.ts:1335` |
-| `ads.product_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.runFeed → AdsDataService.runFeed | `src/modules/ads/services/ads-data.service.ts:773` |
+| `ads.product_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.runFeed → AdsDataService.runFeed | `src/modules/ads/services/ads-data.service.ts:799` |
 | `ads.product_sets` | LEE | LEE | DIRECTA | AdsController.runFeed → AdsDataService.runFeed → AdsDataRepository.findDynamicSets | `src/modules/ads/repositories/ads-data.repository.ts:1319` |
 
 ### Parámetros
@@ -1533,7 +1533,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.sendConversion` — `src/modules/ads/controllers/ads.controller.ts:209`
+- **Implementación:** `AdsController.sendConversion` — `src/modules/ads/controllers/ads.controller.ts:253`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1543,16 +1543,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/datasets/{id}/events` la atiende `AdsController.sendConversion` (src/modules/ads/controllers/ads.controller.ts:209). Exige sesión con alguno de los roles SYSTEM, ADS_ADMIN. Valida el cuerpo como `SendConversionDto` (21 campos, 5 obligatorios). Delega en `AdsDataService.sendConversion`. Crea filas en ads.blocked_ad_events, ads.conversion_event_custom_data, ads.conversion_event_deduplication, ads.conversion_event_delivery_attempts, ads.conversion_event_user_data, ads.server_conversion_events. Actualiza ads.conversion_event_deduplication. Lee ads.ad_event_data_policies, ads.ad_event_field_rules, ads.conversion_datasets, ads.conversion_event_deduplication.
+`POST /ads/datasets/{id}/events` la atiende `AdsController.sendConversion` (src/modules/ads/controllers/ads.controller.ts:253). Exige sesión con alguno de los roles SYSTEM, ADS_ADMIN. Valida el cuerpo como `SendConversionDto` (21 campos, 5 obligatorios). Delega en `AdsDataService.sendConversion`. Crea filas en ads.blocked_ad_events, ads.conversion_event_custom_data, ads.conversion_event_deduplication, ads.conversion_event_delivery_attempts, ads.conversion_event_user_data, ads.server_conversion_events. Actualiza ads.conversion_event_deduplication. Lee ads.ad_event_data_policies, ads.ad_event_field_rules, ads.conversion_datasets, ads.conversion_event_deduplication.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:209` |
+| ROL | Alguno de: SYSTEM, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:253` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:209` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:253` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1566,7 +1566,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 | `ads.blocked_ad_events` | ESCRIBE | CREA | DIRECTA | AdsController.sendConversion → AdsDataService.sendConversion → AdsDataRepository.createBlockedEvent | `src/modules/ads/repositories/ads-data.repository.ts:932` |
 | `ads.conversion_datasets` | LEE | LEE | DIRECTA | AdsController.sendConversion → AdsDataService.sendConversion → AdsDataRepository.findDatasetById | `src/modules/ads/repositories/ads-data.repository.ts:685` |
 | `ads.conversion_event_custom_data` | ESCRIBE | CREA | DIRECTA | AdsController.sendConversion → AdsDataService.sendConversion → AdsDataRepository.createEventCustomData | `src/modules/ads/repositories/ads-data.repository.ts:875` |
-| `ads.conversion_event_deduplication` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.sendConversion → AdsDataService.sendConversion | `src/modules/ads/services/ads-data.service.ts:412` |
+| `ads.conversion_event_deduplication` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.sendConversion → AdsDataService.sendConversion | `src/modules/ads/services/ads-data.service.ts:423` |
 | `ads.conversion_event_deduplication` | ESCRIBE | CREA | DIRECTA | AdsController.sendConversion → AdsDataService.sendConversion → AdsDataRepository.createDedup | `src/modules/ads/repositories/ads-data.repository.ts:737` |
 | `ads.conversion_event_deduplication` | LEE | LEE | DIRECTA | AdsController.sendConversion → AdsDataService.sendConversion → AdsDataRepository.findDedupForUpdate | `src/modules/ads/repositories/ads-data.repository.ts:698` |
 | `ads.conversion_event_delivery_attempts` | ESCRIBE | CREA | DIRECTA | AdsController.sendConversion → AdsDataService.sendConversion → AdsDataRepository.createDeliveryAttempt | `src/modules/ads/repositories/ads-data.repository.ts:985` |
@@ -1692,7 +1692,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.createEventPolicy` — `src/modules/ads/controllers/ads.controller.ts:177`
+- **Implementación:** `AdsController.createEventPolicy` — `src/modules/ads/controllers/ads.controller.ts:212`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1702,14 +1702,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/event-data-policies` la atiende `AdsController.createEventPolicy` (src/modules/ads/controllers/ads.controller.ts:177). Exige sesión con alguno de los roles DATA_PRIVACY_OFFICER, ADS_ADMIN. Valida el cuerpo como `CreateEventPolicyDto` (14 campos, 10 obligatorios). Delega en `AdsDataService.createEventPolicy`. Crea filas en ads.ad_event_data_policies, ads.ad_event_field_rules. Lee ads.ad_event_data_policies.
+`POST /ads/event-data-policies` la atiende `AdsController.createEventPolicy` (src/modules/ads/controllers/ads.controller.ts:212). Exige sesión con alguno de los roles DATA_PRIVACY_OFFICER, ADS_ADMIN. Valida el cuerpo como `CreateEventPolicyDto` (14 campos, 10 obligatorios). Delega en `AdsDataService.createEventPolicy`. Crea filas en ads.ad_event_data_policies, ads.ad_event_field_rules. Lee ads.ad_event_data_policies.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_PRIVACY_OFFICER, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:177` |
+| ROL | Alguno de: DATA_PRIVACY_OFFICER, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:212` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1830,7 +1830,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.ingestInsights` — `src/modules/ads/controllers/ads.controller.ts:193`
+- **Implementación:** `AdsController.ingestInsights` — `src/modules/ads/controllers/ads.controller.ts:233`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1840,14 +1840,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/ingest/insights` la atiende `AdsController.ingestInsights` (src/modules/ads/controllers/ads.controller.ts:193). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `IngestInsightsDto` (17 campos, 10 obligatorios). Delega en `AdsDataService.ingestInsights`. Crea filas en ads.ad_billing_events, ads.delivery_status_snapshots, ads.insight_fact_rows, ads.insight_query_runs, ads.insights_daily. Actualiza ads.ad_accounts, ads.insight_query_runs, ads.insights_daily. Lee ads.ad_accounts, ads.ad_platform_connections, ads.insights_daily.
+`POST /ads/ingest/insights` la atiende `AdsController.ingestInsights` (src/modules/ads/controllers/ads.controller.ts:233). Exige sesión con alguno de los roles SYSTEM. Valida el cuerpo como `IngestInsightsDto` (17 campos, 10 obligatorios). Delega en `AdsDataService.ingestInsights`. Crea filas en ads.ad_billing_events, ads.delivery_status_snapshots, ads.insight_fact_rows, ads.insight_query_runs, ads.insights_daily. Actualiza ads.ad_accounts, ads.insight_query_runs, ads.insights_daily. Lee ads.ad_accounts, ads.ad_platform_connections, ads.insights_daily.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM | `src/modules/ads/controllers/ads.controller.ts:193` |
+| ROL | Alguno de: SYSTEM | `src/modules/ads/controllers/ads.controller.ts:233` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -1857,15 +1857,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `ads.ad_accounts` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.ingestInsights → AdsDataService.ingestInsights | `src/modules/ads/services/ads-data.service.ts:339` |
+| `ads.ad_accounts` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.ingestInsights → AdsDataService.ingestInsights | `src/modules/ads/services/ads-data.service.ts:348` |
 | `ads.ad_accounts` | LEE | LEE | DIRECTA | AdsController.ingestInsights → AdsDataService.ingestInsights → AdsAccountsRepository.findAdAccountForUpdate | `src/modules/ads/repositories/ads-accounts.repository.ts:372` |
 | `ads.ad_billing_events` | ESCRIBE | CREA | DIRECTA | AdsController.ingestInsights → AdsDataService.ingestInsights → AdsDataRepository.createBillingEvent | `src/modules/ads/repositories/ads-data.repository.ts:626` |
 | `ads.ad_platform_connections` | LEE | LEE | DIRECTA | AdsController.ingestInsights → AdsDataService.ingestInsights → AdsAccountsRepository.findConnectionById | `src/modules/ads/repositories/ads-accounts.repository.ts:594` |
 | `ads.delivery_status_snapshots` | ESCRIBE | CREA | DIRECTA | AdsController.ingestInsights → AdsDataService.ingestInsights → AdsDataRepository.createDeliverySnapshot | `src/modules/ads/repositories/ads-data.repository.ts:565` |
 | `ads.insight_fact_rows` | ESCRIBE | CREA | DIRECTA | AdsController.ingestInsights → AdsDataService.ingestInsights → AdsDataRepository.createFactRow | `src/modules/ads/repositories/ads-data.repository.ts:460` |
-| `ads.insight_query_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.ingestInsights → AdsDataService.ingestInsights | `src/modules/ads/services/ads-data.service.ts:342` |
+| `ads.insight_query_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.ingestInsights → AdsDataService.ingestInsights | `src/modules/ads/services/ads-data.service.ts:351` |
 | `ads.insight_query_runs` | ESCRIBE | CREA | DIRECTA | AdsController.ingestInsights → AdsDataService.ingestInsights → AdsDataRepository.createInsightRun | `src/modules/ads/repositories/ads-data.repository.ts:393` |
-| `ads.insights_daily` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.ingestInsights → AdsDataService.ingestInsights | `src/modules/ads/services/ads-data.service.ts:289` |
+| `ads.insights_daily` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.ingestInsights → AdsDataService.ingestInsights | `src/modules/ads/services/ads-data.service.ts:298` |
 | `ads.insights_daily` | ESCRIBE | CREA | DIRECTA | AdsController.ingestInsights → AdsDataService.ingestInsights → AdsDataRepository.createInsightsDaily | `src/modules/ads/repositories/ads-data.repository.ts:505` |
 | `ads.insights_daily` | LEE | LEE | DIRECTA | AdsController.ingestInsights → AdsDataService.ingestInsights → AdsDataRepository.findInsightsDaily | `src/modules/ads/repositories/ads-data.repository.ts:486` |
 
@@ -1984,7 +1984,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.submitLead` — `src/modules/ads/controllers/ads.controller.ts:338`
+- **Implementación:** `AdsController.submitLead` — `src/modules/ads/controllers/ads.controller.ts:422`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1994,16 +1994,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/lead-forms/{id}/submissions` la atiende `AdsController.submitLead` (src/modules/ads/controllers/ads.controller.ts:338). Exige sesión con alguno de los roles SYSTEM, AD_OPS, ADS_ADMIN. Valida el cuerpo como `SubmitLeadDto` (11 campos, 4 obligatorios). Delega en `AdsOptimizationService.submitLead`. Crea filas en ads.lead_answers, ads.lead_delivery_events, ads.lead_submissions. Lee ads.lead_delivery_events, ads.lead_form_questions, ads.lead_forms, ads.lead_submissions.
+`POST /ads/lead-forms/{id}/submissions` la atiende `AdsController.submitLead` (src/modules/ads/controllers/ads.controller.ts:422). Exige sesión con alguno de los roles SYSTEM, AD_OPS, ADS_ADMIN. Valida el cuerpo como `SubmitLeadDto` (11 campos, 4 obligatorios). Delega en `AdsOptimizationService.submitLead`. Crea filas en ads.lead_answers, ads.lead_delivery_events, ads.lead_submissions. Lee ads.lead_delivery_events, ads.lead_form_questions, ads.lead_forms, ads.lead_submissions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:338` |
+| ROL | Alguno de: SYSTEM, AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:422` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:338` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:422` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -2123,7 +2123,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.uploadOfflineConversions` — `src/modules/ads/controllers/ads.controller.ts:226`
+- **Implementación:** `AdsController.uploadOfflineConversions` — `src/modules/ads/controllers/ads.controller.ts:275`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2133,14 +2133,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/offline-conversion-sets/upload` la atiende `AdsController.uploadOfflineConversions` (src/modules/ads/controllers/ads.controller.ts:226). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `UploadOfflineConversionsDto` (12 campos, 6 obligatorios). Delega en `AdsDataService.uploadOfflineConversions`. Crea filas en ads.offline_conversion_events, ads.offline_conversion_sets. Actualiza ads.offline_conversion_sets. Lee ads.ad_accounts.
+`POST /ads/offline-conversion-sets/upload` la atiende `AdsController.uploadOfflineConversions` (src/modules/ads/controllers/ads.controller.ts:275). Exige sesión con alguno de los roles AD_OPS, ADS_ADMIN. Valida el cuerpo como `UploadOfflineConversionsDto` (12 campos, 6 obligatorios). Delega en `AdsDataService.uploadOfflineConversions`. Crea filas en ads.offline_conversion_events, ads.offline_conversion_sets. Actualiza ads.offline_conversion_sets. Lee ads.ad_accounts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:226` |
+| ROL | Alguno de: AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:275` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -2152,7 +2152,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 |---|---|---|---|---|---|
 | `ads.ad_accounts` | LEE | LEE | DIRECTA | AdsController.uploadOfflineConversions → AdsDataService.uploadOfflineConversions → AdsAccountsRepository.findAdAccountById | `src/modules/ads/repositories/ads-accounts.repository.ts:364` |
 | `ads.offline_conversion_events` | ESCRIBE | CREA | DIRECTA | AdsController.uploadOfflineConversions → AdsDataService.uploadOfflineConversions → AdsDataRepository.createOfflineEvent | `src/modules/ads/repositories/ads-data.repository.ts:1126` |
-| `ads.offline_conversion_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.uploadOfflineConversions → AdsDataService.uploadOfflineConversions | `src/modules/ads/services/ads-data.service.ts:632` |
+| `ads.offline_conversion_sets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.uploadOfflineConversions → AdsDataService.uploadOfflineConversions | `src/modules/ads/services/ads-data.service.ts:645` |
 | `ads.offline_conversion_sets` | ESCRIBE | CREA | DIRECTA | AdsController.uploadOfflineConversions → AdsDataService.uploadOfflineConversions → AdsDataRepository.createOfflineSet | `src/modules/ads/repositories/ads-data.repository.ts:1039` |
 
 ### Cuerpo — DTO `UploadOfflineConversionsDto` · `application/json`
@@ -2255,7 +2255,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.connectPlatform` — `src/modules/ads/controllers/ads.controller.ts:111`
+- **Implementación:** `AdsController.connectPlatform` — `src/modules/ads/controllers/ads.controller.ts:126`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2265,14 +2265,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/platform-connections` la atiende `AdsController.connectPlatform` (src/modules/ads/controllers/ads.controller.ts:111). Exige sesión con alguno de los roles ADS_ADMIN, BUSINESS_ADMIN. Valida el cuerpo como `ConnectPlatformDto` (16 campos, 6 obligatorios). Delega en `AdsAccountsService.connectPlatform`. Crea filas en ads.ad_identity_assets, ads.ad_platform_connections, ads.ad_sync_checkpoints, ads.ad_sync_runs. Actualiza ads.ad_identity_assets, ads.ad_platform_connections, ads.ad_sync_checkpoints. Lee ads.ad_identity_assets, ads.ad_platform_connections, ads.ad_sync_checkpoints, ads.business_managers.
+`POST /ads/platform-connections` la atiende `AdsController.connectPlatform` (src/modules/ads/controllers/ads.controller.ts:126). Exige sesión con alguno de los roles ADS_ADMIN, BUSINESS_ADMIN. Valida el cuerpo como `ConnectPlatformDto` (16 campos, 6 obligatorios). Delega en `AdsAccountsService.connectPlatform`. Crea filas en ads.ad_identity_assets, ads.ad_platform_connections, ads.ad_sync_checkpoints, ads.ad_sync_runs. Actualiza ads.ad_identity_assets, ads.ad_platform_connections, ads.ad_sync_checkpoints. Lee ads.ad_identity_assets, ads.ad_platform_connections, ads.ad_sync_checkpoints, ads.business_managers.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: ADS_ADMIN, BUSINESS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:111` |
+| ROL | Alguno de: ADS_ADMIN, BUSINESS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:126` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -2282,10 +2282,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `ads.ad_identity_assets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.connectPlatform → AdsAccountsService.connectPlatform | `src/modules/ads/services/ads-accounts.service.ts:355` |
+| `ads.ad_identity_assets` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.connectPlatform → AdsAccountsService.connectPlatform | `src/modules/ads/services/ads-accounts.service.ts:375` |
 | `ads.ad_identity_assets` | ESCRIBE | CREA | DIRECTA | AdsController.connectPlatform → AdsAccountsService.connectPlatform → AdsAccountsRepository.createIdentityAsset | `src/modules/ads/repositories/ads-accounts.repository.ts:640` |
 | `ads.ad_identity_assets` | LEE | LEE | DIRECTA | AdsController.connectPlatform → AdsAccountsService.connectPlatform → AdsAccountsRepository.findIdentityAsset | `src/modules/ads/repositories/ads-accounts.repository.ts:664` |
-| `ads.ad_platform_connections` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.connectPlatform → AdsAccountsService.connectPlatform | `src/modules/ads/services/ads-accounts.service.ts:403` |
+| `ads.ad_platform_connections` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.connectPlatform → AdsAccountsService.connectPlatform | `src/modules/ads/services/ads-accounts.service.ts:423` |
 | `ads.ad_platform_connections` | ESCRIBE | CREA | DIRECTA | AdsController.connectPlatform → AdsAccountsService.connectPlatform → AdsAccountsRepository.createConnection | `src/modules/ads/repositories/ads-accounts.repository.ts:564` |
 | `ads.ad_platform_connections` | LEE | LEE | DIRECTA | AdsController.connectPlatform → AdsAccountsService.connectPlatform → AdsAccountsRepository.findConnectionByExternalAccount | `src/modules/ads/repositories/ads-accounts.repository.ts:622` |
 | `ads.ad_sync_checkpoints` | ESCRIBE | ACTUALIZA | POR_TIPO | AdsController.connectPlatform → AdsAccountsService.connectPlatform → AdsAccountsRepository.upsertCheckpoint | `src/modules/ads/repositories/ads-accounts.repository.ts:786` |
@@ -2399,7 +2399,7 @@ El árbol de decisión completo está en [flujos](../flujos/ads.md).
 - **Bloque:** Marketing y Crecimiento
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AdsController.submitAppeal` — `src/modules/ads/controllers/ads.controller.ts:290`
+- **Implementación:** `AdsController.submitAppeal` — `src/modules/ads/controllers/ads.controller.ts:359`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2409,16 +2409,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/ads/REA
 
 ### Cómo se atiende (sistema)
 
-`POST /ads/policy-violations/{id}/appeals` la atiende `AdsController.submitAppeal` (src/modules/ads/controllers/ads.controller.ts:290). Exige sesión con alguno de los roles POLICY_REVIEWER, AD_OPS, ADS_ADMIN. Valida el cuerpo como `SubmitAppealDto` (2 campos, 1 obligatorio). Delega en `AdsOptimizationService.submitAppeal`. Crea filas en ads.ad_policy_appeals. Lee ads.ad_policy_appeals, ads.ad_policy_violations.
+`POST /ads/policy-violations/{id}/appeals` la atiende `AdsController.submitAppeal` (src/modules/ads/controllers/ads.controller.ts:359). Exige sesión con alguno de los roles POLICY_REVIEWER, AD_OPS, ADS_ADMIN. Valida el cuerpo como `SubmitAppealDto` (2 campos, 1 obligatorio). Delega en `AdsOptimizationService.submitAppeal`. Crea filas en ads.ad_policy_appeals. Lee ads.ad_policy_appeals, ads.ad_policy_violations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: POLICY_REVIEWER, AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:290` |
+| ROL | Alguno de: POLICY_REVIEWER, AD_OPS, ADS_ADMIN | `src/modules/ads/controllers/ads.controller.ts:359` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/ads/controllers/ads.controller.ts:359` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |

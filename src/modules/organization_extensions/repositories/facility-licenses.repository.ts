@@ -65,9 +65,13 @@ export interface CreateFacilityLicenseData {
  */
 @Injectable()
 export class FacilityLicensesRepository {
-  /** Busca una licencia por id; `null` si no existe. */
-  findById(em: EntityManager, id: string): Promise<FacilityLicenses | null> {
-    return em.findOne(FacilityLicenses, { id });
+  /** Busca una licencia por id dentro de un tenant; `null` si no existe o es de otro tenant. */
+  findByIdInTenant(
+    em: EntityManager,
+    id: string,
+    tenantId: string,
+  ): Promise<FacilityLicenses | null> {
+    return em.findOne(FacilityLicenses, { id, tenantId });
   }
 
   /** Detecta un duplicado de número de licencia para (tenant, tipo). */

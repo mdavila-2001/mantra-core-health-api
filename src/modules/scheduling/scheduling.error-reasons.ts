@@ -35,6 +35,11 @@ export enum SchedulingErrorReason {
 
   // Recursos agendables.
   RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
+  /**
+   * Recurso inexistente o de otra organización: se responde igual para los dos
+   * (404 uniforme) porque distinguirlos confirmaría que el UUID existe.
+   */
+  RESOURCE_NOT_AVAILABLE = 'SCHEDULING_RESOURCE_NOT_AVAILABLE',
 
   // Cupos (slots) de una agenda.
   SLOT_NOT_FOUND = 'SLOT_NOT_FOUND',
