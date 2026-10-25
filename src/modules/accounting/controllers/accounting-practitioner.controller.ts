@@ -32,6 +32,7 @@ import {
   LiabilityCreatedResponseDto,
   LiabilitySummaryDto,
   LiabilityScheduleResponseDto,
+  AssetDepreciationHistoryResponseDto,
   RegisterLiabilityProgressDto,
   ProgressRegisteredResponseDto,
 } from '../dto';
@@ -157,6 +158,21 @@ export class AccountingPractitionerController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<void> {
     return this.practitionerAccounting.setAssetAutomation(id, dto, actor);
+  }
+
+  /** El histórico de depreciación de un activo propio (T26 · criterio 6). */
+  @Get('assets/:id/depreciations')
+  @Roles('PRACTITIONER')
+  @ApiOperation({
+    summary: 'Histórico de depreciación de un activo propio',
+    description:
+      'Una fila por período fiscal depreciado, en orden de registro, con el valor en libros que dejó. Sólo el profesional vinculado a la práctica del activo; un activo ajeno responde 422 y uno de otra organización, 404.',
+  })
+  readAssetDepreciations(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<AssetDepreciationHistoryResponseDto> {
+    return this.practitionerAccounting.readAssetDepreciations(id, actor);
   }
 
   /** "Registrar avance": una corrida de depreciación acotada a este activo. */

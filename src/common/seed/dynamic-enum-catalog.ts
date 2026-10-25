@@ -1231,6 +1231,19 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     targets: ['clinical.service_requests.category_concept_id'],
   },
   {
+    code: 'service-request-performer-selection',
+    name: 'Quién ejecuta la orden',
+    description:
+      'Si el médico hace el procedimiento, lo recomienda en un centro o deja que el paciente elija. Es una recomendación: no le da acceso a la orden a nadie.',
+    concepts: [
+      CLIN.SERVICE_REQUEST_PERFORMER_PATIENT_CHOICE,
+      CLIN.SERVICE_REQUEST_PERFORMER_SELF,
+      CLIN.SERVICE_REQUEST_PERFORMER_ORGANIZATION,
+    ],
+    defaultConceptId: CLIN.SERVICE_REQUEST_PERFORMER_PATIENT_CHOICE,
+    targets: ['clinical.service_requests.performer_selection_concept_id'],
+  },
+  {
     code: 'service-request-intent',
     name: 'Intención de la orden',
     description:

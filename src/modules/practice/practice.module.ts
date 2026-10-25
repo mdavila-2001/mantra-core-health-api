@@ -9,6 +9,8 @@ import {
   RoleAssignmentsController,
   InventoryItemsController,
   OrganizationPracticesController,
+  PracticeInvitationsController,
+  PractitionerInvitationsController,
 } from './controllers';
 import {
   PracticeSitesService,
@@ -23,6 +25,9 @@ import {
   PracticeOrganizationReadService,
   PracticeAccessService,
   OrganizationPracticeProvisioningService,
+  PracticeAdministrationService,
+  HealthcareServiceOffersService,
+  PracticeAffiliationInvitationsService,
 } from './services';
 import {
   PracticesRepository,
@@ -39,6 +44,7 @@ import {
   PracticeOrganizationReadRepository,
 } from './repositories';
 import { ServiceCatalogRepository } from '../billing/repositories';
+import { ProcedureReferenceReader } from '../billing/services/procedure-reference.reader';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { TenantsRepository } from '../directory/repositories';
 import { AddressesRepository } from '../common/repositories';
@@ -63,7 +69,7 @@ import {
 @Module({
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
-    // Regla de administración por organización (CM-11), sin importar
+    // Regla de administración por organización (A-6), sin importar
     // `DirectoryModule` entero.
     DirectoryAuthorizationModule,
   ],
@@ -75,6 +81,8 @@ import {
     RoleAssignmentsController,
     InventoryItemsController,
     OrganizationPracticesController,
+    PracticeInvitationsController,
+    PractitionerInvitationsController,
   ],
   providers: [
     // Repositorios
@@ -96,6 +104,8 @@ import {
     // e importarlo cerraría el ciclo. El repositorio no guarda estado —recibe el
     // `em` en cada llamada—, así que una segunda instancia es la misma cosa.
     ServiceCatalogRepository,
+    // Lector sin estado del nomenclador: se registra la clase, no `BillingModule`.
+    ProcedureReferenceReader,
     AddressesRepository,
     // Stateless: sólo lee la verificación de la organización (CM-11).
     TenantsRepository,
@@ -116,6 +126,9 @@ import {
     PracticeOrganizationReadService,
     PracticeAccessService,
     OrganizationPracticeProvisioningService,
+    PracticeAdministrationService,
+    HealthcareServiceOffersService,
+    PracticeAffiliationInvitationsService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que

@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical` (parte 2/2).
- * 56 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 76 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalIndexes2: readonly IndexTuple[] = [
@@ -37,6 +37,24 @@ export const clinicalIndexes2: readonly IndexTuple[] = [
   ['procedures', 'ix_procedures_practice_site_id', ['practice_site_id'], false, 'btree'],
   ['procedures', 'ix_procedures_patient_occurrence', ['custodian_tenant_id', 'patient_profile_id', 'occurrence_start_at desc'], false, 'btree'],
   ['procedures', 'ix_procedures_code_status_time', ['custodian_tenant_id', 'code_concept_id', 'status_concept_id', 'occurrence_start_at desc'], false, 'btree'],
+  ['received_services', 'ix_received_services_custodian_tenant_id', ['custodian_tenant_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_patient_profile_id', ['patient_profile_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_encounter_id', ['encounter_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_service_type_concept_id', ['service_type_concept_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_service_concept_id', ['service_concept_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['received_services', 'uq_received_services_source_procedure_id', ['source_procedure_id'], true, 'btree', 'source_procedure_id IS NOT NULL'],
+  ['received_services', 'uq_received_services_source_immunization_id', ['source_immunization_id'], true, 'btree', 'source_immunization_id IS NOT NULL'],
+  ['received_services', 'uq_received_services_procedure_case_id', ['procedure_case_id'], true, 'btree', 'procedure_case_id IS NOT NULL'],
+  ['received_services', 'ix_received_services_service_catalog_id', ['service_catalog_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_invoice_line_id', ['invoice_line_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_insurance_claim_line_id', ['insurance_claim_line_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_performer_profile_id', ['performer_profile_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_practice_site_id', ['practice_site_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_outcome_concept_id', ['outcome_concept_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['received_services', 'ix_received_services_patient_performed_at', ['custodian_tenant_id', 'patient_profile_id', 'performed_at desc'], false, 'btree'],
   ['service_requests', 'ix_service_requests_custodian_tenant_id', ['custodian_tenant_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_patient_profile_id', ['patient_profile_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_encounter_id', ['encounter_id'], false, 'btree'],
@@ -47,6 +65,8 @@ export const clinicalIndexes2: readonly IndexTuple[] = [
   ['service_requests', 'ix_service_requests_status_concept_id', ['status_concept_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_requester_profile_id', ['requester_profile_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_performer_tenant_id', ['performer_tenant_id'], false, 'btree'],
+  ['service_requests', 'ix_service_requests_performer_practitioner_profile_id', ['performer_practitioner_profile_id'], false, 'btree'],
+  ['service_requests', 'ix_service_requests_suggested_practice_site_id', ['suggested_practice_site_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_form_instance_id', ['form_instance_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],

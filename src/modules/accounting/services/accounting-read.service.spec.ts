@@ -77,6 +77,7 @@ function build(
     findPostedEntriesWithAssignments: mockFn(() => Promise.resolve([])),
     ledgerEntriesForTransaction: mockFn(),
     assignmentForEntry: mockFn(),
+    assignmentsForEntries: mockFn(),
     createFile: mockFn(),
   };
   const accountsRepo = {
@@ -119,6 +120,7 @@ function build(
     createAssignment: mockFn(),
     createPosting: mockFn(),
     findDepreciation: mockFn(),
+    listDepreciations: mockFn(),
     createDepreciation: mockFn(),
     findDepreciationAreaById: mockFn(),
   };

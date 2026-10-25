@@ -811,6 +811,7 @@ export class LedgerService {
         ledgerEntryId: entry.id,
         costCenterId: line.costCenterId,
         profitCenterId: line.profitCenterId,
+        assetId: line.assetId,
         assignmentSourceConceptId: ACCT.TXN_TYPE_STANDARD,
         actorUserId,
       });

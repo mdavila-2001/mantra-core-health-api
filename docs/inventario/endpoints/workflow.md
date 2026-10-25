@@ -33,7 +33,7 @@
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `WorkflowTransitionsController.getTransitionHistory` — `src/modules/workflow/controllers/workflow-transitions.controller.ts:47`
+- **Implementación:** `WorkflowTransitionsController.getTransitionHistory` — `src/modules/workflow/controllers/workflow-transitions.controller.ts:52`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -43,16 +43,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 ### Cómo se atiende (sistema)
 
-`GET /workflow/aggregates/{aggregateId}/transitions` la atiende `WorkflowTransitionsController.getTransitionHistory` (src/modules/workflow/controllers/workflow-transitions.controller.ts:47). Exige sesión con alguno de los roles AUDITOR, COMPLIANCE_OFFICER, CLINICIAN, PLATFORM_ADMIN. Delega en `TransitionExecutionService.getTransitionHistory`. Lee workflow.state_machine_definitions, workflow.state_transition_definitions, workflow.state_transition_events, workflow.workflow_instances.
+`GET /workflow/aggregates/{aggregateId}/transitions` la atiende `WorkflowTransitionsController.getTransitionHistory` (src/modules/workflow/controllers/workflow-transitions.controller.ts:52). Exige sesión con alguno de los roles AUDITOR, COMPLIANCE_OFFICER, CLINICIAN, PLATFORM_ADMIN. Delega en `TransitionExecutionService.getTransitionHistory`. Lee workflow.state_machine_definitions, workflow.state_transition_definitions, workflow.state_transition_events, workflow.workflow_instances.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: AUDITOR, COMPLIANCE_OFFICER, CLINICIAN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:47` |
+| ROL | Alguno de: AUDITOR, COMPLIANCE_OFFICER, CLINICIAN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:52` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:47` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:52` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
 
 ### Tablas que afecta
@@ -81,21 +81,21 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `aggregateId` | `string` | Sí | formato uuid | — | Identificador asociado a aggregate. | `src/modules/workflow/dto/workflow.dto.ts:952` |
-| `transitions` | `array<TransitionHistoryEntryDto>` | Sí | — | — | Valor de transitions mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:958` |
-| `transitions[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/workflow/dto/workflow.dto.ts:881` |
-| `transitions[].fromStateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a from state concept. | `src/modules/workflow/dto/workflow.dto.ts:887` |
-| `transitions[].toStateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a to state concept. | `src/modules/workflow/dto/workflow.dto.ts:893` |
-| `transitions[].transitionCode` | `string` | No | — | — | Código de la transición aplicada | `src/modules/workflow/dto/workflow.dto.ts:899` |
-| `transitions[].commandCode` | `string` | No | — | — | Comando que la disparó | `src/modules/workflow/dto/workflow.dto.ts:905` |
-| `transitions[].actorUserId` | `string` | Sí | formato uuid | — | Identificador asociado a actor user. | `src/modules/workflow/dto/workflow.dto.ts:911` |
-| `transitions[].reasonConceptId` | `string` | No | formato uuid | — | Identificador asociado a reason concept. | `src/modules/workflow/dto/workflow.dto.ts:917` |
-| `transitions[].reasonText` | `string` | No | — | — | Valor de reason text mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:923` |
-| `transitions[].correlationId` | `string` | No | formato uuid | — | Identificador asociado a correlation. | `src/modules/workflow/dto/workflow.dto.ts:929` |
-| `transitions[].causationId` | `string` | No | formato uuid | — | Identificador asociado a causation. | `src/modules/workflow/dto/workflow.dto.ts:935` |
-| `transitions[].occurredAt` | `string` | Sí | formato date-time | — | Valor de occurred at mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:941` |
-| `total` | `number` | Sí | — | — | Total de transiciones que cumplen el filtro | `src/modules/workflow/dto/workflow.dto.ts:964` |
-| `currentStateConceptId` | `string` | No | formato uuid | — | Estado actual de la instancia asociada | `src/modules/workflow/dto/workflow.dto.ts:973` |
+| `aggregateId` | `string` | Sí | formato uuid | — | Identificador asociado a aggregate. | `src/modules/workflow/dto/workflow.dto.ts:964` |
+| `transitions` | `array<TransitionHistoryEntryDto>` | Sí | — | — | Valor de transitions mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:970` |
+| `transitions[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/workflow/dto/workflow.dto.ts:893` |
+| `transitions[].fromStateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a from state concept. | `src/modules/workflow/dto/workflow.dto.ts:899` |
+| `transitions[].toStateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a to state concept. | `src/modules/workflow/dto/workflow.dto.ts:905` |
+| `transitions[].transitionCode` | `string` | No | — | — | Código de la transición aplicada | `src/modules/workflow/dto/workflow.dto.ts:911` |
+| `transitions[].commandCode` | `string` | No | — | — | Comando que la disparó | `src/modules/workflow/dto/workflow.dto.ts:917` |
+| `transitions[].actorUserId` | `string` | Sí | formato uuid | — | Identificador asociado a actor user. | `src/modules/workflow/dto/workflow.dto.ts:923` |
+| `transitions[].reasonConceptId` | `string` | No | formato uuid | — | Identificador asociado a reason concept. | `src/modules/workflow/dto/workflow.dto.ts:929` |
+| `transitions[].reasonText` | `string` | No | — | — | Valor de reason text mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:935` |
+| `transitions[].correlationId` | `string` | No | formato uuid | — | Identificador asociado a correlation. | `src/modules/workflow/dto/workflow.dto.ts:941` |
+| `transitions[].causationId` | `string` | No | formato uuid | — | Identificador asociado a causation. | `src/modules/workflow/dto/workflow.dto.ts:947` |
+| `transitions[].occurredAt` | `string` | Sí | formato date-time | — | Valor de occurred at mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:953` |
+| `total` | `number` | Sí | — | — | Total de transiciones que cumplen el filtro | `src/modules/workflow/dto/workflow.dto.ts:976` |
+| `currentStateConceptId` | `string` | No | formato uuid | — | Estado actual de la instancia asociada | `src/modules/workflow/dto/workflow.dto.ts:985` |
 
 ### Respuestas posibles
 
@@ -127,7 +127,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `WorkflowTransitionsController.triggerTransition` — `src/modules/workflow/controllers/workflow-transitions.controller.ts:68`
+- **Implementación:** `WorkflowTransitionsController.triggerTransition` — `src/modules/workflow/controllers/workflow-transitions.controller.ts:73`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -137,18 +137,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 ### Cómo se atiende (sistema)
 
-`POST /workflow/aggregates/{aggregateId}/transitions/{commandCode}` la atiende `WorkflowTransitionsController.triggerTransition` (src/modules/workflow/controllers/workflow-transitions.controller.ts:68). Exige sesión con alguno de los roles CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `TriggerTransitionDto` (8 campos, 1 obligatorio). Delega en `TransitionExecutionService.triggerTransition`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.state_transition_events. Lee messaging.outbox_messages, workflow.state_machine_definitions, workflow.state_transition_definitions, workflow.state_transition_events, workflow.transition_guards, workflow.transition_side_effects. Publica un evento calculado (effect.outboxEventType).
+`POST /workflow/aggregates/{aggregateId}/transitions/{commandCode}` la atiende `WorkflowTransitionsController.triggerTransition` (src/modules/workflow/controllers/workflow-transitions.controller.ts:73). Exige sesión con alguno de los roles CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `TriggerTransitionDto` (9 campos, 1 obligatorio). Delega en `TransitionExecutionService.triggerTransition`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.state_transition_events. Lee messaging.outbox_messages, workflow.state_machine_definitions, workflow.state_transition_definitions, workflow.state_transition_events, workflow.transition_guards, workflow.transition_side_effects. Publica un evento calculado (effect.outboxEventType).
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:68` |
+| ROL | Alguno de: CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:73` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CABECERA | idempotency-key (obligatoria) | `contrato (parameters)` |
 | CABECERA | Idempotency-Key (opcional) | `contrato (parameters)` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:68` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:73` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -158,8 +158,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.triggerTransition → TransitionExecutionService.triggerTransition → TransitionExecutionService.publishSideEffects → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.triggerTransition → TransitionExecutionService.triggerTransition → TransitionExecutionService.publishSideEffects → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowTransitionsController.triggerTransition → TransitionExecutionService.triggerTransition → TransitionExecutionService.publishSideEffects → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.triggerTransition → TransitionExecutionService.triggerTransition → TransitionExecutionService.publishSideEffects → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowTransitionsController.triggerTransition → TransitionExecutionService.triggerTransition → TransitionExecutionService.publishSideEffects → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `workflow.state_machine_definitions` | LEE | LEE | DIRECTA | WorkflowTransitionsController.triggerTransition → TransitionExecutionService.triggerTransition → TransitionExecutionService.requireActiveMachine → StateMachinesRepository.findActiveMachineByCode | `src/modules/workflow/repositories/state-machines.repository.ts:330` |
 | `workflow.state_transition_definitions` | LEE | LEE | DIRECTA | WorkflowTransitionsController.triggerTransition → TransitionExecutionService.triggerTransition → StateMachinesRepository.findTransitionByCommand | `src/modules/workflow/repositories/state-machines.repository.ts:525` |
 | `workflow.state_transition_events` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.triggerTransition → TransitionExecutionService.triggerTransition → WorkflowRuntimeRepository.createTransitionEvent | `src/modules/workflow/repositories/workflow-runtime.repository.ts:182` |
@@ -171,7 +171,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | calculado: `effect.outboxEventType` | `src/modules/workflow/services/transition-execution.service.ts:738` |
+| Evento de dominio | calculado: `effect.outboxEventType` | `src/modules/workflow/services/transition-execution.service.ts:750` |
 
 ### Parámetros
 
@@ -187,13 +187,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `machineCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Máquina de estado que gobierna el agregado | `src/modules/workflow/dto/workflow.dto.ts:548` |
-| `actorTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant en cuyo nombre actúa el llamante; queda en el evento de transición | `src/modules/workflow/dto/workflow.dto.ts:560` |
-| `reasonConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Motivo del movimiento | `src/modules/workflow/dto/workflow.dto.ts:568` |
-| `reasonText` | `string` | No | — | `@IsOptional()` `@IsString()` | Texto libre del motivo | `src/modules/workflow/dto/workflow.dto.ts:576` |
-| `expectedRowVersion` | `number` | No | formato uuid; mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | Versión del agregado que vio el llamante; exigida si la transición usa bloqueo optimista | `src/modules/workflow/dto/workflow.dto.ts:589` |
-| `correlationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Hilo de negocio al que pertenece | `src/modules/workflow/dto/workflow.dto.ts:600` |
-| `causationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Evento que causó éste | `src/modules/workflow/dto/workflow.dto.ts:608` |
-| `payloadJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Datos del comando para las guardas | `src/modules/workflow/dto/workflow.dto.ts:616` |
+| `purposeOfUseConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Propósito de uso con el que se dispara el comando. Debe coincidir con el que exige la transición; si ésta lo exige y falta o difiere, 403 WORKFLOW_PURPOSE_NOT_ALLOWED | `src/modules/workflow/dto/workflow.dto.ts:560` |
+| `actorTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant en cuyo nombre actúa el llamante; queda en el evento de transición | `src/modules/workflow/dto/workflow.dto.ts:572` |
+| `reasonConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Motivo del movimiento | `src/modules/workflow/dto/workflow.dto.ts:580` |
+| `reasonText` | `string` | No | — | `@IsOptional()` `@IsString()` | Texto libre del motivo | `src/modules/workflow/dto/workflow.dto.ts:588` |
+| `expectedRowVersion` | `number` | No | formato uuid; mínimo 0 | `@IsOptional()` `@IsInt()` `@Min(0)` | Versión del agregado que vio el llamante; exigida si la transición usa bloqueo optimista | `src/modules/workflow/dto/workflow.dto.ts:601` |
+| `correlationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Hilo de negocio al que pertenece | `src/modules/workflow/dto/workflow.dto.ts:612` |
+| `causationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Evento que causó éste | `src/modules/workflow/dto/workflow.dto.ts:620` |
+| `payloadJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Datos del comando para las guardas | `src/modules/workflow/dto/workflow.dto.ts:628` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -208,6 +209,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 ```json
 {
   "machineCode": "CODIGO_EJEMPLO",
+  "purposeOfUseConceptId": "00000000-0000-4000-8000-000000000001",
   "actorTenantId": "00000000-0000-4000-8000-000000000001",
   "reasonConceptId": "00000000-0000-4000-8000-000000000001",
   "reasonText": "Texto descriptivo de ejemplo",
@@ -224,13 +226,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/workflow/dto/workflow.dto.ts:627` |
-| `aggregateId` | `string` | Sí | formato uuid | — | Identificador asociado a aggregate. | `src/modules/workflow/dto/workflow.dto.ts:633` |
-| `fromStateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a from state concept. | `src/modules/workflow/dto/workflow.dto.ts:639` |
-| `toStateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a to state concept. | `src/modules/workflow/dto/workflow.dto.ts:645` |
-| `occurredAt` | `string` | Sí | formato date-time | — | Valor de occurred at mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:651` |
-| `publishedEffects` | `number` | Sí | — | — | Eventos publicados en el outbox por los efectos de la transición | `src/modules/workflow/dto/workflow.dto.ts:660` |
-| `duplicate` | `boolean` | Sí | — | — | Verdadero si la clave de idempotencia ya se había aplicado y se devuelve el resultado previo | `src/modules/workflow/dto/workflow.dto.ts:669` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/workflow/dto/workflow.dto.ts:639` |
+| `aggregateId` | `string` | Sí | formato uuid | — | Identificador asociado a aggregate. | `src/modules/workflow/dto/workflow.dto.ts:645` |
+| `fromStateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a from state concept. | `src/modules/workflow/dto/workflow.dto.ts:651` |
+| `toStateConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a to state concept. | `src/modules/workflow/dto/workflow.dto.ts:657` |
+| `occurredAt` | `string` | Sí | formato date-time | — | Valor de occurred at mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:663` |
+| `publishedEffects` | `number` | Sí | — | — | Eventos publicados en el outbox por los efectos de la transición | `src/modules/workflow/dto/workflow.dto.ts:672` |
+| `duplicate` | `boolean` | Sí | — | — | Verdadero si la clave de idempotencia ya se había aplicado y se devuelve el resultado previo | `src/modules/workflow/dto/workflow.dto.ts:681` |
 
 ### Respuestas posibles
 
@@ -244,6 +246,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: El agregado cambió desde que el llamante lo leyó. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El comando no es aplicable desde el estado actual del agregado.; PreconditionFailedException: Esta transición exige cabecera Idempotency-Key.; PreconditionFailedException: Esta transición exige declarar el motivo.; PreconditionFailedException: Esta transición exige enviar la versión del agregado que vio el llamante.; PreconditionFailedException: {guard.failureMessageKey ?? 'La transición no cumple una gua…} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 El árbol de decisión completo está en [flujos](../flujos/workflow.md).
 
@@ -264,7 +267,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `WorkflowTransitionsController.compensateTransition` — `src/modules/workflow/controllers/workflow-transitions.controller.ts:98`
+- **Implementación:** `WorkflowTransitionsController.compensateTransition` — `src/modules/workflow/controllers/workflow-transitions.controller.ts:108`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -274,16 +277,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 ### Cómo se atiende (sistema)
 
-`POST /workflow/aggregates/{aggregateId}/transitions/{eventId}/compensate` la atiende `WorkflowTransitionsController.compensateTransition` (src/modules/workflow/controllers/workflow-transitions.controller.ts:98). Exige sesión con alguno de los roles SYSTEM, SAGA_ORCHESTRATOR, PLATFORM_ADMIN. Valida el cuerpo como `CompensateTransitionDto` (2 campos, 1 obligatorio). Delega en `TransitionExecutionService.compensateTransition`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.state_transition_events. Lee messaging.outbox_messages, workflow.state_machine_definitions, workflow.state_transition_events, workflow.transition_side_effects. Publica TransitionCompensated, un evento calculado (`${effect.outboxEventType}.compensated`).
+`POST /workflow/aggregates/{aggregateId}/transitions/{eventId}/compensate` la atiende `WorkflowTransitionsController.compensateTransition` (src/modules/workflow/controllers/workflow-transitions.controller.ts:108). Exige sesión con alguno de los roles SYSTEM, SAGA_ORCHESTRATOR, PLATFORM_ADMIN. Valida el cuerpo como `CompensateTransitionDto` (2 campos, 1 obligatorio). Delega en `TransitionExecutionService.compensateTransition`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.state_transition_events. Lee messaging.outbox_messages, workflow.state_machine_definitions, workflow.state_transition_events, workflow.transition_side_effects. Publica TransitionCompensated, un evento calculado (`${effect.outboxEventType}.compensated`).
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, SAGA_ORCHESTRATOR, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:98` |
+| ROL | Alguno de: SYSTEM, SAGA_ORCHESTRATOR, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:108` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId, eventId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:98` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId, eventId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:108` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -293,8 +296,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.compensateTransition → TransitionExecutionService.compensateTransition → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.compensateTransition → TransitionExecutionService.compensateTransition → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowTransitionsController.compensateTransition → TransitionExecutionService.compensateTransition → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.compensateTransition → TransitionExecutionService.compensateTransition → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowTransitionsController.compensateTransition → TransitionExecutionService.compensateTransition → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `workflow.state_machine_definitions` | LEE | LEE | DIRECTA | WorkflowTransitionsController.compensateTransition → TransitionExecutionService.compensateTransition → StateMachinesRepository.findMachineById | `src/modules/workflow/repositories/state-machines.repository.ts:292` |
 | `workflow.state_transition_events` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.compensateTransition → TransitionExecutionService.compensateTransition → WorkflowRuntimeRepository.createTransitionEvent | `src/modules/workflow/repositories/workflow-runtime.repository.ts:182` |
 | `workflow.state_transition_events` | LEE | LEE | DIRECTA | WorkflowTransitionsController.compensateTransition → TransitionExecutionService.compensateTransition → WorkflowRuntimeRepository.findTransitionEventById | `src/modules/workflow/repositories/workflow-runtime.repository.ts:216` |
@@ -304,8 +307,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `TransitionCompensated` | `src/modules/workflow/services/transition-execution.service.ts:382` |
-| Evento de dominio | calculado: `\`${effect.outboxEventType}.compensated\`` | `src/modules/workflow/services/transition-execution.service.ts:399` |
+| Evento de dominio | `TransitionCompensated` | `src/modules/workflow/services/transition-execution.service.ts:394` |
+| Evento de dominio | calculado: `\`${effect.outboxEventType}.compensated\`` | `src/modules/workflow/services/transition-execution.service.ts:411` |
 
 ### Parámetros
 
@@ -318,8 +321,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reasonText` | `string` | Sí | — | `@IsString()` | Por qué se compensa | `src/modules/workflow/dto/workflow.dto.ts:683` |
-| `correlationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Saga a la que pertenece la compensación | `src/modules/workflow/dto/workflow.dto.ts:694` |
+| `reasonText` | `string` | Sí | — | `@IsString()` | Por qué se compensa | `src/modules/workflow/dto/workflow.dto.ts:695` |
+| `correlationId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Saga a la que pertenece la compensación | `src/modules/workflow/dto/workflow.dto.ts:706` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -344,10 +347,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `compensationEventId` | `string` | Sí | formato uuid | — | Evento de compensación registrado | `src/modules/workflow/dto/workflow.dto.ts:708` |
-| `originalEventId` | `string` | Sí | formato uuid | — | Evento original que se revierte | `src/modules/workflow/dto/workflow.dto.ts:717` |
-| `restoredStateConceptId` | `string` | Sí | formato uuid | — | Estado al que vuelve el agregado | `src/modules/workflow/dto/workflow.dto.ts:726` |
-| `publishedEffects` | `number` | Sí | — | — | Eventos de compensación publicados en el outbox | `src/modules/workflow/dto/workflow.dto.ts:734` |
+| `compensationEventId` | `string` | Sí | formato uuid | — | Evento de compensación registrado | `src/modules/workflow/dto/workflow.dto.ts:720` |
+| `originalEventId` | `string` | Sí | formato uuid | — | Evento original que se revierte | `src/modules/workflow/dto/workflow.dto.ts:729` |
+| `restoredStateConceptId` | `string` | Sí | formato uuid | — | Estado al que vuelve el agregado | `src/modules/workflow/dto/workflow.dto.ts:738` |
+| `publishedEffects` | `number` | Sí | — | — | Eventos de compensación publicados en el outbox | `src/modules/workflow/dto/workflow.dto.ts:746` |
 
 ### Respuestas posibles
 
@@ -382,7 +385,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `WorkflowTransitionsController.retryTransition` — `src/modules/workflow/controllers/workflow-transitions.controller.ts:121`
+- **Implementación:** `WorkflowTransitionsController.retryTransition` — `src/modules/workflow/controllers/workflow-transitions.controller.ts:136`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -392,16 +395,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 ### Cómo se atiende (sistema)
 
-`POST /workflow/aggregates/{aggregateId}/transitions/{eventId}/retry` la atiende `WorkflowTransitionsController.retryTransition` (src/modules/workflow/controllers/workflow-transitions.controller.ts:121). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RetryTransitionDto` (1 campo, 0 obligatorios). Delega en `TransitionExecutionService.retryTransition`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.state_transition_events. Actualiza workflow.workflow_instances. Lee messaging.outbox_messages, workflow.state_transition_events, workflow.transition_side_effects, workflow.workflow_instances. Publica un evento calculado (effect.outboxEventType).
+`POST /workflow/aggregates/{aggregateId}/transitions/{eventId}/retry` la atiende `WorkflowTransitionsController.retryTransition` (src/modules/workflow/controllers/workflow-transitions.controller.ts:136). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RetryTransitionDto` (1 campo, 0 obligatorios). Delega en `TransitionExecutionService.retryTransition`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.state_transition_events. Actualiza workflow.workflow_instances. Lee messaging.outbox_messages, workflow.state_transition_events, workflow.transition_side_effects, workflow.workflow_instances. Publica un evento calculado (effect.outboxEventType).
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:121` |
+| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-transitions.controller.ts:136` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId, eventId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:121` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: aggregateId, eventId | `src/modules/workflow/controllers/workflow-transitions.controller.ts:136` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -411,19 +414,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.retryTransition → TransitionExecutionService.retryTransition → TransitionExecutionService.publishSideEffects → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.retryTransition → TransitionExecutionService.retryTransition → TransitionExecutionService.publishSideEffects → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowTransitionsController.retryTransition → TransitionExecutionService.retryTransition → TransitionExecutionService.publishSideEffects → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.retryTransition → TransitionExecutionService.retryTransition → TransitionExecutionService.publishSideEffects → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowTransitionsController.retryTransition → TransitionExecutionService.retryTransition → TransitionExecutionService.publishSideEffects → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `workflow.state_transition_events` | ESCRIBE | CREA | DIRECTA | WorkflowTransitionsController.retryTransition → TransitionExecutionService.retryTransition → WorkflowRuntimeRepository.createTransitionEvent | `src/modules/workflow/repositories/workflow-runtime.repository.ts:182` |
 | `workflow.state_transition_events` | LEE | LEE | DIRECTA | WorkflowTransitionsController.retryTransition → TransitionExecutionService.retryTransition → WorkflowRuntimeRepository.findTransitionEventById | `src/modules/workflow/repositories/workflow-runtime.repository.ts:216` |
 | `workflow.transition_side_effects` | LEE | LEE | DIRECTA | WorkflowTransitionsController.retryTransition → TransitionExecutionService.retryTransition → TransitionExecutionService.publishSideEffects → StateMachinesRepository.findSideEffectsByTransition | `src/modules/workflow/repositories/state-machines.repository.ts:625` |
-| `workflow.workflow_instances` | ESCRIBE | ACTUALIZA | POR_TIPO | WorkflowTransitionsController.retryTransition → TransitionExecutionService.retryTransition | `src/modules/workflow/services/transition-execution.service.ts:488` |
+| `workflow.workflow_instances` | ESCRIBE | ACTUALIZA | POR_TIPO | WorkflowTransitionsController.retryTransition → TransitionExecutionService.retryTransition | `src/modules/workflow/services/transition-execution.service.ts:500` |
 | `workflow.workflow_instances` | LEE | LEE | DIRECTA | WorkflowTransitionsController.retryTransition → TransitionExecutionService.retryTransition → WorkflowRuntimeRepository.findInstanceForUpdate | `src/modules/workflow/repositories/workflow-runtime.repository.ts:336` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | calculado: `effect.outboxEventType` | `src/modules/workflow/services/transition-execution.service.ts:738` |
+| Evento de dominio | calculado: `effect.outboxEventType` | `src/modules/workflow/services/transition-execution.service.ts:750` |
 
 ### Parámetros
 
@@ -436,7 +439,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `workflowInstanceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Instancia en `retry_scheduled` que vuelve a `running` | `src/modules/workflow/dto/workflow.dto.ts:752` |
+| `workflowInstanceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Instancia en `retry_scheduled` que vuelve a `running` | `src/modules/workflow/dto/workflow.dto.ts:764` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -458,10 +461,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `retryEventId` | `string` | Sí | formato uuid | — | Evento de reintento registrado | `src/modules/workflow/dto/workflow.dto.ts:766` |
-| `originalEventId` | `string` | Sí | formato uuid | — | Identificador asociado a original event. | `src/modules/workflow/dto/workflow.dto.ts:772` |
-| `idempotencyKey` | `string` | No | — | — | Clave de idempotencia conservada del original, para no duplicar el efecto de negocio | `src/modules/workflow/dto/workflow.dto.ts:781` |
-| `workflowInstanceId` | `string` | No | formato uuid | — | Identificador asociado a workflow instance. | `src/modules/workflow/dto/workflow.dto.ts:787` |
+| `retryEventId` | `string` | Sí | formato uuid | — | Evento de reintento registrado | `src/modules/workflow/dto/workflow.dto.ts:778` |
+| `originalEventId` | `string` | Sí | formato uuid | — | Identificador asociado a original event. | `src/modules/workflow/dto/workflow.dto.ts:784` |
+| `idempotencyKey` | `string` | No | — | — | Clave de idempotencia conservada del original, para no duplicar el efecto de negocio | `src/modules/workflow/dto/workflow.dto.ts:793` |
+| `workflowInstanceId` | `string` | No | formato uuid | — | Identificador asociado a workflow instance. | `src/modules/workflow/dto/workflow.dto.ts:799` |
 
 ### Respuestas posibles
 
@@ -494,7 +497,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `WorkflowInstancesController.createInstance` — `src/modules/workflow/controllers/workflow-instances.controller.ts:54`
+- **Implementación:** `WorkflowInstancesController.createInstance` — `src/modules/workflow/controllers/workflow-instances.controller.ts:63`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -504,14 +507,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 ### Cómo se atiende (sistema)
 
-`POST /workflow/instances` la atiende `WorkflowInstancesController.createInstance` (src/modules/workflow/controllers/workflow-instances.controller.ts:54). Exige sesión con alguno de los roles CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `CreateWorkflowInstanceDto` (14 campos, 4 obligatorios). Delega en `WorkflowInstancesService.createInstance`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.workflow_instances, workflow.workflow_tasks. Lee messaging.outbox_messages, workflow.state_definitions, workflow.state_machine_definitions, workflow.workflow_instances. Publica WorkflowInstanceStarted.
+`POST /workflow/instances` la atiende `WorkflowInstancesController.createInstance` (src/modules/workflow/controllers/workflow-instances.controller.ts:63). Exige sesión con alguno de los roles CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `CreateWorkflowInstanceDto` (14 campos, 4 obligatorios). Delega en `WorkflowInstancesService.createInstance`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.workflow_instances, workflow.workflow_tasks. Lee messaging.outbox_messages, workflow.state_definitions, workflow.state_machine_definitions, workflow.workflow_instances. Publica WorkflowInstanceStarted.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-instances.controller.ts:54` |
+| ROL | Alguno de: CLINICIAN, BILLING_AGENT, SCHEDULER, SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-instances.controller.ts:63` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -522,8 +525,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | WorkflowInstancesController.createInstance → WorkflowInstancesService.createInstance → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowInstancesController.createInstance → WorkflowInstancesService.createInstance → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowInstancesController.createInstance → WorkflowInstancesService.createInstance → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowInstancesController.createInstance → WorkflowInstancesService.createInstance → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowInstancesController.createInstance → WorkflowInstancesService.createInstance → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `workflow.state_definitions` | LEE | LEE | DIRECTA | WorkflowInstancesController.createInstance → WorkflowInstancesService.createInstance → StateMachinesRepository.findInitialState | `src/modules/workflow/repositories/state-machines.repository.ts:441` |
 | `workflow.state_machine_definitions` | LEE | LEE | DIRECTA | WorkflowInstancesController.createInstance → WorkflowInstancesService.createInstance → StateMachinesRepository.findActiveMachineByCode | `src/modules/workflow/repositories/state-machines.repository.ts:330` |
 | `workflow.workflow_instances` | ESCRIBE | CREA | DIRECTA | WorkflowInstancesController.createInstance → WorkflowInstancesService.createInstance → WorkflowRuntimeRepository.createInstance | `src/modules/workflow/repositories/workflow-runtime.repository.ts:293` |
@@ -540,20 +543,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `workflowCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Código de la máquina activa que gobierna el flujo | `src/modules/workflow/dto/workflow.dto.ts:1043` |
-| `subjectTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:1050` |
-| `subjectId` | `string` | Sí | formato uuid | `@IsUUID()` | Agregado sobre el que corre el flujo | `src/modules/workflow/dto/workflow.dto.ts:1060` |
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:1067` |
-| `currentStepCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/workflow/dto/workflow.dto.ts:1076` |
-| `contextJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Contexto del flujo | `src/modules/workflow/dto/workflow.dto.ts:1084` |
-| `dueAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Plazo de la instancia | `src/modules/workflow/dto/workflow.dto.ts:1095` |
-| `tasks` | `array<WorkflowTaskInputDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => WorkflowTaskInputDto)` | Tareas de los pasos iniciales | `src/modules/workflow/dto/workflow.dto.ts:1108` |
-| `tasks[].taskCode` | `string` | No | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/workflow/dto/workflow.dto.ts:990` |
-| `tasks[].taskTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:997` |
-| `tasks[].assignedUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:1005` |
-| `tasks[].assignedRoleConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:1013` |
-| `tasks[].requiredPermissionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:1021` |
-| `tasks[].dueAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/workflow/dto/workflow.dto.ts:1029` |
+| `workflowCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Código de la máquina activa que gobierna el flujo | `src/modules/workflow/dto/workflow.dto.ts:1055` |
+| `subjectTypeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:1062` |
+| `subjectId` | `string` | Sí | formato uuid | `@IsUUID()` | Agregado sobre el que corre el flujo | `src/modules/workflow/dto/workflow.dto.ts:1072` |
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:1079` |
+| `currentStepCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/workflow/dto/workflow.dto.ts:1088` |
+| `contextJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Contexto del flujo | `src/modules/workflow/dto/workflow.dto.ts:1096` |
+| `dueAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Plazo de la instancia | `src/modules/workflow/dto/workflow.dto.ts:1107` |
+| `tasks` | `array<WorkflowTaskInputDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => WorkflowTaskInputDto)` | Tareas de los pasos iniciales | `src/modules/workflow/dto/workflow.dto.ts:1120` |
+| `tasks[].taskCode` | `string` | No | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/workflow/dto/workflow.dto.ts:1002` |
+| `tasks[].taskTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:1009` |
+| `tasks[].assignedUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:1017` |
+| `tasks[].assignedRoleConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:1025` |
+| `tasks[].requiredPermissionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/workflow/dto/workflow.dto.ts:1033` |
+| `tasks[].dueAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | — | `src/modules/workflow/dto/workflow.dto.ts:1041` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -596,11 +599,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/workflow/dto/workflow.dto.ts:1119` |
-| `workflowCode` | `string` | Sí | — | — | Valor de workflow code mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:1125` |
-| `currentStateConceptId` | `string` | Sí | formato uuid | — | Estado inicial tomado de la definición | `src/modules/workflow/dto/workflow.dto.ts:1134` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/workflow/dto/workflow.dto.ts:1140` |
-| `taskIds` | `array<string>` | Sí | formato uuid | — | Valor de task ids mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:1146` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/workflow/dto/workflow.dto.ts:1131` |
+| `workflowCode` | `string` | Sí | — | — | Valor de workflow code mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:1137` |
+| `currentStateConceptId` | `string` | Sí | formato uuid | — | Estado inicial tomado de la definición | `src/modules/workflow/dto/workflow.dto.ts:1146` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/workflow/dto/workflow.dto.ts:1152` |
+| `taskIds` | `array<string>` | Sí | formato uuid | — | Valor de task ids mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:1158` |
 
 ### Respuestas posibles
 
@@ -634,7 +637,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `WorkflowInstancesController.sweepTimeouts` — `src/modules/workflow/controllers/workflow-instances.controller.ts:38`
+- **Implementación:** `WorkflowInstancesController.sweepTimeouts` — `src/modules/workflow/controllers/workflow-instances.controller.ts:43`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -644,14 +647,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 ### Cómo se atiende (sistema)
 
-`POST /workflow/instances/sweep-timeouts` la atiende `WorkflowInstancesController.sweepTimeouts` (src/modules/workflow/controllers/workflow-instances.controller.ts:38). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `SweepTimeoutsDto` (1 campo, 0 obligatorios). Delega en `WorkflowInstancesService.sweepTimeouts`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza workflow.workflow_instances, workflow.workflow_tasks. Lee messaging.outbox_messages, workflow.workflow_instances, workflow.workflow_tasks. Publica WorkflowTimedOut.
+`POST /workflow/instances/sweep-timeouts` la atiende `WorkflowInstancesController.sweepTimeouts` (src/modules/workflow/controllers/workflow-instances.controller.ts:43). Exige sesión con alguno de los roles SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `SweepTimeoutsDto` (1 campo, 0 obligatorios). Delega en `WorkflowInstancesService.sweepTimeouts`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza workflow.workflow_instances, workflow.workflow_tasks. Lee messaging.outbox_messages, workflow.workflow_instances, workflow.workflow_tasks. Publica WorkflowTimedOut.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-instances.controller.ts:38` |
+| ROL | Alguno de: SYSTEM, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-instances.controller.ts:43` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -662,8 +665,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | WorkflowInstancesController.sweepTimeouts → WorkflowInstancesService.sweepTimeouts → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowInstancesController.sweepTimeouts → WorkflowInstancesService.sweepTimeouts → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowInstancesController.sweepTimeouts → WorkflowInstancesService.sweepTimeouts → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowInstancesController.sweepTimeouts → WorkflowInstancesService.sweepTimeouts → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowInstancesController.sweepTimeouts → WorkflowInstancesService.sweepTimeouts → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `workflow.workflow_instances` | ESCRIBE | ACTUALIZA | POR_TIPO | WorkflowInstancesController.sweepTimeouts → WorkflowInstancesService.sweepTimeouts | `src/modules/workflow/services/workflow-instances.service.ts:382` |
 | `workflow.workflow_instances` | LEE | LEE | DIRECTA | WorkflowInstancesController.sweepTimeouts → WorkflowInstancesService.sweepTimeouts → WorkflowRuntimeRepository.findDueInstancesForUpdate | `src/modules/workflow/repositories/workflow-runtime.repository.ts:389` |
 | `workflow.workflow_tasks` | ESCRIBE | ACTUALIZA | POR_TIPO | WorkflowInstancesController.sweepTimeouts → WorkflowInstancesService.sweepTimeouts | `src/modules/workflow/services/workflow-instances.service.ts:397` |
@@ -679,7 +682,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `batchSize` | `number` | No | mínimo 1; máximo 500 | `@IsOptional()` `@IsInt()` `@Min(1)` | Cuántas instancias vencidas toma este barrido | `src/modules/workflow/dto/workflow.dto.ts:808` |
+| `batchSize` | `number` | No | mínimo 1; máximo 500 | `@IsOptional()` `@IsInt()` `@Min(1)` | Cuántas instancias vencidas toma este barrido | `src/modules/workflow/dto/workflow.dto.ts:820` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -701,9 +704,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `escalatedInstances` | `number` | Sí | — | — | Instancias que quedaron escaladas | `src/modules/workflow/dto/workflow.dto.ts:819` |
-| `escalatedTasks` | `number` | Sí | — | — | Tareas que quedaron escaladas | `src/modules/workflow/dto/workflow.dto.ts:825` |
-| `instanceIds` | `array<string>` | Sí | formato uuid | — | Valor de instance ids mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:831` |
+| `escalatedInstances` | `number` | Sí | — | — | Instancias que quedaron escaladas | `src/modules/workflow/dto/workflow.dto.ts:831` |
+| `escalatedTasks` | `number` | Sí | — | — | Tareas que quedaron escaladas | `src/modules/workflow/dto/workflow.dto.ts:837` |
+| `instanceIds` | `array<string>` | Sí | formato uuid | — | Valor de instance ids mantenido por la instancia. | `src/modules/workflow/dto/workflow.dto.ts:843` |
 
 ### Respuestas posibles
 
@@ -734,7 +737,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `WorkflowDefinitionsController.registerStateMachine` — `src/modules/workflow/controllers/workflow-definitions.controller.ts:42`
+- **Implementación:** `WorkflowDefinitionsController.registerStateMachine` — `src/modules/workflow/controllers/workflow-definitions.controller.ts:47`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -744,14 +747,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 ### Cómo se atiende (sistema)
 
-`POST /workflow/state-machines` la atiende `WorkflowDefinitionsController.registerStateMachine` (src/modules/workflow/controllers/workflow-definitions.controller.ts:42). Exige sesión con alguno de los roles WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RegisterStateMachineDto` (5 campos, 5 obligatorios). Delega en `StateMachineDefinitionService.registerStateMachine`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.state_machine_definitions. Lee messaging.outbox_messages, workflow.state_machine_definitions. Publica StateMachineDefined.
+`POST /workflow/state-machines` la atiende `WorkflowDefinitionsController.registerStateMachine` (src/modules/workflow/controllers/workflow-definitions.controller.ts:47). Exige sesión con alguno de los roles WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RegisterStateMachineDto` (5 campos, 5 obligatorios). Delega en `StateMachineDefinitionService.registerStateMachine`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.state_machine_definitions. Lee messaging.outbox_messages, workflow.state_machine_definitions. Publica StateMachineDefined.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:42` |
+| ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:47` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
@@ -762,8 +765,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | WorkflowDefinitionsController.registerStateMachine → StateMachineDefinitionService.registerStateMachine → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowDefinitionsController.registerStateMachine → StateMachineDefinitionService.registerStateMachine → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowDefinitionsController.registerStateMachine → StateMachineDefinitionService.registerStateMachine → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowDefinitionsController.registerStateMachine → StateMachineDefinitionService.registerStateMachine → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowDefinitionsController.registerStateMachine → StateMachineDefinitionService.registerStateMachine → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `workflow.state_machine_definitions` | ESCRIBE | CREA | DIRECTA | WorkflowDefinitionsController.registerStateMachine → StateMachineDefinitionService.registerStateMachine → StateMachinesRepository.createMachine | `src/modules/workflow/repositories/state-machines.repository.ts:264` |
 | `workflow.state_machine_definitions` | LEE | LEE | DIRECTA | WorkflowDefinitionsController.registerStateMachine → StateMachineDefinitionService.registerStateMachine → StateMachinesRepository.findMachineByCode | `src/modules/workflow/repositories/state-machines.repository.ts:318` |
 
@@ -848,7 +851,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `WorkflowDefinitionsController.publishStateMachine` — `src/modules/workflow/controllers/workflow-definitions.controller.ts:91`
+- **Implementación:** `WorkflowDefinitionsController.publishStateMachine` — `src/modules/workflow/controllers/workflow-definitions.controller.ts:111`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -858,16 +861,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 ### Cómo se atiende (sistema)
 
-`POST /workflow/state-machines/{id}/publish` la atiende `WorkflowDefinitionsController.publishStateMachine` (src/modules/workflow/controllers/workflow-definitions.controller.ts:91). Exige sesión con alguno de los roles WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `PublishStateMachineDto` (1 campo, 0 obligatorios). Delega en `StateMachineDefinitionService.publishStateMachine`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza workflow.state_machine_definitions. Lee messaging.outbox_messages, workflow.state_definitions, workflow.state_machine_definitions, workflow.state_transition_definitions. Publica StateMachineVersionPublished.
+`POST /workflow/state-machines/{id}/publish` la atiende `WorkflowDefinitionsController.publishStateMachine` (src/modules/workflow/controllers/workflow-definitions.controller.ts:111). Exige sesión con alguno de los roles WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `PublishStateMachineDto` (1 campo, 0 obligatorios). Delega en `StateMachineDefinitionService.publishStateMachine`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza workflow.state_machine_definitions. Lee messaging.outbox_messages, workflow.state_definitions, workflow.state_machine_definitions, workflow.state_transition_definitions. Publica StateMachineVersionPublished.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:91` |
+| ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:111` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-definitions.controller.ts:91` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-definitions.controller.ts:111` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -877,8 +880,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | WorkflowDefinitionsController.publishStateMachine → StateMachineDefinitionService.publishStateMachine → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowDefinitionsController.publishStateMachine → StateMachineDefinitionService.publishStateMachine → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowDefinitionsController.publishStateMachine → StateMachineDefinitionService.publishStateMachine → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowDefinitionsController.publishStateMachine → StateMachineDefinitionService.publishStateMachine → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowDefinitionsController.publishStateMachine → StateMachineDefinitionService.publishStateMachine → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `workflow.state_definitions` | LEE | LEE | DIRECTA | WorkflowDefinitionsController.publishStateMachine → StateMachineDefinitionService.publishStateMachine → StateMachinesRepository.findStatesByMachine | `src/modules/workflow/repositories/state-machines.repository.ts:404` |
 | `workflow.state_machine_definitions` | ESCRIBE | ACTUALIZA | POR_TIPO | WorkflowDefinitionsController.publishStateMachine → StateMachineDefinitionService.publishStateMachine | `src/modules/workflow/services/state-machine-definition.service.ts:472` |
 | `workflow.state_machine_definitions` | LEE | LEE | DIRECTA | WorkflowDefinitionsController.publishStateMachine → StateMachineDefinitionService.publishStateMachine → StateMachinesRepository.findMachineForUpdate | `src/modules/workflow/repositories/state-machines.repository.ts:300` |
@@ -958,7 +961,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `WorkflowDefinitionsController.defineStates` — `src/modules/workflow/controllers/workflow-definitions.controller.ts:58`
+- **Implementación:** `WorkflowDefinitionsController.defineStates` — `src/modules/workflow/controllers/workflow-definitions.controller.ts:68`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -968,16 +971,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 ### Cómo se atiende (sistema)
 
-`POST /workflow/state-machines/{id}/states` la atiende `WorkflowDefinitionsController.defineStates` (src/modules/workflow/controllers/workflow-definitions.controller.ts:58). Exige sesión con alguno de los roles WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineStatesDto` (7 campos, 4 obligatorios). Delega en `StateMachineDefinitionService.defineStates`. Crea filas en workflow.state_definitions. Lee workflow.state_definitions, workflow.state_machine_definitions.
+`POST /workflow/state-machines/{id}/states` la atiende `WorkflowDefinitionsController.defineStates` (src/modules/workflow/controllers/workflow-definitions.controller.ts:68). Exige sesión con alguno de los roles WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineStatesDto` (7 campos, 4 obligatorios). Delega en `StateMachineDefinitionService.defineStates`. Crea filas en workflow.state_definitions. Lee workflow.state_definitions, workflow.state_machine_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:58` |
+| ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:68` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-definitions.controller.ts:58` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-definitions.controller.ts:68` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1081,7 +1084,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `WorkflowDefinitionsController.defineTransition` — `src/modules/workflow/controllers/workflow-definitions.controller.ts:75`
+- **Implementación:** `WorkflowDefinitionsController.defineTransition` — `src/modules/workflow/controllers/workflow-definitions.controller.ts:90`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1091,16 +1094,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 ### Cómo se atiende (sistema)
 
-`POST /workflow/state-machines/{id}/transitions` la atiende `WorkflowDefinitionsController.defineTransition` (src/modules/workflow/controllers/workflow-definitions.controller.ts:75). Exige sesión con alguno de los roles WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineTransitionDto` (25 campos, 6 obligatorios). Delega en `StateMachineDefinitionService.defineTransition`. Crea filas en workflow.state_transition_definitions, workflow.transition_guards, workflow.transition_side_effects. Lee workflow.state_definitions, workflow.state_machine_definitions, workflow.state_transition_definitions.
+`POST /workflow/state-machines/{id}/transitions` la atiende `WorkflowDefinitionsController.defineTransition` (src/modules/workflow/controllers/workflow-definitions.controller.ts:90). Exige sesión con alguno de los roles WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `DefineTransitionDto` (25 campos, 6 obligatorios). Delega en `StateMachineDefinitionService.defineTransition`. Crea filas en workflow.state_transition_definitions, workflow.transition_guards, workflow.transition_side_effects. Lee workflow.state_definitions, workflow.state_machine_definitions, workflow.state_transition_definitions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:75` |
+| ROL | Alguno de: WORKFLOW_ARCHITECT, GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-definitions.controller.ts:90` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-definitions.controller.ts:75` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-definitions.controller.ts:90` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1246,7 +1249,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Operaciones de Plataforma
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `WorkflowInstancesController.completeTask` — `src/modules/workflow/controllers/workflow-instances.controller.ts:70`
+- **Implementación:** `WorkflowInstancesController.completeTask` — `src/modules/workflow/controllers/workflow-instances.controller.ts:84`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1256,16 +1259,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 ### Cómo se atiende (sistema)
 
-`POST /workflow/tasks/{id}/complete` la atiende `WorkflowInstancesController.completeTask` (src/modules/workflow/controllers/workflow-instances.controller.ts:70). Exige sesión con alguno de los roles CLINICIAN, BILLING_AGENT, SCHEDULER, PLATFORM_ADMIN. Valida el cuerpo como `CompleteTaskDto` (4 campos, 0 obligatorios). Delega en `WorkflowInstancesService.completeTask`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.state_transition_events. Actualiza workflow.workflow_instances, workflow.workflow_tasks. Lee messaging.outbox_messages, workflow.state_machine_definitions, workflow.state_transition_definitions, workflow.workflow_instances, workflow.workflow_tasks. Publica WorkflowTaskCompleted.
+`POST /workflow/tasks/{id}/complete` la atiende `WorkflowInstancesController.completeTask` (src/modules/workflow/controllers/workflow-instances.controller.ts:84). Exige sesión con alguno de los roles CLINICIAN, BILLING_AGENT, SCHEDULER, PLATFORM_ADMIN. Valida el cuerpo como `CompleteTaskDto` (4 campos, 0 obligatorios). Delega en `WorkflowInstancesService.completeTask`. Crea filas en messaging.domain_events, messaging.outbox_messages, workflow.state_transition_events. Actualiza workflow.workflow_instances, workflow.workflow_tasks. Lee messaging.outbox_messages, workflow.state_machine_definitions, workflow.state_transition_definitions, workflow.workflow_instances, workflow.workflow_tasks. Publica WorkflowTaskCompleted.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: CLINICIAN, BILLING_AGENT, SCHEDULER, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-instances.controller.ts:70` |
+| ROL | Alguno de: CLINICIAN, BILLING_AGENT, SCHEDULER, PLATFORM_ADMIN | `src/modules/workflow/controllers/workflow-instances.controller.ts:84` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-instances.controller.ts:70` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/workflow/controllers/workflow-instances.controller.ts:84` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
@@ -1275,8 +1278,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | WorkflowInstancesController.completeTask → WorkflowInstancesService.completeTask → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowInstancesController.completeTask → WorkflowInstancesService.completeTask → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowInstancesController.completeTask → WorkflowInstancesService.completeTask → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | WorkflowInstancesController.completeTask → WorkflowInstancesService.completeTask → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | WorkflowInstancesController.completeTask → WorkflowInstancesService.completeTask → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 | `workflow.state_machine_definitions` | LEE | LEE | DIRECTA | WorkflowInstancesController.completeTask → WorkflowInstancesService.completeTask → StateMachinesRepository.findActiveMachineByCode | `src/modules/workflow/repositories/state-machines.repository.ts:330` |
 | `workflow.state_transition_definitions` | LEE | LEE | DIRECTA | WorkflowInstancesController.completeTask → WorkflowInstancesService.completeTask → StateMachinesRepository.findTransitionByCommand | `src/modules/workflow/repositories/state-machines.repository.ts:525` |
 | `workflow.state_transition_events` | ESCRIBE | CREA | DIRECTA | WorkflowInstancesController.completeTask → WorkflowInstancesService.completeTask → WorkflowRuntimeRepository.createTransitionEvent | `src/modules/workflow/repositories/workflow-runtime.repository.ts:182` |
@@ -1301,10 +1304,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `commandCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Comando de la máquina que dispara el completado, si lo hay | `src/modules/workflow/dto/workflow.dto.ts:1165` |
-| `nextStepCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Paso al que avanza la instancia | `src/modules/workflow/dto/workflow.dto.ts:1177` |
-| `nextDueAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Nuevo plazo de la instancia | `src/modules/workflow/dto/workflow.dto.ts:1188` |
-| `resultJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Resultado de la tarea, para el contexto de la instancia | `src/modules/workflow/dto/workflow.dto.ts:1198` |
+| `commandCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Comando de la máquina que dispara el completado, si lo hay | `src/modules/workflow/dto/workflow.dto.ts:1177` |
+| `nextStepCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Paso al que avanza la instancia | `src/modules/workflow/dto/workflow.dto.ts:1189` |
+| `nextDueAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Nuevo plazo de la instancia | `src/modules/workflow/dto/workflow.dto.ts:1200` |
+| `resultJson` | `object` | No | — | `@IsOptional()` `@IsObject()` | Resultado de la tarea, para el contexto de la instancia | `src/modules/workflow/dto/workflow.dto.ts:1210` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1329,12 +1332,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/workflo
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `taskId` | `string` | Sí | formato uuid | — | Identificador asociado a task. | `src/modules/workflow/dto/workflow.dto.ts:1209` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/workflow/dto/workflow.dto.ts:1215` |
-| `workflowInstanceId` | `string` | Sí | formato uuid | — | Identificador asociado a workflow instance. | `src/modules/workflow/dto/workflow.dto.ts:1221` |
-| `currentStepCode` | `string` | No | — | — | Paso al que avanzó la instancia | `src/modules/workflow/dto/workflow.dto.ts:1227` |
-| `transitionEventId` | `string` | No | formato uuid | — | Transición disparada por el completado, si la tarea la tenía asociada | `src/modules/workflow/dto/workflow.dto.ts:1237` |
-| `remainingOpenTasks` | `number` | Sí | — | — | Tareas que quedan abiertas en la instancia | `src/modules/workflow/dto/workflow.dto.ts:1243` |
+| `taskId` | `string` | Sí | formato uuid | — | Identificador asociado a task. | `src/modules/workflow/dto/workflow.dto.ts:1221` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/workflow/dto/workflow.dto.ts:1227` |
+| `workflowInstanceId` | `string` | Sí | formato uuid | — | Identificador asociado a workflow instance. | `src/modules/workflow/dto/workflow.dto.ts:1233` |
+| `currentStepCode` | `string` | No | — | — | Paso al que avanzó la instancia | `src/modules/workflow/dto/workflow.dto.ts:1239` |
+| `transitionEventId` | `string` | No | formato uuid | — | Transición disparada por el completado, si la tarea la tenía asociada | `src/modules/workflow/dto/workflow.dto.ts:1249` |
+| `remainingOpenTasks` | `number` | Sí | — | — | Tareas que quedan abiertas en la instancia | `src/modules/workflow/dto/workflow.dto.ts:1255` |
 
 ### Respuestas posibles
 

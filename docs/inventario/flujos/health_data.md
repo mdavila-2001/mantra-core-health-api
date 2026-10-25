@@ -58,7 +58,7 @@ _Fuente: `src/modules/health_data/README.md:91`_
 |---|---|---|---|---|---|
 | `UC-52-01` | Abrir lote desde una conexión de origen | POST /health-data/ingestion-batches | INGESTION_WORKER · HEALTH_DATA_ADMIN | MEDIO | 4 |
 | `UC-52-02` | Registro crudo y cierre con conteos | POST /health-data/ingestion-batches/{id}/records | INGESTION_WORKER · HEALTH_DATA_ADMIN | MEDIO | 3 |
-| `UC-52-03` | Proyectar recurso canónico y versionarlo | POST /health-data/canonical-resources/project | INGESTION_WORKER · HEALTH_DATA_ADMIN | MEDIO | 10 |
+| `UC-52-03` | Proyectar recurso canónico y versionarlo | POST /health-data/canonical-resources/project | INGESTION_WORKER · HEALTH_DATA_ADMIN | MEDIO | 12 |
 | `UC-52-04` | Identificadores de negocio | POST /health-data/canonical-resources/{id}/identifiers | INGESTION_WORKER · CLINICAL_INFORMATICIAN · HEALTH_DATA_ADMIN | MEDIO | 5 |
 | `UC-52-05` | Relacionar recursos (grafo clínico) | POST /health-data/canonical-resources/{id}/relationships | DATA_STEWARD · CLINICAL_INFORMATICIAN · HEALTH_DATA_ADMIN | MEDIO | 4 |
 | `UC-52-06` | Enlazar a entidad de dominio | POST /health-data/canonical-resources/{id}/bindings | CLINICAL_INFORMATICIAN · HEALTH_DATA_ADMIN | MEDIO | 5 |
@@ -66,11 +66,11 @@ _Fuente: `src/modules/health_data/README.md:91`_
 | `UC-52-08` | Reglas de calidad e incidencias | POST /health-data/quality-runs | DATA_STEWARD · HEALTH_DATA_ADMIN | MEDIO | 6 |
 | `UC-52-09` | Resolver identidad longitudinal (MPI) | POST /health-data/identity/candidates/{id}/decision | MPI_STEWARD · HEALTH_DATA_ADMIN | MEDIO | 9 |
 | `UC-52-10` | Proyectar entrada de línea de tiempo | POST /health-data/timeline-entries | SYSTEM · HEALTH_DATA_ADMIN | MEDIO | 2 |
-| `UC-52-11` | Corrida de de-identificación | POST /health-data/deidentification-runs | PRIVACY_OFFICER · HEALTH_DATA_ADMIN | MEDIO | 5 |
-| `UC-52-12` | Exportar Bundle FHIR con manifiesto | POST /fhir/r5/$export | PRIVACY_OFFICER · HEALTH_DATA_ADMIN | MEDIO | 5 |
-| `UC-52-13` | Servir historia longitudinal | GET /fhir/r5/Patient/{id}/$everything | INTEROP_CONSUMER · CLINICAL_INFORMATICIAN · HEALTH_DATA_ADMIN | BAJO | 3 |
+| `UC-52-11` | Corrida de de-identificación | POST /health-data/deidentification-runs | PRIVACY_OFFICER · HEALTH_DATA_ADMIN | MEDIO | 9 |
+| `UC-52-12` | Exportar Bundle FHIR con manifiesto | POST /fhir/r5/$export | PRIVACY_OFFICER · HEALTH_DATA_ADMIN | MEDIO | 12 |
+| `UC-52-13` | Servir historia longitudinal | GET /fhir/r5/Patient/{id}/$everything | INTEROP_CONSUMER · CLINICAL_INFORMATICIAN · HEALTH_DATA_ADMIN | BAJO | 5 |
 | `UC-52-14` | Retiro gobernado del recurso | POST /health-data/canonical-resources/{id}/retire | CLINICAL_INFORMATICIAN · HEALTH_DATA_ADMIN | MEDIO | 8 |
-| `ctrl:HealthDataController` | Operaciones de HealthDataController que el README no asigna a un caso de uso | POST /health-data/ingestion-batches/{id}/close | INGESTION_WORKER · HEALTH_DATA_ADMIN | MEDIO | 3 |
+| `ctrl:HealthDataController` | Operaciones de HealthDataController que el README no asigna a un caso de uso | POST /health-data/ingestion-batches/{id}/close | INGESTION_WORKER · HEALTH_DATA_ADMIN | BAJO | 2 |
 |  |  | POST /health-data/source-connections | HEALTH_DATA_ADMIN · CLINICAL_INFORMATICIAN · DATA_PLATFORM_ADMIN | MEDIO | 3 |
 
 ### Diagrama — etapas `UC-52-01`, `UC-52-02`, `UC-52-03`…
@@ -78,185 +78,192 @@ _Fuente: `src/modules/health_data/README.md:91`_
 ```mermaid
 flowchart LR
   a2(["INGESTION_WORKER · HEALTH_DATA_ADMIN"]):::actor
-  a12(["INGESTION_WORKER · CLINICAL_INFORMATICIAN · HEALTH_DATA_ADM…"]):::actor
-  a15(["DATA_STEWARD · CLINICAL_INFORMATICIAN · HEALTH_DATA_ADMIN"]):::actor
-  a18(["CLINICAL_INFORMATICIAN · HEALTH_DATA_ADMIN"]):::actor
-  a22(["INGESTION_WORKER · HEALTH_DATA_ADMIN · CLINICAL_INFORMATICI…"]):::actor
-  a28(["DATA_STEWARD · HEALTH_DATA_ADMIN"]):::actor
-  a34(["MPI_STEWARD · HEALTH_DATA_ADMIN"]):::actor
-  a40(["SYSTEM · HEALTH_DATA_ADMIN"]):::actor
-  a43(["PRIVACY_OFFICER · HEALTH_DATA_ADMIN"]):::actor
-  a52(["INTEROP_CONSUMER · CLINICAL_INFORMATICIAN · HEALTH_DATA_ADM…"]):::actor
-  a57(["HEALTH_DATA_ADMIN · CLINICAL_INFORMATICIAN · DATA_PLATFORM_…"]):::actor
+  a13(["INGESTION_WORKER · CLINICAL_INFORMATICIAN · HEALTH_DATA_ADM…"]):::actor
+  a16(["DATA_STEWARD · CLINICAL_INFORMATICIAN · HEALTH_DATA_ADMIN"]):::actor
+  a19(["CLINICAL_INFORMATICIAN · HEALTH_DATA_ADMIN"]):::actor
+  a23(["INGESTION_WORKER · HEALTH_DATA_ADMIN · CLINICAL_INFORMATICI…"]):::actor
+  a29(["DATA_STEWARD · HEALTH_DATA_ADMIN"]):::actor
+  a35(["MPI_STEWARD · HEALTH_DATA_ADMIN"]):::actor
+  a41(["SYSTEM · HEALTH_DATA_ADMIN"]):::actor
+  a44(["PRIVACY_OFFICER · HEALTH_DATA_ADMIN"]):::actor
+  a55(["INTEROP_CONSUMER · CLINICAL_INFORMATICIAN · HEALTH_DATA_ADM…"]):::actor
+  a60(["HEALTH_DATA_ADMIN · CLINICAL_INFORMATICIAN · DATA_PLATFORM_…"]):::actor
   t3[("health_data.health_ingestion_batches")]:::tabla
   t4[("health_data.health_source_connections")]:::tabla
-  t6[("health_data.health_ingestion_records")]:::tabla
-  t8[("health_data.canonical_health_resource_versions")]:::tabla
-  t9[("health_data.canonical_health_resources")]:::tabla
-  t13[("health_data.canonical_resource_identifiers")]:::tabla
-  t16[("health_data.canonical_resource_relationships")]:::tabla
-  t19[("health_data.canonical_resource_bindings")]:::tabla
-  t20[("health_data.health_lineage_edges")]:::tabla
-  t23[("health_data.fhir_profile_versions")]:::tabla
-  t24[("health_data.fhir_validation_issues")]:::tabla
-  t25[("health_data.fhir_validation_runs")]:::tabla
-  t29[("health_data.health_data_quality_issues")]:::tabla
-  t30[("health_data.health_data_quality_rule_sets")]:::tabla
-  t31[("health_data.health_data_quality_rules")]:::tabla
-  t32[("health_data.health_data_quality_runs")]:::tabla
-  t35[("health_data.patient_identity_clusters")]:::tabla
-  t36[("health_data.patient_identity_members")]:::tabla
-  t37[("health_data.patient_match_candidates")]:::tabla
-  t41[("health_data.patient_timeline_entries")]:::tabla
-  t44[("health_data.health_deidentification_profiles")]:::tabla
-  t45[("health_data.health_deidentification_runs")]:::tabla
-  t46[("health_data.health_provenance_records")]:::tabla
-  t47[("health_data.health_provenance_targets")]:::tabla
-  t49[("health_data.health_export_jobs")]:::tabla
-  t50[("health_data.health_export_manifests")]:::tabla
-  t58[("health_data.health_source_systems")]:::tabla
+  t5[("health_data.health_source_systems")]:::tabla
+  t7[("health_data.health_ingestion_records")]:::tabla
+  t9[("health_data.canonical_health_resource_versions")]:::tabla
+  t10[("health_data.canonical_health_resources")]:::tabla
+  t14[("health_data.canonical_resource_identifiers")]:::tabla
+  t17[("health_data.canonical_resource_relationships")]:::tabla
+  t20[("health_data.canonical_resource_bindings")]:::tabla
+  t21[("health_data.health_lineage_edges")]:::tabla
+  t24[("health_data.fhir_profile_versions")]:::tabla
+  t25[("health_data.fhir_validation_issues")]:::tabla
+  t26[("health_data.fhir_validation_runs")]:::tabla
+  t30[("health_data.health_data_quality_issues")]:::tabla
+  t31[("health_data.health_data_quality_rule_sets")]:::tabla
+  t32[("health_data.health_data_quality_rules")]:::tabla
+  t33[("health_data.health_data_quality_runs")]:::tabla
+  t36[("health_data.patient_identity_clusters")]:::tabla
+  t37[("health_data.patient_identity_members")]:::tabla
+  t38[("health_data.patient_match_candidates")]:::tabla
+  t42[("health_data.patient_timeline_entries")]:::tabla
+  t45[("common.files")]:::tabla
+  t46[("consent.consents")]:::tabla
+  t47[("health_data.health_deidentification_profiles")]:::tabla
+  t48[("health_data.health_deidentification_runs")]:::tabla
+  t51[("authz.clinical_access_grants")]:::tabla
+  t52[("health_data.health_export_jobs")]:::tabla
   subgraph s0["UC-52-01 · Abrir lote desde una conexión de origen"]
     o1["POST /health-data/ingestion-batches"]:::op
   end
   subgraph s1["UC-52-02 · Registro crudo y cierre con conteos"]
-    o5["POST /health-data/ingestion-batches/{id}/records"]:::op
+    o6["POST /health-data/ingestion-batches/{id}/records"]:::op
   end
-  t10[("+4 tablas más")]
+  t11[("+6 tablas más")]
   subgraph s2["UC-52-03 · Proyectar recurso canónico y versionarlo"]
-    o7["POST /health-data/canonical-resources/project"]:::op
+    o8["POST /health-data/canonical-resources/project"]:::op
   end
   subgraph s3["UC-52-04 · Identificadores de negocio"]
-    o11["POST /health-data/canonical-resources/{id}/identifiers"]:::op
+    o12["POST /health-data/canonical-resources/{id}/identifiers"]:::op
   end
   subgraph s4["UC-52-05 · Relacionar recursos (grafo clínico)"]
-    o14["POST /health-data/canonical-resources/{id}/relationships"]:::op
+    o15["POST /health-data/canonical-resources/{id}/relationships"]:::op
   end
   subgraph s5["UC-52-06 · Enlazar a entidad de dominio"]
-    o17["POST /health-data/canonical-resources/{id}/bindings"]:::op
+    o18["POST /health-data/canonical-resources/{id}/bindings"]:::op
   end
-  t26[("+1 tablas más")]
+  t27[("+1 tablas más")]
   subgraph s6["UC-52-07 · Validar contra perfil FHIR R5"]
-    o21["POST /health-data/versions/{id}/validate"]:::op
+    o22["POST /health-data/versions/{id}/validate"]:::op
   end
   subgraph s7["UC-52-08 · Reglas de calidad e incidencias"]
-    o27["POST /health-data/quality-runs"]:::op
+    o28["POST /health-data/quality-runs"]:::op
   end
-  t38[("+3 tablas más")]
+  t39[("+3 tablas más")]
   subgraph s8["UC-52-09 · Resolver identidad longitudinal (MPI)"]
-    o33["POST /health-data/identity/candidates/{id}/decision"]:::op
+    o34["POST /health-data/identity/candidates/{id}/decision"]:::op
   end
   subgraph s9["UC-52-10 · Proyectar entrada de línea de tiempo"]
-    o39["POST /health-data/timeline-entries"]:::op
+    o40["POST /health-data/timeline-entries"]:::op
   end
+  t49[("+3 tablas más")]
   subgraph s10["UC-52-11 · Corrida de de-identificación"]
-    o42["POST /health-data/deidentification-runs"]:::op
+    o43["POST /health-data/deidentification-runs"]:::op
   end
+  t53[("+6 tablas más")]
   subgraph s11["UC-52-12 · Exportar Bundle FHIR con manifiesto"]
-    o48["POST /fhir/r5/$export"]:::op
+    o50["POST /fhir/r5/$export"]:::op
   end
   subgraph s12["UC-52-13 · Servir historia longitudinal"]
-    o51["GET /fhir/r5/Patient/{id}/$everything"]:::op
+    o54["GET /fhir/r5/Patient/{id}/$everything"]:::op
   end
-  t54[("+2 tablas más")]
+  t57[("+2 tablas más")]
   subgraph s13["UC-52-14 · Retiro gobernado del recurso"]
-    o53["POST /health-data/canonical-resources/{id}/retire"]:::op
+    o56["POST /health-data/canonical-resources/{id}/retire"]:::op
   end
   subgraph s14["ctrl:HealthDataController · Operaciones de HealthDataController que el README n…"]
-    o55["POST /health-data/ingestion-batches/{id}/close"]:::op
-    o56["POST /health-data/source-connections"]:::op
+    o58["POST /health-data/ingestion-batches/{id}/close"]:::op
+    o59["POST /health-data/source-connections"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
   o1 -->|"LEE"| t3
-  o1 -->|"ACTUALIZA"| t4
   o1 -->|"LEE"| t4
-  a2 --> o5
-  o5 -->|"LEE"| t3
-  o5 -->|"CREA"| t6
-  o5 -->|"LEE"| t6
-  a2 --> o7
-  o7 -->|"CREA"| t8
-  o7 -->|"LEE"| t8
-  o7 -->|"ACTUALIZA"| t9
-  o7 -->|"CREA"| t9
-  o7 -->|"LEE"| t9
-  o7 -->|"ACTUALIZA"| t6
-  o7 -.-> t10
-  a12 --> o11
-  o11 -->|"ACTUALIZA"| t9
-  o11 -->|"LEE"| t9
-  o11 -->|"ACTUALIZA"| t13
-  o11 -->|"CREA"| t13
-  o11 -->|"LEE"| t13
-  a15 --> o14
-  o14 -->|"LEE"| t9
-  o14 -->|"ACTUALIZA"| t16
-  o14 -->|"CREA"| t16
-  o14 -->|"LEE"| t16
-  a18 --> o17
-  o17 -->|"ACTUALIZA"| t9
-  o17 -->|"LEE"| t9
-  o17 -->|"CREA"| t19
-  o17 -->|"LEE"| t19
-  o17 -->|"CREA"| t20
-  a22 --> o21
-  o21 -->|"LEE"| t8
-  o21 -->|"ACTUALIZA"| t9
-  o21 -->|"LEE"| t9
-  o21 -->|"LEE"| t23
-  o21 -->|"CREA"| t24
-  o21 -->|"CREA"| t25
-  o21 -.-> t26
-  a28 --> o27
-  o27 -->|"CREA"| t29
-  o27 -->|"LEE"| t29
-  o27 -->|"LEE"| t30
-  o27 -->|"LEE"| t31
-  o27 -->|"ACTUALIZA"| t32
-  o27 -->|"CREA"| t32
-  a34 --> o33
-  o33 -->|"ACTUALIZA"| t35
-  o33 -->|"CREA"| t35
-  o33 -->|"LEE"| t35
-  o33 -->|"CREA"| t36
-  o33 -->|"LEE"| t36
-  o33 -->|"ACTUALIZA"| t37
-  o33 -.-> t38
-  a40 --> o39
-  o39 -->|"CREA"| t41
-  o39 -->|"LEE"| t41
-  a43 --> o42
-  o42 -->|"LEE"| t44
-  o42 -->|"CREA"| t45
-  o42 -->|"CREA"| t20
-  o42 -->|"CREA"| t46
-  o42 -->|"CREA"| t47
-  a43 --> o48
-  o48 -->|"LEE"| t45
-  o48 -->|"CREA"| t49
-  o48 -->|"CREA"| t50
-  o48 -->|"CREA"| t46
-  o48 -->|"CREA"| t47
-  a52 --> o51
-  o51 -->|"LEE"| t8
-  o51 -->|"LEE"| t9
-  o51 -->|"LEE"| t36
-  a18 --> o53
-  o53 -->|"ACTUALIZA"| t9
-  o53 -->|"LEE"| t9
-  o53 -->|"ACTUALIZA"| t19
-  o53 -->|"LEE"| t19
-  o53 -->|"ACTUALIZA"| t16
-  o53 -->|"LEE"| t16
-  o53 -.-> t54
-  a2 --> o55
-  o55 -->|"ACTUALIZA"| t3
-  o55 -->|"LEE"| t3
-  o55 -->|"LEE"| t6
-  a57 --> o56
-  o56 -->|"CREA"| t4
-  o56 -->|"CREA"| t58
-  o56 -->|"LEE"| t58
+  o1 -->|"LEE"| t5
+  a2 --> o6
+  o6 -->|"LEE"| t3
+  o6 -->|"CREA"| t7
+  o6 -->|"LEE"| t7
+  a2 --> o8
+  o8 -->|"CREA"| t9
+  o8 -->|"LEE"| t9
+  o8 -->|"ACTUALIZA"| t10
+  o8 -->|"CREA"| t10
+  o8 -->|"LEE"| t10
+  o8 -->|"LEE"| t3
+  o8 -.-> t11
+  a13 --> o12
+  o12 -->|"ACTUALIZA"| t10
+  o12 -->|"LEE"| t10
+  o12 -->|"ACTUALIZA"| t14
+  o12 -->|"CREA"| t14
+  o12 -->|"LEE"| t14
+  a16 --> o15
+  o15 -->|"LEE"| t10
+  o15 -->|"ACTUALIZA"| t17
+  o15 -->|"CREA"| t17
+  o15 -->|"LEE"| t17
+  a19 --> o18
+  o18 -->|"ACTUALIZA"| t10
+  o18 -->|"LEE"| t10
+  o18 -->|"CREA"| t20
+  o18 -->|"LEE"| t20
+  o18 -->|"CREA"| t21
+  a23 --> o22
+  o22 -->|"LEE"| t9
+  o22 -->|"ACTUALIZA"| t10
+  o22 -->|"LEE"| t10
+  o22 -->|"LEE"| t24
+  o22 -->|"CREA"| t25
+  o22 -->|"CREA"| t26
+  o22 -.-> t27
+  a29 --> o28
+  o28 -->|"CREA"| t30
+  o28 -->|"LEE"| t30
+  o28 -->|"LEE"| t31
+  o28 -->|"LEE"| t32
+  o28 -->|"ACTUALIZA"| t33
+  o28 -->|"CREA"| t33
+  a35 --> o34
+  o34 -->|"ACTUALIZA"| t36
+  o34 -->|"CREA"| t36
+  o34 -->|"LEE"| t36
+  o34 -->|"CREA"| t37
+  o34 -->|"LEE"| t37
+  o34 -->|"ACTUALIZA"| t38
+  o34 -.-> t39
+  a41 --> o40
+  o40 -->|"CREA"| t42
+  o40 -->|"LEE"| t42
+  a44 --> o43
+  o43 -->|"LEE"| t45
+  o43 -->|"LEE"| t46
+  o43 -->|"LEE"| t9
+  o43 -->|"LEE"| t10
+  o43 -->|"LEE"| t47
+  o43 -->|"CREA"| t48
+  o43 -.-> t49
+  a44 --> o50
+  o50 -->|"LEE"| t51
+  o50 -->|"LEE"| t46
+  o50 -->|"LEE"| t10
+  o50 -->|"LEE"| t47
+  o50 -->|"LEE"| t48
+  o50 -->|"CREA"| t52
+  o50 -.-> t53
+  a55 --> o54
+  o54 -->|"LEE"| t51
+  o54 -->|"LEE"| t9
+  o54 -->|"LEE"| t10
+  o54 -->|"LEE"| t36
+  o54 -->|"LEE"| t37
+  a19 --> o56
+  o56 -->|"ACTUALIZA"| t10
+  o56 -->|"LEE"| t10
+  o56 -->|"ACTUALIZA"| t20
+  o56 -->|"LEE"| t20
+  o56 -->|"ACTUALIZA"| t17
+  o56 -->|"LEE"| t17
+  o56 -.-> t57
+  a2 --> o58
+  o58 -->|"LEE"| t3
+  o58 -->|"LEE"| t7
+  a60 --> o59
+  o59 -->|"CREA"| t4
+  o59 -->|"CREA"| t5
+  o59 -->|"LEE"| t5
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -279,7 +286,7 @@ Exportar un Bundle FHIR interoperable con su manifiesto
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida de de-identificación no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La exportación necesita un paciente o una cohorte; PreconditionFailedException: La corrida de de-identificación no está completada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -296,39 +303,79 @@ flowchart TD
   n4 -->|"sí"| n5
   n6["Transacción: transactional(…)"]:::transaccion
   n4 -->|"no"| n6
-  n7{"dto.deidentificationRunId"}:::decision
+  n7{"dto.patientProfileId"}:::decision
   n6 --> n7
-  n8["Llama a DataReleaseRepository.findDeidRunById"]:::llamada
+  n8["Llama a DataReleaseService.assertPatientInTenant"]:::llamada
   n7 -->|"sí"| n8
-  n9[("LEE health_data.health_deidentification_runs")]:::efecto
+  n9["Llama a DataReleaseService.resolveReadDecision"]:::llamada
   n8 --> n9
-  n10{"!deidRun"}:::decision
+  n10[("LEE authz.clinical_access_grants")]:::efecto
   n9 --> n10
-  n11(["404 NOT_FOUND Corrida de de-identificación no encontrada"]):::error
-  n10 -->|"sí"| n11
-  n12{"deidRun.statusConceptId !== CONCEPTS.DEID_COMPLETED"}:::decision
-  n10 -->|"no"| n12
-  n13(["422 PRECONDITION_FAILED La corrida de de-identificación no está completada"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a DataReleaseRepository.createExportJob"]:::llamada
-  n12 -->|"no"| n14
-  n7 -->|"no"| n14
-  n15[("CREA health_data.health_export_jobs")]:::efecto
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 --> n11
+  n12["Llama a PatientIdentityRepository.findLiveMembershipInTenant"]:::llamada
+  n13[("LEE health_data.patient_identity_members · LEE health_data.patient_identity_clusters")]:::efecto
+  n12 --> n13
+  n14["Llama a CanonicalResourcesRepository.existsResourceByPatient"]:::llamada
+  n13 --> n14
+  n15[("LEE health_data.canonical_health_resources")]:::efecto
   n14 --> n15
-  n16["Llama a DataReleaseRepository.createExportManifest"]:::llamada
+  n16{"!hasResources"}:::decision
   n15 --> n16
-  n17[("CREA health_data.health_export_manifests")]:::efecto
-  n16 --> n17
-  n18["Llama a HealthProvenanceRepository.createProvenanceRecord"]:::llamada
-  n17 --> n18
-  n19[("CREA health_data.health_provenance_records")]:::efecto
-  n18 --> n19
-  n20["Llama a HealthProvenanceRepository.createProvenanceTarget"]:::llamada
+  n17(["↩ (relanza el error capturado)"]):::error
+  n16 -->|"sí"| n17
+  n18{"dto.cohortDefinitionId"}:::decision
+  n16 -->|"no"| n18
+  n7 -->|"no"| n18
+  n19["Llama a DataReleaseService.assertCohortInTenant"]:::llamada
+  n18 -->|"sí"| n19
+  n20[("LEE lakehouse.cohort_definitions")]:::efecto
   n19 --> n20
-  n21[("CREA health_data.health_provenance_targets")]:::efecto
+  n21["Llama a DataReleaseRepository.findDeidProfileById"]:::llamada
   n20 --> n21
-  n22(("201 Responde con éxito")):::ok
+  n22[("LEE health_data.health_deidentification_profiles")]:::efecto
   n21 --> n22
+  n23{"dto.consentDirectiveId"}:::decision
+  n22 --> n23
+  n18 -->|"no"| n23
+  n24["Llama a DataReleaseService.assertConsentInTenant"]:::llamada
+  n23 -->|"sí"| n24
+  n25[("LEE consent.consents")]:::efecto
+  n24 --> n25
+  n26{"!usable"}:::decision
+  n25 --> n26
+  n27(["404 NOT_FOUND Consentimiento no encontrado"]):::error
+  n26 -->|"sí"| n27
+  n28{"dto.deidentificationRunId"}:::decision
+  n26 -->|"no"| n28
+  n23 -->|"no"| n28
+  n29["Llama a DataReleaseRepository.findDeidRunById"]:::llamada
+  n28 -->|"sí"| n29
+  n30[("LEE health_data.health_deidentification_runs")]:::efecto
+  n29 --> n30
+  n31{"deidRun.statusConceptId !== CONCEPTS.DEID_COMPLETED"}:::decision
+  n30 --> n31
+  n32(["422 PRECONDITION_FAILED La corrida de de-identificación no está completada"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a DataReleaseRepository.createExportJob"]:::llamada
+  n31 -->|"no"| n33
+  n28 -->|"no"| n33
+  n34[("CREA health_data.health_export_jobs")]:::efecto
+  n33 --> n34
+  n35["Llama a DataReleaseRepository.createExportManifest"]:::llamada
+  n34 --> n35
+  n36[("CREA health_data.health_export_manifests")]:::efecto
+  n35 --> n36
+  n37["Llama a HealthProvenanceRepository.createProvenanceRecord"]:::llamada
+  n36 --> n37
+  n38[("CREA health_data.health_provenance_records")]:::efecto
+  n37 --> n38
+  n39["Llama a HealthProvenanceRepository.createProvenanceTarget"]:::llamada
+  n38 --> n39
+  n40[("CREA health_data.health_provenance_targets")]:::efecto
+  n39 --> n40
+  n41(("201 Responde con éxito")):::ok
+  n40 --> n41
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -356,29 +403,42 @@ flowchart TD
   n1 --> n2
   n3["Llama a DataReleaseService.serveEverything"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4{"custodianTenantId !== undefined && custodianTenantId !== tenantId"}:::decision
   n3 --> n4
-  n5["Llama a PatientIdentityRepository.findLiveMembershipByProfile"]:::llamada
-  n4 --> n5
-  n6[("LEE health_data.patient_identity_members")]:::efecto
-  n5 --> n6
-  n7{"membership"}:::decision
+  n5(["↩ (relanza el error capturado)"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a PatientIdentityRepository.findLiveMembershipInTenant"]:::llamada
   n6 --> n7
-  n8["Llama a PatientIdentityRepository.findLiveMembers"]:::llamada
-  n7 -->|"sí"| n8
-  n9[("LEE health_data.patient_identity_members")]:::efecto
+  n8[("LEE health_data.patient_identity_members · LEE health_data.patient_identity_clusters")]:::efecto
+  n7 --> n8
+  n9["Llama a DataReleaseService.resolveReadDecision"]:::llamada
   n8 --> n9
-  n10["Llama a CanonicalResourcesRepository.findResourcesByPatient"]:::llamada
+  n10[("LEE authz.clinical_access_grants")]:::efecto
   n9 --> n10
-  n7 -->|"no"| n10
-  n11[("LEE health_data.canonical_health_resources")]:::efecto
+  n11(["↩ (relanza el error capturado)"]):::error
   n10 --> n11
-  n12["Llama a CanonicalResourcesRepository.findVersionsByIds"]:::llamada
-  n11 --> n12
-  n13[("LEE health_data.canonical_health_resource_versions")]:::efecto
-  n12 --> n13
-  n14(("200 Responde con éxito")):::ok
+  n12{"membership"}:::decision
+  n13["Llama a PatientIdentityRepository.findLiveMembers"]:::llamada
+  n12 -->|"sí"| n13
+  n14[("LEE health_data.patient_identity_members")]:::efecto
   n13 --> n14
+  n15["Llama a CanonicalResourcesRepository.findResourcesByPatient"]:::llamada
+  n14 --> n15
+  n12 -->|"no"| n15
+  n16[("LEE health_data.canonical_health_resources")]:::efecto
+  n15 --> n16
+  n17{"decision === 'TENANT_DATA_ADMIN' && !membership && resources.length === 0"}:::decision
+  n16 --> n17
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a CanonicalResourcesRepository.findVersionsByIds"]:::llamada
+  n17 -->|"no"| n19
+  n20[("LEE health_data.canonical_health_resource_versions")]:::efecto
+  n19 --> n20
+  n21(("200 Responde con éxito")):::ok
+  n20 --> n21
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -684,8 +744,7 @@ Proyectar el registro a recurso canónico y versionarlo
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Registro de ingesta no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El registro no está en cola de proyección; PreconditionFailedException: El recurso está retirado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sistema de origen no corresponde a la conexión del lote; PreconditionFailedException: El registro no está en cola de proyección; PreconditionFailedException: El recurso está retirado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -701,58 +760,67 @@ flowchart TD
   n4 --> n5
   n6[("LEE health_data.health_ingestion_records")]:::efecto
   n5 --> n6
-  n7{"!record"}:::decision
+  n7["Llama a HealthIngestionRepository.findBatchById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Registro de ingesta no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"record.processingStatusConceptId !== CONCEPTS.RECORD_QUEUED"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El registro no está en cola de proyección"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a CanonicalResourcesRepository.findResourceByLogicalIdForUpdate"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE health_data.canonical_health_resources")]:::efecto
+  n8[("LEE health_data.health_ingestion_batches")]:::efecto
+  n7 --> n8
+  n9["Llama a HealthIngestionService.assertSourceSystemCoherent"]:::llamada
+  n8 --> n9
+  n10["Llama a HealthIngestionRepository.findSourceSystemById"]:::llamada
+  n9 --> n10
+  n11[("LEE health_data.health_source_systems")]:::efecto
+  n10 --> n11
+  n12["Llama a HealthIngestionRepository.findConnectionById"]:::llamada
   n11 --> n12
-  n13{"!resource"}:::decision
+  n13[("LEE health_data.health_source_connections")]:::efecto
   n12 --> n13
-  n14["Llama a CanonicalResourcesRepository.createResource"]:::llamada
-  n13 -->|"sí"| n14
-  n15[("CREA health_data.canonical_health_resources")]:::efecto
-  n14 --> n15
-  n16{"resource.lifecycleStatusConceptId === CONCEPTS.RESOURCE_RETIRED"}:::decision
-  n13 -->|"no"| n16
-  n17(["422 PRECONDITION_FAILED El recurso está retirado"]):::error
+  n14{"connection && connection.healthSourceSystemId !== dto.sourceSystemId"}:::decision
+  n13 --> n14
+  n15(["422 PRECONDITION_FAILED El sistema de origen no corresponde a la conexión del lote"]):::error
+  n14 -->|"sí"| n15
+  n16{"record.processingStatusConceptId !== CONCEPTS.RECORD_QUEUED"}:::decision
+  n14 -->|"no"| n16
+  n17(["422 PRECONDITION_FAILED El registro no está en cola de proyección"]):::error
   n16 -->|"sí"| n17
-  n18["Llama a CanonicalResourcesRepository.findLatestVersion"]:::llamada
-  n15 --> n18
+  n18["Llama a CanonicalResourcesRepository.findResourceByLogicalIdForUpdate"]:::llamada
   n16 -->|"no"| n18
-  n19[("LEE health_data.canonical_health_resource_versions")]:::efecto
+  n19[("LEE health_data.canonical_health_resources")]:::efecto
   n18 --> n19
-  n20{"previous?.contentHash === contentHash"}:::decision
+  n20{"!resource"}:::decision
   n19 --> n20
-  n21[("ACTUALIZA health_data.health_ingestion_records · ACTUALIZA health_data.health_ingestion_records")]:::efecto
+  n21["Llama a CanonicalResourcesRepository.createResource"]:::llamada
   n20 -->|"sí"| n21
-  n22["Llama a HealthProvenanceRepository.createProvenanceRecord"]:::llamada
+  n22[("CREA health_data.canonical_health_resources")]:::efecto
   n21 --> n22
-  n20 -->|"no"| n22
-  n23[("CREA health_data.health_provenance_records")]:::efecto
-  n22 --> n23
-  n24["Llama a CanonicalResourcesRepository.createResourceVersion"]:::llamada
-  n23 --> n24
-  n25[("CREA health_data.canonical_health_resource_versions")]:::efecto
-  n24 --> n25
-  n26["Llama a HealthProvenanceRepository.createProvenanceTarget"]:::llamada
+  n23{"resource.lifecycleStatusConceptId === CONCEPTS.RESOURCE_RETIRED"}:::decision
+  n20 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED El recurso está retirado"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a CanonicalResourcesRepository.findLatestVersion"]:::llamada
+  n22 --> n25
+  n23 -->|"no"| n25
+  n26[("LEE health_data.canonical_health_resource_versions")]:::efecto
   n25 --> n26
-  n27[("CREA health_data.health_provenance_targets")]:::efecto
+  n27["Llama a HealthProvenanceRepository.createProvenanceRecord"]:::llamada
   n26 --> n27
-  n28["Llama a HealthProvenanceRepository.createLineageEdge"]:::llamada
+  n28[("CREA health_data.health_provenance_records")]:::efecto
   n27 --> n28
-  n29[("CREA health_data.health_lineage_edges")]:::efecto
+  n29["Llama a CanonicalResourcesRepository.createResourceVersion"]:::llamada
   n28 --> n29
-  n30[("ACTUALIZA health_data.canonical_health_resources · ACTUALIZA health_data.canonical_health_resources · ACTUALI…")]:::efecto
+  n30[("CREA health_data.canonical_health_resource_versions")]:::efecto
   n29 --> n30
-  n31(("201 Responde con éxito")):::ok
+  n31["Llama a HealthProvenanceRepository.createProvenanceTarget"]:::llamada
   n30 --> n31
+  n32[("CREA health_data.health_provenance_targets")]:::efecto
+  n31 --> n32
+  n33["Llama a HealthProvenanceRepository.createLineageEdge"]:::llamada
+  n32 --> n33
+  n34[("CREA health_data.health_lineage_edges")]:::efecto
+  n33 --> n34
+  n35[("ACTUALIZA health_data.canonical_health_resources · ACTUALIZA health_data.canonical_health_resources · ACTUALI…")]:::efecto
+  n34 --> n35
+  n36(("201 Responde con éxito")):::ok
+  n35 --> n36
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -771,7 +839,7 @@ Registrar una corrida de de-identificación
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil de de-identificación no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de origen no encontrada; ResourceNotFoundException: Consentimiento no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El perfil de de-identificación no está activo; PreconditionFailedException: Una corrida completada debe declarar su manifiesto de salida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -788,42 +856,74 @@ flowchart TD
   n4 --> n5
   n6[("LEE health_data.health_deidentification_profiles")]:::efecto
   n5 --> n6
-  n7{"!profile"}:::decision
+  n7{"profile.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Perfil de de-identificación no encontrado"]):::error
+  n8(["422 PRECONDITION_FAILED El perfil de de-identificación no está activo"]):::error
   n7 -->|"sí"| n8
-  n9{"profile.stateConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
+  n9{"dto.outcome === 'COMPLETED' && !dto.outputManifestFileId"}:::decision
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El perfil de de-identificación no está activo"]):::error
+  n10(["422 PRECONDITION_FAILED Una corrida completada debe declarar su manifiesto de salida"]):::error
   n9 -->|"sí"| n10
-  n11{"dto.outcome === 'COMPLETED' && !dto.outputManifestFileId"}:::decision
+  n11{"dto.outputManifestFileId"}:::decision
   n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED Una corrida completada debe declarar su manifiesto de salida"]):::error
+  n12["Llama a DataReleaseService.assertVersionsInTenant"]:::llamada
   n11 -->|"sí"| n12
-  n13["Llama a DataReleaseRepository.createDeidRun"]:::llamada
-  n11 -->|"no"| n13
-  n14[("CREA health_data.health_deidentification_runs")]:::efecto
+  n13["Llama a CanonicalResourcesRepository.findVersionsByIds"]:::llamada
+  n12 --> n13
+  n14[("LEE health_data.canonical_health_resource_versions")]:::efecto
   n13 --> n14
-  n15["Llama a HealthProvenanceRepository.createProvenanceRecord"]:::llamada
+  n15["Llama a CanonicalResourcesRepository.findResourcesByIds"]:::llamada
   n14 --> n15
-  n16[("CREA health_data.health_provenance_records")]:::efecto
+  n16[("LEE health_data.canonical_health_resources")]:::efecto
   n15 --> n16
-  n17["Llama a HealthProvenanceRepository.createProvenanceTarget"]:::llamada
+  n17{"!allOwned"}:::decision
   n16 --> n17
-  n18[("CREA health_data.health_provenance_targets")]:::efecto
-  n17 --> n18
-  n19{"dto.outputManifestFileId"}:::decision
-  n18 --> n19
-  n20["Repite: por cada const sourceVersionId de dto.sourceVersionIds ?? []"]:::bucle
+  n18(["404 NOT_FOUND Versión de origen no encontrada"]):::error
+  n17 -->|"sí"| n18
+  n19{"dto.consentDirectiveId"}:::decision
+  n17 -->|"no"| n19
+  n11 -->|"no"| n19
+  n20["Llama a DataReleaseService.assertConsentInTenant"]:::llamada
   n19 -->|"sí"| n20
-  n21["Llama a HealthProvenanceRepository.createLineageEdge"]:::llamada
-  n20 -->|"cada elemento"| n21
-  n22[("CREA health_data.health_lineage_edges")]:::efecto
+  n21[("LEE consent.consents")]:::efecto
+  n20 --> n21
+  n22{"!usable"}:::decision
   n21 --> n22
-  n23(("201 Responde con éxito")):::ok
-  n22 --> n23
-  n20 -->|"al terminar"| n23
-  n19 -->|"no"| n23
+  n23(["404 NOT_FOUND Consentimiento no encontrado"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a DataReleaseService.assertFileInTenant"]:::llamada
+  n22 -->|"no"| n24
+  n19 -->|"no"| n24
+  n25[("LEE common.files")]:::efecto
+  n24 --> n25
+  n26["Llama a DataReleaseService.assertFileInTenant"]:::llamada
+  n25 --> n26
+  n27[("LEE common.files")]:::efecto
+  n26 --> n27
+  n28["Llama a DataReleaseRepository.createDeidRun"]:::llamada
+  n27 --> n28
+  n29[("CREA health_data.health_deidentification_runs")]:::efecto
+  n28 --> n29
+  n30["Llama a HealthProvenanceRepository.createProvenanceRecord"]:::llamada
+  n29 --> n30
+  n31[("CREA health_data.health_provenance_records")]:::efecto
+  n30 --> n31
+  n32["Llama a HealthProvenanceRepository.createProvenanceTarget"]:::llamada
+  n31 --> n32
+  n33[("CREA health_data.health_provenance_targets")]:::efecto
+  n32 --> n33
+  n34{"dto.outputManifestFileId"}:::decision
+  n33 --> n34
+  n35["Repite: por cada const sourceVersionId de dto.sourceVersionIds ?? []"]:::bucle
+  n34 -->|"sí"| n35
+  n36["Llama a HealthProvenanceRepository.createLineageEdge"]:::llamada
+  n35 -->|"cada elemento"| n36
+  n37[("CREA health_data.health_lineage_edges")]:::efecto
+  n36 --> n37
+  n38(("201 Responde con éxito")):::ok
+  n37 --> n38
+  n35 -->|"al terminar"| n38
+  n34 -->|"no"| n38
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -937,7 +1037,6 @@ Abrir un lote de ingesta desde una conexión de origen
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Conexión de origen no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La conexión de origen no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -954,12 +1053,12 @@ flowchart TD
   n4 --> n5
   n6[("LEE health_data.health_source_connections")]:::efecto
   n5 --> n6
-  n7{"!connection"}:::decision
+  n7["Llama a HealthIngestionRepository.findSourceSystemById"]:::llamada
   n6 --> n7
-  n8(["404 NOT_FOUND Conexión de origen no encontrada"]):::error
-  n7 -->|"sí"| n8
+  n8[("LEE health_data.health_source_systems")]:::efecto
+  n7 --> n8
   n9{"connection.statusConceptId !== CONCEPTS.STATE_ACTIVE"}:::decision
-  n7 -->|"no"| n9
+  n8 --> n9
   n10(["422 PRECONDITION_FAILED La conexión de origen no está activa"]):::error
   n9 -->|"sí"| n10
   n11["Llama a HealthIngestionRepository.findBatchByIdentifier"]:::llamada
@@ -970,10 +1069,8 @@ flowchart TD
   n12 --> n13
   n14[("CREA health_data.health_ingestion_batches")]:::efecto
   n13 --> n14
-  n15[("ACTUALIZA health_data.health_source_connections")]:::efecto
+  n15(("201 Responde con éxito")):::ok
   n14 --> n15
-  n16(("201 Responde con éxito")):::ok
-  n15 --> n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -992,7 +1089,6 @@ Cerrar el lote conciliando sus contadores
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Lote no encontrado |
 | 409 | `CONFLICT` | ConflictException: El lote ya está cerrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1009,22 +1105,16 @@ flowchart TD
   n4 --> n5
   n6[("LEE health_data.health_ingestion_batches")]:::efecto
   n5 --> n6
-  n7{"!batch"}:::decision
+  n7{"batch.statusConceptId !== CONCEPTS.BATCH_RECEIVING"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Lote no encontrado"]):::error
+  n8(["409 CONFLICT El lote ya está cerrado"]):::error
   n7 -->|"sí"| n8
-  n9{"batch.statusConceptId !== CONCEPTS.BATCH_RECEIVING"}:::decision
+  n9["Llama a HealthIngestionRepository.findRecordsByBatch"]:::llamada
   n7 -->|"no"| n9
-  n10(["409 CONFLICT El lote ya está cerrado"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a HealthIngestionRepository.findRecordsByBatch"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE health_data.health_ingestion_records")]:::efecto
-  n11 --> n12
-  n13[("ACTUALIZA health_data.health_ingestion_batches · ACTUALIZA health_data.health_ingestion_batches · ACTUALIZA h…")]:::efecto
-  n12 --> n13
-  n14(("200 Responde con éxito")):::ok
-  n13 --> n14
+  n10[("LEE health_data.health_ingestion_records")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1043,7 +1133,6 @@ Registrar un registro crudo del lote
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Lote no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El lote ya no está recibiendo registros |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1060,24 +1149,20 @@ flowchart TD
   n4 --> n5
   n6[("LEE health_data.health_ingestion_batches")]:::efecto
   n5 --> n6
-  n7{"!batch"}:::decision
+  n7{"batch.statusConceptId !== CONCEPTS.BATCH_RECEIVING"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Lote no encontrado"]):::error
+  n8(["422 PRECONDITION_FAILED El lote ya no está recibiendo registros"]):::error
   n7 -->|"sí"| n8
-  n9{"batch.statusConceptId !== CONCEPTS.BATCH_RECEIVING"}:::decision
+  n9["Llama a HealthIngestionRepository.findRecordBySource"]:::llamada
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El lote ya no está recibiendo registros"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a HealthIngestionRepository.findRecordBySource"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE health_data.health_ingestion_records")]:::efecto
+  n10[("LEE health_data.health_ingestion_records")]:::efecto
+  n9 --> n10
+  n11["Llama a HealthIngestionRepository.createRecord"]:::llamada
+  n10 --> n11
+  n12[("CREA health_data.health_ingestion_records")]:::efecto
   n11 --> n12
-  n13["Llama a HealthIngestionRepository.createRecord"]:::llamada
+  n13(("201 Responde con éxito")):::ok
   n12 --> n13
-  n14[("CREA health_data.health_ingestion_records")]:::efecto
-  n13 --> n14
-  n15(("201 Responde con éxito")):::ok
-  n14 --> n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

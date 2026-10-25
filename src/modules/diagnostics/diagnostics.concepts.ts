@@ -327,6 +327,19 @@ export const DIAGNOSTIC_CATEGORIES: readonly string[] = [
 ];
 
 /**
+ * Las categorías de orden que el **paciente** ve en su portal: las diagnósticas
+ * y, además, los procedimientos que un médico le pide hacerse en un centro.
+ *
+ * Es una lista aparte y no una ampliación de {@link DIAGNOSTIC_CATEGORIES}: el
+ * mostrador de laboratorio e imagenología no atiende procedimientos, y sumarlos
+ * allí los pondría en una cola que nadie de ese equipo puede cumplir.
+ */
+export const PATIENT_PORTAL_CATEGORIES: readonly string[] = [
+  ...DIAGNOSTIC_CATEGORIES,
+  CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+];
+
+/**
  * Las categorías de orden que llegan a la **recepción de muestras**: las que
  * tienen un espécimen que recibir. Imagenología queda afuera (una radiografía
  * no trae tubo) y anatomía patológica entra, porque su pieza también se recibe,

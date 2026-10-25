@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `practice`.
- * 82 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 84 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const practiceIndexes: readonly IndexTuple[] = [
@@ -29,6 +29,8 @@ export const practiceIndexes: readonly IndexTuple[] = [
   ['healthcare_services', 'ix_healthcare_services_service_concept_id', ['service_concept_id'], false, 'btree'],
   ['healthcare_services', 'ix_healthcare_services_specialty_concept_id', ['specialty_concept_id'], false, 'btree'],
   ['healthcare_services', 'ix_healthcare_services_status_concept_id', ['status_concept_id'], false, 'btree'],
+  ['healthcare_services', 'ix_healthcare_services_service_catalog_id', ['service_catalog_id'], false, 'btree'],
+  ['healthcare_services', 'ux_healthcare_services_site_service', ['practice_site_id', 'service_concept_id'], true, 'btree'],
   ['healthcare_services', 'ix_healthcare_services_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['healthcare_services', 'ix_healthcare_services_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['inventory_items', 'ix_inventory_items_practice_id', ['practice_id'], false, 'btree'],

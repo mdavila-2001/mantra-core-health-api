@@ -4,6 +4,14 @@ const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 import { IamPractitionerSelfRegistrationService } from './iam-practitioner-self-registration.service';
 import { TracingService } from '../../../../observability';
+import { CommonRegistrationFilesAdapter } from '../../infrastructure/adapters/common-registration-files.adapter';
+import { MessagingEmailNoticeAdapter } from '../../infrastructure/adapters/messaging-email-notice.adapter';
+import { PracticeOwnSiteProvisioningAdapter } from '../../infrastructure/adapters/practice-own-site-provisioning.adapter';
+import {
+  commonRecords,
+  directoryRegistration,
+  profilesRegistration,
+} from './iam-registration.testing';
 import {
   CONCEPTS,
   ConflictException,
@@ -144,28 +152,34 @@ describe('IamPractitionerSelfRegistrationService', () => {
       rolesRepo as never,
       emailVerificationsRepo as never,
       eventsRepo as never,
-      personsRepo as never,
-      personProfilesRepo as never,
-      practitionersRepo as never,
-      specialtiesRepo as never,
-      specialtyCatalog as never,
-      authorizationsRepo as never,
-      professionalCredentialsRepo as never,
-      languagesRepo as never,
-      accountLinksRepo as never,
-      identifiersRepo as never,
-      contactPointsRepo as never,
-      addressesRepo as never,
-      catalogConceptsRepo as never,
-      tenantMembershipsRepo as never,
+      profilesRegistration({
+        persons: personsRepo,
+        personProfiles: personProfilesRepo,
+        practitioners: practitionersRepo,
+        specialties: specialtiesRepo,
+        specialtyCatalog,
+        authorizations: authorizationsRepo,
+        credentials: professionalCredentialsRepo,
+        languages: languagesRepo,
+        accountLinks: accountLinksRepo,
+        administrativeAreas,
+      }),
+      commonRecords({
+        identifiers: identifiersRepo,
+        contactPoints: contactPointsRepo,
+        addresses: addressesRepo,
+        catalogConcepts: catalogConceptsRepo,
+      }),
+      directoryRegistration({ memberships: tenantMembershipsRepo }),
       effectiveRoles as never,
-      notificationsService as never,
+      new MessagingEmailNoticeAdapter(notificationsService as never),
       logger as never,
       new TracingService(),
-      ownSiteProvisioning as never,
-      administrativeAreas as never,
-      attachableFileService as never,
-      fileUploadService as never,
+      new PracticeOwnSiteProvisioningAdapter(ownSiteProvisioning as never),
+      new CommonRegistrationFilesAdapter(
+        fileUploadService as never,
+        attachableFileService as never,
+      ),
     );
     return {
       service,

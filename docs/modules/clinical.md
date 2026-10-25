@@ -9,7 +9,7 @@
 # Módulo `clinical`
 
 **Fuente:** [`src/modules/clinical/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/clinical/README.md)
-· 10 controllers · 18 services · 16 repositories · 23 entidades · 16 DTO
+· 11 controllers · 20 services · 18 repositories · 24 entidades · 18 DTO
 
 ---
 
@@ -54,6 +54,7 @@ Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`
 | `GET /public/prescriptions/:id/verify` | pública | `clinical-prescriptions-public` |
 | `GET /clinical/prescriptions/:id/pdf` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-prescriptions` |
 | `GET /clinical/patients/:patientProfileId/summary` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-read` |
+| `GET /clinical/patients/:patientProfileId/received-services` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-read` |
 | `POST /clinical/conditions` | CLINICIAN, PRACTITIONER | `clinical-records` |
 | `POST /clinical/conditions/:id/change-status` | CLINICIAN, PRACTITIONER | `clinical-records` |
 | `POST /clinical/conditions/:id/verification` | CLINICIAN, PRACTITIONER | `clinical-records` |
@@ -96,6 +97,7 @@ Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`
 | UC-08-12 | `/clinical/procedures` | POST | Registrar procedimiento |
 | UC-08-13 | `/clinical/immunizations` | POST | Registrar inmunización |
 | UC-08-14 | `/clinical/encounters/{id}/close` | POST | Cerrar encuentro (gatilla facturación) |
+| — | `/clinical/patients/{patientProfileId}/received-services` | GET | Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas |
 
 > Nota: los sufijos `:accion` de la spec (`encounters:check-in`,
 > `observations/{id}:amend`, …) se realizan como **segmento de ruta**
@@ -126,18 +128,30 @@ acepta `SYSTEM`/`SYSTEM_WORKER`.
 
 ## Entidades (schema `clinical`)
 
-23 entidades (`find src/modules/clinical -name '*.entity.ts' | wc -l`):
+24 entidades (`find src/modules/clinical -name '*.entity.ts' | wc -l`):
 `care_episodes`, `encounters` (+ `encounter_participants`, `encounter_locations`),
 `observations` (+ `observation_components`, `observation_reference_ranges`,
 `observation_performers`, `observation_notes`), `service_requests`,
 `diagnostic_reports`, `conditions`, `allergy_intolerances` (+ `allergy_reactions`),
 `medication_requests`, `medication_records`, `procedures`, `immunizations`,
+`received_services`,
 `family_member_history`, `social_history`, `patient_reported_health_statements`,
 `prescription_signature_policies` y `appointments` (solo referenciada por el
 check-in).
 
 ## Reglas de negocio
 
+- **Servicios recibidos** (`received_services`): una fila por servicio que el paciente
+  recibió. Hoy son dos tipos, ambos conceptos del value set `vs_received_service_type`:
+  la **intervención médica** realizada (un `procedures` completado o un caso M53
+  completado) y la **vacunación** (un `immunizations` completado). La fila la escribe
+  `ReceivedServicesProjector` en la misma transacción que registra el hecho de origen;
+  un caso M53 y su procedimiento principal comparten fila. Lo que ya existía se
+  proyecta con el parche `v4249` del modelo. La consulta, el laboratorio y la
+  imagenología **no** son servicios recibidos: viven en sus propias pestañas de la
+  historia. El costo lo ve el titular o quien lo representa, no el personal clínico; la
+  cobertura del seguro no se expone porque el reparto se publica por pedido
+  (`PatientSettlementService`) y no por servicio.
 - **Transaccionalidad**: cada operación de escritura corre en `em.transactional`.
   Las FK son columnas uuid planas → se hace `tx.flush()` del padre antes de crear
   hijos (encuentro→participantes/ubicaciones, observación→componentes/etc.,

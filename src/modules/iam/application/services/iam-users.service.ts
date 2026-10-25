@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import * as argon2 from 'argon2';
@@ -19,7 +19,10 @@ import {
   AccountLockoutsRepository,
   SecurityEventsRepository,
 } from '../../infrastructure/repositories';
-import { ContactPointsRepository } from '../../../common/repositories';
+import {
+  COMMON_RECORDS_PORT,
+  type CommonRecordsPort,
+} from '../ports/common-records.port';
 import {
   CreateUserDto,
   UserResponseDto,
@@ -51,7 +54,7 @@ export class IamUsersService {
    * @param refreshRepo - Valor de refresh repo requerido por la operación.
    * @param lockoutsRepo - Valor de lockouts repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
-   * @param contactPointsRepo - Puntos de contacto donde vive el teléfono del usuario.
+   * @param commonRecords - Puntos de contacto donde vive el teléfono del usuario.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -63,7 +66,8 @@ export class IamUsersService {
     private readonly refreshRepo: RefreshTokensRepository,
     private readonly lockoutsRepo: AccountLockoutsRepository,
     private readonly eventsRepo: SecurityEventsRepository,
-    private readonly contactPointsRepo: ContactPointsRepository,
+    @Inject(COMMON_RECORDS_PORT)
+    private readonly commonRecords: CommonRecordsPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IamUsersService.name);
@@ -118,7 +122,7 @@ export class IamUsersService {
       // `iam.users` no tiene columna de teléfono —sólo `phone_verified`—, así que
       // el número vive en `common.contact_points` colgado del propio usuario.
       if (dto.phone) {
-        this.contactPointsRepo.create(tx, {
+        this.commonRecords.createContactPoint(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_USER,
           ownerId: user.id,
           systemConceptId: CONCEPTS.CONTACT_PHONE,

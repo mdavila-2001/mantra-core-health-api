@@ -168,6 +168,24 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       display: 'Cardiac study category',
     },
 
+    /* --- quién ejecuta la orden -------------------------------------------------
+       El médico recomienda, no impone: el paciente siempre puede elegir otro
+       centro. `SR_PERF_PATIENT_CHOICE` es el valor de toda orden que no declara
+       modo. Ninguno concede acceso a la orden: la custodia sigue en
+       `performer_tenant_id`, que la recomendación no llena. */
+    SERVICE_REQUEST_PERFORMER_SELF: {
+      code: 'SR_PERF_SELF',
+      display: 'Performed by the ordering practitioner',
+    },
+    SERVICE_REQUEST_PERFORMER_ORGANIZATION: {
+      code: 'SR_PERF_ORGANIZATION',
+      display: 'Performed at a recommended medical center',
+    },
+    SERVICE_REQUEST_PERFORMER_PATIENT_CHOICE: {
+      code: 'SR_PERF_PATIENT_CHOICE',
+      display: 'Performer chosen by the patient',
+    },
+
     /* --- qué se pide: el catálogo de estudios ---------------------------------
        `service_requests.code_concept_id` es NOT NULL y no tenía ni un concepto
        que ponerle: la pantalla de órdenes respondía «El catálogo de estudios no
@@ -623,6 +641,19 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
     IMMUNIZATION_COMPLETED: {
       code: 'IMM_COMPLETED',
       display: 'Immunization completed',
+    },
+
+    // --- servicios recibidos (vs_received_service_type) ---------------------------
+    // Mismas claves y displays que `gen_seeds.py` (modelo, v4.2.49): ambos lados
+    // siembran por id, y el id sale de `clinical:<NOMBRE>`. Un tipo nuevo se agrega
+    // acá y en el value set del modelo, al final.
+    RECEIVED_SERVICE_INTERVENTION: {
+      code: 'RECEIVED_SERVICE_INTERVENTION',
+      display: 'Received service: medical intervention',
+    },
+    RECEIVED_SERVICE_VACCINATION: {
+      code: 'RECEIVED_SERVICE_VACCINATION',
+      display: 'Received service: vaccination',
     },
 
     // --- appointments (referenciado por check-in) ------------------------------

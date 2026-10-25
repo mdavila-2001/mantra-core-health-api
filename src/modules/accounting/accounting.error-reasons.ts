@@ -110,4 +110,17 @@ export enum AccountingErrorReason {
   ASSET_CODE_ALREADY_EXISTS = 'ASSET_CODE_ALREADY_EXISTS',
   /** Ningún activo activo tiene un importe pendiente de depreciar en el periodo. */
   DEPRECIATION_NO_ELIGIBLE_ASSETS = 'DEPRECIATION_NO_ELIGIBLE_ASSETS',
+
+  // --- Contabilidad simple del doctor, P49 (practitioner-simple-accounting.service.ts) ---
+  /** Un campo de la cuenta, el registro o la transacción no cumple la spec (422). */
+  SIMPLE_ACCOUNTING_INVALID = 'SIMPLE_ACCOUNTING_INVALID',
+  SIMPLE_ACCOUNT_NOT_FOUND = 'SIMPLE_ACCOUNT_NOT_FOUND',
+  SIMPLE_RECORD_NOT_FOUND = 'SIMPLE_RECORD_NOT_FOUND',
+  SIMPLE_TRANSACTION_NOT_FOUND = 'SIMPLE_TRANSACTION_NOT_FOUND',
+  /** Ya hay una cuenta con ese nombre en esa clase (sin distinguir tildes ni mayúsculas). */
+  SIMPLE_ACCOUNT_DUPLICATE_NAME = 'SIMPLE_ACCOUNT_DUPLICATE_NAME',
+  /** La cuenta es una de las generales sembradas: se renombra, no se borra ni cambia de clase. */
+  SIMPLE_ACCOUNT_SEEDED = 'SIMPLE_ACCOUNT_SEEDED',
+  /** La cuenta ya la usa algún registro o transacción. */
+  SIMPLE_ACCOUNT_IN_USE = 'SIMPLE_ACCOUNT_IN_USE',
 }

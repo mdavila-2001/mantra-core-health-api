@@ -2,11 +2,11 @@
 
 # Documentación de endpoints
 
-Se documentan **1539 de 1539 endpoints** en **72 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1549 de 1549 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
-| `accounting` | 45 | [Abrir referencia](endpoints/accounting.md) |
+| `accounting` | 46 | [Abrir referencia](endpoints/accounting.md) |
 | `ads` | 18 | [Abrir referencia](endpoints/ads.md) |
 | `app` | 6 | [Abrir referencia](endpoints/app.md) |
 | `audio_assets` | 10 | [Abrir referencia](endpoints/audio-assets.md) |
@@ -16,7 +16,7 @@ Se documentan **1539 de 1539 endpoints** en **72 módulos**. La referencia compl
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
 | `billing` | 34 | [Abrir referencia](endpoints/billing.md) |
 | `chart` | 23 | [Abrir referencia](endpoints/chart.md) |
-| `clinical` | 40 | [Abrir referencia](endpoints/clinical.md) |
+| `clinical` | 41 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 27 | [Abrir referencia](endpoints/clinical-ext.md) |
 | `common` | 19 | [Abrir referencia](endpoints/common.md) |
 | `community` | 98 | [Abrir referencia](endpoints/community.md) |
@@ -45,7 +45,8 @@ Se documentan **1539 de 1539 endpoints** en **72 módulos**. La referencia compl
 | `integrations` | 15 | [Abrir referencia](endpoints/integrations.md) |
 | `lakehouse` | 13 | [Abrir referencia](endpoints/lakehouse.md) |
 | `marketing` | 15 | [Abrir referencia](endpoints/marketing.md) |
-| `medical_groups` | 8 | [Abrir referencia](endpoints/medical-groups.md) |
+| `medical_centers` | 2 | [Abrir referencia](endpoints/medical-centers.md) |
+| `medical_groups` | 9 | [Abrir referencia](endpoints/medical-groups.md) |
 | `messaging` | 20 | [Abrir referencia](endpoints/messaging.md) |
 | `object_storage` | 14 | [Abrir referencia](endpoints/object-storage.md) |
 | `ops_console` | 9 | [Abrir referencia](endpoints/ops-console.md) |
@@ -56,7 +57,7 @@ Se documentan **1539 de 1539 endpoints** en **72 módulos**. La referencia compl
 | `pharmacy_inventory` | 29 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
-| `practice` | 30 | [Abrir referencia](endpoints/practice.md) |
+| `practice` | 35 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 32 | [Abrir referencia](endpoints/procedures-perioperative.md) |
 | `profiles` | 57 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 19 | [Abrir referencia](endpoints/promotions.md) |

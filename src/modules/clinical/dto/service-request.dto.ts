@@ -105,6 +105,42 @@ export class CreateServiceRequestDto {
   performerTenantId?: string;
 
   /**
+   * Modo de ejecutor recomendado. Omitido ⇒ que elija el paciente.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Quién ejecuta la orden (concept id del conjunto `service-request-performer-selection`: SR_PERF_SELF, SR_PERF_ORGANIZATION, SR_PERF_PATIENT_CHOICE). Es una recomendación, no un candado; omitido = que elija el paciente',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  performerSelectionConceptId?: string;
+
+  /**
+   * Médico ejecutor: obligatorio con «lo hago yo» e igual a quien pide; prohibido en los otros modos.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Médico ejecutor. Obligatorio con SR_PERF_SELF (debe ser quien pide la orden); prohibido con los otros modos',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  performerPractitionerProfileId?: string;
+
+  /**
+   * Sede sugerida: obligatoria con «lo hago yo» y «en este centro»; prohibida si elige el paciente.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  suggestedPracticeSiteId?: string;
+
+  /**
    * El informe diagnóstico previo que satisface este pedido (antiduplicación,
    * v4.2.17). Obligatorio cuando el chequeo previo (`duplicate-check`) marcó
    * `isDuplicate: true` y el médico decidió: exactamente el que devolvió el
@@ -192,6 +228,33 @@ export class ServiceRequestResponseDto {
    */
   @ApiProperty({ description: 'Intención (concept id)', format: 'uuid' })
   intent!: string;
+
+  /**
+   * Modo de ejecutor recomendado (concept id).
+   */
+  @ApiProperty({
+    description: 'Modo de ejecutor recomendado (concept id)',
+    format: 'uuid',
+  })
+  performerSelectionConceptId!: string;
+
+  /**
+   * Médico ejecutor, o `null`.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerPractitionerProfileId!: string | null;
+
+  /**
+   * Sede sugerida, o `null`.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  suggestedPracticeSiteId!: string | null;
+
+  /**
+   * Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid.
+   */
+  @ApiProperty({ nullable: true, type: String })
+  suggestedPracticeSiteName!: string | null;
 
   /**
    * Fecha y hora en que se creó el registro.

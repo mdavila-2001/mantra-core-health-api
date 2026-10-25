@@ -307,6 +307,7 @@ Disparar una transición validada
 | 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: El agregado cambió desde que el llamante lo leyó. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El comando no es aplicable desde el estado actual del agregado.; PreconditionFailedException: Esta transición exige cabecera Idempotency-Key.; PreconditionFailedException: Esta transición exige declarar el motivo.; PreconditionFailedException: Esta transición exige enviar la versión del agregado que vio el llamante.; PreconditionFailedException: {guard.failureMessageKey ?? 'La transición no cumple una gua…} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 ```mermaid
 flowchart TD
@@ -339,66 +340,69 @@ flowchart TD
   n13 --> n14
   n15(["422 PRECONDITION_FAILED El comando no es aplicable desde el estado actual del agregado."]):::error
   n14 -->|"sí"| n15
-  n16{"transition.idempotencyRequired && !idempotencyKey"}:::decision
+  n16["Llama a TransitionExecutionService.assertPurposeOfUse"]:::llamada
   n14 -->|"no"| n16
-  n17(["422 PRECONDITION_FAILED Esta transición exige cabecera Idempotency-Key."]):::error
-  n16 -->|"sí"| n17
-  n18{"idempotencyKey"}:::decision
-  n16 -->|"no"| n18
-  n19["Llama a WorkflowRuntimeRepository.findTransitionEventByIdempotencyKey"]:::llamada
+  n17(["500 INTERNAL {HttpStatus.FORBIDDEN}"]):::error
+  n16 --> n17
+  n18{"transition.idempotencyRequired && !idempotencyKey"}:::decision
+  n19(["422 PRECONDITION_FAILED Esta transición exige cabecera Idempotency-Key."]):::error
   n18 -->|"sí"| n19
-  n20[("LEE workflow.state_transition_events")]:::efecto
-  n19 --> n20
-  n21{"transition.reasonRequired && !dto.reasonConceptId && !dto.reasonText"}:::decision
-  n20 --> n21
-  n18 -->|"no"| n21
-  n22(["422 PRECONDITION_FAILED Esta transición exige declarar el motivo."]):::error
-  n21 -->|"sí"| n22
-  n23{"transition.optimisticLockRequired && dto.expectedRowVersion === undefined"}:::decision
-  n21 -->|"no"| n23
-  n24(["422 PRECONDITION_FAILED Esta transición exige enviar la versión del agregado que vio el llamante."]):::error
+  n20{"idempotencyKey"}:::decision
+  n18 -->|"no"| n20
+  n21["Llama a WorkflowRuntimeRepository.findTransitionEventByIdempotencyKey"]:::llamada
+  n20 -->|"sí"| n21
+  n22[("LEE workflow.state_transition_events")]:::efecto
+  n21 --> n22
+  n23{"transition.reasonRequired && !dto.reasonConceptId && !dto.reasonText"}:::decision
+  n22 --> n23
+  n20 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED Esta transición exige declarar el motivo."]):::error
   n23 -->|"sí"| n24
-  n25["Llama a StateMachinesRepository.findGuardsByTransition"]:::llamada
+  n25{"transition.optimisticLockRequired && dto.expectedRowVersion === undefined"}:::decision
   n23 -->|"no"| n25
-  n26[("LEE workflow.transition_guards")]:::efecto
-  n25 --> n26
-  n27["Llama a TransitionExecutionService.assertGuards"]:::llamada
-  n26 --> n27
-  n28["Repite: por cada const guard de guards"]:::bucle
+  n26(["422 PRECONDITION_FAILED Esta transición exige enviar la versión del agregado que vio el llamante."]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a StateMachinesRepository.findGuardsByTransition"]:::llamada
+  n25 -->|"no"| n27
+  n28[("LEE workflow.transition_guards")]:::efecto
   n27 --> n28
-  n29(["422 PRECONDITION_FAILED {guard.failureMessageKey ?? 'La transición no cumple una gua…}"]):::error
-  n28 -->|"cada elemento"| n29
-  n30{"!applied"}:::decision
-  n28 -->|"al terminar"| n30
-  n31(["409 CONCURRENCY_CONFLICT El agregado cambió desde que el llamante lo leyó."]):::error
-  n30 -->|"sí"| n31
-  n32["Llama a WorkflowRuntimeRepository.createTransitionEvent"]:::llamada
-  n30 -->|"no"| n32
-  n33[("CREA workflow.state_transition_events")]:::efecto
-  n32 --> n33
-  n34["Llama a TransitionExecutionService.publishSideEffects"]:::llamada
-  n33 --> n34
-  n35["Llama a StateMachinesRepository.findSideEffectsByTransition"]:::llamada
+  n29["Llama a TransitionExecutionService.assertGuards"]:::llamada
+  n28 --> n29
+  n30["Repite: por cada const guard de guards"]:::bucle
+  n29 --> n30
+  n31(["422 PRECONDITION_FAILED {guard.failureMessageKey ?? 'La transición no cumple una gua…}"]):::error
+  n30 -->|"cada elemento"| n31
+  n32{"!applied"}:::decision
+  n30 -->|"al terminar"| n32
+  n33(["409 CONCURRENCY_CONFLICT El agregado cambió desde que el llamante lo leyó."]):::error
+  n32 -->|"sí"| n33
+  n34["Llama a WorkflowRuntimeRepository.createTransitionEvent"]:::llamada
+  n32 -->|"no"| n34
+  n35[("CREA workflow.state_transition_events")]:::efecto
   n34 --> n35
-  n36[("LEE workflow.transition_side_effects")]:::efecto
+  n36["Llama a TransitionExecutionService.publishSideEffects"]:::llamada
   n35 --> n36
-  n37["Repite: por cada const effect de effects"]:::bucle
+  n37["Llama a StateMachinesRepository.findSideEffectsByTransition"]:::llamada
   n36 --> n37
-  n38["Llama a OutboxService.publishDomainEvent"]:::llamada
-  n37 -->|"cada elemento"| n38
-  n39["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
+  n38[("LEE workflow.transition_side_effects")]:::efecto
+  n37 --> n38
+  n39["Repite: por cada const effect de effects"]:::bucle
   n38 --> n39
-  n40["Transacción: startActiveSpan(…)"]:::transaccion
-  n39 --> n40
-  n41["Intenta"]:::intento
+  n40["Llama a OutboxService.publishDomainEvent"]:::llamada
+  n39 -->|"cada elemento"| n40
+  n41["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
   n40 --> n41
-  n42(["↩ (relanza el error capturado)"]):::error
-  n41 -->|"si falla"| n42
-  n43>"Evento ~effect.outboxEventType"]:::evento
-  n41 --> n43
-  n44(("201 Responde con éxito")):::ok
-  n43 --> n44
-  n37 -->|"al terminar"| n44
+  n42["Transacción: startActiveSpan(…)"]:::transaccion
+  n41 --> n42
+  n43["Intenta"]:::intento
+  n42 --> n43
+  n44(["↩ (relanza el error capturado)"]):::error
+  n43 -->|"si falla"| n44
+  n45>"Evento ~effect.outboxEventType"]:::evento
+  n43 --> n45
+  n46(("201 Responde con éxito")):::ok
+  n45 --> n46
+  n39 -->|"al terminar"| n46
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

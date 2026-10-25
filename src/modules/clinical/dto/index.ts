@@ -12,5 +12,7 @@ export * from './prescription-signature-policy.dto';
 export * from './procedure.dto';
 export * from './immunization.dto';
 export * from './clinical-read.dto';
+export * from './received-services.dto';
 export * from './prescription-verification.dto';
 export * from './prescription-expiry-notice.dto';
+export * from './procedure-centers.dto';

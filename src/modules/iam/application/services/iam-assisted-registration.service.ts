@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import * as argon2 from 'argon2';
@@ -11,14 +11,8 @@ import {
   type AuthenticatedUser,
 } from '../../../../common';
 import { IamErrorReason } from '../../iam.error-reasons';
-import { composeAccountDisplayName } from '../../../profiles/domain/person-name';
+import { composeAccountDisplayName } from '../../../../common/text/person-name';
 import { PROF } from '../../../profiles/profiles.concepts';
-import {
-  PatientProfilesRepository,
-  PersonAccountLinksRepository,
-  PersonProfilesRepository,
-  PersonsRepository,
-} from '../../../profiles/infrastructure/repositories';
 import {
   UsersRepository,
   CredentialsRepository,
@@ -32,6 +26,10 @@ import {
   ActivateAccountDto,
   ActivationResultDto,
 } from '../../presentation/dto';
+import {
+  PROFILE_REGISTRATION_PORT,
+  type ProfileRegistrationPort,
+} from '../ports/profile-registration.port';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
 /** Vida útil del token de activación de un solo uso (72 h). */
@@ -76,10 +74,7 @@ export class IamAssistedRegistrationService {
    * @param rolesRepo - Valor de roles repo requerido por la operación.
    * @param activationsRepo - Valor de activations repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
-   * @param personsRepo - Valor de persons repo requerido por la operación.
-   * @param personProfilesRepo - Valor de person profiles repo requerido por la operación.
-   * @param patientProfilesRepo - Valor de patient profiles repo requerido por la operación.
-   * @param accountLinksRepo - Valor de account links repo requerido por la operación.
+   * @param profiles - Persona, perfiles y vínculo cuenta-persona (`profiles`).
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -90,10 +85,8 @@ export class IamAssistedRegistrationService {
     private readonly rolesRepo: UserGlobalRolesRepository,
     private readonly activationsRepo: AccountActivationsRepository,
     private readonly eventsRepo: SecurityEventsRepository,
-    private readonly personsRepo: PersonsRepository,
-    private readonly personProfilesRepo: PersonProfilesRepository,
-    private readonly patientProfilesRepo: PatientProfilesRepository,
-    private readonly accountLinksRepo: PersonAccountLinksRepository,
+    @Inject(PROFILE_REGISTRATION_PORT)
+    private readonly profiles: ProfileRegistrationPort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IamAssistedRegistrationService.name);
@@ -168,7 +161,7 @@ export class IamAssistedRegistrationService {
       // `persons`, luego `person_profiles`, luego `patient_profiles`, luego el
       // vínculo; las FK son columnas uuid planas, así que cada padre se persiste
       // antes de sus hijos.
-      const person = this.personsRepo.create(tx, {
+      const person = this.profiles.createPerson(tx, {
         personStatusConceptId: PROF.PERSON_ACTIVE,
         vitalStatusConceptId: PROF.VITAL_ALIVE,
         name: dto.name,
@@ -180,7 +173,7 @@ export class IamAssistedRegistrationService {
       });
       await tx.flush();
 
-      this.personProfilesRepo.create(tx, {
+      this.profiles.createPersonProfile(tx, {
         personId: person.id,
         profileTypeConceptId: PROF.PROFILE_TYPE_PATIENT,
         statusConceptId: PROF.PROFILE_ACTIVE,
@@ -189,7 +182,7 @@ export class IamAssistedRegistrationService {
       await tx.flush();
 
       // `patient_profiles.profile_id` ES `persons.id` (ver ProfilesPatientsService).
-      this.patientProfilesRepo.create(tx, {
+      this.profiles.createPatientProfile(tx, {
         profileId: person.id,
         patientCode: `PAT-${randomUUID()}`,
         recordLinkageStatusConceptId: PROF.LINKAGE_UNLINKED,
@@ -198,7 +191,7 @@ export class IamAssistedRegistrationService {
 
       // El titular de la cuenta es el propio paciente (SELF): la cuenta se crea a su
       // nombre, aunque la haya dado de alta un tercero.
-      this.accountLinksRepo.create(tx, {
+      this.profiles.createAccountLink(tx, {
         personId: person.id,
         userId: user.id,
         linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
