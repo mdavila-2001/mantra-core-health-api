@@ -1614,12 +1614,18 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/education/services/education-scope.service.ts |
 | 409 | `CONFLICT` | El aprendiz ya está inscrito en el curso | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 409 | `CONFLICT` | La cohorte no tiene plazas disponibles | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 409 | `CONFLICT` | El pago ya respalda otra inscripción | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Una inscripción comprada necesita su intento de pago | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 422 | `PRECONDITION_FAILED` | El intento de pago sólo aplica a una inscripción comprada | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 422 | `PRECONDITION_FAILED` | Indique el aprendiz que se inscribe | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 422 | `PRECONDITION_FAILED` | El curso no está publicado | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 422 | `PRECONDITION_FAILED` | El curso es de pago: la inscripción requiere una compra confirmada | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cohorte pertenece a otro curso | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cohorte no está abierta | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pago de la inscripción no está confirmado | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 422 | `PRECONDITION_FAILED` | El curso tiene precio pero no moneda: no se puede verificar el pago | Excepción explícita en src/modules/education/services/education-learning.service.ts |
+| 422 | `PRECONDITION_FAILED` | El pago no corresponde a esta compra | Excepción explícita en src/modules/education/services/education-learning.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
