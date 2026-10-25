@@ -3,6 +3,7 @@ import {
   computePermissionDrift,
   routeKey,
   SAMPLE_SIZE,
+  staleAllowlist,
   type DriftRoute,
 } from './permission-drift';
 
@@ -145,5 +146,35 @@ describe('blockingDrift (lo que un gate de CI rechazaría)', () => {
         routes: ['GET /vacia', 'GET /whoami'],
       }),
     ).not.toContain(expect.stringContaining('AUDITOR'));
+  });
+});
+
+describe('staleAllowlist (la lista de excepciones sólo puede encogerse)', () => {
+  const informe = computePermissionDrift(entrada);
+
+  it('una lista que coincide con la deriva no tiene excepciones obsoletas', () => {
+    expect(
+      staleAllowlist(informe, {
+        roles: ['PLATFORM_ADMIN'],
+        routes: ['GET /vacia', 'GET /whoami'],
+      }),
+    ).toEqual([]);
+  });
+
+  it('un rol que ya se sembró y una ruta que ya declara @Roles se señalan', () => {
+    expect(
+      staleAllowlist(informe, {
+        roles: ['PLATFORM_ADMIN', 'DPO'],
+        routes: ['GET /vacia', 'GET /a', 'GET /health'],
+      }),
+    ).toEqual([
+      'excepción obsoleta, el rol ya no está sin sembrar: DPO',
+      'excepción obsoleta, la ruta ya declara @Roles o @Public: GET /a',
+      'excepción obsoleta, la ruta ya declara @Roles o @Public: GET /health',
+    ]);
+  });
+
+  it('sin lista no hay nada obsoleto', () => {
+    expect(staleAllowlist(informe)).toEqual([]);
   });
 });

@@ -17,11 +17,26 @@ interface RunNextResponse {
   fenced?: boolean;
 }
 
+interface ImportInventoryResponse {
+  inventory: { hash: string };
+  operations: { added: number; changed: number; notObserved: number };
+  impacts: {
+    written: number;
+    skippedNotCataloged: number;
+    skippedUnresolved: number;
+  };
+}
+
 /**
  * Reloj del catálogo de datos: pide a la API que reclame y ejecute la
  * siguiente corrida de escaneo. La API hace el trabajo y la base guarda el
  * estado; el worker sólo aporta el "cuándo", así que puede morir y reiniciarse
  * sin perder nada (el lease vencido deja que la próxima vuelta la retome).
+ *
+ * Tras un escaneo que terminó bien pide además la importación del inventario:
+ * cada impacto de una operación apunta a un objeto de `catalog_objects`, y es
+ * el escaneo el que acaba de dejarlos al día. La importación es idempotente,
+ * así que repetirla no cuesta nada si el inventario no cambió.
  */
 @Injectable()
 export class CatalogScanTickJob {
@@ -48,9 +63,25 @@ export class CatalogScanTickJob {
       };
       if (result.fenced) {
         this.logger.warn(log, 'Catalog scan lease lost to another worker');
-      } else {
-        this.logger.info(log, 'Catalog scan processed');
+        return;
       }
+      this.logger.info(log, 'Catalog scan processed');
+      if (result.status !== 'SUCCEEDED') return;
+
+      const imported = await this.api.post<ImportInventoryResponse>(
+        '/internal/catalog/inventory/import',
+        {},
+      );
+      this.logger.info(
+        {
+          operation: 'worker.data_catalog.inventory-import',
+          scanId: result.scanId,
+          inventoryHash: imported.inventory.hash,
+          operations: imported.operations,
+          impacts: imported.impacts,
+        },
+        'Catalog inventory imported',
+      );
     });
   }
 }

@@ -26,7 +26,11 @@ describe('IamOnboardingDraftsController', () => {
   };
 
   it('guarda un borrador eliminando contraseñas por seguridad y lo recupera', () => {
-    const saveResult = controller.saveDraft('patient', 'draft-xyz', mockPayload);
+    const saveResult = controller.saveDraft(
+      'patient',
+      'draft-xyz',
+      mockPayload,
+    );
     expect(saveResult.ok).toBe(true);
 
     const retrieved = controller.getDraft('patient', 'draft-xyz');

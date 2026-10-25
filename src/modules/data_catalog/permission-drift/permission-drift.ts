@@ -163,3 +163,29 @@ export function blockingDrift(
       .map((r) => `ruta sin @Roles ni @Public: ${routeKey(r)}`),
   ];
 }
+
+/**
+ * Excepciones que ya no hacen falta: figuran en la lista pero la deriva que aceptaban desapareció
+ * (se sembró el rol, la ruta declaró `@Roles`). Un gate las rechaza para que la lista sólo pueda
+ * encogerse: una excepción olvidada aceptaría de antemano la deriva que vuelva a aparecer.
+ */
+export function staleAllowlist(
+  report: PermissionDriftReport,
+  allow: DriftAllowlist = {},
+): string[] {
+  const rolesConDeriva = new Set(report.usedNotSeeded.map((u) => u.role));
+  const rutasConDeriva = new Set(report.routesWithoutRoles.map(routeKey));
+  return [
+    ...(allow.roles ?? [])
+      .filter((rol) => !rolesConDeriva.has(rol))
+      .map(
+        (rol) => `excepción obsoleta, el rol ya no está sin sembrar: ${rol}`,
+      ),
+    ...(allow.routes ?? [])
+      .filter((ruta) => !rutasConDeriva.has(ruta))
+      .map(
+        (ruta) =>
+          `excepción obsoleta, la ruta ya declara @Roles o @Public: ${ruta}`,
+      ),
+  ];
+}
