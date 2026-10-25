@@ -15,7 +15,7 @@ import {
   FieldDefinitionsRepository,
   FieldValuesRepository,
 } from '../repositories';
-import { choiceOptionsOf } from '../entities';
+import { choiceOptionsOf, type DynamicFieldDefinitions } from '../entities';
 import {
   CreateFieldDefinitionDto,
   CreateFieldDependencyDto,
@@ -195,7 +195,10 @@ export class FormsFieldsService {
 
       this.validateChoiceField({
         dataType: dto.dataType ?? field.dataType,
-        valueSetId: field.valueSetId,
+        // La base devuelve `null`, no `undefined`, en una columna vacía: sin
+        // normalizar, pasar a un tipo de elección siempre daba 422 («declara
+        // valueSetId u options») contra Postgres, y nunca con los mocks.
+        valueSetId: field.valueSetId ?? undefined,
         options: dto.options ?? choiceOptionsOf(field.options),
         allowOther: dto.allowOther ?? field.allowOther,
       });
@@ -227,6 +230,7 @@ export class FormsFieldsService {
         }
         field.options = dto.options;
       }
+      this.applyCardinality(field, dto);
       if (dto.name !== undefined) field.name = dto.name;
       if (dto.multiple !== undefined) field.multiple = dto.multiple;
       if (dto.allowOther !== undefined) field.allowOther = dto.allowOther;
@@ -242,6 +246,58 @@ export class FormsFieldsService {
       );
       return { ok: true };
     });
+  }
+
+  /**
+   * Los topes de respuestas de un campo de varias (REQ-27-007).
+   *
+   * Se valida el par **resultante** —lo que llega más lo que ya estaba—,
+   * porque un `PATCH` que sólo baja el máximo puede dejarlo por debajo del
+   * mínimo guardado. Un tope sólo tiene sentido en un campo de elección que
+   * admite varias, y no puede pedir más respuestas que opciones ofrecidas.
+   */
+  private applyCardinality(
+    field: DynamicFieldDefinitions,
+    dto: UpdateFieldDefinitionDto,
+  ): void {
+    if (dto.cardinalityMin === undefined && dto.cardinalityMax === undefined) {
+      return;
+    }
+    // `?? undefined` también sobre lo guardado: la base devuelve `null`.
+    const min =
+      (dto.cardinalityMin === undefined
+        ? field.cardinalityMin
+        : dto.cardinalityMin) ?? undefined;
+    const max =
+      (dto.cardinalityMax === undefined
+        ? field.cardinalityMax
+        : dto.cardinalityMax) ?? undefined;
+
+    if (min !== undefined || max !== undefined) {
+      const multiple = dto.multiple ?? field.multiple;
+      if (field.dataType !== 'code' || multiple !== true) {
+        throw new PreconditionFailedException(
+          'Los topes de respuestas sólo aplican a un campo de elección que admite varias',
+          { dataType: field.dataType },
+        );
+      }
+    }
+    if (min !== undefined && max !== undefined && min > max) {
+      throw new PreconditionFailedException(
+        'El mínimo de respuestas no puede superar al máximo',
+        { cardinalityMin: min, cardinalityMax: max },
+      );
+    }
+    const offered = choiceOptionsOf(field.options)?.length;
+    const highest = max ?? min;
+    if (offered !== undefined && highest !== undefined && highest > offered) {
+      throw new PreconditionFailedException(
+        'El tope de respuestas no puede superar la cantidad de opciones',
+        { tope: highest, opciones: offered },
+      );
+    }
+    field.cardinalityMin = min;
+    field.cardinalityMax = max;
   }
 
   /** UC-09-02: declara una definición de campo con sus reglas de validación. */
