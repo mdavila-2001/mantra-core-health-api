@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `clinical`
 
-Referencia exhaustiva de 39 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 41 operación(es) del módulo `clinical`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-me`, `clinical-observations`, `clinical-orders`, `clinical-prescription-policies`, `clinical-prescriptions`, `clinical-prescriptions-public`, `clinical-read`, `clinical-records`
-- **Controladores:** `ClinicalEncountersController`, `ClinicalMedicalAspectsController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionPoliciesController`, `ClinicalPrescriptionsController`, `ClinicalPrescriptionsPublicController`, `ClinicalReadController`, `ClinicalRecordsController`
+- **Etiquetas OpenAPI:** `clinical-encounters`, `clinical-me`, `clinical-observations`, `clinical-orders`, `clinical-prescription-expiry`, `clinical-prescription-policies`, `clinical-prescriptions`, `clinical-prescriptions-public`, `clinical-read`, `clinical-records`
+- **Controladores:** `ClinicalEncountersController`, `ClinicalMedicalAspectsController`, `ClinicalObservationsController`, `ClinicalOrdersController`, `ClinicalPrescriptionExpiryController`, `ClinicalPrescriptionPoliciesController`, `ClinicalPrescriptionsController`, `ClinicalPrescriptionsPublicController`, `ClinicalReadController`, `ClinicalRecordsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -26,30 +26,32 @@ Referencia exhaustiva de 39 operación(es) del módulo `clinical`, derivada del 
 13. [POST /clinical/encounters/{id}/close](#13-post-clinical-encounters-id-close) — Cerrar un encuentro en curso (gatilla facturación)
 14. [POST /clinical/encounters/check-in](#14-post-clinical-encounters-check-in) — Check-in de un encuentro con participantes y ubicación
 15. [POST /clinical/immunizations](#15-post-clinical-immunizations) — Registrar una inmunización
-16. [GET /clinical/me/medical-aspects](#16-get-clinical-me-medical-aspects) — Ver mis aspectos médicos declarados
-17. [PUT /clinical/me/medical-aspects](#17-put-clinical-me-medical-aspects) — Guardar mis aspectos médicos declarados
-18. [POST /clinical/medication-records](#18-post-clinical-medication-records) — Administrar/registrar medicación
-19. [POST /clinical/medication-requests](#19-post-clinical-medication-requests) — Prescribir medicación
-20. [GET /clinical/medication-requests/{id}/attachments](#20-get-clinical-medication-requests-id-attachments) — Listar los adjuntos de una receta
-21. [POST /clinical/medication-requests/{id}/attachments](#21-post-clinical-medication-requests-id-attachments) — Adjuntar un archivo ya subido a una receta
-22. [POST /clinical/medication-requests/{id}/edit](#22-post-clinical-medication-requests-id-edit) — Editar ítems de una receta en borrador (DRAFT)
-23. [POST /clinical/medication-requests/{id}/invalidate](#23-post-clinical-medication-requests-id-invalidate) — Invalidar una receta emitida
-24. [POST /clinical/medication-requests/{id}/issue](#24-post-clinical-medication-requests-id-issue) — Emitir una receta (la vuelve inmutable)
-25. [POST /clinical/medication-requests/{id}/renew](#25-post-clinical-medication-requests-id-renew) — Renovar una receta (crea una nueva copiando datos)
-26. [POST /clinical/medication-requests/{id}/replace](#26-post-clinical-medication-requests-id-replace) — Reemplazar una receta emitida (crea la corrección)
-27. [POST /clinical/medication-requests/{id}/sign](#27-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
-28. [POST /clinical/observations](#28-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
-29. [PATCH /clinical/observations/{id}/amend](#29-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
-30. [GET /clinical/patients/{patientProfileId}/summary](#30-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
-31. [GET /clinical/prescription-signature-policies](#31-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
-32. [POST /clinical/prescription-signature-policies](#32-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
-33. [POST /clinical/prescription-signature-policies/{id}/deactivate](#33-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
-34. [GET /clinical/prescriptions/{id}/pdf](#34-get-clinical-prescriptions-id-pdf) — Descargar el PDF oficial de una receta
-35. [POST /clinical/procedures](#35-post-clinical-procedures) — Registrar un procedimiento
-36. [POST /clinical/procedures/{id}/attachments](#36-post-clinical-procedures-id-attachments) — Adjuntar un archivo ya subido a un procedimiento
-37. [POST /clinical/service-requests](#37-post-clinical-service-requests) — Crear una orden de servicio
-38. [POST /clinical/service-requests/duplicate-check](#38-post-clinical-service-requests-duplicate-check) — Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
-39. [GET /public/prescriptions/{id}/verify](#39-get-public-prescriptions-id-verify) — Verificar la autenticidad de una receta por su sello
+16. [POST /clinical/internal/prescription-expiry-notices](#16-post-clinical-internal-prescription-expiry-notices) — Avisar al paciente de las recetas por vencer (barrido)
+17. [GET /clinical/me/medical-aspects](#17-get-clinical-me-medical-aspects) — Ver mis aspectos médicos declarados
+18. [PUT /clinical/me/medical-aspects](#18-put-clinical-me-medical-aspects) — Guardar mis aspectos médicos declarados
+19. [POST /clinical/medication-records](#19-post-clinical-medication-records) — Administrar/registrar medicación
+20. [POST /clinical/medication-requests](#20-post-clinical-medication-requests) — Prescribir medicación
+21. [GET /clinical/medication-requests/{id}/attachments](#21-get-clinical-medication-requests-id-attachments) — Listar los adjuntos de una receta
+22. [POST /clinical/medication-requests/{id}/attachments](#22-post-clinical-medication-requests-id-attachments) — Adjuntar un archivo ya subido a una receta
+23. [POST /clinical/medication-requests/{id}/edit](#23-post-clinical-medication-requests-id-edit) — Editar ítems de una receta en borrador (DRAFT)
+24. [POST /clinical/medication-requests/{id}/invalidate](#24-post-clinical-medication-requests-id-invalidate) — Invalidar una receta emitida
+25. [POST /clinical/medication-requests/{id}/issue](#25-post-clinical-medication-requests-id-issue) — Emitir una receta (la vuelve inmutable)
+26. [POST /clinical/medication-requests/{id}/renew](#26-post-clinical-medication-requests-id-renew) — Renovar una receta (crea una nueva copiando datos)
+27. [POST /clinical/medication-requests/{id}/replace](#27-post-clinical-medication-requests-id-replace) — Reemplazar una receta emitida (crea la corrección)
+28. [POST /clinical/medication-requests/{id}/sign](#28-post-clinical-medication-requests-id-sign) — Firmar una receta en borrador (DRAFT)
+29. [POST /clinical/observations](#29-post-clinical-observations) — Registrar una observación con componentes y ejecutantes
+30. [PATCH /clinical/observations/{id}/amend](#30-patch-clinical-observations-id-amend) — Corregir/enmendar una observación (value contract)
+31. [GET /clinical/patients/{patientProfileId}/received-services](#31-get-clinical-patients-patientprofileid-received-services) — Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas
+32. [GET /clinical/patients/{patientProfileId}/summary](#32-get-clinical-patients-patientprofileid-summary) — UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros)
+33. [GET /clinical/prescription-signature-policies](#33-get-clinical-prescription-signature-policies) — Listar las políticas de firma de un tenant
+34. [POST /clinical/prescription-signature-policies](#34-post-clinical-prescription-signature-policies) — Crear una política de firma de receta
+35. [POST /clinical/prescription-signature-policies/{id}/deactivate](#35-post-clinical-prescription-signature-policies-id-deactivate) — Desactivar una política (cierra vigencia, sin borrado duro)
+36. [GET /clinical/prescriptions/{id}/pdf](#36-get-clinical-prescriptions-id-pdf) — Descargar el PDF oficial de una receta
+37. [POST /clinical/procedures](#37-post-clinical-procedures) — Registrar un procedimiento
+38. [POST /clinical/procedures/{id}/attachments](#38-post-clinical-procedures-id-attachments) — Adjuntar un archivo ya subido a un procedimiento
+39. [POST /clinical/service-requests](#39-post-clinical-service-requests) — Crear una orden de servicio
+40. [POST /clinical/service-requests/duplicate-check](#40-post-clinical-service-requests-duplicate-check) — Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
+41. [GET /public/prescriptions/{id}/verify](#41-get-public-prescriptions-id-verify) — Verificar la autenticidad de una receta por su sello
 
 ---
 
@@ -155,6 +157,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AllergyIntoleranceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AllergyIntoleranceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AllergyIntoleranceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AllergyIntoleranceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AllergyIntoleranceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -277,6 +280,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinkedFilePageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -437,6 +441,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileLinkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -576,6 +581,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CareEpisodeResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CareEpisodeResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CareEpisodeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CareEpisodeResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CareEpisodeResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -730,6 +736,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConditionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -868,6 +875,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileLinkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1006,6 +1014,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConditionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConditionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1165,6 +1174,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ConditionItemDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ConditionItemDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ConditionItemDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConditionItemDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConditionItemDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1360,6 +1370,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DiagnosticReportResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DiagnosticReportResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DiagnosticReportResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DiagnosticReportResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticReportResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1493,6 +1504,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DiagnosticReportResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DiagnosticReportResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DiagnosticReportResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DiagnosticReportResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticReportResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1614,6 +1626,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinkedFilePageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1774,6 +1787,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileLinkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1906,6 +1920,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EncounterResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EncounterResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EncounterResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EncounterResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EncounterResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2093,6 +2108,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EncounterResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EncounterResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EncounterResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EncounterResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EncounterResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2254,6 +2270,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ImmunizationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ImmunizationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ImmunizationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ImmunizationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImmunizationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2305,7 +2322,137 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /clinical/me/medical-aspects
+## 16. POST /clinical/internal/prescription-expiry-notices
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-prescription-expiry`
+- **Nombre:** Avisar al paciente de las recetas por vencer (barrido)
+- **Operation ID:** `ClinicalPrescriptionExpiryController_sweep`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalPrescriptionExpiryController.sweep](../../src/modules/clinical/controllers/clinical-prescription-expiry.controller.ts)
+
+### Descripción de negocio
+
+Recetas emitidas cuyo `valid_to` cae en los próximos 3 días y que todavía no tienen aviso. Un aviso por receta, por la bandeja in-app.
+
+Contexto declarado en el controlador: Avisa a los pacientes cuyas recetas vencen en los próximos días.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /clinical/internal/prescription-expiry-notices` en `ClinicalPrescriptionExpiryController_sweep`. El controlador delega en `PrescriptionExpiryNoticesService.sweep`. Valida el body como `PrescriptionExpirySweepDto` y consume `application/json`. El tipo de retorno estático es `Promise<PrescriptionExpirySweepResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PrescriptionExpirySweepDto`; los campos opcionales se omiten.
+
+```http
+POST /clinical/internal/prescription-expiry-notices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`, `SYSTEM_WORKER`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `limit` | No | `number` | mínimo 1; máximo 500 | Tamaño máximo del lote | `200` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /clinical/internal/prescription-expiry-notices HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "limit": 200
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PrescriptionExpirySweepResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PrescriptionExpirySweepResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PrescriptionExpirySweepResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PrescriptionExpirySweepResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PrescriptionExpirySweepResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PrescriptionExpirySweepResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PrescriptionExpirySweepResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PrescriptionExpirySweepResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PrescriptionExpirySweepResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PrescriptionExpirySweepResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrescriptionExpirySweepResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "scanned": 1,
+  "notified": 1,
+  "suppressed": 1,
+  "failed": 1,
+  "skipped": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `scanned` | Sí | `number` | Sin restricción adicional declarada | Recetas por vencer sin aviso previo que se consideraron | `1` |
+| `notified` | Sí | `number` | Sin restricción adicional declarada | Avisos entregados a la bandeja del paciente | `1` |
+| `suppressed` | Sí | `number` | Sin restricción adicional declarada | Avisos que la preferencia del paciente detuvo; quedan registrados y no se reintentan | `1` |
+| `failed` | Sí | `number` | Sin restricción adicional declarada | Avisos que no se pudieron emitir; el siguiente barrido los reintenta | `1` |
+| `skipped` | Sí | `boolean` | Sin restricción adicional declarada | `true` si otro barrido estaba en curso y éste no hizo nada | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, SYSTEM_WORKER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/internal/prescription-expiry-notices"
+}
+```
+
+---
+
+## 17. GET /clinical/me/medical-aspects
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-me`
@@ -2366,6 +2513,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MedicalAspectsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MedicalAspectsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MedicalAspectsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MedicalAspectsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalAspectsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2421,7 +2569,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. PUT /clinical/me/medical-aspects
+## 18. PUT /clinical/me/medical-aspects
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-me`
@@ -2508,6 +2656,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicalAspectsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicalAspectsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicalAspectsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicalAspectsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicalAspectsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2565,7 +2714,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /clinical/medication-records
+## 19. POST /clinical/medication-records
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2658,6 +2807,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicationRecordResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicationRecordResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicationRecordResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicationRecordResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicationRecordResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2710,7 +2860,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /clinical/medication-requests
+## 20. POST /clinical/medication-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2821,6 +2971,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2883,7 +3034,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /clinical/medication-requests/{id}/attachments
+## 21. GET /clinical/medication-requests/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -2949,6 +3100,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LinkedFilePageDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LinkedFilePageDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3027,7 +3179,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /clinical/medication-requests/{id}/attachments
+## 22. POST /clinical/medication-requests/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3109,6 +3261,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileLinkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3162,7 +3315,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. POST /clinical/medication-requests/{id}/edit
+## 23. POST /clinical/medication-requests/{id}/edit
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3268,6 +3421,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3333,7 +3487,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /clinical/medication-requests/{id}/invalidate
+## 24. POST /clinical/medication-requests/{id}/invalidate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3415,6 +3569,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3476,7 +3631,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /clinical/medication-requests/{id}/issue
+## 25. POST /clinical/medication-requests/{id}/issue
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3547,6 +3702,7 @@ idempotency-key: valor-ejemplo
 | 422 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3612,7 +3768,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /clinical/medication-requests/{id}/renew
+## 26. POST /clinical/medication-requests/{id}/renew
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3700,6 +3856,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3761,7 +3918,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /clinical/medication-requests/{id}/replace
+## 27. POST /clinical/medication-requests/{id}/replace
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3861,6 +4018,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3922,7 +4080,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /clinical/medication-requests/{id}/sign
+## 28. POST /clinical/medication-requests/{id}/sign
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -3990,6 +4148,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MedicationRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MedicationRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4051,7 +4210,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /clinical/observations
+## 29. POST /clinical/observations
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-observations`
@@ -4217,6 +4376,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ObservationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4267,7 +4427,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. PATCH /clinical/observations/{id}/amend
+## 30. PATCH /clinical/observations/{id}/amend
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-observations`
@@ -4366,6 +4526,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ObservationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ObservationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4416,7 +4577,162 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /clinical/patients/{patientProfileId}/summary
+## 31. GET /clinical/patients/{patientProfileId}/received-services
+
+- **Módulo:** `clinical`
+- **Etiqueta OpenAPI:** `clinical-read`
+- **Nombre:** Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas
+- **Operation ID:** `ClinicalReadController_getReceivedServices`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ClinicalReadController.getReceivedServices](../../src/modules/clinical/controllers/clinical-read.controller.ts)
+
+### Descripción de negocio
+
+Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Servicios que el paciente recibió: intervenciones médicas realizadas y vacunas. Es la pestaña «Servicios recibidos» de la historia. El estudio de laboratorio y la imagenología no entran: viven en «Resultados». La política de acceso es la del resumen (`ClinicalRecordAccessGuard`) y la lectura deja su asiento en `audit.data_access_log` antes de ejecutarse (`@AccessLogged`).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /clinical/patients/{patientProfileId}/received-services` en `ClinicalReadController_getReceivedServices`. El controlador delega en `ReceivedServicesReadService.list`. No recibe body. El tipo de retorno estático es `Promise<PatientReceivedServicesResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `limit` | query | No | `number` | Sin restricción adicional declarada | Tope de la lista (por defecto 50) | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /clinical/patients/00000000-0000-4000-8000-000000000001/received-services HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `CLINICIAN`, `PRACTITIONER`, `PATIENT`.
+- Deben ser UUID válidos: `patientProfileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /clinical/patients/00000000-0000-4000-8000-000000000001/received-services?limit=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientReceivedServicesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientReceivedServicesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": {},
+      "typeConceptId": "00000000-0000-4000-8000-000000000001",
+      "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "performedAt": "2026-07-31T12:00:00.000Z",
+      "performerProfileId": "00000000-0000-4000-8000-000000000001",
+      "performerName": "Nombre de ejemplo",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+      "practiceSiteName": "Nombre de ejemplo",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "outcomeConceptId": "00000000-0000-4000-8000-000000000001",
+      "resultText": "valor-ejemplo",
+      "cost": {
+        "amount": 350,
+        "currencyCode": "BOB",
+        "source": "INVOICE_LINE"
+      }
+    }
+  ],
+  "limit": 1,
+  "truncated": true,
+  "costsVisible": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Paciente de quien se lee. | `00000000-0000-4000-8000-000000000001` |
+| `items` | Sí | `array<ReceivedServiceItemDto>` | Sin restricción adicional declarada | Servicios, el más reciente primero. | `[{"id":"00000000-0000-4000-8000-000000000001","type":{},"typeConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","statusConceptId":"00000000-0000-4000-8000-000000000001","performedAt":"2026-07-31T12:00:00.000Z","performerProfileId":"00000000-0000-4000-8000-000000000001","performerName":"Nombre de ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","practiceSiteName":"Nombre de ejemplo","encounterId":"00000000-0000-4000-8000-000000000001","outcomeConceptId":"00000000-0000-4000-8000-000000000001","resultText":"valor-ejemplo","cost":{"amount":350,"currencyCode":"BOB","source":"INVOICE_LINE"}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador del servicio recibido. | `00000000-0000-4000-8000-000000000001` |
+| `items[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo de servicio: intervención médica, vacunación u otro. | `{}` |
+| `items[].typeConceptId` | Sí | `string` | formato `uuid` | Concepto del tipo, para resolver su etiqueta en terminología. | `00000000-0000-4000-8000-000000000001` |
+| `items[].serviceConceptId` | Sí | `string` | formato `uuid` | Qué se hizo: el código del procedimiento, de la vacuna o del tipo de caso. | `00000000-0000-4000-8000-000000000001` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Estado del servicio. | `00000000-0000-4000-8000-000000000001` |
+| `items[].performedAt` | Sí | `string` | formato `date-time` | Cuándo se realizó. | `2026-07-31T12:00:00.000Z` |
+| `items[].performerProfileId` | No | `string` | formato `uuid` | Profesional que lo realizó. | `00000000-0000-4000-8000-000000000001` |
+| `items[].performerName` | No | `string` | Sin restricción adicional declarada | Nombre del profesional, ya resuelto: el paciente no puede leer el padrón de profesionales, así que no podría resolverlo desde `performerProfileId`. | `Nombre de ejemplo` |
+| `items[].practiceSiteId` | No | `string` | formato `uuid` | Sede donde se realizó. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practiceSiteName` | No | `string` | Sin restricción adicional declarada | Nombre de la sede, ya resuelto. | `Nombre de ejemplo` |
+| `items[].encounterId` | No | `string` | formato `uuid` | Atención en la que ocurrió. | `00000000-0000-4000-8000-000000000001` |
+| `items[].outcomeConceptId` | No | `string` | formato `uuid` | Resultado del servicio, como concepto. | `00000000-0000-4000-8000-000000000001` |
+| `items[].resultText` | No | `string` | Sin restricción adicional declarada | Nota o resultado en texto libre que dejó quien lo realizó. | `valor-ejemplo` |
+| `items[].cost` | Sí | `ReceivedServiceCostDto` | Sin restricción adicional declarada | Costo registrado. `null` si no hay cobro registrado o si quien pide no ve importes. | `{"amount":350,"currencyCode":"BOB","source":"INVOICE_LINE"}` |
+| `items[].cost.amount` | Sí | `string` | Sin restricción adicional declarada | Importe decimal exacto; nunca un número de coma flotante. | `350` |
+| `items[].cost.currencyCode` | Sí | `string` | admite null | Código de moneda (`BOB`, `USD`), o `null` si el cargo no lo declara. | `BOB` |
+| `items[].cost.source` | Sí | `string` | valores: `INVOICE_LINE`, `CHARGE_ITEMS` | De dónde sale el importe: la línea de factura enlazada o la suma de los cargos del caso. | `INVOICE_LINE` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la lista | `1` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | `true` si hay más servicios de los que el tope dejó pasar. | `true` |
+| `costsVisible` | Sí | `boolean` | Sin restricción adicional declarada | Si quien pide ve importes. Solo los ve el titular o quien lo representa: el personal clínico lee el servicio sin el dinero. Con `false`, todo `cost` es `null` y no significa «sin cobro». | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER, PATIENT. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/clinical/patients/{patientProfileId}/received-services"
+}
+```
+
+---
+
+## 32. GET /clinical/patients/{patientProfileId}/summary
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-read`
@@ -4483,6 +4799,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PatientClinicalSummaryResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PatientClinicalSummaryResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PatientClinicalSummaryResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientClinicalSummaryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientClinicalSummaryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4733,7 +5050,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /clinical/prescription-signature-policies
+## 33. GET /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -4797,6 +5114,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrescriptionSignaturePolicyResponseDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -4845,7 +5163,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. POST /clinical/prescription-signature-policies
+## 34. POST /clinical/prescription-signature-policies
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -4936,6 +5254,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrescriptionSignaturePolicyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -4992,7 +5311,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /clinical/prescription-signature-policies/{id}/deactivate
+## 35. POST /clinical/prescription-signature-policies/{id}/deactivate
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescription-policies`
@@ -5060,6 +5379,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PrescriptionSignaturePolicyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrescriptionSignaturePolicyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5116,7 +5436,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /clinical/prescriptions/{id}/pdf
+## 36. GET /clinical/prescriptions/{id}/pdf
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescriptions`
@@ -5182,6 +5502,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | La receta no existe | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -5213,7 +5534,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. POST /clinical/procedures
+## 37. POST /clinical/procedures
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -5320,6 +5641,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProcedureResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProcedureResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProcedureResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProcedureResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProcedureResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5372,7 +5694,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /clinical/procedures/{id}/attachments
+## 38. POST /clinical/procedures/{id}/attachments
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-records`
@@ -5454,6 +5776,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FileLinkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FileLinkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5507,7 +5830,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /clinical/service-requests
+## 39. POST /clinical/service-requests
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -5608,6 +5931,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ServiceRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ServiceRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5668,7 +5992,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /clinical/service-requests/duplicate-check
+## 40. POST /clinical/service-requests/duplicate-check
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-orders`
@@ -5755,6 +6079,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DuplicateStudyCheckResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DuplicateStudyCheckResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -5831,7 +6156,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. GET /public/prescriptions/{id}/verify
+## 41. GET /public/prescriptions/{id}/verify
 
 - **Módulo:** `clinical`
 - **Etiqueta OpenAPI:** `clinical-prescriptions-public`
@@ -5891,6 +6216,7 @@ Host: localhost:3000
 | 404 | La receta no existe | `Promise<PrescriptionVerificationResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PrescriptionVerificationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrescriptionVerificationResponseDto`. Ejemplo completo derivado de ese DTO:
 

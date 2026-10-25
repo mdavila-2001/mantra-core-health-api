@@ -141,6 +141,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CarePlanResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CarePlanResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CarePlanResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CarePlanResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CarePlanResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -176,6 +177,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Un plan de cuidados necesita un profesional autor. | Excepción explícita en src/modules/chart/services/chart-care-plans.service.ts |
 | 403 | `FORBIDDEN` | La sesión no tiene un perfil profesional con el que crear el plan. | Excepción explícita en src/modules/chart/services/chart-care-plans.service.ts |
 | 403 | `FORBIDDEN` | El autor del plan es el profesional de la sesión: no se crea en nombre de otro perfil. | Excepción explícita en src/modules/chart/services/chart-care-plans.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/chart/services/chart-encounter-scope.service.ts |
+| 404 | `NOT_FOUND` | Diagnóstico no encontrado | Excepción explícita en src/modules/chart/services/chart-encounter-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El encuentro ya está cerrado y sellado: no admite más escrituras. | Excepción explícita en src/modules/clinical/services/encounter-seal-guard.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -279,6 +282,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ActivityResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ActivityResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -437,6 +441,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DocumentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DocumentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -478,6 +483,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/chart/services/chart-encounter-scope.service.ts |
 | 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El encuentro ya está cerrado y sellado: no admite más escrituras. | Excepción explícita en src/modules/clinical/services/encounter-seal-guard.service.ts |
@@ -569,6 +575,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | El documento no existe, o el archivo no cuelga de ese documento | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -673,6 +680,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | El encuentro no está cerrado | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -768,6 +776,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyChartDocumentListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyChartDocumentListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyChartDocumentListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyChartDocumentListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyChartDocumentListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -904,6 +913,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | El documento no existe, no es del titular, no es visible, o el archivo no cuelga de él | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -1006,6 +1016,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | El encuentro no está cerrado | `Promise<void>` | No |
 | 429 | Consulta completada correctamente. | `Promise<void>` | No |
 | 500 | Consulta completada correctamente. | `Promise<void>` | No |
+| 504 | Consulta completada correctamente. | `Promise<void>` | No |
 
 La operación no devuelve body según el tipo TypeScript del controlador.
 
@@ -1100,6 +1111,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<MyChartNoteListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<MyChartNoteListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<MyChartNoteListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyChartNoteListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyChartNoteListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1238,6 +1250,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | La sesión no tiene perfil profesional, o pide las notas de otro profesional sin ser SUPERADMIN. | `Promise<ChartNotesListResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ChartNotesListResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ChartNotesListResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ChartNotesListResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartNotesListResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1418,6 +1431,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NoteVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1453,7 +1467,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Una nota clínica necesita un profesional autor. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | La sesión no tiene un perfil profesional con el que escribir la nota. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
 | 403 | `FORBIDDEN` | El autor de la nota es el profesional de la sesión: no se escribe en nombre de otro perfil. | Excepción explícita en src/modules/chart/services/chart-notes.service.ts |
+| 404 | `NOT_FOUND` | Encuentro no encontrado | Excepción explícita en src/modules/chart/services/chart-encounter-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El encuentro ya está cerrado y sellado: no admite más escrituras. | Excepción explícita en src/modules/chart/services/chart-encounter-scope.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1564,6 +1580,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NoteVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1709,6 +1726,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NoteVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1849,6 +1867,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NoteVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1992,6 +2011,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NoteVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NoteVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2145,6 +2165,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ExamFindingsResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExamFindingsResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExamFindingsResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExamFindingsResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExamFindingsResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2272,6 +2293,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReleaseResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2404,6 +2426,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReleaseResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReleaseResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2520,6 +2543,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientChartResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientChartResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2732,6 +2756,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto[]>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartTemplateResponseDto[]`. Ejemplo completo derivado de ese DTO:
 
@@ -2944,6 +2969,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartTemplateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3141,6 +3167,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ChartTemplateResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ChartTemplateResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3349,6 +3376,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
 

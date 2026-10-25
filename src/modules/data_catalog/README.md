@@ -20,13 +20,14 @@ Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omiti
 
 Su `*.module.ts` importa sólo `RouteIndexModule` (para leer los roles de cada ruta en la deriva de permisos).
 
-Entidades (`tableName`, 8 de 8 archivos `*.entity.ts`): `catalog_annotation_revisions`, `catalog_annotations`, `catalog_change_events`, `catalog_columns`, `catalog_evidence_items`, `catalog_objects`, `catalog_review_decisions`, `catalog_scan_runs`.
+Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `catalog_annotation_revisions`, `catalog_annotations`, `catalog_change_events`, `catalog_columns`, `catalog_evidence_items`, `catalog_objects`, `catalog_operation_impacts`, `catalog_operations`, `catalog_process_step_operations`, `catalog_process_steps`, `catalog_processes`, `catalog_review_decisions`, `catalog_scan_runs`.
 
 Roles (`data_catalog.constants.ts`): `PORTAL_READ_ROLES` = `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`; `CATALOG_WRITE_ROLES` = `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DATA_STEWARD`. Los cinco roles de `data_catalog.roles.ts` (todos de ámbito `GLOBAL`) los siembra la API; se asignan **sin tenant**.
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
 | `POST /internal/catalog/scans/run-next` | SYSTEM | `data-catalog-internal` |
+| `POST /internal/catalog/inventory/import` | SYSTEM | `data-catalog-internal` |
 | `GET /admin/catalog/schemas` | ...PORTAL_READ_ROLES | `admin-catalog` |
 | `GET /admin/catalog/objects` | ...PORTAL_READ_ROLES | `admin-catalog` |
 | `GET /admin/catalog/objects/:id` | ...PORTAL_READ_ROLES | `admin-catalog` |
@@ -115,6 +116,12 @@ sonda (worker scan-tick, cada pocos segundos): POST /internal/catalog/scans/run-
   └─ si no hay ninguno y pasaron PROBE_INTERVAL_MS desde que terminó el último → pide uno y lo ejecuta
        └─ al terminar bien: clasificación automática de las columnas nuevas o cambiadas
 
+importación del inventario (worker scan-tick, tras un escaneo SUCCEEDED): POST /internal/catalog/inventory/import
+  └─ pg_advisory_xact_lock: una importación a la vez
+       └─ planImport: compara inventario/ con las cinco tablas -> altas / cambios / sin cambios / NOT_OBSERVED / reaparecidas
+            └─ catalog_operations + catalog_operation_impacts + catalog_processes + catalog_process_steps + catalog_process_step_operations
+               (todo en una transacción; lo que no cambió no se toca ni sube row_version)
+
 columna: PUT columns/:id/annotation  /  POST columns/:id/evidence   (mismas reglas que la tabla)
 clasificación automática ──> ficha de columna en AUTO_DETECTED (certeza) o NEEDS_REVIEW (duda)
   └─ una persona que guarda la ficha la saca de AUTO_DETECTED (queda DRAFT o NEEDS_REVIEW, origin MANUAL)
@@ -131,6 +138,23 @@ clasificación automática ──> ficha de columna en AUTO_DETECTED (certeza) o
   revierte y no se pisa lo que otro proceso cerró. Intervalo: `PROBE_INTERVAL_MS` (15 min, medido
   desde que terminó el último escaneo que llegó a ejecutarse). El disparo en proceso de
   `POST /admin/catalog/scans` se conserva: ambas vías compiten por `claimScan`.
+- **El inventario se importa, no se reemplaza**: el detalle de cada operación (contrato, árboles,
+  grafos, glosario) sigue saliendo de los archivos de `inventario/`, que viajan en la imagen; las
+  cinco tablas `catalog_operation*` / `catalog_process*` guardan el índice consultable (qué
+  operaciones existen, qué objetos tocan y con qué acceso, y los procesos que las agrupan) para
+  cruzarlo con `catalog_objects`, las fichas y la sonda. `InventoryImportService` es **idempotente**:
+  la huella (`technical_hash`) es de lo que se guarda, incluido el objeto resuelto de cada impacto,
+  y una operación con la misma huella no se toca (ni `row_version` ni `updated_at`). Una operación
+  que deja de aparecer queda `NOT_OBSERVED`, no se borra; si vuelve, vuelve a `OBSERVED`.
+- **Orden: primero el escaneo.** Cada impacto apunta a un objeto de `catalog_objects`. Si la sonda
+  aún no observó la tabla, el impacto se salta y se cuenta en `skippedUnresolved` (o en
+  `skippedNotCataloged` si el inventario tampoco la tiene catalogada); como la huella incluye el
+  objeto resuelto, la siguiente importación lo recupera sola. Sin `inventario/` en la instancia, la
+  ruta responde 503.
+- **Valores sin CHECK**: `risk_level` (`ALTO`/`MEDIO`/`BAJO`), `access_kind` (`LEE`/`ESCRIBE`/`BORRA`),
+  `kind` de proceso (`MODULO`/`CRITICO`) y `observation_status` (`OBSERVED`/`NOT_OBSERVED`) no tienen
+  CHECK en el modelo (decisión del parche v4.2.48): el importador escribe sólo esos valores y
+  `import-plan.spec.ts` los fija contra los archivos del inventario.
 - **Estados de revisión**: `AUTO_DETECTED` (lo detectó la clasificación automática y nadie lo curó),
   `DRAFT` (borrador **humano**), `NEEDS_REVIEW`, `APPROVED`, `REJECTED`. Sólo la clasificación
   automática crea `AUTO_DETECTED`, con `origin = AUTO_CLASSIFIER`. `AUTO_DETECTED` no se revisa:

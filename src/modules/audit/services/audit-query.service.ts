@@ -1,9 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import {
-  PreconditionFailedException,
-  type AuthenticatedUser,
-} from '../../../common';
 import { ROUTE_ACTION_PREFIX } from '../../../common/audit-trail';
 import { CONCEPTS } from '../../../common/constants/concepts';
 import {
@@ -24,8 +20,6 @@ import {
   type AuditLogPageDto,
   type DataAccessPageDto,
   type DataAccessQueryDto,
-  type MyDataAccessPageDto,
-  type MyDataAccessQueryDto,
 } from '../dto/audit-query.dto';
 import {
   AuditQueryRepository,
@@ -180,55 +174,6 @@ export class AuditQueryService {
           recordedAt: f.recorded_at,
         };
       }),
-      nextCursor:
-        hayMas && ultimo
-          ? encodeKeysetCursor({ t: ultimo.recorded_at, i: ultimo.id })
-          : null,
-      limit,
-    };
-  }
-
-  /**
-   * Autoservicio del titular (PAC-HIST-004/005): quién accedió a sus datos, a qué, para qué y
-   * cuándo. Lee `audit.data_access_log` acotado **siempre** por el perfil de paciente de la sesión
-   * (`actor.patientProfileId`): el paciente nunca viene de un parámetro, así que nadie puede pedir
-   * los accesos de otro. No filtra por tenant —el titular ve los accesos a su historia en cualquier
-   * organización—, y no expone el riesgo derivado ni el tenant, que son de la vista de plataforma.
-   *
-   * @throws PreconditionFailedException si la sesión no tiene perfil de paciente.
-   */
-  async myDataAccess(
-    actor: AuthenticatedUser,
-    q: MyDataAccessQueryDto,
-    now: Date = new Date(),
-  ): Promise<MyDataAccessPageDto> {
-    const patientProfileId = actor.patientProfileId;
-    if (!patientProfileId) {
-      throw new PreconditionFailedException(
-        'La sesión no tiene perfil de paciente asociado',
-        { userId: actor.id },
-      );
-    }
-    const limit = q.limit ?? AUDIT_DEFAULT_PAGE_SIZE;
-    const filas = await this.repo.dataAccess(this.em.fork(), {
-      ...rango(q, now),
-      patientProfileId,
-      cursor: cursorDe(q.cursor),
-      limit,
-    });
-    const hayMas = filas.length > limit;
-    const pagina = hayMas ? filas.slice(0, limit) : filas;
-    const ultimo = pagina[pagina.length - 1];
-    return {
-      items: pagina.map((f) => ({
-        id: f.id,
-        userId: f.user_id,
-        operation: OPERATION_BY_CONCEPT[f.action_concept_id] ?? 'READ',
-        resourceType: f.resource_type,
-        resourceId: f.resource_id,
-        purpose: f.purpose,
-        recordedAt: f.recorded_at,
-      })),
       nextCursor:
         hayMas && ultimo
           ? encodeKeysetCursor({ t: ultimo.recorded_at, i: ultimo.id })

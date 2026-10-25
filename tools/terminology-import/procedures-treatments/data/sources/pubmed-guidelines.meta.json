@@ -7,7 +7,15 @@
   "homepage": "https://pubmed.ncbi.nlm.nih.gov/",
   "query": "(Guideline[pt] OR Practice Guideline[pt])",
   "partitions": [
-    "\"1000\"[EDAT] : \"1979\"[EDAT]",
+    "\"1967\"[EDAT] : \"1967\"[EDAT]",
+    "\"1971\"[EDAT] : \"1971\"[EDAT]",
+    "\"1973\"[EDAT] : \"1973\"[EDAT]",
+    "\"1974\"[EDAT] : \"1974\"[EDAT]",
+    "\"1975\"[EDAT] : \"1975\"[EDAT]",
+    "\"1976\"[EDAT] : \"1976\"[EDAT]",
+    "\"1977\"[EDAT] : \"1977\"[EDAT]",
+    "\"1978\"[EDAT] : \"1978\"[EDAT]",
+    "\"1979\"[EDAT] : \"1979\"[EDAT]",
     "\"1980\"[EDAT] : \"1980\"[EDAT]",
     "\"1981\"[EDAT] : \"1981\"[EDAT]",
     "\"1982\"[EDAT] : \"1982\"[EDAT]",
@@ -58,5 +66,7 @@
   ],
   "esearchCount": 44031,
   "records": 42934,
-  "retrievedAt": "2026-10-24T17:29:24.724Z"
+  "booksSkipped": 1097,
+  "retrievedAt": "2026-10-24T17:29:24.724Z",
+  "revalidatedAt": "2026-10-24T21:22:59.445Z"
 }

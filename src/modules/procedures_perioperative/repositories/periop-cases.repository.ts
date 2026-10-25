@@ -183,18 +183,31 @@ export class PeriopCasesRepository {
    * @param id - Identificador de id.
    * @returns Resultado de find case by id conforme al contrato `Promise<ProcedureCases | null>`.
    */
-  findCaseById(em: EntityManager, id: string): Promise<ProcedureCases | null> {
-    return em.findOne(ProcedureCases, { id });
-  }
-
-  /** Toda transición de estado del caso se hace con la fila bloqueada. */
-  findCaseForUpdate(
+  findCaseById(
     em: EntityManager,
     id: string,
+    custodianTenantId?: string,
   ): Promise<ProcedureCases | null> {
     return em.findOne(
       ProcedureCases,
-      { id },
+      custodianTenantId === undefined ? { id } : { id, custodianTenantId },
+    );
+  }
+
+  /**
+   * Toda transición de estado del caso se hace con la fila bloqueada.
+   *
+   * Con `custodianTenantId` el filtro va en la consulta: no se bloquea (ni se
+   * espera el bloqueo de) un caso de otro tenant.
+   */
+  findCaseForUpdate(
+    em: EntityManager,
+    id: string,
+    custodianTenantId?: string,
+  ): Promise<ProcedureCases | null> {
+    return em.findOne(
+      ProcedureCases,
+      custodianTenantId === undefined ? { id } : { id, custodianTenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }

@@ -13,10 +13,45 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { PharmacyErrorReason } from '../pharmacy.error-reasons';
 import { PHARM } from '../pharmacy.concepts';
 
-const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+const T1 = 't1';
+const T2 = 't2';
+const NOT_AVAILABLE = PharmacyErrorReason.PHARMACY_NOT_AVAILABLE;
+const REFERENCE_NOT_AVAILABLE =
+  PharmacyErrorReason.PHARMACY_REFERENCE_NOT_AVAILABLE;
+
+/** Administrador con membresía en T1, el tenant activo de los tests. */
+const actor = {
+  id: 'admin-1',
+  roles: ['SECURITY_ADMIN'],
+  tenantIds: [T1],
+} as any;
+
+/** Ejecuta `fn` con T1 como tenant activo del request. */
+const inTenant = <T>(fn: () => Promise<T>, tenantId = T1): Promise<T> =>
+  runWithTenant(tenantId, fn);
+
+/** Captura el rechazo de una promesa para comparar su respuesta HTTP. */
+async function rejection(promise: Promise<unknown>): Promise<any> {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error('no rechazó');
+}
+
+/** Farmacia activa de un tenant, como la devuelve el repositorio. */
+const pharmacyOf = (tenantId: string, extra: object = {}) => ({
+  id: 'ph1',
+  tenantId,
+  statusConceptId: PHARM.PHARMACY_ACTIVE,
+  ...extra,
+});
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -25,7 +60,9 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const pharmaciesRepo = { findById: mockFn() };
+  const pharmaciesRepo = {
+    findByIdInTenant: mockFn().mockResolvedValue(pharmacyOf(T1)),
+  };
   const productsRepo = {
     findByPharmacyAndCode: mockFn(),
     findById: mockFn(),
@@ -69,18 +106,22 @@ describe('PharmacyProductsService', () => {
   describe('publishProduct (UC-24-04)', () => {
     it('rejects when the pharmacy is not active', async () => {
       const d = build();
-      d.pharmaciesRepo.findById.mockResolvedValue({
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue({
+        tenantId: T1,
         id: 'ph1',
         statusConceptId: PHARM.PHARMACY_DRAFT,
       });
       await expect(
-        d.service.publishProduct('ph1', { productCode: 'P-1' } as any, actor),
+        inTenant(() =>
+          d.service.publishProduct('ph1', { productCode: 'P-1' } as any, actor),
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
     it('rejects a duplicated product code', async () => {
       const d = build();
-      d.pharmaciesRepo.findById.mockResolvedValue({
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue({
+        tenantId: T1,
         id: 'ph1',
         statusConceptId: PHARM.PHARMACY_ACTIVE,
       });
@@ -88,13 +129,16 @@ describe('PharmacyProductsService', () => {
         id: 'existing',
       });
       await expect(
-        d.service.publishProduct('ph1', { productCode: 'P-1' } as any, actor),
+        inTenant(() =>
+          d.service.publishProduct('ph1', { productCode: 'P-1' } as any, actor),
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
     it('publishes the product and its identifiers, flushing parent before children', async () => {
       const d = build();
-      d.pharmaciesRepo.findById.mockResolvedValue({
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue({
+        tenantId: T1,
         id: 'ph1',
         statusConceptId: PHARM.PHARMACY_ACTIVE,
       });
@@ -107,13 +151,15 @@ describe('PharmacyProductsService', () => {
         createdAt: new Date(),
       });
 
-      const res = await d.service.publishProduct(
-        'ph1',
-        {
-          productCode: 'P-1',
-          identifiers: [{ identifierType: 'GTIN', identifierValue: '123' }],
-        } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.publishProduct(
+          'ph1',
+          {
+            productCode: 'P-1',
+            identifiers: [{ identifierType: 'GTIN', identifierValue: '123' }],
+          } as any,
+          actor,
+        ),
       );
 
       expect(res).toMatchObject({ id: 'pr1', identifierCount: 1 });
@@ -154,7 +200,8 @@ describe('PharmacyProductsService', () => {
 
     function ready() {
       const d = build();
-      d.pharmaciesRepo.findById.mockResolvedValue({
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue({
+        tenantId: T1,
         id: 'ph1',
         statusConceptId: PHARM.PHARMACY_ACTIVE,
       });
@@ -173,14 +220,16 @@ describe('PharmacyProductsService', () => {
 
     it('deriva marca, genérico, concentración, presentación, receta y vademécum del registro oficial', async () => {
       const d = ready();
-      await d.service.publishProduct(
-        'ph1',
-        {
-          productCode: 'SKU-1',
-          catalogProductId: 'cat-1',
-          catalogPresentationCode: '700002',
-        } as any,
-        actor,
+      await inTenant(() =>
+        d.service.publishProduct(
+          'ph1',
+          {
+            productCode: 'SKU-1',
+            catalogProductId: 'cat-1',
+            catalogPresentationCode: '700002',
+          } as any,
+          actor,
+        ),
       );
       expect(d.catalogRepo.findVademecumConceptIdByAtc).toHaveBeenCalledWith(
         d.tx,
@@ -205,10 +254,12 @@ describe('PharmacyProductsService', () => {
       const d = ready();
       d.catalogRepo.findProductById.mockResolvedValue(null);
       await expect(
-        d.service.publishProduct(
-          'ph1',
-          { productCode: 'SKU-1', catalogProductId: 'nope' } as any,
-          actor,
+        inTenant(() =>
+          d.service.publishProduct(
+            'ph1',
+            { productCode: 'SKU-1', catalogProductId: 'nope' } as any,
+            actor,
+          ),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(d.productsRepo.create).not.toHaveBeenCalled();
@@ -222,10 +273,12 @@ describe('PharmacyProductsService', () => {
         regulatoryStatus: 'REVOKED',
       });
       await expect(
-        d.service.publishProduct(
-          'ph1',
-          { productCode: 'SKU-1', catalogProductId: 'cat-1' } as any,
-          actor,
+        inTenant(() =>
+          d.service.publishProduct(
+            'ph1',
+            { productCode: 'SKU-1', catalogProductId: 'cat-1' } as any,
+            actor,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -242,15 +295,17 @@ describe('PharmacyProductsService', () => {
       async (field) => {
         const d = ready();
         await expect(
-          d.service.publishProduct(
-            'ph1',
-            {
-              productCode: 'SKU-1',
-              catalogProductId: 'cat-1',
-              catalogPresentationCode: '700001',
-              [field]: 'x',
-            } as any,
-            actor,
+          inTenant(() =>
+            d.service.publishProduct(
+              'ph1',
+              {
+                productCode: 'SKU-1',
+                catalogProductId: 'cat-1',
+                catalogPresentationCode: '700001',
+                [field]: 'x',
+              } as any,
+              actor,
+            ),
           ),
         ).rejects.toBeInstanceOf(BadRequestException);
         expect(d.productsRepo.create).not.toHaveBeenCalled();
@@ -260,10 +315,12 @@ describe('PharmacyProductsService', () => {
     it('con más de una presentación vendible exige elegir cuál (400)', async () => {
       const d = ready();
       await expect(
-        d.service.publishProduct(
-          'ph1',
-          { productCode: 'SKU-1', catalogProductId: 'cat-1' } as any,
-          actor,
+        inTenant(() =>
+          d.service.publishProduct(
+            'ph1',
+            { productCode: 'SKU-1', catalogProductId: 'cat-1' } as any,
+            actor,
+          ),
         ),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
@@ -272,14 +329,16 @@ describe('PharmacyProductsService', () => {
       const d = ready();
       for (const code of ['999999', '700003']) {
         await expect(
-          d.service.publishProduct(
-            'ph1',
-            {
-              productCode: 'SKU-1',
-              catalogProductId: 'cat-1',
-              catalogPresentationCode: code,
-            } as any,
-            actor,
+          inTenant(() =>
+            d.service.publishProduct(
+              'ph1',
+              {
+                productCode: 'SKU-1',
+                catalogProductId: 'cat-1',
+                catalogPresentationCode: code,
+              } as any,
+              actor,
+            ),
           ),
         ).rejects.toBeInstanceOf(BadRequestException);
       }
@@ -288,10 +347,12 @@ describe('PharmacyProductsService', () => {
     it('rechaza (400) una presentación sin producto del catálogo', async () => {
       const d = ready();
       await expect(
-        d.service.publishProduct(
-          'ph1',
-          { productCode: 'SKU-1', catalogPresentationCode: '700001' } as any,
-          actor,
+        inTenant(() =>
+          d.service.publishProduct(
+            'ph1',
+            { productCode: 'SKU-1', catalogPresentationCode: '700001' } as any,
+            actor,
+          ),
         ),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
@@ -300,14 +361,16 @@ describe('PharmacyProductsService', () => {
       const d = ready();
       d.productsRepo.findByPharmacyAndCatalog.mockResolvedValue({ id: 'ya' });
       await expect(
-        d.service.publishProduct(
-          'ph1',
-          {
-            productCode: 'SKU-2',
-            catalogProductId: 'cat-1',
-            catalogPresentationCode: '700001',
-          } as any,
-          actor,
+        inTenant(() =>
+          d.service.publishProduct(
+            'ph1',
+            {
+              productCode: 'SKU-2',
+              catalogProductId: 'cat-1',
+              catalogPresentationCode: '700001',
+            } as any,
+            actor,
+          ),
         ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.productsRepo.findByPharmacyAndCatalog).toHaveBeenCalledWith(
@@ -325,10 +388,12 @@ describe('PharmacyProductsService', () => {
         presentations: [catalogProduct.presentations[0]],
       });
       d.catalogRepo.findVademecumConceptIdByAtc.mockResolvedValue(null);
-      await d.service.publishProduct(
-        'ph1',
-        { productCode: 'SKU-1', catalogProductId: 'cat-1' } as any,
-        actor,
+      await inTenant(() =>
+        d.service.publishProduct(
+          'ph1',
+          { productCode: 'SKU-1', catalogProductId: 'cat-1' } as any,
+          actor,
+        ),
       );
       const data = d.productsRepo.create.mock.calls[0][1];
       expect(data.medicationConceptId).toBeUndefined();
@@ -343,10 +408,16 @@ describe('PharmacyProductsService', () => {
 
     it('sin catalogProductId el alta sigue como antes (producto cargado a mano)', async () => {
       const d = ready();
-      await d.service.publishProduct(
-        'ph1',
-        { productCode: 'SKU-1', brandName: 'Manual', genericName: 'X' } as any,
-        actor,
+      await inTenant(() =>
+        d.service.publishProduct(
+          'ph1',
+          {
+            productCode: 'SKU-1',
+            brandName: 'Manual',
+            genericName: 'X',
+          } as any,
+          actor,
+        ),
       );
       expect(d.catalogRepo.findProductById).not.toHaveBeenCalled();
       expect(d.productsRepo.create).toHaveBeenCalledWith(
@@ -359,7 +430,8 @@ describe('PharmacyProductsService', () => {
   describe('updateProduct sobre un producto del catálogo universal', () => {
     it('rechaza (400) corregir los datos oficiales de un producto vinculado al catálogo', async () => {
       const d = build();
-      d.pharmaciesRepo.findById.mockResolvedValue({
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue({
+        tenantId: T1,
         id: 'ph1',
         statusConceptId: PHARM.PHARMACY_ACTIVE,
       });
@@ -370,11 +442,13 @@ describe('PharmacyProductsService', () => {
         catalogProductConceptId: 'cat-1',
       });
       await expect(
-        d.service.updateProduct(
-          'ph1',
-          'pr1',
-          { brandName: 'Otra' } as any,
-          actor,
+        inTenant(() =>
+          d.service.updateProduct(
+            'ph1',
+            'pr1',
+            { brandName: 'Otra' } as any,
+            actor,
+          ),
         ),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(d.tx.flush).not.toHaveBeenCalled();
@@ -389,7 +463,7 @@ describe('PharmacyProductsService', () => {
         pharmacyId: 'other',
       });
       await expect(
-        d.service.retireProduct('ph1', 'pr1', actor),
+        inTenant(() => d.service.retireProduct('ph1', 'pr1', actor)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -401,7 +475,7 @@ describe('PharmacyProductsService', () => {
         statusConceptId: PHARM.PRODUCT_RETIRED,
       });
       await expect(
-        d.service.retireProduct('ph1', 'pr1', actor),
+        inTenant(() => d.service.retireProduct('ph1', 'pr1', actor)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -425,7 +499,9 @@ describe('PharmacyProductsService', () => {
       d.pricesRepo.findActiveByProduct.mockResolvedValue([price]);
       d.mappingsRepo.findActiveByProduct.mockResolvedValue([mapping]);
 
-      const res = await d.service.retireProduct('ph1', 'pr1', actor);
+      const res = await inTenant(() =>
+        d.service.retireProduct('ph1', 'pr1', actor),
+      );
 
       expect(res).toEqual({ ok: true });
       expect(product.statusConceptId).toBe(PHARM.PRODUCT_RETIRED);
@@ -437,6 +513,7 @@ describe('PharmacyProductsService', () => {
   describe('updateProduct (P47 §2)', () => {
     const pharmacy = {
       id: 'ph1',
+      tenantId: T1,
       tradeName: 'Farmacia Andina',
       legalName: 'Andina SRL',
     };
@@ -459,7 +536,7 @@ describe('PharmacyProductsService', () => {
     }
 
     function given(d: ReturnType<typeof build>, product: unknown) {
-      d.pharmaciesRepo.findById.mockResolvedValue(pharmacy);
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue(pharmacy);
       d.productsRepo.findById.mockResolvedValue(product);
       d.readRepo.findConcepts.mockResolvedValue([
         { id: 'c-med', code: 'MESH-AMOX', display: 'Amoxicilina' },
@@ -471,11 +548,13 @@ describe('PharmacyProductsService', () => {
       const product = activeProduct();
       given(d, product);
 
-      const res = await d.service.updateProduct(
-        'ph1',
-        'pr1',
-        { brandName: 'Amoxil Plus' },
-        actor,
+      const res = await inTenant(() =>
+        d.service.updateProduct(
+          'ph1',
+          'pr1',
+          { brandName: 'Amoxil Plus' },
+          actor,
+        ),
       );
 
       expect(res).toEqual({
@@ -501,11 +580,13 @@ describe('PharmacyProductsService', () => {
       const product = activeProduct();
       given(d, product);
 
-      const res = await d.service.updateProduct(
-        'ph1',
-        'pr1',
-        { genericName: null, requiresPrescription: null },
-        actor,
+      const res = await inTenant(() =>
+        d.service.updateProduct(
+          'ph1',
+          'pr1',
+          { genericName: null, requiresPrescription: null },
+          actor,
+        ),
       );
 
       expect(product.genericName).toBeNull();
@@ -523,7 +604,9 @@ describe('PharmacyProductsService', () => {
       const product = activeProduct();
       given(d, product);
 
-      const res = await d.service.updateProduct('ph1', 'pr1', {}, actor);
+      const res = await inTenant(() =>
+        d.service.updateProduct('ph1', 'pr1', {}, actor),
+      );
 
       expect(d.tx.flush).not.toHaveBeenCalled();
       expect(product).not.toHaveProperty('updatedByUserId');
@@ -537,7 +620,9 @@ describe('PharmacyProductsService', () => {
       const d = build();
       given(d, null);
       await expect(
-        d.service.updateProduct('ph1', 'pr1', { brandName: 'X' }, actor),
+        inTenant(() =>
+          d.service.updateProduct('ph1', 'pr1', { brandName: 'X' }, actor),
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(d.tx.flush).not.toHaveBeenCalled();
     });
@@ -547,7 +632,9 @@ describe('PharmacyProductsService', () => {
       const product = activeProduct({ pharmacyId: 'other' });
       given(d, product);
       await expect(
-        d.service.updateProduct('ph1', 'pr1', { brandName: 'X' }, actor),
+        inTenant(() =>
+          d.service.updateProduct('ph1', 'pr1', { brandName: 'X' }, actor),
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
       expect(product.brandName).toBe('Amoxil');
       expect(d.tx.flush).not.toHaveBeenCalled();
@@ -556,9 +643,11 @@ describe('PharmacyProductsService', () => {
     it('throws when the pharmacy does not exist', async () => {
       const d = build();
       given(d, activeProduct());
-      d.pharmaciesRepo.findById.mockResolvedValue(null);
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue(null);
       await expect(
-        d.service.updateProduct('ph1', 'pr1', { brandName: 'X' }, actor),
+        inTenant(() =>
+          d.service.updateProduct('ph1', 'pr1', { brandName: 'X' }, actor),
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -569,10 +658,55 @@ describe('PharmacyProductsService', () => {
       });
       given(d, product);
       await expect(
-        d.service.updateProduct('ph1', 'pr1', { brandName: 'X' }, actor),
+        inTenant(() =>
+          d.service.updateProduct('ph1', 'pr1', { brandName: 'X' }, actor),
+        ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(product.brandName).toBe('Amoxil');
       expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('alcance de tenant (PHARM-01)', () => {
+    it('publishProduct sobre una farmacia de T2 responde igual que una inexistente y no escribe', async () => {
+      const d = build();
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue(pharmacyOf(T2));
+      const foreignError = await rejection(
+        inTenant(() =>
+          d.service.publishProduct('ph2', { productCode: 'P-1' } as any, actor),
+        ),
+      );
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue(null);
+      const missingError = await rejection(
+        inTenant(() =>
+          d.service.publishProduct('ph2', { productCode: 'P-1' } as any, actor),
+        ),
+      );
+
+      expect(foreignError).toBeInstanceOf(ResourceNotFoundException);
+      expect(foreignError.reason).toBe(NOT_AVAILABLE);
+      expect(foreignError.details).toBeUndefined();
+      expect(foreignError.getResponse()).toEqual(missingError.getResponse());
+      expect(d.productsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('updateProduct y retireProduct exigen la farmacia del tenant antes de cargar el producto', async () => {
+      const d = build();
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue(pharmacyOf(T2));
+
+      const updateError = await rejection(
+        inTenant(() =>
+          d.service.updateProduct('ph2', 'pr1', { brandName: 'X' }, actor),
+        ),
+      );
+      const retireError = await rejection(
+        inTenant(() => d.service.retireProduct('ph2', 'pr1', actor)),
+      );
+
+      expect(updateError.reason).toBe(NOT_AVAILABLE);
+      expect(retireError.reason).toBe(NOT_AVAILABLE);
+      expect(d.productsRepo.findById).not.toHaveBeenCalled();
+      expect(d.pricesRepo.findActiveByProduct).not.toHaveBeenCalled();
     });
   });
 });

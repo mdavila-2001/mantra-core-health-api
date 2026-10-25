@@ -89,13 +89,15 @@ export class ProjectImmunizationPlanDto {
   /**
    * Valor de birth date mantenido por la instancia.
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: String,
     format: 'date',
-    description: 'Fecha de nacimiento del paciente',
+    description:
+      'Opcional y sólo de contraste: la fecha de nacimiento se toma del perfil del paciente; si se envía y difiere, se rechaza',
   })
+  @IsOptional()
   @IsISO8601()
-  birthDate!: string;
+  birthDate?: string;
 
   /**
    * Identificador asociado a jurisdiction concept.
@@ -111,7 +113,11 @@ export class ProjectImmunizationPlanDto {
   /**
    * Identificador asociado a tenant.
    */
-  @ApiPropertyOptional({ format: 'uuid', description: 'Tenant del calendario' })
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Opcional y sólo de contraste: el calendario es el del tenant activo; si se envía y difiere, se rechaza',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;

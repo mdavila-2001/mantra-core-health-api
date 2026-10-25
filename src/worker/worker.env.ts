@@ -25,6 +25,7 @@
 import 'dotenv/config';
 
 import * as Joi from 'joi';
+import { SEED } from '../common/constants/concepts';
 
 /**
  * Esquema de entorno compartido por los 17 procesos worker
@@ -46,6 +47,23 @@ export const workerEnvSchema = Joi.object({
    * arranca sin sonda y lo avisa (ver `worker-health.server.ts`).
    */
   WORKER_HEALTH_PORT: Joi.number().integer().min(0).max(65535).default(9100),
+  /**
+   * Interfaz en la que escucha la sonda. Por defecto el loopback: `/status` no
+   * se autentica y el healthcheck de Compose corre dentro del contenedor. Sólo
+   * se abre (`0.0.0.0`) cuando un orquestador externo necesita sondear por red y
+   * el puerto está aislado de todo lo demás.
+   */
+  WORKER_HEALTH_HOST: Joi.string().trim().min(1).default('127.0.0.1'),
+  /**
+   * Sujeto de plataforma al que se atribuyen las métricas y los eventos de
+   * outbox del mantenimiento físico de `time_series` (compresión, retención,
+   * refresco de rollups). Esas operaciones actúan sobre hypertables compartidas
+   * por todos los tenants, así que no pertenecen a ninguno de ellos: se
+   * atribuyen a un único tenant de plataforma declarado por el despliegue, nunca
+   * al del cuerpo de una petición ni a uno cualquiera. Por defecto el tenant
+   * `DEFAULT` del seed, que existe en todo entorno.
+   */
+  TS_ADMIN_TENANT_ID: Joi.string().uuid().default(SEED.tenantId),
   /**
    * Plazo de un tick programado. No es el plazo de una llamada (eso es
    * `WORKER_HTTP_TIMEOUT_MS`) sino el techo tras el cual la ejecución se aborta
@@ -162,6 +180,7 @@ export interface WorkerEnv {
   apiBaseUrl: string;
   httpTimeoutMs: number;
   healthPort: number;
+  healthHost: string;
   tickTimeoutMs: number;
   stuckTickMs: number;
   drainTimeoutMs: number;
@@ -172,6 +191,8 @@ export interface WorkerEnv {
   tsCompressionOlderThan: string;
   tsRollupRefreshWindowHours: number;
   tsRetentionPolicies: Record<string, string>;
+  /** Sujeto de plataforma del mantenimiento físico de `time_series`. */
+  tsAdminTenantId: string;
   mockProviderBaseUrl: string;
   mockProviderApiKey: string;
   googleOAuthClientId: string;
@@ -221,6 +242,7 @@ export function loadWorkerEnv(): WorkerEnv {
     apiBaseUrl: process.env.WORKER_API_BASE_URL ?? 'http://127.0.0.1:3000',
     httpTimeoutMs: numberFromEnv('WORKER_HTTP_TIMEOUT_MS', 30_000),
     healthPort: numberFromEnv('WORKER_HEALTH_PORT', 9100),
+    healthHost: (process.env.WORKER_HEALTH_HOST ?? '').trim() || '127.0.0.1',
     tickTimeoutMs: numberFromEnv('WORKER_TICK_TIMEOUT_MS', 5 * 60_000),
     stuckTickMs: numberFromEnv('WORKER_STUCK_TICK_MS', 10 * 60_000),
     drainTimeoutMs: numberFromEnv('WORKER_DRAIN_TIMEOUT_MS', 20_000),
@@ -238,8 +260,12 @@ export function loadWorkerEnv(): WorkerEnv {
     tsRetentionPolicies: parseRetentionPolicies(
       process.env.TS_RETENTION_POLICIES ?? '',
     ),
+    tsAdminTenantId: tsAdminTenantFromEnv(),
+    // Sin la variable, producción NO cae al emulador local: cablear un doble de
+    // prueba en un worker productivo es peor que dejar el adapter que falla.
     mockProviderBaseUrl:
-      process.env.MOCK_PROVIDER_BASE_URL ?? 'http://127.0.0.1:4100',
+      process.env.MOCK_PROVIDER_BASE_URL ??
+      (process.env.NODE_ENV === 'production' ? '' : 'http://127.0.0.1:4100'),
     mockProviderApiKey: process.env.MOCK_PROVIDER_API_KEY ?? '',
     googleOAuthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID ?? '',
     googleOAuthClientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET ?? '',
@@ -269,4 +295,22 @@ function parseRetentionPolicies(raw: string): Record<string, string> {
     }
   }
   return policies;
+}
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Tenant de plataforma del mantenimiento de `time_series`. Un valor ausente cae
+ * al tenant `DEFAULT` del seed; uno presente pero que no es un UUID aborta el
+ * arranque, porque atribuir compresiones y borrados a «lo que se pudo leer» es
+ * justamente el fallo que esta variable corrige.
+ */
+function tsAdminTenantFromEnv(): string {
+  const configured = (process.env.TS_ADMIN_TENANT_ID ?? '').trim();
+  if (configured.length === 0) return SEED.tenantId;
+  if (!UUID_PATTERN.test(configured)) {
+    throw new Error('TS_ADMIN_TENANT_ID debe ser un UUID de tenant válido');
+  }
+  return configured.toLowerCase();
 }

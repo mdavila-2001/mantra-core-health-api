@@ -52,6 +52,19 @@ versiona (regla completa en [`AGENTS.md`](https://github.com/mdavila-2001/mantra
 - Los checklists de procedimiento (la *Verificación* de la plantilla del PR, los pasos de un
   runbook) sí van: se tildan en cada uso y no describen trabajo pendiente.
 
+`yarn docs:coverage` (`tools/docs/check-doc-coverage.mjs`, parte de `yarn docs:validate`) lo
+verifica y falla cuando encuentra alguna de estas cosas:
+
+- `docs/trabajo/`, `docs/progress/` o `docs/tareas/`, o un `PLAN.md`, `REPORTE.md` o
+  `PENDIENTES*.md` en cualquier parte del repo;
+- un markdown con un encabezado «Pendiente(s)» o «Falta» (como título entero o seguidos de `:`),
+  «Próximos pasos», «Por hacer», «Qué sigue», `TODO` o `FIXME`;
+- un comentario que empieza con `TODO:` o `FIXME` en `src/**/*.ts`.
+
+Quedan fuera el modelo vendorizado (`database/SQL/`), `.agents/` y `.claude/`, que describen la
+regla, y `.github/`, porque la plantilla del PR lleva su checklist. Las listas de tareas sin tildar
+no se verifican automáticamente, porque un runbook las usa con razón: las cuida la revisión.
+
 ## Ver también
 
 - [Proceso de revisión](review-process.md), [Gestión de cambios](change-management.md).

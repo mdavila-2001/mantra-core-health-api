@@ -17,25 +17,25 @@ a través de los repositorios de este módulo.
   find src/modules/quotations -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **1 controller, 3 rutas HTTP, 0 entidades y 1 servicio**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **1 controller, 3 rutas HTTP, 0 entidades y 1 servicio**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
 Importa (`PracticeModule`).
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `POST /quotations` | PRACTITIONER, CLINICIAN | `quotations` |
-| `GET /quotations` | sesión | `quotations` |
-| `GET /quotations/:id` | sesión | `quotations` |
+| Método y ruta         | Acceso                  | Controller   |
+| --------------------- | ----------------------- | ------------ |
+| `POST /quotations`    | PRACTITIONER, CLINICIAN | `quotations` |
+| `GET /quotations`     | sesión                  | `quotations` |
+| `GET /quotations/:id` | sesión                  | `quotations` |
 
 ## Endpoints
 
-| Método | Ruta | Rol | Qué hace |
-|---|---|---|---|
-| `POST` | `/quotations` | `PRACTITIONER`, `CLINICIAN` | Crea la cotización con sus cuotas. |
-| `GET` | `/quotations?patientProfileId=` | autenticado | Lista las cotizaciones de un paciente en las prácticas que el actor alcanza, más recientes primero. |
-| `GET` | `/quotations/:id` | autenticado | Trae una cotización con sus cuotas, si es de una práctica que el actor alcanza. |
+| Método | Ruta                            | Rol                         | Qué hace                                                                                            |
+| ------ | ------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------- |
+| `POST` | `/quotations`                   | `PRACTITIONER`, `CLINICIAN` | Crea la cotización con sus cuotas.                                                                  |
+| `GET`  | `/quotations?patientProfileId=` | autenticado                 | Lista las cotizaciones de un paciente en las prácticas que el actor alcanza, más recientes primero. |
+| `GET`  | `/quotations/:id`               | autenticado                 | Trae una cotización con sus cuotas, si es de una práctica que el actor alcanza.                     |
 
 Cotizar exige rol clínico porque quien atiende es quien cotiza. Leer no exige rol,
 igual que el catálogo de servicios del que parte.
@@ -54,18 +54,6 @@ del catálogo (`BillingServiceCatalogService.assertPuedeEditar`):
 aislamiento por organización del RLS no la cubre: la organización se resuelve a
 través de la práctica (`PracticeTenantLookupService`). El listado se acota **en la
 consulta**, no después de leer.
-
-## Paciente y cita
-
-Alcanzar la práctica no habilita a cualquier paciente. Antes de crear y de
-listar, el servicio autoriza al actor sobre el paciente con la política de la
-historia clínica (`ClinicalReadService.assertCanReadHistory`: turno de hoy,
-relación asistencial vigente, acceso autorizado o titularidad). Si no la cumple,
-si el paciente no existe, o si la cita (`appointmentId`) no es de ese paciente ni
-de la organización de la práctica, la respuesta es el mismo `404` con
-`reason: QUOTATION_PATIENT_NOT_AVAILABLE` y no se escribe nada. La cuenta
-administradora sin rol clínico lista por las prácticas de su organización y no
-pasa por esa política.
 
 ## El plan de pagos (v4.2.18)
 

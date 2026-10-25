@@ -134,7 +134,7 @@ Entrega bytes de un asset READY desde storage propio
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Asset de audio listo no encontrado; ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: El contenido no está disponible en el almacenamiento local; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: El contenido no está disponible en el almacenamiento configurado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; Error: S3 object body is empty |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; Error: S3 object body is empty |
 
 ```mermaid
 flowchart TD
@@ -181,7 +181,7 @@ flowchart TD
   n20 --> n21
   n22{"!this.env.s3.bucket"}:::decision
   n21 --> n22
-  n23(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
+  n23(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
   n22 -->|"sí"| n23
   n24["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
   n22 -->|"no"| n24
@@ -554,7 +554,7 @@ Elimina conservadoramente objetos de assets deprecados/permanentes
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | StorageLifecycleDenied: DELETE_PERMIT_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3 |
+| 500 | `INTERNAL` | StorageLifecycleDenied: DELETE_PERMIT_REQUIRED; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; DomainException: {HttpStatus.SERVICE_UNAVAILABLE} |
 
 ```mermaid
 flowchart TD
@@ -663,7 +663,7 @@ flowchart TD
   n51 --> n52
   n53{"!this.env.s3.bucket"}:::decision
   n52 --> n53
-  n54(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
+  n54(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
   n53 -->|"sí"| n54
   n55["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
   n53 -->|"no"| n55
@@ -896,7 +896,7 @@ Verifica existencia y checksum de assets READY
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: La URI no pertenece al almacenamiento local; ResourceNotFoundException: La URI de almacenamiento local está mal formada; ResourceNotFoundException: La URI no pertenece al bucket configurado; ResourceNotFoundException: La URI S3 está mal formada o fuera del prefijo permitido; ResourceNotFoundException: El contenido no está disponible en el almacenamiento local; ResourceNotFoundException: El contenido no está disponible en el almacenamiento configurado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3; Error: S3 object body is empty |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; Error: S3 object body is empty |
 
 ```mermaid
 flowchart TD
@@ -938,7 +938,7 @@ flowchart TD
   n17 --> n18
   n19{"!this.env.s3.bucket"}:::decision
   n18 --> n19
-  n20(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
+  n20(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
   n19 -->|"sí"| n20
   n21["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
   n19 -->|"no"| n21
@@ -980,7 +980,7 @@ flowchart TD
   n38 --> n39
   n40{"!this.env.s3.bucket"}:::decision
   n39 --> n40
-  n41(["500 INTERNAL FILE_STORAGE_S3_BUCKET es obligatorio para FILE_STORAGE_ADAPTER=s3"]):::error
+  n41(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
   n40 -->|"sí"| n41
   n42["Llama a S3FileStorageAdapter.parseOwnedKey"]:::llamada
   n40 -->|"no"| n42

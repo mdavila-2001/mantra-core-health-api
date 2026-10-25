@@ -97,6 +97,7 @@
     "orm": "mikro-orm",
     "docs:tsdoc": "node tools/documentation/generate-documentation.mjs",
     "orm:catalog": "node tools/catalog/generate-catalog.mjs",
+    "catalog:permission-drift": "node tools/catalog/permission-drift-gate.mjs",
     "ddl:sources": "python ../mantra-core-health-model/salud-db/check_ddl_sources.py",
     "orm:entities:missing": "node tools/catalog/generate-missing-entities.mjs",
     "orm:audit": "node tools/catalog/audit-fidelity.mjs fidelity-audit.json",
@@ -131,6 +132,7 @@
     "docs:modules:sync": "node tools/docs/sync-module-docs.mjs",
     "docs:data:sync": "node tools/docs/generate-data-catalog.mjs",
     "docs:coverage": "node tools/docs/check-doc-coverage.mjs",
+    "docs:coverage:test": "node --test tools/docs/check-doc-coverage.test.mjs",
     "docs:links": "node tools/docs/check-doc-links.mjs",
     "docs:asyncapi:validate": "node tools/asyncapi/validate.mjs asyncapi/asyncapi.yaml",
     "docs:validate": "yarn docs:openapi:lint && yarn docs:asyncapi:validate && yarn docs:coverage && yarn docs:links",
@@ -221,6 +223,7 @@
     "rxjs": "^7.8.1",
     "socket.io": "^4",
     "uuid": "^14.0.1",
+    "web-push": "3.6.7",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
@@ -250,6 +253,7 @@
     "@types/pg": "^8",
     "@types/qrcode": "^1.5.6",
     "@types/supertest": "^7.0.0",
+    "@types/web-push": "3.6.4",
     "cross-env": "^10.1.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",

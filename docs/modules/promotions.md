@@ -27,7 +27,7 @@ redenciones sobre el checkout y programa de referidos.
   find src/modules/promotions -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **2 controllers, 19 rutas HTTP, 11 entidad y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **2 controllers, 19 rutas HTTP, 11 entidad y 3 servicios**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -35,45 +35,45 @@ Importa (`PaymentsModule`).
 
 Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `coupons`, `discount_rules`, `earning_rules`, `loyalty_memberships`, `loyalty_programs`, `loyalty_tiers`, `member_referrals`, `points_ledger_entries`, `promotions`, `redemptions`, `referral_programs`.
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `GET /loyalty/programs` | SYSTEM, PROMOTIONS_ADMIN, MARKETING_MANAGER | `loyalty` |
-| `GET /loyalty/me` | PATIENT | `loyalty` |
-| `GET /loyalty/me/points` | PATIENT | `loyalty` |
-| `POST /loyalty/me/points/redeem` | PATIENT | `loyalty` |
-| `POST /loyalty/programs` | PROMOTIONS_ADMIN, MARKETING_MANAGER | `loyalty` |
-| `POST /loyalty/programs/:id/memberships` | PROMOTIONS_ADMIN, MEMBER | `loyalty` |
-| `POST /loyalty/memberships/:id/points/earn` | SYSTEM, PROMOTIONS_ADMIN | `loyalty` |
-| `POST /loyalty/memberships/:id/points/redeem` | MEMBER, PROMOTIONS_ADMIN | `loyalty` |
-| `POST /loyalty/memberships/:id/recompute` | SYSTEM, PROMOTIONS_ADMIN | `loyalty` |
-| `POST /loyalty/jobs/expire-points` | SYSTEM | `loyalty` |
-| `POST /referral-programs/:id/referrals` | MEMBER, PROMOTIONS_ADMIN | `loyalty` |
-| `POST /referrals/:id/qualify` | SYSTEM, PROMOTIONS_ADMIN | `loyalty` |
-| `GET /promotions/me` | PATIENT | `promotions` |
-| `POST /promotions` | PROMOTIONS_ADMIN, MARKETING_MANAGER | `promotions` |
-| `POST /promotions/:id/coupons/batch` | PROMOTIONS_ADMIN, MARKETING_MANAGER | `promotions` |
-| `POST /coupons/validate` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
-| `POST /redemptions` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
-| `POST /checkout/:orderId/apply-discount` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
-| `POST /redemptions/:id/reverse` | CASHIER, PROMOTIONS_ADMIN | `promotions` |
+| Método y ruta                                 | Acceso                                      | Controller   |
+| --------------------------------------------- | ------------------------------------------- | ------------ |
+| `GET /loyalty/programs`                       | SYSTEM, PROMOTIONS_ADMIN, MARKETING_MANAGER | `loyalty`    |
+| `GET /loyalty/me`                             | PATIENT                                     | `loyalty`    |
+| `GET /loyalty/me/points`                      | PATIENT                                     | `loyalty`    |
+| `POST /loyalty/me/points/redeem`              | PATIENT                                     | `loyalty`    |
+| `POST /loyalty/programs`                      | PROMOTIONS_ADMIN, MARKETING_MANAGER         | `loyalty`    |
+| `POST /loyalty/programs/:id/memberships`      | PROMOTIONS_ADMIN, MEMBER                    | `loyalty`    |
+| `POST /loyalty/memberships/:id/points/earn`   | SYSTEM, PROMOTIONS_ADMIN                    | `loyalty`    |
+| `POST /loyalty/memberships/:id/points/redeem` | MEMBER, PROMOTIONS_ADMIN                    | `loyalty`    |
+| `POST /loyalty/memberships/:id/recompute`     | SYSTEM, PROMOTIONS_ADMIN                    | `loyalty`    |
+| `POST /loyalty/jobs/expire-points`            | SYSTEM                                      | `loyalty`    |
+| `POST /referral-programs/:id/referrals`       | MEMBER, PROMOTIONS_ADMIN                    | `loyalty`    |
+| `POST /referrals/:id/qualify`                 | SYSTEM, PROMOTIONS_ADMIN                    | `loyalty`    |
+| `GET /promotions/me`                          | PATIENT                                     | `promotions` |
+| `POST /promotions`                            | PROMOTIONS_ADMIN, MARKETING_MANAGER         | `promotions` |
+| `POST /promotions/:id/coupons/batch`          | PROMOTIONS_ADMIN, MARKETING_MANAGER         | `promotions` |
+| `POST /coupons/validate`                      | CASHIER, PROMOTIONS_ADMIN                   | `promotions` |
+| `POST /redemptions`                           | CASHIER, PROMOTIONS_ADMIN                   | `promotions` |
+| `POST /checkout/:orderId/apply-discount`      | CASHIER, PROMOTIONS_ADMIN                   | `promotions` |
+| `POST /redemptions/:id/reverse`               | CASHIER, PROMOTIONS_ADMIN                   | `promotions` |
 
 ## Casos de uso cubiertos (13)
 
-| UC | Endpoint | Descripción |
-| --- | --- | --- |
-| UC-51-01 | `POST /loyalty/programs` | Programa de lealtad con niveles y reglas |
-| UC-51-02 | `POST /loyalty/programs/:id/memberships` | Inscribir miembro |
-| UC-51-03 | `POST /loyalty/memberships/:id/points/earn` | Acumular puntos (idempotente) |
-| UC-51-04 | `POST /loyalty/memberships/:id/points/redeem` | Canjear puntos (idempotente) |
-| UC-51-05 | `POST /loyalty/memberships/:id/recompute` | Reproyectar saldo y nivel |
-| UC-51-06 | `POST /loyalty/jobs/expire-points` | Barrido de puntos vencidos |
-| UC-51-07 | `POST /promotions` | Promoción con reglas de descuento |
-| UC-51-08 | `POST /promotions/:id/coupons/batch` | Emitir lote de cupones |
-| UC-51-09 | `POST /coupons/validate` · `POST /redemptions` | Validar y redimir cupón |
-| UC-51-10 | `POST /checkout/:orderId/apply-discount` | Descuento en checkout |
-| UC-51-11 | `POST /redemptions/:id/reverse` | Revertir redención |
-| UC-51-12 | `POST /referral-programs/:id/referrals` | Generar código de referido |
-| UC-51-13 | `POST /referrals/:id/qualify` | Calificar y recompensar |
+| UC       | Endpoint                                       | Descripción                              |
+| -------- | ---------------------------------------------- | ---------------------------------------- |
+| UC-51-01 | `POST /loyalty/programs`                       | Programa de lealtad con niveles y reglas |
+| UC-51-02 | `POST /loyalty/programs/:id/memberships`       | Inscribir miembro                        |
+| UC-51-03 | `POST /loyalty/memberships/:id/points/earn`    | Acumular puntos (idempotente)            |
+| UC-51-04 | `POST /loyalty/memberships/:id/points/redeem`  | Canjear puntos (idempotente)             |
+| UC-51-05 | `POST /loyalty/memberships/:id/recompute`      | Reproyectar saldo y nivel                |
+| UC-51-06 | `POST /loyalty/jobs/expire-points`             | Barrido de puntos vencidos               |
+| UC-51-07 | `POST /promotions`                             | Promoción con reglas de descuento        |
+| UC-51-08 | `POST /promotions/:id/coupons/batch`           | Emitir lote de cupones                   |
+| UC-51-09 | `POST /coupons/validate` · `POST /redemptions` | Validar y redimir cupón                  |
+| UC-51-10 | `POST /checkout/:orderId/apply-discount`       | Descuento en checkout                    |
+| UC-51-11 | `POST /redemptions/:id/reverse`                | Revertir redención                       |
+| UC-51-12 | `POST /referral-programs/:id/referrals`        | Generar código de referido               |
+| UC-51-13 | `POST /referrals/:id/qualify`                  | Calificar y recompensar                  |
 
 ## Entidades
 

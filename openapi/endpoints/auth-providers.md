@@ -108,6 +108,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccountLinkRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccountLinkRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccountLinkRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccountLinkRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccountLinkRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -243,6 +244,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CompleteAccountLinkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CompleteAccountLinkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CompleteAccountLinkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CompleteAccountLinkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CompleteAccountLinkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -376,6 +378,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<UnlinkIdentityResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<UnlinkIdentityResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<UnlinkIdentityResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<UnlinkIdentityResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `UnlinkIdentityResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -516,6 +519,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProviderResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProviderResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProviderResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProviderResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProviderResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -667,6 +671,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AttributeMappingsResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AttributeMappingsResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AttributeMappingsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AttributeMappingsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AttributeMappingsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -842,6 +847,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProtocolConfigResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProtocolConfigResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProtocolConfigResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProtocolConfigResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProtocolConfigResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -991,6 +997,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProvisioningRuleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProvisioningRuleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProvisioningRuleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProvisioningRuleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProvisioningRuleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1135,6 +1142,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SigningKeyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SigningKeyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SigningKeyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SigningKeyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SigningKeyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1279,6 +1287,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RotateKeyResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RotateKeyResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RotateKeyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RotateKeyResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RotateKeyResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1411,6 +1420,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StartLoginResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StartLoginResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StartLoginResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StartLoginResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StartLoginResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1560,6 +1570,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CallbackResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CallbackResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CallbackResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CallbackResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CallbackResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1706,6 +1717,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<BindingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<BindingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<BindingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BindingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BindingResponseDto`. Ejemplo completo derivado de ese DTO:
 

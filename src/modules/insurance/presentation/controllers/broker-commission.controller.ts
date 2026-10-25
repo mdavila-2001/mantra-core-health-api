@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../../common';
 import { BrokerCommissionService } from '../../application/services';
 import { CreateCommissionStatementDto, CreatedResourceDto } from '../dto';
 
@@ -21,6 +26,11 @@ export class BrokerCommissionController {
   constructor(private readonly service: BrokerCommissionService) {}
 
   /** UC-26-14. */
+  @Audited({
+    action: 'BROKER_COMMISSION_STATEMENT_GENERATED',
+    entity: 'broker_commission_statement',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Generar liquidación de comisión de broker' })

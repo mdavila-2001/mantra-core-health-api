@@ -115,6 +115,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DecisionResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DecisionResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DecisionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DecisionResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DecisionResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -213,6 +214,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `practitionerDelegateAssignmentId` | Sí | `string` | formato `uuid` | Delegación a evaluar | `00000000-0000-4000-8000-000000000001` |
+| `effectiveUserId` | No | `string` | formato `uuid` | Usuario que ejercería el acceso. Si se omite se evalúa al usuario autenticado. Tiene que ser el titular de la asignación del delegado; si no, el acceso no se permite | `00000000-0000-4000-8000-000000000001` |
 | `purpose` | Sí | `string` | valores: `TREATMENT`, `BILLING`, `OPERATIONS` | Propósito de uso del acceso | `TREATMENT` |
 | `permissionId` | No | `string` | formato `uuid` | Permiso concreto que se ejerce | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | No | `string` | formato `uuid` | Paciente sobre el que se accede | `00000000-0000-4000-8000-000000000001` |
@@ -231,6 +233,7 @@ Content-Type: application/json
 
 {
   "practitionerDelegateAssignmentId": "00000000-0000-4000-8000-000000000001",
+  "effectiveUserId": "00000000-0000-4000-8000-000000000001",
   "purpose": "TREATMENT",
   "permissionId": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
@@ -252,6 +255,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EvaluationResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EvaluationResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EvaluationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EvaluationResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EvaluationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -280,7 +284,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Delegación no encontrada | Excepción explícita en src/modules/delegated_access/services/delegated-access-evaluation.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -363,6 +366,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<ExpirySweepResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ExpirySweepResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ExpirySweepResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExpirySweepResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExpirySweepResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -472,6 +476,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListPermissionSetsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListPermissionSetsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -642,6 +647,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PermissionSetVersionDto`. Ejemplo completo derivado de ese DTO:
 
@@ -784,6 +790,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PermissionSetVersionDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PermissionSetVersionDto`. Ejemplo completo derivado de ese DTO:
 
@@ -812,7 +819,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Set de permisos no encontrado | Excepción explícita en src/modules/delegated_access/services/permission-sets.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -930,6 +936,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1060,6 +1067,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1205,6 +1213,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1231,8 +1240,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Asignación de usuario de organización no encontrada | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
-| 404 | `NOT_FOUND` | Set de permisos no encontrado | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El usuario de organización no está activo | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
 | 422 | `PRECONDITION_FAILED` | El set de permisos no está activo | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
@@ -1340,6 +1347,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1479,6 +1487,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1505,7 +1514,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Delegación no encontrada | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La delegación no está activa | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1604,6 +1612,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1630,7 +1639,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Delegación no encontrada | Excepción explícita en src/modules/delegated_access/services/practitioner-delegates.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

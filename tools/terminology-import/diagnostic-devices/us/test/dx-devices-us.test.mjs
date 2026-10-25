@@ -120,6 +120,29 @@ test('io: streamOpenFdaResults recorre `results` sin cargar el archivo entero', 
   assert.deepEqual(got, [{ a: '{"x":[1]}' }, { b: { c: ['}', '"'] } }]);
 });
 
+test('io: streamOpenFdaResults no corrompe un carácter multibyte partido entre trozos', async () => {
+  const json = JSON.stringify({ meta: { last_updated: '2026-10-01' }, results: [{ brand_name: 'Ecógrafo Níño 超音波 😀' }] });
+  const bytes = Buffer.from(json, 'utf8');
+  // Un trozo por byte: cada carácter multibyte (2, 3 y 4 bytes) queda partido.
+  const chunks = Array.from(bytes, (_, i) => bytes.subarray(i, i + 1));
+  const got = [];
+  const { count } = await streamOpenFdaResults(Readable.from(chunks), (r) => got.push(r));
+  assert.equal(count, 1);
+  assert.equal(got[0].brand_name, 'Ecógrafo Níño 超音波 😀');
+  assert.ok(!JSON.stringify(got).includes('\uFFFD'));
+});
+
+test('io: streamXmlElements no corrompe un carácter multibyte partido entre trozos', async () => {
+  const xml = '<root><device><brandName>Ecógrafo Níño 超音波 😀</brandName></device></root>';
+  const bytes = Buffer.from(xml, 'utf8');
+  const chunks = Array.from(bytes, (_, i) => bytes.subarray(i, i + 1));
+  const els = [];
+  const n = await streamXmlElements(Readable.from(chunks), 'device', (x) => els.push(x));
+  assert.equal(n, 1);
+  assert.equal(xmlTag(els[0], 'brandName'), 'Ecógrafo Níño 超音波 😀');
+  assert.ok(!els[0].includes('\uFFFD'));
+});
+
 test('io: readPipeDelimited con cabecera', async () => {
   const rows = [];
   const n = await readPipeDelimited(Readable.from(['PrimaryDI|productCode\n0001|IYN\n', '0002|DQA\n']), (r) => rows.push(r));

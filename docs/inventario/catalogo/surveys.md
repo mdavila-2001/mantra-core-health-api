@@ -281,7 +281,7 @@ Emite invitaciones para responder una encuesta a un paciente después de una ate
 | `ix_survey_invitations_booking` | no | appointment_booking_id | Soporta la clave foránea fk_survey_invitations_appointment_booking_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «appointment_booking_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_survey_invitations_version` | no | survey_version_id | Soporta la clave foránea fk_survey_invitations_survey_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «survey_version_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_survey_invitations_assignment` | no | survey_assignment_id | Soporta la clave foránea fk_survey_invitations_survey_assignment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_survey_invitations_tenant_id` | no | tenant_id | Soporta la clave foránea fk_survey_invitations_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_survey_invitations_tenant_id` | no | tenant_id | Soporta la clave foránea fk_survey_invitations_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Operaciones que la tocan
 

@@ -66,17 +66,33 @@ export interface CreateActivityEventData {
 @Injectable()
 export class UserActivityEventsRepository {
   /**
-   * Obtiene find by idempotency key.
+   * Busca un evento previo con la misma clave de idempotencia **del mismo usuario**.
+   *
+   * La clave la elige el cliente: sin acotarla por usuario, la clave de una
+   * persona descartaría en silencio los eventos de otra.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param key - Valor de key requerido por la operación.
-   * @returns Resultado de find by idempotency key conforme al contrato `Promise<UserActivityEvents | null>`.
+   * @param key - Clave de idempotencia.
+   * @param userId - Usuario autenticado dueño de la clave.
+   * @returns El evento previo, o `null`.
    */
   findByIdempotencyKey(
     em: EntityManager,
     key: string,
+    userId: string,
   ): Promise<UserActivityEvents | null> {
-    return em.findOne(UserActivityEvents, { eventIdempotencyKey: key });
+    return em.findOne(UserActivityEvents, { eventIdempotencyKey: key, userId });
+  }
+
+  /**
+   * Obtiene un evento por id.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param id - Identificador del evento.
+   * @returns El evento, o `null`.
+   */
+  findById(em: EntityManager, id: string): Promise<UserActivityEvents | null> {
+    return em.findOne(UserActivityEvents, { id });
   }
 
   /**

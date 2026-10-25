@@ -9,7 +9,7 @@
 # Módulo `clinical`
 
 **Fuente:** [`src/modules/clinical/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/clinical/README.md)
-· 9 controllers · 17 services · 15 repositories · 23 entidades · 15 DTO
+· 10 controllers · 19 services · 17 repositories · 24 entidades · 17 DTO
 
 ---
 
@@ -27,7 +27,7 @@ los 14 casos de uso UC-08-01..14 como endpoints REST bajo el prefijo `/clinical`
   find src/modules/clinical -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **9 controllers, 39 rutas HTTP, 23 entidades y 17 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **10 controllers, 40 rutas HTTP, 23 entidades y 18 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -54,6 +54,7 @@ Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`
 | `GET /public/prescriptions/:id/verify` | pública | `clinical-prescriptions-public` |
 | `GET /clinical/prescriptions/:id/pdf` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-prescriptions` |
 | `GET /clinical/patients/:patientProfileId/summary` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-read` |
+| `GET /clinical/patients/:patientProfileId/received-services` | CLINICIAN, PRACTITIONER, PATIENT | `clinical-read` |
 | `POST /clinical/conditions` | CLINICIAN, PRACTITIONER | `clinical-records` |
 | `POST /clinical/conditions/:id/change-status` | CLINICIAN, PRACTITIONER | `clinical-records` |
 | `POST /clinical/conditions/:id/verification` | CLINICIAN, PRACTITIONER | `clinical-records` |
@@ -74,6 +75,7 @@ Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`
 | `POST /clinical/procedures` | CLINICIAN, PRACTITIONER | `clinical-records` |
 | `POST /clinical/procedures/:id/attachments` | CLINICIAN, PRACTITIONER | `clinical-records` |
 | `POST /clinical/immunizations` | CLINICIAN, PRACTITIONER | `clinical-records` |
+| `POST /clinical/internal/prescription-expiry-notices` | SYSTEM, SYSTEM_WORKER | `clinical-prescription-expiry` |
 
 ## Endpoints por caso de uso (subconjunto: UC-08-01..14 y adiciones puntuales)
 
@@ -95,6 +97,7 @@ Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`
 | UC-08-12 | `/clinical/procedures` | POST | Registrar procedimiento |
 | UC-08-13 | `/clinical/immunizations` | POST | Registrar inmunización |
 | UC-08-14 | `/clinical/encounters/{id}/close` | POST | Cerrar encuentro (gatilla facturación) |
+| — | `/clinical/patients/{patientProfileId}/received-services` | GET | Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas |
 
 > Nota: los sufijos `:accion` de la spec (`encounters:check-in`,
 > `observations/{id}:amend`, …) se realizan como **segmento de ruta**
@@ -102,20 +105,53 @@ Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`
 > con el router (Express 5 / path-to-regexp v8, donde `:` es sintaxis de
 > parámetro). El método HTTP y la intención se preservan.
 
+## Aviso de receta por vencer (PAC-REC-002)
+
+`POST /clinical/internal/prescription-expiry-notices` lo dispara el job `prescription-expiry-notice`
+del worker `messaging` (cada hora). Es un barrido entre organizaciones, sin actor humano; sólo
+acepta `SYSTEM`/`SYSTEM_WORKER`.
+
+- **Qué receta avisa:** estado emitido (`MR_ISSUED`) con `valid_to` posterior a ahora y hasta
+  `PRESCRIPTION_EXPIRY_NOTICE_DAYS` (3) días. Sin `valid_to` no vence y no avisa; borrador,
+  invalidada, reemplazada, completada o ya vencida tampoco. La fuente (ALOVIDA PAC-REC-002) pide la
+  alerta sin fijar la antelación: los 3 días son el valor adoptado.
+- **A quién y por dónde:** a la cuenta activa del paciente, por la bandeja in-app (categoría
+  `CLINICAL`, destino `PRESCRIPTION_EXPIRING` con el `id` de la receta). El texto no nombra el
+  medicamento. Un paciente sin cuenta activa no recibe aviso hasta que la tenga, si la receta sigue
+  dentro de la ventana.
+- **Una sola vez:** el aviso usa la clave de idempotencia `clinical:PRESCRIPTION_EXPIRING:<receta>`;
+  `messaging.notification_requests` la guarda aun cuando la preferencia del paciente lo suprime, y el
+  barrido excluye las recetas con clave existente. Un aviso que falla no deja fila y se reintenta
+  en el barrido siguiente. Dos barridos simultáneos se excluyen con un bloqueo consultivo de
+  transacción.
+- **Respuesta:** `scanned`, `notified`, `suppressed`, `failed`, `skipped`.
+
 ## Entidades (schema `clinical`)
 
-23 entidades (`find src/modules/clinical -name '*.entity.ts' | wc -l`):
+24 entidades (`find src/modules/clinical -name '*.entity.ts' | wc -l`):
 `care_episodes`, `encounters` (+ `encounter_participants`, `encounter_locations`),
 `observations` (+ `observation_components`, `observation_reference_ranges`,
 `observation_performers`, `observation_notes`), `service_requests`,
 `diagnostic_reports`, `conditions`, `allergy_intolerances` (+ `allergy_reactions`),
 `medication_requests`, `medication_records`, `procedures`, `immunizations`,
+`received_services`,
 `family_member_history`, `social_history`, `patient_reported_health_statements`,
 `prescription_signature_policies` y `appointments` (solo referenciada por el
 check-in).
 
 ## Reglas de negocio
 
+- **Servicios recibidos** (`received_services`): una fila por servicio que el paciente
+  recibió. Hoy son dos tipos, ambos conceptos del value set `vs_received_service_type`:
+  la **intervención médica** realizada (un `procedures` completado o un caso M53
+  completado) y la **vacunación** (un `immunizations` completado). La fila la escribe
+  `ReceivedServicesProjector` en la misma transacción que registra el hecho de origen;
+  un caso M53 y su procedimiento principal comparten fila. Lo que ya existía se
+  proyecta con el parche `v4249` del modelo. La consulta, el laboratorio y la
+  imagenología **no** son servicios recibidos: viven en sus propias pestañas de la
+  historia. El costo lo ve el titular o quien lo representa, no el personal clínico; la
+  cobertura del seguro no se expone porque el reparto se publica por pedido
+  (`PatientSettlementService`) y no por servicio.
 - **Transaccionalidad**: cada operación de escritura corre en `em.transactional`.
   Las FK son columnas uuid planas → se hace `tx.flush()` del padre antes de crear
   hijos (encuentro→participantes/ubicaciones, observación→componentes/etc.,

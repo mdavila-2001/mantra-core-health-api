@@ -15,6 +15,7 @@ import {
   OpsImprovementsRepository,
 } from '../repositories';
 import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
+import { PlatformOpsScope } from './platform-ops-scope.service';
 import {
   CompleteReadinessReviewDto,
   ReadinessReviewResponseDto,
@@ -61,6 +62,7 @@ export class OpsPracticesService {
    * @param practicesRepo - Valor de practices repo requerido por la operación.
    * @param incidentsRepo - Valor de incidents repo requerido por la operación.
    * @param improvementsRepo - Valor de improvements repo requerido por la operación.
+   * @param scope - Alcance de tenant: resuelve cada agregado dentro del tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -68,6 +70,7 @@ export class OpsPracticesService {
     private readonly practicesRepo: OpsPracticesRepository,
     private readonly incidentsRepo: OpsIncidentsRepository,
     private readonly improvementsRepo: OpsImprovementsRepository,
+    private readonly scope: PlatformOpsScope,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OpsPracticesService.name);
@@ -88,15 +91,18 @@ export class OpsPracticesService {
       'Completing readiness review',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const review = await this.practicesRepo.findReviewForUpdate(tx, reviewId);
-      if (!review) {
-        throw new ResourceNotFoundException(
-          'Revisión de preparación no encontrada',
-          { reviewId },
-          PlatformOpsErrorReason.READINESS_REVIEW_NOT_FOUND,
-        );
-      }
+      const foundReview = await this.practicesRepo.findReviewForUpdate(
+        tx,
+        reviewId,
+      );
+      // La revisión hereda el tenant de su componente.
+      const review = await this.scope.viaComponent(
+        tx,
+        foundReview,
+        foundReview?.serviceComponentId ?? reviewId,
+      );
       if (review.statusConceptId !== CONCEPTS.ORR_IN_PROGRESS) {
         throw new PreconditionFailedException(
           'La revisión no está en curso',
@@ -164,6 +170,7 @@ export class OpsPracticesService {
       const improvementItemIds = stillOpen.map(
         (finding) =>
           this.improvementsRepo.createImprovementItem(tx, {
+            tenantId,
             serviceComponentId: review.serviceComponentId,
             readinessReviewFindingId: finding.id,
             sourceTypeConceptId: CONCEPTS.IMPROVEMENT_SOURCE_READINESS,
@@ -226,20 +233,14 @@ export class OpsPracticesService {
       'Publishing runbook version',
     );
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const runbook = await this.practicesRepo.findRunbookForUpdate(
+      const foundRunbook = await this.practicesRepo.findRunbookForUpdate(
         tx,
         runbookId,
+        tenantId,
       );
-      if (!runbook) {
-        throw new ResourceNotFoundException(
-          'Runbook no encontrado',
-          {
-            runbookId,
-          },
-          PlatformOpsErrorReason.RUNBOOK_NOT_FOUND,
-        );
-      }
+      const runbook = this.scope.require(foundRunbook, foundRunbook?.tenantId);
       if (runbook.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'El runbook no está activo',
@@ -315,35 +316,34 @@ export class OpsPracticesService {
       );
     }
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const version = await this.practicesRepo.findRunbookVersionById(
+      // La versión hereda el tenant de su runbook.
+      const foundVersion = await this.practicesRepo.findRunbookVersionById(
         tx,
         dto.runbookVersionId,
       );
-      if (!version) {
-        throw new ResourceNotFoundException(
-          'Versión de runbook no encontrada',
-          {
-            runbookVersionId: dto.runbookVersionId,
-          },
-          PlatformOpsErrorReason.RUNBOOK_VERSION_NOT_FOUND,
-        );
-      }
+      const version = await this.scope.viaRunbook(
+        tx,
+        foundVersion,
+        foundVersion?.runbookId ?? dto.runbookVersionId,
+      );
 
       if (dto.healthIncidentId) {
         const incident = await this.incidentsRepo.findIncidentById(
           tx,
           dto.healthIncidentId,
+          tenantId,
         );
-        if (!incident) {
-          throw new ResourceNotFoundException(
-            'Incidente no encontrado',
-            {
-              healthIncidentId: dto.healthIncidentId,
-            },
-            PlatformOpsErrorReason.INCIDENT_NOT_FOUND,
-          );
-        }
+        this.scope.require(incident, incident?.tenantId);
+      }
+      if (dto.changeRequestId) {
+        const change = await this.practicesRepo.findChangeRequestInTenant(
+          tx,
+          dto.changeRequestId,
+          tenantId,
+        );
+        this.scope.require(change, change?.tenantId);
       }
 
       const resultConceptId = EXECUTION_RESULT_CONCEPT[dto.result];
@@ -413,20 +413,17 @@ export class OpsPracticesService {
       );
     }
 
+    const tenantId = this.scope.activeTenantId();
     return this.em.transactional(async (tx) => {
-      const exercise = await this.practicesRepo.findExerciseForUpdate(
+      const foundExercise = await this.practicesRepo.findExerciseForUpdate(
         tx,
         exerciseId,
+        tenantId,
       );
-      if (!exercise) {
-        throw new ResourceNotFoundException(
-          'Ejercicio de resiliencia no encontrado',
-          {
-            exerciseId,
-          },
-          PlatformOpsErrorReason.RESILIENCE_EXERCISE_NOT_FOUND,
-        );
-      }
+      const exercise = this.scope.require(
+        foundExercise,
+        foundExercise?.tenantId,
+      );
       if (exercise.resultConceptId) {
         throw new ConflictException(
           'El ejercicio ya está cerrado',

@@ -55,11 +55,13 @@ function build(
     findOpenItemById: mockFn(),
     createOpenItem: mockFn(),
     findOpenItemsByReconciliationAccounts: mockFn(() => Promise.resolve([])),
+    findCompanyBankAccountById: mockFn(),
     findClearingByNumber: mockFn(),
     createClearingDocument: mockFn(),
     createClearingItem: mockFn(),
   };
   const journalRepo = {
+    findLedgerEntryById: mockFn(() => Promise.resolve(null)),
     findTransactionById: mockFn(() => Promise.resolve(null)),
     findByTransactionNumber: mockFn(),
     findTransactions: mockFn(() => Promise.resolve([])),
@@ -102,6 +104,8 @@ function build(
     listCostCentersByPractice: mockFn(() => Promise.resolve([])),
     listProfitCentersByTenant: mockFn(() => Promise.resolve([])),
     listSegmentsByTenant: mockFn(() => Promise.resolve([])),
+    findCostCentersByIds: mockFn(() => Promise.resolve([])),
+    findProfitCentersByIds: mockFn(() => Promise.resolve([])),
   };
   const assetRepo = {
     findById: mockFn(),
@@ -115,7 +119,9 @@ function build(
     createAssignment: mockFn(),
     createPosting: mockFn(),
     findDepreciation: mockFn(),
+    listDepreciations: mockFn(),
     createDepreciation: mockFn(),
+    findDepreciationAreaById: mockFn(),
   };
 
   const service = new AccountingReadService(

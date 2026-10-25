@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ReportingDefinitionsService, ReportingRunsService } from '../services';
 import {
   CreateDataSourceDto,
@@ -54,6 +59,11 @@ export class ReportingController {
   ) {}
 
   /** UC-39-01. */
+  @Audited({
+    action: 'REPORT_DATA_SOURCE_CREATED',
+    entity: 'report_data_source',
+    entityId: 'result.id',
+  })
   @Post('data-sources')
   @Roles('REPORTING_ADMIN', 'DATA_STEWARD')
   @HttpCode(HttpStatus.CREATED)
@@ -70,6 +80,11 @@ export class ReportingController {
   }
 
   /** UC-39-02. */
+  @Audited({
+    action: 'REPORT_DEFINITION_CREATED',
+    entity: 'report_definition',
+    entityId: 'result.id',
+  })
   @Post('definitions')
   @Roles('REPORTING_ADMIN', 'REPORT_AUTHOR')
   @HttpCode(HttpStatus.CREATED)
@@ -85,6 +100,11 @@ export class ReportingController {
   }
 
   /** UC-39-03. */
+  @Audited({
+    action: 'REPORT_VERSION_PUBLISHED',
+    entity: 'report_version',
+    entityId: 'result.id',
+  })
   @Post('definitions/:id/versions/publish')
   @Roles('REPORTING_ADMIN', 'REPORT_AUTHOR')
   @HttpCode(HttpStatus.CREATED)
@@ -102,6 +122,11 @@ export class ReportingController {
   }
 
   /** UC-39-04. */
+  @Audited({
+    action: 'REPORT_EXECUTION_CREATED',
+    entity: 'report_execution',
+    entityId: 'result.id',
+  })
   @Post('definitions/:id/executions')
   @Roles('REPORTING_ADMIN', 'REPORT_VIEWER')
   @HttpCode(HttpStatus.CREATED)
@@ -119,6 +144,11 @@ export class ReportingController {
   }
 
   /** UC-39-05. */
+  @Audited({
+    action: 'REPORT_SNAPSHOT_MATERIALIZED',
+    entity: 'report_snapshot',
+    entityId: 'result.id',
+  })
   @Post('executions/:id/snapshot')
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.CREATED)
@@ -136,6 +166,11 @@ export class ReportingController {
   }
 
   /** UC-39-06. */
+  @Audited({
+    action: 'REPORT_SCHEDULE_CREATED',
+    entity: 'report_schedule',
+    entityId: 'result.id',
+  })
   @Post('definitions/:id/schedules')
   @Roles('REPORTING_ADMIN', 'REPORT_AUTHOR')
   @HttpCode(HttpStatus.CREATED)
@@ -149,6 +184,10 @@ export class ReportingController {
   }
 
   /** UC-39-07. */
+  @Audited({
+    action: 'REPORT_SCHEDULER_TICKED',
+    entity: 'report_schedule',
+  })
   @Post('scheduler/tick')
   @Roles('SYSTEM')
   @HttpCode(HttpStatus.OK)
@@ -165,6 +204,11 @@ export class ReportingController {
   }
 
   /** UC-39-08. */
+  @Audited({
+    action: 'REPORT_DISTRIBUTIONS_DISPATCHED',
+    entity: 'report_execution',
+    entityId: 'param:id',
+  })
   @Post('executions/:id/distributions')
   @Roles('SYSTEM', 'REPORTING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -181,6 +225,11 @@ export class ReportingController {
   }
 
   /** UC-39-09. */
+  @Audited({
+    action: 'REPORT_SUBSCRIPTION_CREATED',
+    entity: 'report_subscription',
+    entityId: 'result.id',
+  })
   @Post('schedules/:id/subscriptions')
   @Roles('REPORT_VIEWER', 'REPORTING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -198,6 +247,11 @@ export class ReportingController {
   }
 
   /** UC-39-10. */
+  @Audited({
+    action: 'DASHBOARD_CREATED',
+    entity: 'dashboard',
+    entityId: 'result.id',
+  })
   @Post('dashboards')
   @Roles('REPORTING_ADMIN', 'REPORT_AUTHOR')
   @HttpCode(HttpStatus.CREATED)
@@ -210,6 +264,11 @@ export class ReportingController {
   }
 
   /** UC-39-11. */
+  @Audited({
+    action: 'REPORT_EXECUTION_RETRIED',
+    entity: 'report_execution',
+    entityId: 'param:id',
+  })
   @Post('executions/:id/retry')
   @Roles('SYSTEM', 'REPORTING_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -226,6 +285,11 @@ export class ReportingController {
   }
 
   /** UC-39-12. */
+  @Audited({
+    action: 'REPORT_DEFINITION_DEPRECATED',
+    entity: 'report_definition',
+    entityId: 'param:id',
+  })
   @Post('definitions/:id/deprecate')
   @Roles('REPORTING_ADMIN')
   @HttpCode(HttpStatus.OK)

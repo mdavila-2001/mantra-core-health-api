@@ -25,6 +25,7 @@ Segundo arranque    Esquema materializado en 983 ms: 0 objetos aplicados, 26699 
 | `schema-bootstrap.service.ts` | Orquesta: toma el cerrojo, recorre las capas, compone el informe |
 | `ddl-layer.contract.ts` | El contrato que cumple cada capa y el contexto que recibe |
 | `advisory-lock.ts` | Exclusión mutua entre réplicas mediante advisory lock de PostgreSQL |
+| `schema-integrity.state.ts` | ORMN-01: conteo de FKs/únicos sin crear tras el bootstrap; `/readiness` falla mientras haya alguno |
 | `identifier.ts` | Acota nombres al límite de 63 bytes de PostgreSQL sin colisiones |
 | `layers/` | Las siete capas, en orden de dependencia |
 

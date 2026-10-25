@@ -13,6 +13,15 @@ export class IntegrationContracts {
   id: string = randomUUID();
 
   /**
+   * Tenant propietario del contrato. Todo recurso hijo (versiones, perfiles,
+   * suscripciones, intercambios, cursores) hereda este tenant. Un contrato sin
+   * tenant (previo a la columna) no pertenece a ningún tenant y no es
+   * accesible hasta que se le asigne uno.
+   */
+  @Property({ fieldName: 'tenant_id', type: 'uuid', nullable: true }) // FK → directory.tenants
+  tenantId?: string;
+
+  /**
    * Identificador asociado a external provider.
    */
   @Property({ fieldName: 'external_provider_id', type: 'uuid' }) // FK → integrations.external_providers

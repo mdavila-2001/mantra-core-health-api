@@ -3,14 +3,12 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import {
   PractitionerDelegateAssignmentsRepository,
   OrganizationUserAssignmentsRepository,
-  DelegatedPermissionSetsRepository,
   DelegatedAccessGrantsRepository,
   DelegatedAccessApprovalRequestsRepository,
   DelegationEventsRepository,
@@ -32,6 +30,7 @@ import {
   RESOURCE_TYPE_CONCEPT,
   STATUS,
 } from './concept-maps';
+import { DelegationScopeService } from './delegation-scope.service';
 
 /**
  * UC-29-03 (crear delegación de practitioner), UC-29-06 (emitir grant temporal
@@ -46,20 +45,20 @@ export class PractitionerDelegatesService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param delegatesRepo - Valor de delegates repo requerido por la operación.
    * @param orgAssignmentsRepo - Valor de org assignments repo requerido por la operación.
-   * @param setsRepo - Valor de sets repo requerido por la operación.
    * @param grantsRepo - Valor de grants repo requerido por la operación.
    * @param requestsRepo - Valor de requests repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
+   * @param scope - Política común de tenant y alcance de la delegación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly delegatesRepo: PractitionerDelegateAssignmentsRepository,
     private readonly orgAssignmentsRepo: OrganizationUserAssignmentsRepository,
-    private readonly setsRepo: DelegatedPermissionSetsRepository,
     private readonly grantsRepo: DelegatedAccessGrantsRepository,
     private readonly requestsRepo: DelegatedAccessApprovalRequestsRepository,
     private readonly eventsRepo: DelegationEventsRepository,
+    private readonly scope: DelegationScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PractitionerDelegatesService.name);
@@ -74,19 +73,20 @@ export class PractitionerDelegatesService {
       { operation: 'delegated_access.delegate.create', actorId: actor.id },
       'Creating practitioner delegate assignment',
     );
+    const tenantId = this.scope.resolveTenant();
     return this.em.transactional(async (tx) => {
-      const orgAssignment = await this.orgAssignmentsRepo.findById(
+      // Toda la cadena se resuelve dentro del tenant antes de escribir: un
+      // eslabón de otro tenant responde igual que uno inexistente.
+      const orgAssignment = await this.scope.loadOrgAssignmentInTenant(
         tx,
         dto.delegateUserAssignmentId,
+        tenantId,
       );
-      if (!orgAssignment) {
-        throw new ResourceNotFoundException(
-          'Asignación de usuario de organización no encontrada',
-          {
-            delegateUserAssignmentId: dto.delegateUserAssignmentId,
-          },
-        );
-      }
+      await this.scope.assertRoleAssignmentInTenant(
+        tx,
+        dto.practitionerRoleAssignmentId,
+        tenantId,
+      );
       if (orgAssignment.statusConceptId !== STATUS.ACTIVE) {
         throw new PreconditionFailedException(
           'El usuario de organización no está activo',
@@ -96,15 +96,11 @@ export class PractitionerDelegatesService {
         );
       }
 
-      const set = await this.setsRepo.findById(
+      const set = await this.scope.loadSetInTenant(
         tx,
         dto.delegatedPermissionSetId,
+        tenantId,
       );
-      if (!set) {
-        throw new ResourceNotFoundException('Set de permisos no encontrado', {
-          delegatedPermissionSetId: dto.delegatedPermissionSetId,
-        });
-      }
       if (set.statusConceptId !== STATUS.ACTIVE) {
         throw new PreconditionFailedException(
           'El set de permisos no está activo',
@@ -172,18 +168,27 @@ export class PractitionerDelegatesService {
       },
       'Issuing delegated grant',
     );
+    const tenantId = this.scope.resolveTenant();
     return this.em.transactional(async (tx) => {
-      const delegate = await this.delegatesRepo.findById(tx, delegateId);
-      if (!delegate) {
-        throw new ResourceNotFoundException('Delegación no encontrada', {
-          delegateId,
-        });
-      }
+      // La delegación es del tenant de su set; el paciente y el encuentro del
+      // grant se prueban en el mismo tenant y coherentes entre sí antes de
+      // convertirse en autorización clínica.
+      const { delegate } = await this.scope.loadDelegationInTenant(
+        tx,
+        delegateId,
+        tenantId,
+      );
       if (delegate.statusConceptId !== STATUS.ACTIVE) {
         throw new PreconditionFailedException('La delegación no está activa', {
           delegateId,
         });
       }
+      await this.scope.assertGrantTarget(
+        tx,
+        tenantId,
+        dto.patientProfileId,
+        dto.encounterId,
+      );
 
       const grant = this.grantsRepo.create(tx, {
         practitionerDelegateAssignmentId: delegateId,
@@ -234,13 +239,13 @@ export class PractitionerDelegatesService {
       },
       'Revoking delegation',
     );
+    const tenantId = this.scope.resolveTenant();
     return this.em.transactional(async (tx) => {
-      const delegate = await this.delegatesRepo.findById(tx, delegateId);
-      if (!delegate) {
-        throw new ResourceNotFoundException('Delegación no encontrada', {
-          delegateId,
-        });
-      }
+      const { delegate } = await this.scope.loadDelegationInTenant(
+        tx,
+        delegateId,
+        tenantId,
+      );
       // Idempotente: si ya está revocada no se hace nada.
       if (delegate.statusConceptId === STATUS.REVOKED) {
         return { ok: true };

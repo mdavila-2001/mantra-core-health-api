@@ -431,6 +431,39 @@ que esta pasada no es la segunda en 0: el contador vuelve a empezar.
 - **Sin decisión**: 6 547 959 filas (−115 495).
 - **Descartadas**: ninguna.
 - **Saturación**: las pasadas 10 a 14 aportaron todas. Faltan dos seguidas en 0.
+
+### Pasada 15 (2026-10-24): ROW con CDSCO oficial, NMPA China, INVIMA, OMS, HSA y SAHPRA
+
+- **Base**: el PR #822 (pasadas 10 a 14) se mergeó en `dev`; esta pasada va en `justin/seed-dx-devices-master-p15`, desde `dev`.
+- **Regiones**: `row` @`24cbabb5` (PR de ROW #821): **14 239 561 filas** en 26 archivos (antes 6 569 701). `us` y `eu` sin cambios.
+  - `cdsco-approved-devices` 180 124 (lista oficial de cdscomdonline.gov.in; reemplaza al espejo `cdsco-import-licences`);
+  - `nmpa-udi` 6 294 994 (release completo 2026-10-01 de la base UDI de China);
+  - `invima-dispositivos` 71 434 (Colombia);
+  - `hsa-smdr` 20 857 y `hsa-class-a` 1 127 525 (Singapur);
+  - `who-pq-ivd` 435 (IVD precalificados por la OMS);
+  - `sahpra-covid-ivd` 283 (Sudáfrica).
+- **Criterios nuevos** (publicados por el regulador en el propio registro; en `lib/taxonomy.mjs`):
+  - **CDSCO**: la lista «In Vitro Diagnostic» frente a «Medical Device» (`extra.cdscoCategory = ivd`) → 74 428 registros.
+  - **NMPA**: `qxlb = 体外诊断试剂` → 249 577 registros. El documento de la API (V2.1) no define el campo; se usa el valor verbatim.
+  - **INVIMA**: el grupo «REACTIVO DIAGNOSTICO» y «REACTIVOS  IN VITRO» frente a «MEDICO QUIRURGICOS» y «ODONTOLOGICOS» → 44 794 registros.
+  - **Alcance de la fuente**: OMS PQ IVD (435) y SAHPRA COVID-19 (283).
+- **Criterio no adoptado**: las especialidades de HSA («Clinical chemistry», «Immunology»…) son áreas de la HSA, que no publica que equivalgan a IVD. Sus filas entran solo por mismo modelo (647).
+- **Correcciones**:
+  - `who-pq-ivd` quedó entero inválido (435 de 435) porque el formato común no admitía el prefijo `who:`. Ahora lo admite (README y validador, con test) y la jurisdicción es `WHO`.
+  - `diagnosticTypesWithModels` contaba también tipos sin decisión; ahora cuenta solo los de diagnóstico y `typesWithModels` queda aparte.
+- **Nuevos tras deduplicar** (contra la pasada 14):
+  - Registros: **+370 655** (1 110 490).
+  - Modelos: **+144 547** (729 132).
+  - Fabricantes: **+3 020** (27 736).
+  - Marcas: +28 542 (316 241).
+  - Jurisdicciones: **CN 95 911**, **IN 45 419** (antes 42), **CO 3 212**, **WHO 435**, **SG 318**, **ZA 217**, EU 181 668, US 130 393, IT 118 098, BR 113 974, CA 44 314, TW 3 797, AU 420.
+  - Modelos en 2 jurisdicciones: 8 611; en 3: 200; en 4: 11.
+  - Nodos: 106 607 (+67 034, casi todos nombres de dispositivo de CDSCO, sin decisión). Tipos de diagnóstico con al menos un modelo: 6 372.
+  - Por mismo modelo: 7 350.
+- **Sin decisión**: 13 847 164 filas, de las cuales 3 413 059 no traen tipo (MDALL, Taiwán y NMPA de «器械»). La gran mayoría son dispositivos que no son de diagnóstico y no deben entrar.
+- **Taxonomía cargada** en el Postgres desechable: CDSCO +63 782 conceptos, NMPA +3 216, INVIMA +4, HSA +19, OMS +11, SAHPRA +4. El value set pasa a 7 405 miembros. La 2.ª corrida da 0.
+- **Descartadas**: ninguna fuente nueva.
+- **Saturación**: la pasada 15 también aportó. Faltan dos seguidas en 0.
 - **Descartadas**: ninguna.
 
 ## Propuesta para el repo del modelo (`mantra-core-technologies/mantra-core-health-model`)

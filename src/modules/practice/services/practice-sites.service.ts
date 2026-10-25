@@ -5,10 +5,12 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../practice.concepts';
+import { loadPracticeInScope } from './practice-scope';
 import { PracticeAccessService } from './practice-access.service';
 import { DEFAULT_APPOINTMENT_SERVICE } from '../../billing/default-services';
 import { ServiceCatalogRepository } from '../../billing/repositories';
@@ -73,13 +75,15 @@ export class PracticeSitesService {
     dto: CreatePracticeDto,
     actor: AuthenticatedUser,
   ): Promise<PracticeResponseDto> {
+    // El tenant sale del contexto verificado; el del cuerpo no es fuente de verdad.
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.create', actorId: actor.id },
       'Creating practice',
     );
     return this.em.transactional(async (tx) => {
       const practice = this.practicesRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         typeConceptId: dto.typeConceptId ?? PRAC.PRACTICE_TYPE_CLINIC,
@@ -225,16 +229,18 @@ export class PracticeSitesService {
     dto: CreateSiteDto,
     actor: AuthenticatedUser,
   ): Promise<SiteResponseDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.site.create', practiceId, actorId: actor.id },
       'Creating site',
     );
     return this.em.transactional(async (tx) => {
-      const practice = await this.practicesRepo.findById(tx, practiceId);
-      if (!practice)
-        throw new ResourceNotFoundException('Práctica no encontrada', {
-          practiceId,
-        });
+      const practice = await loadPracticeInScope(
+        this.practicesRepo,
+        tx,
+        practiceId,
+        tenantId,
+      );
       if (practice.statusConceptId !== PRAC.PRACTICE_ACTIVE) {
         throw new PreconditionFailedException('La práctica no está activa', {
           practiceId,
@@ -292,11 +298,15 @@ export class PracticeSitesService {
     siteId: string,
     actor: AuthenticatedUser,
   ): Promise<StatusResultDto> {
+    const tenantId = requireTenantId();
     this.logger.info(
       { operation: 'practice.site.decommission', practiceId, siteId },
       'Decommissioning site',
     );
     return this.em.transactional(async (tx) => {
+      // La práctica primero: la sede se resuelve dentro de una práctica del
+      // tenant activo (una sede de otra práctica es, para este actor, inexistente).
+      await loadPracticeInScope(this.practicesRepo, tx, practiceId, tenantId);
       const site = await this.sitesRepo.findById(tx, siteId);
       if (!site || site.practiceId !== practiceId) {
         throw new ResourceNotFoundException(

@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { PracticeWorkforceService } from '../services';
 import {
   CreateSupportAssignmentDto,
@@ -36,6 +41,11 @@ export class RoleAssignmentsController {
   constructor(private readonly workforceService: PracticeWorkforceService) {}
 
   /** UC-14-09. */
+  @Audited({
+    action: 'PRACTITIONER_SUPPORT_ATTACHED',
+    entity: 'practitioner_support_assignment',
+    entityId: 'result.id',
+  })
   @Post(':roleId/support-assignments')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -51,6 +61,11 @@ export class RoleAssignmentsController {
   }
 
   /** Carril 18: `PENDING → ACTIVE`. */
+  @Audited({
+    action: 'PRACTITIONER_ROLE_ASSIGNMENT_APPROVED',
+    entity: 'practitioner_role_assignment',
+    entityId: 'param:roleId',
+  })
   @Post(':roleId/approve')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -64,6 +79,11 @@ export class RoleAssignmentsController {
   }
 
   /** Carril 18: `PENDING → REJECTED`. */
+  @Audited({
+    action: 'PRACTITIONER_ROLE_ASSIGNMENT_REJECTED',
+    entity: 'practitioner_role_assignment',
+    entityId: 'param:roleId',
+  })
   @Post(':roleId/reject')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -77,6 +97,11 @@ export class RoleAssignmentsController {
   }
 
   /** Carril 18: `ACTIVE → SUSPENDED`. */
+  @Audited({
+    action: 'PRACTITIONER_ROLE_ASSIGNMENT_SUSPENDED',
+    entity: 'practitioner_role_assignment',
+    entityId: 'param:roleId',
+  })
   @Post(':roleId/suspend')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -90,6 +115,11 @@ export class RoleAssignmentsController {
   }
 
   /** Carril 18: `ACTIVE|SUSPENDED → ENDED`. */
+  @Audited({
+    action: 'PRACTITIONER_ROLE_ASSIGNMENT_ENDED',
+    entity: 'practitioner_role_assignment',
+    entityId: 'param:roleId',
+  })
   @Post(':roleId/end')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

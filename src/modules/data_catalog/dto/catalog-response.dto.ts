@@ -462,6 +462,91 @@ export class RunNextResultDto {
   fenced?: boolean;
 }
 
+/** Huella del inventario que leyó la importación. */
+export class InventoryImportSourceDto {
+  @ApiProperty({
+    description:
+      'Huella del inventario (la misma de `GET /admin/portal/version`)',
+  })
+  hash!: string;
+  @ApiProperty() operaciones!: number;
+  @ApiProperty() procesos!: number;
+}
+
+export class InventoryImportOperationsDto {
+  @ApiProperty({ description: 'Operaciones nuevas en la base' }) added!: number;
+  @ApiProperty({ description: 'Operaciones cuya huella técnica cambió' })
+  changed!: number;
+  @ApiProperty({
+    description: 'Operaciones `NOT_OBSERVED` que volvieron a aparecer',
+  })
+  reappeared!: number;
+  @ApiProperty({
+    description: 'Operaciones que no cambiaron: no se tocó su fila',
+  })
+  unchanged!: number;
+  @ApiProperty({
+    description:
+      'Operaciones que dejaron de aparecer y pasaron a `NOT_OBSERVED` (no se borran)',
+  })
+  notObserved!: number;
+}
+
+export class InventoryImportImpactsDto {
+  @ApiProperty({ description: 'Impactos escritos en esta corrida' })
+  written!: number;
+  @ApiProperty({
+    description:
+      'Tablas que el inventario no tiene catalogadas y la sonda tampoco observó (estado actual, no sólo esta corrida)',
+  })
+  skippedNotCataloged!: number;
+  @ApiProperty({
+    description:
+      'Tablas que el inventario da por catalogadas y la sonda aún no observó: correr un escaneo y volver a importar',
+  })
+  skippedUnresolved!: number;
+}
+
+export class InventoryImportProcessesDto {
+  @ApiProperty() added!: number;
+  @ApiProperty() changed!: number;
+  @ApiProperty() unchanged!: number;
+}
+
+export class InventoryImportStepsDto {
+  @ApiProperty({ description: 'Etapas escritas en esta corrida' })
+  written!: number;
+}
+
+export class InventoryImportStepOperationsDto {
+  @ApiProperty({ description: 'Enlaces etapa-operación escritos' })
+  written!: number;
+  @ApiProperty({
+    description: 'Enlaces cuya operación no está en el inventario de endpoints',
+  })
+  skippedUnresolved!: number;
+}
+
+/**
+ * Respuesta de la importación del inventario (`POST /internal/catalog/inventory/import`). Los
+ * contadores de «escritos» son de esta corrida; los de «saltados» describen el estado actual del
+ * inventario contra el catálogo.
+ */
+export class InventoryImportResultDto {
+  @ApiProperty({ type: InventoryImportSourceDto })
+  inventory!: InventoryImportSourceDto;
+  @ApiProperty({ type: InventoryImportOperationsDto })
+  operations!: InventoryImportOperationsDto;
+  @ApiProperty({ type: InventoryImportImpactsDto })
+  impacts!: InventoryImportImpactsDto;
+  @ApiProperty({ type: InventoryImportProcessesDto })
+  processes!: InventoryImportProcessesDto;
+  @ApiProperty({ type: InventoryImportStepsDto })
+  steps!: InventoryImportStepsDto;
+  @ApiProperty({ type: InventoryImportStepOperationsDto })
+  stepOperations!: InventoryImportStepOperationsDto;
+}
+
 /** Resultado de una corrida de la clasificación automática. */
 export class ClassificationRunResultDto {
   @ApiProperty({ description: 'Columnas observadas que se miraron' })

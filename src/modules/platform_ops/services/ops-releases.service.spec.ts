@@ -14,7 +14,28 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { PlatformOpsErrorReason } from '../platform_ops.error-reasons';
+import { PlatformOpsScope } from './platform-ops-scope.service';
+
+const T1 = '00000000-0000-4000-8000-0000000000a1';
+const T2 = '00000000-0000-4000-8000-0000000000b2';
+const OUT_OF_SCOPE = PlatformOpsErrorReason.PLATFORM_OPS_RESOURCE_OUT_OF_SCOPE;
+
+/** Ejecuta `fn` con T1 como tenant activo del request. */
+const inTenant = <T>(fn: () => Promise<T>, tenantId = T1): Promise<T> =>
+  runWithTenant(tenantId, fn);
+
+/** Captura el rechazo de una promesa para comparar su respuesta HTTP. */
+async function rejection(promise: Promise<unknown>): Promise<any> {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error('no rechazó');
+}
 
 const actor = { id: 'user-1', roles: ['RELEASE_MANAGER'] };
 const REQUESTER = 'user-9';
@@ -67,6 +88,7 @@ function build() {
     releasesRepo,
     reliabilityRepo as any,
     practicesRepo as any,
+    new PlatformOpsScope(),
     logger as any,
   );
   return { service, tx, releasesRepo, reliabilityRepo, practicesRepo, logger };
@@ -77,7 +99,7 @@ function build() {
  * @returns Resultado de active component conforme al contrato `any`.
  */
 function activeComponent(): any {
-  return { id: COMPONENT, stateConceptId: CONCEPTS.STATE_ACTIVE };
+  return { id: COMPONENT, tenantId: T1, stateConceptId: CONCEPTS.STATE_ACTIVE };
 }
 
 /**
@@ -89,6 +111,7 @@ function activeComponent(): any {
 function approvedChange(overrides: Record<string, unknown> = {}): any {
   return {
     id: CHANGE,
+    tenantId: T1,
     serviceComponentId: COMPONENT,
     requestedByUserId: REQUESTER,
     statusConceptId: CONCEPTS.CHANGE_APPROVED,
@@ -121,7 +144,9 @@ describe('OpsReleasesService', () => {
       wire(d);
       d.releasesRepo.countChangeRequests.mockResolvedValue(4);
 
-      const res = await d.service.createChangeRequest(dto, actor);
+      const res = await inTenant(() =>
+        d.service.createChangeRequest(dto, actor),
+      );
 
       expect(res).toEqual({
         id: CHANGE,
@@ -145,7 +170,9 @@ describe('OpsReleasesService', () => {
         id: 'other',
       });
 
-      const res = await d.service.createChangeRequest(dto, actor);
+      const res = await inTenant(() =>
+        d.service.createChangeRequest(dto, actor),
+      );
 
       expect(res.changeNumber).toBe('CHG-000002');
     });
@@ -155,13 +182,15 @@ describe('OpsReleasesService', () => {
       wire(d);
 
       await expect(
-        d.service.createChangeRequest(
-          {
-            ...dto,
-            plannedStartAt: '2026-08-02T10:00:00.000Z',
-            plannedEndAt: '2026-08-02T09:00:00.000Z',
-          },
-          actor as any,
+        inTenant(() =>
+          d.service.createChangeRequest(
+            {
+              ...dto,
+              plannedStartAt: '2026-08-02T10:00:00.000Z',
+              plannedEndAt: '2026-08-02T09:00:00.000Z',
+            },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -171,19 +200,20 @@ describe('OpsReleasesService', () => {
       d.releasesRepo.findComponentById.mockResolvedValue(null);
 
       await expect(
-        d.service.createChangeRequest(dto, actor as any),
+        inTenant(() => d.service.createChangeRequest(dto, actor as any)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
     it('refuses an inactive component', async () => {
       const d = build();
       d.releasesRepo.findComponentById.mockResolvedValue({
+        tenantId: T1,
         id: COMPONENT,
         stateConceptId: CONCEPTS.STATE_REVOKED,
       });
 
       await expect(
-        d.service.createChangeRequest(dto, actor as any),
+        inTenant(() => d.service.createChangeRequest(dto, actor as any)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -191,6 +221,7 @@ describe('OpsReleasesService', () => {
       const d = build();
       wire(d);
       d.releasesRepo.findWindowForUpdate.mockResolvedValue({
+        tenantId: T1,
         id: WINDOW,
         statusConceptId: CONCEPTS.MAINTENANCE_WINDOW_CLOSED,
         startsAt: new Date('2026-08-02T00:00:00.000Z'),
@@ -198,9 +229,11 @@ describe('OpsReleasesService', () => {
       });
 
       await expect(
-        d.service.createChangeRequest(
-          { ...dto, maintenanceWindowId: WINDOW },
-          actor as any,
+        inTenant(() =>
+          d.service.createChangeRequest(
+            { ...dto, maintenanceWindowId: WINDOW },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -209,6 +242,7 @@ describe('OpsReleasesService', () => {
       const d = build();
       wire(d);
       d.releasesRepo.findWindowForUpdate.mockResolvedValue({
+        tenantId: T1,
         id: WINDOW,
         statusConceptId: CONCEPTS.MAINTENANCE_WINDOW_PLANNED,
         startsAt: new Date('2026-08-02T00:00:00.000Z'),
@@ -216,14 +250,16 @@ describe('OpsReleasesService', () => {
       });
 
       await expect(
-        d.service.createChangeRequest(
-          {
-            ...dto,
-            maintenanceWindowId: WINDOW,
-            plannedStartAt: '2026-08-02T01:00:00.000Z',
-            plannedEndAt: '2026-08-02T06:00:00.000Z',
-          },
-          actor as any,
+        inTenant(() =>
+          d.service.createChangeRequest(
+            {
+              ...dto,
+              maintenanceWindowId: WINDOW,
+              plannedStartAt: '2026-08-02T01:00:00.000Z',
+              plannedEndAt: '2026-08-02T06:00:00.000Z',
+            },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -232,20 +268,23 @@ describe('OpsReleasesService', () => {
       const d = build();
       wire(d);
       d.releasesRepo.findWindowForUpdate.mockResolvedValue({
+        tenantId: T1,
         id: WINDOW,
         statusConceptId: CONCEPTS.MAINTENANCE_WINDOW_PLANNED,
         startsAt: new Date('2026-08-02T00:00:00.000Z'),
         endsAt: new Date('2026-08-02T08:00:00.000Z'),
       });
 
-      const res = await d.service.createChangeRequest(
-        {
-          ...dto,
-          maintenanceWindowId: WINDOW,
-          plannedStartAt: '2026-08-02T01:00:00.000Z',
-          plannedEndAt: '2026-08-02T03:00:00.000Z',
-        },
-        actor,
+      const res = await inTenant(() =>
+        d.service.createChangeRequest(
+          {
+            ...dto,
+            maintenanceWindowId: WINDOW,
+            plannedStartAt: '2026-08-02T01:00:00.000Z',
+            plannedEndAt: '2026-08-02T03:00:00.000Z',
+          },
+          actor,
+        ),
       );
 
       expect(res.id).toBe(CHANGE);
@@ -257,9 +296,11 @@ describe('OpsReleasesService', () => {
       d.releasesRepo.findWindowForUpdate.mockResolvedValue(null);
 
       await expect(
-        d.service.createChangeRequest(
-          { ...dto, maintenanceWindowId: WINDOW },
-          actor as any,
+        inTenant(() =>
+          d.service.createChangeRequest(
+            { ...dto, maintenanceWindowId: WINDOW },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
@@ -275,6 +316,7 @@ describe('OpsReleasesService', () => {
     function requestedChange(overrides: Record<string, unknown> = {}): any {
       return {
         id: CHANGE,
+        tenantId: T1,
         requestedByUserId: REQUESTER,
         statusConceptId: CONCEPTS.CHANGE_REQUESTED,
         ...overrides,
@@ -298,10 +340,12 @@ describe('OpsReleasesService', () => {
       const d = build();
       const change = wire(d);
 
-      const res = await d.service.recordApproval(
-        CHANGE,
-        { approvalStep: 1, decision: 'APPROVED' } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.recordApproval(
+          CHANGE,
+          { approvalStep: 1, decision: 'APPROVED' } as any,
+          actor,
+        ),
       );
 
       expect(res).toEqual({
@@ -317,14 +361,16 @@ describe('OpsReleasesService', () => {
       const d = build();
       const change = wire(d);
 
-      const res = await d.service.recordApproval(
-        CHANGE,
-        {
-          approvalStep: 1,
-          decision: 'APPROVED',
-          requiredApprovalSteps: 2,
-        } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.recordApproval(
+          CHANGE,
+          {
+            approvalStep: 1,
+            decision: 'APPROVED',
+            requiredApprovalSteps: 2,
+          } as any,
+          actor,
+        ),
       );
 
       expect(res.changeStatusConceptId).toBe(CONCEPTS.CHANGE_IN_REVIEW);
@@ -335,14 +381,16 @@ describe('OpsReleasesService', () => {
       const d = build();
       const change = wire(d);
 
-      const res = await d.service.recordApproval(
-        CHANGE,
-        {
-          approvalStep: 1,
-          decision: 'REJECTED',
-          decisionReason: 'sin plan de vuelta atrás',
-        } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.recordApproval(
+          CHANGE,
+          {
+            approvalStep: 1,
+            decision: 'REJECTED',
+            decisionReason: 'sin plan de vuelta atrás',
+          } as any,
+          actor,
+        ),
       );
 
       expect(res.changeStatusConceptId).toBe(CONCEPTS.CHANGE_REJECTED);
@@ -355,10 +403,12 @@ describe('OpsReleasesService', () => {
       wire(d, requestedChange({ requestedByUserId: actor.id }));
 
       await expect(
-        d.service.recordApproval(
-          CHANGE,
-          { approvalStep: 1, decision: 'APPROVED' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.recordApproval(
+            CHANGE,
+            { approvalStep: 1, decision: 'APPROVED' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -375,10 +425,12 @@ describe('OpsReleasesService', () => {
       ]);
 
       await expect(
-        d.service.recordApproval(
-          CHANGE,
-          { approvalStep: 1, decision: 'APPROVED' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.recordApproval(
+            CHANGE,
+            { approvalStep: 1, decision: 'APPROVED' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(ConflictException);
     });
@@ -388,10 +440,12 @@ describe('OpsReleasesService', () => {
       wire(d);
 
       await expect(
-        d.service.recordApproval(
-          CHANGE,
-          { approvalStep: 2, decision: 'APPROVED' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.recordApproval(
+            CHANGE,
+            { approvalStep: 2, decision: 'APPROVED' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -407,14 +461,16 @@ describe('OpsReleasesService', () => {
         },
       ]);
 
-      const res = await d.service.recordApproval(
-        CHANGE,
-        {
-          approvalStep: 2,
-          decision: 'APPROVED',
-          requiredApprovalSteps: 2,
-        } as any,
-        actor,
+      const res = await inTenant(() =>
+        d.service.recordApproval(
+          CHANGE,
+          {
+            approvalStep: 2,
+            decision: 'APPROVED',
+            requiredApprovalSteps: 2,
+          } as any,
+          actor,
+        ),
       );
 
       expect(res.approvedSteps).toBe(2);
@@ -429,10 +485,12 @@ describe('OpsReleasesService', () => {
       );
 
       await expect(
-        d.service.recordApproval(
-          CHANGE,
-          { approvalStep: 1, decision: 'APPROVED' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.recordApproval(
+            CHANGE,
+            { approvalStep: 1, decision: 'APPROVED' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -442,10 +500,12 @@ describe('OpsReleasesService', () => {
       d.releasesRepo.findChangeRequestForUpdate.mockResolvedValue(null);
 
       await expect(
-        d.service.recordApproval(
-          CHANGE,
-          { approvalStep: 1, decision: 'APPROVED' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.recordApproval(
+            CHANGE,
+            { approvalStep: 1, decision: 'APPROVED' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
@@ -476,7 +536,7 @@ describe('OpsReleasesService', () => {
       const d = build();
       wire(d);
 
-      const res = await d.service.publishArtifact(dto, actor);
+      const res = await inTenant(() => d.service.publishArtifact(dto, actor));
 
       expect(res).toEqual({
         id: ARTIFACT,
@@ -495,7 +555,7 @@ describe('OpsReleasesService', () => {
       });
 
       await expect(
-        d.service.publishArtifact(dto, actor as any),
+        inTenant(() => d.service.publishArtifact(dto, actor as any)),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
@@ -507,7 +567,7 @@ describe('OpsReleasesService', () => {
       });
 
       await expect(
-        d.service.publishArtifact(dto, actor as any),
+        inTenant(() => d.service.publishArtifact(dto, actor as any)),
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
@@ -515,14 +575,17 @@ describe('OpsReleasesService', () => {
       const d = build();
       wire(d);
       d.releasesRepo.findToolById.mockResolvedValue({
+        tenantId: T1,
         id: TOOL,
         isApproved: false,
       });
 
       await expect(
-        d.service.publishArtifact(
-          { ...dto, producedByToolId: TOOL },
-          actor as any,
+        inTenant(() =>
+          d.service.publishArtifact(
+            { ...dto, producedByToolId: TOOL },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -531,13 +594,13 @@ describe('OpsReleasesService', () => {
       const d = build();
       wire(d);
       d.releasesRepo.findToolById.mockResolvedValue({
+        tenantId: T1,
         id: TOOL,
         isApproved: true,
       });
 
-      const res = await d.service.publishArtifact(
-        { ...dto, producedByToolId: TOOL },
-        actor,
+      const res = await inTenant(() =>
+        d.service.publishArtifact({ ...dto, producedByToolId: TOOL }, actor),
       );
 
       expect(res.id).toBe(ARTIFACT);
@@ -549,9 +612,11 @@ describe('OpsReleasesService', () => {
       d.releasesRepo.findToolById.mockResolvedValue(null);
 
       await expect(
-        d.service.publishArtifact(
-          { ...dto, producedByToolId: TOOL },
-          actor as any,
+        inTenant(() =>
+          d.service.publishArtifact(
+            { ...dto, producedByToolId: TOOL },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
@@ -561,7 +626,7 @@ describe('OpsReleasesService', () => {
       d.releasesRepo.findComponentById.mockResolvedValue(null);
 
       await expect(
-        d.service.publishArtifact(dto, actor as any),
+        inTenant(() => d.service.publishArtifact(dto, actor as any)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -584,6 +649,7 @@ describe('OpsReleasesService', () => {
     function wire(d: ReturnType<typeof build>, change = approvedChange()) {
       d.releasesRepo.findChangeRequestForUpdate.mockResolvedValue(change);
       d.releasesRepo.findArtifactById.mockResolvedValue({
+        tenantId: T1,
         id: ARTIFACT,
         serviceComponentId: COMPONENT,
         stateConceptId: CONCEPTS.STATE_ACTIVE,
@@ -599,7 +665,7 @@ describe('OpsReleasesService', () => {
       const d = build();
       wire(d);
 
-      const res = await d.service.createDeployment(dto, actor);
+      const res = await inTenant(() => d.service.createDeployment(dto, actor));
 
       expect(res).toMatchObject({
         id: DEPLOYMENT,
@@ -619,9 +685,8 @@ describe('OpsReleasesService', () => {
         statusConceptId: CONCEPTS.DEPLOY_SUCCEEDED,
       });
 
-      const res = await d.service.createDeployment(
-        { ...dto, outcome: 'SUCCEEDED' },
-        actor,
+      const res = await inTenant(() =>
+        d.service.createDeployment({ ...dto, outcome: 'SUCCEEDED' }, actor),
       );
 
       expect(res.isCurrent).toBe(true);
@@ -641,9 +706,8 @@ describe('OpsReleasesService', () => {
         statusConceptId: CONCEPTS.DEPLOY_FAILED,
       });
 
-      const res = await d.service.createDeployment(
-        { ...dto, outcome: 'FAILED' },
-        actor,
+      const res = await inTenant(() =>
+        d.service.createDeployment({ ...dto, outcome: 'FAILED' }, actor),
       );
 
       expect(res.isCurrent).toBe(false);
@@ -657,7 +721,7 @@ describe('OpsReleasesService', () => {
       wire(d, approvedChange({ statusConceptId: CONCEPTS.CHANGE_IN_REVIEW }));
 
       await expect(
-        d.service.createDeployment(dto, actor as any),
+        inTenant(() => d.service.createDeployment(dto, actor as any)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -665,13 +729,14 @@ describe('OpsReleasesService', () => {
       const d = build();
       wire(d);
       d.releasesRepo.findArtifactById.mockResolvedValue({
+        tenantId: T1,
         id: ARTIFACT,
         serviceComponentId: 'other-component',
         stateConceptId: CONCEPTS.STATE_ACTIVE,
       });
 
       await expect(
-        d.service.createDeployment(dto, actor as any),
+        inTenant(() => d.service.createDeployment(dto, actor as any)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -679,13 +744,14 @@ describe('OpsReleasesService', () => {
       const d = build();
       wire(d);
       d.releasesRepo.findArtifactById.mockResolvedValue({
+        tenantId: T1,
         id: ARTIFACT,
         serviceComponentId: COMPONENT,
         stateConceptId: CONCEPTS.STATE_REVOKED,
       });
 
       await expect(
-        d.service.createDeployment(dto, actor as any),
+        inTenant(() => d.service.createDeployment(dto, actor as any)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -695,9 +761,11 @@ describe('OpsReleasesService', () => {
       d.practicesRepo.findGoReview.mockResolvedValue(null);
 
       await expect(
-        d.service.createDeployment(
-          { ...dto, environment: 'PRODUCTION' },
-          actor as any,
+        inTenant(() =>
+          d.service.createDeployment(
+            { ...dto, environment: 'PRODUCTION' },
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -707,9 +775,11 @@ describe('OpsReleasesService', () => {
       wire(d);
       d.practicesRepo.findGoReview.mockResolvedValue({ id: 'review-1' });
 
-      const res = await d.service.createDeployment(
-        { ...dto, environment: 'PRODUCTION' },
-        actor,
+      const res = await inTenant(() =>
+        d.service.createDeployment(
+          { ...dto, environment: 'PRODUCTION' },
+          actor,
+        ),
       );
 
       expect(res.id).toBe(DEPLOYMENT);
@@ -732,7 +802,7 @@ describe('OpsReleasesService', () => {
       });
 
       await expect(
-        d.service.createDeployment(dto, actor as any),
+        inTenant(() => d.service.createDeployment(dto, actor as any)),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
 
@@ -746,7 +816,7 @@ describe('OpsReleasesService', () => {
         remainingBudgetPercent: '12.50000',
       });
 
-      const res = await d.service.createDeployment(dto, actor);
+      const res = await inTenant(() => d.service.createDeployment(dto, actor));
 
       expect(res.id).toBe(DEPLOYMENT);
     });
@@ -757,7 +827,7 @@ describe('OpsReleasesService', () => {
       d.releasesRepo.findArtifactById.mockResolvedValue(null);
 
       await expect(
-        d.service.createDeployment(dto, actor as any),
+        inTenant(() => d.service.createDeployment(dto, actor as any)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
@@ -772,6 +842,7 @@ describe('OpsReleasesService', () => {
     function currentDeployment(overrides: Record<string, unknown> = {}): any {
       return {
         id: DEPLOYMENT,
+        tenantId: T1,
         serviceComponentId: COMPONENT,
         environmentConceptId: CONCEPTS.OPS_ENV_PRODUCTION,
         statusConceptId: CONCEPTS.DEPLOY_FAILED,
@@ -789,6 +860,7 @@ describe('OpsReleasesService', () => {
     function previousDeployment(overrides: Record<string, unknown> = {}): any {
       return {
         id: 'deployment-prev',
+        tenantId: T1,
         serviceComponentId: COMPONENT,
         environmentConceptId: CONCEPTS.OPS_ENV_PRODUCTION,
         artifactId: 'artifact-prev',
@@ -808,10 +880,12 @@ describe('OpsReleasesService', () => {
         id: 'deployment-rollback',
       });
 
-      const res = await d.service.rollbackDeployment(
-        DEPLOYMENT,
-        { reason: 'errores 5xx tras el despliegue' },
-        actor,
+      const res = await inTenant(() =>
+        d.service.rollbackDeployment(
+          DEPLOYMENT,
+          { reason: 'errores 5xx tras el despliegue' },
+          actor,
+        ),
       );
 
       expect(res).toEqual({
@@ -848,13 +922,15 @@ describe('OpsReleasesService', () => {
         id: 'deployment-rollback',
       });
 
-      const res = await d.service.rollbackDeployment(
-        DEPLOYMENT,
-        {
-          reason: 'volver dos versiones',
-          targetDeploymentId: 'deployment-chosen',
-        },
-        actor,
+      const res = await inTenant(() =>
+        d.service.rollbackDeployment(
+          DEPLOYMENT,
+          {
+            reason: 'volver dos versiones',
+            targetDeploymentId: 'deployment-chosen',
+          },
+          actor,
+        ),
       );
 
       expect(res.artifactId).toBe('artifact-chosen');
@@ -873,10 +949,12 @@ describe('OpsReleasesService', () => {
       );
 
       await expect(
-        d.service.rollbackDeployment(
-          DEPLOYMENT,
-          { reason: 'x', targetDeploymentId: 'deployment-prev' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.rollbackDeployment(
+            DEPLOYMENT,
+            { reason: 'x', targetDeploymentId: 'deployment-prev' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -888,10 +966,12 @@ describe('OpsReleasesService', () => {
       );
 
       await expect(
-        d.service.rollbackDeployment(
-          DEPLOYMENT,
-          { reason: 'x' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.rollbackDeployment(
+            DEPLOYMENT,
+            { reason: 'x' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -903,10 +983,12 @@ describe('OpsReleasesService', () => {
       );
 
       await expect(
-        d.service.rollbackDeployment(
-          DEPLOYMENT,
-          { reason: 'x' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.rollbackDeployment(
+            DEPLOYMENT,
+            { reason: 'x' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -919,10 +1001,12 @@ describe('OpsReleasesService', () => {
       d.releasesRepo.findPreviousSucceededDeployment.mockResolvedValue(null);
 
       await expect(
-        d.service.rollbackDeployment(
-          DEPLOYMENT,
-          { reason: 'x' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.rollbackDeployment(
+            DEPLOYMENT,
+            { reason: 'x' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
@@ -932,12 +1016,283 @@ describe('OpsReleasesService', () => {
       d.releasesRepo.findDeploymentForUpdate.mockResolvedValue(null);
 
       await expect(
-        d.service.rollbackDeployment(
-          DEPLOYMENT,
-          { reason: 'x' } as any,
-          actor as any,
+        inTenant(() =>
+          d.service.rollbackDeployment(
+            DEPLOYMENT,
+            { reason: 'x' } as any,
+            actor as any,
+          ),
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('alcance de tenant (POPS-01)', () => {
+    const changeDto: any = {
+      serviceComponentId: COMPONENT,
+      title: 'Actualizar el gateway',
+      changeType: 'NORMAL',
+      risk: 'MEDIUM',
+    };
+    const approvalDto: any = { approvalStep: 1, decision: 'APPROVED' };
+    const deployDto: any = {
+      changeRequestId: CHANGE,
+      artifactId: ARTIFACT,
+      environment: 'STAGING',
+      strategy: 'ROLLING',
+    };
+    const artifactDto: any = {
+      serviceComponentId: COMPONENT,
+      artifactRef: 'registry/gateway@sha256:abc',
+      artifactKind: 'CONTAINER_IMAGE',
+      name: 'gateway',
+      version: '1.4.0',
+      contentHash: 'AABBCC'.padEnd(64, '0'),
+    };
+
+    it('createChangeRequest persiste el tenant del contexto aunque el cuerpo no lo traiga', async () => {
+      const d = build();
+      d.releasesRepo.findComponentById.mockResolvedValue(activeComponent());
+      d.releasesRepo.createChangeRequest.mockReturnValue({ id: CHANGE });
+
+      await inTenant(() => d.service.createChangeRequest(changeDto, actor));
+
+      expect(d.releasesRepo.findComponentById).toHaveBeenCalledWith(
+        d.tx,
+        COMPONENT,
+        T1,
+      );
+      expect(d.releasesRepo.createChangeRequest).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: T1 }),
+      );
+    });
+
+    it('createChangeRequest y publishArtifact rechazan un cuerpo que declara el tenant de otra organización', async () => {
+      const d = build();
+
+      const change = await rejection(
+        inTenant(() =>
+          d.service.createChangeRequest({ ...changeDto, tenantId: T2 }, actor),
+        ),
+      );
+      const artifact = await rejection(
+        inTenant(() =>
+          d.service.publishArtifact({ ...artifactDto, tenantId: T2 }, actor),
+        ),
+      );
+
+      for (const error of [change, artifact]) {
+        expect(error).toBeInstanceOf(ResourceNotFoundException);
+        expect(error.getStatus()).toBe(404);
+        expect(error.reason).toBe(OUT_OF_SCOPE);
+        expect(error.details).toBeUndefined();
+      }
+      expect(d.releasesRepo.createChangeRequest).not.toHaveBeenCalled();
+      expect(d.releasesRepo.createArtifact).not.toHaveBeenCalled();
+    });
+
+    it('un componente o una ventana de T2 responde igual que uno inexistente y no crea el cambio', async () => {
+      const d = build();
+      d.releasesRepo.findComponentById.mockResolvedValue({
+        ...activeComponent(),
+        tenantId: T2,
+      });
+      const foreignComponent = await rejection(
+        inTenant(() => d.service.createChangeRequest(changeDto, actor)),
+      );
+      d.releasesRepo.findComponentById.mockResolvedValue(null);
+      const missingComponent = await rejection(
+        inTenant(() => d.service.createChangeRequest(changeDto, actor)),
+      );
+      d.releasesRepo.findComponentById.mockResolvedValue(activeComponent());
+      d.releasesRepo.findWindowForUpdate.mockResolvedValue({
+        id: WINDOW,
+        tenantId: T2,
+      });
+      const foreignWindow = await rejection(
+        inTenant(() =>
+          d.service.createChangeRequest(
+            { ...changeDto, maintenanceWindowId: WINDOW },
+            actor,
+          ),
+        ),
+      );
+
+      expect(foreignComponent.reason).toBe(OUT_OF_SCOPE);
+      expect(foreignComponent.getResponse()).toEqual(
+        missingComponent.getResponse(),
+      );
+      expect(foreignWindow.reason).toBe(OUT_OF_SCOPE);
+      expect(d.releasesRepo.createChangeRequest).not.toHaveBeenCalled();
+    });
+
+    it('recordApproval sobre un cambio de T2 responde igual que uno inexistente y no lo decide', async () => {
+      const d = build();
+      const foreign = approvedChange({
+        tenantId: T2,
+        statusConceptId: CONCEPTS.CHANGE_REQUESTED,
+      });
+      d.releasesRepo.findChangeRequestForUpdate.mockResolvedValue(foreign);
+      const foreignError = await rejection(
+        inTenant(() => d.service.recordApproval(CHANGE, approvalDto, actor)),
+      );
+      d.releasesRepo.findChangeRequestForUpdate.mockResolvedValue(null);
+      const missingError = await rejection(
+        inTenant(() => d.service.recordApproval(CHANGE, approvalDto, actor)),
+      );
+
+      expect(foreignError).toBeInstanceOf(ResourceNotFoundException);
+      expect(foreignError.reason).toBe(OUT_OF_SCOPE);
+      expect(foreignError.details).toBeUndefined();
+      expect(foreignError.getResponse()).toEqual(missingError.getResponse());
+      expect(foreign.statusConceptId).toBe(CONCEPTS.CHANGE_REQUESTED);
+      expect(d.releasesRepo.createApproval).not.toHaveBeenCalled();
+      expect(d.releasesRepo.findChangeRequestForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        CHANGE,
+        T1,
+      );
+    });
+
+    it('createDeployment con el artefacto de T2 responde 404 y no despliega', async () => {
+      const d = build();
+      d.releasesRepo.findChangeRequestForUpdate.mockResolvedValue(
+        approvedChange(),
+      );
+      d.releasesRepo.findArtifactById.mockResolvedValue({
+        id: ARTIFACT,
+        tenantId: T2,
+        serviceComponentId: COMPONENT,
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
+      });
+
+      const error = await rejection(
+        inTenant(() => d.service.createDeployment(deployDto, actor)),
+      );
+
+      expect(error.reason).toBe(OUT_OF_SCOPE);
+      expect(d.releasesRepo.createDeployment).not.toHaveBeenCalled();
+    });
+
+    it('createDeployment con un cambio de T2 responde 404 y no toca el cambio', async () => {
+      const d = build();
+      const foreign = approvedChange({ tenantId: T2 });
+      d.releasesRepo.findChangeRequestForUpdate.mockResolvedValue(foreign);
+
+      const error = await rejection(
+        inTenant(() => d.service.createDeployment(deployDto, actor)),
+      );
+
+      expect(error.reason).toBe(OUT_OF_SCOPE);
+      expect(foreign.statusConceptId).toBe(CONCEPTS.CHANGE_APPROVED);
+      expect(d.releasesRepo.findArtifactById).not.toHaveBeenCalled();
+      expect(d.releasesRepo.createDeployment).not.toHaveBeenCalled();
+    });
+
+    it('rollbackDeployment sobre un despliegue de T2 responde 404 y no revierte nada', async () => {
+      const d = build();
+      const foreign = {
+        id: DEPLOYMENT,
+        tenantId: T2,
+        serviceComponentId: COMPONENT,
+        environmentConceptId: CONCEPTS.OPS_ENV_PRODUCTION,
+        statusConceptId: CONCEPTS.DEPLOY_FAILED,
+        isCurrent: true,
+      };
+      d.releasesRepo.findDeploymentForUpdate.mockResolvedValue(foreign);
+      const foreignError = await rejection(
+        inTenant(() =>
+          d.service.rollbackDeployment(DEPLOYMENT, { reason: 'x' }, actor),
+        ),
+      );
+      d.releasesRepo.findDeploymentForUpdate.mockResolvedValue(null);
+      const missingError = await rejection(
+        inTenant(() =>
+          d.service.rollbackDeployment(DEPLOYMENT, { reason: 'x' }, actor),
+        ),
+      );
+
+      expect(foreignError.reason).toBe(OUT_OF_SCOPE);
+      expect(foreignError.getResponse()).toEqual(missingError.getResponse());
+      expect(foreign.statusConceptId).toBe(CONCEPTS.DEPLOY_FAILED);
+      expect(foreign.isCurrent).toBe(true);
+      expect(d.releasesRepo.createDeployment).not.toHaveBeenCalled();
+    });
+
+    it('rollbackDeployment con un destino explícito de T2 responde como si no existiera', async () => {
+      const d = build();
+      d.releasesRepo.findDeploymentForUpdate.mockResolvedValue({
+        id: DEPLOYMENT,
+        tenantId: T1,
+        serviceComponentId: COMPONENT,
+        environmentConceptId: CONCEPTS.OPS_ENV_PRODUCTION,
+        statusConceptId: CONCEPTS.DEPLOY_FAILED,
+        isCurrent: true,
+      });
+      d.releasesRepo.findDeploymentById.mockResolvedValue({
+        id: 'deployment-t2',
+        tenantId: T2,
+        serviceComponentId: COMPONENT,
+        environmentConceptId: CONCEPTS.OPS_ENV_PRODUCTION,
+        artifactId: 'artifact-t2',
+      });
+
+      const error = await rejection(
+        inTenant(() =>
+          d.service.rollbackDeployment(
+            DEPLOYMENT,
+            { reason: 'x', targetDeploymentId: 'deployment-t2' },
+            actor,
+          ),
+        ),
+      );
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(error.reason).toBe(
+        PlatformOpsErrorReason.ROLLBACK_TARGET_NOT_FOUND,
+      );
+      expect(d.releasesRepo.createDeployment).not.toHaveBeenCalled();
+    });
+
+    it('publishArtifact admite una herramienta compartida y rechaza la de T2', async () => {
+      const d = build();
+      d.releasesRepo.findComponentById.mockResolvedValue(activeComponent());
+      d.releasesRepo.createArtifact.mockReturnValue({ id: ARTIFACT });
+      const withTool = { ...artifactDto, producedByToolId: TOOL };
+
+      d.releasesRepo.findToolById.mockResolvedValue({
+        id: TOOL,
+        tenantId: null,
+        isApproved: true,
+      });
+      await expect(
+        inTenant(() => d.service.publishArtifact(withTool, actor)),
+      ).resolves.toMatchObject({ id: ARTIFACT });
+
+      d.releasesRepo.findToolById.mockResolvedValue({
+        id: TOOL,
+        tenantId: T2,
+        isApproved: true,
+      });
+      const error = await rejection(
+        inTenant(() => d.service.publishArtifact(withTool, actor)),
+      );
+      expect(error.reason).toBe(OUT_OF_SCOPE);
+      expect(d.releasesRepo.createArtifact).toHaveBeenCalledTimes(1);
+    });
+
+    it('sin tenant en el contexto ninguna operación llega a la base', async () => {
+      const d = build();
+
+      await expect(
+        d.service.recordApproval(CHANGE, approvalDto, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      await expect(
+        d.service.rollbackDeployment(DEPLOYMENT, { reason: 'x' }, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.releasesRepo.findChangeRequestForUpdate).not.toHaveBeenCalled();
+      expect(d.releasesRepo.findDeploymentForUpdate).not.toHaveBeenCalled();
     });
   });
 });

@@ -482,3 +482,33 @@ test('subconjuntos de MEDLINE: cada uno con su tipo literal registrado y sin afi
     /NOT Randomized Controlled Trial\[pt\]/,
   );
 });
+
+test('página de efetch: artículos + libros igualan lo prometido; una respuesta truncada no', async () => {
+  const { parsePubmedPage } = await import('../lib/sources/pubmed.mjs');
+  // Registros reales: un artículo (revisión Cochrane, PMID 40970433) y un libro
+  // de Bookshelf (guía NICE, PMID 31999418).
+  const article = readFileSync(
+    join(FIX, 'pubmed-cochrane-excerpt.xml'),
+    'utf8',
+  );
+  const book = readFileSync(join(FIX, 'pubmed-book-excerpt.xml'), 'utf8');
+  const page = (...parts) =>
+    `<PubmedArticleSet>${parts.join('')}</PubmedArticleSet>`;
+  const body = article.match(/<PubmedArticle>[\s\S]*?<\/PubmedArticle>/)[0];
+  const bookBody = book.match(
+    /<PubmedBookArticle>[\s\S]*?<\/PubmedBookArticle>/,
+  )[0];
+
+  const full = parsePubmedPage(page(body, bookBody));
+  assert.equal(full.records.length, 1);
+  assert.equal(full.records[0].pmid, '40970433');
+  assert.equal(full.bookCount, 1);
+  assert.equal(full.records.length + full.bookCount, 2); // lo prometido
+
+  // La misma página cortada a mitad del artículo: llega con menos de lo prometido.
+  const truncated = parsePubmedPage(
+    page(bookBody, body.slice(0, body.length / 2)),
+  );
+  assert.equal(truncated.records.length, 0);
+  assert.notEqual(truncated.records.length + truncated.bookCount, 2);
+});

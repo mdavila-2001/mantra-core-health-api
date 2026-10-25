@@ -2,13 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { createHash } from 'node:crypto';
-import {
-  ConflictException,
-  PreconditionFailedException,
-  type AuthenticatedUser,
-} from '../../../common';
+import { ConflictException, type AuthenticatedUser } from '../../../common';
 import { MediaQualityRepository } from '../repositories';
 import { DIAG } from '../diagnostics.concepts';
+import { DiagnosticsScopeService } from './diagnostics-scope.service';
 import {
   AttachClinicalMediaDto,
   CreateDataQualityEventDto,
@@ -27,11 +24,13 @@ export class DiagnosticsMediaQualityService {
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param repo - Valor de repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly repo: MediaQualityRepository,
+    private readonly scope: DiagnosticsScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(DiagnosticsMediaQualityService.name);
@@ -47,11 +46,18 @@ export class DiagnosticsMediaQualityService {
       'Attaching clinical media',
     );
     return this.em.transactional(async (tx) => {
-      const tenantId = dto.custodianTenantId;
-      if (!tenantId) {
-        throw new PreconditionFailedException(
-          'Falta el tenant custodio de la media',
-          {},
+      const tenantId = this.scope.activeTenantFor(dto.custodianTenantId);
+      // Archivo, encuentro e informe deben ser del tenant activo y del mismo
+      // paciente, antes de escribir la primera fila.
+      await this.scope.file(tx, dto.fileId);
+      if (dto.encounterId) {
+        await this.scope.encounter(tx, dto.encounterId, dto.patientProfileId);
+      }
+      if (dto.diagnosticReportId) {
+        await this.scope.report(
+          tx,
+          dto.diagnosticReportId,
+          dto.patientProfileId,
         );
       }
       // Un mismo archivo no genera dos medias.
@@ -102,19 +108,17 @@ export class DiagnosticsMediaQualityService {
   /** UC-20-14: registra un evento de calidad de datos y su enlace de provenance. */
   async recordDataQualityEvent(
     dto: CreateDataQualityEventDto,
-    _actor: AuthenticatedUser,
+    actor: AuthenticatedUser,
   ): Promise<ResourceCreatedDto> {
     this.logger.info(
       { operation: 'diagnostics.dataQuality.record', ruleCode: dto.ruleCode },
       'Recording data-quality event',
     );
     return this.em.transactional(async (tx) => {
-      const tenantId = dto.custodianTenantId;
-      if (!tenantId) {
-        throw new PreconditionFailedException(
-          'Falta el tenant custodio del evento de calidad',
-          {},
-        );
+      const tenantId = this.scope.activeTenantFor(dto.custodianTenantId);
+      await this.scope.dataQualityTarget(tx, dto.targetId);
+      if (dto.provenanceSourceId) {
+        await this.scope.dataQualityTarget(tx, dto.provenanceSourceId);
       }
 
       const now = new Date();
@@ -146,7 +150,7 @@ export class DiagnosticsMediaQualityService {
           activityConceptId: DIAG.PROVENANCE_DERIVATION,
           contentHash,
           recordedAt: now,
-          agentProfileId: dto.agentProfileId,
+          agentProfileId: this.scope.authorFor(actor, dto.agentProfileId),
         });
         await tx.flush();
       }

@@ -201,6 +201,29 @@ export class DiagnosticUnitPrimarySiteDto {
 }
 
 /**
+ * Una sucursal de un laboratorio, declarada en el alta.
+ *
+ * Nace como una sede más de la unidad diagnóstica, con rol de punto de toma
+ * de muestras. Descripción y enlace de mapa NO se aceptan: `practice_sites`
+ * no tiene dónde guardarlos (P54, pendiente en el modelo).
+ */
+export class DiagnosticUnitBranchDto {
+  /** Nombre de la sucursal, tal como la va a ver el paciente. */
+  @ApiProperty({ minLength: 2, maxLength: 200, example: 'Sucursal Equipetrol' })
+  @IsString()
+  @MinLength(2)
+  @MaxLength(200)
+  name!: string;
+
+  /** Dirección de la sucursal. Opcional: se puede cargar más tarde. */
+  @ApiPropertyOptional({ type: OwnSiteAddressDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => OwnSiteAddressDto)
+  address?: OwnSiteAddressDto;
+}
+
+/**
  * Datos del centro de diagnóstico. Obligatorio cuando `tenantType` es
  * `DIAGNOSTIC_CENTER`... salvo que ninguno de sus campos lo sea: el alta
  * puede declarar sólo el tipo y completar la unidad diagnóstica después
@@ -287,4 +310,16 @@ export class DiagnosticUnitProfileDto {
   @ValidateNested()
   @Type(() => DiagnosticUnitPrimarySiteDto)
   primarySite?: DiagnosticUnitPrimarySiteDto;
+
+  /**
+   * Sucursales del laboratorio. Solo para unidades de laboratorio clínico:
+   * declararlas en una unidad de imágenes es un 422.
+   */
+  @ApiPropertyOptional({ type: [DiagnosticUnitBranchDto], maxItems: 50 })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @ValidateNested({ each: true })
+  @Type(() => DiagnosticUnitBranchDto)
+  branches?: DiagnosticUnitBranchDto[];
 }

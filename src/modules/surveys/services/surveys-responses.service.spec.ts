@@ -9,7 +9,9 @@ import { TableNotFoundException } from '@mikro-orm/core';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { SurveysResponsesService } from './surveys-responses.service';
+import { SurveysErrorReason } from '../surveys.error-reasons';
 import { SURVEYS, ANSWER_TYPE_BY_CODE } from '../surveys.concepts';
 import {
   ConflictException,
@@ -47,13 +49,17 @@ const PAST = new Date(Date.now() - 24 * 60 * 60 * 1000);
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
-  const invitationsRepo = {
+  const invitationsRepo: Record<string, any> = {
     findById: mockFn(),
     listByPatient: mockFn().mockResolvedValue([]),
     listByBooking: mockFn().mockResolvedValue([]),
     listByVersions: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
+  // El envío bloquea la fila; en el doble el bloqueo lee lo que lea `findById`.
+  invitationsRepo.findByIdForUpdate = mockFn((em: unknown, id: string) =>
+    invitationsRepo.findById(em, id),
+  );
   const responsesRepo = {
     findByInvitation: mockFn().mockResolvedValue(null),
     listByInvitations: mockFn().mockResolvedValue([]),
@@ -75,8 +81,27 @@ function build() {
     templatesRepo as any,
     logger as any,
   );
+  // Las lecturas del paciente exigen el tenant activo: estas pruebas actúan
+  // dentro del de TENANT. `raw` permite probar otro contexto.
+  const raw = {
+    listMyInvitations: service.listMyInvitations.bind(service),
+    getMyQuestionnaire: service.getMyQuestionnaire.bind(service),
+  };
+  service.listMyInvitations = ((
+    ...args: Parameters<typeof raw.listMyInvitations>
+  ) =>
+    runWithTenant(TENANT, () =>
+      raw.listMyInvitations(...args),
+    )) as typeof service.listMyInvitations;
+  service.getMyQuestionnaire = ((
+    ...args: Parameters<typeof raw.getMyQuestionnaire>
+  ) =>
+    runWithTenant(TENANT, () =>
+      raw.getMyQuestionnaire(...args),
+    )) as typeof service.getMyQuestionnaire;
   return {
     service,
+    raw,
     em,
     tx,
     invitationsRepo,
@@ -179,6 +204,7 @@ describe('SurveysResponsesService', () => {
       expect(d.invitationsRepo.listByPatient).toHaveBeenCalledWith(
         expect.anything(),
         PATIENT,
+        TENANT,
       );
       expect(result).toEqual([
         expect.objectContaining({
@@ -512,6 +538,157 @@ describe('SurveysResponsesService', () => {
       // propósito — de quién es la respuesta no debe cruzar hacia el DTO,
       // aunque la fila de la base sí lo guarde para trazabilidad interna.
       expect(res[0]).not.toHaveProperty('patientProfileId');
+    });
+  });
+
+  describe('alcance de tenant del autoservicio (SURV-01)', () => {
+    const OTHER_TENANT = 'ten-2';
+
+    /** Falla esperada: devuelve la excepción o lanza si no hubo. */
+    async function failure(promise: Promise<unknown>) {
+      try {
+        await promise;
+      } catch (error) {
+        return error as ResourceNotFoundException;
+      }
+      throw new Error('debía rechazar');
+    }
+
+    it('Límite: el mismo paciente con invitaciones en dos tenants ve sólo las del tenant activo', async () => {
+      const d = build();
+      const all = [
+        pendingInvitation({ id: 'inv-a', tenantId: TENANT }),
+        pendingInvitation({ id: 'inv-b', tenantId: OTHER_TENANT }),
+      ];
+      d.invitationsRepo.listByPatient.mockImplementation(
+        (_em: unknown, _patient: string, tenantId: string) =>
+          Promise.resolve(all.filter((i) => i.tenantId === tenantId)),
+      );
+      d.templatesRepo.findVersionById.mockResolvedValue({
+        id: 'ver-1',
+        surveyTemplateId: 'tpl-1',
+      });
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-1',
+        title: 'Cómo fue su consulta',
+      });
+
+      const inA = await d.service.listMyInvitations(patientActor);
+      const inB = await runWithTenant(OTHER_TENANT, () =>
+        d.raw.listMyInvitations(patientActor),
+      );
+
+      expect(inA.map((i) => i.id)).toEqual(['inv-a']);
+      expect(inB.map((i) => i.id)).toEqual(['inv-b']);
+    });
+
+    it('Error: abrir la invitación propia emitida por otro tenant responde 404 sin leer plantilla ni preguntas', async () => {
+      const d = build();
+      d.invitationsRepo.findById.mockResolvedValue(
+        pendingInvitation({ tenantId: OTHER_TENANT }),
+      );
+
+      const error = await failure(
+        d.service.getMyQuestionnaire('inv-1', patientActor),
+      );
+
+      expect(error).toBeInstanceOf(ResourceNotFoundException);
+      expect(error.getStatus()).toBe(404);
+      expect(error.details).toBeUndefined();
+      expect(d.templatesRepo.findVersionById).not.toHaveBeenCalled();
+      expect(d.templatesRepo.findTemplateById).not.toHaveBeenCalled();
+      expect(d.templatesRepo.listQuestions).not.toHaveBeenCalled();
+    });
+
+    it('Falla catalogada: enviar con otro tenant activo responde 404/SURVEY_INVITATION_OUT_OF_SCOPE y no inserta nada', async () => {
+      const d = build();
+      d.invitationsRepo.findById.mockResolvedValue(pendingInvitation());
+
+      const error = await failure(
+        runWithTenant(OTHER_TENANT, () =>
+          d.service.submitResponse(
+            'inv-1',
+            { answers: [{ questionId: 'q-1', valueText: 'Bien' }] },
+            patientActor,
+          ),
+        ),
+      );
+
+      expect(error.getStatus()).toBe(404);
+      expect(error.reason).toBe(SurveysErrorReason.INVITATION_OUT_OF_SCOPE);
+      expect(d.responsesRepo.createResponse).not.toHaveBeenCalled();
+      expect(d.responsesRepo.createAnswer).not.toHaveBeenCalled();
+      expect(d.templatesRepo.listQuestions).not.toHaveBeenCalled();
+    });
+
+    it('la invitación ajena, la de otro tenant y la inexistente responden exactamente igual', async () => {
+      const respond = async (invitation: unknown, activeTenant = TENANT) => {
+        const d = build();
+        d.invitationsRepo.findById.mockResolvedValue(invitation);
+        const error = await failure(
+          runWithTenant(activeTenant, () =>
+            d.raw.getMyQuestionnaire('inv-1', patientActor),
+          ),
+        );
+        return error.getResponse();
+      };
+
+      const inexistente = await respond(null);
+      expect(
+        await respond(pendingInvitation({ patientProfileId: OTHER_PATIENT })),
+      ).toEqual(inexistente);
+      expect(await respond(pendingInvitation(), OTHER_TENANT)).toEqual(
+        inexistente,
+      );
+    });
+
+    it('Correcto: la respuesta conserva el tenant de la invitación y bloquea la fila al enviar', async () => {
+      const d = build();
+      d.invitationsRepo.findById.mockResolvedValue(pendingInvitation());
+      d.templatesRepo.listQuestions.mockResolvedValue([textQuestion()]);
+
+      await withTenant(() =>
+        d.service.submitResponse(
+          'inv-1',
+          { answers: [{ questionId: 'q-1', valueText: 'Bien' }] },
+          patientActor,
+        ),
+      );
+
+      expect(d.invitationsRepo.findByIdForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        'inv-1',
+      );
+      expect(d.responsesRepo.createResponse).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          tenantId: TENANT,
+          patientProfileId: PATIENT,
+        }),
+      );
+    });
+
+    it('una violación de unicidad del modelo sale como 409/SURVEY_ANSWER_DUPLICATE', async () => {
+      const d = build();
+      d.invitationsRepo.findById.mockResolvedValue(pendingInvitation());
+      d.templatesRepo.listQuestions.mockResolvedValue([textQuestion()]);
+      d.tx.flush.mockRejectedValueOnce(
+        new UniqueConstraintViolationException(
+          new Error('duplicate key value violates unique constraint'),
+        ),
+      );
+
+      const error = (await withTenant(() =>
+        d.service.submitResponse(
+          'inv-1',
+          { answers: [{ questionId: 'q-1', valueText: 'Bien' }] },
+          patientActor,
+        ),
+      ).catch((e) => e)) as ConflictException;
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect(error.getStatus()).toBe(409);
+      expect(error.reason).toBe(SurveysErrorReason.ANSWER_DUPLICATE);
     });
   });
 });

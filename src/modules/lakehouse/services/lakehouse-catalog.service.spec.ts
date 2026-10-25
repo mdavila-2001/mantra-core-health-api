@@ -9,9 +9,32 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { LakehouseCatalogService } from './lakehouse-catalog.service';
+import { BadRequestException } from '@nestjs/common';
+import { runWithTenant } from '../../../common';
+import { LakehouseErrorReason } from '../lakehouse.error-reasons';
 
 const actor = { id: 'user-1', roles: ['DATA_PLATFORM_ENGINEER'] } as any;
 const TENANT_ID = '11111111-1111-1111-1111-111111111111';
+const OTHER_TENANT_ID = '99999999-9999-9999-9999-999999999999';
+/**
+ * Ejecuta cada método del servicio con `tenant` como tenant activo del
+ * contexto, igual que lo deja el interceptor en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @param tenant - Tenant activo.
+ * @returns Proxy que fija el contexto en cada llamada.
+ */
+function inTenant<T extends object>(service: T, tenant: string): T {
+  return new Proxy(service, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(tenant, () => value.apply(target, args));
+    },
+  });
+}
+
 const PRODUCT_ID = '22222222-2222-2222-2222-222222222222';
 const VERSION_ID = '33333333-3333-3333-3333-333333333333';
 const ZONE_ID = '44444444-4444-4444-4444-444444444444';
@@ -43,13 +66,14 @@ function build() {
       ...data,
     })),
     findProductForUpdate: mockFn(async () => null),
+    findProductById: mockFn(async () => null),
     findProductByCode: mockFn(async () => null),
     createProduct: mockFn((_tx: any, data: any) => ({
       id: data.id ?? PRODUCT_ID,
       ...data,
     })),
     findProductVersion: mockFn(async () => null),
-    findProductVersionById: mockFn(async () => ({
+    findProductVersionInTenant: mockFn(async () => ({
       id: VERSION_ID,
       dataProductId: PRODUCT_ID,
       state: 'active',
@@ -84,12 +108,27 @@ function build() {
     outbox as any,
     logger as any,
   );
-  return { service, em, tx, catalogRepo, outbox, logger };
+  return {
+    service: inTenant(service, TENANT_ID),
+    raw: service,
+    em,
+    tx,
+    catalogRepo,
+    outbox,
+    logger,
+  };
 }
 
 describe('LakehouseCatalogService', () => {
   describe('defineZone (UC-63-01)', () => {
-    const DTO = { code: 'curated', name: 'Curada', zoneType: 'curated' } as any;
+    const DTO = {
+      code: 'curated',
+      name: 'Curada',
+      zoneType: 'curated',
+      namespaceId: '66666666-6666-6666-6666-666666666666',
+      encryptionProfileCode: 'aes-256',
+      retentionPolicyCode: 'retain-7y',
+    } as any;
 
     it('crea la zona activa', async () => {
       const d = build();
@@ -141,6 +180,9 @@ describe('LakehouseCatalogService', () => {
       code: 'encuentros',
       name: 'Encuentros',
       version: '1.0.0',
+      ownerTeamId: '77777777-7777-7777-7777-777777777777',
+      businessPurpose: 'Análisis de encuentros',
+      classificationCode: 'internal',
       contractSchemaJson: { fields: [] },
       qualityRules: [
         {
@@ -306,7 +348,7 @@ describe('LakehouseCatalogService', () => {
 
     it('rechaza una versión de producto superseded', async () => {
       const d = build();
-      d.catalogRepo.findProductVersionById.mockResolvedValue({
+      d.catalogRepo.findProductVersionInTenant.mockResolvedValue({
         id: VERSION_ID,
         state: 'superseded',
       });
@@ -346,6 +388,291 @@ describe('LakehouseCatalogService', () => {
 
       await expect(d.service.registerDataset(DTO, actor)).rejects.toThrow(
         /ya hay un dataset/i,
+      );
+    });
+  });
+  describe('contrato mínimo y defaults (LAKE-02)', () => {
+    const zone = {
+      code: 'curated',
+      name: 'Curada',
+      zoneType: 'curated',
+      namespaceId: '66666666-6666-6666-6666-666666666666',
+      encryptionProfileCode: 'aes-256',
+      retentionPolicyCode: 'retain-7y',
+    } as any;
+
+    it.each(['namespaceId', 'encryptionProfileCode', 'retentionPolicyCode'])(
+      'la zona sin %s responde 400 catalogado y no intenta persistir',
+      async (field) => {
+        const d = build();
+        const attempt = d.service.defineZone(
+          { ...zone, [field]: undefined },
+          actor,
+        );
+        await expect(attempt).rejects.toBeInstanceOf(BadRequestException);
+        await expect(attempt).rejects.toMatchObject({
+          response: {
+            code: 'VALIDATION_FAILED',
+            reason: LakehouseErrorReason.LAKEHOUSE_REQUIRED_FIELD_MISSING,
+            details: { fields: [field] },
+          },
+        });
+        expect(d.catalogRepo.createZone).not.toHaveBeenCalled();
+        expect(d.tx.flush).not.toHaveBeenCalled();
+      },
+    );
+
+    it('la zona con todos sus campos requeridos se crea con ellos', async () => {
+      const d = build();
+      await d.service.defineZone(zone, actor);
+      expect(d.catalogRepo.createZone).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          namespaceId: zone.namespaceId,
+          encryptionProfileCode: 'aes-256',
+          retentionPolicyCode: 'retain-7y',
+        }),
+      );
+    });
+
+    it('el catálogo sin formato ni compresión usa los defaults de negocio', async () => {
+      const d = build();
+      await d.service.registerCatalog(
+        {
+          code: 'glue-main',
+          catalogType: 'glue',
+          metastoreUri: 'arn:x',
+        } as any,
+        actor,
+      );
+      expect(d.catalogRepo.createCatalog).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          defaultFormat: 'parquet',
+          defaultCompression: 'snappy',
+        }),
+      );
+    });
+
+    it('el dataset sin partición ni origen declarados usa los defaults de negocio', async () => {
+      const d = build();
+      await d.service.registerDataset(
+        {
+          tenantId: TENANT_ID,
+          dataProductVersionId: VERSION_ID,
+          dataLakeZoneId: ZONE_ID,
+          lakehouseCatalogId: CATALOG_ID,
+          databaseName: 'analytics',
+          tableName: 'encounters',
+          schemaJson: { fields: [] },
+          schemaFingerprint: 'fp-1',
+        } as any,
+        actor,
+      );
+      expect(d.catalogRepo.createDataset).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          partitionSpecJson: {},
+          sourceDatasetCode: '',
+        }),
+      );
+    });
+
+    it('publicar sin contrato de esquema responde 400 catalogado', async () => {
+      const d = build();
+      await expect(
+        d.service.publishProductVersion(
+          PRODUCT_ID,
+          {
+            tenantId: TENANT_ID,
+            code: 'encuentros',
+            name: 'Encuentros',
+            version: '1.0.0',
+            ownerTeamId: '77777777-7777-7777-7777-777777777777',
+            businessPurpose: 'x',
+            classificationCode: 'internal',
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        response: {
+          reason: LakehouseErrorReason.LAKEHOUSE_REQUIRED_FIELD_MISSING,
+          details: { fields: ['contractSchemaJson'] },
+        },
+      });
+      expect(d.catalogRepo.createProduct).not.toHaveBeenCalled();
+    });
+
+    it('crear un producto sin dueño, propósito o clasificación responde 400 y lista lo que falta', async () => {
+      const d = build();
+      await expect(
+        d.service.publishProductVersion(
+          PRODUCT_ID,
+          {
+            tenantId: TENANT_ID,
+            code: 'encuentros',
+            name: 'Encuentros',
+            version: '1.0.0',
+            contractSchemaJson: { fields: [] },
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        response: {
+          reason: LakehouseErrorReason.LAKEHOUSE_REQUIRED_FIELD_MISSING,
+          details: {
+            fields: ['ownerTeamId', 'businessPurpose', 'classificationCode'],
+          },
+        },
+      });
+      expect(d.catalogRepo.createProduct).not.toHaveBeenCalled();
+    });
+
+    it('la versión sin SLO y la regla sin expresión ni umbral usan defaults', async () => {
+      const d = build();
+      await d.service.publishProductVersion(
+        PRODUCT_ID,
+        {
+          tenantId: TENANT_ID,
+          code: 'encuentros',
+          name: 'Encuentros',
+          version: '1.0.0',
+          ownerTeamId: '77777777-7777-7777-7777-777777777777',
+          businessPurpose: 'x',
+          classificationCode: 'internal',
+          contractSchemaJson: { fields: [] },
+          qualityRules: [
+            { ruleCode: 'r', dimension: 'completeness', severity: 'info' },
+          ],
+        } as any,
+        actor,
+      );
+      expect(d.catalogRepo.createProductVersion).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ qualitySloJson: {} }),
+      );
+      expect(d.catalogRepo.createQualityRule).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ expression: '', threshold: '0' }),
+      );
+    });
+  });
+
+  describe('aislamiento por tenant (LAKE-01)', () => {
+    const datasetDto = {
+      tenantId: TENANT_ID,
+      dataProductVersionId: VERSION_ID,
+      dataLakeZoneId: ZONE_ID,
+      lakehouseCatalogId: CATALOG_ID,
+      databaseName: 'analytics',
+      tableName: 'encounters',
+      schemaJson: { fields: [] },
+      schemaFingerprint: 'fp-1',
+    } as any;
+    const productDto = {
+      tenantId: TENANT_ID,
+      code: 'encuentros',
+      name: 'Encuentros',
+      version: '1.0.0',
+      ownerTeamId: '77777777-7777-7777-7777-777777777777',
+      businessPurpose: 'x',
+      classificationCode: 'internal',
+      contractSchemaJson: { fields: [] },
+    } as any;
+
+    it('registrar un dataset sobre una versión de otro tenant responde 404 uniforme y no escribe', async () => {
+      const d = build();
+      d.catalogRepo.findProductVersionInTenant.mockResolvedValue(null);
+      const foreign = await d.service
+        .registerDataset(datasetDto, actor)
+        .catch((e: any) => e);
+
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.reason).toBe(
+        LakehouseErrorReason.LAKEHOUSE_RESOURCE_OUTSIDE_TENANT,
+      );
+      expect(foreign.details).toBeUndefined();
+      expect(d.catalogRepo.createDataset).not.toHaveBeenCalled();
+      expect(d.catalogRepo.findProductVersionInTenant).toHaveBeenCalledWith(
+        d.tx,
+        TENANT_ID,
+        VERSION_ID,
+      );
+    });
+
+    it('rechaza un tenantId del cuerpo distinto del activo', async () => {
+      const d = build();
+      const attempt = d.service.registerDataset(
+        { ...datasetDto, tenantId: OTHER_TENANT_ID },
+        actor,
+      );
+      await expect(attempt).rejects.toMatchObject({
+        reason: LakehouseErrorReason.LAKEHOUSE_TENANT_MISMATCH,
+      });
+      expect(d.catalogRepo.createDataset).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant activo no se registra nada (TENANT_REQUIRED)', async () => {
+      const d = build();
+      await expect(
+        d.raw.registerDataset(datasetDto, actor),
+      ).rejects.toMatchObject({ details: { reason: 'TENANT_REQUIRED' } });
+      await expect(
+        d.raw.publishProductVersion(PRODUCT_ID, productDto, actor),
+      ).rejects.toMatchObject({ details: { reason: 'TENANT_REQUIRED' } });
+    });
+
+    it('la duplicidad de tabla se busca dentro del tenant', async () => {
+      const d = build();
+      await d.service.registerDataset(datasetDto, actor);
+      expect(d.catalogRepo.findDatasetByTable).toHaveBeenCalledWith(
+        d.tx,
+        TENANT_ID,
+        CATALOG_ID,
+        'analytics',
+        'encounters',
+      );
+    });
+
+    it('publicar sobre el id de un producto de otro tenant responde 404 uniforme y no toca la fila', async () => {
+      const d = build();
+      const foreignProduct = {
+        id: PRODUCT_ID,
+        tenantId: OTHER_TENANT_ID,
+        code: 'encuentros',
+        lifecycleState: 'draft',
+        name: 'Ajeno',
+      };
+      d.catalogRepo.findProductById.mockResolvedValue(foreignProduct);
+
+      const foreign = await d.service
+        .publishProductVersion(PRODUCT_ID, productDto, actor)
+        .catch((e: any) => e);
+
+      expect(foreign.getStatus()).toBe(404);
+      expect(foreign.reason).toBe(
+        LakehouseErrorReason.LAKEHOUSE_RESOURCE_OUTSIDE_TENANT,
+      );
+      expect(foreign.details).toBeUndefined();
+      expect(foreignProduct.lifecycleState).toBe('draft');
+      expect(foreignProduct.name).toBe('Ajeno');
+      expect(d.catalogRepo.findProductForUpdate).not.toHaveBeenCalled();
+      expect(d.catalogRepo.createProduct).not.toHaveBeenCalled();
+      expect(d.catalogRepo.createProductVersion).not.toHaveBeenCalled();
+    });
+
+    it('el producto propio se busca y se bloquea con el tenant activo', async () => {
+      const d = build();
+      await d.service.publishProductVersion(PRODUCT_ID, productDto, actor);
+      expect(d.catalogRepo.findProductForUpdate).toHaveBeenCalledWith(
+        d.tx,
+        TENANT_ID,
+        PRODUCT_ID,
+      );
+      expect(d.catalogRepo.findProductByCode).toHaveBeenCalledWith(
+        d.tx,
+        TENANT_ID,
+        'encuentros',
       );
     });
   });

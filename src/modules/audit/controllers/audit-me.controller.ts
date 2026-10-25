@@ -1,47 +1,51 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import { AccessLogged } from '../../../common/audit-trail';
 import {
   MyDataAccessPageDto,
   MyDataAccessQueryDto,
-} from '../dto/audit-query.dto';
-import { AuditQueryService } from '../services/audit-query.service';
+} from '../dto/my-data-access.dto';
+import { MyDataAccessService } from '../services/my-data-access.service';
 
 /**
- * «Quién vio mi historia» (PAC-HIST-004/005): el autoservicio del titular sobre
- * `audit.data_access_log`.
+ * Autoservicio del paciente sobre el registro de accesos a su historia (PAC-HIST-004/005).
  *
- * **Sin `@Roles`**, patrón `charts/me`: el filtro real no es un rol sino tener perfil de paciente, y
- * el servidor lo toma del claim de la sesión (`actor.patientProfileId`). Ninguna ruta acepta un id
- * de paciente, de actor ni de tenant por parámetro: si lo aceptara, cualquiera podría pedir los
- * accesos a la historia de otro.
+ * Cuelga de `me`: la persona sale de la cuenta y no hay identificador de paciente que comparar,
+ * así que ninguna ruta puede apuntar a la historia de otro. `@Roles('PATIENT')` acota quién entra;
+ * el aislamiento lo resuelve el servicio. No toca `GET /audit/data-access`, que sigue siendo la
+ * vista de auditoría de plataforma.
  */
 @ApiTags('audit-me')
 @ApiBearerAuth()
+@Roles('PATIENT')
 @Controller('audit/me')
 export class AuditMeController {
-  constructor(private readonly query: AuditQueryService) {}
+  /**
+   * @param service - Lectura del registro de accesos del titular.
+   */
+  constructor(private readonly service: MyDataAccessService) {}
 
+  /** Quién accedió a mi historia, cuándo, qué tipo de dato y con qué finalidad. */
   @Get('data-access')
+  @AccessLogged({ resourceType: 'PATIENT_DATA_ACCESS_LOG', patient: 'actor' })
   @ApiOperation({
-    summary: 'Ver quién accedió a mi historia, a qué y con qué finalidad',
+    summary: 'Quién accedió a mi historia y con qué finalidad',
     description:
-      'Accesos a los datos del titular registrados en `audit.data_access_log`: quién (cuenta), qué (tipo de dato y operación), para qué (finalidad) y cuándo. Más recientes primero, paginado por cursor. Sin rango, mira los últimos 30 días.',
+      'Del más reciente al más antiguo, paginado por cursor. Cada acceso trae quién lo hizo (tipo y nombre), cuándo, la operación, el tipo de dato y la finalidad declarada. No trae contenido clínico, IP ni identificadores de otras cuentas. Consultar este registro es en sí un acceso y queda anotado.',
   })
-  @ApiResponse({ status: 200, type: MyDataAccessPageDto })
-  @ApiResponse({
-    status: 412,
-    description: 'La sesión no tiene perfil de paciente',
-  })
-  myDataAccess(
+  @ApiOkResponse({ type: MyDataAccessPageDto })
+  @ApiNotFoundResponse({ description: 'La cuenta no es la de un paciente' })
+  list(
     @CurrentUser() actor: AuthenticatedUser,
-    @Query() q: MyDataAccessQueryDto,
+    @Query() query: MyDataAccessQueryDto,
   ): Promise<MyDataAccessPageDto> {
-    return this.query.myDataAccess(actor, q);
+    return this.service.list(actor, query);
   }
 }

@@ -1,14 +1,21 @@
 /**
- * Catálogo de sub-códigos de negocio (`reason`) de las excepciones de dominio
- * que lanza el módulo `medical_groups`. `code` dice la forma HTTP del error;
- * `reason` dice cuál fue, para que un cliente ramifique sin parsear `message`.
+ * Catálogo de sub-códigos de negocio estables del módulo `medical_groups`.
+ *
+ * `DomainException` ya lleva un `code` genérico (NOT_FOUND, CONFLICT…), común a
+ * todo el API. `MedicalGroupsErrorReason` añade el **cuál** dentro de ese tipo
+ * para que un cliente ramifique sobre un valor estable sin parsear `message`.
  */
 export enum MedicalGroupsErrorReason {
   /**
-   * El paciente asociado al grupo no está disponible para quien lo crea: no
-   * existe, o el actor no tiene base clínica sobre él (política de lectura de la
-   * historia). Es el mismo 404 en ambos casos, a propósito: probar uuids no
-   * confirma qué pacientes existen ni cuáles atiende otra organización.
+   * El paciente no existe o el solicitante no tiene base clínica para leer su
+   * historia. Ambos casos responden igual: un profesional sin relación con el
+   * paciente no puede distinguir «no existe» de «es de otra organización».
    */
   MEDICAL_GROUP_PATIENT_NOT_AVAILABLE = 'MEDICAL_GROUP_PATIENT_NOT_AVAILABLE',
+
+  /**
+   * El profesional invitado no existe o no tiene vinculación activa en una
+   * práctica de la organización del grupo.
+   */
+  MEDICAL_GROUP_PRACTITIONER_NOT_AVAILABLE = 'MEDICAL_GROUP_PRACTITIONER_NOT_AVAILABLE',
 }

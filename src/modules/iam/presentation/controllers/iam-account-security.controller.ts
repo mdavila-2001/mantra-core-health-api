@@ -12,6 +12,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
+  Audited,
   CurrentUser,
   TenantAgnostic,
   type AuthenticatedUser,
@@ -41,6 +42,10 @@ export class IamAccountSecurityController {
   constructor(private readonly service: IamAccountSecurityService) {}
 
   /** Cambia la contraseña y cierra las otras sesiones. */
+  @Audited({
+    action: 'PASSWORD_CHANGED',
+    entity: 'authentication_credential',
+  })
   @Post('auth/change-password')
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
@@ -63,6 +68,11 @@ export class IamAccountSecurityController {
   }
 
   /** Cierra una sesión propia. */
+  @Audited({
+    action: 'SESSION_REVOKED',
+    entity: 'session',
+    entityId: 'param:id',
+  })
   @Post('me/sessions/:id/revoke')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cerrar una de mis sesiones' })

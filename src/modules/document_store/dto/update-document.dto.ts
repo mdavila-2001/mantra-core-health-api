@@ -22,12 +22,14 @@ export class UpdateDocumentDto {
   /**
    * Identificador asociado a tenant.
    */
-  @ApiProperty({
-    description: 'Tenant propietario del documento',
+  @ApiPropertyOptional({
+    description:
+      'Se ignora como fuente de verdad: el tenant es el activo (X-Tenant-Id). Si se envía y no coincide, responde 404',
     format: 'uuid',
   })
+  @IsOptional()
   @IsUUID()
-  tenantId!: string;
+  tenantId?: string;
 
   /**
    * Valor de expected version mantenido por la instancia.

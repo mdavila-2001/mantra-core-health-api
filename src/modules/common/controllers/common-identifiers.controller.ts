@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '../../../common';
+import { Audited, CurrentUser } from '../../../common';
 import type { AuthenticatedUser } from '../../../common';
 import { IdentifiersService } from '../services';
 import { CreateIdentifierDto, IdentifierResponseDto } from '../dto';
@@ -18,6 +18,11 @@ export class CommonIdentifiersController {
   constructor(private readonly identifiersService: IdentifiersService) {}
 
   /** UC-02-01: registra un identificador oficial. */
+  @Audited({
+    action: 'IDENTIFIER_CREATED',
+    entity: 'identifier',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar un identificador oficial (UC-02-01)' })

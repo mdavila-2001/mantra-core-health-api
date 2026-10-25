@@ -36,6 +36,8 @@ import {
   DiagnosticsOrdersService,
   DiagnosticsPatientResultsService,
   DiagnosticsReceptionService,
+  DiagnosticsScopeService,
+  DiagnosticsPatientAccessService,
 } from './services';
 import {
   SpecimensRepository,
@@ -45,6 +47,7 @@ import {
   MediaQualityRepository,
   DiagnosticOrdersRepository,
   LabReceptionRepository,
+  ClinicalRefsRepository,
 } from './repositories';
 
 /**
@@ -87,6 +90,7 @@ import {
     // `scheduling` provee `AppointmentsRepository`.
     DiagnosticOrdersRepository,
     LabReceptionRepository,
+    ClinicalRefsRepository,
     // Servicios
     DiagnosticsSpecimensService,
     DiagnosticsLabService,
@@ -96,6 +100,9 @@ import {
     DiagnosticsOrdersService,
     DiagnosticsPatientResultsService,
     DiagnosticsReceptionService,
+    // Alcance de tenant de los writes clínicos y política paciente–profesional.
+    DiagnosticsScopeService,
+    DiagnosticsPatientAccessService,
     // Guard del personal de laboratorio (recepción y circuito de especímenes).
     LabStaffGuard,
   ],

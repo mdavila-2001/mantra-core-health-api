@@ -23,8 +23,9 @@
   en castellano (DeCS, Wikidata, TA2, RANM, MedlinePlus) estaban **bloqueadas por la política de red de
   la sesión** (403). **Pasada 9 (2026-10-24, red habilitada):** el importador de Wikidata corrió y suma
   49 615 nombres ES (CC0) de ítems que declaran el id; en la carga por defecto entran **47 342 conceptos
-  con 56 215 designaciones ES** (sinónimos, nunca preferidas). DeCS sigue sin alcanzarse (el servidor de
-  BIREME corta la conexión).
+  con 56 215 designaciones ES** (sinónimos, nunca preferidas). DeCS: `decs.bvsalud.org` responde desde el
+  2026-10-25 y dice que la descarga XML y el token de la API se entregan bajo un contrato de licencia
+  gratuito con BIREME/OPS (condiciones en `dictionaries/SOURCES.md`); sin ese contrato no hay archivo.
 - **Saturación**: las pasadas 7 y 8 aportaron 0 en todos los dominios **sobre el universo alcanzable**
   (registro completo de OBO Foundry + fuentes no OBO conocidas). No es saturación del universo total: las
   fuentes bloqueadas siguen siendo huecos documentados abajo.
@@ -197,7 +198,7 @@ como sinónimos con su ítem Q en `dictionary-es-labels`, no como nombre preferi
 
 | Dominio | Hueco | Por qué | Qué lo cierra |
 |---|---|---|---|
-| Todos | Nombres en castellano oficiales | Wikidata ya aporta 47 342 conceptos con nombres ES de la comunidad (pasada 9), pero no son traducciones oficiales; DeCS (BIREME) no responde (reset del servidor, 403 del CDN, la API pide clave); TA2 y MedlinePlus, bloqueados | Conseguir la descarga oficial de DeCS (o una clave de `api.bvsalud.org`) y su licencia, y escribir su importador contra el archivo real, enlazando por id MeSH |
+| Todos | Nombres en castellano oficiales | Wikidata ya aporta 47 342 conceptos con nombres ES de la comunidad (pasada 9), pero no son traducciones oficiales; DeCS (BIREME) se entrega sólo con un contrato de licencia (gratuito, por edición, tres años, no exclusivo; la API pide token); TA2 y MedlinePlus, bloqueados | El contrato con BIREME/OPS y el archivo XML (o el token de `api.bvsalud.org`); con eso se escribe el importador contra el archivo real, enlazando por id MeSH |
 | Anatomía | TA2 en latín/inglés/español | FIPAT bloqueado; TA2 no está en git | Habilitar FIPAT. Mientras tanto el latín TA98 entra por FMA (8 669 nombres latinos en 6 744 clases) |
 | Microbiología | 138 taxones declarados por Mondo sin etiqueta | El módulo de importación de NCBITaxon de Mondo es más viejo que sus aristas | NCBI Taxonomy (FTP bloqueado) o un release de OBO NCBITaxon |
 | Microbiología | LPSN (nomenclatura procariota) | Bloqueado | Habilitar `lpsn.dsmz.de` y verificar licencia |

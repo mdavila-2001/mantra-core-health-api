@@ -20,6 +20,15 @@ bypass de RBAC completo.
 
 Si el rol no alcanza: `403 FORBIDDEN` (`ErrorCode.FORBIDDEN`, ver `docs/api/error-model.md`).
 
+**Deriva de permisos (gate de CI).** Una ruta autenticada sin `@Roles` ni `@Public` la pasa
+cualquier sesión, y un rol que una ruta exige pero nadie siembra solo lo ejerce `SUPERADMIN`.
+`yarn catalog:permission-drift` arranca la aplicación compilada, calcula esa deriva con
+`computePermissionDrift` (la misma lógica de `GET /admin/catalog/permission-drift`) y falla si
+aparece una ruta o un rol nuevos fuera de `tools/catalog/permission-drift-allowlist.json`. Es un
+trinquete: congela la deriva que ya existía y no la reduce. Una excepción que dejó de hacer falta
+también falla, de modo que la lista solo puede encogerse; `--write` la reescribe con la deriva
+actual.
+
 ### 2. PDP clínico aditivo (`authz` — acceso a PHI)
 
 Un rol global (p. ej. `CLINICIAN`) **no basta por sí solo** para acceder a datos clínicos (PHI):
