@@ -148,6 +148,13 @@ function build() {
           isActive: true,
           descriptionText: 'Términos base',
         };
+      if (id === 'service-sin-descripcion')
+        return {
+          id,
+          practiceId: PRACTICE_A,
+          isActive: true,
+          descriptionText: null,
+        };
       if (id === 'service-b')
         return {
           id,
@@ -476,6 +483,15 @@ describe('MedicalGroupsService', () => {
         } as any),
       ).rejects.toBeInstanceOf(UnauthorizedException);
     });
+  });
+
+  it('un servicio sin descripción (null en la base) no rompe el alta', async () => {
+    const d = build();
+    const created = await d.service.create(
+      baseDto({ serviceCatalogId: 'service-sin-descripcion' }),
+      creator,
+    );
+    expect(created.termsText).toBe('');
   });
 
   describe('colegas que se pueden invitar', () => {

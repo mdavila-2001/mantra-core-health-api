@@ -191,11 +191,15 @@ export class MedicalGroupsService {
       // adicionales del solicitante. `service.descriptionText` es lo más
       // cercano a un default hoy — `billing.service_catalog` todavía no
       // declara un campo de términos propio (ver known_gaps del carril).
+      // `description_text` llega `null` de la base cuando el servicio no tiene
+      // descripción (no `undefined`): sin este chequeo de tipo, `.trim()`
+      // reventaba con 500 y no se podía crear ningún grupo sobre ese servicio.
       const termsParts = [
         service.descriptionText,
         dto.additionalTermsText,
       ].filter(
-        (part): part is string => part !== undefined && part.trim().length > 0,
+        (part): part is string =>
+          typeof part === 'string' && part.trim().length > 0,
       );
       const termsText = termsParts.join('\n\n');
 
