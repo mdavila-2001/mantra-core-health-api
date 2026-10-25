@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `accounting`
 
-Referencia exhaustiva de 45 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 46 operación(es) del módulo `accounting`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `accounting-accruals`, `accounting-assets`, `accounting-cockpit`, `accounting-fiscal`, `accounting-fx`, `accounting-ledger`, `accounting-liabilities`, `accounting-practitioner`, `accounting-subledger`
 - **Controladores:** `AccountingAccrualController`, `AccountingAssetController`, `AccountingCockpitController`, `AccountingExchangeRateController`, `AccountingFiscalController`, `AccountingLedgerController`, `AccountingLiabilityController`, `AccountingPractitionerController`, `AccountingSubledgerController`
@@ -46,16 +46,17 @@ Referencia exhaustiva de 45 operación(es) del módulo `accounting`, derivada de
 33. [GET /accounting/practitioner/assets](#33-get-accounting-practitioner-assets) — Listar los activos propios de una práctica
 34. [POST /accounting/practitioner/assets](#34-post-accounting-practitioner-assets) — Dar de alta un activo propio
 35. [PATCH /accounting/practitioner/assets/{id}/automation](#35-patch-accounting-practitioner-assets-id-automation) — Prender o apagar la automatización de un activo
-36. [POST /accounting/practitioner/assets/{id}/progress](#36-post-accounting-practitioner-assets-id-progress) — Registrar el avance (depreciación) de un activo
-37. [POST /accounting/practitioner/consultation-income](#37-post-accounting-practitioner-consultation-income) — Registrar ingreso por consulta pagada
-38. [POST /accounting/practitioner/entries](#38-post-accounting-practitioner-entries) — Registrar un gasto u otro ingreso
-39. [GET /accounting/practitioner/liabilities](#39-get-accounting-practitioner-liabilities) — Listar los pasivos propios de una práctica
-40. [POST /accounting/practitioner/liabilities](#40-post-accounting-practitioner-liabilities) — Dar de alta un pasivo propio (préstamo)
-41. [PATCH /accounting/practitioner/liabilities/{id}/automation](#41-patch-accounting-practitioner-liabilities-id-automation) — Prender o apagar la automatización de un pasivo
-42. [POST /accounting/practitioner/liabilities/{id}/progress](#42-post-accounting-practitioner-liabilities-id-progress) — Registrar el avance (pago de cuota) de un pasivo
-43. [GET /accounting/practitioner/liabilities/{id}/schedule](#43-get-accounting-practitioner-liabilities-id-schedule) — Cronograma de cuotas de un pasivo propio
-44. [GET /accounting/practitioner/paid-consultations](#44-get-accounting-practitioner-paid-consultations) — Consultas pagadas sin registrar contablemente
-45. [GET /accounting/trial-balance](#45-get-accounting-trial-balance) — Balance de sumas y saldos
+36. [GET /accounting/practitioner/assets/{id}/depreciations](#36-get-accounting-practitioner-assets-id-depreciations) — Histórico de depreciación de un activo propio
+37. [POST /accounting/practitioner/assets/{id}/progress](#37-post-accounting-practitioner-assets-id-progress) — Registrar el avance (depreciación) de un activo
+38. [POST /accounting/practitioner/consultation-income](#38-post-accounting-practitioner-consultation-income) — Registrar ingreso por consulta pagada
+39. [POST /accounting/practitioner/entries](#39-post-accounting-practitioner-entries) — Registrar un gasto u otro ingreso
+40. [GET /accounting/practitioner/liabilities](#40-get-accounting-practitioner-liabilities) — Listar los pasivos propios de una práctica
+41. [POST /accounting/practitioner/liabilities](#41-post-accounting-practitioner-liabilities) — Dar de alta un pasivo propio (préstamo)
+42. [PATCH /accounting/practitioner/liabilities/{id}/automation](#42-patch-accounting-practitioner-liabilities-id-automation) — Prender o apagar la automatización de un pasivo
+43. [POST /accounting/practitioner/liabilities/{id}/progress](#43-post-accounting-practitioner-liabilities-id-progress) — Registrar el avance (pago de cuota) de un pasivo
+44. [GET /accounting/practitioner/liabilities/{id}/schedule](#44-get-accounting-practitioner-liabilities-id-schedule) — Cronograma de cuotas de un pasivo propio
+45. [GET /accounting/practitioner/paid-consultations](#45-get-accounting-practitioner-paid-consultations) — Consultas pagadas sin registrar contablemente
+46. [GET /accounting/trial-balance](#46-get-accounting-trial-balance) — Balance de sumas y saldos
 
 ---
 
@@ -5225,7 +5226,130 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /accounting/practitioner/assets/{id}/progress
+## 36. GET /accounting/practitioner/assets/{id}/depreciations
+
+- **Módulo:** `accounting`
+- **Etiqueta OpenAPI:** `accounting-practitioner`
+- **Nombre:** Histórico de depreciación de un activo propio
+- **Operation ID:** `AccountingPractitionerController_readAssetDepreciations`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccountingPractitionerController.readAssetDepreciations](../../src/modules/accounting/controllers/accounting-practitioner.controller.ts)
+
+### Descripción de negocio
+
+Una fila por período fiscal depreciado, en orden de registro, con el valor en libros que dejó. Sólo el profesional vinculado a la práctica del activo; un activo ajeno responde 422 y uno de otra organización, 404.
+
+Contexto declarado en el controlador: El histórico de depreciación de un activo propio (T26 · criterio 6).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /accounting/practitioner/assets/{id}/depreciations` en `AccountingPractitionerController_readAssetDepreciations`. El controlador delega en `PractitionerAccountingService.readAssetDepreciations`. No recibe body. El tipo de retorno estático es `Promise<AssetDepreciationHistoryResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /accounting/practitioner/assets/00000000-0000-4000-8000-000000000001/depreciations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /accounting/practitioner/assets/00000000-0000-4000-8000-000000000001/depreciations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AssetDepreciationHistoryResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssetDepreciationHistoryResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "assetId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "acquisitionCost": 5000,
+  "accumulatedDepreciation": 83.33,
+  "bookValue": 4916.67,
+  "depreciations": [
+    {}
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `assetId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `acquisitionCost` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `5000` |
+| `accumulatedDepreciation` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `83.33` |
+| `bookValue` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `4916.67` |
+| `depreciations` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{}]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Activo no encontrado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un perfil profesional asociado | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 422 | `PRECONDITION_FAILED` | El profesional no tiene una vinculación activa con esa práctica | Excepción explícita en src/modules/accounting/services/practitioner-accounting.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/accounting/practitioner/assets/{id}/depreciations"
+}
+```
+
+---
+
+## 37. POST /accounting/practitioner/assets/{id}/progress
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5365,7 +5489,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /accounting/practitioner/consultation-income
+## 38. POST /accounting/practitioner/consultation-income
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5526,7 +5650,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /accounting/practitioner/entries
+## 39. POST /accounting/practitioner/entries
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5685,7 +5809,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. GET /accounting/practitioner/liabilities
+## 40. GET /accounting/practitioner/liabilities
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5781,7 +5905,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /accounting/practitioner/liabilities
+## 41. POST /accounting/practitioner/liabilities
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -5935,7 +6059,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. PATCH /accounting/practitioner/liabilities/{id}/automation
+## 42. PATCH /accounting/practitioner/liabilities/{id}/automation
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6051,7 +6175,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. POST /accounting/practitioner/liabilities/{id}/progress
+## 43. POST /accounting/practitioner/liabilities/{id}/progress
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6193,7 +6317,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /accounting/practitioner/liabilities/{id}/schedule
+## 44. GET /accounting/practitioner/liabilities/{id}/schedule
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6316,7 +6440,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. GET /accounting/practitioner/paid-consultations
+## 45. GET /accounting/practitioner/paid-consultations
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-practitioner`
@@ -6445,7 +6569,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /accounting/trial-balance
+## 46. GET /accounting/trial-balance
 
 - **Módulo:** `accounting`
 - **Etiqueta OpenAPI:** `accounting-ledger`

@@ -10,16 +10,16 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [identity_assertions](#identity_assertions) | Registra afirmaciones de identidad verificadas para que otros procesos puedan consumir evidencia confiable de atributos. | 14 | 7 | 6 | COINCIDE |
-| [identity_authorities](#identity_authorities) | Cataloga autoridades que emiten identidades o credenciales usadas para verificar personas en procesos médicos. | 14 | 10 | 2 | COINCIDE |
+| [identity_assertions](#identity_assertions) | Registra afirmaciones de identidad verificadas para que otros procesos puedan consumir evidencia confiable de atributos. | 14 | 7 | 5 | COINCIDE |
+| [identity_authorities](#identity_authorities) | Cataloga autoridades que emiten identidades o credenciales usadas para verificar personas en procesos médicos. | 14 | 10 | 5 | COINCIDE |
 | [identity_authority_endpoints](#identity_authority_endpoints) | Registra endpoints de autoridades de identidad para consultar o verificar atributos con fuentes autorizadas. | 13 | 7 | 4 | COINCIDE |
 | [identity_check_results](#identity_check_results) | Conserva resultados de controles de identidad para explicar qué validaciones fueron satisfactorias o fallidas. | 11 | 4 | 8 | COINCIDE |
 | [identity_checks](#identity_checks) | Representa verificaciones individuales ejecutadas dentro de un caso de identidad. | 12 | 6 | 21 | COINCIDE |
 | [identity_evidence_records](#identity_evidence_records) | Cataloga evidencia presentada o consultada durante verificaciones para fundamentar sus resultados. | 14 | 8 | 15 | COINCIDE |
 | [identity_fraud_signals](#identity_fraud_signals) | Documenta señales de posible fraude de identidad para apoyar revisión de riesgo y protección de cuentas. | 11 | 6 | 4 | COINCIDE |
-| [identity_manual_review_cases](#identity_manual_review_cases) | Encola casos que requieren revisión humana cuando la verificación automática no resuelve la identidad con suficiente certeza. | 14 | 7 | 6 | COINCIDE |
+| [identity_manual_review_cases](#identity_manual_review_cases) | Encola casos que requieren revisión humana cuando la verificación automática no resuelve la identidad con suficiente certeza. | 14 | 7 | 5 | COINCIDE |
 | [identity_verification_attempts](#identity_verification_attempts) | Registra intentos de verificación para conservar métodos, tiempos y resultados parciales del proceso. | 13 | 7 | 13 | COINCIDE |
-| [identity_verification_cases](#identity_verification_cases) | Agrupa procesos de verificación de identidad para seguir su estado, sujeto y resultado. | 16 | 6 | 34 | COINCIDE |
+| [identity_verification_cases](#identity_verification_cases) | Agrupa procesos de verificación de identidad para seguir su estado, sujeto y resultado. | 16 | 6 | 39 | COINCIDE |
 | [identity_verification_policies](#identity_verification_policies) | Define políticas que determinan requisitos y métodos de verificación de identidad para personas usuarias o pacientes. | 15 | 8 | 2 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -156,7 +156,7 @@ Registra afirmaciones de identidad verificadas para que otros procesos puedan co
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_assertions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityAssertions` — `src/modules/identity_assurance/entities/identity_assertions.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -204,7 +204,6 @@ Registra afirmaciones de identidad verificadas para que otros procesos puedan co
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /identity/assertions/{id}/revoke | ACTUALIZA | POR_TIPO |
 | POST /identity/assertions/{id}/revoke | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | CREA | DIRECTA |
 | POST /identity/manual-review/{id}/decision | CREA | DIRECTA |
@@ -234,7 +233,7 @@ Cataloga autoridades que emiten identidades o credenciales usadas para verificar
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_authorities`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityAuthorities` — `src/modules/identity_assurance/entities/identity_authorities.entity.ts`
-- **Resumen:** 14 columnas · 10 índices · 8 FK salientes · 4 entrantes · 2 operaciones
+- **Resumen:** 14 columnas · 10 índices · 8 FK salientes · 4 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -299,6 +298,9 @@ Cataloga autoridades que emiten identidades o credenciales usadas para verificar
 |---|---|---|
 | POST /identity/authorities | CREA | DIRECTA |
 | POST /identity/authorities/{id}/endpoints | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/assertions | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/checks:plan | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/evidence | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -725,7 +727,7 @@ Encola casos que requieren revisión humana cuando la verificación automática 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_manual_review_cases`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityManualReviewCases` — `src/modules/identity_assurance/entities/identity_manual_review_cases.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -774,7 +776,6 @@ Encola casos que requieren revisión humana cuando la verificación automática 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /identity/manual-review/{id}/decision | ACTUALIZA | POR_TIPO |
 | POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | GET /identity/me/verification-cases | LEE | DIRECTA |
 | GET /identity/me/verification-cases/{caseId} | LEE | DIRECTA |
@@ -894,7 +895,7 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml: identity_verification_cases`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_27_identity_assurance.puml` · **DDL:** `SQL/27_identity_assurance/02_tables.sql`
 - **Entidad del ORM:** `IdentityVerificationCases` — `src/modules/identity_assurance/entities/identity_verification_cases.entity.ts`
-- **Resumen:** 16 columnas · 6 índices · 6 FK salientes · 7 entrantes · 34 operaciones
+- **Resumen:** 16 columnas · 6 índices · 6 FK salientes · 7 entrantes · 39 operaciones
 
 #### Columnas
 
@@ -950,8 +951,8 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /identity/assertions/{id}/revoke | ACTUALIZA | POR_TIPO |
 | POST /identity/assertions/{id}/revoke | LEE | DIRECTA |
+| POST /identity/checks/{id}/attempts | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
 | POST /identity/manual-review/{id}/decision | ACTUALIZA | POR_TIPO |
@@ -970,15 +971,20 @@ Agrupa procesos de verificación de identidad para seguir su estado, sujeto y re
 | GET /identity/verification-cases | LEE | DIRECTA |
 | POST /identity/verification-cases | CREA | DIRECTA |
 | GET /identity/verification-cases/{id} | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/assertions | ACTUALIZA | POR_TIPO |
 | POST /identity/verification-cases/{id}/assertions | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/checks:plan | ACTUALIZA | POR_TIPO |
 | POST /identity/verification-cases/{id}/checks:plan | LEE | DIRECTA |
 | POST /identity/verification-cases/{id}/evidence | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/fraud-signals | ACTUALIZA | POR_TIPO |
 | POST /identity/verification-cases/{id}/fraud-signals | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/manual-review | ACTUALIZA | POR_TIPO |
 | POST /identity/verification-cases/{id}/manual-review | LEE | DIRECTA |
-| POST /identity/verification-cases/expire-sweep | ACTUALIZA | POR_TIPO |
 | POST /identity/verification-cases/expire-sweep | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/attempts | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
+| GET /internal/identity/checks/dispatchable | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /internal/identity/evidence/storage-purge-review | LEE | DIRECTA |
 | DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | LEE | DIRECTA |
