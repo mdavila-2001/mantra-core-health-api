@@ -32,6 +32,9 @@ scrape_configs:
         action: drop
 
   - job_name: docker-state
+    # Inspeccionar ~120 contenedores uno por uno tarda ~15 s con el VPS cargado;
+    # con el timeout por defecto (10 s) el job quedaba down.
+    scrape_timeout: 25s
     static_configs:
       - targets: ["telegram-bot:9200"]
 
