@@ -6,6 +6,8 @@ import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { SeedBootstrapService } from './common/seed/seed-bootstrap.service';
+import { seedExitCode } from './common/seed/seed-exit-code';
+import { SchemaIntegrityState } from './orm';
 
 /**
  * Siembra los datos estructurales una sola vez y termina.
@@ -35,12 +37,22 @@ async function main(): Promise<void> {
 
   try {
     const summary = await app.get(SeedBootstrapService).run();
+    const integrity = app.get(SchemaIntegrityState);
+    if (!integrity.isComplete()) {
+      app
+        .get(Logger)
+        .error(
+          { blockingCount: integrity.current()?.blockingCount },
+          'El esquema quedó con incidencias de integridad bloqueantes',
+        );
+    }
     await app.close();
     // El código de salida es el contrato con quien lo invoca: un seed omitido
     // deja el catálogo incompleto, y un paso de despliegue que devuelve 0 con
     // el catálogo a medias es exactamente el silencio que este trabajo vino a
-    // sacar del medio.
-    process.exit(summary.failed > 0 ? 1 : 0);
+    // sacar del medio. Lo mismo vale para un esquema con FK o únicos críticos
+    // ausentes (ORMN-01): la API no debe arrancar sobre él.
+    process.exit(seedExitCode(summary.failed, integrity.isComplete()));
   } catch (error) {
     app
       .get(Logger)
