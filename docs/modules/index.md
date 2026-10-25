@@ -30,14 +30,14 @@
 | [`delegated_access`](delegated_access.md) | 5 | 6 | 8 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 9 | 12 | 10 | 13 |
 | [`profiles`](profiles.md) | 5 | 11 | 14 | 19 | 30 |
+| [`telemetry`](telemetry.md) | 5 | 6 | 16 | 14 | 12 |
 | [`geo`](geo.md) | 4 | 4 | 6 | 6 | 14 |
+| [`iam`](iam.md) | 4 | 16 | 13 | 14 | 24 |
 | [`integrations`](integrations.md) | 4 | 5 | 9 | 10 | 9 |
 | [`messaging`](messaging.md) | 4 | 4 | 4 | 22 | 3 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 6 | 6 | 8 |
-| [`telemetry`](telemetry.md) | 4 | 5 | 16 | 14 | 12 |
 | [`data_catalog`](data_catalog.md) | 3 | 7 | 3 | 13 | 4 |
 | [`directory`](directory.md) | 3 | 10 | 5 | 7 | 20 |
-| [`iam`](iam.md) | 3 | 15 | 13 | 14 | 24 |
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
 | [`pharmacy`](pharmacy.md) | 3 | 10 | 13 | 9 | 13 |
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
@@ -77,4 +77,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **282** | **454** | **430** | **1274** | **528** |
+| **Total** | **284** | **456** | **430** | **1274** | **528** |

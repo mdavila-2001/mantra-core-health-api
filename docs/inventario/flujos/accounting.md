@@ -3,12 +3,12 @@
 # Flujos del módulo `accounting`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 45 (44 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 46 (45 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [accounting](../endpoints/accounting.md)
 
 ## Proceso: Módulo 16 — Accounting (Libro Mayor y Subledgers)
 
-- **Código:** `accounting` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 45
+- **Código:** `accounting` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 46
 - **Actores:** ACCOUNTING_APPROVER · PRACTITIONER · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/accounting/README.md`
@@ -57,6 +57,7 @@ _Fuente: `src/modules/accounting/README.md:3`_
 | `ctrl:AccountingPractitionerController` | Operaciones de AccountingPractitionerController que el README no asigna a un caso de uso | GET /accounting/practitioner/assets | PRACTITIONER | BAJO | 3 |
 |  |  | POST /accounting/practitioner/assets | PRACTITIONER | MEDIO | 16 |
 |  |  | PATCH /accounting/practitioner/assets/{id}/automation | PRACTITIONER | MEDIO | 7 |
+|  |  | GET /accounting/practitioner/assets/{id}/depreciations | PRACTITIONER | BAJO | 5 |
 |  |  | POST /accounting/practitioner/assets/{id}/progress | PRACTITIONER | MEDIO | 15 |
 |  |  | POST /accounting/practitioner/consultation-income | PRACTITIONER | MEDIO | 23 |
 |  |  | POST /accounting/practitioner/entries | PRACTITIONER | MEDIO | 17 |
@@ -378,7 +379,7 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["PRACTITIONER"]):::actor
-  a42(["SECURITY_ADMIN"]):::actor
+  a43(["SECURITY_ADMIN"]):::actor
   t3[("accounting.accounts")]:::tabla
   t4[("accounting.assets")]:::tabla
   t5[("practice.practitioner_role_assignments")]:::tabla
@@ -389,47 +390,48 @@ flowchart LR
   t13[("iam.sessions")]:::tabla
   t14[("practice.practices")]:::tabla
   t17[("accounting.asset_depreciations")]:::tabla
-  t20[("accounting.cost_centers")]:::tabla
-  t21[("accounting.fiscal_periods")]:::tabla
-  t22[("accounting.fiscal_years")]:::tabla
-  t23[("accounting.journal_entry_assignments")]:::tabla
-  t24[("accounting.journal_transactions")]:::tabla
-  t29[("accounting.liabilities")]:::tabla
-  t31[("accounting.liability_schedules")]:::tabla
-  t38[("billing.invoices")]:::tabla
-  t39[("clinical.appointments")]:::tabla
-  t40[("clinical.encounters")]:::tabla
-  t43[("accounting.clearing_documents")]:::tabla
-  t44[("accounting.clearing_items")]:::tabla
-  t45[("accounting.company_bank_accounts")]:::tabla
-  t48[("accounting.ledger_entries")]:::tabla
-  t49[("accounting.open_items")]:::tabla
-  t50[("accounting.subledger_accounts")]:::tabla
+  t18[("accounting.fiscal_periods")]:::tabla
+  t22[("accounting.cost_centers")]:::tabla
+  t23[("accounting.fiscal_years")]:::tabla
+  t24[("accounting.journal_entry_assignments")]:::tabla
+  t25[("accounting.journal_transactions")]:::tabla
+  t30[("accounting.liabilities")]:::tabla
+  t32[("accounting.liability_schedules")]:::tabla
+  t39[("billing.invoices")]:::tabla
+  t40[("clinical.appointments")]:::tabla
+  t41[("clinical.encounters")]:::tabla
+  t44[("accounting.clearing_documents")]:::tabla
+  t45[("accounting.clearing_items")]:::tabla
+  t46[("accounting.company_bank_accounts")]:::tabla
+  t49[("accounting.ledger_entries")]:::tabla
+  t50[("accounting.open_items")]:::tabla
+  t51[("accounting.subledger_accounts")]:::tabla
   t10[("+10 tablas más")]
   t15[("+1 tablas más")]
-  t18[("+9 tablas más")]
-  t25[("+17 tablas más")]
-  t27[("+11 tablas más")]
-  t33[("+1 tablas más")]
-  t35[("+9 tablas más")]
+  t20[("+9 tablas más")]
+  t26[("+17 tablas más")]
+  t28[("+11 tablas más")]
+  t34[("+1 tablas más")]
+  t36[("+9 tablas más")]
   subgraph s0["ctrl:AccountingPractitionerController · Operaciones de AccountingPractitionerCo…"]
     o1["GET /accounting/practitioner/assets"]:::op
     o6["POST /accounting/practitioner/assets"]:::op
     o11["PATCH /accounting/practitioner/assets/{id}/automation"]:::op
-    o16["POST /accounting/practitioner/assets/{id}/progress"]:::op
-    o19["POST /accounting/practitioner/consultation-income"]:::op
-    o26["POST /accounting/practitioner/entries"]:::op
-    o28["GET /accounting/practitioner/liabilities"]:::op
-    o30["POST /accounting/practitioner/liabilities"]:::op
-    o32["PATCH /accounting/practitioner/liabilities/{id}/automation"]:::op
-    o34["POST /accounting/practitioner/liabilities/{id}/progress"]:::op
-    o36["GET /accounting/practitioner/liabilities/{id}/schedule"]:::op
-    o37["GET /accounting/practitioner/paid-consultations"]:::op
+    o16["GET /accounting/practitioner/assets/{id}/depreciations"]:::op
+    o19["POST /accounting/practitioner/assets/{id}/progress"]:::op
+    o21["POST /accounting/practitioner/consultation-income"]:::op
+    o27["POST /accounting/practitioner/entries"]:::op
+    o29["GET /accounting/practitioner/liabilities"]:::op
+    o31["POST /accounting/practitioner/liabilities"]:::op
+    o33["PATCH /accounting/practitioner/liabilities/{id}/automation"]:::op
+    o35["POST /accounting/practitioner/liabilities/{id}/progress"]:::op
+    o37["GET /accounting/practitioner/liabilities/{id}/schedule"]:::op
+    o38["GET /accounting/practitioner/paid-consultations"]:::op
   end
-  t46[("+9 tablas más")]
+  t47[("+9 tablas más")]
   subgraph s1["ctrl:AccountingSubledgerController · Operaciones de AccountingSubledgerControll…"]
-    o41["POST /accounting/clearing-documents"]:::op
-    o47["POST /accounting/open-items"]:::op
+    o42["POST /accounting/clearing-documents"]:::op
+    o48["POST /accounting/open-items"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -452,81 +454,87 @@ flowchart LR
   o11 -->|"LEE"| t14
   o11 -.-> t15
   a2 --> o16
-  o16 -->|"LEE"| t3
-  o16 -->|"CREA"| t17
   o16 -->|"LEE"| t17
-  o16 -->|"CREA"| t8
-  o16 -->|"ACTUALIZA"| t4
   o16 -->|"LEE"| t4
-  o16 -.-> t18
+  o16 -->|"LEE"| t18
+  o16 -->|"LEE"| t14
+  o16 -->|"LEE"| t5
   a2 --> o19
   o19 -->|"LEE"| t3
-  o19 -->|"LEE"| t20
-  o19 -->|"LEE"| t21
-  o19 -->|"LEE"| t22
-  o19 -->|"CREA"| t23
-  o19 -->|"CREA"| t24
-  o19 -.-> t25
-  a2 --> o26
-  o26 -->|"LEE"| t3
-  o26 -->|"LEE"| t20
-  o26 -->|"LEE"| t21
-  o26 -->|"LEE"| t22
-  o26 -->|"CREA"| t23
-  o26 -->|"CREA"| t24
-  o26 -.-> t27
-  a2 --> o28
-  o28 -->|"LEE"| t3
-  o28 -->|"LEE"| t29
-  o28 -->|"LEE"| t5
-  a2 --> o30
-  o30 -->|"LEE"| t3
-  o30 -->|"CREA"| t29
-  o30 -->|"LEE"| t29
-  o30 -->|"CREA"| t31
-  o30 -->|"LEE"| t14
-  o30 -->|"LEE"| t5
-  a2 --> o32
-  o32 -->|"ACTUALIZA"| t29
-  o32 -->|"LEE"| t29
-  o32 -->|"CREA"| t12
-  o32 -->|"LEE"| t12
-  o32 -->|"LEE"| t13
-  o32 -->|"LEE"| t14
-  o32 -.-> t33
-  a2 --> o34
-  o34 -->|"LEE"| t3
-  o34 -->|"LEE"| t20
-  o34 -->|"LEE"| t21
-  o34 -->|"LEE"| t22
-  o34 -->|"CREA"| t23
-  o34 -->|"CREA"| t24
-  o34 -.-> t35
-  a2 --> o36
-  o36 -->|"LEE"| t3
-  o36 -->|"LEE"| t29
-  o36 -->|"LEE"| t31
-  o36 -->|"LEE"| t14
-  o36 -->|"LEE"| t5
+  o19 -->|"CREA"| t17
+  o19 -->|"LEE"| t17
+  o19 -->|"CREA"| t8
+  o19 -->|"ACTUALIZA"| t4
+  o19 -->|"LEE"| t4
+  o19 -.-> t20
+  a2 --> o21
+  o21 -->|"LEE"| t3
+  o21 -->|"LEE"| t22
+  o21 -->|"LEE"| t18
+  o21 -->|"LEE"| t23
+  o21 -->|"CREA"| t24
+  o21 -->|"CREA"| t25
+  o21 -.-> t26
+  a2 --> o27
+  o27 -->|"LEE"| t3
+  o27 -->|"LEE"| t22
+  o27 -->|"LEE"| t18
+  o27 -->|"LEE"| t23
+  o27 -->|"CREA"| t24
+  o27 -->|"CREA"| t25
+  o27 -.-> t28
+  a2 --> o29
+  o29 -->|"LEE"| t3
+  o29 -->|"LEE"| t30
+  o29 -->|"LEE"| t5
+  a2 --> o31
+  o31 -->|"LEE"| t3
+  o31 -->|"CREA"| t30
+  o31 -->|"LEE"| t30
+  o31 -->|"CREA"| t32
+  o31 -->|"LEE"| t14
+  o31 -->|"LEE"| t5
+  a2 --> o33
+  o33 -->|"ACTUALIZA"| t30
+  o33 -->|"LEE"| t30
+  o33 -->|"CREA"| t12
+  o33 -->|"LEE"| t12
+  o33 -->|"LEE"| t13
+  o33 -->|"LEE"| t14
+  o33 -.-> t34
+  a2 --> o35
+  o35 -->|"LEE"| t3
+  o35 -->|"LEE"| t22
+  o35 -->|"LEE"| t18
+  o35 -->|"LEE"| t23
+  o35 -->|"CREA"| t24
+  o35 -->|"CREA"| t25
+  o35 -.-> t36
   a2 --> o37
-  o37 -->|"LEE"| t38
-  o37 -->|"LEE"| t39
-  o37 -->|"LEE"| t40
+  o37 -->|"LEE"| t3
+  o37 -->|"LEE"| t30
+  o37 -->|"LEE"| t32
+  o37 -->|"LEE"| t14
   o37 -->|"LEE"| t5
-  a42 --> o41
-  o41 -->|"LEE"| t3
-  o41 -->|"CREA"| t43
-  o41 -->|"LEE"| t43
-  o41 -->|"CREA"| t44
-  o41 -->|"LEE"| t45
-  o41 -->|"LEE"| t20
-  o41 -.-> t46
-  a42 --> o47
-  o47 -->|"LEE"| t24
-  o47 -->|"LEE"| t48
-  o47 -->|"CREA"| t49
-  o47 -->|"LEE"| t50
-  o47 -->|"LEE"| t14
+  a2 --> o38
+  o38 -->|"LEE"| t39
+  o38 -->|"LEE"| t40
+  o38 -->|"LEE"| t41
+  o38 -->|"LEE"| t5
+  a43 --> o42
+  o42 -->|"LEE"| t3
+  o42 -->|"CREA"| t44
+  o42 -->|"LEE"| t44
+  o42 -->|"CREA"| t45
+  o42 -->|"LEE"| t46
+  o42 -->|"LEE"| t22
+  o42 -.-> t47
+  a43 --> o48
+  o48 -->|"LEE"| t25
+  o48 -->|"LEE"| t49
+  o48 -->|"CREA"| t50
+  o48 -->|"LEE"| t51
+  o48 -->|"LEE"| t14
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -3188,7 +3196,70 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. POST /accounting/practitioner/assets/{id}/progress
+#### 35. GET /accounting/practitioner/assets/{id}/depreciations
+
+Histórico de depreciación de un activo propio
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Activo no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: El profesional no tiene una vinculación activa con esa práctica |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAccountingService.readAssetDepreciations"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerAccountingService.assertOwnsAsset"]:::llamada
+  n3 --> n4
+  n5["Llama a AssetRepository.findById"]:::llamada
+  n4 --> n5
+  n6[("LEE accounting.assets")]:::efecto
+  n5 --> n6
+  n7["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n6 --> n7
+  n8{"!actor.practitionerProfileId"}:::decision
+  n7 --> n8
+  n9(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n8 -->|"sí"| n9
+  n10{"!practiceIds.includes(practiceId)"}:::decision
+  n8 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a AssetRepository.findById"]:::llamada
+  n10 -->|"no"| n12
+  n13[("LEE accounting.assets")]:::efecto
+  n12 --> n13
+  n14{"!asset"}:::decision
+  n13 --> n14
+  n15(["404 NOT_FOUND Activo no encontrado"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a AssetRepository.listDepreciations"]:::llamada
+  n14 -->|"no"| n16
+  n17[("LEE accounting.asset_depreciations")]:::efecto
+  n16 --> n17
+  n18["Llama a FiscalRepository.findPeriodsByIds"]:::llamada
+  n17 --> n18
+  n19[("LEE accounting.fiscal_periods")]:::efecto
+  n18 --> n19
+  n20(("200 Responde con éxito")):::ok
+  n19 --> n20
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 36. POST /accounting/practitioner/assets/{id}/progress
 
 Registrar el avance (depreciación) de un activo
 
@@ -3300,7 +3371,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. POST /accounting/practitioner/consultation-income
+#### 37. POST /accounting/practitioner/consultation-income
 
 Registrar ingreso por consulta pagada
 
@@ -3471,7 +3542,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. POST /accounting/practitioner/entries
+#### 38. POST /accounting/practitioner/entries
 
 Registrar un gasto u otro ingreso
 
@@ -3639,7 +3710,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. GET /accounting/practitioner/liabilities
+#### 39. GET /accounting/practitioner/liabilities
 
 Listar los pasivos propios de una práctica
 
@@ -3695,7 +3766,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. POST /accounting/practitioner/liabilities
+#### 40. POST /accounting/practitioner/liabilities
 
 Dar de alta un pasivo propio (préstamo)
 
@@ -3772,7 +3843,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 40. PATCH /accounting/practitioner/liabilities/{id}/automation
+#### 41. PATCH /accounting/practitioner/liabilities/{id}/automation
 
 Prender o apagar la automatización de un pasivo
 
@@ -3839,7 +3910,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 41. POST /accounting/practitioner/liabilities/{id}/progress
+#### 42. POST /accounting/practitioner/liabilities/{id}/progress
 
 Registrar el avance (pago de cuota) de un pasivo
 
@@ -3981,7 +4052,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. GET /accounting/practitioner/liabilities/{id}/schedule
+#### 43. GET /accounting/practitioner/liabilities/{id}/schedule
 
 Cronograma de cuotas de un pasivo propio
 
@@ -4046,7 +4117,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 43. GET /accounting/practitioner/paid-consultations
+#### 44. GET /accounting/practitioner/paid-consultations
 
 Consultas pagadas sin registrar contablemente
 
@@ -4094,7 +4165,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 44. GET /accounting/trial-balance
+#### 45. GET /accounting/trial-balance
 
 Balance de sumas y saldos
 

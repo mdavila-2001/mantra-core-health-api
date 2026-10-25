@@ -3,7 +3,7 @@
 # Endpoints del módulo `clinical`
 
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
-- **Operaciones:** 41 (40 en el contrato, 1 sólo en el código)
+- **Operaciones:** 41 (41 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 1 · MEDIO 30 · BAJO 10
 - **Tablas distintas que tocan:** 85
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/clinical.md` (generado aparte por `yarn docs:endpoints:generate`)
@@ -42,7 +42,7 @@
 | 28 | POST | `/clinical/medication-requests/{id}/sign` | Firmar una receta en borrador (DRAFT) | MEDIO | 24 | CLINICIAN, PRACTITIONER |
 | 29 | POST | `/clinical/observations` | Registrar una observación con componentes y ejecutantes | MEDIO | 7 | CLINICIAN, PRACTITIONER |
 | 30 | PATCH | `/clinical/observations/{id}/amend` | Corregir/enmendar una observación (value contract) | MEDIO | 20 | CLINICIAN, PRACTITIONER |
-| 31 | GET | `/clinical/patients/{patientProfileId}/received-services` | Servicios que el paciente recibió: intervenciones médicas realizadas y vacunas. Es la pestaña «Servicios recibidos» de la historia. El estudio de laboratorio y la imagenología no entran: viven en «Resultados». La política de acceso es la del resumen (`ClinicalRecordAccessGuard`) y la lectura deja su asiento en `audit.data_access_log` antes de ejecutarse (`@AccessLogged`). | BAJO | 6 | CLINICIAN, PRACTITIONER, PATIENT |
+| 31 | GET | `/clinical/patients/{patientProfileId}/received-services` | Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas | BAJO | 6 | CLINICIAN, PRACTITIONER, PATIENT |
 | 32 | GET | `/clinical/patients/{patientProfileId}/summary` | UC-39-20: historial clínico del paciente (condiciones, alergias, medicación, observaciones, encuentros) | MEDIO | 9 | CLINICIAN, PRACTITIONER, PATIENT |
 | 33 | GET | `/clinical/prescription-signature-policies` | Listar las políticas de firma de un tenant | BAJO | 1 | CLINICIAN, SECURITY_ADMIN |
 | 34 | POST | `/clinical/prescription-signature-policies` | Crear una política de firma de receta | MEDIO | 1 | CLINICIAN, SECURITY_ADMIN |
@@ -3877,8 +3877,8 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 
 ## 31. GET /clinical/patients/{patientProfileId}/received-services
 
-- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
-- **Nombre:** Servicios que el paciente recibió: intervenciones médicas realizadas y vacunas. Es la pestaña «Servicios recibidos» de la historia. El estudio de laboratorio y la imagenología no entran: viven en «Resultados». La política de acceso es la del resumen (`ClinicalRecordAccessGuard`) y la lectura deja su asiento en `audit.data_access_log` antes de ejecutarse (`@AccessLogged`).
+- **Origen:** CONTRATO
+- **Nombre:** Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas
 - **Bloque:** Clínico y Diagnóstico
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
@@ -3886,7 +3886,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 
 ### Qué es y para qué sirve (negocio)
 
-Servicios que el paciente recibió: intervenciones médicas realizadas y vacunas. Es la pestaña «Servicios recibidos» de la historia. El estudio de laboratorio y la imagenología no entran: viven en «Resultados». La política de acceso es la del resumen (`ClinicalRecordAccessGuard`) y la lectura deja su asiento en `audit.data_access_log` antes de ejecutarse (`@AccessLogged`). Dominio: Clínico y Diagnóstico.
+Servicios recibidos del paciente: intervenciones médicas realizadas y vacunas. Dominio: Clínico y Diagnóstico.
 
 _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 
@@ -3920,7 +3920,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Nombre | En | Obligatorio | Tipo | Descripción |
 |---|---|---|---|---|
 | `patientProfileId` | path | Sí | `string` | — |
-| `limit` | query | sin dato | `number` | — |
+| `limit` | query | No | `number` | Tope de la lista (por defecto 50) |
 
 ### Cuerpo
 
