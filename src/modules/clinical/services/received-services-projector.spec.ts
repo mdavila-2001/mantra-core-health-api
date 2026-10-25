@@ -12,6 +12,8 @@ function build() {
   const repository = {
     upsert: mockFn().mockResolvedValue({}),
     findCaseByPrimaryProcedure: mockFn().mockResolvedValue(null),
+    // Por defecto el procedimiento citado es del paciente del caso.
+    isProcedureOf: mockFn().mockResolvedValue(true),
   };
   return {
     projector: new ReceivedServicesProjector(repository as any),
@@ -92,6 +94,8 @@ describe('ReceivedServicesProjector', () => {
       const d = build();
       d.repository.findCaseByPrimaryProcedure.mockResolvedValue({
         id: 'case-1',
+        patientProfileId: 'patient-1',
+        custodianTenantId: 'tenant-1',
       });
       await d.projector.projectProcedure(tx, procedure());
       expect(d.repository.upsert).toHaveBeenCalledWith(
@@ -101,6 +105,34 @@ describe('ReceivedServicesProjector', () => {
           procedureCaseId: 'case-1',
         }),
       );
+    });
+  });
+
+  describe('un caso de otro paciente nunca se mezcla', () => {
+    it('ignora un caso que apunta a este procedimiento pero es de otro paciente', async () => {
+      const d = build();
+      d.repository.findCaseByPrimaryProcedure.mockResolvedValue({
+        id: 'case-ajeno',
+        patientProfileId: 'otro-paciente',
+        custodianTenantId: 'tenant-1',
+      });
+      await d.projector.projectProcedure(tx, procedure());
+      expect(
+        d.repository.upsert.mock.calls[0][1].procedureCaseId,
+      ).toBeUndefined();
+    });
+
+    it('ignora un caso de otro tenant aunque el paciente coincida', async () => {
+      const d = build();
+      d.repository.findCaseByPrimaryProcedure.mockResolvedValue({
+        id: 'case-ajeno',
+        patientProfileId: 'patient-1',
+        custodianTenantId: 'otro-tenant',
+      });
+      await d.projector.projectProcedure(tx, procedure());
+      expect(
+        d.repository.upsert.mock.calls[0][1].procedureCaseId,
+      ).toBeUndefined();
     });
   });
 
@@ -197,6 +229,45 @@ describe('ReceivedServicesProjector', () => {
           procedureCaseId: 'case-1',
           serviceConceptId: 'type-1',
         }),
+      );
+    });
+
+    it('no enlaza el procedimiento del informe si es de otro paciente: el caso es su propio servicio', async () => {
+      const d = build();
+      d.repository.isProcedureOf.mockResolvedValue(false);
+      await d.projector.projectCompletedCase(
+        tx,
+        surgicalCase(),
+        'user-1',
+        'proc-de-otro-paciente',
+      );
+      expect(d.repository.isProcedureOf).toHaveBeenCalledWith(
+        tx,
+        'proc-de-otro-paciente',
+        'patient-1',
+        'tenant-1',
+      );
+      expect(d.repository.upsert.mock.calls[0][1]).toEqual(
+        expect.objectContaining({
+          sourceProcedureId: undefined,
+          procedureCaseId: 'case-1',
+        }),
+      );
+    });
+
+    it('si el principal es ajeno pero el del informe es propio, enlaza el propio', async () => {
+      const d = build();
+      d.repository.isProcedureOf.mockImplementation(
+        async (_em: unknown, id: string) => id === 'proc-propio',
+      );
+      await d.projector.projectCompletedCase(
+        tx,
+        surgicalCase({ primaryProcedureId: 'proc-ajeno' }),
+        'user-1',
+        'proc-propio',
+      );
+      expect(d.repository.upsert.mock.calls[0][1].sourceProcedureId).toBe(
+        'proc-propio',
       );
     });
 

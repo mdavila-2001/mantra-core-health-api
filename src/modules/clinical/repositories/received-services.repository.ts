@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { ReceivedServices } from '../entities';
+import { Procedures, ReceivedServices } from '../entities';
 import { createdBy, touch } from '../../../common';
 import { InvoiceLines } from '../../billing/entities/invoice_lines.entity';
 import { Invoices } from '../../billing/entities/invoices.entity';
+import { PracticeSites } from '../../practice/entities/practice_sites.entity';
+import { findPractitionerNames } from '../../profiles/infrastructure/read-models/practitioner-names';
 import { ProcedureCases } from '../../procedures_perioperative/entities/procedure_cases.entity';
 import { ProcedureChargeItems } from '../../procedures_perioperative/entities/procedure_charge_items.entity';
 
@@ -84,28 +86,48 @@ export class ReceivedServicesRepository {
   async upsert(
     em: EntityManager,
     data: UpsertReceivedServiceData,
-  ): Promise<ReceivedServices> {
+  ): Promise<ReceivedServices | null> {
     // Un caso M53 y su procedimiento principal son UN servicio: la fila puede haber
     // nacido por cualquiera de los dos orígenes, así que se busca por los tres.
-    const existing =
-      (data.sourceProcedureId
-        ? await this.findBySourceProcedure(em, data.sourceProcedureId)
-        : null) ??
-      (data.sourceImmunizationId
-        ? await this.findBySourceImmunization(em, data.sourceImmunizationId)
-        : null) ??
-      (data.procedureCaseId
-        ? await this.findByProcedureCase(em, data.procedureCaseId)
-        : null);
+    const [byProcedure, byImmunization, byCase] = await Promise.all([
+      data.sourceProcedureId
+        ? this.findBySourceProcedure(em, data.sourceProcedureId)
+        : null,
+      data.sourceImmunizationId
+        ? this.findBySourceImmunization(em, data.sourceImmunizationId)
+        : null,
+      data.procedureCaseId
+        ? this.findByProcedureCase(em, data.procedureCaseId)
+        : null,
+    ]);
+
+    // Un id de origen puede venir de un cliente (el procedimiento que cita un
+    // informe operatorio) y apuntar a la fila de OTRO paciente. Esa fila no se toca
+    // ni se reutiliza su origen: el servicio de un paciente nunca se pisa con el de
+    // otro, y el índice único de origen impediría crear uno propio con ese id.
+    const own = (row: ReceivedServices | null): ReceivedServices | null =>
+      row &&
+      row.patientProfileId === data.patientProfileId &&
+      row.custodianTenantId === data.custodianTenantId
+        ? row
+        : null;
+    const sourceProcedureId =
+      byProcedure && !own(byProcedure) ? undefined : data.sourceProcedureId;
+    const sourceImmunizationId =
+      byImmunization && !own(byImmunization)
+        ? undefined
+        : data.sourceImmunizationId;
+    const procedureCaseId =
+      byCase && !own(byCase) ? undefined : data.procedureCaseId;
+    const existing = own(byProcedure) ?? own(byImmunization) ?? own(byCase);
 
     if (existing) {
       existing.statusConceptId = data.statusConceptId;
       existing.serviceConceptId = data.serviceConceptId;
       existing.sourceProcedureId =
-        existing.sourceProcedureId ?? data.sourceProcedureId;
+        existing.sourceProcedureId ?? sourceProcedureId;
       existing.encounterId = data.encounterId ?? existing.encounterId;
-      existing.procedureCaseId =
-        data.procedureCaseId ?? existing.procedureCaseId;
+      existing.procedureCaseId = existing.procedureCaseId ?? procedureCaseId;
       existing.performerProfileId =
         data.performerProfileId ?? existing.performerProfileId;
       existing.practiceSiteId = data.practiceSiteId ?? existing.practiceSiteId;
@@ -116,6 +138,11 @@ export class ReceivedServicesRepository {
       return touch(existing, data.actorUserId);
     }
 
+    // Sin ningún origen propio no hay servicio que proyectar (el CHECK de la tabla
+    // lo exige): todos los orígenes que llegaron eran de otro paciente.
+    if (!sourceProcedureId && !sourceImmunizationId && !procedureCaseId)
+      return null;
+
     return em.create(
       ReceivedServices,
       {
@@ -125,9 +152,9 @@ export class ReceivedServicesRepository {
         serviceTypeConceptId: data.serviceTypeConceptId,
         serviceConceptId: data.serviceConceptId,
         statusConceptId: data.statusConceptId,
-        sourceProcedureId: data.sourceProcedureId,
-        sourceImmunizationId: data.sourceImmunizationId,
-        procedureCaseId: data.procedureCaseId,
+        sourceProcedureId,
+        sourceImmunizationId,
+        procedureCaseId,
         performerProfileId: data.performerProfileId,
         practiceSiteId: data.practiceSiteId,
         performedAt: data.performedAt,
@@ -136,6 +163,22 @@ export class ReceivedServicesRepository {
         ...createdBy(data.actorUserId),
       },
       { partial: true },
+    );
+  }
+
+  /** Si el procedimiento existe y es de este paciente y de este tenant. */
+  async isProcedureOf(
+    em: EntityManager,
+    procedureId: string,
+    patientProfileId: string,
+    custodianTenantId: string,
+  ): Promise<boolean> {
+    return (
+      (await em.count(Procedures, {
+        id: procedureId,
+        patientProfileId,
+        custodianTenantId,
+      })) > 0
     );
   }
 
@@ -156,9 +199,14 @@ export class ReceivedServicesRepository {
     );
   }
 
-  /** Cargos de los casos o procedimientos indicados (pertenecen al paciente que ya se filtró). */
+  /**
+   * Cargos de los casos o procedimientos indicados, SOLO los de casos de este
+   * paciente: el cargo no guarda al paciente, lo guarda el caso, y un id de caso o
+   * de procedimiento mal enlazado no debe traer el cobro de otra persona.
+   */
   async findChargeLines(
     em: EntityManager,
+    patientProfileId: string,
     procedureCaseIds: readonly string[],
     procedureIds: readonly string[],
   ): Promise<ChargeLine[]> {
@@ -169,13 +217,46 @@ export class ReceivedServicesRepository {
       or.push({ procedureId: { $in: [...procedureIds] } });
     if (!or.length) return [];
     const rows = await em.find(ProcedureChargeItems, { $or: or });
-    return rows.map((row) => ({
-      procedureCaseId: row.procedureCaseId,
-      procedureId: row.procedureId,
-      quantity: row.quantity,
-      unitPrice: row.unitPrice,
-      currencyCode: row.currencyCode,
-    }));
+    if (!rows.length) return [];
+    const ownCases = await em.find(
+      ProcedureCases,
+      {
+        id: { $in: [...new Set(rows.map((row) => row.procedureCaseId))] },
+        patientProfileId,
+      },
+      { fields: ['id'] },
+    );
+    const ownCaseIds = new Set(ownCases.map((row) => row.id));
+    return rows
+      .filter((row) => ownCaseIds.has(row.procedureCaseId))
+      .map((row) => ({
+        procedureCaseId: row.procedureCaseId,
+        procedureId: row.procedureId,
+        quantity: row.quantity,
+        unitPrice: row.unitPrice,
+        currencyCode: row.currencyCode,
+      }));
+  }
+
+  /**
+   * Nombre de cada profesional. La ausencia es un estado real: el perfil puede no
+   * tener persona o la persona no tener nombre, y el mapa no inventa uno.
+   */
+  findPerformerNames(
+    em: EntityManager,
+    profileIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    return findPractitionerNames(em, profileIds);
+  }
+
+  /** Nombre de cada sede por id. */
+  async findSiteNames(
+    em: EntityManager,
+    siteIds: readonly string[],
+  ): Promise<Map<string, string>> {
+    if (!siteIds.length) return new Map();
+    const sites = await em.find(PracticeSites, { id: { $in: [...siteIds] } });
+    return new Map(sites.map((site) => [site.id, site.name]));
   }
 
   /** Total de cada línea de factura enlazada y la moneda de su factura. */

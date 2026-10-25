@@ -36,10 +36,18 @@ export class ReceivedServicesProjector {
     actorUserId?: string,
   ): Promise<void> {
     if (procedure.statusConceptId !== CLIN.PROCEDURE_COMPLETED) return;
-    const procedureCase = await this.repository.findCaseByPrimaryProcedure(
+    const foundCase = await this.repository.findCaseByPrimaryProcedure(
       em,
       procedure.id,
     );
+    // El caso lo creó un cliente con `primaryProcedureId` sin cruzarlo con el
+    // paciente: un caso de otra persona no se mezcla con este servicio.
+    const procedureCase =
+      foundCase &&
+      foundCase.patientProfileId === procedure.patientProfileId &&
+      foundCase.custodianTenantId === procedure.custodianTenantId
+        ? foundCase
+        : null;
     await this.repository.upsert(em, {
       custodianTenantId: procedure.custodianTenantId,
       patientProfileId: procedure.patientProfileId,
@@ -98,6 +106,28 @@ export class ReceivedServicesProjector {
     reportedProcedureId?: string,
   ): Promise<void> {
     if (procedureCase.statusConceptId !== CONCEPTS.CASE_COMPLETED) return;
+    // Los dos ids de procedimiento los carga un cliente (al crear el caso y al
+    // redactar el informe) y nadie los cruzó con el paciente del caso. Solo se
+    // enlaza el que existe y es de este paciente y de este tenant; con uno ajeno el
+    // caso queda como su propio servicio y la fila de otro paciente no se toca.
+    let sourceProcedureId: string | undefined;
+    for (const candidate of [
+      procedureCase.primaryProcedureId,
+      reportedProcedureId,
+    ]) {
+      if (
+        candidate &&
+        (await this.repository.isProcedureOf(
+          em,
+          candidate,
+          procedureCase.patientProfileId,
+          procedureCase.custodianTenantId,
+        ))
+      ) {
+        sourceProcedureId = candidate;
+        break;
+      }
+    }
     await this.repository.upsert(em, {
       custodianTenantId: procedureCase.custodianTenantId,
       patientProfileId: procedureCase.patientProfileId,
@@ -105,8 +135,7 @@ export class ReceivedServicesProjector {
       serviceTypeConceptId: CLIN.RECEIVED_SERVICE_INTERVENTION,
       serviceConceptId: procedureCase.caseTypeConceptId,
       statusConceptId: procedureCase.statusConceptId,
-      sourceProcedureId:
-        procedureCase.primaryProcedureId ?? reportedProcedureId,
+      sourceProcedureId,
       procedureCaseId: procedureCase.id,
       performerProfileId: procedureCase.primarySurgeonProfileId,
       practiceSiteId: procedureCase.practiceSiteId,

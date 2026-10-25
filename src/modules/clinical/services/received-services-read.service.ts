@@ -87,16 +87,29 @@ export class ReceivedServicesReadService {
     const truncated = rows.length > limit;
     const page = truncated ? rows.slice(0, limit) : rows;
 
+    const [performerNames, siteNames] = await Promise.all([
+      this.repository.findPerformerNames(
+        em,
+        unique(page.map((row) => row.performerProfileId)),
+      ),
+      this.repository.findSiteNames(
+        em,
+        unique(page.map((row) => row.practiceSiteId)),
+      ),
+    ]);
+
     const costsVisible = !actor.roles.some((role) =>
       ROLES_THAT_DO_NOT_SEE_COSTS.includes(role),
     );
     const costs = costsVisible
-      ? await this.costsOf(em, page)
+      ? await this.costsOf(em, patientProfileId, page)
       : new Map<string, ReceivedServiceCostDto>();
 
     return {
       patientProfileId,
-      items: page.map((row) => this.toItem(row, costs.get(row.id) ?? null)),
+      items: page.map((row) =>
+        this.toItem(row, costs.get(row.id) ?? null, performerNames, siteNames),
+      ),
       limit,
       truncated,
       costsVisible,
@@ -106,6 +119,8 @@ export class ReceivedServicesReadService {
   private toItem(
     row: ReceivedServices,
     cost: ReceivedServiceCostDto | null,
+    performerNames: ReadonlyMap<string, string>,
+    siteNames: ReadonlyMap<string, string>,
   ): ReceivedServiceItemDto {
     return {
       id: row.id,
@@ -115,7 +130,13 @@ export class ReceivedServicesReadService {
       statusConceptId: row.statusConceptId,
       performedAt: row.performedAt,
       performerProfileId: row.performerProfileId,
+      performerName: row.performerProfileId
+        ? performerNames.get(row.performerProfileId)
+        : undefined,
       practiceSiteId: row.practiceSiteId,
+      practiceSiteName: row.practiceSiteId
+        ? siteNames.get(row.practiceSiteId)
+        : undefined,
       encounterId: row.encounterId,
       outcomeConceptId: row.outcomeConceptId,
       resultText: row.resultText,
@@ -131,6 +152,7 @@ export class ReceivedServicesReadService {
    */
   private async costsOf(
     em: EntityManager,
+    patientProfileId: string,
     rows: readonly ReceivedServices[],
   ): Promise<Map<string, ReceivedServiceCostDto>> {
     const result = new Map<string, ReceivedServiceCostDto>();
@@ -152,6 +174,7 @@ export class ReceivedServicesReadService {
 
     const charges = await this.repository.findChargeLines(
       em,
+      patientProfileId,
       withoutInvoice.flatMap((row) =>
         row.procedureCaseId ? [row.procedureCaseId] : [],
       ),
@@ -172,6 +195,10 @@ export class ReceivedServicesReadService {
     }
     return result;
   }
+}
+
+function unique(ids: readonly (string | undefined)[]): string[] {
+  return [...new Set(ids.filter((id): id is string => !!id))];
 }
 
 function typeOf(conceptId: string): ReceivedServiceType {

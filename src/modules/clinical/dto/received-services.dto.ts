@@ -57,9 +57,20 @@ export class ReceivedServiceItemDto {
   @ApiPropertyOptional({ format: 'uuid' })
   performerProfileId?: string;
 
+  /**
+   * Nombre del profesional, ya resuelto: el paciente no puede leer el padrón de
+   * profesionales, así que no podría resolverlo desde `performerProfileId`.
+   */
+  @ApiPropertyOptional()
+  performerName?: string;
+
   /** Sede donde se realizó. */
   @ApiPropertyOptional({ format: 'uuid' })
   practiceSiteId?: string;
+
+  /** Nombre de la sede, ya resuelto. */
+  @ApiPropertyOptional()
+  practiceSiteName?: string;
 
   /** Atención en la que ocurrió. */
   @ApiPropertyOptional({ format: 'uuid' })
