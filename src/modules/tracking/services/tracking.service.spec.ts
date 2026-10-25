@@ -9,12 +9,15 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
 import { TrackingService } from './tracking.service';
+import { carrierSignedString } from '../tracking-webhook-auth';
 import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  UnauthorizedException,
   runWithTenant,
+  signPayload,
 } from '../../../common';
 import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { TrackingErrorReason } from '../tracking.error-reasons';
@@ -466,6 +469,23 @@ describe('TrackingService', () => {
   });
 
   describe('ingestCarrierWebhook (UC-37-05)', () => {
+    const SECRET = 'c'.repeat(40);
+    const ENV_NAME = 'WEBHOOK_SECRET_CARRIER_DHL';
+    const originalSecret = process.env[ENV_NAME];
+    const originalPrev = process.env[`${ENV_NAME}_PREV`];
+
+    beforeEach(() => {
+      process.env[ENV_NAME] = SECRET;
+      delete process.env[`${ENV_NAME}_PREV`];
+    });
+
+    afterEach(() => {
+      if (originalSecret === undefined) delete process.env[ENV_NAME];
+      else process.env[ENV_NAME] = originalSecret;
+      if (originalPrev === undefined) delete process.env[`${ENV_NAME}_PREV`];
+      else process.env[`${ENV_NAME}_PREV`] = originalPrev;
+    });
+
     /**
      * Ejecuta la operación dto.
      *
@@ -481,6 +501,24 @@ describe('TrackingService', () => {
       };
     }
 
+    /** Cabeceras que enviaría el transportista para `body`, firmadas con `secret`. */
+    function signed(
+      body: any,
+      {
+        secret = SECRET,
+        carrierCode = 'DHL',
+        timestamp = String(Math.floor(Date.now() / 1000)),
+      }: { secret?: string; carrierCode?: string; timestamp?: string } = {},
+    ) {
+      return {
+        timestamp,
+        signature: signPayload(
+          secret,
+          carrierSignedString(timestamp, carrierCode, body),
+        ),
+      };
+    }
+
     /**
      * Ejecuta la operación wire.
      *
@@ -491,23 +529,36 @@ describe('TrackingService', () => {
       d.trackingRepo.findCarrierByCode.mockResolvedValue({
         id: CARRIER,
         code: 'DHL',
+        stateConceptId: CONCEPTS.STATE_ACTIVE,
       });
       const subject = openSubject();
       d.trackingRepo.findSubjectByTrackingNumber.mockResolvedValue(subject);
       d.trackingRepo.findEventByExternalReference.mockResolvedValue(null);
       d.trackingRepo.lockSubjectById.mockResolvedValue(subject);
+      d.trackingRepo.findShipmentBySubjectForUpdate.mockResolvedValue(
+        liveShipment(),
+      );
       d.trackingRepo.createEvent.mockReturnValue({ id: 'event-1' });
       return subject;
+    }
+
+    /** Afirma que se rechazó sin leer sujetos ni escribir nada. */
+    function expectNoMutation(d: ReturnType<typeof build>) {
+      expect(d.trackingRepo.findSubjectByTrackingNumber).not.toHaveBeenCalled();
+      expect(d.trackingRepo.lockSubjectById).not.toHaveBeenCalled();
+      expect(d.trackingRepo.createEvent).not.toHaveBeenCalled();
     }
 
     it('maps the external code and records the event', async () => {
       const d = build();
       wire(d);
-      d.trackingRepo.findShipmentBySubjectForUpdate.mockResolvedValue(
-        liveShipment(),
-      );
+      const body = dto();
 
-      const res = await d.service.ingestCarrierWebhook('DHL', dto());
+      const res = await d.service.ingestCarrierWebhook(
+        'DHL',
+        body,
+        signed(body),
+      );
 
       expect(res).toMatchObject({
         eventId: 'event-1',
@@ -516,29 +567,50 @@ describe('TrackingService', () => {
       });
     });
 
-    it('is idempotent when the carrier redelivers the event', async () => {
+    it('is idempotent when the carrier redelivers the event (signed redelivery)', async () => {
       const d = build();
       wire(d);
       d.trackingRepo.findEventByExternalReference.mockResolvedValue({
         id: 'event-prev',
       });
+      const body = dto();
 
-      const res = await d.service.ingestCarrierWebhook('DHL', dto());
+      const res = await d.service.ingestCarrierWebhook(
+        'DHL',
+        body,
+        signed(body),
+      );
 
       expect(res).toMatchObject({ eventId: 'event-prev', duplicate: true });
       expect(d.trackingRepo.createEvent).not.toHaveBeenCalled();
     });
 
+    it('decides the redelivery AFTER locking the subject, so concurrent deliveries cannot both insert', async () => {
+      const d = build();
+      wire(d);
+      d.trackingRepo.findEventByExternalReference.mockResolvedValue({
+        id: 'event-prev',
+      });
+      const body = dto();
+
+      await d.service.ingestCarrierWebhook('DHL', body, signed(body));
+
+      expect(
+        d.trackingRepo.lockSubjectById.mock.invocationCallOrder[0],
+      ).toBeLessThan(
+        d.trackingRepo.findEventByExternalReference.mock.invocationCallOrder[0],
+      );
+    });
+
     it('records an unmapped code as an exception and warns', async () => {
       const d = build();
       wire(d);
-      d.trackingRepo.findShipmentBySubjectForUpdate.mockResolvedValue(
-        liveShipment(),
-      );
+      const body = dto({ externalStatusCode: 'RARO' });
 
       const res = await d.service.ingestCarrierWebhook(
         'DHL',
-        dto({ externalStatusCode: 'RARO' }),
+        body,
+        signed(body),
       );
 
       expect(res.currentStatusConceptId).toBe(CONCEPTS.TRACK_EXCEPTION);
@@ -552,35 +624,292 @@ describe('TrackingService', () => {
         statusConceptId: CONCEPTS.TRACK_DELIVERED,
       });
       d.trackingRepo.findShipmentBySubjectForUpdate.mockResolvedValue(shipment);
+      const body = dto({ externalStatusCode: 'IN_TRANSIT' });
 
-      await d.service.ingestCarrierWebhook(
-        'DHL',
-        dto({ externalStatusCode: 'IN_TRANSIT' }),
-      );
+      await d.service.ingestCarrierWebhook('DHL', body, signed(body));
 
       expect(shipment.statusConceptId).toBe(CONCEPTS.TRACK_DELIVERED);
     });
 
     it('fails on an unknown tracking number', async () => {
       const d = build();
-      d.trackingRepo.findCarrierByCode.mockResolvedValue({
-        id: CARRIER,
-        code: 'DHL',
-      });
+      wire(d);
       d.trackingRepo.findSubjectByTrackingNumber.mockResolvedValue(null);
+      const body = dto();
 
       await expect(
-        d.service.ingestCarrierWebhook('DHL', dto()),
+        d.service.ingestCarrierWebhook('DHL', body, signed(body)),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
-    it('fails on an unknown carrier code', async () => {
+    it('answers an unknown carrier code like a bad signature, without revealing it', async () => {
       const d = build();
       d.trackingRepo.findCarrierByCode.mockResolvedValue(null);
+      const body = dto();
 
       await expect(
-        d.service.ingestCarrierWebhook('NOPE', dto()),
-      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        d.service.ingestCarrierWebhook('NOPE', body, signed(body)),
+      ).rejects.toMatchObject({
+        reason: TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,
+      });
+      expectNoMutation(d);
+    });
+
+    describe('autenticación del emisor (TRACK-01)', () => {
+      it.each([
+        ['sin firma', { timestamp: '1' }],
+        ['sin marca de tiempo', { signature: 'a'.repeat(64) }],
+        ['sin ninguna cabecera', {}],
+        [
+          'firma con formato inválido',
+          { signature: 'tampered', timestamp: '1' },
+        ],
+      ])('rechaza %s con 401 y sin mutar', async (_label, auth) => {
+        const d = build();
+        wire(d);
+
+        await expect(
+          d.service.ingestCarrierWebhook('DHL', dto(), auth as any),
+        ).rejects.toMatchObject({
+          reason: TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,
+        });
+        await expect(
+          d.service.ingestCarrierWebhook('DHL', dto(), auth as any),
+        ).rejects.toBeInstanceOf(UnauthorizedException);
+        expectNoMutation(d);
+      });
+
+      it('rechaza una firma alterada: cualquier campo del evento cambia el HMAC', async () => {
+        for (const tamper of [
+          { externalStatusCode: 'DELIVERED' },
+          { trackingNumber: 'OTHER' },
+          { externalEventId: 'evt-2' },
+          { occurredAt: '2026-10-24T10:00:00Z' },
+          { locationText: 'Quito' },
+        ]) {
+          const d = build();
+          wire(d);
+          const original = dto();
+          const auth = signed(original);
+
+          await expect(
+            d.service.ingestCarrierWebhook(
+              'DHL',
+              { ...original, ...tamper },
+              auth,
+            ),
+          ).rejects.toMatchObject({
+            reason: TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,
+          });
+          expectNoMutation(d);
+        }
+      });
+
+      it('rechaza una firma hecha con el secreto de otro transportista', async () => {
+        const d = build();
+        wire(d);
+        const body = dto();
+
+        await expect(
+          d.service.ingestCarrierWebhook(
+            'DHL',
+            body,
+            signed(body, { secret: 'z'.repeat(40) }),
+          ),
+        ).rejects.toMatchObject({
+          reason: TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,
+        });
+        expectNoMutation(d);
+      });
+
+      it('rechaza al transportista que no tiene secreto configurado (fail-closed)', async () => {
+        const d = build();
+        wire(d);
+        delete process.env[ENV_NAME];
+        const body = dto();
+
+        await expect(
+          d.service.ingestCarrierWebhook('DHL', body, signed(body)),
+        ).rejects.toMatchObject({
+          reason: TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,
+        });
+        expectNoMutation(d);
+      });
+
+      it('rechaza un secreto demasiado corto', async () => {
+        const d = build();
+        wire(d);
+        process.env[ENV_NAME] = 'corto';
+        const body = dto();
+
+        await expect(
+          d.service.ingestCarrierWebhook(
+            'DHL',
+            body,
+            signed(body, { secret: 'corto' }),
+          ),
+        ).rejects.toMatchObject({
+          reason: TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,
+        });
+      });
+
+      it('rechaza al transportista inactivo aunque la firma sea válida', async () => {
+        const d = build();
+        wire(d);
+        d.trackingRepo.findCarrierByCode.mockResolvedValue({
+          id: CARRIER,
+          code: 'DHL',
+          stateConceptId: CONCEPTS.STATE_REVOKED,
+        });
+        const body = dto();
+
+        await expect(
+          d.service.ingestCarrierWebhook('DHL', body, signed(body)),
+        ).rejects.toMatchObject({
+          reason: TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,
+        });
+        expectNoMutation(d);
+      });
+
+      it('rechaza una marca de tiempo vencida aunque la firma verifique (replay)', async () => {
+        const d = build();
+        wire(d);
+        const body = dto();
+        const stale = String(Math.floor(Date.now() / 1000) - 3_600);
+
+        await expect(
+          d.service.ingestCarrierWebhook(
+            'DHL',
+            body,
+            signed(body, { timestamp: stale }),
+          ),
+        ).rejects.toMatchObject({
+          reason: TrackingErrorReason.WEBHOOK_REPLAY_REJECTED,
+        });
+        expectNoMutation(d);
+      });
+
+      it('rechaza una marca de tiempo adelantada más allá de la ventana', async () => {
+        const d = build();
+        wire(d);
+        const body = dto();
+        const future = String(Math.floor(Date.now() / 1000) + 3_600);
+
+        await expect(
+          d.service.ingestCarrierWebhook(
+            'DHL',
+            body,
+            signed(body, { timestamp: future }),
+          ),
+        ).rejects.toMatchObject({
+          reason: TrackingErrorReason.WEBHOOK_REPLAY_REJECTED,
+        });
+      });
+
+      it('acepta el secreto anterior durante una rotación', async () => {
+        const d = build();
+        wire(d);
+        const OLD = 'o'.repeat(40);
+        process.env[`${ENV_NAME}_PREV`] = OLD;
+        const body = dto();
+
+        await expect(
+          d.service.ingestCarrierWebhook(
+            'DHL',
+            body,
+            signed(body, { secret: OLD }),
+          ),
+        ).resolves.toMatchObject({ duplicate: false });
+        await expect(
+          d.service.ingestCarrierWebhook(
+            'DHL',
+            body,
+            signed(body, { secret: SECRET }),
+          ),
+        ).resolves.toMatchObject({ duplicate: false });
+      });
+
+      it('no registra la firma ni el secreto al rechazar', async () => {
+        const d = build();
+        wire(d);
+        const body = dto();
+        const auth = signed(body, { secret: 'z'.repeat(40) });
+
+        await d.service
+          .ingestCarrierWebhook('DHL', body, auth)
+          .catch(() => undefined);
+
+        const logged = JSON.stringify(d.logger.warn.mock.calls);
+        expect(logged).not.toContain(auth.signature);
+        expect(logged).not.toContain(SECRET);
+      });
+    });
+
+    describe('autorización por objeto', () => {
+      it('un transportista autenticado no mueve el envío de otro transportista', async () => {
+        const d = build();
+        wire(d);
+        d.trackingRepo.findShipmentBySubjectForUpdate.mockResolvedValue(
+          liveShipment({ carrierId: 'another-carrier' }),
+        );
+        const body = dto({ externalStatusCode: 'DELIVERED' });
+
+        await expect(
+          d.service.ingestCarrierWebhook('DHL', body, signed(body)),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.trackingRepo.createEvent).not.toHaveBeenCalled();
+      });
+
+      it('un sujeto sin envío asignado tampoco se mueve por webhook', async () => {
+        const d = build();
+        wire(d);
+        d.trackingRepo.findShipmentBySubjectForUpdate.mockResolvedValue(null);
+        const body = dto();
+
+        await expect(
+          d.service.ingestCarrierWebhook('DHL', body, signed(body)),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.trackingRepo.createEvent).not.toHaveBeenCalled();
+      });
+
+      it('un transportista de un tenant no opera sujetos de otro tenant', async () => {
+        const d = build();
+        wire(d);
+        d.trackingRepo.findCarrierByCode.mockResolvedValue({
+          id: CARRIER,
+          code: 'DHL',
+          tenantId: TENANT,
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+        });
+        d.trackingRepo.lockSubjectById.mockResolvedValue(
+          openSubject({ tenantId: OTHER_TENANT }),
+        );
+        const body = dto();
+
+        await expect(
+          d.service.ingestCarrierWebhook('DHL', body, signed(body)),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.trackingRepo.createEvent).not.toHaveBeenCalled();
+      });
+
+      it('un transportista de un tenant sí opera sujetos de su tenant', async () => {
+        const d = build();
+        wire(d);
+        d.trackingRepo.findCarrierByCode.mockResolvedValue({
+          id: CARRIER,
+          code: 'DHL',
+          tenantId: TENANT,
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+        });
+        d.trackingRepo.lockSubjectById.mockResolvedValue(
+          openSubject({ tenantId: TENANT }),
+        );
+        const body = dto();
+
+        await expect(
+          d.service.ingestCarrierWebhook('DHL', body, signed(body)),
+        ).resolves.toMatchObject({ duplicate: false });
+      });
     });
   });
 

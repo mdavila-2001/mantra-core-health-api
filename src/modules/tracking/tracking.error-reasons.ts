@@ -14,4 +14,10 @@ export enum TrackingErrorReason {
 
   // --- Recurso del tenant, pero no asignado al actor (403) ---
   SHIPMENT_ACCESS_DENIED = 'TRACKING_SHIPMENT_ACCESS_DENIED',
+
+  // --- Webhook del transportista no autenticado (401) ---
+  /** Firma ausente, con formato inválido o que no verifica; también transportista sin secreto. */
+  WEBHOOK_SIGNATURE_INVALID = 'TRACKING_WEBHOOK_SIGNATURE_INVALID',
+  /** Firma válida pero con marca de tiempo fuera de la ventana anti-replay. */
+  WEBHOOK_REPLAY_REJECTED = 'TRACKING_WEBHOOK_REPLAY_REJECTED',
 }

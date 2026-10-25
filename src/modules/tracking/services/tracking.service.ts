@@ -9,13 +9,25 @@ import {
   ResourceNotFoundException,
   requireTenantId,
   roleAuthorizesInTenant,
+  UnauthorizedException,
   touch,
+  verifySignature,
   type AuthenticatedUser,
 } from '../../../common';
 import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { TrackingRepository } from '../repositories';
 import { TrackingErrorReason } from '../tracking.error-reasons';
-import { TrackableSubjects } from '../entities';
+import {
+  isWithinReplayWindow,
+  parseWebhookTimestamp,
+} from '../../../common/crypto/webhook-timestamp';
+import { TrackableSubjects, type TrackingCarriers } from '../entities';
+import {
+  carrierSignedString,
+  carrierWebhookSecrets,
+  normalizeCarrierSignature,
+  type CarrierWebhookAuth,
+} from '../tracking-webhook-auth';
 import {
   OpenSubjectDto,
   SubjectResponseDto,
@@ -496,42 +508,67 @@ export class TrackingService {
    * UC-37-05: ingerir el webhook del transportista. Es idempotente por el
    * identificador del evento externo: los transportistas reentregan, y el
    * timeline no debe duplicarse por eso.
+   *
+   * La ruta es pública, así que el emisor se autentica antes de tocar nada:
+   * HMAC-SHA256 con el secreto propio del transportista sobre la marca de
+   * tiempo y todos los campos del evento, comparado en tiempo constante, y la
+   * marca dentro de la ventana anti-replay. Después se exige que el envío del
+   * número de seguimiento sea de ese transportista (y de su tenant, si el
+   * transportista es de un tenant): un transportista autenticado no mueve
+   * envíos ajenos.
    */
   async ingestCarrierWebhook(
     carrierCode: string,
     dto: CarrierWebhookDto,
+    auth: CarrierWebhookAuth = {},
   ): Promise<WebhookResponseDto> {
-    this.logger.info(
-      {
-        operation: 'tracking.webhook.ingest',
-        carrierCode,
-        externalStatusCode: dto.externalStatusCode,
-      },
-      'Ingesting carrier webhook',
-    );
-
     return this.em.transactional(async (tx) => {
-      const carrier = await this.trackingRepo.findCarrierByCode(
-        tx,
+      const carrier = this.authenticateCarrierWebhook(
+        await this.trackingRepo.findCarrierByCode(tx, carrierCode),
         carrierCode,
+        dto,
+        auth,
       );
-      if (!carrier) {
-        throw new ResourceNotFoundException('Transportista no encontrado', {
+
+      this.logger.info(
+        {
+          operation: 'tracking.webhook.ingest',
           carrierCode,
-        });
-      }
+          externalStatusCode: dto.externalStatusCode,
+        },
+        'Ingesting carrier webhook',
+      );
 
       const subject = await this.trackingRepo.findSubjectByTrackingNumber(
         tx,
         dto.trackingNumber,
       );
-      if (!subject) {
-        throw new ResourceNotFoundException(
-          'Número de seguimiento desconocido',
-          {
-            trackingNumber: dto.trackingNumber,
-          },
-        );
+      if (!subject) throw this.unknownTrackingNumber(dto.trackingNumber);
+
+      // El sujeto es el agregado del timeline: se bloquea ANTES de decidir si el
+      // evento es una reentrega. Con la comprobación antes del bloqueo, dos
+      // entregas simultáneas del mismo evento pasaban las dos y duplicaban el
+      // timeline.
+      const locked = await this.trackingRepo.lockSubjectById(tx, subject.id);
+      if (!locked) {
+        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
+          subjectId: subject.id,
+        });
+      }
+
+      // El transportista autenticado sólo opera sobre envíos que tiene
+      // asignados y, si es de un tenant, sobre sujetos de ese tenant. Mismo 404
+      // que un número desconocido: no revela que el número existe.
+      const shipment = await this.trackingRepo.findShipmentBySubjectForUpdate(
+        tx,
+        locked.id,
+      );
+      if (
+        !shipment ||
+        shipment.carrierId !== carrier.id ||
+        (carrier.tenantId && locked.tenantId !== carrier.tenantId)
+      ) {
+        throw this.unknownTrackingNumber(dto.trackingNumber);
       }
 
       const reference = this.externalReference(
@@ -540,26 +577,17 @@ export class TrackingService {
       );
       const previous = await this.trackingRepo.findEventByExternalReference(
         tx,
-        subject.id,
+        locked.id,
         reference,
       );
       if (previous) {
         return {
           eventId: previous.id,
-          trackableSubjectId: subject.id,
+          trackableSubjectId: locked.id,
           currentStatusConceptId:
-            subject.currentStatusConceptId ?? CONCEPTS.TRACK_CREATED,
+            locked.currentStatusConceptId ?? CONCEPTS.TRACK_CREATED,
           duplicate: true,
         };
-      }
-
-      // El webhook resolvió el sujeto por número de seguimiento, no por un
-      // UUID de un cliente autenticado: no hay tenant de sesión que aplicar.
-      const locked = await this.trackingRepo.lockSubjectById(tx, subject.id);
-      if (!locked) {
-        throw new ResourceNotFoundException('Sujeto rastreable no encontrado', {
-          subjectId: subject.id,
-        });
       }
 
       const mapped = EXTERNAL_STATUS_MAP[dto.externalStatusCode.toUpperCase()];
@@ -589,11 +617,7 @@ export class TrackingService {
 
       // El envío sigue al sujeto sólo mientras siga vivo: un envío entregado o
       // cancelado no vuelve atrás por un webhook tardío.
-      const shipment = await this.trackingRepo.findShipmentBySubjectForUpdate(
-        tx,
-        locked.id,
-      );
-      if (shipment && LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)) {
+      if (LIVE_SHIPMENT_STATES.includes(shipment.statusConceptId)) {
         shipment.statusConceptId = statusConceptId;
         if (statusConceptId === CONCEPTS.TRACK_DELIVERED)
           shipment.deliveredAt = new Date();
@@ -1257,6 +1281,70 @@ export class TrackingService {
       return CONCEPTS.TRACK_PRIORITY_CRITICAL;
     }
     return CONCEPTS.TRACK_PRIORITY_HIGH;
+  }
+
+  /**
+   * Autentica al emisor del webhook (fail-closed). Cualquier fallo de firma
+   * —transportista inexistente, inactivo o sin secreto, cabecera ausente o mal
+   * formada, HMAC que no verifica— responde igual, para no revelar qué
+   * transportistas existen. Sólo una firma válida con la marca de tiempo
+   * vencida se distingue (`WEBHOOK_REPLAY_REJECTED`).
+   */
+  private authenticateCarrierWebhook(
+    carrier: TrackingCarriers | null,
+    carrierCode: string,
+    dto: CarrierWebhookDto,
+    auth: CarrierWebhookAuth,
+  ): TrackingCarriers {
+    const reject = (reason: TrackingErrorReason, message: string): never => {
+      this.logger.warn(
+        {
+          operation: 'tracking.webhook.ingest',
+          carrierCode: carrierCode.slice(0, 64),
+          reason,
+        },
+        'Rejected carrier webhook',
+      );
+      throw new UnauthorizedException(message, undefined, reason);
+    };
+
+    const secrets =
+      carrier && carrier.stateConceptId === CONCEPTS.STATE_ACTIVE
+        ? carrierWebhookSecrets(carrierCode)
+        : null;
+    const signature = normalizeCarrierSignature(auth.signature);
+    const timestamp = auth.timestamp;
+    if (!carrier || !secrets || !signature || !timestamp) {
+      return reject(
+        TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,
+        'Webhook de transportista no autenticado',
+      );
+    }
+
+    const signed = carrierSignedString(timestamp, carrierCode, dto);
+    if (!secrets.some((secret) => verifySignature(secret, signed, signature))) {
+      return reject(
+        TrackingErrorReason.WEBHOOK_SIGNATURE_INVALID,
+        'Webhook de transportista no autenticado',
+      );
+    }
+
+    const sentAt = parseWebhookTimestamp(timestamp);
+    if (!sentAt || !isWithinReplayWindow(sentAt, new Date())) {
+      return reject(
+        TrackingErrorReason.WEBHOOK_REPLAY_REJECTED,
+        'Webhook de transportista fuera de la ventana de validez',
+      );
+    }
+    return carrier;
+  }
+
+  private unknownTrackingNumber(
+    trackingNumber: string,
+  ): ResourceNotFoundException {
+    return new ResourceNotFoundException('Número de seguimiento desconocido', {
+      trackingNumber,
+    });
   }
 
   /** Referencia estable del evento externo, con la que se deduplica. */
