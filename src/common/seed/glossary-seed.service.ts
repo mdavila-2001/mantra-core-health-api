@@ -54,7 +54,10 @@ import {
   GLOSSARY_TERMS,
   type GlossaryTermSeed,
 } from './glossary-terms.catalog';
-import { glossaryArticleFor } from './glossary-articles.catalog';
+import {
+  GLOSSARY_ARTICLE_SLUGS,
+  glossaryArticleFor,
+} from './glossary-articles.catalog';
 import { GLOSSARY_SOURCE_REFERENCES } from './glossary-source-provenance';
 
 /** Única versión que recibe cada value set de la taxonomía del glosario. */
@@ -71,6 +74,16 @@ const STRING_DATA_TYPE = 'string';
  * declara más de tres.
  */
 const MAX_OWNED_SYNONYM_INDEX = 32;
+
+/**
+ * Cuántos slugs se resuelven por consulta al buscar el concepto de cada
+ * artículo. Acota la cantidad de parámetros de una sentencia aunque el
+ * catálogo de artículos siga creciendo.
+ */
+const ARTICLE_SLUG_LOOKUP_CHUNK = 500;
+
+/** Cuántos slugs sin concepto se nombran, como muestra, en la advertencia. */
+const ARTICLE_MISSING_SAMPLE = 20;
 
 /** Los códigos de propiedad que este servicio escribe. */
 const OWNED_PROPERTY_CODES = [
@@ -176,6 +189,10 @@ export class GlossarySeedService {
     updated: number;
     /** Filas sembradas que el catálogo ya no declara y se quitaron. */
     removed: number;
+    /** Artículos enciclopédicos (`glossary-article`) creados. */
+    articles: number;
+    /** Artículos cuyo slug no tiene todavía un concepto en la base; se omiten con advertencia. */
+    articlesWithoutConcept: number;
   }> {
     this.assertUniqueSlugs();
 
@@ -192,6 +209,8 @@ export class GlossarySeedService {
       codeSystemBackfilled: 0,
       updated: 0,
       removed: 0,
+      articles: 0,
+      articlesWithoutConcept: 0,
     };
 
     // --- Nivel 0: procedencia propia del catálogo curado (FND-25-03) ---
@@ -311,6 +330,14 @@ export class GlossarySeedService {
     counters.updated += reconciled.updated;
     counters.removed += reconciled.removed;
 
+    // --- Nivel 9: artículos enciclopédicos, de cualquier término del glosario ---
+    // Va al final porque resuelve el concepto por su propiedad `glossary-slug`,
+    // y la de los términos curados la escribe el Nivel 5 de esta misma corrida.
+    const articles = await this.seedArticles(em, now);
+    counters.articles += articles.created;
+    counters.updated += articles.updated;
+    counters.articlesWithoutConcept += articles.withoutConcept;
+
     if (
       counters.valueSets +
         counters.terms +
@@ -320,7 +347,8 @@ export class GlossarySeedService {
         counters.relationships +
         counters.codeSystemBackfilled +
         counters.updated +
-        counters.removed >
+        counters.removed +
+        counters.articles >
       0
     ) {
       this.logger.info(
@@ -441,9 +469,6 @@ export class GlossarySeedService {
             glossaryPropertyId(term.slug, code),
           )
         : []),
-      ...(glossaryArticleFor(term.slug) !== undefined
-        ? [glossaryPropertyId(term.slug, GLOSSARY_ARTICLE_PROPERTY_CODE)]
-        : []),
     ]);
     const existing = await this.existingIds(em, ConceptProperties, ids);
 
@@ -535,33 +560,6 @@ export class GlossarySeedService {
               propertyCode: GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE,
               dataType: JSON_DATA_TYPE,
               valueJson: sourceReferences,
-              createdAt: now,
-              updatedAt: now,
-            },
-            { partial: true },
-          );
-          created += 1;
-        }
-      }
-
-      // Artículo enciclopédico de autoría propia: sólo los términos que lo
-      // tienen (ver `glossary-articles.catalog.ts`). Es el documento que sirve
-      // `GET /terminology/concepts/:id/glossary-article`.
-      const article = glossaryArticleFor(term.slug);
-      if (article !== undefined) {
-        const articleId = glossaryPropertyId(
-          term.slug,
-          GLOSSARY_ARTICLE_PROPERTY_CODE,
-        );
-        if (!existing.has(articleId)) {
-          em.create(
-            ConceptProperties,
-            {
-              id: articleId,
-              conceptId,
-              propertyCode: GLOSSARY_ARTICLE_PROPERTY_CODE,
-              dataType: JSON_DATA_TYPE,
-              valueJson: article,
               createdAt: now,
               updatedAt: now,
             },
@@ -886,13 +884,6 @@ export class GlossarySeedService {
       for (const code of OWNED_PROPERTY_CODES) {
         ownedProperties.add(glossaryPropertyId(term.slug, code));
       }
-      // El artículo se adopta sólo donde el catálogo lo declara: un término sin
-      // artículo propio conserva el que le haya adjuntado otra canalización.
-      if (glossaryArticleFor(term.slug) !== undefined) {
-        ownedProperties.add(
-          glossaryPropertyId(term.slug, GLOSSARY_ARTICLE_PROPERTY_CODE),
-        );
-      }
       for (const [code, value] of this.declaredProperties(term)) {
         desiredProperties.set(glossaryPropertyId(term.slug, code), value);
       }
@@ -971,6 +962,197 @@ export class GlossarySeedService {
     return { updated, removed };
   }
 
+  /**
+   * Siembra cada artículo enciclopédico de `glossary-articles.catalog.ts` como
+   * la propiedad `glossary-article` del concepto cuyo `glossary-slug` coincide.
+   *
+   * El catálogo de artículos no se limita a `GLOSSARY_TERMS`: cubre cualquier
+   * término del glosario. Los ~80 curados los materializa este servicio, pero
+   * el resto los cargan los importadores de `tools/terminology-import/`, cada
+   * uno con su propia fórmula de id (`mantra:glossary-es:concept:<slug>`,
+   * `mantra:symptoms:concept:<cs>:<code>`…). Lo único que comparten todos es la
+   * propiedad `glossary-slug`, la misma con la que la API traduce concepto ↔
+   * slug: por eso el concepto se busca por ella y no por una fórmula de id.
+   *
+   * La fila es propia por su id (`glossaryPropertyId(slug, 'glossary-article')`,
+   * el mismo que ya tenían los artículos de los curados), así que la corrida es
+   * idempotente: crea la que falta, reescribe la que difiere del catálogo y
+   * no escribe nada si todo coincide. Nunca quita un artículo: un término sin
+   * artículo propio conserva el que le haya adjuntado otra canalización.
+   *
+   * Un slug sin concepto en la base —la capa que lo trae todavía no se
+   * importó— no es un error: se cuenta y se advierte una vez, y la corrida
+   * siguiente lo adjunta cuando el concepto exista.
+   */
+  private async seedArticles(
+    em: ReturnType<MikroORM['em']['fork']>,
+    now: Date,
+  ): Promise<{ created: number; updated: number; withoutConcept: number }> {
+    if (GLOSSARY_ARTICLE_SLUGS.length === 0) {
+      return { created: 0, updated: 0, withoutConcept: 0 };
+    }
+    const conceptIdsBySlug = await this.conceptIdsBySlug(
+      em,
+      GLOSSARY_ARTICLE_SLUGS,
+    );
+
+    const targets: { slug: string; id: string; conceptId: string }[] = [];
+    const missing: string[] = [];
+    const ambiguous: string[] = [];
+    for (const slug of GLOSSARY_ARTICLE_SLUGS) {
+      const candidates = conceptIdsBySlug.get(slug);
+      if (candidates === undefined || candidates.length === 0) {
+        missing.push(slug);
+        continue;
+      }
+      if (candidates.length > 1) ambiguous.push(slug);
+      targets.push({
+        slug,
+        id: glossaryPropertyId(slug, GLOSSARY_ARTICLE_PROPERTY_CODE),
+        conceptId: this.pickArticleConcept(slug, candidates),
+      });
+    }
+
+    if (missing.length > 0) {
+      this.logger.warn(
+        {
+          operation: 'seed.glossary.article',
+          withoutConcept: missing.length,
+          total: GLOSSARY_ARTICLE_SLUGS.length,
+          sample: missing.slice(0, ARTICLE_MISSING_SAMPLE),
+        },
+        'Artículos del glosario omitidos: su slug no tiene concepto en la base (se adjuntan cuando se importe la capa que lo trae)',
+      );
+    }
+    if (ambiguous.length > 0) {
+      this.logger.warn(
+        {
+          operation: 'seed.glossary.article',
+          ambiguous: ambiguous.length,
+          sample: ambiguous.slice(0, ARTICLE_MISSING_SAMPLE),
+        },
+        'Slugs del glosario con más de un concepto: el artículo va al curado o, si no hay, al de menor id',
+      );
+    }
+
+    const targetIds = new Set(targets.map((target) => target.id));
+    const owned = new Map(
+      (
+        await em.find(ConceptProperties, {
+          id: { $in: [...targetIds] },
+        })
+      ).map((row) => [row.id, row]),
+    );
+
+    // Otra canalización puede haber colgado su propio artículo del mismo
+    // concepto. No se borra (no es de este servicio), pero se avisa: con dos
+    // filas `glossary-article`, cuál sirve la API deja de ser determinista.
+    const foreign = (
+      await em.find(
+        ConceptProperties,
+        {
+          conceptId: { $in: targets.map((target) => target.conceptId) },
+          propertyCode: GLOSSARY_ARTICLE_PROPERTY_CODE,
+        },
+        { fields: ['id', 'conceptId'] as never },
+      )
+    ).filter((row) => !targetIds.has(row.id));
+    if (foreign.length > 0) {
+      this.logger.warn(
+        {
+          operation: 'seed.glossary.article',
+          foreignArticles: foreign.length,
+          sample: foreign.slice(0, ARTICLE_MISSING_SAMPLE).map((row) => row.id),
+        },
+        'Conceptos con un artículo propio y otro de otra canalización: el ajeno no se toca',
+      );
+    }
+
+    let created = 0;
+    let updated = 0;
+    for (const target of targets) {
+      const article = glossaryArticleFor(target.slug);
+      if (article === undefined) continue;
+      const row = owned.get(target.id);
+      if (row === undefined) {
+        em.create(
+          ConceptProperties,
+          {
+            id: target.id,
+            conceptId: target.conceptId,
+            propertyCode: GLOSSARY_ARTICLE_PROPERTY_CODE,
+            dataType: JSON_DATA_TYPE,
+            valueJson: article,
+            createdAt: now,
+            updatedAt: now,
+          },
+          { partial: true },
+        );
+        created += 1;
+        continue;
+      }
+      const sameConcept = row.conceptId === target.conceptId;
+      const sameValue = sameJson(row.valueJson, article);
+      if (sameConcept && sameValue) continue;
+      if (!sameConcept) row.conceptId = target.conceptId;
+      if (!sameValue) row.valueJson = article;
+      row.updatedAt = now;
+      updated += 1;
+    }
+    await em.flush();
+    return { created, updated, withoutConcept: missing.length };
+  }
+
+  /**
+   * Los conceptos de cada slug, por su propiedad `glossary-slug`.
+   *
+   * Consulta directa y no `em.find`: el filtro es sobre el texto de un `jsonb`
+   * (`value_json #>> '{}'`), igual que `procedure-nomenclature.service.ts`. Va
+   * por lotes para no armar una sentencia con miles de parámetros.
+   */
+  private async conceptIdsBySlug(
+    em: ReturnType<MikroORM['em']['fork']>,
+    slugs: readonly string[],
+  ): Promise<Map<string, string[]>> {
+    const result = new Map<string, string[]>();
+    for (
+      let start = 0;
+      start < slugs.length;
+      start += ARTICLE_SLUG_LOOKUP_CHUNK
+    ) {
+      const chunk = slugs.slice(start, start + ARTICLE_SLUG_LOOKUP_CHUNK);
+      const markers = chunk.map(() => '?').join(', ');
+      const rows = await em
+        .getConnection()
+        .execute<{ concept_id: string; slug: string }[]>(
+          `SELECT p.concept_id, p.value_json #>> '{}' AS slug
+             FROM terminology.concept_properties p
+            WHERE p.property_code = ?
+              AND jsonb_typeof(p.value_json) = 'string'
+              AND p.value_json #>> '{}' IN (${markers})`,
+          [GLOSSARY_SLUG_PROPERTY_CODE, ...chunk],
+        );
+      for (const row of rows) {
+        const list = result.get(row.slug) ?? [];
+        if (!list.includes(row.concept_id)) list.push(row.concept_id);
+        result.set(row.slug, list);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * El concepto que recibe el artículo cuando hay uno solo, o —si un slug
+   * resolviera a varios— el curado de este servicio y, a falta de él, el de
+   * menor id: una elección estable entre corridas.
+   */
+  private pickArticleConcept(slug: string, candidates: string[]): string {
+    if (candidates.length === 1) return candidates[0];
+    const curated = glossaryTermConceptId(slug);
+    if (candidates.includes(curated)) return curated;
+    return [...candidates].sort()[0];
+  }
+
   /** Las propiedades que el catálogo declara para un término, por código. */
   private declaredProperties(
     term: GlossaryTermSeed,
@@ -989,10 +1171,6 @@ export class GlossarySeedService {
     const sourceReferences = GLOSSARY_SOURCE_REFERENCES[term.slug];
     if (sourceReferences !== undefined) {
       rows.push([GLOSSARY_SOURCE_REFERENCES_PROPERTY_CODE, sourceReferences]);
-    }
-    const article = glossaryArticleFor(term.slug);
-    if (article !== undefined) {
-      rows.push([GLOSSARY_ARTICLE_PROPERTY_CODE, article]);
     }
     if (term.drugFacts !== undefined) {
       rows.push(
