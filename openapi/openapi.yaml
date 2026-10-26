@@ -103362,6 +103362,10 @@ components:
             - SERVICES
             - MIXED
           description: 'Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS'
+        telemedicineEnabled:
+          type: boolean
+          description: La franja atiende también por telemedicina. Ausente ≡ false (sólo presencial)
+          default: false
       required:
         - dayOfWeek
         - startTime
@@ -107974,9 +107978,57 @@ components:
           type: number
           description: Conteo final de eventos (si el worker lo consolida)
       additionalProperties: false
+    OnboardingEventDto:
+      type: object
+      properties:
+        eventType:
+          type: string
+          enum:
+            - start
+            - step_view
+            - field_interaction
+            - field_error
+            - abandon
+            - complete
+        formType:
+          type: string
+        draftId:
+          type: string
+        stepIndex:
+          type: number
+        stepKey:
+          type: string
+        fieldKey:
+          type: string
+        interactionType:
+          type: string
+          enum:
+            - focus
+            - blur
+            - change
+            - error
+        errorCategory:
+          type: string
+        durationMs:
+          type: number
+        timestamp:
+          type: string
+      required:
+        - eventType
+        - formType
+        - draftId
+        - stepIndex
+        - timestamp
+      additionalProperties: false
     IngestOnboardingEventsDto:
       type: object
-      properties: {}
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingEventDto'
+      required:
+        - events
       additionalProperties: false
     OpenSubjectDto:
       type: object

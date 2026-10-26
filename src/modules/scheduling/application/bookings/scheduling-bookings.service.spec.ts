@@ -20,6 +20,7 @@ import {
 } from '../../../../common';
 import { SCHED } from '../../domain/scheduling.concepts';
 import { CLIN } from '../../../clinical/clinical.concepts';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
 
 const actor = { id: 'user-1', roles: ['SCHEDULING_AGENT'] };
 /** Tenant activo de las pruebas de lectura: el de los recursos que se listan. */
@@ -92,6 +93,10 @@ function build() {
     findResourceById: mockFn(),
     findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
     createSlot: mockFn().mockReturnValue({ id: 'slot-directo' }),
+    // v4.2.61: por omisión el recurso no tiene horario publicado, así que
+    // ninguna franja habilita la telemedicina.
+    findTemplatesByResource: mockFn().mockResolvedValue([]),
+    findRulesByTemplates: mockFn().mockResolvedValue([]),
   };
   // C-10: la historia de transición se versiona vía el HistoryRepository de audit.
   // `latestBySource` es la lectura del motivo (corrección #14): por defecto no
@@ -1767,8 +1772,33 @@ describe('SchedulingBookingsService', () => {
        * reserva, que es otro eje), y que omitirlo no inventa nada.
        */
       describe('el canal de la atención', () => {
+        /**
+         * v4.2.61: publica un horario cuyo jueves de 08:00 a 12:00 (La Paz)
+         * tiene la telemedicina como se pida. `dto.startAt` es el jueves
+         * 10/09 a las 10:00 de La Paz.
+         */
+        function withThursdayBand(
+          d: ReturnType<typeof build>,
+          telemedicineEnabled: boolean,
+          statusConceptId: string = CONCEPTS.TEMPLATE_PUBLISHED,
+        ) {
+          d.catalogRepo.findTemplatesByResource.mockResolvedValue([
+            { id: 'tpl-1', statusConceptId },
+          ]);
+          d.catalogRepo.findRulesByTemplates.mockResolvedValue([
+            {
+              scheduleTemplateId: 'tpl-1',
+              dayOfWeek: 4,
+              startTime: '08:00:00',
+              endTime: '12:00:00',
+              telemedicineEnabled,
+            },
+          ]);
+          return d;
+        }
+
         it('escribe la teleconsulta en la cita clínica, no en la reserva', async () => {
-          const d = readyToAssign(build());
+          const d = withThursdayBand(readyToAssign(build()), true);
 
           await d.service.createDirectAppointment(
             { ...dto, channel: 'TELECONSULTA' } as never,
@@ -1786,6 +1816,65 @@ describe('SchedulingBookingsService', () => {
           expect(reservation.bookingChannelConceptId).toBe(
             CONCEPTS.CHANNEL_DESK,
           );
+        });
+
+        describe('telemedicina por franja (v4.2.61)', () => {
+          it('rechaza la teleconsulta en una franja sin telemedicina (por defecto)', async () => {
+            const d = withThursdayBand(readyToAssign(build()), false);
+
+            await expect(
+              d.service.createDirectAppointment(
+                { ...dto, channel: 'TELECONSULTA' } as never,
+                practitioner,
+              ),
+            ).rejects.toMatchObject({
+              reason: SchedulingErrorReason.TELEMEDICINE_NOT_ENABLED,
+            });
+            // Nada se escribe: ni cupo, ni cita clínica, ni reserva.
+            expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+            expect(d.appointmentsRepo.create).not.toHaveBeenCalled();
+          });
+
+          it('rechaza la teleconsulta fuera de toda franja publicada', async () => {
+            const d = readyToAssign(build());
+
+            await expect(
+              d.service.createDirectAppointment(
+                { ...dto, channel: 'TELECONSULTA' } as never,
+                practitioner,
+              ),
+            ).rejects.toMatchObject({
+              reason: SchedulingErrorReason.TELEMEDICINE_NOT_ENABLED,
+            });
+          });
+
+          it('una plantilla retirada no habilita la telemedicina', async () => {
+            const d = withThursdayBand(
+              readyToAssign(build()),
+              true,
+              CONCEPTS.TEMPLATE_RETIRED,
+            );
+
+            await expect(
+              d.service.createDirectAppointment(
+                { ...dto, channel: 'TELECONSULTA' } as never,
+                practitioner,
+              ),
+            ).rejects.toMatchObject({
+              reason: SchedulingErrorReason.TELEMEDICINE_NOT_ENABLED,
+            });
+          });
+
+          it('presencial no mira la telemedicina de la franja', async () => {
+            const d = withThursdayBand(readyToAssign(build()), false);
+
+            await d.service.createDirectAppointment(
+              { ...dto, channel: 'PRESENCIAL' } as never,
+              practitioner,
+            );
+
+            expect(d.appointmentsRepo.create).toHaveBeenCalled();
+          });
         });
 
         it('sin canal no escribe ninguno: ausente ≠ presencial explícito', async () => {

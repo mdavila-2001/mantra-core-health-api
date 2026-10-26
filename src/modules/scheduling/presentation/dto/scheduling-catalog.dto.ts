@@ -346,6 +346,22 @@ export class ScheduleRuleDto {
   @IsOptional()
   @IsIn(RULE_BOOKING_MODES as readonly string[])
   bookingMode?: RuleBookingMode;
+
+  /**
+   * La franja atiende también por telemedicina (v4.2.61).
+   *
+   * **Ausente ≡ `false`**: por defecto la telemedicina está apagada. Al editar
+   * una plantilla las franjas se reemplazan enteras, así que una franja que ya
+   * la tenía activa tiene que volver a mandarla en `true`.
+   */
+  @ApiPropertyOptional({
+    description:
+      'La franja atiende también por telemedicina. Ausente ≡ false (sólo presencial)',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  telemedicineEnabled?: boolean;
 }
 
 /**
@@ -541,6 +557,13 @@ export class TemplateRuleDto {
   /** Qué admite la franja. No se emite cuando no se declaró (≡ `CONSULTATIONS`). */
   @ApiProperty({ required: false, enum: RULE_BOOKING_MODES })
   bookingMode?: RuleBookingMode;
+
+  /**
+   * La franja atiende también por telemedicina. Se emite siempre: la columna
+   * es `NOT NULL DEFAULT false`, así que no hay «no declarado» que preservar.
+   */
+  @ApiProperty({ default: false })
+  telemedicineEnabled!: boolean;
 }
 
 /**
