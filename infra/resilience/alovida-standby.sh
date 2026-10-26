@@ -99,6 +99,10 @@ healthy_for_seconds() {
 
 image_id() { docker inspect -f '{{.Image}}' "$1" 2>/dev/null; }
 
+# Imagen del vivo de la que salió un standby. No es la imagen del standby:
+# cuando la del vivo desapareció, el standby corre una copia (docker commit).
+source_image_of() { docker inspect -f '{{index .Config.Labels "alovida.standby.from-image"}}' "$1" 2>/dev/null; }
+
 # Copia el entorno del vivo a un archivo 600. Fuera las variables que describen
 # al contenedor de Coolify y no a la app.
 write_env_file() {
@@ -133,6 +137,16 @@ replace_from() {
   local src="$1" name="$2" net="$3" alias="$4" mem="$5" net2="${6:-}" alias2="${7:-}"
   local img envf hc tmp="$2-next" waited=0
   img="$(image_id "$src")"
+  local from_img="$img"
+  # La imagen del vivo puede haber desaparecido aunque el contenedor siga
+  # corriendo (pasó el 25/10/2026 con la API de dev: `No such image`). Sin
+  # ella no hay cómo levantar ESA versión, así que se copia el contenedor
+  # vivo tal cual. --pause=false: no congelar la app viva ni un instante.
+  if ! docker image inspect "$img" >/dev/null 2>&1; then
+    img="$(docker commit --pause=false "$src" "alovida-standby-image/$name:latest")" ||
+      { log "ERROR: la imagen de $src no existe y no se pudo copiar el contenedor"; return 1; }
+    log "imagen de $src no existe: copiada del contenedor vivo (${img:7:12})"
+  fi
   envf="$STATE/$name.env"
   write_env_file "$src" "$envf"
   hc="$(health_cmd_of "$src")"
@@ -141,6 +155,7 @@ replace_from() {
   docker run -d --name "$tmp" \
     --restart unless-stopped --memory "$mem" \
     --label "alovida.standby=$name" --label "alovida.standby.source=$src" \
+    --label "alovida.standby.from-image=$from_img" \
     --env-file "$envf" \
     --network "$net" ${alias:+--network-alias "$alias"} \
     $(volume_args_of "$src") \
@@ -174,7 +189,7 @@ reconcile_single() {
   ensure_attached "$EDGE_NET" "$live" "alovida-live-$app"
 
   [ "$(healthy_for_seconds "$live")" -ge "$MIN_HEALTHY_SECONDS" ] || return 0
-  [ "$(image_id "$live")" = "$(image_id "$standby")" ] && return 0
+  [ "$(image_id "$live")" = "$(source_image_of "$standby")" ] && return 0
   replace_from "$live" "$standby" "$EDGE_NET" "$standby" 768m
 }
 
@@ -195,10 +210,10 @@ reconcile_pair() {
   [ -n "$web" ] || return 0
   [ "$(healthy_for_seconds "$proxy")" -ge "$MIN_HEALTHY_SECONDS" ] || return 0
   [ "$(healthy_for_seconds "$web")" -ge "$MIN_HEALTHY_SECONDS" ] || return 0
-  if [ "$(image_id "$web")" != "$(image_id "$standby-web")" ]; then
+  if [ "$(image_id "$web")" != "$(source_image_of "$standby-web")" ]; then
     replace_from "$web" "$standby-web" "$net" web 768m || return 0
   fi
-  if [ "$(image_id "$proxy")" != "$(image_id "$standby")" ]; then
+  if [ "$(image_id "$proxy")" != "$(source_image_of "$standby")" ]; then
     replace_from "$proxy" "$standby" "$net" "$standby" 128m || return 0
   fi
 }
@@ -214,7 +229,7 @@ reconcile_api() {
   live="$(live_container api "$uuid")"
   [ -n "$live" ] || return 0
   [ "$(healthy_for_seconds "$live")" -ge "$MIN_HEALTHY_SECONDS" ] || return 0
-  [ "$(image_id "$live")" = "$(image_id "$standby")" ] && return 0
+  [ "$(image_id "$live")" = "$(source_image_of "$standby")" ] && return 0
   replace_from "$live" "$standby" "$uuid" "" 1536m "$front_net" alovida-api-standby
 }
 
@@ -234,6 +249,19 @@ guard_data_stack() {
   done
 }
 
+# Una API que no despliega Coolify (dev: stack manual `alovida-api-dev`). El
+# 2.º campo es el prefijo del nombre del contenedor; el 4.º, la red donde están
+# sus bases y el front (la misma en dev). Standby sólo con alias
+# `alovida-api-standby`, nunca `api`.
+reconcile_api_named() {
+  local app="$1" prefix="$2" net="$3" live standby="alovida-api-standby-$1"
+  live="$(docker ps --filter "name=^$prefix" --format '{{.Names}}' | sort | tail -1)"
+  [ -n "$live" ] || return 0
+  [ "$(healthy_for_seconds "$live")" -ge "$MIN_HEALTHY_SECONDS" ] || return 0
+  [ "$(image_id "$live")" = "$(source_image_of "$standby")" ] && return 0
+  replace_from "$live" "$standby" "$net" alovida-api-standby 1536m
+}
+
 # Una app apagada a propósito no se sigue sirviendo desde el standby.
 retire_standby() {
   local c
@@ -250,6 +278,7 @@ pass() {
     if [ -f "$STATE/$app.disabled" ]; then retire_standby "$app"; continue; fi
     case "$mode" in
       api) reconcile_api "$app" "$uuid" "$api_uuid" ;;  # 4.º campo: red compartida con el front
+      api-named) reconcile_api_named "$app" "$uuid" "$api_uuid" ;;
       single) reconcile_single "$app" "$uuid" ;;
       pair) reconcile_pair "$app" "$uuid" "$api_uuid" ;;  # 4.º campo: prefijo del contenedor de API
       *) log "ERROR: modo desconocido «$mode» para $app" ;;
@@ -272,6 +301,7 @@ status() {
     case "$mode" in
       single) live="$(live_container web "$uuid")" ;;
       api) live="$(live_container api "$uuid")"; sb="alovida-api-standby-$app" ;;
+      api-named) live="$(docker ps --filter "name=^$uuid" --format '{{.Names}}' | sort | tail -1)"; sb="alovida-api-standby-$app" ;;
       *) live="$(live_container proxy "$uuid")" ;;
     esac
     printf '%-8s vivo=%-48s %-9s img=%-12s | standby=%-9s img=%-12s %s\n' "$app" \

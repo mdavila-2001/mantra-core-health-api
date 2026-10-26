@@ -19,6 +19,7 @@ import {
 import {
   Audited,
   CurrentUser,
+  NotAudited,
   ParseOptionalLimitPipe,
   Roles,
   type AuthenticatedUser,
@@ -170,6 +171,9 @@ export class IamUsersController {
   @Post('search')
   @HttpCode(HttpStatus.OK)
   @Roles('SECURITY_ADMIN')
+  @NotAudited(
+    'Listado de sólo lectura, sin efectos: es el mismo listado que `GET /iam/users` (que no muta), con los filtros en el cuerpo para que no queden en la URL. No hay estado que sellar.',
+  )
   @ApiOperation({
     summary: 'Listado paginado de usuarios, con los filtros en el cuerpo',
     description:
