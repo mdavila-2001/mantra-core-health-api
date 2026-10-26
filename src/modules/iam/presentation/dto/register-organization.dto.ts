@@ -524,8 +524,8 @@ export class RegisterOrganizationDetailsDto {
     description:
       'Tipo de organización. Obligatorio: cada tipo exige sus propios datos. ' +
       'PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto ' +
-      '—PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cuatro ' +
-      'institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y ' +
+      '—PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cinco ' +
+      'institucionales (HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y ' +
       'HEALTH_BUSINESS— ' +
       'exigen país y ' +
       'jurisdicción, que es lo que determina bajo qué regulador operan.',

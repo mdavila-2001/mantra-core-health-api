@@ -315,6 +315,16 @@ export class AvailabilitySiteDto {
   currency!: InventoryConceptDto | null;
 
   /**
+   * Cuándo se actualizó la existencia más vieja que respalda lo disponible,
+   * ISO 8601: el `updated_at` más antiguo entre las posiciones de stock con
+   * cantidad disponible de los productos solicitados en esta sede. Se toma la
+   * más vieja porque es la que puede no estar al día. `null` si ninguna
+   * posición lo declara.
+   */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  stockUpdatedAt!: string | null;
+
+  /**
    * El detalle por producto solicitado que la sede tiene disponible.
    */
   @ApiProperty({ type: [AvailabilityProductDto] })

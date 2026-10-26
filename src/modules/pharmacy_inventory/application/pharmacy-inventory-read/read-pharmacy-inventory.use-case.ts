@@ -257,10 +257,14 @@ export class ReadPharmacyInventoryUseCase {
       );
       availableBySite.set(row.siteId, perProduct);
     }
+    const stockUpdatedAtBySite = oldestStockUpdateBySite(
+      positions,
+      siteByLocation,
+    );
 
     const items = sites
-      .map((site) =>
-        this.toAvailabilitySite(
+      .map((site): AvailabilitySiteDto => ({
+        ...this.toAvailabilitySite(
           site,
           pharmacyById.get(site.pharmacyId)!,
           productIds,
@@ -272,7 +276,9 @@ export class ReadPharmacyInventoryUseCase {
           practiceContext.get(site.id),
           origin,
         ),
-      )
+        stockUpdatedAt:
+          stockUpdatedAtBySite.get(site.id)?.toISOString() ?? null,
+      }))
       // Una sede sin ninguno de los solicitados no es una candidata: servirla
       // sería ruido, no información.
       .filter((item) => item.availableCount > 0)
@@ -333,7 +339,7 @@ export class ReadPharmacyInventoryUseCase {
     conceptById: ReadonlyMap<string, PharmacyConceptSnapshot>,
     address: PharmacyAddressSnapshot | undefined,
     origin: GeoPoint | undefined,
-  ): AvailabilitySiteDto {
+  ): Omit<AvailabilitySiteDto, 'stockUpdatedAt'> {
     const available = requested.filter(
       (product) =>
         product.pharmacyId === site.pharmacyId &&
@@ -407,6 +413,33 @@ function coordinate(value: string | undefined): number | null {
   if (value === undefined) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+/**
+ * Por sede, el `updated_at` más viejo de las posiciones que respaldan stock
+ * disponible. Una posición sin cantidad disponible no afirma nada y no cuenta;
+ * una fecha ausente o ilegible tampoco: no se inventa una antigüedad.
+ */
+function oldestStockUpdateBySite(
+  positions: readonly InventoryStockPositions[],
+  siteByLocation: ReadonlyMap<string, string>,
+): Map<string, Date> {
+  const oldest = new Map<string, Date>();
+  for (const position of positions) {
+    const siteId = siteByLocation.get(position.inventoryLocationId);
+    const updatedAt: Date | undefined = position.updatedAt;
+    if (
+      !siteId ||
+      quantity(position.availableQuantity) <= 0 ||
+      !(updatedAt instanceof Date) ||
+      Number.isNaN(updatedAt.getTime())
+    ) {
+      continue;
+    }
+    const current = oldest.get(siteId);
+    if (!current || updatedAt < current) oldest.set(siteId, updatedAt);
+  }
+  return oldest;
 }
 
 /** Una cantidad `numeric` (string de BD) como número; lo ilegible cuenta 0. */

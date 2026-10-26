@@ -509,6 +509,10 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       CONCEPTS.TENANT_TYPE_BROKER,
       CONCEPTS.TENANT_TYPE_HEALTH_BUSINESS,
       CONCEPTS.TENANT_TYPE_HEALTH_OTHER,
+      // Al final y no junto a HOSPITAL: el seed respeta el ordinal de las
+      // opciones ya sembradas, así que intercalarla repetiría el de otra en
+      // las bases vivas.
+      CONCEPTS.TENANT_TYPE_CLINIC,
     ],
     targets: ['directory.tenants.tenant_type_concept_id'],
   },

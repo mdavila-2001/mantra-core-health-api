@@ -229,6 +229,13 @@ export class IamOrganizationSelfRegistrationService {
         );
       }
 
+      // Cerrojo por correo antes de comprobarlo, como el alta de paciente: sin
+      // él, dos altas simultáneas con el mismo correo pasan las dos la lectura y
+      // la segunda choca con el índice único como un 409 genérico.
+      await this.credentialsRepo.lockSubjectForRegistration(
+        tx,
+        dto.owner.email,
+      );
       const emailClash = await this.credentialsRepo.findLivePasswordBySubject(
         tx,
         dto.owner.email,

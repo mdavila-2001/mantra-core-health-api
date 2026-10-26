@@ -86,6 +86,7 @@ describe('TenantTypeProfileService', () => {
 
       // No solo PROVIDER: una universidad, una farmacia o un hospital también
       // operan bajo un regulador, y sin jurisdicción no se sabe cuál.
+      expect(TERRITORIAL_TENANT_TYPES).toContain('CLINIC');
       for (const tenantType of TERRITORIAL_TENANT_TYPES) {
         expect(() =>
           service.assertProfileMatchesType({
@@ -97,7 +98,7 @@ describe('TenantTypeProfileService', () => {
       }
     });
 
-    it('acepta los ocho tipos nuevos con país y jurisdicción', () => {
+    it('acepta los nueve tipos nuevos con país y jurisdicción', () => {
       const { service } = build();
 
       // El alta de una universidad, una farmacia o un consultorio no puede
@@ -106,6 +107,7 @@ describe('TenantTypeProfileService', () => {
         'UNIVERSITY',
         'PHARMACY',
         'HOSPITAL',
+        'CLINIC',
         'MEDICAL_OFFICE',
         'NURSING',
         'HEALTH_OTHER',

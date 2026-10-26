@@ -669,6 +669,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    CONCEPTS.TENANT_TYPE_CLINIC,
+    {
+      display: 'Clínica',
+      definition:
+        'Establecimiento privado de atención con internación, de menor escala que un hospital.',
+    },
+  ],
+  [
     CONCEPTS.TENANT_TYPE_MEDICAL_OFFICE,
     {
       display: 'Consultorio médico',
