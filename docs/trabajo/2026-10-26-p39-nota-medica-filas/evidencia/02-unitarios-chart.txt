@@ -1,3 +1,0 @@
-$ yarn test src/modules/chart
-Test Suites: 21 passed, 21 total
-Tests:       201 passed, 201 total

@@ -9,7 +9,8 @@ de la farmacia verificada del tenant dueño de la ficha) y **qué sucursal tiene
 lo de una receta escrita a mano**: `POST` con los renglones en el cuerpo —un
 renglón de receta es un dato de salud y no viaja en la URL—, sólo stock
 disponible, completas primero y después la más cercana en línea recta. No guarda
-nada. Decisiones en `docs/trabajo/2026-10-26-p37-sucursales-receta/`.
+nada. Decisiones en el repositorio del frontend,
+`mantra-core-health/docs/trabajo/2026-10-26-p37-sucursales-receta/`.
 
 ## Rutas HTTP y alcance (medido)
 

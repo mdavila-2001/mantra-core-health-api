@@ -1,3 +1,0 @@
-    thrown: "Exceeded timeout of 180000 ms for a test.
-    thrown: "Exceeded timeout of 180000 ms for a hook.
-Tests:       13 failed, 13 total
