@@ -20,6 +20,8 @@ import {
   PharmacyStaffReadService,
   PharmacyMarketplaceService,
   MedicineCatalogSearchService,
+  PharmacyCategoriesService,
+  PharmacyOpeningHoursService,
   PharmacyProvisioningService,
 } from './services';
 import {
@@ -36,6 +38,8 @@ import {
   PharmacyExternalProductMappingsRepository,
   PharmacyReadRepository,
   PharmacyMarketplaceRepository,
+  PharmacyCatalogRepository,
+  PharmacyOnCallShiftsRepository,
 } from './repositories';
 
 /**
@@ -56,6 +60,8 @@ import {
     // direcciones (`PharmacyProvisioningService`). Ni `practice` ni `common`
     // importan `pharmacy`, así que no cierra ciclo.
     PracticeModule,
+    // P47: las imágenes del producto pasan por `AttachableFileService` (archivo
+    // vivo, de imagen y subido por quien edita).
     CommonModule,
   ],
   controllers: [
@@ -78,6 +84,8 @@ import {
     PharmacyExternalProductMappingsRepository,
     PharmacyReadRepository,
     PharmacyMarketplaceRepository,
+    PharmacyCatalogRepository,
+    PharmacyOnCallShiftsRepository,
     // Servicios
     PharmaciesService,
     PharmacySitesService,
@@ -89,6 +97,8 @@ import {
     PharmacyStaffReadService,
     PharmacyMarketplaceService,
     MedicineCatalogSearchService,
+    PharmacyCategoriesService,
+    PharmacyOpeningHoursService,
     PharmacyProvisioningService,
   ],
   // La cara de lectura se exporta para que el inventario (módulo 25) componga

@@ -108,6 +108,7 @@ export class ListTemplatesUseCase {
         : { bookingPolicyId: template.bookingPolicyId }),
       statusConceptId: template.statusConceptId,
       retired: template.statusConceptId === CONCEPTS.TEMPLATE_RETIRED,
+      flexibleHours: template.flexibleHours === true,
     }));
 
     return { items, count: items.length };

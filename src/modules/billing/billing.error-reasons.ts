@@ -178,4 +178,10 @@ export enum BillingErrorReason {
 
   /** La factura de un ítem de morosidad no existe o no es del tenant del actor. */
   DUNNING_INVOICE_NOT_FOUND = 'DUNNING_INVOICE_NOT_FOUND',
+
+  /** `GET /patient-spending/me`: `from` es posterior a `to`. */
+  PATIENT_SPENDING_RANGE_INVERTED = 'PATIENT_SPENDING_RANGE_INVERTED',
+
+  /** `GET /patient-spending/me`: el rango pedido supera los tres años. */
+  PATIENT_SPENDING_RANGE_TOO_LONG = 'PATIENT_SPENDING_RANGE_TOO_LONG',
 }

@@ -3821,10 +3821,13 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId` | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
 | 422 | `PRECONDITION_FAILED` | El caso está cancelado | Excepción explícita en src/modules/procedures_perioperative/services/periop-preop.service.ts |
+| 422 | `PRECONDITION_FAILED` | La categoría indicada no corresponde al concepto de categoría | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El informe previo indicado no coincide con el duplicado detectado | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se detectó ningún estudio duplicado para justificar | Excepción explícita en src/modules/clinical/services/service-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | La nota médica citada no está disponible como motivo de esta orden | Excepción explícita en src/modules/clinical/services/service-request-notes.service.ts |
+| 422 | `PRECONDITION_FAILED` | La nota médica citada pertenece a otra consulta | Excepción explícita en src/modules/clinical/services/service-request-notes.service.ts |
 | 422 | `PRECONDITION_FAILED` | El modo de ejecutor no es válido | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
 | 422 | `PRECONDITION_FAILED` | Si elige el paciente, la orden no lleva médico ni sede sugeridos | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |
 | 422 | `PRECONDITION_FAILED` | La orden necesita la sede sugerida | Excepción explícita en src/modules/clinical/services/performer-selection.validator.ts |

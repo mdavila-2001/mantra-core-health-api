@@ -107,7 +107,7 @@ export class DisplacedRequestsCanceller {
       );
       if (ownSlot) {
         ownSlot.remainingCapacity += 1;
-        if (ownSlot.practitionerServiceOfferingId) {
+        if (await this.serviceSlots.isOneOffOnDemand(tx, ownSlot)) {
           await this.serviceSlots.discardOneOffSlot(tx, ownSlot, actor.id);
         } else {
           if (ownSlot.statusConceptId === CONCEPTS.SLOT_HELD) {

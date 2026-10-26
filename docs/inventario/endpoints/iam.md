@@ -558,13 +558,18 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/observability.int-spec.ts:76` |
 | INTEGRACION | `test/integration/organization-headquarters-location.int-spec.ts:111` |
 | INTEGRACION | `test/integration/organization-legal-representative.int-spec.ts:96` |
+| INTEGRACION | `test/integration/p23-cambiar-horario-con-citas.int-spec.ts:155` |
+| INTEGRACION | `test/integration/p36-horario-flexible.int-spec.ts:86` |
+| INTEGRACION | `test/integration/p40-orden-basada-en-notas.int-spec.ts:91` |
 | INTEGRACION | `test/integration/patient-access-revocation.int-spec.ts:50` |
 | INTEGRACION | `test/integration/patient-diagnostic-orders.int-spec.ts:66` |
 | INTEGRACION | `test/integration/patient-own-profile.int-spec.ts:63` |
 | INTEGRACION | `test/integration/practice-ownership.int-spec.ts:71` |
 | INTEGRACION | `test/integration/practitioner-credential-registration-files.int-spec.ts:154` |
+| INTEGRACION | `test/integration/practitioner-license-registration-files.int-spec.ts:101` |
 | INTEGRACION | `test/integration/practitioner-own-credential.int-spec.ts:42` |
 | INTEGRACION | `test/integration/practitioner-own-profile.int-spec.ts:67` |
+| INTEGRACION | `test/integration/practitioner-profile-identity-fields.int-spec.ts:53` |
 | INTEGRACION | `test/integration/practitioner-registration.int-spec.ts:137` |
 | INTEGRACION | `test/integration/practitioner-signature-registration.int-spec.ts:72` |
 | INTEGRACION | `test/integration/quitar-punto-del-mapa.int-spec.ts:91` |
@@ -741,7 +746,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/auth/register-organization` la atiende `IamAuthController.registerOrganization` (src/modules/iam/presentation/controllers/iam-auth.controller.ts:134). Es una ruta pública: no exige token. Valida el cuerpo como `RegisterOrganizationDto` (137 campos, 7 obligatorios). Delega en `IamOrganizationSelfRegistrationService.registerOrganization`. Crea filas en common.addresses, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.branches, directory.tenant_affiliation_documents, directory.tenant_legal_representatives, directory.tenant_memberships y 13 más. Actualiza common.files. Lee common.file_versions, common.files, directory.tenant_affiliation_documents, directory.tenants, iam.authentication_credentials, messaging.message_channels, messaging.message_templates, messaging.notification_requests y 7 más.
+`POST /iam/auth/register-organization` la atiende `IamAuthController.registerOrganization` (src/modules/iam/presentation/controllers/iam-auth.controller.ts:134). Es una ruta pública: no exige token. Valida el cuerpo como `RegisterOrganizationDto` (139 campos, 7 obligatorios). Delega en `IamOrganizationSelfRegistrationService.registerOrganization`. Crea filas en common.addresses, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.branches, directory.tenant_affiliation_documents, directory.tenant_legal_representatives, directory.tenant_memberships y 13 más. Actualiza common.files. Lee common.file_versions, common.files, directory.tenant_affiliation_documents, directory.tenants, iam.authentication_credentials, messaging.message_channels, messaging.message_templates, messaging.notification_requests y 7 más.
 
 ### Requerimientos
 
@@ -888,13 +893,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `organization.broker.agreements[].contractFileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/insurance/presentation/dto/read.dto.ts:357` |
 | `organization.broker.publicProfileId` | `string` | No | formato uuid; admite null | — | — | sin fuente |
 | `organization.diagnosticUnit` | `DiagnosticUnitProfileDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => DiagnosticUnitProfileDto)` | — | `src/modules/iam/presentation/dto/register-organization.dto.ts:653` |
-| `organization.diagnosticUnit.code` | `string` | No | longitud mínima 3; longitud máxima 100; patrón runtime /^[A-Za-z0-9._-]+$/ | `@IsOptional()` `@IsString()` `@MinLength(3)` `@MaxLength(100)` `@Matches(/^[A-Za-z0-9._-]+$/, { message: 'El código sólo admite letras, dígitos, punto, guion y guion bajo', })` | — | `src/common/dto/tenant-type-profile.dto.ts:249` |
-| `organization.diagnosticUnit.name` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(200)` | — | `src/common/dto/tenant-type-profile.dto.ts:262` |
-| `organization.diagnosticUnit.diagnosticUnitTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/common/dto/tenant-type-profile.dto.ts:273` |
-| `organization.diagnosticUnit.modalityConceptIds` | `array<string>` | No | formato uuid; máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayUnique()` `@ArrayMaxSize(20)` `@IsUUID(undefined, { each: true })` | — | `src/common/dto/tenant-type-profile.dto.ts:286` |
-| `organization.diagnosticUnit.walkInAvailable` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/common/dto/tenant-type-profile.dto.ts:294` |
-| `organization.diagnosticUnit.homeCollectionAvailable` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/common/dto/tenant-type-profile.dto.ts:302` |
-| `organization.diagnosticUnit.primarySite` | `DiagnosticUnitPrimarySiteDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => DiagnosticUnitPrimarySiteDto)` | — | `src/common/dto/tenant-type-profile.dto.ts:312` |
+| `organization.diagnosticUnit.code` | `string` | No | longitud mínima 3; longitud máxima 100; patrón runtime /^[A-Za-z0-9._-]+$/ | `@IsOptional()` `@IsString()` `@MinLength(3)` `@MaxLength(100)` `@Matches(/^[A-Za-z0-9._-]+$/, { message: 'El código sólo admite letras, dígitos, punto, guion y guion bajo', })` | — | `src/common/dto/tenant-type-profile.dto.ts:271` |
+| `organization.diagnosticUnit.name` | `string` | No | longitud mínima 1; longitud máxima 200 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(200)` | — | `src/common/dto/tenant-type-profile.dto.ts:284` |
+| `organization.diagnosticUnit.diagnosticUnitTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/common/dto/tenant-type-profile.dto.ts:294` |
+| `organization.diagnosticUnit.modalityConceptIds` | `array<string>` | No | formato uuid; máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayUnique()` `@ArrayMaxSize(20)` `@IsUUID(undefined, { each: true })` | — | `src/common/dto/tenant-type-profile.dto.ts:307` |
+| `organization.diagnosticUnit.walkInAvailable` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/common/dto/tenant-type-profile.dto.ts:315` |
+| `organization.diagnosticUnit.homeCollectionAvailable` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/common/dto/tenant-type-profile.dto.ts:323` |
+| `organization.diagnosticUnit.primarySite` | `DiagnosticUnitPrimarySiteDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => DiagnosticUnitPrimarySiteDto)` | — | `src/common/dto/tenant-type-profile.dto.ts:333` |
 | `organization.diagnosticUnit.primarySite.name` | `string` | No | longitud mínima 2; longitud máxima 200 | `@IsOptional()` `@IsString()` `@MinLength(2)` `@MaxLength(200)` | — | `src/common/dto/tenant-type-profile.dto.ts:182` |
 | `organization.diagnosticUnit.primarySite.timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/common/dto/tenant-type-profile.dto.ts:191` |
 | `organization.diagnosticUnit.primarySite.address` | `OwnSiteAddressDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => OwnSiteAddressDto)` | — | `src/common/dto/tenant-type-profile.dto.ts:200` |
@@ -904,15 +909,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `organization.diagnosticUnit.primarySite.address.administrativeAreaConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/common/dto/create-own-site.dto.ts:63` |
 | `organization.diagnosticUnit.primarySite.address.latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/common/dto/create-own-site.dto.ts:84` |
 | `organization.diagnosticUnit.primarySite.address.longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/common/dto/create-own-site.dto.ts:95` |
-| `organization.diagnosticUnit.branches` | `array<DiagnosticUnitBranchDto>` | No | máximo 50 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => DiagnosticUnitBranchDto)` | — | `src/common/dto/tenant-type-profile.dto.ts:324` |
-| `organization.diagnosticUnit.branches[].name` | `string` | No | longitud mínima 2; longitud máxima 200 | `@IsString()` `@MinLength(2)` `@MaxLength(200)` | — | `src/common/dto/tenant-type-profile.dto.ts:216` |
-| `organization.diagnosticUnit.branches[].address` | `OwnSiteAddressDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => OwnSiteAddressDto)` | — | `src/common/dto/tenant-type-profile.dto.ts:223` |
+| `organization.diagnosticUnit.branches` | `array<DiagnosticUnitBranchDto>` | No | máximo 50 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(50)` `@ValidateNested({ each: true })` `@Type(() => DiagnosticUnitBranchDto)` | — | `src/common/dto/tenant-type-profile.dto.ts:345` |
+| `organization.diagnosticUnit.branches[].name` | `string` | No | longitud mínima 2; longitud máxima 200 | `@IsString()` `@MinLength(2)` `@MaxLength(200)` | — | `src/common/dto/tenant-type-profile.dto.ts:217` |
+| `organization.diagnosticUnit.branches[].address` | `OwnSiteAddressDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => OwnSiteAddressDto)` | — | `src/common/dto/tenant-type-profile.dto.ts:224` |
 | `organization.diagnosticUnit.branches[].address.lines` | `array<string>` | No | longitud máxima 500 | `@IsArray()` `@IsString({ each: true })` `@MaxLength(500, { each: true })` | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `src/common/dto/create-own-site.dto.ts:44` |
 | `organization.diagnosticUnit.branches[].address.city` | `string` | No | longitud máxima 255 | `@IsOptional()` `@IsString()` `@MaxLength(255)` | — | `src/common/dto/create-own-site.dto.ts:51` |
 | `organization.diagnosticUnit.branches[].address.municipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/common/dto/create-own-site.dto.ts:57` |
 | `organization.diagnosticUnit.branches[].address.administrativeAreaConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/common/dto/create-own-site.dto.ts:63` |
 | `organization.diagnosticUnit.branches[].address.latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/common/dto/create-own-site.dto.ts:84` |
 | `organization.diagnosticUnit.branches[].address.longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/common/dto/create-own-site.dto.ts:95` |
+| `organization.diagnosticUnit.branches[].description` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | — | `src/common/dto/tenant-type-profile.dto.ts:231` |
+| `organization.diagnosticUnit.branches[].locationUrl` | `string` | No | longitud máxima 2000; patrón runtime /^https?:\/\//i | `@IsOptional()` `@IsString()` `@MaxLength(2000)` `@Matches(/^https?:\/\//i, { message: 'locationUrl debe ser http o https' })` | — | `src/common/dto/tenant-type-profile.dto.ts:245` |
 | `organization.countryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-organization.dto.ts:661` |
 | `organization.jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-organization.dto.ts:669` |
 | `organization.timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Zona horaria IANA | `src/modules/iam/presentation/dto/register-organization.dto.ts:682` |
@@ -1096,7 +1103,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
             "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
             "latitude": 1,
             "longitude": 1
-          }
+          },
+          "description": "Frente al mercado",
+          "locationUrl": "https://maps.google.com/?q=-17.78,-63.18"
         }
       ]
     },
@@ -1176,13 +1185,14 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/insurance-plan-administration.int-spec.ts:36` |
 | INTEGRACION | `test/integration/insurer-patients.int-spec.ts:44` |
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:52` |
+| INTEGRACION | `test/integration/laboratory-registration.int-spec.ts:198` |
 | INTEGRACION | `test/integration/medical-center-registration.int-spec.ts:35` |
 | INTEGRACION | `test/integration/medical-centers.int-spec.ts:129` |
 | INTEGRACION | `test/integration/organization-headquarters-location.int-spec.ts:141` |
 | INTEGRACION | `test/integration/organization-legal-documents.int-spec.ts:97` |
 | INTEGRACION | `test/integration/organization-legal-entity-type.int-spec.ts:46` |
 | INTEGRACION | `test/integration/organization-legal-representative.int-spec.ts:150` |
-| INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:109` |
+| INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:113` |
 | CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:139` |
 
 ### Flujos
@@ -1409,6 +1419,8 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/issuer-administrative-area.int-spec.ts:50` |
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:135` |
 | INTEGRACION | `test/integration/medical-centers.int-spec.ts:200` |
+| INTEGRACION | `test/integration/p23-cambiar-horario-con-citas.int-spec.ts:176` |
+| INTEGRACION | `test/integration/p36-horario-flexible.int-spec.ts:69` |
 | INTEGRACION | `test/integration/patient-access-revocation.int-spec.ts:40` |
 | INTEGRACION | `test/integration/patient-diagnostic-orders.int-spec.ts:56` |
 | INTEGRACION | `test/integration/patient-own-profile.int-spec.ts:45` |
@@ -1442,7 +1454,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/auth/register-practitioner` la atiende `IamAuthController.registerPractitioner` (src/modules/iam/presentation/controllers/iam-auth.controller.ts:234). Es una ruta pública: no exige token. Valida el cuerpo como `RegisterPractitionerDto` (65 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.registerPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 18 más. Actualiza common.files, messaging.queued_jobs. Lee authz.roles, authz.user_role_assignments, common.file_versions, common.files, iam.authentication_credentials, messaging.message_channels, messaging.message_queues, messaging.message_templates y 9 más.
+`POST /iam/auth/register-practitioner` la atiende `IamAuthController.registerPractitioner` (src/modules/iam/presentation/controllers/iam-auth.controller.ts:234). Es una ruta pública: no exige token. Valida el cuerpo como `RegisterPractitionerDto` (67 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.registerPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 18 más. Actualiza common.files, messaging.queued_jobs. Lee authz.roles, authz.user_role_assignments, common.file_versions, common.files, iam.authentication_credentials, messaging.message_channels, messaging.message_queues, messaging.message_templates y 9 más.
 
 ### Requerimientos
 
@@ -1521,38 +1533,40 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `sedesLicenseNumber` | `string` | No | longitud mínima 1; longitud máxima 100 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Número de registro del SEDES departamental | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:223` |
 | `regulatoryAuthority` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Autoridad reguladora que emitió la licencia | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:235` |
 | `licenseIssueDate` | `string` | No | formato date | `@IsOptional()` `@IsISO8601()` | Fecha de inscripción de la matrícula (ISO) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:248` |
-| `professionalTitle` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:257` |
-| `specialtyConceptIds` | `array<string>` | No | formato uuid; máximo 4 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(4)` `@IsUUID(undefined, { each: true })` | Especialidades declaradas (una principal y hasta tres adicionales). | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:283` |
-| `nationalId` | `string` | Sí | longitud máxima 40; patrón runtime /^[A-Za-z0-9.-]+$/ | `@IsString()` `@MaxLength(40)` `@Matches(/^[A-Za-z0-9.-]+$/, { message: 'El documento sólo admite letras, dígitos, punto y guion', })` | Documento de identidad obligatorio; se guarda como identificador oficial | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:296` |
-| `issuerAdministrativeAreaConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:318` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:339` |
-| `homeAddressLines` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(500)` | Calle y número del domicilio particular | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:356` |
-| `homeLatitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:375` |
-| `homeLongitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:386` |
-| `workAddressLines` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(500)` | Calle y número de la dirección laboral | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:397` |
-| `workLatitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:408` |
-| `workLongitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:419` |
-| `phone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:441` |
-| `mobilePhone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Celular personal en formato E.164 o nacional | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:454` |
-| `workMobilePhone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Celular de trabajo en formato E.164 o nacional | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:467` |
-| `workLandline` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Teléfono fijo del lugar de trabajo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:480` |
-| `birthDate` | `string` | No | formato date | `@IsOptional()` `@IsISO8601()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:488` |
-| `gender` | `string` | No | valores: MALE, FEMALE, OTHER, UNKNOWN | `@IsOptional()` `@IsIn(ADMIN_GENDER_CODES)` | Género administrativo (HL7 AdministrativeGender) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:499` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | `@IsOptional()` `@IsIn(BIRTH_SEX_CODES)` | Sexo asignado al nacer | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:510` |
-| `practitionerCategoryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:519` |
-| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:527` |
-| `credentialTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:535` |
-| `languageConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:543` |
-| `acceptsNewPatients` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:552` |
-| `occupationConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ocupación del catálogo (VS_BO_OCCUPATION) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:563` |
-| `occupationFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)` | Ocupación en texto libre, para cuando no está en el catálogo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:576` |
-| `workEmployerConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:587` |
-| `workEmployerFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)` | Empresa en texto libre, para cuando no está en el catálogo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:601` |
-| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:610` |
-| `profilePhotoBase64` | `string` | No | longitud máxima 2800000 | `@IsOptional()` `@IsString()` `@MaxLength(2_800_000)` | Foto de perfil en formato Base64 (Data URI o base64 plano) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:622` |
-| `signatureFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:628` |
-| `sealFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:634` |
-| `ownSite` | `CreateOwnSiteDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => CreateOwnSiteDto)` | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:657` |
+| `licenseFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:269` |
+| `sedesLicenseFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:284` |
+| `professionalTitle` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:293` |
+| `specialtyConceptIds` | `array<string>` | No | formato uuid; máximo 4 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(4)` `@IsUUID(undefined, { each: true })` | Especialidades declaradas (una principal y hasta tres adicionales). | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:319` |
+| `nationalId` | `string` | Sí | longitud máxima 40; patrón runtime /^[A-Za-z0-9.-]+$/ | `@IsString()` `@MaxLength(40)` `@Matches(/^[A-Za-z0-9.-]+$/, { message: 'El documento sólo admite letras, dígitos, punto y guion', })` | Documento de identidad obligatorio; se guarda como identificador oficial | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:332` |
+| `issuerAdministrativeAreaConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:354` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:375` |
+| `homeAddressLines` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(500)` | Calle y número del domicilio particular | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:392` |
+| `homeLatitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:411` |
+| `homeLongitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:422` |
+| `workAddressLines` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(500)` | Calle y número de la dirección laboral | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:433` |
+| `workLatitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:444` |
+| `workLongitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:455` |
+| `phone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:477` |
+| `mobilePhone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Celular personal en formato E.164 o nacional | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:490` |
+| `workMobilePhone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Celular de trabajo en formato E.164 o nacional | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:503` |
+| `workLandline` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Teléfono fijo del lugar de trabajo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:516` |
+| `birthDate` | `string` | No | formato date | `@IsOptional()` `@IsISO8601()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:524` |
+| `gender` | `string` | No | valores: MALE, FEMALE, OTHER, UNKNOWN | `@IsOptional()` `@IsIn(ADMIN_GENDER_CODES)` | Género administrativo (HL7 AdministrativeGender) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:535` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | `@IsOptional()` `@IsIn(BIRTH_SEX_CODES)` | Sexo asignado al nacer | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:546` |
+| `practitionerCategoryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:555` |
+| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:563` |
+| `credentialTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:571` |
+| `languageConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:579` |
+| `acceptsNewPatients` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:588` |
+| `occupationConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ocupación del catálogo (VS_BO_OCCUPATION) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:599` |
+| `occupationFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)` | Ocupación en texto libre, para cuando no está en el catálogo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:612` |
+| `workEmployerConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:623` |
+| `workEmployerFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)` | Empresa en texto libre, para cuando no está en el catálogo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:637` |
+| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:646` |
+| `profilePhotoBase64` | `string` | No | longitud máxima 2800000 | `@IsOptional()` `@IsString()` `@MaxLength(2_800_000)` | Foto de perfil en formato Base64 (Data URI o base64 plano) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:658` |
+| `signatureFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:664` |
+| `sealFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:670` |
+| `ownSite` | `CreateOwnSiteDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => CreateOwnSiteDto)` | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:693` |
 | `ownSite.name` | `string` | No | longitud máxima 200 | — | Nombre del consultorio | sin fuente |
 | `ownSite.timeZone` | `string` | No | — | — | — | sin fuente |
 | `ownSite.address` | `OwnSiteAddressDto` | No | — | — | — | sin fuente |
@@ -1563,15 +1577,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `ownSite.address.latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/common/dto/create-own-site.dto.ts:84` |
 | `ownSite.address.longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/common/dto/create-own-site.dto.ts:95` |
 | `ownSite.contactPhone` | `string` | No | longitud máxima 40 | — | — | sin fuente |
-| `credentials` | `array<RegisterPractitionerCredentialDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => RegisterPractitionerCredentialDto)` | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:684` |
-| `credentials[].credentialTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:709` |
-| `credentials[].number` | `string` | No | longitud máxima 100; patrón runtime /\S/ | `@IsString()` `@Matches(/\S/, { message: 'number no puede estar vacío' })` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:724` |
-| `credentials[].issuingInstitutionText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:736` |
-| `credentials[].issuingCityText` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:747` |
-| `credentials[].issuingCountryText` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:757` |
-| `credentials[].professionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de VS_BO_PROFESSION (COB-2023) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:769` |
-| `credentials[].titleText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:779` |
-| `credentials[].fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:793` |
+| `credentials` | `array<RegisterPractitionerCredentialDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => RegisterPractitionerCredentialDto)` | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:720` |
+| `credentials[].credentialTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:745` |
+| `credentials[].number` | `string` | No | longitud máxima 100; patrón runtime /\S/ | `@IsString()` `@Matches(/\S/, { message: 'number no puede estar vacío' })` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:760` |
+| `credentials[].issuingInstitutionText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:772` |
+| `credentials[].issuingCityText` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:783` |
+| `credentials[].issuingCountryText` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:793` |
+| `credentials[].professionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de VS_BO_PROFESSION (COB-2023) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:805` |
+| `credentials[].titleText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:815` |
+| `credentials[].fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:829` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1603,6 +1617,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "sedesLicenseNumber": "T.I. 538/14",
   "regulatoryAuthority": "valor-ejemplo",
   "licenseIssueDate": "2026-07-31",
+  "licenseFileId": "00000000-0000-4000-8000-000000000001",
+  "sedesLicenseFileId": "00000000-0000-4000-8000-000000000001",
   "professionalTitle": "valor-ejemplo",
   "specialtyConceptIds": [
     "00000000-0000-4000-8000-000000000001"
@@ -1672,19 +1688,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `userId` | `string` | Sí | formato uuid | — | Cuenta creada, con la que ya puede iniciar sesión. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:802` |
-| `personId` | `string` | Sí | formato uuid | — | Persona creada para el profesional. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:808` |
-| `practitionerProfileId` | `string` | Sí | formato uuid | — | Perfil profesional (comparte id con la persona). | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:814` |
-| `practitionerCode` | `string` | Sí | — | — | Código interno asignado al profesional. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:820` |
-| `licenseId` | `string` | Sí | formato uuid | — | Licencia registrada, pendiente de verificación por la plataforma. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:826` |
-| `credentialId` | `string` | No | formato uuid | — | Credencial profesional creada, pendiente de verificación. Se devuelve porque `POST /profiles/credentials/{credentialId}/verify` —el acto que habilita al profesional a ejercer— la exige por id, y no había ninguna otra forma de obtenerla: el alta no la devolvía y `profiles` no expone ningún listado de credenciales. La verificación quedaba fuera de alcance salvo consultando la base de datos a mano. Ausente cuando el alta no declara `credentialNumber`, que dejó de ser obligatorio: sin credencial no hay id que devolver. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:841` |
-| `sedesLicenseId` | `string` | No | formato uuid | — | Autorización del SEDES creada, pendiente de verificación. El equivalente de para la habilitación departamental: se devuelve para poder verificarla por id sin consultar la base. Ausente cuando el alta no declara `sedesLicenseNumber`. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:851` |
-| `verificationStatus` | `string` | Sí | — | — | Estado de verificación del perfil al terminar el alta. Siempre PENDING: registrarse no habilita a ejercer. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:858` |
-| `emailVerificationSent` | `boolean` | Sí | — | — | Si se pudo encolar el correo de verificación. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:864` |
-| `photoFileId` | `string` | No | formato uuid | — | Identificador del archivo de foto de perfil (FK → common.files), si se subió. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:870` |
-| `profilePhotoStored` | `boolean` | No | — | — | Presente sólo si el alta trajo foto: `false` cuando el almacenamiento no pudo guardarla y la cuenta se creó igual, sin foto. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:877` |
-| `ownPracticeId` | `string` | No | formato uuid | — | Práctica personal creada o reutilizada para el consultorio propio. Ausente cuando el alta no declaró `ownSite`. Se devuelve por el mismo motivo que : poder referenciarla por id sin consultar la base. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:887` |
-| `ownSiteId` | `string` | No | formato uuid | — | Consultorio propio creado a partir de `ownSite`. Ausente cuando el alta no lo declaró. Es el mismo id que devuelve `POST /practitioners/me/sites` y que acepta `GET /practitioners/:id/sites`. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:896` |
+| `userId` | `string` | Sí | formato uuid | — | Cuenta creada, con la que ya puede iniciar sesión. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:838` |
+| `personId` | `string` | Sí | formato uuid | — | Persona creada para el profesional. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:844` |
+| `practitionerProfileId` | `string` | Sí | formato uuid | — | Perfil profesional (comparte id con la persona). | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:850` |
+| `practitionerCode` | `string` | Sí | — | — | Código interno asignado al profesional. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:856` |
+| `licenseId` | `string` | Sí | formato uuid | — | Licencia registrada, pendiente de verificación por la plataforma. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:862` |
+| `credentialId` | `string` | No | formato uuid | — | Credencial profesional creada, pendiente de verificación. Se devuelve porque `POST /profiles/credentials/{credentialId}/verify` —el acto que habilita al profesional a ejercer— la exige por id, y no había ninguna otra forma de obtenerla: el alta no la devolvía y `profiles` no expone ningún listado de credenciales. La verificación quedaba fuera de alcance salvo consultando la base de datos a mano. Ausente cuando el alta no declara `credentialNumber`, que dejó de ser obligatorio: sin credencial no hay id que devolver. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:877` |
+| `sedesLicenseId` | `string` | No | formato uuid | — | Autorización del SEDES creada, pendiente de verificación. El equivalente de para la habilitación departamental: se devuelve para poder verificarla por id sin consultar la base. Ausente cuando el alta no declara `sedesLicenseNumber`. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:887` |
+| `verificationStatus` | `string` | Sí | — | — | Estado de verificación del perfil al terminar el alta. Siempre PENDING: registrarse no habilita a ejercer. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:894` |
+| `emailVerificationSent` | `boolean` | Sí | — | — | Si se pudo encolar el correo de verificación. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:900` |
+| `photoFileId` | `string` | No | formato uuid | — | Identificador del archivo de foto de perfil (FK → common.files), si se subió. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:906` |
+| `profilePhotoStored` | `boolean` | No | — | — | Presente sólo si el alta trajo foto: `false` cuando el almacenamiento no pudo guardarla y la cuenta se creó igual, sin foto. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:913` |
+| `ownPracticeId` | `string` | No | formato uuid | — | Práctica personal creada o reutilizada para el consultorio propio. Ausente cuando el alta no declaró `ownSite`. Se devuelve por el mismo motivo que : poder referenciarla por id sin consultar la base. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:923` |
+| `ownSiteId` | `string` | No | formato uuid | — | Consultorio propio creado a partir de `ownSite`. Ausente cuando el alta no lo declaró. Es el mismo id que devuelve `POST /practitioners/me/sites` y que acepta `GET /practitioners/:id/sites`. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:932` |
 
 ### Respuestas posibles
 
@@ -1694,7 +1710,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: El archivo del registro del SEDES necesita su número de registro; PreconditionFailedException: La matrícula y el registro del SEDES no pueden compartir el mismo archivo; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING |
 
@@ -1727,10 +1743,15 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 | INTEGRACION | `test/integration/hardening/mch-034.int-spec.ts:68` |
 | INTEGRACION | `test/integration/issuer-administrative-area.int-spec.ts:139` |
 | INTEGRACION | `test/integration/medical-centers.int-spec.ts:170` |
+| INTEGRACION | `test/integration/p23-cambiar-horario-con-citas.int-spec.ts:143` |
+| INTEGRACION | `test/integration/p36-horario-flexible.int-spec.ts:122` |
+| INTEGRACION | `test/integration/p40-orden-basada-en-notas.int-spec.ts:79` |
 | INTEGRACION | `test/integration/practice-ownership.int-spec.ts:57` |
 | INTEGRACION | `test/integration/practitioner-credential-registration-files.int-spec.ts:103` |
+| INTEGRACION | `test/integration/practitioner-license-registration-files.int-spec.ts:40` |
 | INTEGRACION | `test/integration/practitioner-own-credential.int-spec.ts:26` |
 | INTEGRACION | `test/integration/practitioner-own-profile.int-spec.ts:52` |
+| INTEGRACION | `test/integration/practitioner-profile-identity-fields.int-spec.ts:40` |
 | INTEGRACION | `test/integration/practitioner-registration.int-spec.ts:115` |
 | INTEGRACION | `test/integration/practitioner-signature-registration.int-spec.ts:60` |
 | INTEGRACION | `test/integration/tj1-onboarding-medico.int-spec.ts:95` |
@@ -2202,8 +2223,9 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 |---|---|
 | INTEGRACION | `test/integration/organization-legal-documents.int-spec.ts:37` |
 | INTEGRACION | `test/integration/organization-legal-representative.int-spec.ts:41` |
-| INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:46` |
+| INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:50` |
 | INTEGRACION | `test/integration/practitioner-credential-registration-files.int-spec.ts:25` |
+| INTEGRACION | `test/integration/practitioner-license-registration-files.int-spec.ts:32` |
 | CONTROLADOR | `src/modules/iam/presentation/controllers/iam-auth.controller.spec.ts:152` |
 
 ### Flujos
@@ -4176,7 +4198,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/assisted-practitioner-registration` la atiende `IamUsersController.assistedPractitionerRegistration` (src/modules/iam/presentation/controllers/iam-users.controller.ts:254). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AssistedPractitionerRegistrationDto` (66 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.assistedRegisterPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 17 más. Actualiza common.files. Lee authz.roles, authz.user_role_assignments, common.file_versions, common.files, iam.authentication_credentials, messaging.message_channels, messaging.message_templates, messaging.notification_requests y 8 más.
+`POST /iam/users/assisted-practitioner-registration` la atiende `IamUsersController.assistedPractitionerRegistration` (src/modules/iam/presentation/controllers/iam-users.controller.ts:254). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AssistedPractitionerRegistrationDto` (68 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.assistedRegisterPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 17 más. Actualiza common.files. Lee authz.roles, authz.user_role_assignments, common.file_versions, common.files, iam.authentication_credentials, messaging.message_channels, messaging.message_templates, messaging.notification_requests y 8 más.
 
 ### Requerimientos
 
@@ -4253,38 +4275,40 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `sedesLicenseNumber` | `string` | No | longitud mínima 1; longitud máxima 100 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(100)` | Número de registro del SEDES departamental | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:223` |
 | `regulatoryAuthority` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Autoridad reguladora que emitió la licencia | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:235` |
 | `licenseIssueDate` | `string` | No | formato date | `@IsOptional()` `@IsISO8601()` | Fecha de inscripción de la matrícula (ISO) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:248` |
-| `professionalTitle` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:257` |
-| `specialtyConceptIds` | `array<string>` | No | formato uuid; máximo 4 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(4)` `@IsUUID(undefined, { each: true })` | Especialidades declaradas (una principal y hasta tres adicionales). | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:283` |
-| `nationalId` | `string` | Sí | longitud máxima 40; patrón runtime /^[A-Za-z0-9.-]+$/ | `@IsString()` `@MaxLength(40)` `@Matches(/^[A-Za-z0-9.-]+$/, { message: 'El documento sólo admite letras, dígitos, punto y guion', })` | Documento de identidad obligatorio; se guarda como identificador oficial | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:296` |
-| `issuerAdministrativeAreaConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:318` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:339` |
-| `homeAddressLines` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(500)` | Calle y número del domicilio particular | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:356` |
-| `homeLatitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:375` |
-| `homeLongitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:386` |
-| `workAddressLines` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(500)` | Calle y número de la dirección laboral | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:397` |
-| `workLatitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:408` |
-| `workLongitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:419` |
-| `phone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:441` |
-| `mobilePhone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Celular personal en formato E.164 o nacional | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:454` |
-| `workMobilePhone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Celular de trabajo en formato E.164 o nacional | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:467` |
-| `workLandline` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Teléfono fijo del lugar de trabajo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:480` |
-| `birthDate` | `string` | No | formato date | `@IsOptional()` `@IsISO8601()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:488` |
-| `gender` | `string` | No | valores: MALE, FEMALE, OTHER, UNKNOWN | `@IsOptional()` `@IsIn(ADMIN_GENDER_CODES)` | Género administrativo (HL7 AdministrativeGender) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:499` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | `@IsOptional()` `@IsIn(BIRTH_SEX_CODES)` | Sexo asignado al nacer | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:510` |
-| `practitionerCategoryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:519` |
-| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:527` |
-| `credentialTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:535` |
-| `languageConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:543` |
-| `acceptsNewPatients` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:552` |
-| `occupationConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ocupación del catálogo (VS_BO_OCCUPATION) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:563` |
-| `occupationFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)` | Ocupación en texto libre, para cuando no está en el catálogo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:576` |
-| `workEmployerConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:587` |
-| `workEmployerFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)` | Empresa en texto libre, para cuando no está en el catálogo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:601` |
-| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:610` |
-| `profilePhotoBase64` | `string` | No | longitud máxima 2800000 | `@IsOptional()` `@IsString()` `@MaxLength(2_800_000)` | Foto de perfil en formato Base64 (Data URI o base64 plano) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:622` |
-| `signatureFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:628` |
-| `sealFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:634` |
-| `ownSite` | `CreateOwnSiteDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => CreateOwnSiteDto)` | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:657` |
+| `licenseFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:269` |
+| `sedesLicenseFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:284` |
+| `professionalTitle` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:293` |
+| `specialtyConceptIds` | `array<string>` | No | formato uuid; máximo 4 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(4)` `@IsUUID(undefined, { each: true })` | Especialidades declaradas (una principal y hasta tres adicionales). | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:319` |
+| `nationalId` | `string` | Sí | longitud máxima 40; patrón runtime /^[A-Za-z0-9.-]+$/ | `@IsString()` `@MaxLength(40)` `@Matches(/^[A-Za-z0-9.-]+$/, { message: 'El documento sólo admite letras, dígitos, punto y guion', })` | Documento de identidad obligatorio; se guarda como identificador oficial | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:332` |
+| `issuerAdministrativeAreaConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:354` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:375` |
+| `homeAddressLines` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(500)` | Calle y número del domicilio particular | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:392` |
+| `homeLatitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:411` |
+| `homeLongitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:422` |
+| `workAddressLines` | `string` | No | longitud mínima 1; longitud máxima 500 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(500)` | Calle y número de la dirección laboral | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:433` |
+| `workLatitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:444` |
+| `workLongitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: RegisterPractitionerDto) => dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:455` |
+| `phone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Forma anterior de declarar el teléfono del trabajo. Preferí workLandline o workMobilePhone. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:477` |
+| `mobilePhone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Celular personal en formato E.164 o nacional | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:490` |
+| `workMobilePhone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Celular de trabajo en formato E.164 o nacional | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:503` |
+| `workLandline` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Teléfono fijo del lugar de trabajo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:516` |
+| `birthDate` | `string` | No | formato date | `@IsOptional()` `@IsISO8601()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:524` |
+| `gender` | `string` | No | valores: MALE, FEMALE, OTHER, UNKNOWN | `@IsOptional()` `@IsIn(ADMIN_GENDER_CODES)` | Género administrativo (HL7 AdministrativeGender) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:535` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | `@IsOptional()` `@IsIn(BIRTH_SEX_CODES)` | Sexo asignado al nacer | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:546` |
+| `practitionerCategoryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:555` |
+| `jurisdictionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:563` |
+| `credentialTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:571` |
+| `languageConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:579` |
+| `acceptsNewPatients` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:588` |
+| `occupationConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Ocupación del catálogo (VS_BO_OCCUPATION) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:599` |
+| `occupationFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)` | Ocupación en texto libre, para cuando no está en el catálogo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:612` |
+| `workEmployerConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:623` |
+| `workEmployerFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)` | Empresa en texto libre, para cuando no está en el catálogo | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:637` |
+| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:646` |
+| `profilePhotoBase64` | `string` | No | longitud máxima 2800000 | `@IsOptional()` `@IsString()` `@MaxLength(2_800_000)` | Foto de perfil en formato Base64 (Data URI o base64 plano) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:658` |
+| `signatureFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:664` |
+| `sealFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:670` |
+| `ownSite` | `CreateOwnSiteDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => CreateOwnSiteDto)` | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:693` |
 | `ownSite.name` | `string` | No | longitud máxima 200 | — | Nombre del consultorio | sin fuente |
 | `ownSite.timeZone` | `string` | No | — | — | — | sin fuente |
 | `ownSite.address` | `OwnSiteAddressDto` | No | — | — | — | sin fuente |
@@ -4295,17 +4319,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `ownSite.address.latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/common/dto/create-own-site.dto.ts:84` |
 | `ownSite.address.longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/common/dto/create-own-site.dto.ts:95` |
 | `ownSite.contactPhone` | `string` | No | longitud máxima 40 | — | — | sin fuente |
-| `credentials` | `array<RegisterPractitionerCredentialDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => RegisterPractitionerCredentialDto)` | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:684` |
-| `credentials[].credentialTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:709` |
-| `credentials[].number` | `string` | No | longitud máxima 100; patrón runtime /\S/ | `@IsString()` `@Matches(/\S/, { message: 'number no puede estar vacío' })` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:724` |
-| `credentials[].issuingInstitutionText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:736` |
-| `credentials[].issuingCityText` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:747` |
-| `credentials[].issuingCountryText` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:757` |
-| `credentials[].professionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de VS_BO_PROFESSION (COB-2023) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:769` |
-| `credentials[].titleText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:779` |
-| `credentials[].fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:793` |
-| `reason` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | Motivo del alta administrativa (trazabilidad C-18) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:933` |
-| `clinicalRoles` | `array<string>` | No | longitud máxima 100; máximo 10 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(10)` `@IsString({ each: true })` `@MaxLength(100, { each: true })` | Roles asistenciales a conceder (códigos de `GET /authz/roles`) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:960` |
+| `credentials` | `array<RegisterPractitionerCredentialDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => RegisterPractitionerCredentialDto)` | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:720` |
+| `credentials[].credentialTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:745` |
+| `credentials[].number` | `string` | No | longitud máxima 100; patrón runtime /\S/ | `@IsString()` `@Matches(/\S/, { message: 'number no puede estar vacío' })` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:760` |
+| `credentials[].issuingInstitutionText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:772` |
+| `credentials[].issuingCityText` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:783` |
+| `credentials[].issuingCountryText` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:793` |
+| `credentials[].professionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de VS_BO_PROFESSION (COB-2023) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:805` |
+| `credentials[].titleText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:815` |
+| `credentials[].fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:829` |
+| `reason` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | Motivo del alta administrativa (trazabilidad C-18) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:969` |
+| `clinicalRoles` | `array<string>` | No | longitud máxima 100; máximo 10 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(10)` `@IsString({ each: true })` `@MaxLength(100, { each: true })` | Roles asistenciales a conceder (códigos de `GET /authz/roles`) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:996` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -4336,6 +4360,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "sedesLicenseNumber": "T.I. 538/14",
   "regulatoryAuthority": "valor-ejemplo",
   "licenseIssueDate": "2026-07-31",
+  "licenseFileId": "00000000-0000-4000-8000-000000000001",
+  "sedesLicenseFileId": "00000000-0000-4000-8000-000000000001",
   "professionalTitle": "valor-ejemplo",
   "specialtyConceptIds": [
     "00000000-0000-4000-8000-000000000001"
@@ -4410,9 +4436,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `activationToken` | `string` | Sí | — | — | Token de un solo uso a entregar al titular por canal seguro | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:977` |
-| `activationExpiresAt` | `string` | Sí | formato date-time | — | Cuándo caduca el token. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:983` |
-| `clinicalRoles` | `array<string>` | No | — | — | Roles asistenciales efectivamente concedidos. Se devuelven para que el administrador vea con qué quedó operativo el profesional sin tener que consultarlo aparte. Si alguno de los pedidos no existía, el alta entera falla, así que esta lista coincide siempre con lo solicitado. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:994` |
+| `activationToken` | `string` | Sí | — | — | Token de un solo uso a entregar al titular por canal seguro | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1013` |
+| `activationExpiresAt` | `string` | Sí | formato date-time | — | Cuándo caduca el token. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1019` |
+| `clinicalRoles` | `array<string>` | No | — | — | Roles asistenciales efectivamente concedidos. Se devuelven para que el administrador vea con qué quedó operativo el profesional sin tener que consultarlo aparte. Si alguno de los pedidos no existía, el alta entera falla, así que esta lista coincide siempre con lo solicitado. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1030` |
 
 ### Respuestas posibles
 
@@ -4423,7 +4449,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: El archivo del registro del SEDES necesita su número de registro; PreconditionFailedException: La matrícula y el registro del SEDES no pueden compartir el mismo archivo; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING |
 

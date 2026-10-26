@@ -1241,7 +1241,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 403 | `FORBIDDEN` | mode === 'administer'         ? 'Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma'         : 'Se requiere pertenecer a la organización, o ser administrador de la plataforma' | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
 | 404 | `NOT_FOUND` | Organización no encontrada | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
 | 409 | `CONFLICT` | Ese documento ya está presentado y pendiente de verificación | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -3481,7 +3481,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | Se requiere pertenecer a la organización, o ser administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
+| 403 | `FORBIDDEN` | mode === 'administer'         ? 'Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma'         : 'Se requiere pertenecer a la organización, o ser administrador de la plataforma' | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
 | 404 | `NOT_FOUND` | Organización no encontrada | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
 | 422 | `PRECONDITION_FAILED` | La organización no es una farmacia | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no está disponible | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |

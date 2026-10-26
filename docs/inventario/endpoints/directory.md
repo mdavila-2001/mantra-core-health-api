@@ -13,7 +13,7 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | GET | `/admin/tenants` | Listado paginado de organizaciones | BAJO | 1 | SUPERADMIN, SECURITY_ADMIN |
-| 2 | POST | `/admin/tenants` | Aprovisionar un tenant raíz con su membership owner | MEDIO | 13 | SUPERADMIN |
+| 2 | POST | `/admin/tenants` | Aprovisionar un tenant raíz con su membership owner | MEDIO | 14 | SUPERADMIN |
 | 3 | PUT | `/admin/tenants/{tenantId}/public-profile` | Completar la ficha pública de una organización verificada | MEDIO | 3 | SUPERADMIN, SECURITY_ADMIN |
 | 4 | POST | `/admin/tenants/{tenantId}/suspend` | Suspender un tenant con cascada de revocación | MEDIO | 6 | SUPERADMIN |
 | 5 | POST | `/admin/tenants/{tenantId}/verification` | Verificar y activar un tenant | MEDIO | 15 | SECURITY_ADMIN |
@@ -24,7 +24,7 @@
 | 10 | POST | `/tenants/{tenantId}/branches` | Crear una branch / sede física con geolocalización | ALTO | 4 | sesión (sin roles) |
 | 11 | PATCH | `/tenants/{tenantId}/branches/{branchId}` | Editar una sucursal | ALTO | 3 | sesión (sin roles) |
 | 12 | GET | `/tenants/{tenantId}/child-tenants` | Sub-organizaciones de una organización | BAJO | 2 | sesión (sin roles) |
-| 13 | POST | `/tenants/{tenantId}/child-tenants` | Crear una organización hija / sub-tenant | MEDIO | 13 | SECURITY_ADMIN |
+| 13 | POST | `/tenants/{tenantId}/child-tenants` | Crear una organización hija / sub-tenant | MEDIO | 14 | SECURITY_ADMIN |
 | 14 | GET | `/tenants/{tenantId}/logo` | Logo de la propia organización | BAJO | 3 | sesión (sin roles) |
 | 15 | PUT | `/tenants/{tenantId}/logo` | Cambiar o quitar el logo como administrador de la organización | ALTO | 7 | sesión (sin roles) |
 | 16 | GET | `/tenants/{tenantId}/logo/content` | Imagen del logo para miembros de la organización | BAJO | 5 | sesión (sin roles) |
@@ -145,7 +145,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/tenants` la atiende `AdminTenantsController.provision` (src/modules/directory/controllers/admin-tenants.controller.ts:111). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `CreateTenantDto` (53 campos, 4 obligatorios). Delega en `DirectoryTenantsService.provision`. Crea filas en common.addresses, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.tenant_memberships, directory.tenants, insurance.insurance_brokers, insurance.insurance_carriers y 2 más. Lee directory.tenants, practice.practice_sites, terminology.catalog_concepts.
+`POST /admin/tenants` la atiende `AdminTenantsController.provision` (src/modules/directory/controllers/admin-tenants.controller.ts:111). Exige sesión con alguno de los roles SUPERADMIN. Valida el cuerpo como `CreateTenantDto` (53 campos, 4 obligatorios). Delega en `DirectoryTenantsService.provision`. Crea filas en common.addresses, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.branches, directory.tenant_memberships, directory.tenants, insurance.insurance_brokers y 3 más. Lee directory.tenants, practice.practice_sites, terminology.catalog_concepts.
 
 ### Requerimientos
 
@@ -166,6 +166,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticStudyOfferingsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:119` |
 | `diagnostic_units.diagnostic_unit_sites` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticUnitSitesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:72` |
 | `diagnostic_units.diagnostic_units` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticUnitsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:83` |
+| `directory.branches` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantTypeProfileService.materializeProfile → TenantTypeProfileService.registerLaboratoryBranches → BranchesRepository.create | `src/modules/directory/repositories/branches.repository.ts:76` |
 | `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:131` |
 | `directory.tenants` | ESCRIBE | CREA | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantsRepository.create | `src/modules/directory/repositories/tenants.repository.ts:131` |
 | `directory.tenants` | LEE | LEE | DIRECTA | AdminTenantsController.provision → DirectoryTenantsService.provision → TenantsRepository.findByCode | `src/modules/directory/repositories/tenants.repository.ts:76` |
@@ -681,7 +682,7 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/medical-center-registration.int-spec.ts:118` |
-| INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:212` |
+| INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:236` |
 | CONTROLADOR | `src/modules/directory/controllers/admin-tenants.controller.spec.ts:45` |
 
 ### Flujos
@@ -933,7 +934,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `directory.tenant_affiliation_documents` | ESCRIBE | CREA | DIRECTA | TenantsController.completeAffiliationDocuments → TenantDocumentCompletionService.complete → TenantAffiliationDocumentsService.attachDocument → TenantAffiliationDocumentsService.attachOne → DirectoryTenantLegalRepository.createAffiliationDocument | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:108` |
 | `directory.tenant_affiliation_documents` | LEE | LEE | DIRECTA | TenantsController.completeAffiliationDocuments → TenantDocumentCompletionService.complete → PharmacyOperatingRequirementsService.liveDocumentsByType → DirectoryTenantLegalRepository.listAffiliationDocsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:92` |
 | `directory.tenant_legal_representatives` | LEE | LEE | DIRECTA | TenantsController.completeAffiliationDocuments → TenantDocumentCompletionService.complete → TenantDocumentCompletionService.attachPowerOfAttorney → DirectoryTenantLegalRepository.listLegalRepsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:84` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.completeAffiliationDocuments → TenantDocumentCompletionService.complete → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.completeAffiliationDocuments → TenantDocumentCompletionService.complete → TenantDocumentCompletionService.assertAuthorized → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
 | `directory.tenants` | LEE | LEE | DIRECTA | TenantsController.completeAffiliationDocuments → TenantDocumentCompletionService.complete → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
 | `messaging.queued_jobs` | LEE | LEE | DIRECTA | TenantsController.completeAffiliationDocuments → TenantDocumentCompletionService.complete → TenantAffiliationDocumentsService.attachDocument → TenantAffiliationDocumentsService.attachOne → AttachableFileService.claimAnonymousUpload → StoragePublicationService.guardFile → StorageLifecycleCoordinator.assertNoContender → QueuesRepository.findStorageIntents | `src/modules/messaging/repositories/queues.repository.ts:62` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | TenantsController.completeAffiliationDocuments → TenantDocumentCompletionService.complete → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
@@ -995,7 +996,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma / Se requiere pertenecer a la organización, o ser administrador de la plataf… |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ese documento ya está presentado y pendiente de verificación |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare al menos un documento para vincular; PreconditionFailedException: Un mismo archivo no puede respaldar dos documentos distintos; PreconditionFailedException: Los papeles se completan mientras la organización está pendiente de verificación; PreconditionFailedException: El documento {label} ya está vinculado a una organización; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: El catálogo de {subject} no incluye el código {code.toUpperCase()}; PreconditionFailedException: La organización no tiene representante legal al que atar el poder |
@@ -1008,7 +1009,7 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:247` |
+| INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:271` |
 | CONTROLADOR | `src/modules/directory/controllers/tenants.controller.spec.ts:68` |
 
 ### Flujos
@@ -1462,7 +1463,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /tenants/{tenantId}/child-tenants` la atiende `TenantsController.createChild` (src/modules/directory/controllers/tenants.controller.ts:264). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateChildTenantDto` (51 campos, 4 obligatorios). Delega en `DirectoryTenantsService.createChild`. Crea filas en common.addresses, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.tenant_memberships, directory.tenants, insurance.insurance_brokers, insurance.insurance_carriers y 2 más. Lee directory.tenants, practice.practice_sites, terminology.catalog_concepts.
+`POST /tenants/{tenantId}/child-tenants` la atiende `TenantsController.createChild` (src/modules/directory/controllers/tenants.controller.ts:264). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateChildTenantDto` (51 campos, 4 obligatorios). Delega en `DirectoryTenantsService.createChild`. Crea filas en common.addresses, diagnostic_units.diagnostic_study_offerings, diagnostic_units.diagnostic_unit_sites, diagnostic_units.diagnostic_units, directory.branches, directory.tenant_memberships, directory.tenants, insurance.insurance_brokers y 3 más. Lee directory.tenants, practice.practice_sites, terminology.catalog_concepts.
 
 ### Requerimientos
 
@@ -1484,6 +1485,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `diagnostic_units.diagnostic_study_offerings` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticStudyOfferingsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-study-offerings.repository.ts:119` |
 | `diagnostic_units.diagnostic_unit_sites` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticUnitSitesRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-unit-sites.repository.ts:72` |
 | `diagnostic_units.diagnostic_units` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticUnitsRepository.create | `src/modules/diagnostic_units/repositories/diagnostic-units.repository.ts:83` |
+| `directory.branches` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantTypeProfileService.materializeProfile → TenantTypeProfileService.registerLaboratoryBranches → BranchesRepository.create | `src/modules/directory/repositories/branches.repository.ts:76` |
 | `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:131` |
 | `directory.tenants` | ESCRIBE | CREA | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantsRepository.create | `src/modules/directory/repositories/tenants.repository.ts:131` |
 | `directory.tenants` | LEE | LEE | DIRECTA | TenantsController.createChild → DirectoryTenantsService.createChild → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
@@ -2656,7 +2658,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.addresses` | LEE | LEE | DIRECTA | TenantsController.getPharmacyReadiness → TenantDocumentCompletionService.pharmacyReadiness → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.headquartersHasPoint | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:220` |
 | `directory.tenant_affiliation_documents` | LEE | LEE | DIRECTA | TenantsController.getPharmacyReadiness → TenantDocumentCompletionService.pharmacyReadiness → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.liveDocumentsByType → DirectoryTenantLegalRepository.listAffiliationDocsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:92` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.getPharmacyReadiness → TenantDocumentCompletionService.pharmacyReadiness → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantsController.getPharmacyReadiness → TenantDocumentCompletionService.pharmacyReadiness → TenantDocumentCompletionService.assertAuthorized → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
 | `directory.tenants` | LEE | LEE | DIRECTA | TenantsController.getPharmacyReadiness → TenantDocumentCompletionService.pharmacyReadiness → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | TenantsController.getPharmacyReadiness → TenantDocumentCompletionService.pharmacyReadiness → PharmacyOperatingRequirementsService.evaluate | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:134` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | TenantsController.getPharmacyReadiness → TenantDocumentCompletionService.pharmacyReadiness → PharmacyOperatingRequirementsService.evaluate → PharmacyOperatingRequirementsService.headquartersHasPoint | `src/modules/directory/services/pharmacy-operating-requirements.service.ts:216` |
@@ -2689,7 +2691,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere pertenecer a la organización, o ser administrador de la plataforma |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma / Se requiere pertenecer a la organización, o ser administrador de la plataf… |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La organización no es una farmacia |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -2700,7 +2702,7 @@ El árbol de decisión completo está en [flujos](../flujos/directory.md).
 
 | Tipo | Archivo |
 |---|---|
-| INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:225` |
+| INTEGRACION | `test/integration/pharmacy-registration.int-spec.ts:249` |
 | CONTROLADOR | `src/modules/directory/controllers/tenants.controller.spec.ts:69` |
 
 ### Flujos

@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `profiles`
 
-Referencia exhaustiva de 57 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 58 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `profiles-affiliations`, `profiles-patients`, `profiles-practitioners`
 - **Controladores:** `PractitionerSignatureAssetsController`, `ProfilesDependentRequestsController`, `ProfilesPatientsController`, `ProfilesPractitionersController`, `TenantPractitionerRequestsController`
@@ -39,35 +39,36 @@ Referencia exhaustiva de 57 operación(es) del módulo `profiles`, derivada del 
 26. [POST /profiles/persons/{personId}/decease](#26-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
 27. [GET /profiles/practitioners](#27-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
 28. [POST /profiles/practitioners](#28-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
-29. [POST /profiles/practitioners/{profileId}/affiliations](#29-post-profiles-practitioners-profileid-affiliations) — Registrar un consultorio de un profesional sin cuenta
-30. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#30-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
-31. [DELETE /profiles/practitioners/{profileId}/photo](#31-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
-32. [PUT /profiles/practitioners/{profileId}/photo](#32-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
-33. [POST /profiles/practitioners/{profileId}/specialties](#33-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
-34. [GET /profiles/practitioners/{profileId}/summary](#34-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
-35. [PATCH /profiles/practitioners/me](#35-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
-36. [GET /profiles/practitioners/me/affiliations](#36-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
-37. [POST /profiles/practitioners/me/affiliations](#37-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
-38. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#38-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
-39. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#39-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
-40. [POST /profiles/practitioners/me/credentials](#40-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
-41. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#41-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
-42. [PATCH /profiles/practitioners/me/credentials/{credentialId}](#42-patch-profiles-practitioners-me-credentials-credentialid) — Editar un título propio pendiente de verificación
-43. [DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#43-delete-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Retirar una matrícula propia pendiente de verificación
-44. [PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#44-patch-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Corregir una matrícula propia pendiente de verificación
-45. [GET /profiles/practitioners/me/linkable-organizations](#45-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
-46. [GET /profiles/practitioners/me/onboarding](#46-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
-47. [GET /profiles/practitioners/me/signature-assets](#47-get-profiles-practitioners-me-signature-assets) — Consultar las imágenes de firma y sello propias
-48. [PUT /profiles/practitioners/me/signature-assets](#48-put-profiles-practitioners-me-signature-assets) — Guardar o quitar las imágenes de firma y sello propias
-49. [DELETE /profiles/practitioners/me/specialties/{specialtyId}](#49-delete-profiles-practitioners-me-specialties-specialtyid) — Retirar una especialidad propia pendiente de verificación
-50. [PATCH /profiles/practitioners/me/specialties/{specialtyId}](#50-patch-profiles-practitioners-me-specialties-specialtyid) — Corregir una especialidad propia pendiente de verificación
-51. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#51-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
-52. [GET /profiles/practitioners/me/summary](#52-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
-53. [GET /profiles/practitioners/specialty-counts](#53-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
-54. [GET /tenants/{tenantId}/practitioner-requests](#54-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
-55. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#55-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
-56. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#56-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
-57. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#57-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
+29. [PATCH /profiles/practitioners/{profileId}](#29-patch-profiles-practitioners-profileid) — Corregir el perfil profesional de otro (titular o plataforma)
+30. [POST /profiles/practitioners/{profileId}/affiliations](#30-post-profiles-practitioners-profileid-affiliations) — Registrar un consultorio de un profesional sin cuenta
+31. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#31-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
+32. [DELETE /profiles/practitioners/{profileId}/photo](#32-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
+33. [PUT /profiles/practitioners/{profileId}/photo](#33-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
+34. [POST /profiles/practitioners/{profileId}/specialties](#34-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
+35. [GET /profiles/practitioners/{profileId}/summary](#35-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
+36. [PATCH /profiles/practitioners/me](#36-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
+37. [GET /profiles/practitioners/me/affiliations](#37-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
+38. [POST /profiles/practitioners/me/affiliations](#38-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
+39. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#39-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
+40. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#40-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
+41. [POST /profiles/practitioners/me/credentials](#41-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
+42. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#42-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
+43. [PATCH /profiles/practitioners/me/credentials/{credentialId}](#43-patch-profiles-practitioners-me-credentials-credentialid) — Editar un título propio pendiente de verificación
+44. [DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#44-delete-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Retirar una matrícula propia pendiente de verificación
+45. [PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#45-patch-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Corregir una matrícula propia pendiente de verificación
+46. [GET /profiles/practitioners/me/linkable-organizations](#46-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
+47. [GET /profiles/practitioners/me/onboarding](#47-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
+48. [GET /profiles/practitioners/me/signature-assets](#48-get-profiles-practitioners-me-signature-assets) — Consultar las imágenes de firma y sello propias
+49. [PUT /profiles/practitioners/me/signature-assets](#49-put-profiles-practitioners-me-signature-assets) — Guardar o quitar las imágenes de firma y sello propias
+50. [DELETE /profiles/practitioners/me/specialties/{specialtyId}](#50-delete-profiles-practitioners-me-specialties-specialtyid) — Retirar una especialidad propia pendiente de verificación
+51. [PATCH /profiles/practitioners/me/specialties/{specialtyId}](#51-patch-profiles-practitioners-me-specialties-specialtyid) — Corregir una especialidad propia pendiente de verificación
+52. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#52-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
+53. [GET /profiles/practitioners/me/summary](#53-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
+54. [GET /profiles/practitioners/specialty-counts](#54-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
+55. [GET /tenants/{tenantId}/practitioner-requests](#55-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
+56. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#56-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
+57. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#57-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
+58. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#58-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
 
 ---
 
@@ -4507,7 +4508,436 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /profiles/practitioners/{profileId}/affiliations
+## 29. PATCH /profiles/practitioners/{profileId}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-practitioners`
+- **Nombre:** Corregir el perfil profesional de otro (titular o plataforma)
+- **Operation ID:** `ProfilesPractitionersController_updatePractitionerProfile`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [ProfilesPractitionersController.updatePractitionerProfile](../../src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts)
+
+### Descripción de negocio
+
+`403` si quien pide no es el titular ni plataforma. `409` `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` si se corrige el número del documento de una identidad verificada o con un caso de verificación en curso.
+
+Contexto declarado en el controlador: Corregir el perfil profesional de otro — la plataforma (P28). Mismo cuerpo que `practitioners/me`. Sin `@Roles` por el mismo criterio que la foto: quién puede lo decide `ProfileOwnershipService` (titular o `SECURITY_ADMIN`/`SUPERADMIN`), y un profesional que apunta al perfil de un colega recibe 403. Va DESPUÉS de `practitioners/me`: Nest resuelve por orden de declaración y el parámetro capturaría `me`.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /profiles/practitioners/{profileId}` en `ProfilesPractitionersController_updatePractitionerProfile`. El controlador delega en `ProfilesPractitionersService.updatePractitionerProfile`. Valida el body como `UpdateOwnPractitionerProfileDto` y consume `application/json`. El tipo de retorno estático es `Promise<PractitionerProfileSummaryDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `profileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateOwnPractitionerProfileDto`; los campos opcionales se omiten.
+
+```http
+PATCH /profiles/practitioners/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `profileId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `professionalTitle` | No | `string` | longitud máxima 200 | Título profesional | `valor-ejemplo` |
+| `professionalBio` | No | `string` | longitud máxima 4000 | Biografía profesional | `valor-ejemplo` |
+| `acceptsNewPatients` | No | `boolean` | Sin restricción adicional declarada | Si acepta pacientes nuevos | `true` |
+| `telehealthAvailable` | No | `boolean` | Sin restricción adicional declarada | Si atiende por telemedicina | `true` |
+| `name` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `middleName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `object` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
+| `nationalId` | No | `string` | longitud mínima 1; longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Número del documento de identidad. 409 si la identidad está verificada o en verificación. | `00000000-0000-4000-8000-000000000001` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor del documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `phone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Forma anterior de declarar el teléfono. Preferí workMobilePhone. | `+59170000000` |
+| `workEmail` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `personalEmail` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
+| `mobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `workMobilePhone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `workLandline` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `taxId` | No | `string` | longitud máxima 20 | NIT para facturación. Cadena vacía para quedarse sin NIT. | `00000000-0000-4000-8000-000000000001` |
+| `taxHolderName` | No | `string` | longitud máxima 200 | Nombre o razón social del titular del NIT. Cadena vacía para quitarla. | `Nombre de ejemplo` |
+| `homeAddressLines` | No | `string` | longitud máxima 300 | Domicilio, tal como lo escribe la persona. Vacío para quitarlo. | `valor-ejemplo` |
+| `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `workAddressLines` | No | `string` | longitud máxima 300 | Dirección del lugar de trabajo. Vacío para quitarla. | `valor-ejemplo` |
+| `workLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `workLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | longitud máxima 200 | Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla. | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | longitud máxima 200 | Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto. | `valor-ejemplo` |
+| `languages` | No | `array<PractitionerLanguageInputDto>` | máximo 20 elemento(s) | Idiomas de atención. Reemplaza la lista guardada; [] la vacía. Un idioma no puede repetirse. | `[{"languageConceptId":"00000000-0000-4000-8000-000000000001","proficiencyConceptId":"00000000-0000-4000-8000-000000000001","clinicalInterpretationAllowed":true}]` |
+| `languages[].languageConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].clinicalInterpretationAllowed` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /profiles/practitioners/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "professionalTitle": "valor-ejemplo",
+  "professionalBio": "valor-ejemplo",
+  "acceptsNewPatients": true,
+  "telehealthAvailable": true,
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "birthDate": {},
+  "sexAtBirth": "MALE",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "phone": "+59170000000",
+  "workEmail": "usuario@example.com",
+  "personalEmail": "usuario@example.com",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "taxId": "00000000-0000-4000-8000-000000000001",
+  "taxHolderName": "Nombre de ejemplo",
+  "homeAddressLines": "valor-ejemplo",
+  "homeLatitude": {},
+  "homeLongitude": {},
+  "workAddressLines": "valor-ejemplo",
+  "workLatitude": {},
+  "workLongitude": {},
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
+  "languages": [
+    {
+      "languageConceptId": "00000000-0000-4000-8000-000000000001",
+      "proficiencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "clinicalInterpretationAllowed": true
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PractitionerProfileSummaryDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PractitionerProfileSummaryDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "unavailableSections": [
+    "valor-ejemplo"
+  ],
+  "profileId": "00000000-0000-4000-8000-000000000001",
+  "personId": "00000000-0000-4000-8000-000000000001",
+  "practitionerCode": "CODIGO_EJEMPLO",
+  "displayName": "Nombre de ejemplo",
+  "professionalTitle": "valor-ejemplo",
+  "professionalBio": "valor-ejemplo",
+  "photoFileId": "00000000-0000-4000-8000-000000000001",
+  "email": "usuario@example.com",
+  "phone": "+59170000000",
+  "workEmail": "usuario@example.com",
+  "personalEmail": "usuario@example.com",
+  "mobilePhone": "+59170000000",
+  "workMobilePhone": "+59170000000",
+  "workLandline": "valor-ejemplo",
+  "name": "Nombre de ejemplo",
+  "middleName": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "birthDate": "2026-07-31",
+  "sexAtBirth": "MALE",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
+  "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
+  "taxId": "00000000-0000-4000-8000-000000000001",
+  "taxHolderName": "Nombre de ejemplo",
+  "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "homeAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "workAddress": {
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "latitude": 1,
+    "longitude": 1
+  },
+  "occupationConceptId": "00000000-0000-4000-8000-000000000001",
+  "occupationFreeText": "valor-ejemplo",
+  "workEmployerConceptId": "00000000-0000-4000-8000-000000000001",
+  "workEmployerFreeText": "valor-ejemplo",
+  "practitionerCategoryConceptId": "00000000-0000-4000-8000-000000000001",
+  "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "practiceStatusConceptId": "00000000-0000-4000-8000-000000000001",
+  "acceptsNewPatients": true,
+  "telehealthAvailable": true,
+  "specialties": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+      "isPrimary": true,
+      "boardCertified": true,
+      "practiceScopeText": "valor-ejemplo",
+      "verificationStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "credentials": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "credentialTypeConceptId": "00000000-0000-4000-8000-000000000001",
+      "number": "valor-ejemplo",
+      "fileId": "00000000-0000-4000-8000-000000000001",
+      "issuingInstitutionText": "valor-ejemplo",
+      "issuingCityText": "valor-ejemplo",
+      "issuingCountryText": "BO",
+      "professionConceptId": "00000000-0000-4000-8000-000000000001",
+      "titleText": "valor-ejemplo",
+      "issueDate": "2026-07-31T12:00:00.000Z",
+      "expiryDate": "2026-07-31T12:00:00.000Z",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "verifiedAt": "2026-07-31T12:00:00.000Z",
+      "verificationSourceUri": "valor-ejemplo"
+    }
+  ],
+  "licenses": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
+      "licenseNumber": "valor-ejemplo",
+      "regulatoryAuthority": "valor-ejemplo",
+      "stateConceptId": "00000000-0000-4000-8000-000000000001",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "fileId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "languages": [
+    {
+      "languageConceptId": "00000000-0000-4000-8000-000000000001",
+      "proficiencyConceptId": "00000000-0000-4000-8000-000000000001",
+      "clinicalInterpretationAllowed": true
+    }
+  ],
+  "affiliations": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "organizationName": "Nombre de ejemplo",
+      "roleTitle": {},
+      "practiceSiteId": {},
+      "healthFacilityConceptId": {},
+      "affiliationTypeConceptId": {},
+      "startDate": "2026-07-31",
+      "endDate": "2026-07-31",
+      "current": true,
+      "status": "00000000-0000-4000-8000-000000000001",
+      "statusKind": "pendiente",
+      "decisionReasonText": "Texto descriptivo de ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "activity": {
+    "encounters": 1,
+    "medicationRequests": 1,
+    "clinicalNotes": 1,
+    "documents": 1
+  },
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `unavailableSections` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `profileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `personId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `displayName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `professionalTitle` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `professionalBio` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `photoFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `email` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `phone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `personalEmail` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `usuario@example.com` |
+| `mobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workMobilePhone` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `+59170000000` |
+| `workLandline` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `valor-ejemplo` |
+| `name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `middleName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
+| `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
+| `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
+| `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
+| `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
+| `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
+| `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
+| `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
+| `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
+| `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
+| `occupationFreeText` | No | `string` | Sin restricción adicional declarada | Ocupación declarada en texto libre | `valor-ejemplo` |
+| `workEmployerConceptId` | No | `string` | formato `uuid` | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `00000000-0000-4000-8000-000000000001` |
+| `workEmployerFreeText` | No | `string` | Sin restricción adicional declarada | Empresa declarada en texto libre | `valor-ejemplo` |
+| `practitionerCategoryConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practiceStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `acceptsNewPatients` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `telehealthAvailable` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `specialties` | Sí | `array<PractitionerSpecialtyDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","specialtyConceptId":"00000000-0000-4000-8000-000000000001","isPrimary":true,"boardCertified":true,"practiceScopeText":"valor-ejemplo","verificationStatusConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `specialties[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].specialtyConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].isPrimary` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `specialties[].boardCertified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `specialties[].practiceScopeText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `specialties[].verificationStatusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `specialties[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `specialties[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `credentials` | Sí | `array<PractitionerCredentialDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","credentialTypeConceptId":"00000000-0000-4000-8000-000000000001","number":"valor-ejemplo","fileId":"00000000-0000-4000-8000-000000000001","issuingInstitutionText":"valor-ejemplo","issuingCityText":"valor-ejemplo","issuingCountryText":"BO","professionConceptId":"00000000-0000-4000-8000-000000000001","titleText":"valor-ejemplo","issueDate":"2026-07-31T12:00:00.000Z","expiryDate":"2026-07-31T12:00:00.000Z","stateConceptId":"00000000-0000-4000-8000-000000000001","verifiedAt":"2026-07-31T12:00:00.000Z","verificationSourceUri":"valor-ejemplo"}]` |
+| `credentials[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].credentialTypeConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].number` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia; permite descargar el diploma adjunto | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].issuingInstitutionText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCityText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issuingCountryText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BO` |
+| `credentials[].professionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].titleText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `credentials[].issueDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `credentials[].expiryDate` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `credentials[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `credentials[].verifiedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `credentials[].verificationSourceUri` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses` | Sí | `array<PractitionerLicenseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","licenseNumber":"valor-ejemplo","regulatoryAuthority":"valor-ejemplo","stateConceptId":"00000000-0000-4000-8000-000000000001","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","fileId":"00000000-0000-4000-8000-000000000001"}]` |
+| `licenses[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].jurisdictionConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].licenseNumber` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].regulatoryAuthority` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `licenses[].stateConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `licenses[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `licenses[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `licenses[].fileId` | No | `string` | formato `uuid` | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
+| `languages` | Sí | `array<PractitionerLanguageDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"languageConceptId":"00000000-0000-4000-8000-000000000001","proficiencyConceptId":"00000000-0000-4000-8000-000000000001","clinicalInterpretationAllowed":true}]` |
+| `languages[].languageConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].proficiencyConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `languages[].clinicalInterpretationAllowed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `affiliations` | Sí | `array<AffiliationResponseDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTitle":{},"practiceSiteId":{},"healthFacilityConceptId":{},"affiliationTypeConceptId":{},"startDate":"2026-07-31","endDate":"2026-07-31","current":true,"status":"00000000-0000-4000-8000-000000000001","statusKind":"pendiente","decisionReasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `affiliations[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `affiliations[].roleTitle` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].practiceSiteId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].healthFacilityConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].affiliationTypeConceptId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `affiliations[].startDate` | Sí | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `affiliations[].endDate` | No | `string` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
+| `affiliations[].current` | Sí | `boolean` | Sin restricción adicional declarada | Derivado de `endDate`: sin fin declarado, sigue vigente | `true` |
+| `affiliations[].status` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `affiliations[].statusKind` | Sí | `string` | valores: `pendiente`, `declarado`, `aprobado`, `rechazado`, `revocado`, `desconocido` | Sin descripción específica en el contrato OpenAPI. | `pendiente` |
+| `affiliations[].decisionReasonText` | No | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `affiliations[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `activity` | Sí | `PractitionerActivityDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"encounters":1,"medicationRequests":1,"clinicalNotes":1,"documents":1}` |
+| `activity.encounters` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `activity.medicationRequests` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `activity.clinicalNotes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `activity.documents` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
+| 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Un idioma no puede declararse dos veces | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 422 | `PRECONDITION_FAILED` | El catálogo de departamentos no está disponible | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/{profileId}"
+}
+```
+
+---
+
+## 30. POST /profiles/practitioners/{profileId}/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4680,7 +5110,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+## 31. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4827,7 +5257,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. DELETE /profiles/practitioners/{profileId}/photo
+## 32. DELETE /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4924,6 +5354,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
   "taxHolderName": "Nombre de ejemplo",
@@ -5054,6 +5485,7 @@ Campos de la respuesta:
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
@@ -5167,7 +5599,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. PUT /profiles/practitioners/{profileId}/photo
+## 33. PUT /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5278,6 +5710,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
   "taxHolderName": "Nombre de ejemplo",
@@ -5408,6 +5841,7 @@ Campos de la respuesta:
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
@@ -5522,7 +5956,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /profiles/practitioners/{profileId}/specialties
+## 34. POST /profiles/practitioners/{profileId}/specialties
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5668,7 +6102,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /profiles/practitioners/{profileId}/summary
+## 35. GET /profiles/practitioners/{profileId}/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5763,6 +6197,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
   "taxHolderName": "Nombre de ejemplo",
@@ -5893,6 +6328,7 @@ Campos de la respuesta:
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
@@ -6004,7 +6440,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. PATCH /profiles/practitioners/me
+## 36. PATCH /profiles/practitioners/me
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6059,6 +6495,7 @@ Content-Type: application/json
 | `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `birthDate` | No | `object` | formato `date`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sexo asignado al nacer | `MALE` |
+| `nationalId` | No | `string` | longitud mínima 1; longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Número del documento de identidad. 409 si la identidad está verificada o en verificación. | `00000000-0000-4000-8000-000000000001` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor del documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `phone` | No | `string` | longitud máxima 40; patrón runtime `PHONE_PATTERN` | Forma anterior de declarar el teléfono. Preferí workMobilePhone. | `+59170000000` |
 | `workEmail` | No | `string` | formato `email`; longitud máxima 320 | Sin descripción específica en el contrato OpenAPI. | `usuario@example.com` |
@@ -6105,6 +6542,7 @@ Content-Type: application/json
   "motherLastName": "Nombre de ejemplo",
   "birthDate": {},
   "sexAtBirth": "MALE",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "phone": "+59170000000",
   "workEmail": "usuario@example.com",
@@ -6178,6 +6616,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
   "taxHolderName": "Nombre de ejemplo",
@@ -6308,6 +6747,7 @@ Campos de la respuesta:
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
@@ -6402,6 +6842,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un idioma no puede declararse dos veces | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
@@ -6424,7 +6865,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. GET /profiles/practitioners/me/affiliations
+## 37. GET /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6560,7 +7001,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /profiles/practitioners/me/affiliations
+## 38. POST /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6727,7 +7168,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+## 39. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6826,7 +7267,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+## 40. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6986,7 +7427,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /profiles/practitioners/me/credentials
+## 41. POST /profiles/practitioners/me/credentials
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7147,7 +7588,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. DELETE /profiles/practitioners/me/credentials/{credentialId}
+## 42. DELETE /profiles/practitioners/me/credentials/{credentialId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7247,7 +7688,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. PATCH /profiles/practitioners/me/credentials/{credentialId}
+## 43. PATCH /profiles/practitioners/me/credentials/{credentialId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7377,7 +7818,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 44. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7479,7 +7920,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 45. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7599,7 +8040,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /profiles/practitioners/me/linkable-organizations
+## 46. GET /profiles/practitioners/me/linkable-organizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7725,7 +8166,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /profiles/practitioners/me/onboarding
+## 47. GET /profiles/practitioners/me/onboarding
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7844,7 +8285,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. GET /profiles/practitioners/me/signature-assets
+## 48. GET /profiles/practitioners/me/signature-assets
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7949,7 +8390,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. PUT /profiles/practitioners/me/signature-assets
+## 49. PUT /profiles/practitioners/me/signature-assets
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8073,7 +8514,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. DELETE /profiles/practitioners/me/specialties/{specialtyId}
+## 50. DELETE /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8173,7 +8614,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. PATCH /profiles/practitioners/me/specialties/{specialtyId}
+## 51. PATCH /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8291,7 +8732,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
+## 52. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8411,7 +8852,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. GET /profiles/practitioners/me/summary
+## 53. GET /profiles/practitioners/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8502,6 +8943,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "birthDate": "2026-07-31",
   "sexAtBirth": "MALE",
   "nationalId": "00000000-0000-4000-8000-000000000001",
+  "identityVerified": true,
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "taxId": "00000000-0000-4000-8000-000000000001",
   "taxHolderName": "Nombre de ejemplo",
@@ -8632,6 +9074,7 @@ Campos de la respuesta:
 | `birthDate` | No | `string` | formato `date` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31` |
 | `sexAtBirth` | No | `string` | valores: `MALE`, `FEMALE`, `INTERSEX`, `UNKNOWN` | Sólo en la lectura propia | `MALE` |
 | `nationalId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `identityVerified` | No | `boolean` | Sin restricción adicional declarada | Sólo en la lectura propia | `true` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento emisor (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
@@ -8743,7 +9186,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. GET /profiles/practitioners/specialty-counts
+## 54. GET /profiles/practitioners/specialty-counts
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8856,7 +9299,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. GET /tenants/{tenantId}/practitioner-requests
+## 55. GET /tenants/{tenantId}/practitioner-requests
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -8986,7 +9429,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+## 56. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -9086,7 +9529,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+## 57. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -9199,7 +9642,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+## 58. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
