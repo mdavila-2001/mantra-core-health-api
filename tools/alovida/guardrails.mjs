@@ -72,9 +72,17 @@ const ALLOWED_COMMANDS =
  *   - prescription-favorites: plantillas personales del profesional para
  *     repetir una indicación. No es una receta emitida ni entra en la historia
  *     clínica; el servicio sólo borra favoritos del perfil de quien pide.
+ *   - accounting-practitioner-simple (P49): la contabilidad simple del doctor,
+ *     sus propias cuentas, gastos/activos/deudas y transacciones debe/haber. No
+ *     es el libro mayor del tenant: no toca `accounting.journal_transactions`.
+ *     Cada borrado se limita a la práctica de quien pide, deja su registro en
+ *     la bitácora (`@Audited`) y la cuenta general o en uso responde 409.
  */
 const RESTRICTED_DELETE_ALLOWLIST = new Set([
   "src/modules/clinical_ext/controllers/prescription-favorites.controller.ts#':id'",
+  "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts#'accounts/:id'",
+  "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts#'records/:id'",
+  "src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts#'transactions/:id'",
 ]);
 
 const AUTHN_NON_ROLE_ALLOWLIST =
