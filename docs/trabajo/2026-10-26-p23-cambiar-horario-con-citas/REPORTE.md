@@ -107,6 +107,10 @@ Archivos: `evidencia/post-merge.txt`, `evidencia/int-p23.txt`, `evidencia/int-ki
   segunda corrida (caché caliente) arrancó en ~30 s.
 - Un `it` del int-spec comparaba `Date` y el driver devuelve texto (`TEST_BUG`): se compara como instante,
   sin aflojar la aserción.
+- El gancho `pre-push` del frontend (construcción de producción) murió por el entorno
+  (`fatal error: all goroutines are asleep - deadlock!`, código 129, máquina compartida). Se construyó
+  aparte con `yarn ng build` → EXIT=0 (`evidencia/front-build.txt`) y se publicó con `SALTAR_BUILD=1`,
+  la vía de escape del propio gancho.
 - No se tocó `generate-slots` de la API (P36 lo cambia): ya omite los instantes que pisan citas
   confirmadas del profesional; el int-spec lo demuestra.
 
