@@ -195,6 +195,8 @@ export interface CreateRuleData {
   gapMinutes?: number;
   /** Qué admite la franja (concepto). Ausente ≡ solo consultas. */
   bookingModeConceptId?: string;
+  /** La franja atiende también por telemedicina. Ausente ≡ `false`. */
+  telemedicineEnabled?: boolean;
   /**
    * Identificador asociado a actor user.
    */
@@ -486,6 +488,7 @@ export class SchedulingCatalogRepository {
         capacityPerSlot: data.capacityPerSlot,
         gapMinutes: data.gapMinutes,
         bookingModeConceptId: data.bookingModeConceptId,
+        telemedicineEnabled: data.telemedicineEnabled === true,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

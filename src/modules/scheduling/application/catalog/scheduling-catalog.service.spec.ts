@@ -599,8 +599,14 @@ describe('SchedulingCatalogService', () => {
         const res = await d.service.listTemplates(RESOURCE, actor);
 
         expect(res.count).toBe(2);
+        // v4.2.61: la telemedicina viaja siempre; sin declararla, `false`.
         expect(res.items[0].rules).toEqual([
-          { dayOfWeek: 1, startTime: '09:00:00', endTime: '13:00:00' },
+          {
+            dayOfWeek: 1,
+            startTime: '09:00:00',
+            endTime: '13:00:00',
+            telemedicineEnabled: false,
+          },
         ]);
         expect(res.items[1].rules).toHaveLength(1);
       });
@@ -674,8 +680,46 @@ describe('SchedulingCatalogService', () => {
           id: 'tpl-1',
           name: 'Horario',
           statusConceptId: 'c',
-          rules: [{ dayOfWeek: 1, startTime: '09:00:00', endTime: '13:00:00' }],
+          rules: [
+            {
+              dayOfWeek: 1,
+              startTime: '09:00:00',
+              endTime: '13:00:00',
+              // v4.2.61: NOT NULL DEFAULT false, viaja siempre.
+              telemedicineEnabled: false,
+            },
+          ],
         });
+      });
+
+      it('devuelve la telemedicina de cada franja (v4.2.61)', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.findTemplatesByResource.mockResolvedValue([
+          { id: 'tpl-1', name: 'Horario', statusConceptId: 'c' },
+        ]);
+        d.catalogRepo.findRulesByTemplates.mockResolvedValue([
+          {
+            scheduleTemplateId: 'tpl-1',
+            dayOfWeek: 2,
+            startTime: '15:00:00',
+            endTime: '19:00:00',
+            telemedicineEnabled: true,
+          },
+          {
+            scheduleTemplateId: 'tpl-1',
+            dayOfWeek: 4,
+            startTime: '08:00:00',
+            endTime: '12:00:00',
+            telemedicineEnabled: false,
+          },
+        ]);
+
+        const res = await d.service.listTemplates(RESOURCE, actor);
+
+        expect(
+          res.items[0].rules.map((rule) => rule.telemedicineEnabled),
+        ).toEqual([true, false]);
       });
 
       it('un recurso inexistente sí es 404', async () => {
@@ -834,6 +878,33 @@ describe('SchedulingCatalogService', () => {
         expect(res.ruleCount).toBe(1);
         expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_PUBLISHED);
         expect(d.catalogRepo.createRule).toHaveBeenCalledTimes(1);
+      });
+
+      it('la telemedicina por franja: apagada por defecto, encendida si se pide (v4.2.61)', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+
+        await d.service.createTemplate(
+          RESOURCE,
+          {
+            name: 'Mixto',
+            rules: [
+              { dayOfWeek: 1, startTime: '08:00:00', endTime: '12:00:00' },
+              {
+                dayOfWeek: 2,
+                startTime: '15:00:00',
+                endTime: '19:00:00',
+                telemedicineEnabled: true,
+              },
+            ],
+          } as never,
+          actor,
+        );
+
+        const bands = d.catalogRepo.createRule.mock.calls.map((c: any) => c[1]);
+        expect(bands[0].telemedicineEnabled).toBe(false);
+        expect(bands[1].telemedicineEnabled).toBe(true);
       });
 
       it('rejects a rule that ends before it starts', async () => {
@@ -1566,6 +1637,33 @@ describe('SchedulingCatalogService', () => {
         );
         expect(d.catalogRepo.createRule).toHaveBeenCalledTimes(2);
         expect(res.ruleCount).toBe(2);
+      });
+
+      it('al reemplazar las franjas conserva la telemedicina que se manda (v4.2.61)', async () => {
+        const d = buildCatalog();
+        withOwnTemplate(d);
+
+        await d.service.updateTemplate(
+          'tpl-1',
+          {
+            rules: [
+              {
+                dayOfWeek: 2,
+                startTime: '09:00',
+                endTime: '12:00',
+                telemedicineEnabled: true,
+              },
+              { dayOfWeek: 4, startTime: '14:00', endTime: '17:00' },
+            ],
+          } as never,
+          owner as never,
+        );
+
+        const bands = d.catalogRepo.createRule.mock.calls.map((c: any) => c[1]);
+        expect(bands.map((b: any) => b.telemedicineEnabled)).toEqual([
+          true,
+          false,
+        ]);
       });
 
       it('rechaza una franja cuyo turno, completo, pisaría la siguiente', async () => {

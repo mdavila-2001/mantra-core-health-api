@@ -86,6 +86,7 @@ export class ListTemplatesUseCase {
         ...(band.bookingModeConceptId == null
           ? {}
           : { bookingMode: modeOfConcept(band.bookingModeConceptId) }),
+        telemedicineEnabled: band.telemedicineEnabled === true,
       });
       byTemplate.set(band.scheduleTemplateId, list);
     }

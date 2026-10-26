@@ -139,6 +139,7 @@ export class UpdateTemplateUseCase {
             capacityPerSlot: rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY,
             gapMinutes: rule.gapMinutes,
             bookingModeConceptId: bandMode(rule.bookingMode),
+            telemedicineEnabled: rule.telemedicineEnabled === true,
             actorUserId: actor.id,
           });
         }

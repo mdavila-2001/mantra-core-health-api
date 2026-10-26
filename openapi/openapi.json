@@ -146658,6 +146658,11 @@
               "MIXED"
             ],
             "description": "Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS"
+          },
+          "telemedicineEnabled": {
+            "type": "boolean",
+            "description": "La franja atiende también por telemedicina. Ausente ≡ false (sólo presencial)",
+            "default": false
           }
         },
         "required": [
