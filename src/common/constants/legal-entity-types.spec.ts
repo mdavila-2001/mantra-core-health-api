@@ -61,21 +61,77 @@ describe('LEGAL_ENTITY_TYPES', () => {
     }
   });
 
-  it('las 8 formas bolivianas conservan sus códigos históricos, sin prefijo de país', () => {
+  it('las 8 formas bolivianas conservan sus códigos históricos, sin prefijo de país, y en su lugar', () => {
     const bolivianos = LEGAL_ENTITY_TYPES.filter(
       (e) => e.countryIso === 'BO',
     ).map((e) => e.code);
-    expect(bolivianos.sort()).toEqual(
-      [
-        'UNIPERSONAL',
-        'SRL',
-        'LTDA',
-        'SA',
-        'SOCIEDAD_COLECTIVA',
-        'COMANDITA_SIMPLE',
-        'COMANDITA_ACCIONES',
-        'SUCURSAL_EXTRANJERA',
-      ].sort(),
+    expect(bolivianos.slice(0, 8)).toEqual([
+      'UNIPERSONAL',
+      'SRL',
+      'LTDA',
+      'SA',
+      'SOCIEDAD_COLECTIVA',
+      'COMANDITA_SIMPLE',
+      'COMANDITA_ACCIONES',
+      'SUCURSAL_EXTRANJERA',
+    ]);
+    // Ningún código boliviano lleva prefijo de país.
+    for (const code of bolivianos) {
+      expect(code).not.toMatch(/^[A-Z]{2}_/);
+    }
+  });
+
+  it('cubre las formas no societarias y del sector público con las que se presta salud en Bolivia', () => {
+    const bolivianos = LEGAL_ENTITY_TYPES.filter(
+      (e) => e.countryIso === 'BO',
+    ).map((e) => e.code);
+    expect(bolivianos).toEqual(
+      expect.arrayContaining([
+        'SAM',
+        'COOPERATIVA',
+        'ASOCIACION_CIVIL',
+        'FUNDACION',
+        'ONG',
+        'ENTIDAD_PUBLICA',
+        'EMPRESA_ESTATAL',
+        'EMPRESA_ESTATAL_MIXTA',
+        'ENTIDAD_RELIGIOSA',
+        'MUTUAL',
+        'IFD',
+        'PROFESIONAL_INDEPENDIENTE',
+      ]),
+    );
+    expect(bolivianos).toHaveLength(27);
+  });
+
+  it('agrega las formas nuevas al final: las 21 originales conservan su posición', () => {
+    expect(LEGAL_ENTITY_TYPES.slice(0, 21).map((e) => e.code)).toEqual([
+      'UNIPERSONAL',
+      'SRL',
+      'LTDA',
+      'SA',
+      'SOCIEDAD_COLECTIVA',
+      'COMANDITA_SIMPLE',
+      'COMANDITA_ACCIONES',
+      'SUCURSAL_EXTRANJERA',
+      'BR_LTDA',
+      'BR_SA',
+      'BR_MEI',
+      'BR_EI',
+      'BR_SLU',
+      'BR_FILIAL_EST',
+      'US_LLC',
+      'US_CORP',
+      'US_SOLE_PROP',
+      'US_LLP',
+      'US_BRANCH',
+      'AR_SAS',
+      'MX_S_RL',
+    ]);
+    // El orden de la enumeración es el del diccionario: el seed asigna el
+    // ordinal por posición y no reordena lo ya sembrado.
+    expect(ENUM_LEGAL_ENTITY_TYPE.concepts).toEqual(
+      LEGAL_ENTITY_TYPES.map((e) => e.conceptId),
     );
   });
 });

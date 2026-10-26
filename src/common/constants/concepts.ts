@@ -766,6 +766,108 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'MX_S_RL',
     'Sociedad de Responsabilidad Limitada (Mexico)',
   ),
+
+  /* Formas jurídicas bolivianas que faltaban (ampliación del 26/10/2026: el
+     cliente pidió «la máxima amplitud»). Además de las sociedades comerciales,
+     en Bolivia dan servicios de salud cooperativas, fundaciones, ONG, iglesias,
+     entidades y empresas públicas (Ley 466), organismos internacionales y el
+     profesional que factura con su NIT personal. Se agregan al final: los ids
+     son UUIDv5 de la clave, así que nada de lo ya persistido cambia. */
+  LEGAL_ENTITY_SAM: def(
+    'directory:legal-entity:sam',
+    'SAM',
+    'Mixed-capital corporation (S.A.M.)',
+  ),
+  LEGAL_ENTITY_ACCIDENTAL_ASSOCIATION: def(
+    'directory:legal-entity:accidental-association',
+    'ASOCIACION_ACCIDENTAL',
+    'Accidental association (joint venture)',
+  ),
+  LEGAL_ENTITY_CIVIL_PARTNERSHIP: def(
+    'directory:legal-entity:civil-partnership',
+    'SOCIEDAD_CIVIL',
+    'Civil partnership',
+  ),
+  LEGAL_ENTITY_INDEPENDENT_PROFESSIONAL: def(
+    'directory:legal-entity:independent-professional',
+    'PROFESIONAL_INDEPENDIENTE',
+    'Independent professional (natural person)',
+  ),
+  LEGAL_ENTITY_COOPERATIVE: def(
+    'directory:legal-entity:cooperative',
+    'COOPERATIVA',
+    'Cooperative',
+  ),
+  LEGAL_ENTITY_MUTUAL: def(
+    'directory:legal-entity:mutual',
+    'MUTUAL',
+    'Mutual society',
+  ),
+  LEGAL_ENTITY_SOCIAL_ENTERPRISE: def(
+    'directory:legal-entity:social-enterprise',
+    'EMPRESA_SOCIAL',
+    'Social enterprise',
+  ),
+  LEGAL_ENTITY_CIVIL_ASSOCIATION: def(
+    'directory:legal-entity:civil-association',
+    'ASOCIACION_CIVIL',
+    'Civil association',
+  ),
+  LEGAL_ENTITY_FOUNDATION: def(
+    'directory:legal-entity:foundation',
+    'FUNDACION',
+    'Foundation',
+  ),
+  LEGAL_ENTITY_NGO: def(
+    'directory:legal-entity:ngo',
+    'ONG',
+    'Non-governmental organization',
+  ),
+  LEGAL_ENTITY_RELIGIOUS: def(
+    'directory:legal-entity:religious-organization',
+    'ENTIDAD_RELIGIOSA',
+    'Religious organization',
+  ),
+  LEGAL_ENTITY_DEVELOPMENT_FINANCE: def(
+    'directory:legal-entity:development-finance-institution',
+    'IFD',
+    'Development finance institution',
+  ),
+  LEGAL_ENTITY_COMMUNITY_ORGANIZATION: def(
+    'directory:legal-entity:community-organization',
+    'ORGANIZACION_SOCIAL',
+    'Community or social organization',
+  ),
+  LEGAL_ENTITY_PUBLIC_ENTITY: def(
+    'directory:legal-entity:public-entity',
+    'ENTIDAD_PUBLICA',
+    'Public entity',
+  ),
+  LEGAL_ENTITY_STATE_ENTERPRISE: def(
+    'directory:legal-entity:state-enterprise',
+    'EMPRESA_ESTATAL',
+    'State-owned enterprise',
+  ),
+  LEGAL_ENTITY_MIXED_STATE_ENTERPRISE: def(
+    'directory:legal-entity:mixed-state-enterprise',
+    'EMPRESA_ESTATAL_MIXTA',
+    'Mixed state-owned enterprise',
+  ),
+  LEGAL_ENTITY_MIXED_ENTERPRISE: def(
+    'directory:legal-entity:mixed-enterprise',
+    'EMPRESA_MIXTA',
+    'Mixed enterprise',
+  ),
+  LEGAL_ENTITY_INTERGOVERNMENTAL_ENTERPRISE: def(
+    'directory:legal-entity:intergovernmental-enterprise',
+    'EMPRESA_ESTATAL_INTERGUBERNAMENTAL',
+    'Intergovernmental state enterprise',
+  ),
+  LEGAL_ENTITY_INTERNATIONAL_ORGANIZATION: def(
+    'directory:legal-entity:international-organization',
+    'ORGANISMO_INTERNACIONAL',
+    'International organization',
+  ),
   TENANT_ACTIVE: def(
     'directory:tenant-status:active',
     'TENANT_ACTIVE',

@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 
 import {
   BOLIVIA_CARRIERS,
+  BOLIVIA_CURATED_CARRIERS,
   BOLIVIA_HEALTH_PLANS,
   BOLIVIA_PUBLIC_INSURERS,
   carrierId,
@@ -134,7 +135,9 @@ describe('InsuranceCatalogService', () => {
       statusConceptId: string;
     };
     expect(filter.id.$in).toHaveLength(
-      BOLIVIA_CARRIERS.length + BOLIVIA_PUBLIC_INSURERS.length,
+      BOLIVIA_CARRIERS.length +
+        BOLIVIA_CURATED_CARRIERS.length +
+        BOLIVIA_PUBLIC_INSURERS.length,
     );
     expect(filter.statusConceptId).toBe(INS.CARRIER_ACTIVE);
   });
@@ -201,5 +204,63 @@ describe('catálogo de planes sembrado', () => {
       'MUNDIAL_BLUE',
       'NARANJA_PLUS',
     ]);
+  });
+});
+
+describe('catálogo de aseguradoras ampliado (26/10/2026)', () => {
+  const all = [
+    ...BOLIVIA_CARRIERS.map((c) => c.code),
+    ...BOLIVIA_CURATED_CARRIERS.map((c) => c.code),
+    ...BOLIVIA_PUBLIC_INSURERS.map((c) => c.code),
+  ];
+
+  it('no repite códigos entre el listado, las curadas y las públicas', () => {
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it('trae todos los entes gestores de la seguridad social de corto plazo', () => {
+    const publicCodes = new Set(BOLIVIA_PUBLIC_INSURERS.map((c) => c.code));
+    for (const code of [
+      'BO_PUB_CNS',
+      'BO_PUB_CPS',
+      'BO_PUB_COSSMIL',
+      'BO_PUB_CBES',
+      'BO_PUB_BANCA_PRIVADA',
+      'BO_PUB_CAMINOS',
+      'BO_PUB_CORDES',
+      'BO_PUB_SINEC',
+      'BO_PUB_SSU',
+      'BO_PUB_SSU_LA_PAZ',
+      'BO_PUB_SSU_COCHABAMBA',
+      'BO_PUB_SSU_SUCRE',
+      'BO_PUB_SSU_ORURO',
+      'BO_PUB_SSU_POTOSI',
+      'BO_PUB_SSU_TARIJA',
+      'BO_PUB_SSU_SANTA_CRUZ',
+      'BO_PUB_SUS',
+    ]) {
+      expect(publicCodes.has(code)).toBe(true);
+    }
+  });
+
+  it('las curadas usan la regla de código del extractor y son del sector privado', () => {
+    for (const carrier of BOLIVIA_CURATED_CARRIERS) {
+      expect(carrier.code).toMatch(/^BO_ASEG_[A-Z0-9_]+$/);
+      expect(declaredPlanSector(carrierPlanId(carrier.code, 'BASE'))).toBe(
+        'private',
+      );
+    }
+    expect(BOLIVIA_CURATED_CARRIERS.map((c) => c.code)).toContain(
+      'BO_ASEG_SEGUROS_PROVIDA_S_A',
+    );
+  });
+
+  it('los entes nuevos son públicos: su plan BASE cae en el sector público', () => {
+    expect(declaredPlanSector(carrierPlanId('BO_PUB_CBES', 'BASE'))).toBe(
+      'public',
+    );
+    expect(
+      declaredPlanSector(carrierPlanId('BO_PUB_SSU_SANTA_CRUZ', 'BASE')),
+    ).toBe('public');
   });
 });

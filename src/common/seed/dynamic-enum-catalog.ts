@@ -332,6 +332,39 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       PROF.RELATIONSHIP_OTHER_RELATIVE,
       PROF.RELATIONSHIP_FRIEND,
       PROF.RELATIONSHIP_OTHER,
+      // La ampliación va después de `RELATIONSHIP_OTHER` y no antes: el seed
+      // sólo inserta, y numera cada opción por su posición en esta lista.
+      // Intercalarla correría el ordinal de las nueve que ya existen en bases
+      // sembradas y dejaría dos opciones con el mismo número.
+      PROF.RELATIONSHIP_GRANDPARENT,
+      PROF.RELATIONSHIP_GRANDCHILD,
+      PROF.RELATIONSHIP_UNCLE_AUNT,
+      PROF.RELATIONSHIP_NEPHEW_NIECE,
+      PROF.RELATIONSHIP_COUSIN,
+      PROF.RELATIONSHIP_HALF_SIBLING,
+      PROF.RELATIONSHIP_GREAT_GRANDPARENT,
+      PROF.RELATIONSHIP_GREAT_GRANDCHILD,
+      PROF.RELATIONSHIP_PARENT_IN_LAW,
+      PROF.RELATIONSHIP_CHILD_IN_LAW,
+      PROF.RELATIONSHIP_SIBLING_IN_LAW,
+      PROF.RELATIONSHIP_STEPPARENT,
+      PROF.RELATIONSHIP_STEPCHILD,
+      PROF.RELATIONSHIP_STEPSIBLING,
+      PROF.RELATIONSHIP_ADOPTIVE_PARENT,
+      PROF.RELATIONSHIP_ADOPTED_CHILD,
+      PROF.RELATIONSHIP_FOSTER_PARENT,
+      PROF.RELATIONSHIP_EX_SPOUSE,
+      PROF.RELATIONSHIP_GODPARENT,
+      PROF.RELATIONSHIP_GODCHILD,
+      PROF.RELATIONSHIP_COMPADRE,
+      PROF.RELATIONSHIP_CAREGIVER,
+      PROF.RELATIONSHIP_DOMESTIC_WORKER,
+      PROF.RELATIONSHIP_ATTORNEY_IN_FACT,
+      PROF.RELATIONSHIP_CARE_HOME_STAFF,
+      PROF.RELATIONSHIP_NEIGHBOR,
+      PROF.RELATIONSHIP_HOUSEMATE,
+      PROF.RELATIONSHIP_COWORKER,
+      PROF.RELATIONSHIP_EMPLOYER,
     ],
     targets: ['profiles.related_persons.relationship_concept_id'],
   },
@@ -437,7 +470,20 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       'Ámbito territorial de la licencia para ejercer. SEDES Santa Cruz es ' +
       'departamental y se suma a la nacional, no la reemplaza: un profesional ' +
       'puede declarar las dos como autorizaciones separadas.',
-    concepts: [PROF.JURISDICTION_NATIONAL, PROF.JURISDICTION_SEDES_SANTA_CRUZ],
+    // Los nueve SEDES, uno por departamento. Santa Cruz conserva su lugar
+    // porque el seed numera por posición y sólo inserta.
+    concepts: [
+      PROF.JURISDICTION_NATIONAL,
+      PROF.JURISDICTION_SEDES_SANTA_CRUZ,
+      PROF.JURISDICTION_SEDES_LA_PAZ,
+      PROF.JURISDICTION_SEDES_COCHABAMBA,
+      PROF.JURISDICTION_SEDES_ORURO,
+      PROF.JURISDICTION_SEDES_POTOSI,
+      PROF.JURISDICTION_SEDES_CHUQUISACA,
+      PROF.JURISDICTION_SEDES_TARIJA,
+      PROF.JURISDICTION_SEDES_BENI,
+      PROF.JURISDICTION_SEDES_PANDO,
+    ],
     defaultConceptId: PROF.JURISDICTION_NATIONAL,
     targets: ['profiles.jurisdiction_authorizations.jurisdiction_concept_id'],
   },
@@ -521,9 +567,11 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     name: 'Forma societaria',
     description:
       'Figura jurídica con la que la organización está constituida. Las ocho primeras son del ' +
-      'derecho comercial boliviano; las siguientes son de otras jurisdicciones (subtarea 1.1, ' +
-      'diccionario internacional) — país y categoría canónica de cada una viajan como propiedades ' +
-      'del concepto (`legal-entity-country` / `legal-entity-canonical-category`), no acá.',
+      'derecho comercial boliviano; las trece siguientes son de otras jurisdicciones (subtarea 1.1, ' +
+      'diccionario internacional) y las últimas son las formas bolivianas no societarias y del ' +
+      'sector público (cooperativas, fundaciones, ONG, entidades y empresas públicas…) — país y ' +
+      'categoría canónica de cada una viajan como propiedades del concepto ' +
+      '(`legal-entity-country` / `legal-entity-canonical-category`), no acá.',
     concepts: [
       // Bolivia — orden histórico, no se reordena: cambiar el ordinal de un
       // concepto ya sembrado desplaza el `isDefault`/posición en bases vivas.
@@ -551,6 +599,27 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       // Argentina y México
       CONCEPTS.LEGAL_ENTITY_AR_SAS,
       CONCEPTS.LEGAL_ENTITY_MX_S_RL,
+      // Bolivia: formas no societarias y del sector público (26/10/2026). Al
+      // final por la misma razón que arriba: el seed no reordena lo sembrado.
+      CONCEPTS.LEGAL_ENTITY_SAM,
+      CONCEPTS.LEGAL_ENTITY_ACCIDENTAL_ASSOCIATION,
+      CONCEPTS.LEGAL_ENTITY_CIVIL_PARTNERSHIP,
+      CONCEPTS.LEGAL_ENTITY_INDEPENDENT_PROFESSIONAL,
+      CONCEPTS.LEGAL_ENTITY_COOPERATIVE,
+      CONCEPTS.LEGAL_ENTITY_MUTUAL,
+      CONCEPTS.LEGAL_ENTITY_SOCIAL_ENTERPRISE,
+      CONCEPTS.LEGAL_ENTITY_CIVIL_ASSOCIATION,
+      CONCEPTS.LEGAL_ENTITY_FOUNDATION,
+      CONCEPTS.LEGAL_ENTITY_NGO,
+      CONCEPTS.LEGAL_ENTITY_RELIGIOUS,
+      CONCEPTS.LEGAL_ENTITY_DEVELOPMENT_FINANCE,
+      CONCEPTS.LEGAL_ENTITY_COMMUNITY_ORGANIZATION,
+      CONCEPTS.LEGAL_ENTITY_PUBLIC_ENTITY,
+      CONCEPTS.LEGAL_ENTITY_STATE_ENTERPRISE,
+      CONCEPTS.LEGAL_ENTITY_MIXED_STATE_ENTERPRISE,
+      CONCEPTS.LEGAL_ENTITY_MIXED_ENTERPRISE,
+      CONCEPTS.LEGAL_ENTITY_INTERGOVERNMENTAL_ENTERPRISE,
+      CONCEPTS.LEGAL_ENTITY_INTERNATIONAL_ORGANIZATION,
     ],
     // Sin preseleccionado: la forma societaria es un hecho registral, y el que
     // viniera puesto por omisión sería el que más filas tendría al final sin que
@@ -846,6 +915,22 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       CLIN.MEDICATION_ROUTE_SUBCUTANEOUS,
       CLIN.MEDICATION_ROUTE_TOPICAL,
       CLIN.MEDICATION_ROUTE_INHALATION,
+      CLIN.MEDICATION_ROUTE_SUBLINGUAL,
+      CLIN.MEDICATION_ROUTE_BUCCAL,
+      CLIN.MEDICATION_ROUTE_NASAL,
+      CLIN.MEDICATION_ROUTE_RECTAL,
+      CLIN.MEDICATION_ROUTE_VAGINAL,
+      CLIN.MEDICATION_ROUTE_OPHTHALMIC,
+      CLIN.MEDICATION_ROUTE_OTIC,
+      CLIN.MEDICATION_ROUTE_TRANSDERMAL,
+      CLIN.MEDICATION_ROUTE_INTRADERMAL,
+      CLIN.MEDICATION_ROUTE_INTRALESIONAL,
+      CLIN.MEDICATION_ROUTE_INFILTRATION,
+      CLIN.MEDICATION_ROUTE_INTRAARTICULAR,
+      CLIN.MEDICATION_ROUTE_INTRATHECAL,
+      CLIN.MEDICATION_ROUTE_EPIDURAL,
+      CLIN.MEDICATION_ROUTE_INTRAOSSEOUS,
+      CLIN.MEDICATION_ROUTE_ENTERAL_TUBE,
     ],
     targets: ['clinical.medication_requests.route_concept_id'],
   },
@@ -860,6 +945,20 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       CLIN.MEDICATION_UNIT_TABLET,
       CLIN.MEDICATION_UNIT_CAPSULE,
       CLIN.MEDICATION_UNIT_DROP,
+      CLIN.MEDICATION_UNIT_MICROGRAM,
+      CLIN.MEDICATION_UNIT_INTERNATIONAL_UNIT,
+      CLIN.MEDICATION_UNIT_MILLIEQUIVALENT,
+      CLIN.MEDICATION_UNIT_AMPOULE,
+      CLIN.MEDICATION_UNIT_VIAL,
+      CLIN.MEDICATION_UNIT_PREFILLED_SYRINGE,
+      CLIN.MEDICATION_UNIT_SACHET,
+      CLIN.MEDICATION_UNIT_SUPPOSITORY,
+      CLIN.MEDICATION_UNIT_PESSARY,
+      CLIN.MEDICATION_UNIT_PATCH,
+      CLIN.MEDICATION_UNIT_PUFF,
+      CLIN.MEDICATION_UNIT_APPLICATION,
+      CLIN.MEDICATION_UNIT_BOTTLE,
+      CLIN.MEDICATION_UNIT_TUBE,
     ],
     targets: ['clinical.medication_requests.unit_concept_id'],
   },
