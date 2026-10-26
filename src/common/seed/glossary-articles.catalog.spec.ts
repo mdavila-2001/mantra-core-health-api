@@ -71,6 +71,27 @@ const OWN_IMAGE = /^\/glossary-images\/[a-z0-9]+(?:-[a-z0-9]+)*\.svg$/;
 const wordsOf = (text: string): number =>
   text.split(/\s+/).filter(Boolean).length;
 
+/** Un slug del glosario: kebab-case, el mismo formato que exige el generador del front. */
+const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/**
+ * Piso de palabras de un artículo de término curado: los de autoría manual
+ * (`data/glossary/articulos/00_README.md`, «--min 2000» por omisión).
+ */
+const CURATED_MIN_WORDS = 2000;
+
+/**
+ * Piso de palabras de cualquier artículo: el de los artículos de
+ * investigación de las capas del front (`--min 350`, ver el mismo README).
+ */
+const MIN_WORDS = 350;
+
+const wordsOfArticle = (slug: string): number =>
+  glossaryArticleFor(slug)!.sections.reduce(
+    (total, section) => total + wordsOf(section.text),
+    0,
+  );
+
 describe('Artículos enciclopédicos de autoría propia del glosario', () => {
   const termSlugs = new Set(GLOSSARY_TERMS.map((term) => term.slug));
 
@@ -78,11 +99,19 @@ describe('Artículos enciclopédicos de autoría propia del glosario', () => {
     expect(GLOSSARY_ARTICLE_SLUGS.length).toBeGreaterThan(0);
   });
 
-  it('cada artículo es de un término curado que existe', () => {
-    const unknown = GLOSSARY_ARTICLE_SLUGS.filter(
-      (slug) => !termSlugs.has(slug),
-    );
-    expect(unknown).toEqual([]);
+  it('cada artículo está bajo el slug de su término, en kebab-case', () => {
+    // No se exige que el término sea curado: el seed adjunta el artículo a
+    // cualquier concepto del glosario por su `glossary-slug`.
+    for (const slug of GLOSSARY_ARTICLE_SLUGS) {
+      expect(slug).toMatch(SLUG);
+      expect(glossaryArticleFor(slug)!.conceptRef.slug).toBe(slug);
+    }
+  });
+
+  it('un slug sin artículo no devuelve nada, ni siquiera uno heredado de Object', () => {
+    expect(glossaryArticleFor('no-existe-este-termino')).toBeUndefined();
+    expect(glossaryArticleFor('constructor')).toBeUndefined();
+    expect(glossaryArticleFor('__proto__')).toBeUndefined();
   });
 
   it('cada artículo declara el slug de su término y su procedencia propia', () => {
@@ -109,14 +138,18 @@ describe('Artículos enciclopédicos de autoría propia del glosario', () => {
     }
   });
 
-  it('cada artículo llega al piso de 2.000 palabras', () => {
+  it('cada artículo de un término curado llega al piso de 2.000 palabras', () => {
+    const short = GLOSSARY_ARTICLE_SLUGS.filter((slug) => termSlugs.has(slug))
+      .map((slug) => ({ slug, words: wordsOfArticle(slug) }))
+      .filter((entry) => entry.words < CURATED_MIN_WORDS);
+    expect(short).toEqual([]);
+  });
+
+  it('todo artículo llega al piso de 350 palabras', () => {
     const short = GLOSSARY_ARTICLE_SLUGS.map((slug) => ({
       slug,
-      words: glossaryArticleFor(slug)!.sections.reduce(
-        (total, section) => total + wordsOf(section.text),
-        0,
-      ),
-    })).filter((entry) => entry.words < 2000);
+      words: wordsOfArticle(slug),
+    })).filter((entry) => entry.words < MIN_WORDS);
     expect(short).toEqual([]);
   });
 
@@ -131,10 +164,12 @@ describe('Artículos enciclopédicos de autoría propia del glosario', () => {
     }
   });
 
-  it('cada artículo trae imágenes propias y referencias https', () => {
+  it('cada artículo trae sólo imágenes propias y referencias https', () => {
+    // Un artículo puede no tener ilustración: los de investigación se
+    // compilan con `--sin-imagen` (ver `00_README.md` del front). Las que trae
+    // tienen que ser propias y describirse.
     for (const slug of GLOSSARY_ARTICLE_SLUGS) {
       const article = glossaryArticleFor(slug)!;
-      expect(article.images.length).toBeGreaterThan(0);
       for (const image of article.images) {
         expect(image.url).toMatch(OWN_IMAGE);
         expect(image.thumbUrl).toMatch(OWN_IMAGE);
