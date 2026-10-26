@@ -795,9 +795,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."practitioner_simple_accounts" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
-    CONSTRAINT "pk_practitioner_simple_accounts" PRIMARY KEY ("id"),
-    CONSTRAINT "uq_practitioner_simple_accounts_practice_code" UNIQUE ("practice_id", "code"),
-    CONSTRAINT "ck_practitioner_simple_accounts_class" CHECK ("account_class" IN ('ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE'))
+    CONSTRAINT "pk_practitioner_simple_accounts" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "accounting"."practitioner_simple_records" (
@@ -813,9 +811,7 @@ CREATE TABLE IF NOT EXISTS "accounting"."practitioner_simple_records" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
-    CONSTRAINT "pk_practitioner_simple_records" PRIMARY KEY ("id"),
-    CONSTRAINT "ck_practitioner_simple_records_kind" CHECK ("kind" IN ('EXPENSE', 'ASSET', 'DEBT')),
-    CONSTRAINT "ck_practitioner_simple_records_amount" CHECK ("amount" > 0)
+    CONSTRAINT "pk_practitioner_simple_records" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "accounting"."practitioner_simple_transactions" (
@@ -831,7 +827,5 @@ CREATE TABLE IF NOT EXISTS "accounting"."practitioner_simple_transactions" (
     "created_by_user_id" uuid,
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
-    CONSTRAINT "pk_practitioner_simple_transactions" PRIMARY KEY ("id"),
-    CONSTRAINT "ck_practitioner_simple_transactions_distinct" CHECK ("debit_account_id" <> "credit_account_id"),
-    CONSTRAINT "ck_practitioner_simple_transactions_amount" CHECK ("amount" > 0)
+    CONSTRAINT "pk_practitioner_simple_transactions" PRIMARY KEY ("id")
 );
