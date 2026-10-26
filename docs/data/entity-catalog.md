@@ -1,20 +1,20 @@
 # Catálogo de entidades
 
 > Generado por `yarn docs:data:sync` (`tools/docs/generate-data-catalog.mjs`) cruzando las
-> **1271 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
+> **1274 entidades MikroORM reales** (`tools/catalog/lib/tsentities.mjs`) contra el
 > propósito de negocio real de la bóveda SALUD (Obsidian, sibling de este repositorio —
 > `../Mantra Core Health Vault/SALUD/Entidades` vía `vault.mjs`, la misma fuente que usa
 > `yarn orm:catalog`; `SALUD_VAULT` la sobreescribe) y fallbacks respaldados por el JSDoc de la entidad en este
-> repositorio. **1268/1271** entidades tienen descripción de negocio
+> repositorio. **1268/1274** entidades tienen descripción de negocio
 > verificada; las que no, se marcan explícitamente en vez de fabricar una frase genérica.
 >
 > Este es el catálogo de lo **implementado**. La bóveda describe 1416 entidades en total
 > — la diferencia (145) son entidades diseñadas pero no materializadas aún en
 > código; ver [entidades no implementadas](#entidades-disenadas-no-implementadas) al final.
 
-## Por schema (63 schemas · 1271 entidades)
+## Por schema (63 schemas · 1274 entidades)
 
-### `accounting` (42 entidades, módulo `accounting`)
+### `accounting` (45 entidades, módulo `accounting`)
 
 | Tabla | Clase | Campos | PK | Bloqueo optimista | Propósito de negocio |
 |---|---|---:|---|:---:|---|
@@ -54,6 +54,9 @@
 | `liability_postings` | `LiabilityPostings` | 10 | `id` | — | liability_postings es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `liability_schedules` | `LiabilitySchedules` | 15 | `id` | ✅ | liability_schedules es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `open_items` | `OpenItems` | 20 | `id` | ✅ | open_items es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
+| `practitioner_simple_accounts` | `PractitionerSimpleAccounts` | 11 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `practitioner_simple_records` | `PractitionerSimpleRecords` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
+| `practitioner_simple_transactions` | `PractitionerSimpleTransactions` | 12 | `id` | ✅ | _sin descripción verificada en la bóveda_ |
 | `profit_centers` | `ProfitCenters` | 16 | `id` | ✅ | profit_centers es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `purchases` | `Purchases` | 15 | `id` | ✅ | purchases es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
 | `sales` | `Sales` | 16 | `id` | ✅ | sales es un registro central de negocio del módulo 16 · accounting (libro mayor y sub-libros contables), dominio Financiero y ERP. |
