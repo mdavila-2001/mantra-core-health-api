@@ -29,6 +29,7 @@ describe('PracticesController', () => {
       createSite: mockFn(),
       decommissionSite: mockFn(),
       listPractices: mockFn(),
+      listSites: mockFn(),
     };
     const accreditationsService = { create: mockFn() };
     const structureService = { publishHealthcareService: mockFn() };
@@ -166,6 +167,16 @@ describe('PracticesController', () => {
     const d = build();
     await runWithTenant('tenant-1', () => d.controller.listPractices(actor));
     expect(d.sitesService.listPractices).toHaveBeenCalledWith(
+      'tenant-1',
+      actor,
+    );
+  });
+
+  it('pasa el tenant del contexto y el actor al listar sedes: el servicio autoriza por rol o por administración de la organización (A-6)', async () => {
+    const d = build();
+    await runWithTenant('tenant-1', () => d.controller.listSites('p1', actor));
+    expect(d.sitesService.listSites).toHaveBeenCalledWith(
+      'p1',
       'tenant-1',
       actor,
     );

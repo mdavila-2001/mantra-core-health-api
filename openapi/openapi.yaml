@@ -18823,7 +18823,10 @@ paths:
         - insurer-patients
   /practices:
     get:
-      description: Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE.
+      description: >-
+        Sin `@Roles`: el servicio autoriza por rol clínico o por ser OWNER/ADMIN de la organización (A-6). Un
+        PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE; quien administra la organización
+        recibe todas las suyas.
       operationId: PracticesController_listPractices
       parameters: []
       responses:
