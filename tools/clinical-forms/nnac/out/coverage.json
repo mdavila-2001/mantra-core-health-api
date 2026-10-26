@@ -1,0 +1,106 @@
+{
+  "forms": 231,
+  "rows": 543,
+  "byField": {
+    "criterios_clinicos": {
+      "mapped": 221,
+      "unmapped": 2028,
+      "percent": 9.8
+    },
+    "specialty": {
+      "mapped": 147,
+      "unmapped": 67,
+      "percent": 68.7
+    },
+    "examenes_solicitados": {
+      "mapped": 70,
+      "unmapped": 609,
+      "percent": 10.3
+    },
+    "complicaciones": {
+      "mapped": 58,
+      "unmapped": 252,
+      "percent": 18.7
+    },
+    "criterios_de_referencia": {
+      "mapped": 19,
+      "unmapped": 467,
+      "percent": 3.9
+    },
+    "factores_de_riesgo": {
+      "mapped": 28,
+      "unmapped": 267,
+      "percent": 9.5
+    }
+  },
+  "blockers": [
+    {
+      "form": "NNAC_U01_11_HERIDAS",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC_U01_23_CAIDAS_ADULTO_MAYOR",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC_U06_03_NEUROPATIA_DIABETICA",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC_U08_03_TRASTORNOS_USO_ALCOHOL",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC_U08_08_CONDUCTA_SUICIDA",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC_U09_06_ENFERMEDAD_CEREBRO_VASCULAR",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC_U10_07_CONJUNTIVITIS_HIPERPLASICA_PIG",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC_U10_27_RETINOPATIA_DIABETICA",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC25_MI_07_ENFERMEDAD_CAMBIOS_MINIMOS",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC25_MI_24_SINDROME_METABOLICO",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC25_NEU_03_DEMENCIAS",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC25_PED_11_FIEBRE_OROPOUCHE",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC25_TI_03_CETOACIDOSIS_DIABETICA",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC25_TRA_03_FRACTURAS",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC25_TRA_08_FRACTURA_METACARPIANOS",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC25_TRA_15_OSTEOARTRITIS_TUBERCULOSA",
+      "blocker": "sin-concepto-cie10"
+    },
+    {
+      "form": "NNAC25_TRA_17_OSTEOMIELITIS_CRONICA",
+      "blocker": "sin-concepto-cie10"
+    }
+  ]
+}
