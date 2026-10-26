@@ -5972,6 +5972,83 @@
         "description": "Editar la presentación del propio perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/profiles/practitioners/{profileId}": {
+      "patch": {
+        "description": "`403` si quien pide no es el titular ni plataforma. `409` `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` si se corrige el número del documento de una identidad verificada o con un caso de verificación en curso.",
+        "operationId": "ProfilesPractitionersController_updatePractitionerProfile",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOwnPractitionerProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PractitionerProfileSummaryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Corregir el perfil profesional de otro (titular o plataforma)",
+        "tags": [
+          "profiles-practitioners"
+        ]
+      }
+    },
     "/profiles/practitioners/{profileId}/photo": {
       "put": {
         "operationId": "ProfilesPractitionersController_setPractitionerPhoto",
@@ -39037,6 +39114,87 @@
           "billing-simulated"
         ],
         "description": "Una de mis facturas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/patient-spending/me": {
+      "get": {
+        "description": "Un movimiento por factura emitida al titular entre `from` y `to` (inclusive, nunca después de hoy), del más reciente al más antiguo. Importes en texto decimal exacto, con `paidAmount = grossAmount − coveredAmount − discountAmount`. El titular sale del token.",
+        "operationId": "PatientSpendingController_listMine",
+        "parameters": [
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "description": "Desde (inclusive)",
+            "schema": {
+              "example": "2025-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "description": "Hasta (inclusive)",
+            "schema": {
+              "example": "2026-10-26",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 1000,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientSpendingResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`from`/`to` faltan, no son `YYYY-MM-DD` válidos, están invertidos o abarcan más de tres años; o `limit` fuera de 1..1000."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "422": {
+            "description": "La cuenta no tiene perfil de paciente."
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mis gastos de salud",
+        "tags": [
+          "patient-spending"
+        ]
       }
     },
     "/surveys/templates": {
@@ -100701,6 +100859,10 @@
       "description": "Operaciones del dominio funcional orgext hospitals. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "patient-spending",
+      "description": "Operaciones del dominio funcional patient spending. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "payments",
       "description": "Operaciones del dominio funcional payments. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -104924,6 +105086,10 @@
           "nationalId": {
             "type": "string"
           },
+          "identityVerified": {
+            "type": "boolean",
+            "description": "Sólo en la lectura propia"
+          },
           "issuerAdministrativeAreaConceptId": {
             "type": "string",
             "format": "uuid",
@@ -105112,6 +105278,11 @@
               "UNKNOWN"
             ],
             "description": "Sexo asignado al nacer"
+          },
+          "nationalId": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Número del documento de identidad. 409 si la identidad está verificada o en verificación."
           },
           "issuerAdministrativeAreaConceptId": {
             "type": "string",
@@ -122199,6 +122370,106 @@
           "to"
         ],
         "additionalProperties": false
+      },
+      "PatientSpendingConceptDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "SPEND_CONSULTATION"
+          },
+          "display": {
+            "type": "string",
+            "example": "Consultations"
+          }
+        },
+        "required": [
+          "code",
+          "display"
+        ]
+      },
+      "PatientSpendingMovementDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "example": "2026-10-20T14:05:00.000Z"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/PatientSpendingConceptDto"
+          },
+          "providerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "grossAmount": {
+            "type": "string",
+            "example": "300.00"
+          },
+          "coveredAmount": {
+            "type": "string",
+            "example": "150.00"
+          },
+          "discountAmount": {
+            "type": "string",
+            "example": "0.00"
+          },
+          "paidAmount": {
+            "type": "string",
+            "example": "150.00"
+          }
+        },
+        "required": [
+          "id",
+          "occurredAt",
+          "description",
+          "category",
+          "providerName",
+          "grossAmount",
+          "coveredAmount",
+          "discountAmount",
+          "paidAmount"
+        ]
+      },
+      "PatientSpendingResponseDto": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "example": "BOB"
+          },
+          "from": {
+            "type": "string",
+            "example": "2025-01-01"
+          },
+          "to": {
+            "type": "string",
+            "example": "2026-10-26"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatientSpendingMovementDto"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "currency",
+          "from",
+          "to",
+          "items",
+          "truncated"
+        ]
       },
       "CreateTemplateDto": {
         "type": "object",

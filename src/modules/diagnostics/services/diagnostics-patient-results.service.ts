@@ -1,5 +1,6 @@
 import { PatientSettlementService } from '../../insurance/application/services/patient-settlement.service';
 import { SuggestedSiteNamesReader } from '../../clinical/services/suggested-site-names.reader';
+import { analysisCategoryOf } from '../../clinical/service-request-category';
 import { unavailableSettlement } from '../../insurance/presentation/dto/patient-settlement.dto';
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -226,6 +227,7 @@ export class DiagnosticsPatientResultsService {
         encounterId: order.encounterId,
         codeConceptId: order.codeConceptId,
         categoryConceptId: order.categoryConceptId,
+        category: analysisCategoryOf(order.categoryConceptId),
         statusConceptId: order.statusConceptId,
         priorityConceptId: order.priorityConceptId,
         performerSelectionConceptId: order.performerSelectionConceptId ?? null,

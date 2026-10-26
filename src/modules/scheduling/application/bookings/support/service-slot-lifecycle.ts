@@ -6,7 +6,10 @@ import {
 } from '../../../../../common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
-import { SchedulingBookingsRepository } from '../../../infrastructure/repositories';
+import {
+  SchedulingBookingsRepository,
+  SchedulingCatalogRepository,
+} from '../../../infrastructure/repositories';
 import { SchedulingServiceAgendaService } from '../../service-offerings/scheduling-service-agenda.service';
 
 /**
@@ -19,6 +22,7 @@ export class ServiceSlotLifecycle {
   constructor(
     private readonly bookingsRepo: SchedulingBookingsRepository,
     private readonly serviceAgenda: SchedulingServiceAgendaService,
+    private readonly catalogRepo: SchedulingCatalogRepository,
   ) {}
 
   /**
@@ -97,7 +101,45 @@ export class ServiceSlotLifecycle {
     );
   }
 
-  /** Un servicio no se mueve de horario: se cancela y se pide otro. */
+  /**
+   * ¿El cupo nació para una sola reserva y no se vuelve a ofrecer al soltarse?
+   *
+   * El de un servicio (v4.2.40) y el de un horario flexible (P36): los dos se
+   * crean al retener, en la hora que se pidió, y nunca estuvieron en una grilla.
+   * Reabrirlo al cancelar o al vencer la retención dejaría un turno fijo
+   * ofreciéndose en una agenda que el médico publicó sin turnos.
+   */
+  async isOneOffOnDemand(
+    tx: EntityManager,
+    slot: Pick<
+      BookableSlots,
+      'practitionerServiceOfferingId' | 'scheduleTemplateId'
+    >,
+  ): Promise<boolean> {
+    if (slot.practitionerServiceOfferingId) return true;
+    return this.isFlexible(tx, slot);
+  }
+
+  /** ¿El cupo es de una plantilla de horario flexible (P36)? */
+  async isFlexible(
+    tx: EntityManager,
+    slot: Pick<BookableSlots, 'scheduleTemplateId'>,
+  ): Promise<boolean> {
+    if (!slot.scheduleTemplateId) return false;
+    const template = await this.catalogRepo.findTemplateById(
+      tx,
+      slot.scheduleTemplateId,
+    );
+    return template?.flexibleHours === true;
+  }
+
+  /**
+   * Un servicio no se mueve de horario: se cancela y se pide otro.
+   *
+   * Lo mismo un turno de horario flexible (P36): no hay un cupo libre al que
+   * moverlo —en esa agenda los cupos nacen al pedirlos—, y mover el viejo a otra
+   * grilla dejaría su hora reabierta como un turno fijo que nadie publicó.
+   */
   async assertNotAService(
     tx: EntityManager,
     slotId: string,
@@ -107,6 +149,12 @@ export class ServiceSlotLifecycle {
     if (slot?.practitionerServiceOfferingId) {
       throw new PreconditionFailedException(
         `Todavía no se puede ${action} un servicio: cancele la reserva y pida otro horario.`,
+        { slotId },
+      );
+    }
+    if (slot && (await this.isFlexible(tx, slot))) {
+      throw new PreconditionFailedException(
+        `Todavía no se puede ${action} un turno de horario flexible: cancele la reserva y pida otra hora.`,
         { slotId },
       );
     }

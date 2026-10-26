@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1576 de 1576 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1578 de 1578 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -14,7 +14,7 @@ Se documentan **1576 de 1576 endpoints** en **73 módulos**. La referencia compl
 | `auth_providers` | 12 | [Abrir referencia](endpoints/auth-providers.md) |
 | `authz` | 32 | [Abrir referencia](endpoints/authz.md) |
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
-| `billing` | 35 | [Abrir referencia](endpoints/billing.md) |
+| `billing` | 36 | [Abrir referencia](endpoints/billing.md) |
 | `chart` | 23 | [Abrir referencia](endpoints/chart.md) |
 | `clinical` | 42 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 27 | [Abrir referencia](endpoints/clinical-ext.md) |
@@ -59,7 +59,7 @@ Se documentan **1576 de 1576 endpoints** en **73 módulos**. La referencia compl
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
 | `practice` | 36 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 32 | [Abrir referencia](endpoints/procedures-perioperative.md) |
-| `profiles` | 57 | [Abrir referencia](endpoints/profiles.md) |
+| `profiles` | 58 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 19 | [Abrir referencia](endpoints/promotions.md) |
 | `public` | 4 | [Abrir referencia](endpoints/public.md) |
 | `qa_execution` | 9 | [Abrir referencia](endpoints/qa-execution.md) |

@@ -5,6 +5,10 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsUUID } from 'class-validator';
+import {
+  ANALYSIS_CATEGORIES,
+  type AnalysisCategory,
+} from '../../clinical/service-request-category';
 
 /**
  * Un archivo del informe: lo que se descarga.
@@ -145,6 +149,14 @@ export class PatientOrderSummaryDto implements PatientSettlementProjection {
 
   /** Laboratorio o imagenología (concept id). */
   @ApiPropertyOptional({ format: 'uuid' }) categoryConceptId?: string;
+
+  /**
+   * P40: categoría de análisis derivada del concepto; ausente = sin clasificar.
+   * Las notas que motivan la orden (`basedOnNoteIds`) no viajan al portal:
+   * una nota puede no estar liberada al paciente.
+   */
+  @ApiPropertyOptional({ enum: ANALYSIS_CATEGORIES })
+  category?: AnalysisCategory;
 
   /** Estado de la orden (concept id). */
   @ApiProperty({ format: 'uuid' }) statusConceptId!: string;

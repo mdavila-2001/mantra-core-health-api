@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `billing`
 
-Referencia exhaustiva de 35 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 36 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated`
-- **Controladores:** `BillingOperationsController`, `BillingPayablesController`, `BillingReceivablesController`, `BillingServiceCatalogController`, `BillingSimulatedController`
+- **Etiquetas OpenAPI:** `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated`, `patient-spending`
+- **Controladores:** `BillingOperationsController`, `BillingPayablesController`, `BillingReceivablesController`, `BillingServiceCatalogController`, `BillingSimulatedController`, `PatientSpendingController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -46,6 +46,7 @@ Referencia exhaustiva de 35 operación(es) del módulo `billing`, derivada del c
 33. [GET /billing/simulated/my-invoices/{invoiceId}](#33-get-billing-simulated-my-invoices-invoiceid) — Una de mis facturas
 34. [GET /billing/simulated/outbox](#34-get-billing-simulated-outbox) — Bandeja de correo simulada (sólo administración)
 35. [GET /billing/simulated/status](#35-get-billing-simulated-status) — Estado fiscal simulado: emisores y credenciales sintéticas
+36. [GET /patient-spending/me](#36-get-patient-spending-me) — Mis gastos de salud
 
 ---
 
@@ -4647,6 +4648,150 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/billing/simulated/status"
+}
+```
+
+---
+
+## 36. GET /patient-spending/me
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `patient-spending`
+- **Nombre:** Mis gastos de salud
+- **Operation ID:** `PatientSpendingController_listMine`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientSpendingController.listMine](../../src/modules/billing/controllers/patient-spending.controller.ts)
+
+### Descripción de negocio
+
+Un movimiento por factura emitida al titular entre `from` y `to` (inclusive, nunca después de hoy), del más reciente al más antiguo. Importes en texto decimal exacto, con `paidAmount = grossAmount − coveredAmount − discountAmount`. El titular sale del token.
+
+Contexto declarado en el controlador: Los gastos de salud del titular en un rango de fechas.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /patient-spending/me` en `PatientSpendingController_listMine`. El controlador delega en `PatientSpendingService.listMine`. No recibe body. El tipo de retorno estático es `Promise<PatientSpendingResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `from` | query | Sí | `string` | Sin restricción adicional declarada | Desde (inclusive) | `2025-01-01` |
+| `to` | query | Sí | `string` | Sin restricción adicional declarada | Hasta (inclusive) | `2026-10-26` |
+| `limit` | query | No | `number` | mínimo 1; máximo 1000 | Sin descripción específica en OpenAPI. | `1000` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /patient-spending/me?from=2025-01-01&to=2026-10-26 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /patient-spending/me?from=2025-01-01&to=2026-10-26&limit=1000 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientSpendingResponseDto>` | Sí |
+| 400 | `from`/`to` faltan, no son `YYYY-MM-DD` válidos, están invertidos o abarcan más de tres años; o `limit` fuera de 1..1000. | `Promise<PatientSpendingResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientSpendingResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientSpendingResponseDto>` | No |
+| 422 | La cuenta no tiene perfil de paciente. | `Promise<PatientSpendingResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientSpendingResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientSpendingResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientSpendingResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientSpendingResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "currency": "BOB",
+  "from": "2025-01-01",
+  "to": "2026-10-26",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "occurredAt": "2026-10-20T14:05:00.000Z",
+      "description": "Texto descriptivo de ejemplo",
+      "category": {
+        "code": "SPEND_CONSULTATION",
+        "display": "Consultations"
+      },
+      "providerName": "Nombre de ejemplo",
+      "grossAmount": "300.00",
+      "coveredAmount": "150.00",
+      "discountAmount": "0.00",
+      "paidAmount": "150.00"
+    }
+  ],
+  "truncated": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `currency` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `from` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `2025-01-01` |
+| `to` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `2026-10-26` |
+| `items` | Sí | `array<PatientSpendingMovementDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","occurredAt":"2026-10-20T14:05:00.000Z","description":"Texto descriptivo de ejemplo","category":{"code":"SPEND_CONSULTATION","display":"Consultations"},"providerName":"Nombre de ejemplo","grossAmount":"300.00","coveredAmount":"150.00","discountAmount":"0.00","paidAmount":"150.00"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].occurredAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `2026-10-20T14:05:00.000Z` |
+| `items[].description` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].category` | Sí | `PatientSpendingConceptDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"SPEND_CONSULTATION","display":"Consultations"}` |
+| `items[].category.code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `SPEND_CONSULTATION` |
+| `items[].category.display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Consultations` |
+| `items[].providerName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].grossAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `300.00` |
+| `items[].coveredAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `150.00` |
+| `items[].discountAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `0.00` |
+| `items[].paidAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `150.00` |
+| `truncated` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil de paciente | Excepción explícita en src/modules/billing/services/patient-spending.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/patient-spending/me"
 }
 ```
 

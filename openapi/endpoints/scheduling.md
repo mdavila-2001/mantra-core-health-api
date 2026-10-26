@@ -2186,6 +2186,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El horario propuesto es el que ya tiene la solicitud | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/propose-schedule.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | Sólo se opera así sobre una solicitud pendiente | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un servicio: cancele la reserva y pida otro horario. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
+| 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un turno de horario flexible: cancele la reserva y pida otra hora. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
 | 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -2734,6 +2735,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El slot destino es el mismo que el actual | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una cita confirmada a esa hora${             clash.resourceName ? ` en «${clash.resourceName}»` : ''           }. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un servicio: cancele la reserva y pida otro horario. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
+| 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un turno de horario flexible: cancele la reserva y pida otra hora. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${who} de ${localTime(         first.startAt,         first.timeZone,       )} a ${localTime(         first.endAt,         first.timeZone,       )}${first.resourceName ? ` en «${first.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/application/professional-time/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -6098,6 +6100,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "name": "Nombre de ejemplo",
   "ruleCount": 1,
+  "flexibleHours": true,
   "statusConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -6109,6 +6112,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
 | `ruleCount` | Sí | `number` | Sin restricción adicional declarada | Franjas creadas | `1` |
+| `flexibleHours` | Sí | `boolean` | Sin restricción adicional declarada | true cuando el horario es flexible, sin turnos fijos | `true` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -7553,6 +7557,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "name": "Nombre de ejemplo",
   "ruleCount": 1,
+  "flexibleHours": true,
   "statusConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -7564,6 +7569,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
 | `ruleCount` | Sí | `number` | Sin restricción adicional declarada | Franjas creadas | `1` |
+| `flexibleHours` | Sí | `boolean` | Sin restricción adicional declarada | true cuando el horario es flexible, sin turnos fijos | `true` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
