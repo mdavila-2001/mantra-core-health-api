@@ -91,6 +91,10 @@ function build(assignments: AssignmentRow[] = []) {
   const rolesRepo = { findBySite: mockFn().mockResolvedValue([]) };
   const serviceCatalogRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // Por omisión nadie administra la organización: lo que ya pasaba por rol sigue pasando por rol.
+  const tenantAdministration = {
+    canAdminister: mockFn().mockResolvedValue(false),
+  };
 
   const service = new PracticeSitesService(
     em as any,
@@ -103,6 +107,7 @@ function build(assignments: AssignmentRow[] = []) {
     serviceCatalogRepo as any,
     logger as any,
     buildPracticeAccess(assignments),
+    tenantAdministration as any,
   );
   return {
     service: inTenant(service, TENANT_A),
@@ -115,6 +120,7 @@ function build(assignments: AssignmentRow[] = []) {
     spacesRepo,
     servicesRepo,
     rolesRepo,
+    tenantAdministration,
   };
 }
 
@@ -491,5 +497,121 @@ describe('PracticeSitesService · alcance de tenant (PRAC-01)', () => {
     expect(d.unitsRepo.findBySite).not.toHaveBeenCalled();
     expect(d.rolesRepo.findBySite).not.toHaveBeenCalled();
     expect(d.tx.flush).not.toHaveBeenCalled();
+  });
+});
+
+describe('PracticeSitesService · lectura de prácticas y sedes por quien administra la organización (A-6)', () => {
+  const PRACTICE = { id: 'prac-1', code: 'CMN', name: 'Centro Médico Norte' };
+  const OTHER = { id: 'prac-2', code: 'CMS', name: 'Centro Médico Sur' };
+  /** El dueño de un centro: rol global `USER` y membresía `OWNER` en su tenant, ningún rol clínico ni de programación. */
+  const owner = { id: 'user-owner', roles: ['USER'] } as any;
+  const stranger = { id: 'user-x', roles: ['USER'] } as any;
+
+  /** Servicio con dos prácticas activas en el tenant A y la decisión de administración que se le indique. */
+  function withAdministration(administers: boolean) {
+    const d = build([]);
+    d.tenantAdministration.canAdminister.mockResolvedValue(administers);
+    d.practicesRepo.findByTenant.mockResolvedValue(
+      [PRACTICE, OTHER].map((p) => ({
+        ...p,
+        tenantId: TENANT_A,
+        statusConceptId: PRAC.PRACTICE_ACTIVE,
+      })),
+    );
+    d.practicesRepo.findById.mockResolvedValue({
+      ...PRACTICE,
+      tenantId: TENANT_A,
+    });
+    d.sitesRepo.findByPractice.mockResolvedValue([
+      {
+        id: 'site-1',
+        practiceId: PRACTICE.id,
+        code: 'N1',
+        name: 'Sede Norte 1',
+        statusConceptId: PRAC.SITE_ACTIVE ?? 'st',
+      },
+    ]);
+    return d;
+  }
+
+  /** Lo que el cliente ve: 403 con el `reason` de siempre, el mismo que daba el `RolesGuard`. */
+  async function expectRoleInsufficient(promise: Promise<unknown>) {
+    const error: any = await promise.then(
+      () => null,
+      (e: unknown) => e,
+    );
+    expect(error?.getStatus?.()).toBe(403);
+    expect(error.getResponse()).toMatchObject({ reason: 'ROLE_INSUFFICIENT' });
+  }
+
+  it('el dueño de la organización lista todas las prácticas de su tenant, sin filtro por vinculación', async () => {
+    const d = withAdministration(true);
+
+    const list = await d.raw.listPractices(TENANT_A, owner);
+
+    expect(list.map((p) => p.id)).toEqual([PRACTICE.id, OTHER.id]);
+    // La administración se pregunta por el tenant del contexto, nunca por otro.
+    expect(d.tenantAdministration.canAdminister.mock.calls[0][1]).toBe(
+      TENANT_A,
+    );
+  });
+
+  it('quien no administra y no tiene un rol de la lista recibe 403 ROLE_INSUFFICIENT al listar prácticas', async () => {
+    const d = withAdministration(false);
+
+    await expectRoleInsufficient(d.raw.listPractices(TENANT_A, stranger));
+    expect(d.practicesRepo.findByTenant).not.toHaveBeenCalled();
+  });
+
+  it('un médico sigue viendo sólo las prácticas donde tiene vinculación ACTIVE', async () => {
+    const d = withAdministration(false);
+    const doctor = {
+      id: 'u-doc',
+      roles: ['PRACTITIONER'],
+      practitionerProfileId: 'hp-doc',
+    } as any;
+
+    const list = await d.raw.listPractices(TENANT_A, doctor);
+
+    expect(list).toEqual([]);
+  });
+
+  it('el dueño lista las sedes de una práctica de su organización', async () => {
+    const d = withAdministration(true);
+
+    const sites = await d.raw.listSites(PRACTICE.id, TENANT_A, owner);
+
+    expect(sites.map((s) => s.id)).toEqual(['site-1']);
+  });
+
+  it('quien tiene un rol de programación sigue listando sedes sin ser dueño', async () => {
+    const d = withAdministration(false);
+    const scheduler = { id: 'u-sch', roles: ['SURGERY_SCHEDULER'] } as any;
+
+    const sites = await d.raw.listSites(PRACTICE.id, TENANT_A, scheduler);
+
+    expect(sites).toHaveLength(1);
+  });
+
+  it('quien no administra y no tiene rol recibe 403 al listar sedes, y no se lee nada', async () => {
+    const d = withAdministration(false);
+
+    await expectRoleInsufficient(
+      d.raw.listSites(PRACTICE.id, TENANT_A, stranger),
+    );
+    expect(d.sitesRepo.findByPractice).not.toHaveBeenCalled();
+  });
+
+  it('el dueño de otra organización no ve las sedes de una práctica ajena: 404 uniforme', async () => {
+    const d = withAdministration(true);
+    d.practicesRepo.findById.mockResolvedValue({
+      ...PRACTICE,
+      tenantId: TENANT_B,
+    });
+
+    await expect(
+      d.raw.listSites(PRACTICE.id, TENANT_A, owner),
+    ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    expect(d.sitesRepo.findByPractice).not.toHaveBeenCalled();
   });
 });

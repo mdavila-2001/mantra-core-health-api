@@ -29,20 +29,7 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_spaces`, `clinic
 | ----------------------------------------- | --------------- | ----------------- |
 | `POST /accreditations/:id/verify`         | SECURITY_ADMIN  | `accreditations`  |
 | `POST /inventory-items/:itemId/movements` | SECURITY_ADMIN  | `inventory-items` |
-| `GET /practices`                          | SECURITY_ADMIN, |
-
-    SURGERY_SCHEDULER,
-    PERIOP_ADMIN,
-    SURGEON,
-    ANESTHESIOLOGIST,
-    PERIOP_NURSE,
-    SCHEDULING_ADMIN,
-
-
-
-    PRACTITIONER,
-    CLINICIAN,
-    ACCOUNTING_APPROVER, | `practices` |
+| `GET /practices` | sesión (el servicio exige un rol clínico o de programación, o ser OWNER/ADMIN de la organización) | `practices` |
 
 | `GET /practices/:practiceId/organization` | SECURITY_ADMIN,
 PERIOP_ADMIN,
@@ -51,13 +38,7 @@ SCHEDULING_ADMIN,
 PRACTITIONER,
 CLINICIAN,
 ACCOUNTING_APPROVER, | `practices` |
-| `GET /practices/:practiceId/sites` | SECURITY_ADMIN,
-SURGERY_SCHEDULER,
-PERIOP_ADMIN,
-SURGEON,
-ANESTHESIOLOGIST,
-PERIOP_NURSE,
-SCHEDULING_ADMIN, | `practices` |
+| `GET /practices/:practiceId/sites` | sesión (el servicio exige un rol de programación o ser OWNER/ADMIN de la organización) | `practices` |
 | `GET /practices/:practiceId/role-assignments` | SECURITY_ADMIN | `practices` |
 | `POST /practices` | SECURITY_ADMIN | `practices` |
 | `POST /practices/:practiceId/sites` | SECURITY_ADMIN | `practices` |

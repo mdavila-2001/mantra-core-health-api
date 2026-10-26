@@ -564,7 +564,7 @@
       ]
     },
     {
-      "reason": "Administración de la organización por membresía: la regla es «quien administra ESA organización» (A-6) o la plataforma, no un rol global — un `SECURITY_ADMIN` global dejaría a la clínica recién registrada sin poder abrir su práctica ni gestionar su oferta, plantilla e invitaciones. El servicio autoriza con `assertCanAdministerPractice` / `assertCanAdminister` (404 si la práctica no existe, 403 si el actor administra otra) antes de leer o escribir.",
+      "reason": "Administración de la organización por membresía: la regla es «quien administra ESA organización» (A-6) o la plataforma, no un rol global — un `SECURITY_ADMIN` global dejaría a la clínica recién registrada sin poder abrir su práctica ni gestionar su oferta, plantilla e invitaciones. El servicio autoriza con `assertCanAdministerPractice` / `assertCanAdminister` (404 si la práctica no existe, 403 si el actor administra otra) antes de leer o escribir. Las dos lecturas que antes exigían un `@Roles` de programación (`GET /practices` y `GET /practices/:practiceId/sites`) ahora autorizan en el servicio por esos mismos roles **o** por administrar la organización (`TenantAdministrationService.canAdminister`), con el mismo 403 `ROLE_INSUFFICIENT` para el resto.",
       "evidence": [
         "src/modules/practice/services/practice-administration.service.ts#assertCanAdministerPractice",
         "src/modules/practice/services/healthcare-service-offers.service.ts#listOffers",
@@ -572,11 +572,15 @@
         "src/modules/practice/services/practice-workforce.service.ts#listPracticeAssignments",
         "src/modules/practice/services/practice-workforce.service.ts#approveAssignment",
         "src/modules/practice/services/practice-affiliation-invitations.service.ts#invite",
-        "src/modules/practice/services/organization-practice-provisioning.service.ts#provision"
+        "src/modules/practice/services/organization-practice-provisioning.service.ts#provision",
+        "src/modules/practice/services/practice-sites.service.ts#listPractices",
+        "src/modules/practice/services/practice-sites.service.ts#listSites"
       ],
       "routes": [
+        "GET /practices",
         "GET /practices/:practiceId/healthcare-services",
         "GET /practices/:practiceId/role-assignments",
+        "GET /practices/:practiceId/sites",
         "PATCH /practices/:practiceId/healthcare-services/:id",
         "POST /practices/:practiceId/healthcare-services",
         "POST /practices/:practiceId/role-assignments/invitations",
