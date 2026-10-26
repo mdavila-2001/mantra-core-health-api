@@ -85484,6 +85484,18 @@ components:
           type: string
           description: Motivo del fallo
       additionalProperties: false
+    ChartNoteEntryDto:
+      type: object
+      properties:
+        label:
+          type: string
+          example: Presión arterial
+        value:
+          type: string
+          example: 120/80
+      required:
+        - label
+        - value
     ChartNoteListItemDto:
       type: object
       properties:
@@ -85509,6 +85521,10 @@ components:
         authorProfileId:
           type: string
           format: uuid
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChartNoteEntryDto'
         chiefComplaintText:
           type: string
         subjectiveText:
@@ -85562,6 +85578,23 @@ components:
         - count
         - limit
         - nextCursor
+    NoteEntryInputDto:
+      type: object
+      properties:
+        label:
+          type: string
+          maxLength: 60
+          example: Presión arterial
+          description: Rótulo de la fila; se recorta. Único (sin distinguir mayúsculas ni tildes) dentro de la nota
+        value:
+          type: string
+          maxLength: 500
+          example: 120/80
+          description: Valor de la fila; se recorta
+      required:
+        - label
+        - value
+      additionalProperties: false
     CreateNoteDto:
       type: object
       properties:
@@ -85587,6 +85620,14 @@ components:
           description: Concept id de confidencialidad
         chiefComplaintText:
           type: string
+        entries:
+          maxItems: 40
+          description: >-
+            P39: filas campo/valor de la nota médica, en orden. Se guardan en la versión; omitirlas o mandar [] deja la
+            versión sin filas
+          type: array
+          items:
+            $ref: '#/components/schemas/NoteEntryInputDto'
         subjectiveText:
           type: string
           description: Bloque S (subjetivo) del SOAP
@@ -85611,6 +85652,14 @@ components:
           description: Perfil del clínico autor. Se toma de la sesión; si viaja otro, 403
         chiefComplaintText:
           type: string
+        entries:
+          maxItems: 40
+          description: >-
+            P39: filas campo/valor de la nota médica, en orden. Se guardan en la versión; omitirlas o mandar [] deja la
+            versión sin filas
+          type: array
+          items:
+            $ref: '#/components/schemas/NoteEntryInputDto'
         subjectiveText:
           type: string
         objectiveText:
@@ -85660,6 +85709,14 @@ components:
           type: string
           format: uuid
           description: Concept id del motivo de enmienda
+        entries:
+          maxItems: 40
+          description: >-
+            P39: filas campo/valor de la nota médica, en orden. Se guardan en la versión; omitirlas o mandar [] deja la
+            versión sin filas
+          type: array
+          items:
+            $ref: '#/components/schemas/NoteEntryInputDto'
         subjectiveText:
           type: string
         objectiveText:
