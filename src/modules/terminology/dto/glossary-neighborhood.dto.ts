@@ -2,9 +2,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsIn, IsInt, IsOptional, Max, Min, ValidateIf } from 'class-validator';
 import {
+  GLOSSARY_EVIDENCE_TIERS,
   GLOSSARY_RELATION_DIRECTIONS,
+  GLOSSARY_RELATION_FREQUENCIES,
   GLOSSARY_RELATION_TYPES,
+  type GlossaryEvidenceTier,
   type GlossaryRelationDirection,
+  type GlossaryRelationFrequency,
   type GlossaryRelationType,
 } from '../glossary.constants';
 import { SUPPORTED_DESIGNATION_LANGUAGES } from '../terminology.constants';
@@ -100,7 +104,44 @@ export type GlossaryNeighborhoodRequest =
       readonly limit: number;
     };
 
-/** Un término vecino: lo justo para pintarlo y navegar a él. */
+/**
+ * A quién aplica una relación, según su evidencia. Cada campo viaja sólo si
+ * **todas** las evidencias de la relación lo restringen igual: si una fuente
+ * lo restringe y otra no, la relación no está restringida y el campo se omite.
+ */
+export class GlossaryNeighborQualifiersDto {
+  /** Código del sexo al que aplica (`sex_concept_id`). */
+  @ApiPropertyOptional()
+  sex?: string;
+
+  /** Edad mínima en días: la menor entre las evidencias. */
+  @ApiPropertyOptional({ minimum: 0 })
+  ageMinDays?: number;
+
+  /** Edad máxima en días: la mayor entre las evidencias. */
+  @ApiPropertyOptional({ minimum: 0 })
+  ageMaxDays?: number;
+
+  /** Código de aplicabilidad en el embarazo. */
+  @ApiPropertyOptional()
+  pregnancy?: string;
+
+  /** Código del nivel de atención (`FIRST_LEVEL`, `SECOND_LEVEL`, `THIRD_LEVEL`). */
+  @ApiPropertyOptional()
+  careLevel?: string;
+
+  /** Código de la línea de tratamiento (`FIRST_LINE`, `SECOND_LINE`). */
+  @ApiPropertyOptional()
+  lineOfTherapy?: string;
+}
+
+/**
+ * Un término vecino: lo justo para pintarlo y navegar a él.
+ *
+ * Los campos opcionales (TAREA-41 F1.5) salen de la evidencia de la relación y
+ * se **omiten** cuando la relación no tiene ese dato: una relación sin
+ * evidencia cargada se publica igual que antes de F1.
+ */
 export class GlossaryNeighborDto {
   @ApiProperty({ format: 'uuid' })
   conceptId!: string;
@@ -113,6 +154,28 @@ export class GlossaryNeighborDto {
 
   @ApiProperty({ type: () => ConceptTaxonomyRefDto, nullable: true })
   category!: ConceptTaxonomyRefDto | null;
+
+  /** Fuerza de la relación, de 0 a 1 (`strength_score`). Ordena el grupo. */
+  @ApiPropertyOptional({ minimum: 0, maximum: 1 })
+  strength?: number;
+
+  /**
+   * Frecuencia del hallazgo según la mejor evidencia. `EXCLUDED` significa que
+   * la fuente lo descarta: no es una relación positiva.
+   */
+  @ApiPropertyOptional({ enum: GLOSSARY_RELATION_FREQUENCIES })
+  frequency?: GlossaryRelationFrequency;
+
+  /** Mejor nivel de evidencia de la relación. */
+  @ApiPropertyOptional({ enum: GLOSSARY_EVIDENCE_TIERS })
+  evidenceTier?: GlossaryEvidenceTier;
+
+  /** Ids de origen de cada evidencia (`source_reference`), sin repetir. */
+  @ApiPropertyOptional({ type: [String] })
+  sourceCodes?: string[];
+
+  @ApiPropertyOptional({ type: () => GlossaryNeighborQualifiersDto })
+  qualifiers?: GlossaryNeighborQualifiersDto;
 }
 
 /** Los vecinos de un término por tipo y sentido de relación. */
