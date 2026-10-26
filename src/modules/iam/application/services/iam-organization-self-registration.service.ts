@@ -10,11 +10,9 @@ import {
 import {
   CONCEPTS,
   ConflictException,
-  createdBy,
   PreconditionFailedException,
   TokenService,
 } from '../../../../common';
-import { PHARM } from '../../../pharmacy/pharmacy.concepts';
 import { IamErrorReason } from '../../iam.error-reasons';
 import {
   BRANCH_TYPE_CONCEPT_BY_CODE,
@@ -52,6 +50,9 @@ import {
 import { IamOrganizationRepresentativesService } from './iam-organization-representatives.service';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
+/** Nombre con el que nace la sede central de una farmacia (P50). */
+const PHARMACY_HEADQUARTERS_NAME = 'Casa central';
+
 /** Vida útil del token de verificación de correo (24 h). */
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -80,7 +81,13 @@ function assertLegalDocumentsForEntityType(
       { document: 'constitutionFileId' },
     );
   }
+  // Farmacia (P50): el poder, como los otros cinco papeles, se exige para
+  // operar y no para nacer (decisión D2 del carril). Lo hace cumplir la
+  // verificación de la plataforma (`PharmacyOperatingRequirementsService`),
+  // y la farmacia lo puede subir después con
+  // `POST /tenants/{id}/affiliation-documents`.
   if (
+    organization.tenantType !== 'PHARMACY' &&
     organization.legalRepresentative &&
     organization.legalRepresentative.powerOfAttorneyFileId === undefined
   ) {
@@ -128,7 +135,7 @@ export class IamOrganizationSelfRegistrationService {
    * @param emailVerificationsRepo - Valor de email verifications repo requerido por la operación.
    * @param directory - Tenant, membresía, sucursales, perfil por tipo y documentos legales (subtarea 1.2) de `directory`.
    * @param emailNotice - Encolado del correo de verificación.
-   * @param pharmacies - Fila de `pharmacy.pharmacies` que nace con el alta de una farmacia.
+   * @param pharmacies - La farmacia, su central y sus sucursales, que nacen con el alta (P50).
    * @param representatives - Registra al representante legal y a las gerencias (subtarea 1.4).
    * @param logger - Valor de logger requerido por la operación.
    * @param tracing - Valor de tracing requerido por la operación.
@@ -316,25 +323,42 @@ export class IamOrganizationSelfRegistrationService {
         user.id,
       );
 
-      // 2b) Farmacia: la casa central y las sucursales declaradas en el alta
-      // (P50) y la fila de `pharmacy.pharmacies`, que nace en borrador y sin
-      // verificar: la plataforma la activa al verificar el tenant
-      // (`DirectoryTenantsService.verify`). Sin esto el alta descartaba las
-      // sedes y la farmacia nacía invisible para su propio portal.
+      // 2b) Farmacia (P50): la fila de `pharmacy.pharmacies` en borrador, su
+      // práctica propia y la casa central y cada sucursal como sede física y
+      // sede dispensadora, con la central enlazada. Las sucursales además se
+      // registran en `directory.branches`, que es lo que lista y edita el
+      // portal de la organización. Todo en esta transacción: si algo falla no
+      // queda una farmacia sin sedes ni sedes sin farmacia.
+      let pharmacyId: string | undefined;
       if (dto.organization.tenantType === 'PHARMACY') {
         this.createPharmacyBranches(tx, tenant.id, dto, user.id);
-        this.pharmacies.createPharmacy(tx, {
-          tenantId: tenant.id,
-          code: dto.organization.code,
-          legalName: dto.organization.legalName,
-          tradeName: dto.organization.tradeName,
-          pharmacyTypeConceptId: PHARM.PHARMACY_TYPE_RETAIL,
-          ownershipTypeConceptId: PHARM.OWNERSHIP_PRIVATE,
-          defaultCurrencyConceptId: PHARM.CURRENCY_USD,
-          verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
-          statusConceptId: PHARM.PHARMACY_DRAFT,
-          ...createdBy(user.id),
-        });
+        const block = dto.organization.pharmacy;
+        const provisioned = await this.pharmacies.provision(
+          tx,
+          {
+            tenantId: tenant.id,
+            code: dto.organization.code,
+            legalName: dto.organization.legalName,
+            tradeName: dto.organization.tradeName,
+            ownerUserId: user.id,
+            timeZone: dto.organization.timeZone,
+          },
+          {
+            headquarters: {
+              name: PHARMACY_HEADQUARTERS_NAME,
+              addressLines: block?.address,
+              latitude: block?.latitude,
+              longitude: block?.longitude,
+            },
+            branches: (block?.branches ?? []).map((branch) => ({
+              name: branch.name,
+              latitude: branch.latitude,
+              longitude: branch.longitude,
+            })),
+          },
+          user.id,
+        );
+        pharmacyId = provisioned.pharmacyId;
       }
 
       // 3) La membresía OWNER, que es lo que convierte a esa cuenta en dueña de
@@ -362,7 +386,9 @@ export class IamOrganizationSelfRegistrationService {
             tenantId: tenant.id,
             ownerUserId: user.id,
             legalEntityType: dto.organization.legalEntityType,
-            taxIdentifier: dto.organization.payer?.regulatorIdentifier,
+            taxIdentifier:
+              dto.organization.taxIdentifier ??
+              dto.organization.payer?.regulatorIdentifier,
             documents: {
               CONSTITUTION_DOC:
                 dto.organization.legalDocuments.constitutionFileId,
@@ -448,6 +474,7 @@ export class IamOrganizationSelfRegistrationService {
           dto.organization.tenantType === 'DIAGNOSTIC_CENTER'
             ? profileId
             : undefined,
+        pharmacyId,
         legalDocumentsRegistered: legalDocumentIds?.length,
         representativesRegistered,
       };
@@ -482,6 +509,7 @@ export class IamOrganizationSelfRegistrationService {
       status: created.status,
       emailVerificationSent,
       diagnosticUnitId: created.diagnosticUnitId,
+      pharmacyId: created.pharmacyId,
       legalDocumentsRegistered: created.legalDocumentsRegistered,
       representativesRegistered: created.representativesRegistered,
     };
