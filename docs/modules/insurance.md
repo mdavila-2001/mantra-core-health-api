@@ -343,6 +343,17 @@ encontrada» de una cobertura inexistente, antes de comparar aseguradora o plan,
 descubrir coberturas ajenas. Los reclamos vinculados a un pedido de farmacia o diagnóstico y la factura al paciente
 de un reclamo ya presentado no pasan por esta puerta.
 
+La relación la deja el check-in de un encuentro (`POST /clinical/encounters/check-in`,
+`AuthzCareRelationshipsService.recordEncounterCareRelationships`), en la misma transacción, por cada profesional
+del encuentro (el principal y los participantes) que aún no tiene una relación `ACTIVE` ni una solicitud `PENDING`
+en el tenant. Un check-in lo hace el personal para cualquier paciente existente, así que por sí solo no prueba el
+vínculo: si el paciente deja huella propia en el tenant (la misma comprobación de `authz`, ver
+`patientHasFootprintInTenant`), la relación nace `ACTIVE`, de tipo `TREATING`, acotada a `PAYMENT` (habilita cobrar
+y no abre la historia clínica) y sin `valid_to`; si no, nace `PENDING` como una solicitud que el paciente responde
+(se le avisa in-app tras el commit) y no habilita el cobro hasta que la acepta. Un paciente de mostrador sin cuenta
+ni huella propia no se puede cobrar hasta entonces. Un check-in cuyo `tenantId` no es el activo del actor, o sin
+ningún profesional, no deja relación. La cita y el check-in de agenda (`scheduling`) no la crean.
+
 **Capas.** La regla pura vive en `domain/patient-billing-enforcer.ts` (sin imports). Billing se alcanza
 sólo por `PatientBillingPort`, cuyo adaptador `billing-patient-invoice.adapter.ts` es el único archivo del
 módulo que importa `billing`. El aviso al paciente sale por `PatientNoticePort` después de confirmar la
