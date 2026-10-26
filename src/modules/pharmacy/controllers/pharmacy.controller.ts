@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -32,6 +33,7 @@ import {
   PharmacyIntegrationService,
   PharmacyCatalogService,
   PharmacyCategoriesService,
+  PharmacyOpeningHoursService,
 } from '../services';
 import {
   CatalogProjectionDto,
@@ -41,6 +43,11 @@ import {
   UpdateInventoryDto,
   ConnectionResponseDto,
   CreateConnectionDto,
+  CreateOnCallShiftDto,
+  OnCallShiftDto,
+  PharmacyOpeningHoursDto,
+  SetOpen24hDto,
+  SiteOpeningHoursDto,
   CreateMappingDto,
   CreatePharmacyDto,
   CreatePriceDto,
@@ -91,6 +98,7 @@ export class PharmacyController {
     private readonly integrationService: PharmacyIntegrationService,
     private readonly catalogService: PharmacyCatalogService,
     private readonly categoriesService: PharmacyCategoriesService,
+    private readonly openingHoursService: PharmacyOpeningHoursService,
   ) {}
 
   /** P47 D8: categorías de la farmacia, con cuántos productos vivos usan cada una. */
@@ -188,6 +196,88 @@ export class PharmacyController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<InventoryUpdatedDto> {
     return this.productsService.updateInventory(pharmacyId, dto, actor);
+  }
+
+  /** P34: 24 h y turnos de guardia de cada sede (sólo su personal). */
+  @Get(':pharmacyId/opening-hours')
+  @ApiOperation({
+    summary:
+      'Horario declarado de las sedes: 24 h y turnos vigentes y próximos',
+    description:
+      'Sólo el personal de la farmacia (o la plataforma). Los turnos ya terminados o cancelados no se listan. Las horas vienen en UTC y en la hora local de la sede (`timeZone`, `America/La_Paz` por defecto).',
+  })
+  @ApiOkResponse({ type: PharmacyOpeningHoursDto })
+  getOpeningHours(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOpeningHoursDto> {
+    return this.openingHoursService.getOpeningHours(pharmacyId, actor);
+  }
+
+  /** P34: la sede declara (o retira) que abre 24 h. */
+  @Audited({
+    action: 'PHARMACY_SITE_OPEN_24H_DECLARED',
+    entity: 'pharmacy_site',
+    entityId: 'param:siteId',
+  })
+  @Put(':pharmacyId/sites/:siteId/open-24h')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Declarar si la sede abre las 24 horas',
+    description:
+      '`open24h: null` vuelve a «no declarado». Una sede de otra farmacia responde 404 igual que una inexistente.',
+  })
+  @ApiOkResponse({ type: SiteOpeningHoursDto })
+  setOpen24h(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @Body() dto: SetOpen24hDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SiteOpeningHoursDto> {
+    return this.openingHoursService.setOpen24h(pharmacyId, siteId, dto, actor);
+  }
+
+  /** P34: registrar un turno de guardia de la sede. */
+  @Audited({
+    action: 'PHARMACY_ON_CALL_SHIFT_CREATED',
+    entity: 'pharmacy_on_call_shift',
+    entityId: 'result.id',
+  })
+  @Post(':pharmacyId/sites/:siteId/on-call-shifts')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registrar un turno de guardia de la sede',
+    description:
+      'Horas ISO-8601 con desplazamiento obligatorio. Como mucho 72 h, no ya terminado, a no más de 62 días: si no, 422 `ON_CALL_SHIFT_WINDOW_INVALID`. Solapado con otro turno activo de la sede: 409 `ON_CALL_SHIFT_OVERLAP`.',
+  })
+  @ApiOkResponse({ type: OnCallShiftDto })
+  createOnCallShift(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @Body() dto: CreateOnCallShiftDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OnCallShiftDto> {
+    return this.openingHoursService.createShift(pharmacyId, siteId, dto, actor);
+  }
+
+  /** P34: cancelar un turno que todavía no terminó. */
+  @Audited({
+    action: 'PHARMACY_ON_CALL_SHIFT_CANCELLED',
+    entity: 'pharmacy_on_call_shift',
+    entityId: 'param:shiftId',
+  })
+  @Post(':pharmacyId/on-call-shifts/:shiftId/cancel')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Cancelar un turno de guardia (deja de publicarse)',
+  })
+  @ApiOkResponse({ type: OnCallShiftDto })
+  cancelOnCallShift(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('shiftId', ParseUUIDPipe) shiftId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OnCallShiftDto> {
+    return this.openingHoursService.cancelShift(pharmacyId, shiftId, actor);
   }
 
   /** UC-24-01. */

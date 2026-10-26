@@ -12,3 +12,4 @@ export * from './pharmacy-marketplace.repository';
 export * from './medicine-catalog.repository';
 export * from './pharmacy-references.repository';
 export * from './pharmacy-catalog.repository';
+export * from './pharmacy-on-call-shifts.repository';

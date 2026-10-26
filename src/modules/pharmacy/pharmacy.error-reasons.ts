@@ -16,4 +16,13 @@ export enum PharmacyErrorReason {
    * o no pertenece a la farmacia o al tenant autorizados.
    */
   PHARMACY_REFERENCE_NOT_AVAILABLE = 'PHARMACY_REFERENCE_NOT_AVAILABLE',
+  /**
+   * El turno de guardia no cumple la ventana: fin no posterior al inicio, más
+   * de 72 h, ya terminado o declarado con más de 62 días de anticipación.
+   */
+  ON_CALL_SHIFT_WINDOW_INVALID = 'ON_CALL_SHIFT_WINDOW_INVALID',
+  /** La sede ya tiene un turno activo que se solapa con el declarado. */
+  ON_CALL_SHIFT_OVERLAP = 'ON_CALL_SHIFT_OVERLAP',
+  /** El turno ya terminó o ya estaba cancelado: no se puede cancelar. */
+  ON_CALL_SHIFT_NOT_CANCELLABLE = 'ON_CALL_SHIFT_NOT_CANCELLABLE',
 }

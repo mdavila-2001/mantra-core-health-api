@@ -20,6 +20,7 @@ import {
   PharmacyMarketplaceService,
   MedicineCatalogSearchService,
   PharmacyCategoriesService,
+  PharmacyOpeningHoursService,
 } from './services';
 import {
   PharmaciesRepository,
@@ -36,6 +37,7 @@ import {
   PharmacyReadRepository,
   PharmacyMarketplaceRepository,
   PharmacyCatalogRepository,
+  PharmacyOnCallShiftsRepository,
 } from './repositories';
 
 /**
@@ -77,6 +79,7 @@ import {
     PharmacyReadRepository,
     PharmacyMarketplaceRepository,
     PharmacyCatalogRepository,
+    PharmacyOnCallShiftsRepository,
     // Servicios
     PharmaciesService,
     PharmacySitesService,
@@ -89,6 +92,7 @@ import {
     PharmacyMarketplaceService,
     MedicineCatalogSearchService,
     PharmacyCategoriesService,
+    PharmacyOpeningHoursService,
   ],
   // La cara de lectura se exporta para que el inventario (módulo 25) componga
   // disponibilidad sin duplicar los finders de publicación y precios.

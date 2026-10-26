@@ -57,6 +57,7 @@ function build() {
     findActiveAffiliationDocuments: mockFn().mockResolvedValue([]),
     findIdentifiers: mockFn().mockResolvedValue([]),
     findHeadquartersAddress: mockFn().mockResolvedValue(null),
+    findCurrentOnCallShifts: mockFn().mockResolvedValue([]),
   };
   const catalogRepo = {
     findCurrentPrices: mockFn().mockResolvedValue(new Map()),

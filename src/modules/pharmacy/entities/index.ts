@@ -2,6 +2,7 @@ export * from './pharmacies.entity';
 export * from './pharmacy_external_product_mappings.entity';
 export * from './pharmacy_integration_connections.entity';
 export * from './pharmacy_licenses.entity';
+export * from './pharmacy_on_call_shifts.entity';
 export * from './pharmacy_price_lists.entity';
 export * from './pharmacy_product_categories.entity';
 export * from './pharmacy_product_identifiers.entity';
