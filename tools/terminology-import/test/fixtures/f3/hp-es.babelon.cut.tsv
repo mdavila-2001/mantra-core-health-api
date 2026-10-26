@@ -1,3 +1,5 @@
+# fixture-source: hp-es.babelon.tsv https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/src/translations/hp-es.babelon.tsv (sha256 00972e33775a0340…, el mismo medido en volumes.md)
+# fixture-lines: 6,44,292,983,1002,1402,1516,2232,3797,5475,7760,8775
 source_language	translation_language	subject_id	source_value	predicate_id	translation_value	translation_status
 en	es	HP:0000006	Autosomal dominant inheritance	rdfs:label	Herencia autosómica dominante	OFFICIAL
 en	es	HP:0000047	Hypospadias	rdfs:label	Hipospadias	OFFICIAL
