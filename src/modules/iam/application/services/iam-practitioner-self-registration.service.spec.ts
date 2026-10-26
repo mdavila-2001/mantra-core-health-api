@@ -515,9 +515,10 @@ describe('IamPractitionerSelfRegistrationService', () => {
         sedesLicenseFileId: 'file-sedes-1',
       });
 
-      const filas = d.authorizationsRepo.create.mock.calls.map(
-        (call: unknown[]) => call[1] as Record<string, unknown>,
-      );
+      const filas: Record<string, unknown>[] =
+        d.authorizationsRepo.create.mock.calls.map(
+          (call: unknown[]) => call[1] as Record<string, unknown>,
+        );
       expect(
         filas.map((fila) => [fila.jurisdictionConceptId, fila.fileId]),
       ).toEqual([
