@@ -7,6 +7,10 @@ import {
   ensureTestSession,
   type TestContext,
 } from './harness';
+import {
+  assertPermanentResidueTarget,
+  resolveResetTarget,
+} from './disposable-database';
 import { CONCEPTS, TokenService } from '../../src/common';
 import { PROF } from '../../src/modules/profiles/profiles.concepts';
 import { PRAC } from '../../src/modules/practice/practice.concepts';
@@ -119,12 +123,32 @@ describe('P50 · alta pública de farmacia (integración)', () => {
   }
 
   beforeAll(async () => {
+    // Completar papeles y verificar son rutas `@Audited`: dejan filas en
+    // `audit.audit_log` (WORM) que nombran al tenant, y ese tenant ya no se
+    // puede borrar. Igual que lane16: sólo contra una base descartable.
+    assertPermanentResidueTarget(resolveResetTarget(process.env), process.env);
     ctx = await bootstrapTestApp();
   });
 
   afterAll(async () => {
     await ctx.app.close();
-    await deleteRegisteredOrganizations(creados);
+    // Limpieza de mejor esfuerzo, una organización por vez: la que quedó
+    // fijada por la bitácora WORM se informa como residuo y no rompe la suite;
+    // cualquier otro fallo de limpieza sí.
+    const residuo: string[] = [];
+    for (const fixture of creados) {
+      try {
+        await deleteRegisteredOrganizations([fixture]);
+      } catch (error) {
+        if (!String(error).includes('audit_log')) throw error;
+        residuo.push(fixture.tenantId);
+      }
+    }
+    if (residuo.length > 0) {
+      console.warn(
+        `P50: ${residuo.length} organización(es) sintética(s) quedan fijadas por audit.audit_log: ${residuo.join(', ')}`,
+      );
+    }
   });
 
   it('escenario 1 · el cuerpo del front → 201 con farmacia, central enlazada y sucursal', async () => {
