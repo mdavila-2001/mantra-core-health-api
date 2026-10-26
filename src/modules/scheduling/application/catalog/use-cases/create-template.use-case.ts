@@ -20,6 +20,7 @@ import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 import { assertFirstSlotFits } from '../support/assert-first-slot-fits';
+import { assertFlexibleRules } from '../support/assert-flexible-rules';
 
 /** UC-41-02: publica una plantilla con franjas semanales. */
 @Injectable()
@@ -45,6 +46,11 @@ export class CreateTemplateUseCase {
       'Publishing schedule template',
     );
 
+    const flexible = dto.flexibleHours === true;
+    if (flexible) {
+      assertFlexibleRules(dto.rules, dto.slotMinutes ?? DEFAULT_SLOT_MINUTES);
+    }
+
     for (const rule of dto.rules) {
       if (rule.startTime >= rule.endTime) {
         throw new PreconditionFailedException(
@@ -59,11 +65,16 @@ export class CreateTemplateUseCase {
       // Con el redondeo hacia adelante una franja siempre da al menos uno —el
       // último se completa aunque pase la hora de fin—, salvo que ese turno
       // pise la franja siguiente del mismo día.
-      assertFirstSlotFits(
-        rule,
-        dto.rules,
-        rule.slotMinutes ?? dto.slotMinutes ?? DEFAULT_SLOT_MINUTES,
-      );
+      // En horario flexible no hay redondeo hacia adelante: la consulta tiene
+      // que caber entera dentro de la franja, y eso ya lo exigió
+      // `assertFlexibleRules`. Lo de acá mide el primer turno de una grilla.
+      if (!flexible) {
+        assertFirstSlotFits(
+          rule,
+          dto.rules,
+          rule.slotMinutes ?? dto.slotMinutes ?? DEFAULT_SLOT_MINUTES,
+        );
+      }
     }
 
     return this.em.transactional(async (tx) => {
@@ -86,6 +97,7 @@ export class CreateTemplateUseCase {
         validFrom: dto.validFrom ? new Date(dto.validFrom) : undefined,
         validTo: dto.validTo ? new Date(dto.validTo) : undefined,
         slotMinutes: dto.slotMinutes ?? DEFAULT_SLOT_MINUTES,
+        flexibleHours: flexible,
         bookingPolicyId: dto.bookingPolicyId,
         statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
         actorUserId: actor.id,
@@ -109,9 +121,15 @@ export class CreateTemplateUseCase {
           dayOfWeek: rule.dayOfWeek,
           startTime: rule.startTime,
           endTime: rule.endTime,
-          slotMinutes:
-            rule.slotMinutes ?? dto.slotMinutes ?? DEFAULT_SLOT_MINUTES,
-          capacityPerSlot: rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY,
+          // Horario flexible: la franja no tiene turnos que medir ni contar.
+          // Lo que dura cada consulta vive en la plantilla (`slotMinutes`) y
+          // escribirlo también acá serían dos fuentes para el mismo número.
+          slotMinutes: flexible
+            ? undefined
+            : (rule.slotMinutes ?? dto.slotMinutes ?? DEFAULT_SLOT_MINUTES),
+          capacityPerSlot: flexible
+            ? undefined
+            : (rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY),
           // Sin `?? 0`: la columna es anulable a propósito y ausente se lee
           // como cero al generar. Escribir un cero que nadie declaró borraría
           // la diferencia entre «no lo dijeron» y «dijeron que no hay respiro».
@@ -126,6 +144,7 @@ export class CreateTemplateUseCase {
         name: dto.name,
         ruleCount: dto.rules.length,
         statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
+        flexibleHours: flexible,
       };
     });
   }

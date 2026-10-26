@@ -19,6 +19,7 @@ import {
   UpdateTemplateDto,
 } from '../../../presentation/dto';
 import { assertFirstSlotFits } from '../support/assert-first-slot-fits';
+import { assertFlexibleRules } from '../support/assert-flexible-rules';
 
 /** Edita las franjas de una plantilla. */
 @Injectable()
@@ -114,6 +115,11 @@ export class UpdateTemplateUseCase {
         const effectiveSlotMinutes =
           dto.slotMinutes ?? template.slotMinutes ?? DEFAULT_SLOT_MINUTES;
 
+        // Horario flexible (P36): el modo no cambia por PATCH, pero las franjas
+        // nuevas tienen que respetarlo.
+        const flexible = template.flexibleHours === true;
+        if (flexible) assertFlexibleRules(dto.rules, effectiveSlotMinutes);
+
         for (const rule of dto.rules) {
           if (rule.startTime >= rule.endTime) {
             throw new PreconditionFailedException(
@@ -121,11 +127,13 @@ export class UpdateTemplateUseCase {
               { dayOfWeek: rule.dayOfWeek },
             );
           }
-          assertFirstSlotFits(
-            rule,
-            dto.rules,
-            rule.slotMinutes ?? effectiveSlotMinutes,
-          );
+          if (!flexible) {
+            assertFirstSlotFits(
+              rule,
+              dto.rules,
+              rule.slotMinutes ?? effectiveSlotMinutes,
+            );
+          }
         }
 
         await this.catalogRepo.deleteRulesByTemplate(tx, templateId);
@@ -135,8 +143,12 @@ export class UpdateTemplateUseCase {
             dayOfWeek: rule.dayOfWeek,
             startTime: rule.startTime,
             endTime: rule.endTime,
-            slotMinutes: rule.slotMinutes ?? effectiveSlotMinutes,
-            capacityPerSlot: rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY,
+            slotMinutes: flexible
+              ? undefined
+              : (rule.slotMinutes ?? effectiveSlotMinutes),
+            capacityPerSlot: flexible
+              ? undefined
+              : (rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY),
             gapMinutes: rule.gapMinutes,
             bookingModeConceptId: bandMode(rule.bookingMode),
             actorUserId: actor.id,
@@ -153,6 +165,7 @@ export class UpdateTemplateUseCase {
         name: template.name,
         ruleCount,
         statusConceptId: template.statusConceptId,
+        flexibleHours: template.flexibleHours === true,
       };
     });
   }
