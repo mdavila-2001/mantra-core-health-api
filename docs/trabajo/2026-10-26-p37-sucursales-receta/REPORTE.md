@@ -79,7 +79,9 @@ Archivos: `evidencia/unit-public.txt`, `evidencia/integracion-p37.txt`, `evidenc
 - La integración corrió **antes** del `eslint --fix` del archivo de prueba (un cambio que sólo toca el formato), y no
   se volvió a correr después.
 - No se corrieron las suites completas del front ni de la API: sólo lo dirigido y `src/architecture`.
-- El `yarn typecheck` del front no se corrió aparte; el build de `ng test` compiló los tres archivos y sus plantillas.
+- El `yarn typecheck` del front no se corrió aparte. Sí se corrió `yarn build` de producción (`BUILD_EXIT=0`) antes de
+  empujar, por eso el empuje del front lleva `SALTAR_BUILD=1`: el gancho repetía la misma construcción sin el
+  semáforo de memoria y se caía.
 - No se midió el rendimiento con catálogos grandes (el filtro por renglón va en SQL, con un tope de 5000 filas
   producto×sede).
 
