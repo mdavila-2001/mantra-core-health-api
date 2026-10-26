@@ -7,6 +7,7 @@ import {
   IsEmail,
   IsIn,
   IsISO8601,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -27,7 +28,8 @@ import {
 } from '../../../../common/constants/person-field-limits';
 
 /**
- * Cuerpo de `PATCH /profiles/practitioners/me`.
+ * Cuerpo de `PATCH /profiles/practitioners/me` y de su gemelo de plataforma
+ * `PATCH /profiles/practitioners/:profileId`.
  *
  * ## Por qué existe
  *
@@ -135,9 +137,9 @@ export class UpdateOwnPractitionerProfileDto {
      al registrarse y después no había forma de tocarlos. Mismo alcance que ya
      tiene el paciente en `PATCH /profiles/patients/me`.
 
-     Lo que NO entra: el documento de identidad y el correo. El primero es un
-     identificador oficial con su circuito de verificación; el segundo es su
-     credencial de acceso y se cambia por el flujo de la cuenta. */
+     El número del documento entra desde P28, mientras la identidad no esté
+     verificada (ver `nationalId`). El correo de acceso no: es la credencial de
+     la cuenta y se cambia por el flujo de IAM (`workEmail` es el contacto). */
 
   /**
    * Las cuatro partes del nombre.
@@ -194,9 +196,36 @@ export class UpdateOwnPractitionerProfileDto {
   sexAtBirth?: BirthSexCode;
 
   /**
+   * Número del documento de identidad (P28). Mismo formato que el alta
+   * (`RegisterPractitionerDto.nationalId`): letras, dígitos, punto y guion.
+   *
+   * Se corrige mientras la identidad de la persona **no** está verificada ni
+   * en verificación: un error de tipeo en la cédula tiene que tener dónde
+   * arreglarse. Con una aserción vigente o un caso abierto responde 409
+   * `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` — lo verificado (o lo que se está
+   * verificando) es ese número. La fila vieja se cierra y se abre otra: lo que
+   * apunta a la vieja no cambia.
+   *
+   * No se puede borrar: el alta del profesional lo exige. No toca la cuenta: el
+   * profesional entra con su correo, no con la CI.
+   */
+  @ApiPropertyOptional({
+    maxLength: 40,
+    description:
+      'Número del documento de identidad. 409 si la identidad está verificada o en verificación.',
+  })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty({ message: 'El documento no puede quedar vacío' })
+  @MaxLength(40)
+  @Matches(/^[A-Za-z0-9.-]+$/, {
+    message: 'El documento sólo admite letras, dígitos, punto y guion',
+  })
+  nationalId?: string;
+
+  /**
    * Departamento que emitió el documento (miembro de `VS_BO_DEPARTMENT`; uno
-   * ajeno responde 422). Se corrige el departamento, **no** el número: la CI
-   * sigue de solo lectura porque tiene su propio circuito de verificación.
+   * ajeno responde 422).
    */
   @ApiPropertyOptional({
     format: 'uuid',

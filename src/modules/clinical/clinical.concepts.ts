@@ -167,6 +167,14 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'SR_CARDIO',
       display: 'Cardiac study category',
     },
+    /* P40 (carril C2): la orden de análisis clasifica en tres —laboratorio,
+       imagen y «otro»— y «otro» no tenía concepto: una orden que no era de
+       laboratorio ni de imagen sólo podía pedirse sin categoría, que la lectura
+       trata como «sin clasificar». Es el `category: 'OTHER'` del alta. */
+    SERVICE_REQUEST_CATEGORY_OTHER: {
+      code: 'SR_OTHER',
+      display: 'Other analysis category',
+    },
 
     /* --- quién ejecuta la orden -------------------------------------------------
        El médico recomienda, no impone: el paciente siempre puede elegir otro

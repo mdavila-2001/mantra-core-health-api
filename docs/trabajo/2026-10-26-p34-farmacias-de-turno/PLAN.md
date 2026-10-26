@@ -44,14 +44,14 @@
 errores la segunda vez.
 **DoD:** `gen_ddl.py 24` + `gen_integrity.py` + `gen_apply.py` sin diff fuera de lo esperado · patch ×2 con
 `ON_ERROR_STOP=1` en `mantra_p34` · consultas de verificación.
-**Estado:** TODO
+**Estado:** HECHO (sin prueba visual: ver REPORTE)
 
 | ID | Microtarea | CA (binario) | DoD (comando) | Estado |
 |---|---|---|---|---|
-| H1.S1.M1 | `.puml` 24 + 33 declaran columna, tabla, índices, CHECK, EXCLUDE | gen_ddl emite la tabla | `python3 salud-db/gen_ddl.py 24` → 10 tablas | TODO |
-| H1.S1.M2 | 05_constraints de 24 y apply_all regenerados | archivo con CHECK y EXCLUDE | `gen_integrity.py` + `gen_apply.py` | TODO |
-| H1.S1.M3 | Patch idempotente aplicado dos veces | 2 corridas sin error | `psql -v ON_ERROR_STOP=1 -f patch` ×2 | TODO |
-| H1.S1.M4 | Copia vendorizada en la API | `db:vendor:check` limpio | `yarn db:vendor` | TODO |
+| H1.S1.M1 | `.puml` 24 + 33 declaran columna, tabla, índices, CHECK, EXCLUDE | gen_ddl emite la tabla | `python3 salud-db/gen_ddl.py 24` → 10 tablas | HECHO |
+| H1.S1.M2 | 05_constraints de 24 y apply_all regenerados | archivo con CHECK y EXCLUDE | `gen_integrity.py` + `gen_apply.py` | HECHO |
+| H1.S1.M3 | Patch idempotente aplicado dos veces | 2 corridas sin error | `psql -v ON_ERROR_STOP=1 -f patch` ×2 | HECHO |
+| H1.S1.M4 | Copia vendorizada en la API | `db:vendor:check` limpio | `yarn db:vendor` | HECHO |
 
 ## H2 — API
 **CA:** Dado el personal de una farmacia, cuando declara 24 h y un turno de su sede, entonces
@@ -59,32 +59,32 @@ errores la segunda vez.
 recibe 403; un turno vencido, cancelado o sin desplazamiento horario no se publica / se rechaza.
 **DoD:** unitarios dirigidos · `yarn typecheck` · lint de los archivos · integración HTTP real contra
 `mantra_p34` (incluye 401/403 y turno vencido) · OpenAPI regenerado.
-**Estado:** TODO
+**Estado:** HECHO (sin prueba visual: ver REPORTE)
 
 | ID | Microtarea | CA (binario) | DoD (comando) | Estado |
 |---|---|---|---|---|
-| H2.S1.M1 | Entidades regeneradas (`gen_entities.py`) | `PharmacyOnCallShifts` + `open24h` | `gen_entities.py` + typecheck | TODO |
-| H2.S1.M2 | Conceptos `ON_CALL_*` | UUID = los del EXCLUDE | test de conceptos | TODO |
-| H2.S2.M1 | `PATCH .../sites/:siteId/open-24h` | 200 y persistido | unitario del servicio | TODO |
-| H2.S2.M2 | `POST/GET/DELETE` turnos | validación 72 h / 62 días / offset / solape | unitario del servicio y DTO | TODO |
-| H2.S3.M1 | `GET /public/pharmacies/open-now` paginado | sólo vigentes; cursor | unitario + integración | TODO |
-| H2.S3.M2 | `GET /pharmacy/sites` trae `open24h` y `onCallUntil` | campos presentes | unitario del read service | TODO |
-| H2.S4.M1 | Integración HTTP real contra la base | todo lo del CA | `yarn test:integration pharmacy-on-call` | TODO |
-| H2.S4.M2 | OpenAPI e inventario regenerados | sin breaking | `docs:openapi:generate` | TODO |
+| H2.S1.M1 | Entidades regeneradas (`gen_entities.py`) | `PharmacyOnCallShifts` + `open24h` | `gen_entities.py` + typecheck | HECHO |
+| H2.S1.M2 | Conceptos `ON_CALL_*` | UUID = los del EXCLUDE | test de conceptos | HECHO |
+| H2.S2.M1 | `PATCH .../sites/:siteId/open-24h` | 200 y persistido | unitario del servicio | HECHO |
+| H2.S2.M2 | `POST/GET/DELETE` turnos | validación 72 h / 62 días / offset / solape | unitario del servicio y DTO | HECHO |
+| H2.S3.M1 | `GET /public/pharmacies/open-now` paginado | sólo vigentes; cursor | unitario + integración | HECHO |
+| H2.S3.M2 | `GET /pharmacy/sites` trae `open24h` y `onCallUntil` | campos presentes | unitario del read service | HECHO |
+| H2.S4.M1 | Integración HTTP real contra la base | todo lo del CA | `yarn test:integration pharmacy-on-call` | HECHO |
+| H2.S4.M2 | OpenAPI e inventario regenerados | sin breaking | `docs:openapi:generate` | HECHO |
 
 ## H3 — Frontend
 **CA:** Dado el paciente eligiendo farmacia, entonces ve «Abierta 24 h» / «De turno hasta HH:MM» en las
 sedes que lo declararon y puede pedir sólo las abiertas ahora; el directorio público muestra
 «Abiertas ahora»; el portal de la farmacia permite declarar 24 h y cargar/cancelar turnos.
 **DoD:** specs del cliente y de los componentes (`ng test --include`) · typecheck · lint de los archivos.
-**Estado:** TODO
+**Estado:** HECHO (sin prueba visual: ver REPORTE)
 
 | ID | Microtarea | CA (binario) | DoD (comando) | Estado |
 |---|---|---|---|---|
-| H3.S1.M1 | Cliente + tipos + simulador con el mismo contrato | spec del cliente verde | `ng test --include` cliente | TODO |
-| H3.S2.M1 | Badges y filtro en «elegir farmacia» | spec del componente | `ng test --include` | TODO |
-| H3.S2.M2 | «Abiertas ahora» en el directorio público | spec del componente | `ng test --include` | TODO |
-| H3.S3.M1 | Pantalla «Horario y turnos» del portal | spec del componente | `ng test --include` | TODO |
+| H3.S1.M1 | Cliente + tipos + simulador con el mismo contrato | spec del cliente verde | `ng test --include` cliente | HECHO |
+| H3.S2.M1 | Badges y filtro en «elegir farmacia» | spec del componente | `ng test --include` | HECHO |
+| H3.S2.M2 | «Abiertas ahora» en el directorio público | spec del componente | `ng test --include` | HECHO |
+| H3.S3.M1 | Pantalla «Horario y turnos» del portal | spec del componente | `ng test --include` | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |

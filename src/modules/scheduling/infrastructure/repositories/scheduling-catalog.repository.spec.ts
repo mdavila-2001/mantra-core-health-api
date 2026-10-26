@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { LockMode } from '@mikro-orm/core';
 
 // Fábrica de dobles laxa, igual que en los specs de servicio del módulo.
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
@@ -33,10 +34,14 @@ describe('SchedulingCatalogRepository · retireTemplate', () => {
     reschedules?: Array<{ fromSlotId: string; toSlotId: string }>;
   }) {
     const template = { id: 'tpl-1', statusConceptId: 'TPL_PUBLISHED' };
+    const slotRows = options.slots.map((id) => ({
+      id,
+      statusConceptId: 'SLOT_OPEN',
+    }));
     const em = {
       find: mockFn(async (entity: unknown, where: any) => {
         if (entity === BookableSlots) {
-          return options.slots.map((id) => ({ id }));
+          return slotRows;
         }
         if (entity === AppointmentBookings) {
           return (options.withAppointment ?? []).map((bookableSlotId) => ({
@@ -58,7 +63,12 @@ describe('SchedulingCatalogRepository · retireTemplate', () => {
         entity === ScheduleTemplates ? template : null,
       ),
     };
-    return { em, template: template, repo: new SchedulingCatalogRepository() };
+    return {
+      em,
+      template: template,
+      slotRows,
+      repo: new SchedulingCatalogRepository(),
+    };
   }
 
   /** Los ids de cupo que se mandaron a borrar. */
@@ -81,6 +91,7 @@ describe('SchedulingCatalogRepository · retireTemplate', () => {
       'tpl-1',
       'TPL_RETIRED',
       'u-1',
+      'SLOT_BLOCKED',
     );
 
     expect(deleted(em)).toEqual(['s-libre']);
@@ -93,7 +104,13 @@ describe('SchedulingCatalogRepository · retireTemplate', () => {
       reschedules: [{ fromSlotId: 's-afuera', toSlotId: 's-destino' }],
     });
 
-    await repo.retireTemplate(em as any, 'tpl-1', 'TPL_RETIRED', 'u-1');
+    await repo.retireTemplate(
+      em as any,
+      'tpl-1',
+      'TPL_RETIRED',
+      'u-1',
+      'SLOT_BLOCKED',
+    );
 
     expect(deleted(em)).toEqual(['s-libre']);
   });
@@ -106,6 +123,7 @@ describe('SchedulingCatalogRepository · retireTemplate', () => {
       'tpl-1',
       'TPL_RETIRED',
       'u-1',
+      'SLOT_BLOCKED',
     );
 
     expect(em.nativeDelete).toHaveBeenCalledWith(SlotHolds, {
@@ -128,9 +146,59 @@ describe('SchedulingCatalogRepository · retireTemplate', () => {
       'tpl-1',
       'TPL_RETIRED',
       'u-1',
+      'SLOT_BLOCKED',
     );
 
     expect(em.nativeDelete).not.toHaveBeenCalled();
     expect(res).toEqual({ releasedSlots: 0, keptSlots: 2 });
+  });
+  /**
+   * P23 · cambiar el horario con citas. El cupo conservado sigue sosteniendo su
+   * cita pero no se vuelve a ofrecer: abierto, se ofrecía con la hora y la
+   * duración del horario retirado al lado del cupo nuevo del mismo instante.
+   */
+  it('cierra los cupos que conserva y no toca el estado de los que suelta', async () => {
+    const { em, slotRows, repo } = withBase({
+      slots: ['s-con-cita', 's-libre', 's-reprogramado'],
+      withAppointment: ['s-con-cita'],
+      reschedules: [{ fromSlotId: 's-reprogramado', toSlotId: 's-otro' }],
+    });
+
+    await repo.retireTemplate(
+      em as any,
+      'tpl-1',
+      'TPL_RETIRED',
+      'u-1',
+      'SLOT_BLOCKED',
+    );
+
+    const estado = Object.fromEntries(
+      slotRows.map((slot) => [slot.id, slot.statusConceptId]),
+    );
+    expect(estado).toEqual({
+      's-con-cita': 'SLOT_BLOCKED',
+      's-libre': 'SLOT_OPEN',
+      's-reprogramado': 'SLOT_BLOCKED',
+    });
+    expect(deleted(em)).toEqual(['s-libre']);
+  });
+
+  it('toma los cupos de la plantilla FOR UPDATE antes de mirar sus citas', async () => {
+    const { em, repo } = withBase({ slots: ['s-1'] });
+
+    await repo.retireTemplate(
+      em as any,
+      'tpl-1',
+      'TPL_RETIRED',
+      'u-1',
+      'SLOT_BLOCKED',
+    );
+
+    const [entity, where, options] = em.find.mock.calls[0];
+    expect(entity).toBe(BookableSlots);
+    expect(where).toEqual({ scheduleTemplateId: 'tpl-1' });
+    expect(options).toEqual(
+      expect.objectContaining({ lockMode: LockMode.PESSIMISTIC_WRITE }),
+    );
   });
 });

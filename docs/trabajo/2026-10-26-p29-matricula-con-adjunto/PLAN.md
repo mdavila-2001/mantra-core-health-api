@@ -49,16 +49,17 @@ silencio** al crear la cuenta — exactamente el defecto que la sección P29 des
 registra con `licenseFileId` (y/o `sedesLicenseFileId`), entonces la matrícula queda con ese `file_id`,
 el archivo pasa a ser suyo, y un id inexistente, ya reclamado o de otro tipo hace fallar el alta entera.
 **DoD:** unit + integración + typecheck + lint · front: specs dirigidos.
-**Estado:** TODO
+**Estado:** HECHO (sin prueba de navegador: ver REPORTE «No cubierto»)
 
 | ID | Microtarea | CA (binario) | DoD (comando) | Estado |
 |---|---|---|---|---|
-| H1.S1.M1 | DTO acepta `licenseFileId` / `sedesLicenseFileId` (uuid, opcionales) | uuid inválido → 400 | `yarn jest register-practitioner.dto` | TODO |
-| H1.S1.M2 | Servicio reclama y guarda `fileId` en ambas filas; SEDES sin número → 422 | spec en verde | `yarn jest iam-practitioner-self-registration` | TODO |
-| H1.S1.M3 | Integración real contra `mantra_p29`: claim + `file_id` + negativo (archivo ajeno/ya reclamado) | PASS | `yarn test:integration <archivo>` | TODO |
-| H1.S1.M4 | OpenAPI / inventario regenerados si se versionan | diff sólo del campo | script del repo | TODO |
-| H1.S2.M1 | Front sube los respaldos y manda los ids; mock con el mismo contrato | spec en verde | `yarn vitest run register-practitioner` | TODO |
-| H1.S2.M2 | Typecheck/lint front | exit 0 | `yarn typecheck`, `yarn lint` | TODO |
+| H1.S1.M1 | DTO acepta `licenseFileId` / `sedesLicenseFileId` (uuid, opcionales) | uuid inválido → 400 | `yarn jest register-practitioner.dto` | HECHO |
+| H1.S1.M2 | Servicio reclama y guarda `fileId` en ambas filas; SEDES sin número → 422 | spec en verde | `yarn jest iam-practitioner-self-registration` | HECHO |
+| H1.S1.M3 | Integración real contra `mantra_p29`: claim + `file_id` + negativo (archivo ajeno/ya reclamado) | PASS | `yarn test:integration <archivo>` | HECHO |
+| H1.S1.M4 | OpenAPI / inventario regenerados si se versionan | diff sólo del campo | script del repo | HECHO |
+| H1.S2.M1 | Front sube los respaldos y manda los ids; mock con el mismo contrato | spec en verde | `yarn vitest run register-practitioner` | HECHO |
+| H1.S2.M3 | (no previsto) `IamClient.registerPractitioner` arma el cuerpo campo por campo y descartaba los dos ids | spec del cliente en verde | `yarn ng test --include iam.client.spec.ts` | HECHO |
+| H1.S2.M2 | Typecheck/lint front | exit 0 | `yarn typecheck`, `yarn lint` | HECHO |
 
 ## Riesgos
 | Riesgo | Impacto | Mitigación |
