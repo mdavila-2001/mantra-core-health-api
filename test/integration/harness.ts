@@ -1102,6 +1102,12 @@ export async function deleteRegisteredPractitioners(
 const TENANT_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   { table: 'audit.tenants_history', column: 'tenant_id' },
   { table: 'directory.tenant_memberships', column: 'tenant_id' },
+  // P50: el alta de farmacia crea su fila de `pharmacy.pharmacies` (de la que
+  // cuelgan sus `pharmacy_sites`) y la registra en `directory.branches`. Va
+  // ANTES de `practice.practices`: `pharmacies.primary_practice_site_id` y
+  // `pharmacy_sites.practice_site_id` apuntan a las sedes de esa práctica.
+  { table: 'pharmacy.pharmacies', column: 'tenant_id' },
+  { table: 'directory.branches', column: 'tenant_id' },
   { table: 'practice.practices', column: 'tenant_id' },
   { table: 'diagnostic_units.diagnostic_units', column: 'tenant_id' },
   { table: 'messaging.notification_requests', column: 'tenant_id' },

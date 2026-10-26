@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import type { EntityManager } from '@mikro-orm/postgresql';
-import { Pharmacies } from '../../../pharmacy/entities/pharmacies.entity';
+import { PharmacyProvisioningService } from '../../../pharmacy/services/pharmacy-provisioning.service';
 import type { PharmacyRegistrationPort } from '../../application/ports/pharmacy-registration.port';
 
-/** La fila de `pharmacy.pharmacies` que nace con el alta de una farmacia. */
+/** La farmacia que nace con el alta, que provisiona `pharmacy` (P50). */
 @Injectable()
 export class PharmacyRegistrationAdapter implements PharmacyRegistrationPort {
-  createPharmacy(tx: EntityManager, data: object): void {
-    tx.create(Pharmacies, data as never, { partial: true });
+  constructor(private readonly provisioning: PharmacyProvisioningService) {}
+
+  provision(...args: Parameters<PharmacyRegistrationPort['provision']>) {
+    return this.provisioning.provision(...args);
   }
 }

@@ -355,6 +355,38 @@ describe('TenantTypeProfileService', () => {
     });
   });
 
+  describe('assertProfileMatchesType · PHARMACY (P50)', () => {
+    it('acepta el bloque pharmacy en una farmacia', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'PHARMACY',
+          legalName: 'Farmacia Central S.R.L.',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          pharmacy: { latitude: -17.78, longitude: -63.18 },
+        }),
+      ).not.toThrow();
+    });
+
+    it('rechaza el bloque pharmacy con un tipo que no es PHARMACY', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Laboratorio Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          pharmacy: { branches: [] },
+        }),
+      ).toThrow(
+        'El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY',
+      );
+    });
+  });
+
   describe('assertConceptsExist', () => {
     it('rechaza un concepto que no está en el catálogo, nombrando el campo', async () => {
       const { service, conceptsRepo, tx } = build();

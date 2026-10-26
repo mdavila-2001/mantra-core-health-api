@@ -69,6 +69,12 @@ export interface TenantTypeProfileInput {
    * válido: el alta puede completar la unidad después desde el módulo 23).
    */
   diagnosticUnit?: DiagnosticUnitProfileDto;
+  /**
+   * Bloque de farmacia (casa central y sucursales) del alta pública; sólo
+   * corresponde a `PHARMACY` (P50). Aquí sólo importa si viene: su forma la
+   * valida el DTO de `iam` y lo materializa `PharmacyProvisioningService`.
+   */
+  pharmacy?: object;
 }
 
 /**
@@ -176,6 +182,12 @@ export class TenantTypeProfileService {
     if (tenantType !== 'BROKER' && input.broker) {
       throw new PreconditionFailedException(
         'El bloque `broker` sólo corresponde a un tenant de tipo BROKER',
+        { tenantType },
+      );
+    }
+    if (tenantType !== 'PHARMACY' && input.pharmacy) {
+      throw new PreconditionFailedException(
+        'El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY',
         { tenantType },
       );
     }

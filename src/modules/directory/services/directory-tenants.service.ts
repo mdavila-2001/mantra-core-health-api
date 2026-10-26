@@ -4,6 +4,7 @@ import { Pharmacies } from '../../pharmacy/entities/pharmacies.entity';
 import { PHARM } from '../../pharmacy/pharmacy.concepts';
 import { PinoLogger } from 'nestjs-pino';
 import { TenantTypeProfileService } from './tenant-type-profile.service';
+import { PharmacyOperatingRequirementsService } from './pharmacy-operating-requirements.service';
 import {
   CONCEPTS,
   ConflictException,
@@ -95,6 +96,8 @@ export class DirectoryTenantsService {
     private readonly publicProfiles: PublicProfileProjectionService,
     private readonly catalogRepo: CatalogRepository,
     private readonly logger: PinoLogger,
+    // P50: los requisitos de operación de una farmacia, que la verificación exige.
+    private readonly pharmacyRequirements: PharmacyOperatingRequirementsService,
   ) {
     this.logger.setContext(DirectoryTenantsService.name);
   }
@@ -273,6 +276,30 @@ export class DirectoryTenantsService {
         );
       }
 
+      // P50: una farmacia sólo opera —y verificarla es lo que la deja operar—
+      // con sus seis papeles presentados y el punto de su casa central. El
+      // alta pública los deja opcionales (D2); acá se exigen, y se rechaza
+      // nombrando lo que falta, antes de tocar nada.
+      const pharmacyReadiness =
+        tenant.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY
+          ? await this.pharmacyRequirements.evaluate(tx, tenant)
+          : undefined;
+      if (pharmacyReadiness && !pharmacyReadiness.ready) {
+        this.logger.warn(
+          {
+            operation: 'directory.tenant.verify',
+            tenantId,
+            reason: 'pharmacy-not-ready',
+            missing: pharmacyReadiness.missing,
+          },
+          'Rejected verification: pharmacy operating requirements missing',
+        );
+        throw new PreconditionFailedException(
+          'La farmacia todavía no puede operar: faltan papeles o el punto de su casa central',
+          { tenantId, missing: pharmacyReadiness.missing },
+        );
+      }
+
       tenant.verificationStatusConceptId = CONCEPTS.TENANT_VERIFIED;
       tenant.statusConceptId = CONCEPTS.TENANT_ACTIVE;
       if (dto.countryConceptId) tenant.countryConceptId = dto.countryConceptId;
@@ -323,6 +350,13 @@ export class DirectoryTenantsService {
           pharmacy.publicProfileId = publicProfileId;
           touch(pharmacy, actor.id);
         }
+        // La plataforma atestigua los papeles al verificar: quedan VERIFICADO
+        // con quién y cuándo, en vez de PENDIENTE para siempre.
+        await this.pharmacyRequirements.markDocumentsVerified(
+          tx,
+          pharmacyReadiness?.documentIds ?? [],
+          actor.id,
+        );
       }
 
       this.logger.info(

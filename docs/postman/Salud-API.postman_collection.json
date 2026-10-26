@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1565 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1565 requests en 145 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1567 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1567 requests en 145 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -70830,7 +70830,7 @@
                 "practices"
               ]
             },
-            "description": "Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE.\n\n`GET /practices`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PracticesController_listPractices`"
+            "description": "Sin `@Roles`: el servicio autoriza por rol clínico o por ser OWNER/ADMIN de la organización (A-6). Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE; quien administra la organización recibe todas las suyas.\n\n`GET /practices`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PracticesController_listPractices`"
           },
           "response": [],
           "event": [
@@ -91247,7 +91247,7 @@
       ]
     },
     {
-      "name": "tenants (24)",
+      "name": "tenants (26)",
       "item": [
         {
           "name": "directory-tenants",
@@ -91293,6 +91293,73 @@
                       "  const list = Array.isArray(body) ? body : (body.tenants || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('tenantId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /tenants/{tenantId}/affiliation-documents · Completar los documentos legales de la organización",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/tenants/:tenantId/affiliation-documents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tenants",
+                    ":tenantId",
+                    "affiliation-documents"
+                  ],
+                  "variable": [
+                    {
+                      "key": "tenantId",
+                      "value": "{{tenantId}}",
+                      "description": "Identificador de ruta · variable `{{tenantId}}`"
+                    }
+                  ]
+                },
+                "description": "Vincula PDF ya subidos con POST /iam/auth/upload-registration-document. 422 sin documentos, fuera de PENDING, con archivo repetido o sin representante para el poder; 409 si ese papel ya está presentado; 403 si no administra la organización.\n\n`POST /tenants/{tenantId}/affiliation-documents`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `TenantsController_completeAffiliationDocuments`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"taxIdentifier\": \"1023456029\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{affiliationDocumentId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.affiliationDocumentId);",
+                      "  if (id) pm.environment.set('affiliationDocumentId', id);",
                       "}"
                     ]
                   }
@@ -92129,6 +92196,61 @@
                       "  const list = Array.isArray(body) ? body : (body.branchAssignments || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('branchAssignmentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /tenants/{tenantId}/pharmacy-readiness · Requisitos pendientes para que la farmacia opere",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/tenants/:tenantId/pharmacy-readiness",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tenants",
+                    ":tenantId",
+                    "pharmacy-readiness"
+                  ],
+                  "variable": [
+                    {
+                      "key": "tenantId",
+                      "value": "{{tenantId}}",
+                      "description": "Identificador de ruta · variable `{{tenantId}}`"
+                    }
+                  ]
+                },
+                "description": "Requisitos pendientes para que la farmacia opere. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /tenants/{tenantId}/pharmacy-readiness`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `TenantsController_getPharmacyReadiness`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.pharmacyReadiness || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('pharmacyReadinessId', first.id);",
                       "}"
                     ]
                   }

@@ -17,6 +17,8 @@ import {
   DirectoryBranchesService,
   DirectoryMembershipsService,
   DirectoryReadService,
+  PharmacyOperatingRequirementsService,
+  TenantDocumentCompletionService,
 } from './services';
 import * as entities from './entities';
 import { AdminTenantsController, TenantsController } from './controllers';
@@ -69,6 +71,10 @@ import {
     AffiliationDocumentConceptsService,
     TenantAffiliationDocumentsService,
     TenantLegalRepresentativesService,
+    // P50: lo que una farmacia necesita para operar, y la puerta para
+    // completar los papeles que el alta pública dejó opcionales.
+    PharmacyOperatingRequirementsService,
+    TenantDocumentCompletionService,
     // Repositorios
     TenantsRepository,
     BranchesRepository,

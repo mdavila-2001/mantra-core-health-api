@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1574,
+    "total": 1576,
     "porOrigen": {
-      "CONTRATO": 1565,
+      "CONTRATO": 1567,
       "CONTRATO_AUSENTE": 9
     },
     "porRiesgo": {
-      "BAJO": 498,
+      "BAJO": 499,
       "MEDIO": 887,
-      "ALTO": 189
+      "ALTO": 190
     },
-    "conTablas": 1513,
+    "conTablas": 1515,
     "sinTablasSinDeterminar": 0,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 916,
-    "conRequerimientos": 1574
+    "conPruebas": 918,
+    "conRequerimientos": 1576
   },
   "endpoints": [
     {
@@ -10589,9 +10589,9 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 7,
+      "tablas": 15,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10624,6 +10624,22 @@
       "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TenantsController_completeAffiliationDocuments",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/tenants/{tenantId}/affiliation-documents",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Completar los documentos legales de la organización",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10866,6 +10882,22 @@
       "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TenantsController_getPharmacyReadiness",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/tenants/{tenantId}/pharmacy-readiness",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Requisitos pendientes para que la farmacia opere",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13164,7 +13196,7 @@
       "roles": [],
       "tablas": 23,
       "eventos": 0,
-      "pruebas": 53,
+      "pruebas": 54,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13210,9 +13242,9 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 36,
+      "tablas": 37,
       "eventos": 0,
-      "pruebas": 17,
+      "pruebas": 19,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13228,7 +13260,7 @@
       "roles": [],
       "tablas": 21,
       "eventos": 0,
-      "pruebas": 31,
+      "pruebas": 32,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13244,7 +13276,7 @@
       "roles": [],
       "tablas": 45,
       "eventos": 0,
-      "pruebas": 31,
+      "pruebas": 32,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13326,7 +13358,7 @@
       "roles": [],
       "tablas": 6,
       "eventos": 0,
-      "pruebas": 4,
+      "pruebas": 5,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -21032,19 +21064,8 @@
       "nombre": "Listar las prácticas activas del tenant",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN",
-        "SURGERY_SCHEDULER",
-        "PERIOP_ADMIN",
-        "SURGEON",
-        "ANESTHESIOLOGIST",
-        "PERIOP_NURSE",
-        "SCHEDULING_ADMIN",
-        "PRACTITIONER",
-        "CLINICIAN",
-        "ACCOUNTING_APPROVER"
-      ],
-      "tablas": 2,
+      "roles": [],
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -21064,7 +21085,7 @@
       ],
       "tablas": 2,
       "eventos": 0,
-      "pruebas": 5,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -21271,16 +21292,8 @@
       "nombre": "Listar las sedes de una práctica",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN",
-        "SURGERY_SCHEDULER",
-        "PERIOP_ADMIN",
-        "SURGEON",
-        "ANESTHESIOLOGIST",
-        "PERIOP_NURSE",
-        "SCHEDULING_ADMIN"
-      ],
-      "tablas": 2,
+      "roles": [],
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -27772,7 +27785,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"

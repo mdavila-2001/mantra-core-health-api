@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { DirectoryModule } from '../directory/directory.module';
+import { PracticeModule } from '../practice/practice.module';
+import { CommonModule } from '../common/common.module';
 import {
   PharmacyController,
   PharmacyPublicController,
@@ -18,6 +20,7 @@ import {
   PharmacyStaffReadService,
   PharmacyMarketplaceService,
   MedicineCatalogSearchService,
+  PharmacyProvisioningService,
 } from './services';
 import {
   PharmaciesRepository,
@@ -49,6 +52,11 @@ import {
     // `DirectoryAuthorizationModule`) y el representante y las gerencias
     // (`DirectoryReadService`), leídos en el mismo lugar que `GET /tenants/me`.
     DirectoryModule,
+    // P50: el alta de farmacia crea su práctica, sus sedes físicas y sus
+    // direcciones (`PharmacyProvisioningService`). Ni `practice` ni `common`
+    // importan `pharmacy`, así que no cierra ciclo.
+    PracticeModule,
+    CommonModule,
   ],
   controllers: [
     PharmacyController,
@@ -81,9 +89,12 @@ import {
     PharmacyStaffReadService,
     PharmacyMarketplaceService,
     MedicineCatalogSearchService,
+    PharmacyProvisioningService,
   ],
   // La cara de lectura se exporta para que el inventario (módulo 25) componga
   // disponibilidad sin duplicar los finders de publicación y precios.
-  exports: [PharmacyReadRepository],
+  // `PharmacyProvisioningService` se exporta para `iam`: el alta pública de
+  // farmacia la provisiona dentro de su propia transacción (P50).
+  exports: [PharmacyReadRepository, PharmacyProvisioningService],
 })
 export class PharmacyModule {}

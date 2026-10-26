@@ -880,7 +880,12 @@
                 "ANATOMY",
                 "DIAGNOSTIC_TEST",
                 "SYMPTOM",
-                "SPECIALTY"
+                "SPECIALTY",
+                "DIAGNOSTIC_CRITERION",
+                "REQUIRED_TEST",
+                "COMPLICATION",
+                "RISK_FACTOR",
+                "REFERRAL_CRITERION"
               ]
             }
           },
@@ -13456,6 +13461,127 @@
           "directory-tenants"
         ],
         "description": "Ficha de una organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/tenants/{tenantId}/affiliation-documents": {
+      "post": {
+        "description": "Vincula PDF ya subidos con POST /iam/auth/upload-registration-document. 422 sin documentos, fuera de PENDING, con archivo repetido o sin representante para el poder; 409 si ese papel ya está presentado; 403 si no administra la organización.",
+        "operationId": "TenantsController_completeAffiliationDocuments",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteAffiliationDocumentsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Completar los documentos legales de la organización",
+        "tags": [
+          "directory-tenants"
+        ]
+      }
+    },
+    "/tenants/{tenantId}/pharmacy-readiness": {
+      "get": {
+        "operationId": "TenantsController_getPharmacyReadiness",
+        "parameters": [
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Requisitos pendientes para que la farmacia opere",
+        "tags": [
+          "directory-tenants"
+        ],
+        "description": "Requisitos pendientes para que la farmacia opere. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/tenants/{tenantId}/child-tenants": {
@@ -31942,6 +32068,1679 @@
           "diagnostic-unit-accreditations"
         ],
         "description": "Renovar/registrar acreditación con evidencia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/categories": {
+      "get": {
+        "operationId": "PharmacyController_listCategories",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyCategoryListDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Categorías de la farmacia (sólo su personal)",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Categorías de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies": {
+      "post": {
+        "operationId": "PharmacyController_createPharmacy",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePharmacyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alta de farmacia con licencia inicial",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Alta de farmacia con licencia inicial. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/licenses/{licenseId}/verify": {
+      "post": {
+        "operationId": "PharmacyController_verifyLicense",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "licenseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PharmacyVerifyLicenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Verificar licencia y aprobar farmacia",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Verificar licencia y aprobar farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/sites": {
+      "post": {
+        "operationId": "PharmacyController_createSite",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PharmacyCreateSiteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar sede dispensadora",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Registrar sede dispensadora. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/products": {
+      "post": {
+        "operationId": "PharmacyController_publishProduct",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PharmacyCreateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Publicar producto en catálogo con identificadores",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Publicar producto en catálogo con identificadores. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/products/{productId}": {
+      "patch": {
+        "description": "Marca, genérico, concentración, empaque y receta: cada uno opcional y `null` lo borra. Precio, categoría, descripción, existencias, estado e imágenes no tienen columna (P47 §3-5) y se rechazan con 400. Un producto retirado responde 422.",
+        "operationId": "PharmacyController_updateProduct",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PharmacyUpdateProductDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyProductReadDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Editar los datos descriptivos de un producto del catálogo",
+        "tags": [
+          "pharmacy"
+        ]
+      },
+      "delete": {
+        "operationId": "PharmacyController_retireProduct",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retirar (soft-delete) producto del catálogo",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Retirar (soft-delete) producto del catálogo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/price-lists": {
+      "post": {
+        "operationId": "PharmacyController_createPriceList",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePriceListDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear lista de precios (pública / por aseguradora)",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Crear lista de precios (pública / por aseguradora). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/price-lists/{priceListId}/prices": {
+      "post": {
+        "operationId": "PharmacyController_versionPrice",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "priceListId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePriceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Fijar/versionar precio de producto",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Fijar/versionar precio de producto. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/price-lists/{priceListId}/close": {
+      "post": {
+        "operationId": "PharmacyController_closePriceList",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "priceListId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cerrar/expirar lista de precios",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Cerrar/expirar lista de precios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/integration-connections": {
+      "post": {
+        "operationId": "PharmacyController_createConnection",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConnectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Establecer conexión de integración externa",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Establecer conexión de integración externa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings": {
+      "post": {
+        "operationId": "PharmacyController_mapProduct",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "connId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMappingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mapear producto a código de proveedor externo",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Mapear producto a código de proveedor externo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/projections": {
+      "post": {
+        "operationId": "PharmacyController_projectCatalog",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Proyectar catálogo y precios a read-model",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Proyectar catálogo y precios a read-model. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacy/pharmacies": {
+      "get": {
+        "operationId": "PharmacyReadController_listPharmacies",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyDirectoryResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar farmacias publicadas del tenant activo",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Listar farmacias publicadas del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacy/pharmacies/{id}": {
+      "get": {
+        "operationId": "PharmacyReadController_getPharmacy",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar el perfil de una farmacia",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Consultar el perfil de una farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacy/pharmacies/{id}/licenses": {
+      "get": {
+        "operationId": "PharmacyReadController_listLicenses",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyLicenseListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Licencias de la farmacia (sólo su personal)",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Licencias de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacy/pharmacies/{id}/summary": {
+      "get": {
+        "operationId": "PharmacyReadController_getSummary",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacySummaryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resumen del catálogo de la farmacia (sólo su personal)",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Resumen del catálogo de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacy/pharmacies/{id}/contacts": {
+      "get": {
+        "operationId": "PharmacyReadController_getContacts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyContactsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Representante legal y gerencias de la farmacia (sólo su personal)",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Representante legal y gerencias de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacy/sites": {
+      "get": {
+        "operationId": "PharmacyReadController_listSites",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Texto a buscar en el nombre de la farmacia o la sede",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "description": "Latitud WGS84 desde donde medir distancia (va con lng)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lng",
+            "required": false,
+            "in": "query",
+            "description": "Longitud WGS84 desde donde medir distancia (va con lat)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope del listado (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacySiteListResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar sedes publicadas, sueltas",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Listar sedes publicadas, sueltas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacy/catalog-products": {
+      "get": {
+        "operationId": "PharmacyReadController_searchCatalogProducts",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Nombre, principio activo, ATC, titular o nº de registro (mínimo 2 letras)",
+            "schema": {
+              "minLength": 2,
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "name": "source",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "agemed",
+                "cima",
+                "invima",
+                "anvisa"
+              ]
+            }
+          },
+          {
+            "name": "atc",
+            "required": false,
+            "in": "query",
+            "description": "ATC nivel 5 exacto",
+            "schema": {
+              "example": "N02BE01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyCatalogProductPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar en el catálogo universal de medicamentos",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Buscar en el catálogo universal de medicamentos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacy/products": {
+      "get": {
+        "operationId": "PharmacyReadController_searchProducts",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Texto a buscar en marca, genérico o código de producto",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "conceptId",
+            "required": false,
+            "in": "query",
+            "description": "Medicamento del vademécum (medication_concept_id)",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "pharmacyId",
+            "required": false,
+            "in": "query",
+            "description": "Sólo lo publicado por esta farmacia (carril A, H5)",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope del listado (por defecto 50)",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyProductSearchResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Buscar productos publicados por texto, medicamento o farmacia",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Buscar productos publicados por texto, medicamento o farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacy/sites/{siteId}/prices": {
+      "get": {
+        "operationId": "PharmacyReadController_getSitePrices",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "product",
+            "required": false,
+            "in": "query",
+            "description": "Producto puntual, si se acota",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacySitePricesResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar los precios públicos vigentes de una sede",
+        "tags": [
+          "pharmacy-directory"
+        ],
+        "description": "Consultar los precios públicos vigentes de una sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/public/medications": {
+      "get": {
+        "operationId": "PharmacyPublicController_listMedications",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "description": "Texto a buscar en principio activo, marca o código ATC",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "group",
+            "required": false,
+            "in": "query",
+            "description": "Grupo terapéutico ATC de primer nivel, tal como lo lista `groups`",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "description": "Latitud WGS84 desde donde medir distancias (va con lng)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lng",
+            "required": false,
+            "in": "query",
+            "description": "Longitud WGS84 desde donde medir distancias (va con lat)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "radiusKm",
+            "required": false,
+            "in": "query",
+            "description": "Radio en km; sólo se aplica si viajó el origen",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tope de tarjetas (máx. 60)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicMedicationPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "summary": "Vitrina pública de medicamentos con disponibilidad por farmacia",
+        "tags": [
+          "pharmacy-public"
+        ],
+        "security": [],
+        "description": "Vitrina pública de medicamentos con disponibilidad por farmacia. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/public/medications/{conceptId}/availability": {
+      "get": {
+        "operationId": "PharmacyPublicController_getAvailability",
+        "parameters": [
+          {
+            "name": "conceptId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "description": "Latitud WGS84 del origen",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lng",
+            "required": false,
+            "in": "query",
+            "description": "Longitud WGS84 del origen",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "radiusKm",
+            "required": false,
+            "in": "query",
+            "description": "Radio en km",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicMedicationAvailabilityDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "summary": "Farmacias que publican un medicamento, con precio y distancia",
+        "tags": [
+          "pharmacy-public"
+        ],
+        "security": [],
+        "description": "Farmacias que publican un medicamento, con precio y distancia. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/admin/content-packs": {
@@ -71559,1679 +73358,6 @@
         "description": "Rentabilidad por producto y costos por proyecto del periodo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
-    "/pharmacies/{pharmacyId}/categories": {
-      "get": {
-        "operationId": "PharmacyController_listCategories",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PharmacyCategoryListDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Categorías de la farmacia (sólo su personal)",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Categorías de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacies": {
-      "post": {
-        "operationId": "PharmacyController_createPharmacy",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePharmacyDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Alta de farmacia con licencia inicial",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Alta de farmacia con licencia inicial. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacies/{pharmacyId}/licenses/{licenseId}/verify": {
-      "post": {
-        "operationId": "PharmacyController_verifyLicense",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "licenseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PharmacyVerifyLicenseDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Verificar licencia y aprobar farmacia",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Verificar licencia y aprobar farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacies/{pharmacyId}/sites": {
-      "post": {
-        "operationId": "PharmacyController_createSite",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PharmacyCreateSiteDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Registrar sede dispensadora",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Registrar sede dispensadora. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacies/{pharmacyId}/products": {
-      "post": {
-        "operationId": "PharmacyController_publishProduct",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PharmacyCreateProductDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Publicar producto en catálogo con identificadores",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Publicar producto en catálogo con identificadores. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacies/{pharmacyId}/products/{productId}": {
-      "patch": {
-        "description": "Marca, genérico, concentración, empaque y receta: cada uno opcional y `null` lo borra. Precio, categoría, descripción, existencias, estado e imágenes no tienen columna (P47 §3-5) y se rechazan con 400. Un producto retirado responde 422.",
-        "operationId": "PharmacyController_updateProduct",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "productId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PharmacyUpdateProductDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PharmacyProductReadDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Editar los datos descriptivos de un producto del catálogo",
-        "tags": [
-          "pharmacy"
-        ]
-      },
-      "delete": {
-        "operationId": "PharmacyController_retireProduct",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "productId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Retirar (soft-delete) producto del catálogo",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Retirar (soft-delete) producto del catálogo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacies/{pharmacyId}/price-lists": {
-      "post": {
-        "operationId": "PharmacyController_createPriceList",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePriceListDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Crear lista de precios (pública / por aseguradora)",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Crear lista de precios (pública / por aseguradora). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacies/{pharmacyId}/price-lists/{priceListId}/prices": {
-      "post": {
-        "operationId": "PharmacyController_versionPrice",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "priceListId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePriceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Fijar/versionar precio de producto",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Fijar/versionar precio de producto. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacies/{pharmacyId}/price-lists/{priceListId}/close": {
-      "post": {
-        "operationId": "PharmacyController_closePriceList",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "priceListId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Cerrar/expirar lista de precios",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Cerrar/expirar lista de precios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacies/{pharmacyId}/integration-connections": {
-      "post": {
-        "operationId": "PharmacyController_createConnection",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateConnectionDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Establecer conexión de integración externa",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Establecer conexión de integración externa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings": {
-      "post": {
-        "operationId": "PharmacyController_mapProduct",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "connId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMappingDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "413": {
-            "$ref": "#/components/responses/PayloadTooLarge"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Mapear producto a código de proveedor externo",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Mapear producto a código de proveedor externo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacies/{pharmacyId}/projections": {
-      "post": {
-        "operationId": "PharmacyController_projectCatalog",
-        "parameters": [
-          {
-            "name": "pharmacyId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/PreconditionFailed"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Proyectar catálogo y precios a read-model",
-        "tags": [
-          "pharmacy"
-        ],
-        "description": "Proyectar catálogo y precios a read-model. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacy/pharmacies": {
-      "get": {
-        "operationId": "PharmacyReadController_listPharmacies",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PharmacyDirectoryResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Listar farmacias publicadas del tenant activo",
-        "tags": [
-          "pharmacy-directory"
-        ],
-        "description": "Listar farmacias publicadas del tenant activo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacy/pharmacies/{id}": {
-      "get": {
-        "operationId": "PharmacyReadController_getPharmacy",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PharmacyDetailDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Consultar el perfil de una farmacia",
-        "tags": [
-          "pharmacy-directory"
-        ],
-        "description": "Consultar el perfil de una farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacy/pharmacies/{id}/licenses": {
-      "get": {
-        "operationId": "PharmacyReadController_listLicenses",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PharmacyLicenseListResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Licencias de la farmacia (sólo su personal)",
-        "tags": [
-          "pharmacy-directory"
-        ],
-        "description": "Licencias de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacy/pharmacies/{id}/summary": {
-      "get": {
-        "operationId": "PharmacyReadController_getSummary",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PharmacySummaryDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Resumen del catálogo de la farmacia (sólo su personal)",
-        "tags": [
-          "pharmacy-directory"
-        ],
-        "description": "Resumen del catálogo de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacy/pharmacies/{id}/contacts": {
-      "get": {
-        "operationId": "PharmacyReadController_getContacts",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PharmacyContactsResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Representante legal y gerencias de la farmacia (sólo su personal)",
-        "tags": [
-          "pharmacy-directory"
-        ],
-        "description": "Representante legal y gerencias de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacy/sites": {
-      "get": {
-        "operationId": "PharmacyReadController_listSites",
-        "parameters": [
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "description": "Texto a buscar en el nombre de la farmacia o la sede",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lat",
-            "required": false,
-            "in": "query",
-            "description": "Latitud WGS84 desde donde medir distancia (va con lng)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lng",
-            "required": false,
-            "in": "query",
-            "description": "Longitud WGS84 desde donde medir distancia (va con lat)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "description": "Tope del listado (por defecto 50)",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PharmacySiteListResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Listar sedes publicadas, sueltas",
-        "tags": [
-          "pharmacy-directory"
-        ],
-        "description": "Listar sedes publicadas, sueltas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacy/catalog-products": {
-      "get": {
-        "operationId": "PharmacyReadController_searchCatalogProducts",
-        "parameters": [
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "description": "Nombre, principio activo, ATC, titular o nº de registro (mínimo 2 letras)",
-            "schema": {
-              "minLength": 2,
-              "maxLength": 100,
-              "type": "string"
-            }
-          },
-          {
-            "name": "source",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "agemed",
-                "cima",
-                "invima",
-                "anvisa"
-              ]
-            }
-          },
-          {
-            "name": "atc",
-            "required": false,
-            "in": "query",
-            "description": "ATC nivel 5 exacto",
-            "schema": {
-              "example": "N02BE01",
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "maximum": 50,
-              "default": 20,
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PharmacyCatalogProductPageDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Buscar en el catálogo universal de medicamentos",
-        "tags": [
-          "pharmacy-directory"
-        ],
-        "description": "Buscar en el catálogo universal de medicamentos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacy/products": {
-      "get": {
-        "operationId": "PharmacyReadController_searchProducts",
-        "parameters": [
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "description": "Texto a buscar en marca, genérico o código de producto",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "conceptId",
-            "required": false,
-            "in": "query",
-            "description": "Medicamento del vademécum (medication_concept_id)",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "pharmacyId",
-            "required": false,
-            "in": "query",
-            "description": "Sólo lo publicado por esta farmacia (carril A, H5)",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "description": "Tope del listado (por defecto 50)",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PharmacyProductSearchResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Buscar productos publicados por texto, medicamento o farmacia",
-        "tags": [
-          "pharmacy-directory"
-        ],
-        "description": "Buscar productos publicados por texto, medicamento o farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/pharmacy/sites/{siteId}/prices": {
-      "get": {
-        "operationId": "PharmacyReadController_getSitePrices",
-        "parameters": [
-          {
-            "name": "siteId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "product",
-            "required": false,
-            "in": "query",
-            "description": "Producto puntual, si se acota",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PharmacySitePricesResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Consultar los precios públicos vigentes de una sede",
-        "tags": [
-          "pharmacy-directory"
-        ],
-        "description": "Consultar los precios públicos vigentes de una sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/public/medications": {
-      "get": {
-        "operationId": "PharmacyPublicController_listMedications",
-        "parameters": [
-          {
-            "name": "q",
-            "required": false,
-            "in": "query",
-            "description": "Texto a buscar en principio activo, marca o código ATC",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "group",
-            "required": false,
-            "in": "query",
-            "description": "Grupo terapéutico ATC de primer nivel, tal como lo lista `groups`",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lat",
-            "required": false,
-            "in": "query",
-            "description": "Latitud WGS84 desde donde medir distancias (va con lng)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lng",
-            "required": false,
-            "in": "query",
-            "description": "Longitud WGS84 desde donde medir distancias (va con lat)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "radiusKm",
-            "required": false,
-            "in": "query",
-            "description": "Radio en km; sólo se aplica si viajó el origen",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "description": "Tope de tarjetas (máx. 60)",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicMedicationPageDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "summary": "Vitrina pública de medicamentos con disponibilidad por farmacia",
-        "tags": [
-          "pharmacy-public"
-        ],
-        "security": [],
-        "description": "Vitrina pública de medicamentos con disponibilidad por farmacia. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
-    "/public/medications/{conceptId}/availability": {
-      "get": {
-        "operationId": "PharmacyPublicController_getAvailability",
-        "parameters": [
-          {
-            "name": "conceptId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lat",
-            "required": false,
-            "in": "query",
-            "description": "Latitud WGS84 del origen",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lng",
-            "required": false,
-            "in": "query",
-            "description": "Longitud WGS84 del origen",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "radiusKm",
-            "required": false,
-            "in": "query",
-            "description": "Radio en km",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PublicMedicationAvailabilityDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "429": {
-            "$ref": "#/components/responses/RateLimited"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalError"
-          },
-          "504": {
-            "$ref": "#/components/responses/GatewayTimeout"
-          }
-        },
-        "summary": "Farmacias que publican un medicamento, con precio y distancia",
-        "tags": [
-          "pharmacy-public"
-        ],
-        "security": [],
-        "description": "Farmacias que publican un medicamento, con precio y distancia. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse."
-      }
-    },
     "/pharmacy/{pharmacyId}/suppliers": {
       "post": {
         "operationId": "PharmacyProcurementController_createSupplier",
@@ -101926,12 +102052,12 @@
           },
           "latitude": {
             "type": "number",
-            "description": "Latitud",
+            "description": "Latitud; va junto con longitude o no va",
             "example": -17.769
           },
           "longitude": {
             "type": "number",
-            "description": "Longitud",
+            "description": "Longitud; va junto con latitude o no va",
             "example": -63.196
           },
           "description": {
@@ -101953,15 +102079,22 @@
       "RegisterPharmacyBlockDto": {
         "type": "object",
         "properties": {
+          "address": {
+            "type": "string",
+            "description": "Dirección escrita de la casa central (dirección legal)",
+            "maxLength": 500,
+            "example": "Av. Cristo Redentor 1234, Santa Cruz de la Sierra"
+          },
           "latitude": {
             "type": "number",
-            "description": "Latitud de la casa central"
+            "description": "Latitud de la casa central; va junto con longitude o no va"
           },
           "longitude": {
             "type": "number",
-            "description": "Longitud de la casa central"
+            "description": "Longitud de la casa central; va junto con latitude o no va"
           },
           "branches": {
+            "maxItems": 50,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RegisterPharmacyBranchDto"
@@ -102035,6 +102168,12 @@
             ],
             "example": "SRL"
           },
+          "taxIdentifier": {
+            "type": "string",
+            "description": "Identificación tributaria (NIT en Bolivia); se registra como número del documento tributario",
+            "maxLength": 50,
+            "example": "1023456029"
+          },
           "legalDocuments": {
             "$ref": "#/components/schemas/RegisterOrganizationLegalDocumentsDto"
           },
@@ -102068,7 +102207,12 @@
             "example": "America/La_Paz"
           },
           "pharmacy": {
-            "$ref": "#/components/schemas/RegisterPharmacyBlockDto"
+            "description": "Sólo para PHARMACY: dirección y punto de la casa central y sucursales",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RegisterPharmacyBlockDto"
+              }
+            ]
           }
         },
         "required": [
@@ -107695,6 +107839,41 @@
           },
           "payer": {
             "$ref": "#/components/schemas/UpdatePayerProfileDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CompleteAffiliationDocumentsDto": {
+        "type": "object",
+        "properties": {
+          "constitutionFileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taxIdentifierFileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "commerceRegistryFileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operatingLicenseFileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "healthAuthorityCertificateFileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "powerOfAttorneyFileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taxIdentifier": {
+            "type": "string",
+            "maxLength": 50,
+            "example": "1023456029"
           }
         },
         "additionalProperties": false
@@ -118118,6 +118297,1594 @@
           }
         },
         "additionalProperties": false
+      },
+      "PharmacyCategoryListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "InitialLicenseDto": {
+        "type": "object",
+        "properties": {
+          "licenseNumber": {
+            "type": "string",
+            "description": "Número de licencia",
+            "maxLength": 200
+          },
+          "issuingAuthorityTenantId": {
+            "type": "string",
+            "description": "Tenant de la autoridad emisora",
+            "format": "uuid"
+          },
+          "jurisdictionConceptId": {
+            "type": "string",
+            "description": "Concept id de la jurisdicción",
+            "format": "uuid"
+          },
+          "validFrom": {
+            "type": "string",
+            "description": "Inicio de vigencia",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "description": "Fin de vigencia",
+            "format": "date"
+          },
+          "evidenceFileId": {
+            "type": "string",
+            "description": "Archivo de evidencia de la licencia",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "licenseNumber"
+        ],
+        "additionalProperties": false
+      },
+      "CreatePharmacyDto": {
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "description": "Tenant propietario de la farmacia",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "Código único de la farmacia por tenant",
+            "maxLength": 100
+          },
+          "legalName": {
+            "type": "string",
+            "description": "Razón social",
+            "maxLength": 300
+          },
+          "tradeName": {
+            "type": "string",
+            "description": "Nombre comercial",
+            "maxLength": 300
+          },
+          "isRetail": {
+            "type": "boolean",
+            "description": "Tenant no público / farmacia interna",
+            "example": false
+          },
+          "license": {
+            "description": "Licencia inicial de la farmacia",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InitialLicenseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "tenantId",
+          "code",
+          "legalName",
+          "license"
+        ],
+        "additionalProperties": false
+      },
+      "PharmacyVerifyLicenseDto": {
+        "type": "object",
+        "properties": {
+          "approve": {
+            "type": "boolean",
+            "description": "true (por defecto) verifica; false rechaza la licencia",
+            "default": true
+          },
+          "evidenceFileId": {
+            "type": "string",
+            "description": "Archivo de evidencia usado en la verificación",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Motivo del rechazo (si aplica)",
+            "maxLength": 500
+          }
+        },
+        "additionalProperties": false
+      },
+      "PharmacyCreateSiteDto": {
+        "type": "object",
+        "properties": {
+          "practiceSiteId": {
+            "type": "string",
+            "description": "Sede física (practice.practice_sites)",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string",
+            "description": "Código único de sede por farmacia",
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre de la sede",
+            "maxLength": 300
+          },
+          "pharmacySiteTypeConceptId": {
+            "type": "string",
+            "description": "Concept id del tipo de sede",
+            "format": "uuid"
+          },
+          "dispensingModeConceptId": {
+            "type": "string",
+            "description": "Concept id del modo de dispensación",
+            "format": "uuid"
+          },
+          "controlledSubstanceCapabilityConceptId": {
+            "type": "string",
+            "description": "Concept id de capacidad de sustancias controladas",
+            "format": "uuid"
+          },
+          "homeDeliveryAvailable": {
+            "type": "boolean",
+            "description": "Ofrece entrega a domicilio"
+          },
+          "pickupAvailable": {
+            "type": "boolean",
+            "description": "Ofrece retiro en tienda"
+          }
+        },
+        "required": [
+          "practiceSiteId",
+          "code",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "ProductIdentifierDto": {
+        "type": "object",
+        "properties": {
+          "identifierType": {
+            "type": "string",
+            "description": "Tipo de identificador",
+            "enum": [
+              "GTIN",
+              "NDC"
+            ]
+          },
+          "identifierValue": {
+            "type": "string",
+            "description": "Valor del identificador",
+            "maxLength": 100
+          },
+          "assigningAuthorityTenantId": {
+            "type": "string",
+            "description": "Tenant de la autoridad que asigna el identificador",
+            "format": "uuid"
+          },
+          "validFrom": {
+            "type": "string",
+            "description": "Inicio de vigencia",
+            "format": "date"
+          },
+          "validTo": {
+            "type": "string",
+            "description": "Fin de vigencia",
+            "format": "date"
+          }
+        },
+        "required": [
+          "identifierType",
+          "identifierValue"
+        ],
+        "additionalProperties": false
+      },
+      "PharmacyCreateProductDto": {
+        "type": "object",
+        "properties": {
+          "productCode": {
+            "type": "string",
+            "description": "Código único de producto por farmacia",
+            "maxLength": 100
+          },
+          "catalogProductId": {
+            "type": "string",
+            "description": "Producto del catálogo universal de medicamentos (id de `GET /pharmacy/catalog-products`). Con él, marca, genérico, concentración, forma, presentación, receta y el medicamento del vademécum los deriva el servidor y mandarlos es un 400.",
+            "format": "uuid"
+          },
+          "catalogPresentationCode": {
+            "type": "string",
+            "description": "Presentación elegida del producto del catálogo (su `code`: CN, CUM…). Sólo con `catalogProductId`.",
+            "maxLength": 100
+          },
+          "medicationConceptId": {
+            "type": "string",
+            "description": "Concept id del medicamento",
+            "format": "uuid"
+          },
+          "manufacturerTenantId": {
+            "type": "string",
+            "description": "Tenant fabricante",
+            "format": "uuid"
+          },
+          "brandName": {
+            "type": "string",
+            "description": "Marca comercial",
+            "maxLength": 300
+          },
+          "genericName": {
+            "type": "string",
+            "description": "Nombre genérico",
+            "maxLength": 300
+          },
+          "strengthText": {
+            "type": "string",
+            "description": "Concentración (texto libre)",
+            "maxLength": 200
+          },
+          "dosageFormConceptId": {
+            "type": "string",
+            "description": "Concept id de la forma farmacéutica",
+            "format": "uuid"
+          },
+          "packageSizeText": {
+            "type": "string",
+            "description": "Tamaño de empaque (texto libre)",
+            "maxLength": 200
+          },
+          "requiresPrescription": {
+            "type": "boolean",
+            "description": "Requiere receta"
+          },
+          "coldChainRequired": {
+            "type": "boolean",
+            "description": "Requiere cadena de frío"
+          },
+          "identifiers": {
+            "description": "Identificadores (GTIN/NDC)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductIdentifierDto"
+            }
+          }
+        },
+        "required": [
+          "productCode"
+        ],
+        "additionalProperties": false
+      },
+      "PharmacyUpdateProductDto": {
+        "type": "object",
+        "properties": {
+          "brandName": {
+            "type": "string",
+            "description": "Marca comercial; `null` la borra",
+            "minLength": 1,
+            "maxLength": 300,
+            "nullable": true
+          },
+          "genericName": {
+            "type": "string",
+            "description": "Nombre genérico; `null` lo borra",
+            "minLength": 1,
+            "maxLength": 300,
+            "nullable": true
+          },
+          "strengthText": {
+            "type": "string",
+            "description": "Concentración (texto libre); `null` la borra",
+            "minLength": 1,
+            "maxLength": 200,
+            "nullable": true
+          },
+          "packageSizeText": {
+            "type": "string",
+            "description": "Tamaño de empaque (texto libre); `null` lo borra",
+            "minLength": 1,
+            "maxLength": 200,
+            "nullable": true
+          },
+          "requiresPrescription": {
+            "type": "boolean",
+            "description": "Requiere receta; `null` lo borra",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PharmacyConceptDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "display"
+        ]
+      },
+      "PharmacyProductReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pharmacyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pharmacyName": {
+            "type": "string"
+          },
+          "productCode": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "object",
+            "nullable": true
+          },
+          "genericName": {
+            "type": "object",
+            "nullable": true
+          },
+          "strengthText": {
+            "type": "object",
+            "nullable": true
+          },
+          "packageSizeText": {
+            "type": "object",
+            "nullable": true
+          },
+          "dosageForm": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "medication": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "requiresPrescription": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "pharmacyId",
+          "pharmacyName",
+          "productCode"
+        ]
+      },
+      "CreatePriceListDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Código único de lista por farmacia",
+            "maxLength": 100
+          },
+          "priceListType": {
+            "type": "string",
+            "description": "Tipo de lista de precios",
+            "enum": [
+              "PUBLIC",
+              "INSURER"
+            ]
+          },
+          "pharmacySiteId": {
+            "type": "string",
+            "description": "Sede a la que aplica la lista",
+            "format": "uuid"
+          },
+          "insurerTenantId": {
+            "type": "string",
+            "description": "Tenant aseguradora (obligatorio si tipo INSURER)",
+            "format": "uuid"
+          },
+          "currencyConceptId": {
+            "type": "string",
+            "description": "Concept id de la moneda",
+            "format": "uuid"
+          },
+          "validFrom": {
+            "type": "string",
+            "description": "Inicio de vigencia",
+            "format": "date-time"
+          },
+          "validTo": {
+            "type": "string",
+            "description": "Fin de vigencia",
+            "format": "date-time"
+          },
+          "publicVisibility": {
+            "type": "boolean",
+            "description": "Visible públicamente"
+          }
+        },
+        "required": [
+          "code",
+          "priceListType"
+        ],
+        "additionalProperties": false
+      },
+      "CreatePriceDto": {
+        "type": "object",
+        "properties": {
+          "pharmacyProductId": {
+            "type": "string",
+            "description": "Producto al que se fija el precio",
+            "format": "uuid"
+          },
+          "unitAmount": {
+            "type": "number",
+            "description": "Importe unitario",
+            "example": 12.5
+          },
+          "taxAmount": {
+            "type": "number",
+            "description": "Impuesto",
+            "example": 1.5
+          },
+          "patientAmount": {
+            "type": "number",
+            "description": "Importe a cargo del paciente",
+            "example": 5
+          },
+          "insurerAmount": {
+            "type": "number",
+            "description": "Importe a cargo de la aseguradora",
+            "example": 7.5
+          },
+          "minimumQuantity": {
+            "type": "number",
+            "description": "Cantidad mínima",
+            "example": 1
+          }
+        },
+        "required": [
+          "pharmacyProductId",
+          "unitAmount"
+        ],
+        "additionalProperties": false
+      },
+      "CreateConnectionDto": {
+        "type": "object",
+        "properties": {
+          "integrationMode": {
+            "type": "string",
+            "description": "Modo de integración",
+            "enum": [
+              "REALTIME",
+              "BATCH"
+            ]
+          },
+          "connectionId": {
+            "type": "string",
+            "description": "Conexión de integración externa registrada; si se omite, la fila se auto-referencia",
+            "format": "uuid"
+          },
+          "pharmacySiteId": {
+            "type": "string",
+            "description": "Sede a la que aplica la conexión",
+            "format": "uuid"
+          },
+          "inventoryAuthorityConceptId": {
+            "type": "string",
+            "description": "Concept id de la autoridad de inventario",
+            "format": "uuid"
+          },
+          "supportsStockQuery": {
+            "type": "boolean",
+            "description": "Soporta consulta de stock"
+          },
+          "supportsPriceQuery": {
+            "type": "boolean",
+            "description": "Soporta consulta de precio"
+          },
+          "supportsReservation": {
+            "type": "boolean",
+            "description": "Soporta reserva"
+          },
+          "supportsDispenseConfirmation": {
+            "type": "boolean",
+            "description": "Soporta confirmación de dispensación"
+          },
+          "manualFallbackAllowed": {
+            "type": "boolean",
+            "description": "Permite fallback manual"
+          }
+        },
+        "required": [
+          "integrationMode"
+        ],
+        "additionalProperties": false
+      },
+      "CreateMappingDto": {
+        "type": "object",
+        "properties": {
+          "pharmacyProductId": {
+            "type": "string",
+            "description": "Producto a mapear",
+            "format": "uuid"
+          },
+          "externalProductCode": {
+            "type": "string",
+            "description": "Código de producto en el sistema externo",
+            "maxLength": 200
+          },
+          "externalUnitCode": {
+            "type": "string",
+            "description": "Código de unidad en el sistema externo",
+            "maxLength": 100
+          },
+          "mappingVersion": {
+            "type": "string",
+            "description": "Versión del mapeo",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "pharmacyProductId",
+          "externalProductCode"
+        ],
+        "additionalProperties": false
+      },
+      "PharmacyDirectoryItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "type": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "siteCount": {
+            "type": "number"
+          },
+          "productCount": {
+            "type": "number"
+          },
+          "homeDeliveryAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "pickupAvailable": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "legalName",
+          "siteCount",
+          "productCount"
+        ]
+      },
+      "PharmacyDirectoryResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyDirectoryItemDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ]
+      },
+      "PharmacySiteReadDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "addressText": {
+            "type": "object",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "object",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "object",
+            "nullable": true
+          },
+          "dispensingMode": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "homeDeliveryAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "pickupAvailable": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name"
+        ]
+      },
+      "PharmacyGeoPointDto": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ]
+      },
+      "PharmacyDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "type": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "siteCount": {
+            "type": "number"
+          },
+          "productCount": {
+            "type": "number"
+          },
+          "homeDeliveryAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "pickupAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "sites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacySiteReadDto"
+            }
+          },
+          "taxId": {
+            "type": "object",
+            "nullable": true
+          },
+          "companyType": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "legalAddressText": {
+            "type": "object",
+            "nullable": true
+          },
+          "headquarters": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyGeoPointDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "legalName",
+          "siteCount",
+          "productCount",
+          "sites"
+        ]
+      },
+      "PharmacyLicenseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "number": {
+            "type": "string"
+          },
+          "siteId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "siteName": {
+            "type": "object",
+            "nullable": true
+          },
+          "jurisdiction": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "validFrom": {
+            "type": "object",
+            "format": "date",
+            "nullable": true
+          },
+          "validTo": {
+            "type": "object",
+            "format": "date",
+            "nullable": true
+          },
+          "daysToExpiry": {
+            "type": "object",
+            "nullable": true
+          },
+          "verificationStatus": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "evidenceFileId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "number"
+        ]
+      },
+      "PharmacyLicenseListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyLicenseDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ]
+      },
+      "PharmacyCategoryCountDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "category",
+          "count"
+        ]
+      },
+      "PharmacyRecentActivityDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "at": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "at",
+          "kind",
+          "text"
+        ]
+      },
+      "PharmacySummaryDto": {
+        "type": "object",
+        "properties": {
+          "published": {
+            "type": "number"
+          },
+          "drafts": {
+            "type": "number"
+          },
+          "withdrawn": {
+            "type": "number"
+          },
+          "outOfStock": {
+            "type": "number"
+          },
+          "lowStock": {
+            "type": "number"
+          },
+          "inventoryValue": {
+            "type": "string",
+            "description": "Valor del inventario, decimal en texto"
+          },
+          "byCategory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyCategoryCountDto"
+            }
+          },
+          "recentActivity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyRecentActivityDto"
+            }
+          }
+        },
+        "required": [
+          "published",
+          "drafts",
+          "withdrawn",
+          "outOfStock",
+          "lowStock",
+          "inventoryValue",
+          "byCategory",
+          "recentActivity"
+        ]
+      },
+      "PharmacyContactPersonDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "object",
+            "nullable": true
+          },
+          "phone": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "role",
+          "fullName"
+        ]
+      },
+      "PharmacyContactsResponseDto": {
+        "type": "object",
+        "properties": {
+          "legalRepresentative": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyContactPersonDto"
+              }
+            ]
+          },
+          "executives": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyContactPersonDto"
+            }
+          }
+        },
+        "required": [
+          "executives"
+        ]
+      },
+      "PharmacySiteListItemDto": {
+        "type": "object",
+        "properties": {
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteName": {
+            "type": "string"
+          },
+          "pharmacyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pharmacyName": {
+            "type": "string"
+          },
+          "addressText": {
+            "type": "object",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "object",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "object",
+            "nullable": true
+          },
+          "distanceKm": {
+            "type": "object",
+            "nullable": true
+          },
+          "homeDeliveryAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "pickupAvailable": {
+            "type": "object",
+            "nullable": true
+          },
+          "productCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "siteId",
+          "siteName",
+          "pharmacyId",
+          "pharmacyName",
+          "productCount"
+        ]
+      },
+      "PharmacySiteListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacySiteListItemDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ]
+      },
+      "CatalogIngredientDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "object",
+            "nullable": true
+          },
+          "unit": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CatalogPresentationDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "object",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "gtin": {
+            "type": "object",
+            "nullable": true
+          },
+          "active": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "CatalogPhotoDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "thumbUrl": {
+            "type": "object",
+            "nullable": true
+          },
+          "attribution": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "attribution"
+        ]
+      },
+      "PharmacyCatalogProductDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "agemed",
+              "cima",
+              "invima",
+              "anvisa"
+            ]
+          },
+          "sourceName": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "display": {
+            "type": "string"
+          },
+          "holder": {
+            "type": "object",
+            "nullable": true
+          },
+          "strengthText": {
+            "type": "object",
+            "nullable": true
+          },
+          "dosageForm": {
+            "type": "object",
+            "nullable": true
+          },
+          "requiresPrescription": {
+            "type": "object",
+            "nullable": true
+          },
+          "generic": {
+            "type": "object",
+            "nullable": true
+          },
+          "activeIngredients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogIngredientDto"
+            }
+          },
+          "atc": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "presentations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogPresentationDto"
+            }
+          },
+          "regulatoryStatus": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "SUSPENDED",
+              "REVOKED"
+            ]
+          },
+          "selectable": {
+            "type": "boolean"
+          },
+          "photo": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CatalogPhotoDto"
+              }
+            ]
+          },
+          "sourceUrl": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "sourceName",
+          "code",
+          "display",
+          "activeIngredients",
+          "atc",
+          "presentations",
+          "regulatoryStatus",
+          "selectable"
+        ]
+      },
+      "PharmacyCatalogProductPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyCatalogProductDto"
+            }
+          },
+          "limit": {
+            "type": "number"
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "limit",
+          "truncated"
+        ]
+      },
+      "PharmacyProductSearchResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyProductReadDto"
+            }
+          },
+          "limit": {
+            "type": "number",
+            "description": "Tope aplicado al listado"
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "true si quedaron productos fuera del tope. Se declara, no se calla"
+          }
+        },
+        "required": [
+          "items",
+          "limit",
+          "truncated"
+        ]
+      },
+      "PharmacySitePriceDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "productCode": {
+            "type": "string"
+          },
+          "brandName": {
+            "type": "object",
+            "nullable": true
+          },
+          "genericName": {
+            "type": "object",
+            "nullable": true
+          },
+          "strengthText": {
+            "type": "object",
+            "nullable": true
+          },
+          "packageSizeText": {
+            "type": "object",
+            "nullable": true
+          },
+          "medication": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "requiresPrescription": {
+            "type": "object",
+            "nullable": true
+          },
+          "priceListId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "priceListCode": {
+            "type": "string"
+          },
+          "currency": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PharmacyConceptDto"
+              }
+            ]
+          },
+          "unitAmount": {
+            "type": "string"
+          },
+          "taxAmount": {
+            "type": "object",
+            "nullable": true
+          },
+          "patientAmount": {
+            "type": "object",
+            "nullable": true
+          },
+          "minimumQuantity": {
+            "type": "object",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "productId",
+          "productCode",
+          "priceListId",
+          "priceListCode",
+          "unitAmount",
+          "effectiveFrom"
+        ]
+      },
+      "PharmacySitePricesResponseDto": {
+        "type": "object",
+        "properties": {
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteName": {
+            "type": "string"
+          },
+          "pharmacyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "pharmacyName": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacySitePriceDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "siteId",
+          "siteName",
+          "pharmacyId",
+          "pharmacyName",
+          "items",
+          "count"
+        ]
+      },
+      "PublicMedicationCardDto": {
+        "type": "object",
+        "properties": {
+          "conceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "atcCode": {
+            "type": "string"
+          },
+          "genericName": {
+            "type": "string"
+          },
+          "therapeuticGroup": {
+            "type": "string"
+          },
+          "brands": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "presentations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requiresPrescription": {
+            "type": "boolean"
+          },
+          "priceFrom": {
+            "type": "string"
+          },
+          "priceTo": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "pharmacyCount": {
+            "type": "number"
+          },
+          "nearestKm": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "conceptId",
+          "atcCode",
+          "genericName",
+          "therapeuticGroup",
+          "brands",
+          "presentations",
+          "requiresPrescription",
+          "priceFrom",
+          "priceTo",
+          "currency",
+          "pharmacyCount"
+        ]
+      },
+      "PublicMedicationPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicMedicationCardDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "generatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "groups",
+          "generatedAt"
+        ]
+      },
+      "PublicMedicationOfferDto": {
+        "type": "object",
+        "properties": {
+          "pharmacySlug": {
+            "type": "string"
+          },
+          "pharmacyName": {
+            "type": "string"
+          },
+          "addressText": {
+            "type": "object",
+            "nullable": true
+          },
+          "city": {
+            "type": "object",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number"
+          },
+          "distanceKm": {
+            "type": "object",
+            "nullable": true
+          },
+          "brandName": {
+            "type": "object",
+            "nullable": true
+          },
+          "presentation": {
+            "type": "object",
+            "nullable": true
+          },
+          "price": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "inStock": {
+            "type": "boolean"
+          },
+          "homeDelivery": {
+            "type": "boolean"
+          },
+          "pickup": {
+            "type": "boolean"
+          },
+          "requiresPrescription": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "pharmacySlug",
+          "pharmacyName",
+          "latitude",
+          "longitude",
+          "price",
+          "currency",
+          "inStock",
+          "homeDelivery",
+          "pickup",
+          "requiresPrescription"
+        ]
+      },
+      "PublicMedicationAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "medication": {
+            "$ref": "#/components/schemas/PublicMedicationCardDto"
+          },
+          "offers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicMedicationOfferDto"
+            }
+          },
+          "generatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "medication",
+          "offers",
+          "generatedAt"
+        ]
       },
       "ApplyContentPackDto": {
         "type": "object",
@@ -137822,1594 +139589,6 @@
           "allocatedOn"
         ],
         "additionalProperties": false
-      },
-      "PharmacyCategoryListDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "items"
-        ]
-      },
-      "InitialLicenseDto": {
-        "type": "object",
-        "properties": {
-          "licenseNumber": {
-            "type": "string",
-            "description": "Número de licencia",
-            "maxLength": 200
-          },
-          "issuingAuthorityTenantId": {
-            "type": "string",
-            "description": "Tenant de la autoridad emisora",
-            "format": "uuid"
-          },
-          "jurisdictionConceptId": {
-            "type": "string",
-            "description": "Concept id de la jurisdicción",
-            "format": "uuid"
-          },
-          "validFrom": {
-            "type": "string",
-            "description": "Inicio de vigencia",
-            "format": "date"
-          },
-          "validTo": {
-            "type": "string",
-            "description": "Fin de vigencia",
-            "format": "date"
-          },
-          "evidenceFileId": {
-            "type": "string",
-            "description": "Archivo de evidencia de la licencia",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "licenseNumber"
-        ],
-        "additionalProperties": false
-      },
-      "CreatePharmacyDto": {
-        "type": "object",
-        "properties": {
-          "tenantId": {
-            "type": "string",
-            "description": "Tenant propietario de la farmacia",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string",
-            "description": "Código único de la farmacia por tenant",
-            "maxLength": 100
-          },
-          "legalName": {
-            "type": "string",
-            "description": "Razón social",
-            "maxLength": 300
-          },
-          "tradeName": {
-            "type": "string",
-            "description": "Nombre comercial",
-            "maxLength": 300
-          },
-          "isRetail": {
-            "type": "boolean",
-            "description": "Tenant no público / farmacia interna",
-            "example": false
-          },
-          "license": {
-            "description": "Licencia inicial de la farmacia",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/InitialLicenseDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "tenantId",
-          "code",
-          "legalName",
-          "license"
-        ],
-        "additionalProperties": false
-      },
-      "PharmacyVerifyLicenseDto": {
-        "type": "object",
-        "properties": {
-          "approve": {
-            "type": "boolean",
-            "description": "true (por defecto) verifica; false rechaza la licencia",
-            "default": true
-          },
-          "evidenceFileId": {
-            "type": "string",
-            "description": "Archivo de evidencia usado en la verificación",
-            "format": "uuid"
-          },
-          "reason": {
-            "type": "string",
-            "description": "Motivo del rechazo (si aplica)",
-            "maxLength": 500
-          }
-        },
-        "additionalProperties": false
-      },
-      "PharmacyCreateSiteDto": {
-        "type": "object",
-        "properties": {
-          "practiceSiteId": {
-            "type": "string",
-            "description": "Sede física (practice.practice_sites)",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string",
-            "description": "Código único de sede por farmacia",
-            "maxLength": 100
-          },
-          "name": {
-            "type": "string",
-            "description": "Nombre de la sede",
-            "maxLength": 300
-          },
-          "pharmacySiteTypeConceptId": {
-            "type": "string",
-            "description": "Concept id del tipo de sede",
-            "format": "uuid"
-          },
-          "dispensingModeConceptId": {
-            "type": "string",
-            "description": "Concept id del modo de dispensación",
-            "format": "uuid"
-          },
-          "controlledSubstanceCapabilityConceptId": {
-            "type": "string",
-            "description": "Concept id de capacidad de sustancias controladas",
-            "format": "uuid"
-          },
-          "homeDeliveryAvailable": {
-            "type": "boolean",
-            "description": "Ofrece entrega a domicilio"
-          },
-          "pickupAvailable": {
-            "type": "boolean",
-            "description": "Ofrece retiro en tienda"
-          }
-        },
-        "required": [
-          "practiceSiteId",
-          "code",
-          "name"
-        ],
-        "additionalProperties": false
-      },
-      "ProductIdentifierDto": {
-        "type": "object",
-        "properties": {
-          "identifierType": {
-            "type": "string",
-            "description": "Tipo de identificador",
-            "enum": [
-              "GTIN",
-              "NDC"
-            ]
-          },
-          "identifierValue": {
-            "type": "string",
-            "description": "Valor del identificador",
-            "maxLength": 100
-          },
-          "assigningAuthorityTenantId": {
-            "type": "string",
-            "description": "Tenant de la autoridad que asigna el identificador",
-            "format": "uuid"
-          },
-          "validFrom": {
-            "type": "string",
-            "description": "Inicio de vigencia",
-            "format": "date"
-          },
-          "validTo": {
-            "type": "string",
-            "description": "Fin de vigencia",
-            "format": "date"
-          }
-        },
-        "required": [
-          "identifierType",
-          "identifierValue"
-        ],
-        "additionalProperties": false
-      },
-      "PharmacyCreateProductDto": {
-        "type": "object",
-        "properties": {
-          "productCode": {
-            "type": "string",
-            "description": "Código único de producto por farmacia",
-            "maxLength": 100
-          },
-          "catalogProductId": {
-            "type": "string",
-            "description": "Producto del catálogo universal de medicamentos (id de `GET /pharmacy/catalog-products`). Con él, marca, genérico, concentración, forma, presentación, receta y el medicamento del vademécum los deriva el servidor y mandarlos es un 400.",
-            "format": "uuid"
-          },
-          "catalogPresentationCode": {
-            "type": "string",
-            "description": "Presentación elegida del producto del catálogo (su `code`: CN, CUM…). Sólo con `catalogProductId`.",
-            "maxLength": 100
-          },
-          "medicationConceptId": {
-            "type": "string",
-            "description": "Concept id del medicamento",
-            "format": "uuid"
-          },
-          "manufacturerTenantId": {
-            "type": "string",
-            "description": "Tenant fabricante",
-            "format": "uuid"
-          },
-          "brandName": {
-            "type": "string",
-            "description": "Marca comercial",
-            "maxLength": 300
-          },
-          "genericName": {
-            "type": "string",
-            "description": "Nombre genérico",
-            "maxLength": 300
-          },
-          "strengthText": {
-            "type": "string",
-            "description": "Concentración (texto libre)",
-            "maxLength": 200
-          },
-          "dosageFormConceptId": {
-            "type": "string",
-            "description": "Concept id de la forma farmacéutica",
-            "format": "uuid"
-          },
-          "packageSizeText": {
-            "type": "string",
-            "description": "Tamaño de empaque (texto libre)",
-            "maxLength": 200
-          },
-          "requiresPrescription": {
-            "type": "boolean",
-            "description": "Requiere receta"
-          },
-          "coldChainRequired": {
-            "type": "boolean",
-            "description": "Requiere cadena de frío"
-          },
-          "identifiers": {
-            "description": "Identificadores (GTIN/NDC)",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProductIdentifierDto"
-            }
-          }
-        },
-        "required": [
-          "productCode"
-        ],
-        "additionalProperties": false
-      },
-      "PharmacyUpdateProductDto": {
-        "type": "object",
-        "properties": {
-          "brandName": {
-            "type": "string",
-            "description": "Marca comercial; `null` la borra",
-            "minLength": 1,
-            "maxLength": 300,
-            "nullable": true
-          },
-          "genericName": {
-            "type": "string",
-            "description": "Nombre genérico; `null` lo borra",
-            "minLength": 1,
-            "maxLength": 300,
-            "nullable": true
-          },
-          "strengthText": {
-            "type": "string",
-            "description": "Concentración (texto libre); `null` la borra",
-            "minLength": 1,
-            "maxLength": 200,
-            "nullable": true
-          },
-          "packageSizeText": {
-            "type": "string",
-            "description": "Tamaño de empaque (texto libre); `null` lo borra",
-            "minLength": 1,
-            "maxLength": 200,
-            "nullable": true
-          },
-          "requiresPrescription": {
-            "type": "boolean",
-            "description": "Requiere receta; `null` lo borra",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "PharmacyConceptDto": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "display": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "display"
-        ]
-      },
-      "PharmacyProductReadDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "pharmacyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "pharmacyName": {
-            "type": "string"
-          },
-          "productCode": {
-            "type": "string"
-          },
-          "brandName": {
-            "type": "object",
-            "nullable": true
-          },
-          "genericName": {
-            "type": "object",
-            "nullable": true
-          },
-          "strengthText": {
-            "type": "object",
-            "nullable": true
-          },
-          "packageSizeText": {
-            "type": "object",
-            "nullable": true
-          },
-          "dosageForm": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "medication": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "requiresPrescription": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "pharmacyId",
-          "pharmacyName",
-          "productCode"
-        ]
-      },
-      "CreatePriceListDto": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "description": "Código único de lista por farmacia",
-            "maxLength": 100
-          },
-          "priceListType": {
-            "type": "string",
-            "description": "Tipo de lista de precios",
-            "enum": [
-              "PUBLIC",
-              "INSURER"
-            ]
-          },
-          "pharmacySiteId": {
-            "type": "string",
-            "description": "Sede a la que aplica la lista",
-            "format": "uuid"
-          },
-          "insurerTenantId": {
-            "type": "string",
-            "description": "Tenant aseguradora (obligatorio si tipo INSURER)",
-            "format": "uuid"
-          },
-          "currencyConceptId": {
-            "type": "string",
-            "description": "Concept id de la moneda",
-            "format": "uuid"
-          },
-          "validFrom": {
-            "type": "string",
-            "description": "Inicio de vigencia",
-            "format": "date-time"
-          },
-          "validTo": {
-            "type": "string",
-            "description": "Fin de vigencia",
-            "format": "date-time"
-          },
-          "publicVisibility": {
-            "type": "boolean",
-            "description": "Visible públicamente"
-          }
-        },
-        "required": [
-          "code",
-          "priceListType"
-        ],
-        "additionalProperties": false
-      },
-      "CreatePriceDto": {
-        "type": "object",
-        "properties": {
-          "pharmacyProductId": {
-            "type": "string",
-            "description": "Producto al que se fija el precio",
-            "format": "uuid"
-          },
-          "unitAmount": {
-            "type": "number",
-            "description": "Importe unitario",
-            "example": 12.5
-          },
-          "taxAmount": {
-            "type": "number",
-            "description": "Impuesto",
-            "example": 1.5
-          },
-          "patientAmount": {
-            "type": "number",
-            "description": "Importe a cargo del paciente",
-            "example": 5
-          },
-          "insurerAmount": {
-            "type": "number",
-            "description": "Importe a cargo de la aseguradora",
-            "example": 7.5
-          },
-          "minimumQuantity": {
-            "type": "number",
-            "description": "Cantidad mínima",
-            "example": 1
-          }
-        },
-        "required": [
-          "pharmacyProductId",
-          "unitAmount"
-        ],
-        "additionalProperties": false
-      },
-      "CreateConnectionDto": {
-        "type": "object",
-        "properties": {
-          "integrationMode": {
-            "type": "string",
-            "description": "Modo de integración",
-            "enum": [
-              "REALTIME",
-              "BATCH"
-            ]
-          },
-          "connectionId": {
-            "type": "string",
-            "description": "Conexión de integración externa registrada; si se omite, la fila se auto-referencia",
-            "format": "uuid"
-          },
-          "pharmacySiteId": {
-            "type": "string",
-            "description": "Sede a la que aplica la conexión",
-            "format": "uuid"
-          },
-          "inventoryAuthorityConceptId": {
-            "type": "string",
-            "description": "Concept id de la autoridad de inventario",
-            "format": "uuid"
-          },
-          "supportsStockQuery": {
-            "type": "boolean",
-            "description": "Soporta consulta de stock"
-          },
-          "supportsPriceQuery": {
-            "type": "boolean",
-            "description": "Soporta consulta de precio"
-          },
-          "supportsReservation": {
-            "type": "boolean",
-            "description": "Soporta reserva"
-          },
-          "supportsDispenseConfirmation": {
-            "type": "boolean",
-            "description": "Soporta confirmación de dispensación"
-          },
-          "manualFallbackAllowed": {
-            "type": "boolean",
-            "description": "Permite fallback manual"
-          }
-        },
-        "required": [
-          "integrationMode"
-        ],
-        "additionalProperties": false
-      },
-      "CreateMappingDto": {
-        "type": "object",
-        "properties": {
-          "pharmacyProductId": {
-            "type": "string",
-            "description": "Producto a mapear",
-            "format": "uuid"
-          },
-          "externalProductCode": {
-            "type": "string",
-            "description": "Código de producto en el sistema externo",
-            "maxLength": 200
-          },
-          "externalUnitCode": {
-            "type": "string",
-            "description": "Código de unidad en el sistema externo",
-            "maxLength": 100
-          },
-          "mappingVersion": {
-            "type": "string",
-            "description": "Versión del mapeo",
-            "maxLength": 100
-          }
-        },
-        "required": [
-          "pharmacyProductId",
-          "externalProductCode"
-        ],
-        "additionalProperties": false
-      },
-      "PharmacyDirectoryItemDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "legalName": {
-            "type": "string"
-          },
-          "type": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "siteCount": {
-            "type": "number"
-          },
-          "productCount": {
-            "type": "number"
-          },
-          "homeDeliveryAvailable": {
-            "type": "object",
-            "nullable": true
-          },
-          "pickupAvailable": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "code",
-          "name",
-          "legalName",
-          "siteCount",
-          "productCount"
-        ]
-      },
-      "PharmacyDirectoryResponseDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PharmacyDirectoryItemDto"
-            }
-          },
-          "count": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "items",
-          "count"
-        ]
-      },
-      "PharmacySiteReadDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "addressText": {
-            "type": "object",
-            "nullable": true
-          },
-          "latitude": {
-            "type": "object",
-            "nullable": true
-          },
-          "longitude": {
-            "type": "object",
-            "nullable": true
-          },
-          "dispensingMode": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "homeDeliveryAvailable": {
-            "type": "object",
-            "nullable": true
-          },
-          "pickupAvailable": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "code",
-          "name"
-        ]
-      },
-      "PharmacyGeoPointDto": {
-        "type": "object",
-        "properties": {
-          "latitude": {
-            "type": "number"
-          },
-          "longitude": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "latitude",
-          "longitude"
-        ]
-      },
-      "PharmacyDetailDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "legalName": {
-            "type": "string"
-          },
-          "type": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "siteCount": {
-            "type": "number"
-          },
-          "productCount": {
-            "type": "number"
-          },
-          "homeDeliveryAvailable": {
-            "type": "object",
-            "nullable": true
-          },
-          "pickupAvailable": {
-            "type": "object",
-            "nullable": true
-          },
-          "sites": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PharmacySiteReadDto"
-            }
-          },
-          "taxId": {
-            "type": "object",
-            "nullable": true
-          },
-          "companyType": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "legalAddressText": {
-            "type": "object",
-            "nullable": true
-          },
-          "headquarters": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyGeoPointDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "code",
-          "name",
-          "legalName",
-          "siteCount",
-          "productCount",
-          "sites"
-        ]
-      },
-      "PharmacyLicenseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "number": {
-            "type": "string"
-          },
-          "siteId": {
-            "type": "object",
-            "format": "uuid",
-            "nullable": true
-          },
-          "siteName": {
-            "type": "object",
-            "nullable": true
-          },
-          "jurisdiction": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "validFrom": {
-            "type": "object",
-            "format": "date",
-            "nullable": true
-          },
-          "validTo": {
-            "type": "object",
-            "format": "date",
-            "nullable": true
-          },
-          "daysToExpiry": {
-            "type": "object",
-            "nullable": true
-          },
-          "verificationStatus": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "evidenceFileId": {
-            "type": "object",
-            "format": "uuid",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "number"
-        ]
-      },
-      "PharmacyLicenseListResponseDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PharmacyLicenseDto"
-            }
-          },
-          "count": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "items",
-          "count"
-        ]
-      },
-      "PharmacyCategoryCountDto": {
-        "type": "object",
-        "properties": {
-          "category": {
-            "type": "string"
-          },
-          "count": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "category",
-          "count"
-        ]
-      },
-      "PharmacyRecentActivityDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "at": {
-            "type": "string"
-          },
-          "kind": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "at",
-          "kind",
-          "text"
-        ]
-      },
-      "PharmacySummaryDto": {
-        "type": "object",
-        "properties": {
-          "published": {
-            "type": "number"
-          },
-          "drafts": {
-            "type": "number"
-          },
-          "withdrawn": {
-            "type": "number"
-          },
-          "outOfStock": {
-            "type": "number"
-          },
-          "lowStock": {
-            "type": "number"
-          },
-          "inventoryValue": {
-            "type": "string",
-            "description": "Valor del inventario, decimal en texto"
-          },
-          "byCategory": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PharmacyCategoryCountDto"
-            }
-          },
-          "recentActivity": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PharmacyRecentActivityDto"
-            }
-          }
-        },
-        "required": [
-          "published",
-          "drafts",
-          "withdrawn",
-          "outOfStock",
-          "lowStock",
-          "inventoryValue",
-          "byCategory",
-          "recentActivity"
-        ]
-      },
-      "PharmacyContactPersonDto": {
-        "type": "object",
-        "properties": {
-          "role": {
-            "type": "string"
-          },
-          "fullName": {
-            "type": "string"
-          },
-          "email": {
-            "type": "object",
-            "nullable": true
-          },
-          "phone": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "role",
-          "fullName"
-        ]
-      },
-      "PharmacyContactsResponseDto": {
-        "type": "object",
-        "properties": {
-          "legalRepresentative": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyContactPersonDto"
-              }
-            ]
-          },
-          "executives": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PharmacyContactPersonDto"
-            }
-          }
-        },
-        "required": [
-          "executives"
-        ]
-      },
-      "PharmacySiteListItemDto": {
-        "type": "object",
-        "properties": {
-          "siteId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "siteName": {
-            "type": "string"
-          },
-          "pharmacyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "pharmacyName": {
-            "type": "string"
-          },
-          "addressText": {
-            "type": "object",
-            "nullable": true
-          },
-          "latitude": {
-            "type": "object",
-            "nullable": true
-          },
-          "longitude": {
-            "type": "object",
-            "nullable": true
-          },
-          "distanceKm": {
-            "type": "object",
-            "nullable": true
-          },
-          "homeDeliveryAvailable": {
-            "type": "object",
-            "nullable": true
-          },
-          "pickupAvailable": {
-            "type": "object",
-            "nullable": true
-          },
-          "productCount": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "siteId",
-          "siteName",
-          "pharmacyId",
-          "pharmacyName",
-          "productCount"
-        ]
-      },
-      "PharmacySiteListResponseDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PharmacySiteListItemDto"
-            }
-          },
-          "count": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "items",
-          "count"
-        ]
-      },
-      "CatalogIngredientDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "object",
-            "nullable": true
-          },
-          "unit": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "CatalogPresentationDto": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "object",
-            "nullable": true
-          },
-          "name": {
-            "type": "string"
-          },
-          "gtin": {
-            "type": "object",
-            "nullable": true
-          },
-          "active": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "name"
-        ]
-      },
-      "CatalogPhotoDto": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string"
-          },
-          "thumbUrl": {
-            "type": "object",
-            "nullable": true
-          },
-          "attribution": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "url",
-          "attribution"
-        ]
-      },
-      "PharmacyCatalogProductDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "source": {
-            "type": "string",
-            "enum": [
-              "agemed",
-              "cima",
-              "invima",
-              "anvisa"
-            ]
-          },
-          "sourceName": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          },
-          "display": {
-            "type": "string"
-          },
-          "holder": {
-            "type": "object",
-            "nullable": true
-          },
-          "strengthText": {
-            "type": "object",
-            "nullable": true
-          },
-          "dosageForm": {
-            "type": "object",
-            "nullable": true
-          },
-          "requiresPrescription": {
-            "type": "object",
-            "nullable": true
-          },
-          "generic": {
-            "type": "object",
-            "nullable": true
-          },
-          "activeIngredients": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CatalogIngredientDto"
-            }
-          },
-          "atc": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "presentations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CatalogPresentationDto"
-            }
-          },
-          "regulatoryStatus": {
-            "type": "string",
-            "enum": [
-              "ACTIVE",
-              "INACTIVE",
-              "SUSPENDED",
-              "REVOKED"
-            ]
-          },
-          "selectable": {
-            "type": "boolean"
-          },
-          "photo": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/CatalogPhotoDto"
-              }
-            ]
-          },
-          "sourceUrl": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "source",
-          "sourceName",
-          "code",
-          "display",
-          "activeIngredients",
-          "atc",
-          "presentations",
-          "regulatoryStatus",
-          "selectable"
-        ]
-      },
-      "PharmacyCatalogProductPageDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PharmacyCatalogProductDto"
-            }
-          },
-          "limit": {
-            "type": "number"
-          },
-          "truncated": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "items",
-          "limit",
-          "truncated"
-        ]
-      },
-      "PharmacyProductSearchResponseDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PharmacyProductReadDto"
-            }
-          },
-          "limit": {
-            "type": "number",
-            "description": "Tope aplicado al listado"
-          },
-          "truncated": {
-            "type": "boolean",
-            "description": "true si quedaron productos fuera del tope. Se declara, no se calla"
-          }
-        },
-        "required": [
-          "items",
-          "limit",
-          "truncated"
-        ]
-      },
-      "PharmacySitePriceDto": {
-        "type": "object",
-        "properties": {
-          "productId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "productCode": {
-            "type": "string"
-          },
-          "brandName": {
-            "type": "object",
-            "nullable": true
-          },
-          "genericName": {
-            "type": "object",
-            "nullable": true
-          },
-          "strengthText": {
-            "type": "object",
-            "nullable": true
-          },
-          "packageSizeText": {
-            "type": "object",
-            "nullable": true
-          },
-          "medication": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "requiresPrescription": {
-            "type": "object",
-            "nullable": true
-          },
-          "priceListId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "priceListCode": {
-            "type": "string"
-          },
-          "currency": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PharmacyConceptDto"
-              }
-            ]
-          },
-          "unitAmount": {
-            "type": "string"
-          },
-          "taxAmount": {
-            "type": "object",
-            "nullable": true
-          },
-          "patientAmount": {
-            "type": "object",
-            "nullable": true
-          },
-          "minimumQuantity": {
-            "type": "object",
-            "nullable": true
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "effectiveTo": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        },
-        "required": [
-          "productId",
-          "productCode",
-          "priceListId",
-          "priceListCode",
-          "unitAmount",
-          "effectiveFrom"
-        ]
-      },
-      "PharmacySitePricesResponseDto": {
-        "type": "object",
-        "properties": {
-          "siteId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "siteName": {
-            "type": "string"
-          },
-          "pharmacyId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "pharmacyName": {
-            "type": "string"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PharmacySitePriceDto"
-            }
-          },
-          "count": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "siteId",
-          "siteName",
-          "pharmacyId",
-          "pharmacyName",
-          "items",
-          "count"
-        ]
-      },
-      "PublicMedicationCardDto": {
-        "type": "object",
-        "properties": {
-          "conceptId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "atcCode": {
-            "type": "string"
-          },
-          "genericName": {
-            "type": "string"
-          },
-          "therapeuticGroup": {
-            "type": "string"
-          },
-          "brands": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "presentations": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "requiresPrescription": {
-            "type": "boolean"
-          },
-          "priceFrom": {
-            "type": "string"
-          },
-          "priceTo": {
-            "type": "string"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "pharmacyCount": {
-            "type": "number"
-          },
-          "nearestKm": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "conceptId",
-          "atcCode",
-          "genericName",
-          "therapeuticGroup",
-          "brands",
-          "presentations",
-          "requiresPrescription",
-          "priceFrom",
-          "priceTo",
-          "currency",
-          "pharmacyCount"
-        ]
-      },
-      "PublicMedicationPageDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PublicMedicationCardDto"
-            }
-          },
-          "total": {
-            "type": "number"
-          },
-          "groups": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "generatedAt": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "items",
-          "total",
-          "groups",
-          "generatedAt"
-        ]
-      },
-      "PublicMedicationOfferDto": {
-        "type": "object",
-        "properties": {
-          "pharmacySlug": {
-            "type": "string"
-          },
-          "pharmacyName": {
-            "type": "string"
-          },
-          "addressText": {
-            "type": "object",
-            "nullable": true
-          },
-          "city": {
-            "type": "object",
-            "nullable": true
-          },
-          "latitude": {
-            "type": "number"
-          },
-          "longitude": {
-            "type": "number"
-          },
-          "distanceKm": {
-            "type": "object",
-            "nullable": true
-          },
-          "brandName": {
-            "type": "object",
-            "nullable": true
-          },
-          "presentation": {
-            "type": "object",
-            "nullable": true
-          },
-          "price": {
-            "type": "string"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "inStock": {
-            "type": "boolean"
-          },
-          "homeDelivery": {
-            "type": "boolean"
-          },
-          "pickup": {
-            "type": "boolean"
-          },
-          "requiresPrescription": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "pharmacySlug",
-          "pharmacyName",
-          "latitude",
-          "longitude",
-          "price",
-          "currency",
-          "inStock",
-          "homeDelivery",
-          "pickup",
-          "requiresPrescription"
-        ]
-      },
-      "PublicMedicationAvailabilityDto": {
-        "type": "object",
-        "properties": {
-          "medication": {
-            "$ref": "#/components/schemas/PublicMedicationCardDto"
-          },
-          "offers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PublicMedicationOfferDto"
-            }
-          },
-          "generatedAt": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "medication",
-          "offers",
-          "generatedAt"
-        ]
       },
       "CreateSupplierDto": {
         "type": "object",
