@@ -34,7 +34,12 @@ import { CONCEPTS } from './concepts';
  * contrato sin motivo: el país ya se deriva de `countryIso` acá abajo.
  */
 
-/** Las 6 macro-categorías canónicas que agrupan cualquier forma societaria. */
+/**
+ * Las macro-categorías canónicas que agrupan cualquier forma jurídica. Las seis
+ * primeras son societarias; las cinco últimas cubren a quien presta servicios
+ * de salud sin ser una sociedad comercial (cooperativas y mutuales, entidades
+ * sin fines de lucro, el Estado y sus empresas, organismos internacionales).
+ */
 export const CANONICAL_LEGAL_CATEGORIES = [
   'SOLE_PROPRIETORSHIP',
   'LIMITED_LIABILITY',
@@ -42,6 +47,11 @@ export const CANONICAL_LEGAL_CATEGORIES = [
   'SIMPLIFIED_SHARES',
   'PARTNERSHIP',
   'FOREIGN_BRANCH',
+  'COOPERATIVE',
+  'NONPROFIT',
+  'PUBLIC_ENTITY',
+  'STATE_OWNED_ENTERPRISE',
+  'INTERNATIONAL_ORGANIZATION',
 ] as const;
 
 export type CanonicalLegalCategory =
@@ -223,6 +233,142 @@ export const LEGAL_ENTITY_TYPES: readonly LegalEntityTypeDef[] = [
     countryIso: 'MX',
     canonicalCategory: 'LIMITED_LIABILITY',
     acronym: 'S. de R.L.',
+  },
+  // --- Bolivia: formas jurídicas no societarias y del sector público ---
+  // (ampliación del 26/10/2026). Van al final y no junto a las ocho de arriba
+  // para respetar el orden en que se sembraron los conceptos.
+  {
+    code: 'SAM',
+    conceptId: CONCEPTS.LEGAL_ENTITY_SAM,
+    countryIso: 'BO',
+    canonicalCategory: 'CORPORATION',
+    acronym: 'S.A.M.',
+  },
+  {
+    code: 'ASOCIACION_ACCIDENTAL',
+    conceptId: CONCEPTS.LEGAL_ENTITY_ACCIDENTAL_ASSOCIATION,
+    countryIso: 'BO',
+    canonicalCategory: 'PARTNERSHIP',
+    acronym: 'A.A.',
+  },
+  {
+    code: 'SOCIEDAD_CIVIL',
+    conceptId: CONCEPTS.LEGAL_ENTITY_CIVIL_PARTNERSHIP,
+    countryIso: 'BO',
+    canonicalCategory: 'PARTNERSHIP',
+    acronym: 'S. Civ.',
+  },
+  {
+    code: 'PROFESIONAL_INDEPENDIENTE',
+    conceptId: CONCEPTS.LEGAL_ENTITY_INDEPENDENT_PROFESSIONAL,
+    countryIso: 'BO',
+    canonicalCategory: 'SOLE_PROPRIETORSHIP',
+    acronym: 'P.I.',
+  },
+  {
+    code: 'COOPERATIVA',
+    conceptId: CONCEPTS.LEGAL_ENTITY_COOPERATIVE,
+    countryIso: 'BO',
+    canonicalCategory: 'COOPERATIVE',
+    acronym: 'Coop.',
+  },
+  {
+    code: 'MUTUAL',
+    conceptId: CONCEPTS.LEGAL_ENTITY_MUTUAL,
+    countryIso: 'BO',
+    canonicalCategory: 'COOPERATIVE',
+    acronym: 'Mutual',
+  },
+  {
+    code: 'EMPRESA_SOCIAL',
+    conceptId: CONCEPTS.LEGAL_ENTITY_SOCIAL_ENTERPRISE,
+    countryIso: 'BO',
+    canonicalCategory: 'COOPERATIVE',
+    acronym: 'E.S.',
+  },
+  {
+    code: 'ASOCIACION_CIVIL',
+    conceptId: CONCEPTS.LEGAL_ENTITY_CIVIL_ASSOCIATION,
+    countryIso: 'BO',
+    canonicalCategory: 'NONPROFIT',
+    acronym: 'Asoc.',
+  },
+  {
+    code: 'FUNDACION',
+    conceptId: CONCEPTS.LEGAL_ENTITY_FOUNDATION,
+    countryIso: 'BO',
+    canonicalCategory: 'NONPROFIT',
+    acronym: 'Fund.',
+  },
+  {
+    code: 'ONG',
+    conceptId: CONCEPTS.LEGAL_ENTITY_NGO,
+    countryIso: 'BO',
+    canonicalCategory: 'NONPROFIT',
+    acronym: 'ONG',
+  },
+  {
+    code: 'ENTIDAD_RELIGIOSA',
+    conceptId: CONCEPTS.LEGAL_ENTITY_RELIGIOUS,
+    countryIso: 'BO',
+    canonicalCategory: 'NONPROFIT',
+    acronym: 'E.R.',
+  },
+  {
+    code: 'IFD',
+    conceptId: CONCEPTS.LEGAL_ENTITY_DEVELOPMENT_FINANCE,
+    countryIso: 'BO',
+    canonicalCategory: 'NONPROFIT',
+    acronym: 'IFD',
+  },
+  {
+    code: 'ORGANIZACION_SOCIAL',
+    conceptId: CONCEPTS.LEGAL_ENTITY_COMMUNITY_ORGANIZATION,
+    countryIso: 'BO',
+    canonicalCategory: 'NONPROFIT',
+    acronym: 'OTB',
+  },
+  {
+    code: 'ENTIDAD_PUBLICA',
+    conceptId: CONCEPTS.LEGAL_ENTITY_PUBLIC_ENTITY,
+    countryIso: 'BO',
+    canonicalCategory: 'PUBLIC_ENTITY',
+    acronym: 'E.P.',
+  },
+  {
+    code: 'EMPRESA_ESTATAL',
+    conceptId: CONCEPTS.LEGAL_ENTITY_STATE_ENTERPRISE,
+    countryIso: 'BO',
+    canonicalCategory: 'STATE_OWNED_ENTERPRISE',
+    acronym: 'E.E.',
+  },
+  {
+    code: 'EMPRESA_ESTATAL_MIXTA',
+    conceptId: CONCEPTS.LEGAL_ENTITY_MIXED_STATE_ENTERPRISE,
+    countryIso: 'BO',
+    canonicalCategory: 'STATE_OWNED_ENTERPRISE',
+    acronym: 'E.E.M.',
+  },
+  {
+    code: 'EMPRESA_MIXTA',
+    conceptId: CONCEPTS.LEGAL_ENTITY_MIXED_ENTERPRISE,
+    countryIso: 'BO',
+    canonicalCategory: 'STATE_OWNED_ENTERPRISE',
+    acronym: 'E.M.',
+  },
+  {
+    code: 'EMPRESA_ESTATAL_INTERGUBERNAMENTAL',
+    conceptId: CONCEPTS.LEGAL_ENTITY_INTERGOVERNMENTAL_ENTERPRISE,
+    countryIso: 'BO',
+    canonicalCategory: 'STATE_OWNED_ENTERPRISE',
+    acronym: 'E.E.I.',
+  },
+  {
+    code: 'ORGANISMO_INTERNACIONAL',
+    conceptId: CONCEPTS.LEGAL_ENTITY_INTERNATIONAL_ORGANIZATION,
+    countryIso: 'BO',
+    canonicalCategory: 'INTERNATIONAL_ORGANIZATION',
+    acronym: 'O.I.',
   },
 ];
 
