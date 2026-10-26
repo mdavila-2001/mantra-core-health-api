@@ -80,6 +80,59 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
     SPECIMEN_TYPE_CSF: { code: 'CSF', display: 'Cerebrospinal fluid' },
     SPECIMEN_TYPE_SPUTUM: { code: 'SPT', display: 'Sputum' },
     SPECIMEN_TYPE_THROAT_SWAB: { code: 'THRT', display: 'Throat swab' },
+    // Las muestras que completan el mostrador de un laboratorio boliviano:
+    // microbiología (herida, pus, secreciones genitales, ótica y conjuntival,
+    // hisopado nasal), líquidos de punción (sinovial, pleural, ascítico,
+    // amniótico), hematología y patología (médula ósea, tejido), micología
+    // (piel, uña), el contenido gástrico de la baciloscopía pediátrica, semen,
+    // leche materna, saliva y cálculos. Códigos de HL7 v2-0487, salvo `NPSWAB`,
+    // que es de este proyecto por la misma razón que `UR24`: el hisopado
+    // nasofaríngeo es otra toma —otro hisopo, otra técnica— que el nasal.
+    SPECIMEN_TYPE_URINE_CLEAN_CATCH: {
+      code: 'URC',
+      display: 'Urine (clean catch, midstream)',
+    },
+    SPECIMEN_TYPE_URINE_CATHETER: {
+      code: 'URT',
+      display: 'Urine (catheter)',
+    },
+    SPECIMEN_TYPE_NASAL_SWAB: { code: 'NOS', display: 'Nasal swab' },
+    SPECIMEN_TYPE_NASOPHARYNGEAL_SWAB: {
+      code: 'NPSWAB',
+      display: 'Nasopharyngeal swab',
+    },
+    SPECIMEN_TYPE_GASTRIC_CONTENT: {
+      code: 'GAST',
+      display: 'Gastric fluid/contents',
+    },
+    SPECIMEN_TYPE_WOUND: { code: 'WND', display: 'Wound' },
+    SPECIMEN_TYPE_PUS: { code: 'PUS', display: 'Pus' },
+    SPECIMEN_TYPE_VAGINAL: { code: 'GENV', display: 'Vaginal secretion' },
+    SPECIMEN_TYPE_CERVIX: {
+      code: 'CVX',
+      display: 'Cervix (endocervical sample)',
+    },
+    SPECIMEN_TYPE_URETHRA: { code: 'URTH', display: 'Urethral secretion' },
+    SPECIMEN_TYPE_SEMEN: { code: 'SEM', display: 'Seminal fluid' },
+    SPECIMEN_TYPE_EAR: { code: 'EAR', display: 'Ear secretion' },
+    SPECIMEN_TYPE_EYE: { code: 'EYE', display: 'Eye (conjunctival) secretion' },
+    SPECIMEN_TYPE_SYNOVIAL_FLUID: {
+      code: 'SNV',
+      display: 'Synovial fluid (joint fluid)',
+    },
+    SPECIMEN_TYPE_PLEURAL_FLUID: { code: 'PLR', display: 'Pleural fluid' },
+    SPECIMEN_TYPE_PERITONEAL_FLUID: {
+      code: 'PRT',
+      display: 'Peritoneal fluid / ascites',
+    },
+    SPECIMEN_TYPE_AMNIOTIC_FLUID: { code: 'AMN', display: 'Amniotic fluid' },
+    SPECIMEN_TYPE_BONE_MARROW: { code: 'MAR', display: 'Bone marrow' },
+    SPECIMEN_TYPE_TISSUE: { code: 'TISS', display: 'Tissue (biopsy)' },
+    SPECIMEN_TYPE_SKIN: { code: 'SKN', display: 'Skin scraping' },
+    SPECIMEN_TYPE_NAIL: { code: 'NAIL', display: 'Nail' },
+    SPECIMEN_TYPE_BREAST_MILK: { code: 'MILK', display: 'Breast milk' },
+    SPECIMEN_TYPE_SALIVA: { code: 'SAL', display: 'Saliva' },
+    SPECIMEN_TYPE_CALCULUS: { code: 'CALC', display: 'Calculus (stone)' },
 
     // --- Tipo de contenedor (specimen_containers / specimens.container_type_concept_id) ---
     // Tubos por color de tapa según la convención ISO 6710 que usan los
@@ -129,6 +182,40 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
     CONTAINER_TYPE_SWAB_TRANSPORT: {
       code: 'SWAB_TRANSPORT',
       display: 'Swab with transport medium',
+    },
+    // Los recipientes que faltaban para las muestras de arriba y para los
+    // programas de salud pública: el frasco de hemocultivo, el de esputo de la
+    // baciloscopía, el microtubo pediátrico, la lámina de la gota gruesa y del
+    // Papanicolaou, la tarjeta de papel filtro del tamizaje neonatal, el
+    // frasco con formol de la biopsia y el tubo de tapa rosa del banco de
+    // sangre (EDTA para inmunohematología).
+    CONTAINER_TYPE_BOTTLE_BLOOD_CULTURE: {
+      code: 'BOTTLE_BLOOD_CULTURE',
+      display: 'Blood culture bottle',
+    },
+    CONTAINER_TYPE_CUP_SPUTUM: {
+      code: 'CUP_SPUTUM',
+      display: 'Sputum container',
+    },
+    CONTAINER_TYPE_MICROTUBE_CAPILLARY: {
+      code: 'MICROTUBE_CAPILLARY',
+      display: 'Capillary microtube (pediatric)',
+    },
+    CONTAINER_TYPE_SLIDE_GLASS: {
+      code: 'SLIDE_GLASS',
+      display: 'Glass microscope slide',
+    },
+    CONTAINER_TYPE_CARD_FILTER_PAPER: {
+      code: 'CARD_FILTER_PAPER',
+      display: 'Filter paper card (dried blood spot)',
+    },
+    CONTAINER_TYPE_JAR_FORMALIN: {
+      code: 'JAR_FORMALIN',
+      display: 'Container with 10% buffered formalin',
+    },
+    CONTAINER_TYPE_TUBE_PINK_EDTA: {
+      code: 'TUBE_PINK_EDTA',
+      display: 'Pink-top tube (K2 EDTA, blood bank)',
     },
 
     // --- Cadena de custodia (specimen_chain_of_custody_events.custody_event_type_concept_id) ---
@@ -363,6 +450,33 @@ export const SPECIMEN_TYPE_CONCEPTS: readonly string[] = [
   DIAG.SPECIMEN_TYPE_CSF,
   DIAG.SPECIMEN_TYPE_SPUTUM,
   DIAG.SPECIMEN_TYPE_THROAT_SWAB,
+  // Ampliación: van después de las once primeras porque el seed sólo inserta y
+  // numera por posición; agregarlas al medio correría el ordinal de filas que
+  // ya existen en bases sembradas.
+  DIAG.SPECIMEN_TYPE_URINE_CLEAN_CATCH,
+  DIAG.SPECIMEN_TYPE_URINE_CATHETER,
+  DIAG.SPECIMEN_TYPE_NASAL_SWAB,
+  DIAG.SPECIMEN_TYPE_NASOPHARYNGEAL_SWAB,
+  DIAG.SPECIMEN_TYPE_GASTRIC_CONTENT,
+  DIAG.SPECIMEN_TYPE_WOUND,
+  DIAG.SPECIMEN_TYPE_PUS,
+  DIAG.SPECIMEN_TYPE_VAGINAL,
+  DIAG.SPECIMEN_TYPE_CERVIX,
+  DIAG.SPECIMEN_TYPE_URETHRA,
+  DIAG.SPECIMEN_TYPE_SEMEN,
+  DIAG.SPECIMEN_TYPE_EAR,
+  DIAG.SPECIMEN_TYPE_EYE,
+  DIAG.SPECIMEN_TYPE_SYNOVIAL_FLUID,
+  DIAG.SPECIMEN_TYPE_PLEURAL_FLUID,
+  DIAG.SPECIMEN_TYPE_PERITONEAL_FLUID,
+  DIAG.SPECIMEN_TYPE_AMNIOTIC_FLUID,
+  DIAG.SPECIMEN_TYPE_BONE_MARROW,
+  DIAG.SPECIMEN_TYPE_TISSUE,
+  DIAG.SPECIMEN_TYPE_SKIN,
+  DIAG.SPECIMEN_TYPE_NAIL,
+  DIAG.SPECIMEN_TYPE_BREAST_MILK,
+  DIAG.SPECIMEN_TYPE_SALIVA,
+  DIAG.SPECIMEN_TYPE_CALCULUS,
 ];
 
 /** Tipos de contenedor publicados como catálogo (`specimen-container-type`). */
@@ -379,4 +493,12 @@ export const CONTAINER_TYPE_CONCEPTS: readonly string[] = [
   DIAG.CONTAINER_TYPE_CUP_STOOL,
   DIAG.CONTAINER_TYPE_TUBE_STERILE,
   DIAG.CONTAINER_TYPE_SWAB_TRANSPORT,
+  // Ampliación, al final por la misma razón que la de los tipos de espécimen.
+  DIAG.CONTAINER_TYPE_BOTTLE_BLOOD_CULTURE,
+  DIAG.CONTAINER_TYPE_CUP_SPUTUM,
+  DIAG.CONTAINER_TYPE_MICROTUBE_CAPILLARY,
+  DIAG.CONTAINER_TYPE_SLIDE_GLASS,
+  DIAG.CONTAINER_TYPE_CARD_FILTER_PAPER,
+  DIAG.CONTAINER_TYPE_JAR_FORMALIN,
+  DIAG.CONTAINER_TYPE_TUBE_PINK_EDTA,
 ];
