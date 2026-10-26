@@ -162,17 +162,29 @@ export class PharmacyReadController {
     required: false,
     description: 'Tope del listado (por defecto 50)',
   })
+  @ApiQuery({
+    name: 'openNow',
+    required: false,
+    enum: ['true', 'false'],
+    description:
+      'P34: `true` deja sólo las sedes abiertas ahora (24 h declaradas o de turno vigente)',
+  })
   @ApiOkResponse({ type: PharmacySiteListResponseDto })
   listSites(
     @Query('search') search?: string,
     @Query('lat') lat?: string,
     @Query('lng') lng?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('openNow') openNow?: string,
   ): Promise<PharmacySiteListResponseDto> {
+    if (openNow !== undefined && openNow !== 'true' && openNow !== 'false') {
+      throw new BadRequestException('openNow debe ser `true` o `false`');
+    }
     return this.readService.listSites({
       search,
       origin: parseOrigin(lat, lng),
       limit: limit ?? 50,
+      ...(openNow === 'true' ? { openNow: true } : {}),
     });
   }
 

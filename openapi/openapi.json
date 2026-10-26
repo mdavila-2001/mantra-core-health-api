@@ -880,7 +880,12 @@
                 "ANATOMY",
                 "DIAGNOSTIC_TEST",
                 "SYMPTOM",
-                "SPECIALTY"
+                "SPECIALTY",
+                "DIAGNOSTIC_CRITERION",
+                "REQUIRED_TEST",
+                "COMPLICATION",
+                "RISK_FACTOR",
+                "REFERRAL_CRITERION"
               ]
             }
           },
@@ -71617,6 +71622,306 @@
         "description": "Categorías de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/pharmacies/{pharmacyId}/opening-hours": {
+      "get": {
+        "description": "Sólo el personal de la farmacia (o la plataforma). Los turnos ya terminados o cancelados no se listan. Las horas vienen en UTC y en la hora local de la sede (`timeZone`, `America/La_Paz` por defecto).",
+        "operationId": "PharmacyController_getOpeningHours",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyOpeningHoursDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Horario declarado de las sedes: 24 h y turnos vigentes y próximos",
+        "tags": [
+          "pharmacy"
+        ]
+      }
+    },
+    "/pharmacies/{pharmacyId}/sites/{siteId}/open-24h": {
+      "put": {
+        "description": "`open24h: null` vuelve a «no declarado». Una sede de otra farmacia responde 404 igual que una inexistente.",
+        "operationId": "PharmacyController_setOpen24h",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PharmacySetOpen24hDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacySiteOpeningHoursDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Declarar si la sede abre las 24 horas",
+        "tags": [
+          "pharmacy"
+        ]
+      }
+    },
+    "/pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts": {
+      "post": {
+        "description": "Horas ISO-8601 con desplazamiento obligatorio. Como mucho 72 h, no ya terminado, a no más de 62 días: si no, 422 `ON_CALL_SHIFT_WINDOW_INVALID`. Solapado con otro turno activo de la sede: 409 `ON_CALL_SHIFT_OVERLAP`.",
+        "operationId": "PharmacyController_createOnCallShift",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PharmacyCreateOnCallShiftDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyOnCallShiftDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar un turno de guardia de la sede",
+        "tags": [
+          "pharmacy"
+        ]
+      }
+    },
+    "/pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel": {
+      "post": {
+        "operationId": "PharmacyController_cancelOnCallShift",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "shiftId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyOnCallShiftDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancelar un turno de guardia (deja de publicarse)",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Cancelar un turno de guardia (deja de publicarse). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/pharmacies": {
       "post": {
         "operationId": "PharmacyController_createPharmacy",
@@ -72776,6 +73081,19 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "name": "openNow",
+            "required": false,
+            "in": "query",
+            "description": "P34: `true` deja sólo las sedes abiertas ahora (24 h declaradas o de turno vigente)",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -73064,6 +73382,106 @@
           "pharmacy-directory"
         ],
         "description": "Consultar los precios públicos vigentes de una sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/public/pharmacies/open-now": {
+      "get": {
+        "operationId": "PharmacyPublicController_openNow",
+        "parameters": [
+          {
+            "name": "mode",
+            "required": false,
+            "in": "query",
+            "description": "`any` (por defecto): 24 h o de turno · `24h`: sólo 24 h · `on-call`: sólo de turno",
+            "schema": {
+              "enum": [
+                "any",
+                "24h",
+                "on-call"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "city",
+            "required": false,
+            "in": "query",
+            "description": "Ciudad de la sede (sin distinguir mayúsculas)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lat",
+            "required": false,
+            "in": "query",
+            "description": "Latitud WGS84 para ordenar por distancia (va con lng)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lng",
+            "required": false,
+            "in": "query",
+            "description": "Longitud WGS84 para ordenar por distancia (va con lat)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tamaño de página (por defecto 20, máx. 50)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicOpenNowPageDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "summary": "Farmacias abiertas ahora: 24 h o de turno vigente",
+        "tags": [
+          "pharmacy-public"
+        ],
+        "description": "Farmacias abiertas ahora: 24 h o de turno vigente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
     "/public/medications": {
@@ -137837,6 +138255,159 @@
           "items"
         ]
       },
+      "PharmacyOnCallShiftDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startsAtLocal": {
+            "type": "string",
+            "example": "2026-10-26T20:00:00-04:00"
+          },
+          "endsAtLocal": {
+            "type": "string",
+            "example": "2026-10-27T08:00:00-04:00"
+          },
+          "timeZone": {
+            "type": "string",
+            "example": "America/La_Paz"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "PHARMACY",
+              "PLATFORM"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "CANCELLED"
+            ]
+          },
+          "current": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "siteId",
+          "startsAt",
+          "endsAt",
+          "startsAtLocal",
+          "endsAtLocal",
+          "timeZone",
+          "source",
+          "status",
+          "current"
+        ]
+      },
+      "PharmacySiteOpeningHoursDto": {
+        "type": "object",
+        "properties": {
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteName": {
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string",
+            "example": "America/La_Paz"
+          },
+          "open24h": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "shifts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyOnCallShiftDto"
+            }
+          }
+        },
+        "required": [
+          "siteId",
+          "siteName",
+          "timeZone",
+          "open24h",
+          "shifts"
+        ]
+      },
+      "PharmacyOpeningHoursDto": {
+        "type": "object",
+        "properties": {
+          "pharmacyId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacySiteOpeningHoursDto"
+            }
+          }
+        },
+        "required": [
+          "pharmacyId",
+          "asOf",
+          "sites"
+        ]
+      },
+      "PharmacySetOpen24hDto": {
+        "type": "object",
+        "properties": {
+          "open24h": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "`true`: abre las 24 h · `false`: no · `null`: retira la declaración (vuelve a «no declarado»)"
+          }
+        },
+        "required": [
+          "open24h"
+        ],
+        "additionalProperties": false
+      },
+      "PharmacyCreateOnCallShiftDto": {
+        "type": "object",
+        "properties": {
+          "startsAt": {
+            "type": "string",
+            "description": "Inicio, ISO-8601 con desplazamiento obligatorio (p. ej. `2026-10-26T20:00:00-04:00`)",
+            "example": "2026-10-26T20:00:00-04:00"
+          },
+          "endsAt": {
+            "type": "string",
+            "description": "Fin (exclusivo), ISO-8601 con desplazamiento obligatorio. Como mucho 72 h después del inicio",
+            "example": "2026-10-27T08:00:00-04:00"
+          }
+        },
+        "required": [
+          "startsAt",
+          "endsAt"
+        ],
+        "additionalProperties": false
+      },
       "InitialLicenseDto": {
         "type": "object",
         "properties": {
@@ -138869,6 +139440,15 @@
           },
           "productCount": {
             "type": "number"
+          },
+          "open24h": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "onCallUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "required": [
@@ -139229,6 +139809,131 @@
           "pharmacyName",
           "items",
           "count"
+        ]
+      },
+      "PublicOnCallNowDto": {
+        "type": "object",
+        "properties": {
+          "startsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endsAtLocal": {
+            "type": "string",
+            "example": "2026-10-27T08:00:00-04:00"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "PHARMACY",
+              "PLATFORM"
+            ]
+          }
+        },
+        "required": [
+          "startsAt",
+          "endsAt",
+          "endsAtLocal",
+          "source"
+        ]
+      },
+      "PublicOpenNowItemDto": {
+        "type": "object",
+        "properties": {
+          "siteId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "siteName": {
+            "type": "string"
+          },
+          "pharmacyName": {
+            "type": "string"
+          },
+          "pharmacySlug": {
+            "type": "string"
+          },
+          "addressText": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "latitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "longitude": {
+            "type": "number",
+            "nullable": true
+          },
+          "distanceKm": {
+            "type": "number",
+            "nullable": true
+          },
+          "open24h": {
+            "type": "boolean"
+          },
+          "onCall": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PublicOnCallNowDto"
+              }
+            ]
+          },
+          "timeZone": {
+            "type": "string",
+            "example": "America/La_Paz"
+          }
+        },
+        "required": [
+          "siteId",
+          "siteName",
+          "pharmacyName",
+          "pharmacySlug",
+          "open24h",
+          "timeZone"
+        ]
+      },
+      "PublicOpenNowPageDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicOpenNowItemDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "asOfLocal": {
+            "type": "string",
+            "example": "2026-10-26T03:00:00-04:00"
+          },
+          "timeZone": {
+            "type": "string",
+            "example": "America/La_Paz"
+          }
+        },
+        "required": [
+          "items",
+          "asOf",
+          "asOfLocal",
+          "timeZone"
         ]
       },
       "PublicMedicationCardDto": {
