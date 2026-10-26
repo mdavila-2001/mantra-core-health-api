@@ -96,7 +96,9 @@ describe('DiagnosticUnitProvisioningService', () => {
           tenantId: OWNER.tenantId,
           code: OWNER.tenantCode,
           name: OWNER.legalName,
-          diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_IMAGING,
+          // Sin tipo ni modalidades de imagen, la unidad es de laboratorio
+          // (P51, D-1): antes era imágenes por omisión.
+          diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_LABORATORY,
           ownershipTypeConceptId: DUNIT.OWNERSHIP_PRIVATE,
           practiceId: 'practice-1',
           primaryPracticeSiteId: 'site-1',
@@ -111,8 +113,8 @@ describe('DiagnosticUnitProvisioningService', () => {
           diagnosticUnitId: 'unit-1',
           practiceSiteId: 'site-1',
           siteRoleConceptId: DUNIT.SITE_ROLE_PRIMARY,
-          imagingAvailable: true,
-          sampleCollectionAvailable: undefined,
+          imagingAvailable: undefined,
+          sampleCollectionAvailable: true,
         }),
       );
       expect(res).toMatchObject({
@@ -122,6 +124,52 @@ describe('DiagnosticUnitProvisioningService', () => {
         addressId: undefined,
         offeringIds: [],
       });
+    });
+
+    it('sin tipo declarado, una modalidad de imagen hace la unidad de imágenes (P51, D-1)', async () => {
+      const d = build();
+
+      await d.service.provision(
+        d.tx as never,
+        OWNER,
+        {
+          modalityConceptIds: [DUNIT.MODALITY_LABORATORY, DUNIT.MODALITY_XRAY],
+        },
+        OWNER.ownerUserId,
+      );
+
+      expect(d.unitsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_IMAGING,
+        }),
+      );
+      expect(d.unitSitesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          siteRoleConceptId: DUNIT.SITE_ROLE_PRIMARY,
+          imagingAvailable: true,
+          sampleCollectionAvailable: undefined,
+        }),
+      );
+    });
+
+    it('sin tipo declarado, sólo la modalidad de laboratorio hace la unidad de laboratorio (P51, D-1)', async () => {
+      const d = build();
+
+      await d.service.provision(
+        d.tx as never,
+        OWNER,
+        { modalityConceptIds: [DUNIT.MODALITY_LABORATORY] },
+        OWNER.ownerUserId,
+      );
+
+      expect(d.unitsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_LABORATORY,
+        }),
+      );
     });
 
     it('usa el código, el nombre y el tipo declarados en vez de los defaults', async () => {

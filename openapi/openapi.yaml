@@ -53460,6 +53460,83 @@ paths:
       tags:
         - public-catalog
       security: []
+  /public/profiles/f/{slug}/branches:
+    get:
+      description: >-
+        Sin sesión. Sedes activas de las farmacias activas y verificadas del tenant dueño de la ficha, por ciudad y
+        nombre, con su punto si lo tiene. Un slug inexistente, oculto o de otro tipo responde 404.
+      operationId: PublicCatalogController_pharmacyBranches
+      parameters:
+        - name: slug
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      summary: Sucursales de una farmacia, desde su ficha pública
+      tags:
+        - public-catalog
+  /public/profiles/f/{slug}/branch-availability:
+    post:
+      description: >-
+        Sin sesión. Cuerpo { items: string[] (1-20, texto libre), lat?, lng? }. Sólo cuenta lo que está en stock; un
+        agotado es faltante. Orden del servidor: primero las completas, después la más cercana en línea recta. No guarda
+        nada. Un slug inexistente, oculto o de otro tipo responde 404.
+      operationId: PublicCatalogController_pharmacyBranchAvailability
+      parameters:
+        - name: slug
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicPrescriptionAvailabilityDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      summary: Disponibilidad de una receta en las sucursales de una farmacia
+      tags:
+        - public-catalog
   /qa/environments:
     post:
       description: '`isProductionSafe` decide si los payloads capturados se guardan en claro.'
@@ -100427,6 +100504,32 @@ components:
           description: Puntos a restituir
       required:
         - reason
+      additionalProperties: false
+    PublicPrescriptionAvailabilityDto:
+      type: object
+      properties:
+        items:
+          minItems: 1
+          maxItems: 20
+          example:
+            - Paracetamol 500 mg
+            - Losartán
+          description: 'Texto libre: una receta de papel no trae ids de producto. Vacíos y repetidos (sin tildes) se ignoran.'
+          type: array
+          items:
+            type: string
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+          example: -17.78
+        lng:
+          type: number
+          minimum: -180
+          maximum: 180
+          example: -63.18
+      required:
+        - items
       additionalProperties: false
     CreateEnvironmentDto:
       type: object

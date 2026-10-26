@@ -652,3 +652,27 @@ describe('RegisterPractitionerDto · firma y sello reales', () => {
     ).toContain('signatureImageBase64');
   });
 });
+
+describe('RegisterPractitionerDto · respaldos de la matrícula y del SEDES (P29)', () => {
+  it('acepta los dos fileId precargados', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        licenseFileId: '5b0d7c4e-8f1a-4c2b-9d3e-1a2b3c4d5e6f',
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseFileId: '6c1e8d5f-9a2b-4d3c-8e4f-2b3c4d5e6f70',
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza un fileId de matrícula o de SEDES que no es uuid', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        licenseFileId: 'carnet.pdf',
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseFileId: 'sedes.pdf',
+      }),
+    ).toEqual(['licenseFileId', 'sedesLicenseFileId']);
+  });
+});
