@@ -7,6 +7,7 @@ import {
 } from '../../../../common';
 import { InsurancePlanBenefits, PatientCoverages } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
+import { ClaimCareRelationshipGate } from './claim-care-relationship-gate';
 import { ClaimCoveragePolicy } from './claim-coverage-policy';
 import { ClaimsService } from './claims.service';
 
@@ -19,11 +20,13 @@ const fn = () => jest.fn<(...args: any[]) => any>();
 const TENANT = '11111111-1111-4111-8111-111111111111';
 const PLAN = 'plan-1';
 const CONSULT = 'service-consult';
+const PATIENT = 'patient-1';
 
 function build(
   benefits: Record<string, unknown>[],
   practiceIds: string[] = ['practice-1'],
   coveragePlan: string = PLAN,
+  hasCareRelationship = true,
 ) {
   const createdLines: Record<string, unknown>[] = [];
   const tx = {
@@ -56,7 +59,12 @@ function build(
     findCoverage: fn().mockResolvedValue({
       id: 'coverage-1',
       insurancePlanId: PLAN,
+      patientProfileId: PATIENT,
     }),
+  };
+  // La puerta es la real; sólo el puerto hacia `authz` es un doble.
+  const careRelationships = {
+    hasCareRelationshipForPayment: fn().mockResolvedValue(hasCareRelationship),
   };
   const catalog = {
     findPlanForCarrier: fn().mockResolvedValue({
@@ -77,6 +85,7 @@ function build(
     {} as never,
     {} as never,
     new ClaimCoveragePolicy(),
+    new ClaimCareRelationshipGate(careRelationships as never),
   );
   // El alta se presenta dentro del tenant, como lo deja el interceptor.
   const submit = (dto: never) =>
@@ -90,6 +99,7 @@ function build(
     catalog,
     tx,
     practiceLookup,
+    careRelationships,
   };
 }
 
@@ -239,5 +249,66 @@ describe('ClaimsService — alcance del alta legacy (INS-01)', () => {
       ResourceNotFoundException,
     );
     expect(d.repo.createClaim).not.toHaveBeenCalled();
+  });
+});
+
+describe('ClaimsService — relación asistencial con la organización que cobra (REQ-16-035)', () => {
+  it('con relación vigente, cobra: el paciente sale de la cobertura y el tenant del contexto', async () => {
+    const d = build([activeBenefit]);
+    await d.submit(claimDto());
+    expect(
+      d.careRelationships.hasCareRelationshipForPayment,
+    ).toHaveBeenCalledWith(d.tx, {
+      patientProfileId: PATIENT,
+      tenantId: TENANT,
+      at: expect.any(Date),
+    });
+    expect(d.repo.createClaim).toHaveBeenCalledTimes(1);
+  });
+
+  it('sin relación vigente se rechaza con 404 y no se crea nada', async () => {
+    const d = build([activeBenefit], undefined, PLAN, false);
+    await expect(d.submit(claimDto())).rejects.toBeInstanceOf(
+      ResourceNotFoundException,
+    );
+    expect(d.repo.createClaim).not.toHaveBeenCalled();
+    expect(d.repo.createLine).not.toHaveBeenCalled();
+  });
+
+  it('responde igual que una cobertura inexistente: mismo estado, mismo cuerpo', async () => {
+    const withoutRelation = build([activeBenefit], undefined, PLAN, false);
+    const missingCoverage = build([activeBenefit]);
+    missingCoverage.coverage.findCoverage.mockResolvedValue(null);
+    const a: any = await withoutRelation
+      .submit(claimDto())
+      .catch((e: unknown) => e);
+    const b: any = await missingCoverage
+      .submit(claimDto())
+      .catch((e: unknown) => e);
+    expect(a).toBeInstanceOf(ResourceNotFoundException);
+    expect(a.getStatus()).toBe(b.getStatus());
+    expect(a.getResponse()).toEqual(b.getResponse());
+  });
+
+  it('corre antes de hablar de la cobertura: ni aseguradora ni plan se consultan', async () => {
+    const d = build([activeBenefit], undefined, 'plan-ajeno', false);
+    await expect(d.submit(claimDto())).rejects.toBeInstanceOf(
+      ResourceNotFoundException,
+    );
+    expect(d.catalog.findPlanForCarrier).not.toHaveBeenCalled();
+  });
+
+  it('la relación se pregunta con la cobertura real, no con un paciente del cuerpo', async () => {
+    const d = build([activeBenefit]);
+    await d.submit({
+      ...(claimDto() as any),
+      patientProfileId: 'otro',
+    } as never);
+    expect(
+      d.careRelationships.hasCareRelationshipForPayment,
+    ).not.toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ patientProfileId: 'otro' }),
+    );
   });
 });

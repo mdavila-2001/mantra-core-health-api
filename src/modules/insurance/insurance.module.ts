@@ -53,6 +53,7 @@ import {
   PriorAuthReadService,
   ClaimsService,
   ClaimCoveragePolicy,
+  ClaimCareRelationshipGate,
   ClaimQuoteService,
   ClaimPatientInvoiceService,
   PatientConsentValidator,
@@ -114,6 +115,9 @@ import { PractitionerInsuranceNetworksController } from './presentation/controll
 import { PractitionerInsuranceNetworksService } from './application/services/practitioner-insurance-networks.service';
 import { DirectoryTenantAdministrationAdapter } from './infrastructure/adapters/directory-tenant-administration.adapter';
 import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
+import { PatientCareRelationshipAdapter } from './infrastructure/adapters/patient-care-relationship.adapter';
+import { PATIENT_CARE_RELATIONSHIP_PORT } from './application/ports/patient-care-relationship.port';
+import { CareRelationshipsRepository } from '../authz/repositories/care-relationships.repository';
 import { PracticeTenantLookupAdapter } from './infrastructure/adapters/practice-tenant-lookup.adapter';
 import { INSURANCE_PRACTICE_TENANT_LOOKUP_PORT } from './application/ports/practice-tenant-lookup.port';
 import { DuplicateStudyDescriptionAdapter } from './infrastructure/adapters/duplicate-study-description.adapter';
@@ -183,6 +187,14 @@ import {
     InsurerPatientsController,
   ],
   providers: [
+    // Repositorio sin estado (recibe el `EntityManager`): no hace falta importar
+    // `AuthzModule` entero para preguntar por la relación asistencial.
+    CareRelationshipsRepository,
+    PatientCareRelationshipAdapter,
+    {
+      provide: PATIENT_CARE_RELATIONSHIP_PORT,
+      useExisting: PatientCareRelationshipAdapter,
+    },
     PracticeTenantLookupAdapter,
     {
       provide: INSURANCE_PRACTICE_TENANT_LOOKUP_PORT,
@@ -278,6 +290,7 @@ import {
     PriorAuthReadService,
     ClaimsService,
     ClaimCoveragePolicy,
+    ClaimCareRelationshipGate,
     ClaimQuoteService,
     ClaimPatientInvoiceService,
     PatientConsentValidator,

@@ -72,6 +72,8 @@ function serviceWith(
     {} as never,
     {} as never,
     {} as never,
+    // No se cobra en este spec: la puerta de relación asistencial no corre.
+    {} as never,
   );
 }
 
@@ -406,6 +408,8 @@ describe('ClaimsService — alcance de la mutación de reclamos legacy', () => {
       logger,
       {} as never,
       {} as never,
+      {} as never,
+      // No se cobra en este spec: la puerta de relación asistencial no corre.
       {} as never,
     );
     return { service, r, catalog };

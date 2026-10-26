@@ -163,6 +163,8 @@ function fixture(overVersion: Record<string, unknown> = {}) {
     orders as never,
     access as never,
     {} as never,
+    // Sin cobro directo en este spec: la puerta de relación asistencial no corre.
+    {} as never,
   );
   return { service, claim, line, version, tx, repo, versionsCreated };
 }
