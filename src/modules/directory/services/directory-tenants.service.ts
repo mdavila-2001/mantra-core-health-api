@@ -276,29 +276,37 @@ export class DirectoryTenantsService {
         );
       }
 
-      // P50: una farmacia sólo opera —y verificarla es lo que la deja operar—
-      // con sus seis papeles presentados y el punto de su casa central. El
-      // alta pública los deja opcionales (D2); acá se exigen, y se rechaza
-      // nombrando lo que falta, antes de tocar nada.
-      const pharmacyReadiness =
-        tenant.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY
-          ? await this.pharmacyRequirements.evaluate(tx, tenant)
-          : undefined;
-      if (pharmacyReadiness && !pharmacyReadiness.ready) {
+      // P50 y P51: una farmacia o un laboratorio sólo operan —y verificarlos
+      // es lo que los deja operar— con sus papeles presentados (y, la
+      // farmacia, con el punto de su casa central). El alta pública los deja
+      // opcionales (D2); acá se exigen, y se rechaza nombrando lo que falta,
+      // antes de tocar nada. Otros tipos no tienen requisitos.
+      const operating = await this.pharmacyRequirements.evaluateForTenant(
+        tx,
+        tenant,
+      );
+      if (operating && !operating.readiness.ready) {
         this.logger.warn(
           {
             operation: 'directory.tenant.verify',
             tenantId,
-            reason: 'pharmacy-not-ready',
-            missing: pharmacyReadiness.missing,
+            reason:
+              operating.kind === 'PHARMACY'
+                ? 'pharmacy-not-ready'
+                : 'laboratory-not-ready',
+            missing: operating.readiness.missing,
           },
-          'Rejected verification: pharmacy operating requirements missing',
+          'Rejected verification: operating requirements missing',
         );
         throw new PreconditionFailedException(
-          'La farmacia todavía no puede operar: faltan papeles o el punto de su casa central',
-          { tenantId, missing: pharmacyReadiness.missing },
+          operating.kind === 'PHARMACY'
+            ? 'La farmacia todavía no puede operar: faltan papeles o el punto de su casa central'
+            : 'El laboratorio todavía no puede operar: faltan la matrícula del SEPREC, la licencia de funcionamiento o el certificado del SEDES',
+          { tenantId, missing: operating.readiness.missing },
         );
       }
+      const pharmacyReadiness =
+        operating?.kind === 'PHARMACY' ? operating.readiness : undefined;
 
       tenant.verificationStatusConceptId = CONCEPTS.TENANT_VERIFIED;
       tenant.statusConceptId = CONCEPTS.TENANT_ACTIVE;
@@ -355,6 +363,14 @@ export class DirectoryTenantsService {
         await this.pharmacyRequirements.markDocumentsVerified(
           tx,
           pharmacyReadiness?.documentIds ?? [],
+          actor.id,
+        );
+      }
+      // P51: lo mismo con los tres papeles del laboratorio.
+      if (operating?.kind === 'LABORATORY') {
+        await this.pharmacyRequirements.markDocumentsVerified(
+          tx,
+          operating.readiness.documentIds,
           actor.id,
         );
       }

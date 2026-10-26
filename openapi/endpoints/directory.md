@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `directory`
 
-Referencia exhaustiva de 25 operación(es) del módulo `directory`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 26 operación(es) del módulo `directory`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `directory-admin-tenants`, `directory-tenants`
 - **Controladores:** `AdminTenantsController`, `OrganizationLogoController`, `TenantsController`
@@ -24,18 +24,19 @@ Referencia exhaustiva de 25 operación(es) del módulo `directory`, derivada del
 11. [PATCH /tenants/{tenantId}/branches/{branchId}](#11-patch-tenants-tenantid-branches-branchid) — Editar una sucursal
 12. [GET /tenants/{tenantId}/child-tenants](#12-get-tenants-tenantid-child-tenants) — Sub-organizaciones de una organización
 13. [POST /tenants/{tenantId}/child-tenants](#13-post-tenants-tenantid-child-tenants) — Crear una organización hija / sub-tenant
-14. [GET /tenants/{tenantId}/logo](#14-get-tenants-tenantid-logo) — Logo de la propia organización
-15. [PUT /tenants/{tenantId}/logo](#15-put-tenants-tenantid-logo) — Cambiar o quitar el logo como administrador de la organización
-16. [GET /tenants/{tenantId}/logo/content](#16-get-tenants-tenantid-logo-content) — Imagen del logo para miembros de la organización
-17. [GET /tenants/{tenantId}/memberships](#17-get-tenants-tenantid-memberships) — Plantilla de la organización
-18. [POST /tenants/{tenantId}/memberships](#18-post-tenants-tenantid-memberships) — Incorporar un usuario al tenant (membership)
-19. [GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#19-get-tenants-tenantid-memberships-membershipid-branch-assignments) — Sucursales asignadas a una membresía
-20. [POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#20-post-tenants-tenantid-memberships-membershipid-branch-assignments) — Asignar la membresía a una branch
-21. [POST /tenants/{tenantId}/memberships/{membershipId}/offboard](#21-post-tenants-tenantid-memberships-membershipid-offboard) — Revocar / offboarding de un miembro
-22. [PATCH /tenants/{tenantId}/memberships/{membershipId}/role](#22-patch-tenants-tenantid-memberships-membershipid-role) — Cambiar rol / scope de la membresía
-23. [POST /tenants/{tenantId}/memberships/{membershipId}/transfer](#23-post-tenants-tenantid-memberships-membershipid-transfer) — Transferir la membresía entre branches
-24. [GET /tenants/{tenantId}/pharmacy-readiness](#24-get-tenants-tenantid-pharmacy-readiness) — Requisitos pendientes para que la farmacia opere
-25. [GET /tenants/me](#25-get-tenants-me) — Las organizaciones del actor, con su rol en cada una
+14. [GET /tenants/{tenantId}/laboratory-readiness](#14-get-tenants-tenantid-laboratory-readiness) — Requisitos pendientes para que el laboratorio opere
+15. [GET /tenants/{tenantId}/logo](#15-get-tenants-tenantid-logo) — Logo de la propia organización
+16. [PUT /tenants/{tenantId}/logo](#16-put-tenants-tenantid-logo) — Cambiar o quitar el logo como administrador de la organización
+17. [GET /tenants/{tenantId}/logo/content](#17-get-tenants-tenantid-logo-content) — Imagen del logo para miembros de la organización
+18. [GET /tenants/{tenantId}/memberships](#18-get-tenants-tenantid-memberships) — Plantilla de la organización
+19. [POST /tenants/{tenantId}/memberships](#19-post-tenants-tenantid-memberships) — Incorporar un usuario al tenant (membership)
+20. [GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#20-get-tenants-tenantid-memberships-membershipid-branch-assignments) — Sucursales asignadas a una membresía
+21. [POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments](#21-post-tenants-tenantid-memberships-membershipid-branch-assignments) — Asignar la membresía a una branch
+22. [POST /tenants/{tenantId}/memberships/{membershipId}/offboard](#22-post-tenants-tenantid-memberships-membershipid-offboard) — Revocar / offboarding de un miembro
+23. [PATCH /tenants/{tenantId}/memberships/{membershipId}/role](#23-patch-tenants-tenantid-memberships-membershipid-role) — Cambiar rol / scope de la membresía
+24. [POST /tenants/{tenantId}/memberships/{membershipId}/transfer](#24-post-tenants-tenantid-memberships-membershipid-transfer) — Transferir la membresía entre branches
+25. [GET /tenants/{tenantId}/pharmacy-readiness](#25-get-tenants-tenantid-pharmacy-readiness) — Requisitos pendientes para que la farmacia opere
+26. [GET /tenants/me](#26-get-tenants-me) — Las organizaciones del actor, con su rol en cada una
 
 ---
 
@@ -829,9 +830,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Tenant no encontrado | Excepción explícita en src/modules/directory/services/directory-tenants.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El tenant no está pendiente de verificación | Excepción explícita en src/modules/directory/services/directory-tenants.service.ts |
-| 422 | `PRECONDITION_FAILED` | La farmacia todavía no puede operar: faltan papeles o el punto de su casa central | Excepción explícita en src/modules/directory/services/directory-tenants.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no está disponible | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
+| 422 | `PRECONDITION_FAILED` | operating.kind === 'PHARMACY'             ? 'La farmacia todavía no puede operar: faltan papeles o el punto de su casa central'             : 'El laboratorio todavía no puede operar: faltan la matrícula del SEPREC, la licencia de funcionamiento o el certificado del SEDES' | Excepción explícita en src/modules/directory/services/directory-tenants.service.ts |
 | 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code.toUpperCase()} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1249,8 +1248,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | Un mismo archivo no puede respaldar dos documentos distintos | Excepción explícita en src/modules/directory/services/tenant-affiliation-documents.service.ts |
 | 422 | `PRECONDITION_FAILED` | Los papeles se completan mientras la organización está pendiente de verificación | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
 | 422 | `PRECONDITION_FAILED` | La organización no tiene representante legal al que atar el poder | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no está disponible | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
 | 422 | `PRECONDITION_FAILED` | El documento ${label} ya está vinculado a una organización | Excepción explícita en src/modules/directory/services/tenant-affiliation-documents.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no corresponde a un archivo subido en este registro | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
@@ -2136,7 +2133,121 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. GET /tenants/{tenantId}/logo
+## 14. GET /tenants/{tenantId}/laboratory-readiness
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Requisitos pendientes para que el laboratorio opere
+- **Operation ID:** `TenantsController_getLaboratoryReadiness`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TenantsController.getLaboratoryReadiness](../../src/modules/directory/controllers/tenants.controller.ts)
+
+### Descripción de negocio
+
+403 si no pertenece a la organización; 422 si no es un laboratorio.
+
+Contexto declarado en el controlador: P51: lo que le falta a un laboratorio para que la plataforma pueda verificarlo (SEPREC, licencia de funcionamiento y SEDES).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /tenants/{tenantId}/laboratory-readiness` en `TenantsController_getLaboratoryReadiness`. El controlador delega en `TenantDocumentCompletionService.laboratoryReadiness`. No recibe body. El tipo de retorno estático es `Promise<LaboratoryReadinessResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /tenants/00000000-0000-4000-8000-000000000001/laboratory-readiness HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `tenantId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /tenants/00000000-0000-4000-8000-000000000001/laboratory-readiness HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LaboratoryReadinessResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<LaboratoryReadinessResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LaboratoryReadinessResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LaboratoryReadinessResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<LaboratoryReadinessResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LaboratoryReadinessResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LaboratoryReadinessResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LaboratoryReadinessResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LaboratoryReadinessResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ready": true,
+  "missing": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ready` | Sí | `boolean` | Sin restricción adicional declarada | `true` si la plataforma ya puede verificarlo. | `true` |
+| `missing` | Sí | `array<string>` | valores: `COMMERCE_REGISTRY_DOC`, `OPERATING_LICENSE_DOC`, `HEALTH_AUTHORITY_CERT_DOC` | Los papeles que faltan, en orden estable. | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | mode === 'administer'         ? 'Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma'         : 'Se requiere pertenecer a la organización, o ser administrador de la plataforma' | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
+| 404 | `NOT_FOUND` | Organización no encontrada | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
+| 422 | `PRECONDITION_FAILED` | kind === 'PHARMACY'           ? 'La organización no es una farmacia'           : 'La organización no es un laboratorio' | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/{tenantId}/laboratory-readiness"
+}
+```
+
+---
+
+## 15. GET /tenants/{tenantId}/logo
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2232,7 +2343,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. PUT /tenants/{tenantId}/logo
+## 16. PUT /tenants/{tenantId}/logo
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2353,7 +2464,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /tenants/{tenantId}/logo/content
+## 17. GET /tenants/{tenantId}/logo/content
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2457,7 +2568,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. GET /tenants/{tenantId}/memberships
+## 18. GET /tenants/{tenantId}/memberships
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2596,7 +2707,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /tenants/{tenantId}/memberships
+## 19. POST /tenants/{tenantId}/memberships
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2736,7 +2847,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+## 20. GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -2862,7 +2973,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
+## 21. POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3002,7 +3113,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
+## 22. POST /tenants/{tenantId}/memberships/{membershipId}/offboard
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3116,7 +3227,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
+## 23. PATCH /tenants/{tenantId}/memberships/{membershipId}/role
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3254,7 +3365,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
+## 24. POST /tenants/{tenantId}/memberships/{membershipId}/transfer
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3387,7 +3498,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /tenants/{tenantId}/pharmacy-readiness
+## 25. GET /tenants/{tenantId}/pharmacy-readiness
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3483,9 +3594,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | mode === 'administer'         ? 'Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma'         : 'Se requiere pertenecer a la organización, o ser administrador de la plataforma' | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
 | 404 | `NOT_FOUND` | Organización no encontrada | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
-| 422 | `PRECONDITION_FAILED` | La organización no es una farmacia | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no está disponible | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
+| 422 | `PRECONDITION_FAILED` | kind === 'PHARMACY'           ? 'La organización no es una farmacia'           : 'La organización no es un laboratorio' | Excepción explícita en src/modules/directory/services/tenant-document-completion.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3503,7 +3612,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. GET /tenants/me
+## 26. GET /tenants/me
 
 - **Módulo:** `directory`
 - **Etiqueta OpenAPI:** `directory-tenants`
@@ -3656,8 +3765,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no está disponible | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

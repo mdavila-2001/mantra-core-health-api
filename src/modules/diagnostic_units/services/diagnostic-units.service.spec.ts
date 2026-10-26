@@ -10,6 +10,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { DiagnosticUnitsService } from './diagnostic-units.service';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -44,7 +45,10 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    findOne: mockFn().mockResolvedValue(null),
+  };
   const em = {
     transactional: mockFn((cb: any) => cb(tx)),
     fork: mockFn(() => em),
@@ -224,6 +228,60 @@ describe('DiagnosticUnitsService', () => {
       );
       expect(d.specialtiesRepo.verifyOpenForUnit).toHaveBeenCalled();
       expect(d.accreditationsRepo.verifyOpenForUnit).toHaveBeenCalled();
+    });
+  });
+
+  describe('verifyAndPublish · laboratorio sin organización verificada (P51)', () => {
+    const labUnit = () => ({
+      ...activeUnit(),
+      diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_LABORATORY,
+    });
+
+    it('rechaza con 422 si la organización DIAGNOSTIC_CENTER no está verificada', async () => {
+      const d = build();
+      const unit = labUnit();
+      d.unitsRepo.findById.mockResolvedValue(unit);
+      d.sitesRepo.countActiveForUnit.mockResolvedValue(1);
+      d.tx.findOne.mockResolvedValue({
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER,
+        verificationStatusConceptId: CONCEPTS.TENANT_UNVERIFIED,
+      });
+
+      await expect(
+        d.service.verifyAndPublish('u1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(unit.verificationStatusConceptId).toBe(DUNIT.VERIFICATION_PENDING);
+      expect(d.publicProfiles.projectOrganization).not.toHaveBeenCalled();
+    });
+
+    it('con la organización verificada, publica', async () => {
+      const d = build();
+      const unit = labUnit();
+      d.unitsRepo.findById.mockResolvedValue(unit);
+      d.sitesRepo.countActiveForUnit.mockResolvedValue(1);
+      d.tx.findOne.mockResolvedValue({
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER,
+        verificationStatusConceptId: CONCEPTS.TENANT_VERIFIED,
+      });
+
+      await d.service.verifyAndPublish('u1', actor);
+
+      expect(unit.verificationStatusConceptId).toBe(
+        DUNIT.VERIFICATION_VERIFIED,
+      );
+    });
+
+    it('una unidad de imágenes no consulta la organización', async () => {
+      const d = build();
+      d.unitsRepo.findById.mockResolvedValue({
+        ...activeUnit(),
+        diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_IMAGING,
+      });
+      d.sitesRepo.countActiveForUnit.mockResolvedValue(1);
+
+      await d.service.verifyAndPublish('u1', actor);
+
+      expect(d.tx.findOne).not.toHaveBeenCalled();
     });
   });
 

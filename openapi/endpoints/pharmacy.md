@@ -3682,8 +3682,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | Se requiere pertenecer a la organización, o ser administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no está disponible | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
-| 422 | `PRECONDITION_FAILED` | El catálogo de ${subject} no incluye el código ${code} | Excepción explícita en src/modules/directory/services/affiliation-document-concepts.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 

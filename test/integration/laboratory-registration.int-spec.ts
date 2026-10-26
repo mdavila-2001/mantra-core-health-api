@@ -7,9 +7,17 @@ import {
   ensureTestSession,
   type TestContext,
 } from './harness';
+import {
+  assertPermanentResidueTarget,
+  resolveResetTarget,
+} from './disposable-database';
 import { CONCEPTS, TokenService } from '../../src/common';
 import { DUNIT } from '../../src/modules/diagnostic_units/diagnostic_units.concepts';
-import { Branches, Tenants } from '../../src/modules/directory/entities';
+import {
+  Branches,
+  TenantAffiliationDocuments,
+  Tenants,
+} from '../../src/modules/directory/entities';
 import { PracticeSites } from '../../src/modules/practice/entities';
 import {
   DiagnosticUnits,
@@ -375,5 +383,169 @@ describe('P51 · alta de laboratorio contra la API real (integración)', () => {
       .send(cuerpo)
       .expect(400);
     expect(JSON.stringify(res.body)).toContain('idNumber');
+  });
+
+  /** Sube un PDF anónimo (pre-carga pública) y devuelve su `fileId`. */
+  async function subirPdf(nombre: string): Promise<string> {
+    const res = await http()
+      .post('/iam/auth/upload-registration-document')
+      .attach('file', Buffer.from('%PDF-1.7\nP51 laboratorio\n'), {
+        filename: nombre,
+        contentType: 'application/pdf',
+      })
+      .expect(201);
+    return res.body.fileId as string;
+  }
+
+  it('punto 6 · sin SEPREC, licencia y SEDES el laboratorio no opera; con los tres, la plataforma lo verifica y la unidad se publica', async () => {
+    // Completar papeles, verificar y publicar dejan filas en `audit.audit_log`
+    // (WORM) con el tenant: esta organización no se puede borrar después. Sólo
+    // corre contra una base descartable y queda como residuo declarado.
+    assertPermanentResidueTarget(resolveResetTarget(process.env), process.env);
+    const propia = await http()
+      .post('/iam/auth/register-organization')
+      .send(cuerpoDelFront('OPERA'))
+      .expect(201);
+    const ajena = await http()
+      .post('/iam/auth/register-organization')
+      .send(cuerpoDelFront('OPERAJ'))
+      .expect(201);
+    creados.push({
+      userId: ajena.body.ownerUserId,
+      tenantId: ajena.body.tenantId,
+    });
+    const tenantId = propia.body.tenantId as string;
+    const unitId = propia.body.diagnosticUnitId as string;
+    const tokenPropio = await tokenDelOwner(propia.body.ownerUserId, tenantId);
+    const tokenAjeno = await tokenDelOwner(
+      ajena.body.ownerUserId,
+      ajena.body.tenantId,
+    );
+    const lectura = `/tenants/${tenantId}/laboratory-readiness`;
+
+    // 1) Requisitos: el owner los ve; otra organización 403; sin sesión 401.
+    const antes = await http()
+      .get(lectura)
+      .set(bearer(tokenPropio))
+      .expect(200);
+    expect(antes.body).toEqual({
+      ready: false,
+      missing: [
+        'COMMERCE_REGISTRY_DOC',
+        'OPERATING_LICENSE_DOC',
+        'HEALTH_AUTHORITY_CERT_DOC',
+      ],
+    });
+    await http().get(lectura).set(bearer(tokenAjeno)).expect(403);
+    await http().get(lectura).expect(401);
+    // Un laboratorio no es una farmacia.
+    await http()
+      .get(`/tenants/${tenantId}/pharmacy-readiness`)
+      .set(bearer(tokenPropio))
+      .expect(422);
+
+    // 2) La plataforma no puede verificarlo ni publicar su unidad todavía.
+    const rechazo = await http()
+      .post(`/admin/tenants/${tenantId}/verification`)
+      .set(bearer(ctx.adminToken))
+      .send({})
+      .expect(422);
+    expect(rechazo.body.details.missing).toEqual([
+      'COMMERCE_REGISTRY_DOC',
+      'OPERATING_LICENSE_DOC',
+      'HEALTH_AUTHORITY_CERT_DOC',
+    ]);
+    const sinPublicar = await http()
+      .post(`/diagnostic-units/${unitId}/verify-and-publish`)
+      .set(bearer(ctx.adminToken))
+      .set('X-Tenant-Id', tenantId)
+      .expect(422);
+    expect(sinPublicar.body.details).toMatchObject({
+      reason: 'TENANT_NOT_VERIFIED',
+    });
+
+    // 3) Otra organización no le completa los papeles (403, nada vinculado).
+    const seprec = await subirPdf('seprec.pdf');
+    await http()
+      .post(`/tenants/${tenantId}/affiliation-documents`)
+      .set(bearer(tokenAjeno))
+      .send({ commerceRegistryFileId: seprec })
+      .expect(403);
+    let em = ctx.orm.em.fork();
+    expect(await em.count(TenantAffiliationDocuments, { tenantId })).toBe(0);
+
+    // 4) Con dos de tres sigue sin poder operar, y lo nombra.
+    await http()
+      .post(`/tenants/${tenantId}/affiliation-documents`)
+      .set(bearer(tokenPropio))
+      .send({
+        commerceRegistryFileId: seprec,
+        operatingLicenseFileId: await subirPdf('licencia.pdf'),
+      })
+      .expect(201);
+    const casi = await http()
+      .post(`/admin/tenants/${tenantId}/verification`)
+      .set(bearer(ctx.adminToken))
+      .send({})
+      .expect(422);
+    expect(casi.body.details.missing).toEqual(['HEALTH_AUTHORITY_CERT_DOC']);
+
+    // 5) Con el SEDES: listo, se verifica y la unidad se publica.
+    await http()
+      .post(`/tenants/${tenantId}/affiliation-documents`)
+      .set(bearer(tokenPropio))
+      .send({ healthAuthorityCertificateFileId: await subirPdf('sedes.pdf') })
+      .expect(201);
+    const despues = await http()
+      .get(lectura)
+      .set(bearer(tokenPropio))
+      .expect(200);
+    expect(despues.body).toEqual({ ready: true, missing: [] });
+    await http()
+      .post(`/admin/tenants/${tenantId}/verification`)
+      .set(bearer(ctx.adminToken))
+      .send({})
+      .expect(200);
+    await http()
+      .post(`/diagnostic-units/${unitId}/verify-and-publish`)
+      .set(bearer(ctx.adminToken))
+      .set('X-Tenant-Id', tenantId)
+      .expect(200);
+
+    em = ctx.orm.em.fork();
+    const tenant = await em.findOneOrFail(Tenants, { id: tenantId });
+    expect(tenant.verificationStatusConceptId).toBe(CONCEPTS.TENANT_VERIFIED);
+    const unit = await em.findOneOrFail(DiagnosticUnits, { id: unitId });
+    expect(unit.verificationStatusConceptId).toBe(DUNIT.VERIFICATION_VERIFIED);
+    const docs = await em.find(TenantAffiliationDocuments, { tenantId });
+    expect(docs).toHaveLength(3);
+    expect(docs.every((d) => d.verifiedAt instanceof Date)).toBe(true);
+  });
+
+  it('punto 6 · un centro de imágenes no es un laboratorio: laboratory-readiness → 422', async () => {
+    const cuerpo = cuerpoDelFront('IMGRD');
+    const unidad = cuerpo.organization.diagnosticUnit as Record<
+      string,
+      unknown
+    >;
+    delete unidad.branches;
+    unidad.diagnosticUnitTypeConceptId = concepto(
+      catalogos.tipoDeUnidad,
+      'DU_TYPE_IMAGING',
+    );
+    unidad.modalityConceptIds = [
+      concepto(catalogos.modalidad, 'DU_MODALITY_XRAY'),
+    ];
+    const res = await http()
+      .post('/iam/auth/register-organization')
+      .send(cuerpo)
+      .expect(201);
+    creados.push({ userId: res.body.ownerUserId, tenantId: res.body.tenantId });
+    const token = await tokenDelOwner(res.body.ownerUserId, res.body.tenantId);
+
+    await http()
+      .get(`/tenants/${res.body.tenantId}/laboratory-readiness`)
+      .set(bearer(token))
+      .expect(422);
   });
 });

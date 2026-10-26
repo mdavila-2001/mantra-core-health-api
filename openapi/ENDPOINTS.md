@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1582 de 1582 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1583 de 1583 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -28,7 +28,7 @@ Se documentan **1582 de 1582 endpoints** en **73 módulos**. La referencia compl
 | `delegated_access` | 12 | [Abrir referencia](endpoints/delegated-access.md) |
 | `diagnostic_units` | 21 | [Abrir referencia](endpoints/diagnostic-units.md) |
 | `diagnostics` | 31 | [Abrir referencia](endpoints/diagnostics.md) |
-| `directory` | 25 | [Abrir referencia](endpoints/directory.md) |
+| `directory` | 26 | [Abrir referencia](endpoints/directory.md) |
 | `document_store` | 5 | [Abrir referencia](endpoints/document-store.md) |
 | `education` | 14 | [Abrir referencia](endpoints/education.md) |
 | `erp` | 17 | [Abrir referencia](endpoints/erp.md) |
