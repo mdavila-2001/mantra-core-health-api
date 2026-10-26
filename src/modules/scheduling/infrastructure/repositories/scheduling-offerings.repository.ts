@@ -279,4 +279,65 @@ export class SchedulingOfferingsRepository {
       cleanupMinutes: Number(row.cleanupMinutes ?? 0),
     }));
   }
+
+  /**
+   * Los turnos vivos de horario flexible del profesional que pisan un rango (P36).
+   *
+   * Un turno flexible nace al retener, con la hora que eligió el paciente, y vive
+   * mientras su cupo esté reservado —confirmado **o solicitado**— o retenido con
+   * una retención vigente. Igual que una consulta de grilla de capacidad 1: el
+   * pedido pendiente ocupa el turno hasta que el médico lo acepte o lo rechace, y
+   * otro paciente no puede pedir encima.
+   */
+  async findLiveFlexibleSlotsOfProfessional(
+    em: EntityManager,
+    practitionerProfileId: string,
+    from: Date,
+    to: Date,
+    ids: {
+      bookedStatusConceptId: string;
+      heldStatusConceptId: string;
+      activeHoldStatusConceptId: string;
+    },
+    now: Date,
+  ): Promise<{ slotId: string; startAt: Date; endAt: Date }[]> {
+    const rows: {
+      slotId: string;
+      startAt: Date | string;
+      endAt: Date | string;
+    }[] = await em.getConnection().execute(
+      `SELECT s.id AS "slotId", s.start_at AS "startAt", s.end_at AS "endAt"
+         FROM scheduling.bookable_slots s
+         JOIN scheduling.schedulable_resources r ON r.id = s.resource_id
+         JOIN scheduling.schedule_templates t ON t.id = s.schedule_template_id
+        WHERE r.resource_ref_id = ?
+          AND r.resource_ref_type IN ('practitioner_profiles', 'health_practitioner_profiles')
+          AND t.flexible_hours = true
+          AND s.start_at < ?
+          AND s.end_at   > ?
+          AND (
+                s.status_concept_id = ?
+             OR (s.status_concept_id = ?
+                 AND EXISTS (SELECT 1
+                               FROM scheduling.slot_holds h
+                              WHERE h.bookable_slot_id = s.id
+                                AND h.status_concept_id = ?
+                                AND h.expires_at > ?))
+              )`,
+      [
+        practitionerProfileId,
+        to,
+        from,
+        ids.bookedStatusConceptId,
+        ids.heldStatusConceptId,
+        ids.activeHoldStatusConceptId,
+        now,
+      ],
+    );
+    return rows.map((row) => ({
+      slotId: row.slotId,
+      startAt: new Date(row.startAt),
+      endAt: new Date(row.endAt),
+    }));
+  }
 }

@@ -86,6 +86,11 @@ export interface PharmacyDirectoryPort {
     uow: UnitOfWork,
     ids: readonly string[],
   ): Promise<PharmacyProductSnapshot[]>;
+  /** Publicados y vendibles hoy: sin el «no tengo» del catálogo (P47). */
+  findSellableProductsByIds(
+    uow: UnitOfWork,
+    ids: readonly string[],
+  ): Promise<PharmacyProductSnapshot[]>;
   findCurrentPublicPriceLists(
     uow: UnitOfWork,
     pharmacyIds: readonly string[],

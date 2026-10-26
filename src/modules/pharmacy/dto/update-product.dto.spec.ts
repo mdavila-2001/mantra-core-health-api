@@ -76,21 +76,73 @@ describe('UpdateProductDto', () => {
     await expect(parse(body)).rejects.toBeInstanceOf(BadRequestException);
   });
 
+  it.each(['productCode', 'pharmacyId', 'catalogProductId', 'price'])(
+    'rejects %s: it is not editable or not part of the contract',
+    async (key) => {
+      const error: unknown = await parse({ [key]: 'x' }).catch(
+        (e: unknown) => e,
+      );
+      expect(error).toBeInstanceOf(BadRequestException);
+      expect(
+        JSON.stringify((error as BadRequestException).getResponse()),
+      ).toContain(`property ${key} should not exist`);
+    },
+  );
+
+  // P47 §3-5: lo que administra la farmacia ya tiene columna o tabla.
+  it('accepts what the pharmacy manages (P47 §3-5)', async () => {
+    const body = {
+      unitPrice: 12.5,
+      category: 'Medicamentos',
+      description: 'Para el dolor de cabeza',
+      inStock: false,
+      status: 'DRAFT',
+      minStock: 3,
+      imageFileIds: ['11111111-1111-4111-8111-111111111111'],
+    };
+    await expect(parse(body)).resolves.toMatchObject(body);
+    await expect(parse({ stock: 0 })).resolves.toMatchObject({ stock: 0 });
+    await expect(parse({ unitPrice: '1250.00' })).resolves.toMatchObject({
+      unitPrice: '1250.00',
+    });
+  });
+
+  it('accepts null to clear the price, the category and the description', async () => {
+    const body = { unitPrice: null, category: null, description: null };
+    await expect(parse(body)).resolves.toMatchObject(body);
+  });
+
   it.each([
-    'productCode',
-    'unitPrice',
-    'category',
-    'description',
-    'inStock',
-    'status',
-    'stock',
-    'minStock',
-    'imageFileIds',
-  ])('rejects %s: the model has no column for it (P47)', async (key) => {
-    const error: unknown = await parse({ [key]: 'x' }).catch((e: unknown) => e);
-    expect(error).toBeInstanceOf(BadRequestException);
-    expect(
-      JSON.stringify((error as BadRequestException).getResponse()),
-    ).toContain(`property ${key} should not exist`);
+    ['a price with three decimals', { unitPrice: 12.125 }],
+    ['a zero price', { unitPrice: 0 }],
+    ['a negative price', { unitPrice: -3 }],
+    ['a price in exponent notation', { unitPrice: '1e3' }],
+    ['a price as text with a comma', { unitPrice: '12,50' }],
+    ['a negative stock', { stock: -1 }],
+    ['a fractional stock', { stock: 1.5 }],
+    ['a stock over the cap', { stock: 1_000_001 }],
+    ['a status outside the three', { status: 'IN_REVIEW' }],
+    [
+      'four images',
+      {
+        imageFileIds: [1, 2, 3, 4].map(
+          (n) => `${n}1111111-1111-4111-8111-111111111111`,
+        ),
+      },
+    ],
+    [
+      'the same image twice',
+      {
+        imageFileIds: [
+          '11111111-1111-4111-8111-111111111111',
+          '11111111-1111-4111-8111-111111111111',
+        ],
+      },
+    ],
+    ['an image that is not a uuid', { imageFileIds: ['x'] }],
+    ['a category over 60 characters', { category: 'a'.repeat(61) }],
+    ['an empty category (cleared with null)', { category: '' }],
+  ])('rejects %s', async (_label, body) => {
+    await expect(parse(body)).rejects.toBeInstanceOf(BadRequestException);
   });
 });

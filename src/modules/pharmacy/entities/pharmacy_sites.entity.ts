@@ -83,6 +83,12 @@ export class PharmacySites {
   pickupAvailable?: boolean;
 
   /**
+   * Valor de open24h mantenido por la instancia.
+   */
+  @Property({ fieldName: 'open_24h', type: 'boolean', nullable: true })
+  open24h?: boolean;
+
+  /**
    * Identificador asociado a status concept.
    */
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
