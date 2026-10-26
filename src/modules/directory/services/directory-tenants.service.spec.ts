@@ -64,6 +64,15 @@ function build() {
   const catalogRepo = {
     findCarrierByTenantId: mockFn(() => Promise.resolve(null)),
   };
+  // P50: por defecto la farmacia cumple; los tests de farmacia lo sobrescriben.
+  const pharmacyRequirements = {
+    evaluate: mockFn().mockResolvedValue({
+      ready: true,
+      missing: [],
+      documentIds: ['doc-1'],
+    }),
+    markDocumentsVerified: mockFn().mockResolvedValue(undefined),
+  };
   const service = new DirectoryTenantsService(
     em as any,
     tenantsRepo,
@@ -74,8 +83,10 @@ function build() {
     publicProfiles as any,
     catalogRepo as any,
     logger as any,
+    pharmacyRequirements as any,
   );
   return {
+    pharmacyRequirements,
     service,
     tx,
     tenantsRepo,
@@ -499,6 +510,21 @@ describe('DirectoryTenantsService', () => {
       );
     });
 
+    it('no evalúa requisitos de farmacia para otro tipo de organización', async () => {
+      const d = build();
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-1',
+        legalName: 'Clinica',
+        statusConceptId: DIR.TENANT_PENDING,
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PROVIDER,
+        createdAt: new Date(),
+      });
+
+      await d.service.verify('ten-1', {} as any, actor);
+
+      expect(d.pharmacyRequirements.evaluate).not.toHaveBeenCalled();
+    });
+
     /** Sin aprobar no aparece: la vitrina se crea al verificar, no antes. */
     it('una organización que no está pendiente no se publica', async () => {
       const d = build();
@@ -513,6 +539,67 @@ describe('DirectoryTenantsService', () => {
         d.service.verify('ten-3', {} as any, actor),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.publicProfiles.projectOrganization).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('verify · farmacia sin papeles no opera (P50)', () => {
+    const actor = { id: 'user-plat', roles: ['SECURITY_ADMIN'] } as any;
+    const pharmacyTenant = () => ({
+      id: 'ten-ph',
+      code: 'FARM-1',
+      legalName: 'Farmacia Central SRL',
+      statusConceptId: DIR.TENANT_PENDING,
+      tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PHARMACY,
+      legalEntityTypeConceptId: 'le-1',
+      createdAt: new Date(),
+    });
+
+    it('rechaza con 422 nombrando lo que falta, sin activar ni publicar', async () => {
+      const d = build();
+      const tenant = pharmacyTenant();
+      d.tenantsRepo.findById.mockResolvedValue(tenant);
+      d.pharmacyRequirements.evaluate.mockResolvedValue({
+        ready: false,
+        missing: ['HEALTH_AUTHORITY_CERT_DOC', 'HEADQUARTERS_LOCATION'],
+        documentIds: [],
+      });
+
+      const error = await d.service
+        .verify('ten-ph', {} as any, actor)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as PreconditionFailedException).getResponse()).toEqual(
+        expect.objectContaining({
+          details: expect.objectContaining({
+            missing: ['HEALTH_AUTHORITY_CERT_DOC', 'HEADQUARTERS_LOCATION'],
+          }),
+        }),
+      );
+      expect(tenant.statusConceptId).toBe(DIR.TENANT_PENDING);
+      expect(d.publicProfiles.projectOrganization).not.toHaveBeenCalled();
+      expect(
+        d.pharmacyRequirements.markDocumentsVerified,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('con todo presentado, activa la farmacia y marca verificados sus papeles', async () => {
+      const d = build();
+      const pharmacy = {
+        statusConceptId: 'draft',
+        verificationStatusConceptId: 'pending',
+      } as any;
+      (d.tx as any).find = mockFn().mockResolvedValue([pharmacy]);
+      d.tenantsRepo.findById.mockResolvedValue(pharmacyTenant());
+
+      await d.service.verify('ten-ph', {} as any, actor);
+
+      expect(d.pharmacyRequirements.markDocumentsVerified).toHaveBeenCalledWith(
+        d.tx,
+        ['doc-1'],
+        'user-plat',
+      );
+      expect(pharmacy.publicProfileId).toBe('pub-1');
     });
   });
 });

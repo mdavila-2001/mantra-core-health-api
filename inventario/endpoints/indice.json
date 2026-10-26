@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1589,
+    "total": 1591,
     "porOrigen": {
-      "CONTRATO": 1580,
+      "CONTRATO": 1582,
       "CONTRATO_AUSENTE": 9
     },
     "porRiesgo": {
-      "BAJO": 506,
+      "BAJO": 507,
       "MEDIO": 890,
-      "ALTO": 193
+      "ALTO": 194
     },
-    "conTablas": 1528,
+    "conTablas": 1530,
     "sinTablasSinDeterminar": 0,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 926,
-    "conRequerimientos": 1589
+    "conPruebas": 928,
+    "conRequerimientos": 1591
   },
   "endpoints": [
     {
@@ -10607,9 +10607,9 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 7,
+      "tablas": 15,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10642,6 +10642,22 @@
       "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TenantsController_completeAffiliationDocuments",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/tenants/{tenantId}/affiliation-documents",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Completar los documentos legales de la organización",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10884,6 +10900,22 @@
       "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TenantsController_getPharmacyReadiness",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/tenants/{tenantId}/pharmacy-readiness",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Requisitos pendientes para que la farmacia opere",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13228,9 +13260,9 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 36,
+      "tablas": 37,
       "eventos": 0,
-      "pruebas": 19,
+      "pruebas": 20,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13344,7 +13376,7 @@
       "roles": [],
       "tablas": 6,
       "eventos": 0,
-      "pruebas": 5,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {

@@ -11,6 +11,10 @@ import { ServiceRequests, DiagnosticReports } from '../clinical/entities';
 // dónde vive un acceso compartido (`authz`).
 import { ProfilesModule } from '../profiles/profiles.module';
 import { AuthzModule } from '../authz/authz.module';
+// P40: `ClinicalRecordAccessGuard` en la ficha diagnóstica; Nest lo resuelve en
+// este contenedor y necesita `ClinicalReadService`, que `ClinicalModule` exporta
+// (mismo criterio que `chart` y `clinical_ext`).
+import { ClinicalModule } from '../clinical/clinical.module';
 // Bytes de un archivo ya autorizado por contexto (`FileUploadService`); lo exporta
 // `CommonModule`. La descarga del resultado del titular (CL-40) lo necesita.
 import { CommonModule } from '../common/common.module';
@@ -68,6 +72,7 @@ import {
     ]),
     ProfilesModule,
     AuthzModule,
+    ClinicalModule,
     CommonModule,
     DirectoryAuthorizationModule,
   ],

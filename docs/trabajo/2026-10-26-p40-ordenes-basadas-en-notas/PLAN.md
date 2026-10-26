@@ -53,18 +53,24 @@ devuelve; con una nota de otro paciente, 422 y no se escribe nada.
 | H1.S2.M2 | Concepto `SR_OTHER` + catálogo dinámico + designación es | seed lo siembra (FK del alta) | integración `category OTHER` | HECHO |
 | H1.S2.M3 | `category` y `basedOnNoteIds` en el alta, validación y vínculo | 422 en nota ajena/otra consulta/mismatch | unit `service-requests.service.spec`, `service-request-notes.service.spec` | HECHO |
 | H1.S2.M4 | Lectura en `GET /diagnostics/patients/:id/orders` y `GET /diagnostic-results/me/orders` | `category` (+ `basedOnNoteIds` sólo personal) | unit `diagnostics-orders.service.spec`, `…orders.service.spec` | HECHO |
-| H1.S2.M5 | Integración real con negativos (nota ajena, otra consulta, mismatch, 400, 403) | 7 casos verdes | `p40-orden-basada-en-notas.int-spec.ts` | ver REPORTE |
+| H1.S2.M5 | Integración real con negativos (nota ajena, otra consulta, mismatch, 400, 403) | 9 casos verdes | `p40-orden-basada-en-notas.int-spec.ts` | HECHO |
 
 ### H1.S3 — Frontend
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
 | H1.S3.M1 | Tipos: quitar «sólo el simulador», documentar el contrato | sin notas P40 de simulador | `grep` | HECHO |
-| H1.S3.M2 | Simulador con el mismo contrato (validación y lectura) | 8 casos verdes | `service-request-category.mock.spec.ts` | ver REPORTE |
-| H1.S3.M3 | «Mis órdenes» usa `category` de la API en lugar del código | pruebas del componente verdes | `diagnostic-orders.spec.ts` | ver REPORTE |
-| H1.S3.M4 | Línea del encuentro: `category` cuando falta el concepto | 3 casos | `history-view-model.spec.ts` | ver REPORTE |
+| H1.S3.M2 | Simulador con el mismo contrato (validación y lectura) | 8 casos verdes | `service-request-category.mock.spec.ts` | HECHO |
+| H1.S3.M3 | «Mis órdenes» usa `category` de la API en lugar del código | pruebas del componente verdes | `diagnostic-orders.spec.ts` | HECHO |
+| H1.S3.M4 | Línea del encuentro: `category` cuando falta el concepto | 3 casos | `history-view-model.spec.ts` | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
 |---|---|---|
 | P39 toca `diagram_15_chart` / `SQL/15_chart` y el `_generation_report.md` | conflicto en derivados | en el merge se regenera, no se elige lado |
 | Caché de metadata MikroORM compartida por el symlink de `node_modules` | integración no arranca | setup de jest que desactiva la caché, sólo en la corrida |
+
+### H1.S4 — Gate de seguridad (agregado a mitad de camino: hallazgo de la revisión automática)
+| ID | Microtarea | CA (binario) | DoD | Estado |
+|---|---|---|---|---|
+| H1.S4.M1 | Acotar las notas al tenant custodio (vía su encuentro), sólo firmadas/enmendadas, sin confidencialidad restringida | nota del mismo paciente en otro tenant → 422 `BASED_ON_NOTE_NOT_FOUND` | unit `service-request-notes.service.spec` + integración | HECHO |
+| H1.S4.M2 | `GET /diagnostics/patients/:id/orders` con `ClinicalRecordAccessGuard` (devuelve ids de notas) | profesional sin vínculo → 403 | integración | HECHO |
