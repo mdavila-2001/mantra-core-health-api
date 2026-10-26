@@ -31,6 +31,11 @@ import { DiagnosticStudyOfferings } from '../../diagnostic_units/entities';
 import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
 import { PerformerSelectionValidator } from './performer-selection.validator';
 import { SuggestedSiteNamesReader } from './suggested-site-names.reader';
+import { ServiceRequestNotesService } from './service-request-notes.service';
+import {
+  analysisCategoryOf,
+  categoryConceptIdFor,
+} from '../service-request-category';
 
 /**
  * Cómo trata `create` la regla de antiduplicación cuando el llamador no es la
@@ -64,6 +69,7 @@ export class ServiceRequestsService {
    * @param formOrigin - Valida la instancia de formulario de origen (P43).
    * @param performerSelection - Reglas del modo de ejecutor (centros médicos).
    * @param siteNames - Nombre de la sede sugerida, para el paciente.
+   * @param basedOnNotes - Notas que motivan la orden (P40).
    */
   constructor(
     private readonly em: EntityManager,
@@ -77,6 +83,7 @@ export class ServiceRequestsService {
     private readonly formOrigin: FormInstanceOriginValidator,
     private readonly performerSelection: PerformerSelectionValidator,
     private readonly siteNames: SuggestedSiteNamesReader,
+    private readonly basedOnNotes: ServiceRequestNotesService,
   ) {
     this.logger.setContext(ServiceRequestsService.name);
   }
@@ -217,6 +224,32 @@ export class ServiceRequestsService {
     }
   }
 
+  /**
+   * P40: el `category_concept_id` que se guarda. El texto (`category`) se
+   * resuelve a su concepto; si viaja con `categoryConceptId`, tienen que
+   * coincidir —un concepto que el texto no nombra (p. ej. procedimiento) es
+   * `OTHER`—, y en ese caso se guarda el concepto, que es el más preciso.
+   */
+  private resolveCategoryConceptId(
+    dto: CreateServiceRequestDto,
+  ): string | undefined {
+    if (dto.category === undefined) return dto.categoryConceptId;
+    if (dto.categoryConceptId === undefined) {
+      return categoryConceptIdFor(dto.category);
+    }
+    if (analysisCategoryOf(dto.categoryConceptId) !== dto.category) {
+      throw new PreconditionFailedException(
+        'La categoría indicada no corresponde al concepto de categoría',
+        {
+          category: dto.category,
+          categoryConceptId: dto.categoryConceptId,
+        },
+        ClinicalErrorReason.SERVICE_REQUEST_CATEGORY_MISMATCH,
+      );
+    }
+    return dto.categoryConceptId;
+  }
+
   /** UC-08-05: registra una orden de servicio con intención de orden. */
   async create(
     dto: CreateServiceRequestDto,
@@ -230,8 +263,19 @@ export class ServiceRequestsService {
       },
       'Placing service request',
     );
+    const categoryConceptId = this.resolveCategoryConceptId(dto);
+    const basedOnNoteIds = dto.basedOnNoteIds ?? [];
     return this.em.transactional(async (tx) => {
       await this.assertEncounterBelongsToPatient(tx, dto);
+      // P40: las notas citadas, del mismo paciente y encuentro; 422 antes de escribir.
+      if (basedOnNoteIds.length > 0) {
+        await this.basedOnNotes.assertUsable(
+          tx,
+          basedOnNoteIds,
+          dto.patientProfileId,
+          dto.encounterId,
+        );
+      }
       // P43: sólo si viaja; 422 antes de escribir nada.
       if (dto.formInstanceId !== undefined) {
         await this.formOrigin.assertUsableOrigin(
@@ -260,7 +304,7 @@ export class ServiceRequestsService {
         encounterId: dto.encounterId,
         formInstanceId: dto.formInstanceId,
         codeConceptId: dto.codeConceptId,
-        categoryConceptId: dto.categoryConceptId,
+        categoryConceptId,
         intentConceptId: CLIN.SERVICE_REQUEST_INTENT_ORDER,
         priorityConceptId: dto.priorityConceptId,
         statusConceptId: decision.statusConceptId,
@@ -277,6 +321,12 @@ export class ServiceRequestsService {
         actorUserId: actor.id,
       });
       await tx.flush();
+      // Después del flush de la orden: el vínculo no es una relación del ORM,
+      // así que el orden de los INSERT no lo garantiza la unidad de trabajo.
+      if (basedOnNoteIds.length > 0) {
+        this.basedOnNotes.link(tx, sr.id, basedOnNoteIds, actor.id);
+        await tx.flush();
+      }
 
       this.logger.info(
         {
@@ -331,6 +381,8 @@ export class ServiceRequestsService {
         id: sr.id,
         patientProfileId: sr.patientProfileId,
         formInstanceId: sr.formInstanceId ?? null,
+        category: analysisCategoryOf(sr.categoryConceptId),
+        basedOnNoteIds: [...basedOnNoteIds],
         status: sr.statusConceptId,
         intent: sr.intentConceptId ?? CLIN.SERVICE_REQUEST_INTENT_ORDER,
         performerSelectionConceptId: performer.performerSelectionConceptId,
