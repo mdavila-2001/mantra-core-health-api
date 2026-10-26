@@ -54,28 +54,28 @@
 **CA:** Dado un tenant con dos sedes y stock en una, cuando un anónimo pide las sucursales y manda una receta,
 entonces recibe las dos sedes y la que tiene stock primero con `complete: true`; un slug de otro tipo da 404.
 **DoD:** `yarn test src/modules/public` verde · integración real contra `mantra_p37` verde · typecheck y lint.
-**Estado:** TODO
+**Estado:** HECHO
 
 | ID | Microtarea | CA (binario) | DoD (comando) | Estado |
 |---|---|---|---|---|
-| H1.S1.M1 | Repositorio: sedes públicas del tenant (sede, dirección, sucursal) | devuelve sólo sedes activas de farmacias verificadas | test de integración | TODO |
-| H1.S1.M2 | Repositorio: productos en stock que casan con algún renglón, con precio por sede | agotado no sale | test de integración | TODO |
-| H1.S2.M1 | Dominio puro: casar renglones, total exacto, orden | casos correcto/límite/inválido | `yarn test src/modules/public` | TODO |
-| H1.S2.M2 | Servicio + DTO + controlador (`GET .../branches`, `POST .../branch-availability`) | 404 por tipo, 400 por cuerpo inválido | `public-catalog.http.spec.ts` | TODO |
-| H1.S3.M1 | Integración real: datos sintéticos, dos sedes, slug de otro tipo → 404 | verde | `yarn test:integration p37` | TODO |
-| H1.S3.M2 | README del módulo, OpenAPI y ENDPOINTS regenerados | sin diff pendiente | `docs:openapi:generate` | TODO |
+| H1.S1.M1 | Repositorio: sedes públicas del tenant (sede, dirección, sucursal) | devuelve sólo sedes activas de farmacias verificadas | test de integración | HECHO |
+| H1.S1.M2 | Repositorio: productos en stock que casan con algún renglón, con precio por sede | agotado no sale | test de integración | HECHO |
+| H1.S2.M1 | Dominio puro: casar renglones, total exacto, orden | casos correcto/límite/inválido | `yarn test src/modules/public` | HECHO |
+| H1.S2.M2 | Servicio + DTO + controlador (`GET .../branches`, `POST .../branch-availability`) | 404 por tipo, 400 por cuerpo inválido | `public-catalog.http.spec.ts` | HECHO |
+| H1.S3.M1 | Integración real: datos sintéticos, dos sedes, slug de otro tipo → 404 | verde | `yarn test:integration p37` | HECHO |
+| H1.S3.M2 | README del módulo, OpenAPI y ENDPOINTS regenerados | sin diff pendiente | `docs:openapi:generate` | HECHO |
 
 ## H2 — El front usa el contrato real
 **CA:** Dado el cliente real, cuando la persona busca su receta, entonces sale un `POST` sin parámetros en la URL y
 la ficha dibuja el resultado; el simulador sirve el mismo contrato.
 **DoD:** `yarn vitest run` de la ficha y del cliente verdes · `yarn lint` de lo tocado · typecheck.
-**Estado:** TODO
+**Estado:** A MEDIAS (falta prueba visual en navegador)
 
 | ID | Microtarea | CA (binario) | DoD (comando) | Estado |
 |---|---|---|---|---|
-| H2.S1.M1 | Cliente `prescriptionAvailability` por `POST` con cuerpo | URL sin `items` | spec del cliente | TODO |
-| H2.S1.M2 | Simulador `POST` con el mismo cuerpo y campos nuevos | spec de la ficha verde | `vitest pharmacy-detail` | TODO |
-| H2.S2.M1 | Ficha: enlace sólo a otra ficha, descripción, «Cómo llegar», vacío orientado | spec | `vitest pharmacy-detail` | TODO |
+| H2.S1.M1 | Cliente `prescriptionAvailability` por `POST` con cuerpo | URL sin `items` | spec del cliente | HECHO |
+| H2.S1.M2 | Simulador `POST` con el mismo cuerpo y campos nuevos | spec de la ficha verde | `vitest pharmacy-detail` | HECHO |
+| H2.S2.M1 | Ficha: enlace sólo a otra ficha, descripción, «Cómo llegar», vacío orientado | spec | `vitest pharmacy-detail` | A MEDIAS (sin captura de navegador) |
 
 ## Riesgos
 | Riesgo | Impacto | Mitigación |
