@@ -44,6 +44,16 @@ export const RELATION_TYPE_CONCEPT_ID = Object.freeze({
 const STUDY_CATEGORIES = new Set(['diagnostic-test', 'lab', 'imaging']);
 
 /**
+ * Qué puede ser el otro extremo según el tipo: un examen exigido es un estudio
+ * y una complicación es una enfermedad. Un homónimo de otra categoría (el
+ * «Hemograma completo» catalogado como enfermedad) no es candidato.
+ */
+const ALLOWED_CATEGORIES = Object.freeze({
+  REQUIRED_TEST: new Set([...STUDY_CATEGORIES, 'procedure']),
+  COMPLICATION: new Set(['disease']),
+});
+
+/**
  * Inicio de vigencia de la edición 2012. La ficha NNAC 2012 no trae resolución
  * ministerial en su `provenance.note`; la fecha es la que fija TAREA-41 F2.1
  * para la edición, no una leída de la norma (ver DECISIONS del carril 41).
@@ -90,7 +100,8 @@ export function icd10CodesOf(form) {
 /**
  * Índice de designaciones: texto normalizado → conceptos que lo llevan.
  *
- * @param {Iterable<{conceptId: string, text: string, categoryKey: string|null}>} designations
+ * @param {Iterable<{conceptId: string, text: string, categoryKey: string|null}>} designations - Las que
+ *   no tienen categoría sólo registran el concepto (para la búsqueda por CIE-10).
  */
 export function buildDesignationIndex(designations) {
   const byText = new Map();
@@ -98,7 +109,9 @@ export function buildDesignationIndex(designations) {
   for (const { conceptId: id, text, categoryKey } of designations) {
     conceptIds.add(id);
     const key = normalizeOption(text);
-    if (!key) continue;
+    // Sin categoría del glosario no es un término que el mapa pueda mostrar:
+    // no compite como candidato (sí cuenta para encontrar la enfermedad por CIE-10).
+    if (!key || !categoryKey) continue;
     const list = byText.get(key) ?? [];
     if (!list.some((c) => c.conceptId === id)) list.push({ conceptId: id, categoryKey: categoryKey ?? null });
     byText.set(key, list);
@@ -112,7 +125,8 @@ export function buildDesignationIndex(designations) {
  * estudio si el texto antes de los dos puntos es exactamente un estudio.
  */
 export function resolveOption(index, option, relationType) {
-  const exact = index.byText.get(normalizeOption(option)) ?? [];
+  const allowed = ALLOWED_CATEGORIES[relationType];
+  const exact = (index.byText.get(normalizeOption(option)) ?? []).filter((c) => !allowed || allowed.has(c.categoryKey));
   if (exact.length === 1) return { conceptId: exact[0].conceptId, matchedBy: 'exact' };
   if (exact.length > 1) return { reason: 'ambiguous', candidates: exact.map((c) => c.conceptId) };
   const colon = option.indexOf(':');
@@ -150,7 +164,9 @@ export function nnacRelations(form, index) {
       sourceConceptId: source,
       targetConceptId: target,
       relationshipTypeConceptId: RELATION_TYPE_CONCEPT_ID[type],
-      ordinal,
+      // Sin `ordinal`: es de la relación, no de la evidencia, y dos fichas que
+      // comparten código CIE-10 se lo pisarían en cada carga. La posición de la
+      // opción en su ficha queda en `sourceReference`.
       evidenceTier: NATIONAL_STANDARD,
       sourceReference: `${form.code}#${fieldName}#${ordinal}`,
       citationText: option,

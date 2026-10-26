@@ -102,7 +102,6 @@ test('NNAC 2025: filas T1 con cita literal, ubicación y vigencia', () => {
     sourceConceptId: disease,
     targetConceptId: hemograma,
     relationshipTypeConceptId: RELATION_TYPE_CONCEPT_ID.REQUIRED_TEST,
-    ordinal: options(nac2025, 'examenes_solicitados').indexOf('Hemograma completo') + 1,
     evidenceTier: 'NATIONAL_STANDARD',
     sourceReference: `NNAC25_MI_21_NEUMONIA_ADQUIRIDA_COMUNIDAD#examenes_solicitados#${options(nac2025, 'examenes_solicitados').indexOf('Hemograma completo') + 1}`,
     citationText: 'Hemograma completo',
