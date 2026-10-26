@@ -137,6 +137,7 @@ export type TenantTypeCode =
   | 'UNIVERSITY'
   | 'PHARMACY'
   | 'HOSPITAL'
+  | 'CLINIC'
   | 'MEDICAL_OFFICE'
   | 'NURSING'
   | 'HEALTH_OTHER'
@@ -152,10 +153,11 @@ export const TENANT_TYPE_CONCEPT_BY_CODE: Readonly<
   BROKER: CONCEPTS.TENANT_TYPE_BROKER,
   UNIVERSITY: CONCEPTS.TENANT_TYPE_UNIVERSITY,
   PHARMACY: CONCEPTS.TENANT_TYPE_PHARMACY,
-  // Las cuatro institucionales. Son códigos hermanos y no un subtipo de otro
+  // Las cinco institucionales. Son códigos hermanos y no un subtipo de otro
   // código porque el tipo ya vive en una sola columna (`tenant_type_concept_id`)
-  // y anidar exigiría una columna más para distinguir cuatro valores.
+  // y anidar exigiría una columna más para distinguir cinco valores.
   HOSPITAL: CONCEPTS.TENANT_TYPE_HOSPITAL,
+  CLINIC: CONCEPTS.TENANT_TYPE_CLINIC,
   MEDICAL_OFFICE: CONCEPTS.TENANT_TYPE_MEDICAL_OFFICE,
   NURSING: CONCEPTS.TENANT_TYPE_NURSING,
   HEALTH_OTHER: CONCEPTS.TENANT_TYPE_HEALTH_OTHER,
@@ -206,6 +208,7 @@ export const TERRITORIAL_TENANT_TYPES: readonly TenantTypeCode[] = [
   'UNIVERSITY',
   'PHARMACY',
   'HOSPITAL',
+  'CLINIC',
   'MEDICAL_OFFICE',
   'NURSING',
   'HEALTH_OTHER',

@@ -880,7 +880,12 @@
                 "ANATOMY",
                 "DIAGNOSTIC_TEST",
                 "SYMPTOM",
-                "SPECIALTY"
+                "SPECIALTY",
+                "DIAGNOSTIC_CRITERION",
+                "REQUIRED_TEST",
+                "COMPLICATION",
+                "RISK_FACTOR",
+                "REFERRAL_CRITERION"
               ]
             }
           },
@@ -101991,7 +101996,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cuatro institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan.",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cinco institucionales (HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan.",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -101999,6 +102004,7 @@
               "UNIVERSITY",
               "PHARMACY",
               "HOSPITAL",
+              "CLINIC",
               "MEDICAL_OFFICE",
               "NURSING",
               "HEALTH_OTHER",
@@ -107509,7 +107515,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto.",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto.",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -107517,6 +107523,7 @@
               "UNIVERSITY",
               "PHARMACY",
               "HOSPITAL",
+              "CLINIC",
               "MEDICAL_OFFICE",
               "NURSING",
               "HEALTH_OTHER",
@@ -107719,7 +107726,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto.",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto.",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -107727,6 +107734,7 @@
               "UNIVERSITY",
               "PHARMACY",
               "HOSPITAL",
+              "CLINIC",
               "MEDICAL_OFFICE",
               "NURSING",
               "HEALTH_OTHER",

@@ -191,6 +191,38 @@ describe('IamOrganizationSelfRegistrationService', () => {
     );
   });
 
+  // Organización médica: las cinco institucionales de salud. CLINIC es el
+  // código de «Clínica», que no existía y se rechazaba con 400 en el DTO.
+  it.each([
+    ['HOSPITAL', CONCEPTS.TENANT_TYPE_HOSPITAL],
+    ['CLINIC', CONCEPTS.TENANT_TYPE_CLINIC],
+    ['MEDICAL_OFFICE', CONCEPTS.TENANT_TYPE_MEDICAL_OFFICE],
+    ['NURSING', CONCEPTS.TENANT_TYPE_NURSING],
+    ['HEALTH_OTHER', CONCEPTS.TENANT_TYPE_HEALTH_OTHER],
+  ] as const)(
+    'registra la organización médica %s con su concepto de tipo, pendiente y sin verificar',
+    async (tenantType, conceptId) => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: { ...dto.organization, tenantType },
+      });
+
+      expect(d.typeProfile.assertProfileMatchesType).toHaveBeenCalledWith(
+        expect.objectContaining({ tenantType }),
+      );
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          tenantTypeConceptId: conceptId,
+          statusConceptId: DIR.TENANT_PENDING,
+          verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
+        }),
+      );
+    },
+  );
+
   describe('DIAGNOSTIC_CENTER (subtarea 1.5)', () => {
     it('devuelve diagnosticUnitId cuando el tipo es DIAGNOSTIC_CENTER', async () => {
       const d = build();
