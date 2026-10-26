@@ -51,7 +51,7 @@ function build() {
     pricingService as any,
     integrationService as any,
     catalogService as any,
-    { listCategories: mockFn() } as any,
+    { list: mockFn() } as any,
     openingHoursService as any,
   );
   return {

@@ -19,6 +19,8 @@ import {
   PharmacySites,
 } from '../entities';
 import { PHARM } from '../pharmacy.concepts';
+import type { FilterQuery } from '@mikro-orm/core';
+import { SELLABLE_STOCK_FILTER } from '../services/pharmacy-catalog-rules';
 
 /** Acotaciones de la búsqueda de productos del directorio. */
 export interface ProductSearchFilter {
@@ -129,6 +131,40 @@ export class PharmacyReadRepository {
   }
 
   /**
+   * Todo el catálogo de UNA farmacia —publicados, borradores y retirados—, para
+   * la lectura de gestión de su personal (P47 `managed=true`). Quien llama ya
+   * comprobó que el actor es de esa farmacia.
+   */
+  findCatalogProducts(
+    em: EntityManager,
+    pharmacyId: string,
+    filter: ProductSearchFilter,
+    limit: number,
+  ): Promise<PharmacyProducts[]> {
+    const term = filter.search?.trim();
+    return em.find(
+      PharmacyProducts,
+      {
+        pharmacyId,
+        ...(filter.conceptId ? { medicationConceptId: filter.conceptId } : {}),
+        ...(term
+          ? {
+              $or: [
+                { brandName: { $ilike: `%${term}%` } },
+                { genericName: { $ilike: `%${term}%` } },
+                { productCode: { $ilike: `%${term}%` } },
+              ],
+            }
+          : {}),
+      },
+      {
+        orderBy: { genericName: 'ASC', brandName: 'ASC', id: 'ASC' },
+        limit,
+      },
+    );
+  }
+
+  /**
    * Sólo el dueño de cada producto activo, para contar catálogo por farmacia
    * sin traer las filas enteras (proyección de columnas, no N+1 de counts).
    */
@@ -157,6 +193,23 @@ export class PharmacyReadRepository {
       id: { $in: [...ids] },
       statusConceptId: PHARM.PRODUCT_ACTIVE,
     });
+  }
+
+  /**
+   * Productos publicados que además se pueden vender hoy: la farmacia no los
+   * marcó «no tengo» y, si llevan conteo, les queda (P47). Es lo que piden la
+   * disponibilidad, los precios de una sede y un pedido nuevo.
+   */
+  findSellableProductsByIds(
+    em: EntityManager,
+    ids: readonly string[],
+  ): Promise<PharmacyProducts[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return em.find(PharmacyProducts, {
+      id: { $in: [...ids] },
+      statusConceptId: PHARM.PRODUCT_ACTIVE,
+      ...SELLABLE_STOCK_FILTER,
+    } as FilterQuery<PharmacyProducts>);
   }
 
   /**

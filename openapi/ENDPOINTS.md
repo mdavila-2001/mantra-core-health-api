@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1572 de 1572 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1576 de 1576 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -53,7 +53,7 @@ Se documentan **1572 de 1572 endpoints** en **73 módulos**. La referencia compl
 | `organization_extensions` | 9 | [Abrir referencia](endpoints/organization-extensions.md) |
 | `payments` | 14 | [Abrir referencia](endpoints/payments.md) |
 | `pharma_lab` | 76 | [Abrir referencia](endpoints/pharma-lab.md) |
-| `pharmacy` | 29 | [Abrir referencia](endpoints/pharmacy.md) |
+| `pharmacy` | 33 | [Abrir referencia](endpoints/pharmacy.md) |
 | `pharmacy_inventory` | 29 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |

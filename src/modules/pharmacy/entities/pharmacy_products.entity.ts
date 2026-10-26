@@ -137,6 +137,37 @@ export class PharmacyProducts {
   })
   catalogPresentationCode?: string;
 
+  @Property({
+    fieldName: 'pharmacy_product_category_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → pharmacy.pharmacy_product_categories (inferida)
+  pharmacyProductCategoryId?: string;
+
+  @Property({
+    fieldName: 'description_text',
+    columnType: 'text',
+    nullable: true,
+  })
+  descriptionText?: string;
+
+  @Property({ fieldName: 'stock_quantity', columnType: 'int', nullable: true })
+  stockQuantity?: number;
+
+  @Property({
+    fieldName: 'min_stock_quantity',
+    columnType: 'int',
+    nullable: true,
+  })
+  minStockQuantity?: number;
+
+  @Property({
+    fieldName: 'out_of_stock_declared',
+    type: 'boolean',
+    default: false,
+  })
+  outOfStockDeclared!: boolean;
+
   @Property({ fieldName: 'status_concept_id', type: 'uuid' }) // FK → terminology.catalog_concepts
   statusConceptId!: string;
 

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
 import { DirectoryModule } from '../directory/directory.module';
+import { CommonModule } from '../common/common.module';
 import {
   PharmacyController,
   PharmacyPublicController,
@@ -18,6 +19,7 @@ import {
   PharmacyStaffReadService,
   PharmacyMarketplaceService,
   MedicineCatalogSearchService,
+  PharmacyCategoriesService,
   PharmacyOpeningHoursService,
 } from './services';
 import {
@@ -34,6 +36,7 @@ import {
   PharmacyExternalProductMappingsRepository,
   PharmacyReadRepository,
   PharmacyMarketplaceRepository,
+  PharmacyCatalogRepository,
   PharmacyOnCallShiftsRepository,
 } from './repositories';
 
@@ -51,6 +54,9 @@ import {
     // `DirectoryAuthorizationModule`) y el representante y las gerencias
     // (`DirectoryReadService`), leídos en el mismo lugar que `GET /tenants/me`.
     DirectoryModule,
+    // P47: las imágenes del producto pasan por `AttachableFileService` (archivo
+    // vivo, de imagen y subido por quien edita).
+    CommonModule,
   ],
   controllers: [
     PharmacyController,
@@ -72,6 +78,7 @@ import {
     PharmacyExternalProductMappingsRepository,
     PharmacyReadRepository,
     PharmacyMarketplaceRepository,
+    PharmacyCatalogRepository,
     PharmacyOnCallShiftsRepository,
     // Servicios
     PharmaciesService,
@@ -84,6 +91,7 @@ import {
     PharmacyStaffReadService,
     PharmacyMarketplaceService,
     MedicineCatalogSearchService,
+    PharmacyCategoriesService,
     PharmacyOpeningHoursService,
   ],
   // La cara de lectura se exporta para que el inventario (módulo 25) componga

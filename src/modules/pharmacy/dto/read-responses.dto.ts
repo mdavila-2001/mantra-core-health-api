@@ -416,6 +416,56 @@ export class PharmacyProductReadDto {
    */
   @ApiPropertyOptional({ nullable: true })
   requiresPrescription!: boolean | null;
+
+  /*
+   * P47 §3-5 · lo que administra la farmacia y ve el público.
+   */
+
+  /** Precio de venta vigente, texto exacto; `null` = sin precio publicado. */
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    example: '12.50',
+    description:
+      'Precio vigente (lista `CATALOGO`, o el menor de sus listas públicas de mostrador). Texto exacto; `null` = sin precio.',
+  })
+  unitPrice!: string | null;
+
+  /** Moneda ISO 4217 del precio; `null` sin precio. */
+  @ApiPropertyOptional({ nullable: true, type: String, example: 'BOB' })
+  currency!: string | null;
+
+  /** Si la farmacia lo puede vender hoy (declaración del catálogo). */
+  @ApiProperty()
+  inStock!: boolean;
+
+  /** Categoría de la vitrina, por nombre. */
+  @ApiPropertyOptional({ nullable: true, type: String })
+  category!: string | null;
+
+  /** Descripción para el paciente. */
+  @ApiPropertyOptional({ nullable: true, type: String })
+  description!: string | null;
+
+  /*
+   * Sólo en la lectura de gestión (`managed=true`) y en la respuesta del PATCH.
+   */
+
+  /** Publicado, borrador o retirado. */
+  @ApiPropertyOptional({ enum: ['PUBLISHED', 'DRAFT', 'WITHDRAWN'] })
+  status?: 'PUBLISHED' | 'DRAFT' | 'WITHDRAWN';
+
+  /** Existencias declaradas; `null` = «sin conteo». */
+  @ApiPropertyOptional({ nullable: true, type: Number })
+  stock?: number | null;
+
+  /** Umbral de alerta; `null` = el de por defecto. */
+  @ApiPropertyOptional({ nullable: true, type: Number })
+  minStock?: number | null;
+
+  /** Imágenes propias, en orden. */
+  @ApiPropertyOptional({ type: [String], format: 'uuid' })
+  imageFileIds?: string[];
 }
 
 /** Resultado de la búsqueda de productos, acotado y con el recorte declarado. */
@@ -703,10 +753,11 @@ export class PharmacyCategoryCountDto {
 }
 
 /**
- * Los números del resumen del portal de la farmacia (P47). Lo que el modelo ya
- * guarda se cuenta de verdad —productos publicados y retirados—; lo que todavía
- * no tiene dónde vivir (categorías, borradores, existencias, valor del
- * inventario) sale en cero y vacío en vez de inventarse.
+ * Los números del resumen del portal de la farmacia (P47), contados sobre el
+ * catálogo: borradores y retirados por estado, sin stock y bajo umbral por la
+ * declaración de existencias, el valor como Σ existencias × precio vigente de
+ * lo publicado con conteo (decimal exacto), y la actividad reciente leída de la
+ * bitácora (`audit.audit_log`).
  */
 export class PharmacySummaryDto {
   @ApiProperty() published!: number;
@@ -722,8 +773,15 @@ export class PharmacySummaryDto {
   recentActivity!: PharmacyRecentActivityDto[];
 }
 
-/** Las categorías de la farmacia (el modelo todavía no las guarda). */
+/** Una categoría de la farmacia, con cuántos productos vivos la usan. */
+export class PharmacyCategoryItemDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty() name!: string;
+  @ApiProperty() productCount!: number;
+}
+
+/** Las categorías de la farmacia, por nombre. */
 export class PharmacyCategoryListDto {
-  @ApiProperty({ type: [String] })
-  items!: never[];
+  @ApiProperty({ type: [PharmacyCategoryItemDto] })
+  items!: PharmacyCategoryItemDto[];
 }
