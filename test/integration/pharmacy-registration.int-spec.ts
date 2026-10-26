@@ -21,7 +21,11 @@ import {
   TenantAffiliationDocuments,
   Tenants,
 } from '../../src/modules/directory/entities';
-import { Pharmacies, PharmacySites } from '../../src/modules/pharmacy/entities';
+import {
+  Pharmacies,
+  PharmacyProductCategories,
+  PharmacySites,
+} from '../../src/modules/pharmacy/entities';
 import { Practices, PracticeSites } from '../../src/modules/practice/entities';
 import { Addresses } from '../../src/modules/common/entities';
 
@@ -169,6 +173,11 @@ describe('P50 · alta pública de farmacia (integración)', () => {
       PHARM.VERIFICATION_PENDING,
     );
     expect(pharmacy.primaryPracticeSiteId).toEqual(expect.any(String));
+
+    // P47: la farmacia nueva nace con las seis categorías por defecto.
+    expect(
+      await em.count(PharmacyProductCategories, { pharmacyId: pharmacy.id }),
+    ).toBe(6);
 
     const central = await em.findOneOrFail(PracticeSites, {
       id: pharmacy.primaryPracticeSiteId!,

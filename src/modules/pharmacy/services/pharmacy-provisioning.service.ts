@@ -11,6 +11,7 @@ import {
 import { siteCodeBase } from '../../practice/site-code';
 import { PHARM } from '../pharmacy.concepts';
 import { PharmaciesRepository, PharmacySitesRepository } from '../repositories';
+import { PharmacyCategoriesService } from './pharmacy-categories.service';
 
 /** A quién pertenece la farmacia que se va a provisionar. */
 export interface PharmacyOwner {
@@ -83,6 +84,7 @@ export class PharmacyProvisioningService {
    * @param practicesRepo - Prácticas, para la práctica propia de la farmacia.
    * @param practiceSitesRepo - Sedes de práctica (sitios físicos).
    * @param addressesRepo - Direcciones de cada sitio.
+   * @param categories - Las categorías por defecto del catálogo (P47).
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -91,6 +93,7 @@ export class PharmacyProvisioningService {
     private readonly practicesRepo: PracticesRepository,
     private readonly practiceSitesRepo: PracticeSitesRepository,
     private readonly addressesRepo: AddressesRepository,
+    private readonly categories: PharmacyCategoriesService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PharmacyProvisioningService.name);
@@ -139,6 +142,10 @@ export class PharmacyProvisioningService {
     });
     // Las FK son columnas uuid planas: persistir los padres antes que los hijos.
     await tx.flush();
+
+    // Las seis categorías de partida del catálogo (P47), como las que recibe
+    // toda farmacia nueva: sin ellas el portal arranca sin dónde clasificar.
+    await this.categories.provisionDefaults(tx, pharmacy.id, actorUserId);
 
     // Los códigos sólo tienen que ser únicos dentro de esta práctica y esta
     // farmacia, que acaban de nacer: alcanza con recordarlos en memoria.

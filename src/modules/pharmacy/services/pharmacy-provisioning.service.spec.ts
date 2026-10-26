@@ -38,6 +38,7 @@ function build() {
   const addressesRepo = {
     create: fn(() => ({ id: `address-${++addressSeq}` })),
   };
+  const categories = { provisionDefaults: fn().mockResolvedValue(undefined) };
   const logger = { setContext: fn(), info: fn(), warn: fn(), error: fn() };
 
   const service = new PharmacyProvisioningService(
@@ -46,9 +47,11 @@ function build() {
     practicesRepo as never,
     practiceSitesRepo as never,
     addressesRepo as never,
+    categories as never,
     logger as never,
   );
   return {
+    categories,
     service,
     tx,
     pharmacy,
@@ -81,6 +84,23 @@ describe('PharmacyProvisioningService', () => {
         verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
         actorUserId: 'owner-1',
       }),
+    );
+  });
+
+  it('siembra las categorías por defecto del catálogo en la misma transacción (P47)', async () => {
+    const d = build();
+
+    await d.service.provision(
+      d.tx as never,
+      OWNER,
+      { headquarters: { name: 'Casa central' } },
+      OWNER.ownerUserId,
+    );
+
+    expect(d.categories.provisionDefaults).toHaveBeenCalledWith(
+      d.tx,
+      'pharmacy-1',
+      'owner-1',
     );
   });
 
