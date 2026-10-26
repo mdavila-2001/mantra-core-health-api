@@ -68,7 +68,12 @@ export function flexibleBands(
       if (!validThatDay(day, validFrom, validTo)) continue;
       const start = localTimeToUtc(day, rule.startTime, zone);
       const end = localTimeToUtc(day, rule.endTime, zone);
-      const clippedFrom = start < from ? from : start;
+      // Recortar a `from` sin perder la grilla: el inicio recortado se corre al
+      // próximo paso contado desde el inicio de la franja. Con `from` = «ahora»
+      // (09:53:14.989) la primera hora era 09:53:14.989, que la reserva no
+      // podía reencontrar al releer con otro «ahora» ni retener (no es un
+      // minuto entero). Ver evidencia visual de P36 (26/10/2026).
+      const clippedFrom = start < from ? alignToStep(start, from) : start;
       const clippedTo = end > to ? to : end;
       if (clippedTo > clippedFrom) {
         bands.push({ startAt: clippedFrom, endAt: clippedTo });
@@ -76,6 +81,16 @@ export function flexibleBands(
     }
   }
   return bands.sort((a, b) => a.startAt.getTime() - b.startAt.getTime());
+}
+
+/**
+ * El primer instante de la grilla de inicios (cada
+ * {@link FLEXIBLE_START_STEP_MINUTES} desde `start`) que no es anterior a `from`.
+ */
+function alignToStep(start: Date, from: Date): Date {
+  const stepMs = FLEXIBLE_START_STEP_MINUTES * 60_000;
+  const steps = Math.ceil((from.getTime() - start.getTime()) / stepMs);
+  return new Date(start.getTime() + steps * stepMs);
 }
 
 /**

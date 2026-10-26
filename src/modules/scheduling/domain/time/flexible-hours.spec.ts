@@ -51,6 +51,34 @@ describe('flexible-hours', () => {
     expect(bands[0].startAt.toISOString()).toBe('2026-11-02T10:00:00.000Z');
   });
 
+  it('al recortar a una ventana que empieza a mitad de un paso, conserva la grilla de inicios', () => {
+    const bands = flexibleBands(
+      [{ dayOfWeek: 1, startTime: '09:00', endTime: '13:00' }],
+      'UTC',
+      new Date('2026-11-02T09:53:14.989Z'),
+      W.to,
+    );
+    expect(bands[0].startAt.toISOString()).toBe('2026-11-02T10:00:00.000Z');
+    expect(isWholeMinute(bands[0].startAt)).toBe(true);
+  });
+
+  it('dos ventanas que empiezan en instantes distintos del mismo paso dan el mismo primer inicio', () => {
+    const rule = [{ dayOfWeek: 1, startTime: '09:00', endTime: '13:00' }];
+    const a = flexibleBands(
+      rule,
+      'UTC',
+      new Date('2026-11-02T09:46:00.000Z'),
+      W.to,
+    );
+    const b = flexibleBands(
+      rule,
+      'UTC',
+      new Date('2026-11-02T09:59:59.999Z'),
+      W.to,
+    );
+    expect(a[0].startAt).toEqual(b[0].startAt);
+  });
+
   it('respeta la vigencia de la plantilla cuando la franja no declara la suya', () => {
     const bands = flexibleBands(
       [{ dayOfWeek: 1, startTime: '08:00', endTime: '12:00' }],
