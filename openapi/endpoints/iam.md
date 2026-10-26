@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 38 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 39 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `iam-auth`, `iam-onboarding-drafts`, `iam-users`
 - **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamOnboardingDraftsController`, `IamUsersController`
@@ -32,7 +32,7 @@ Referencia exhaustiva de 38 operación(es) del módulo `iam`, derivada del contr
 19. [DELETE /iam/onboarding-drafts/{formType}/{draftId}](#19-delete-iam-onboarding-drafts-formtype-draftid) — Elimina el borrador al completar el alta exitosamente o por descarte del usuario
 20. [GET /iam/onboarding-drafts/{formType}/{draftId}](#20-get-iam-onboarding-drafts-formtype-draftid) — Recupera un borrador de alta guardado por identificador y tipo de formulario
 21. [PUT /iam/onboarding-drafts/{formType}/{draftId}](#21-put-iam-onboarding-drafts-formtype-draftid) — Guarda o actualiza el avance del formulario de alta en borrador
-22. [GET /iam/users](#22-get-iam-users) — Listado paginado de usuarios
+22. [GET /iam/users](#22-get-iam-users) — Listado paginado de usuarios (obsoleto)
 23. [POST /iam/users](#23-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
 24. [GET /iam/users/{id}](#24-get-iam-users-id) — Ficha de un usuario
 25. [POST /iam/users/{id}/anonymize](#25-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
@@ -49,6 +49,7 @@ Referencia exhaustiva de 38 operación(es) del módulo `iam`, derivada del contr
 36. [GET /iam/users/{id}/sessions](#36-get-iam-users-id-sessions) — Sesiones del usuario
 37. [POST /iam/users/assisted-practitioner-registration](#37-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
 38. [POST /iam/users/assisted-registration](#38-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+39. [POST /iam/users/search](#39-post-iam-users-search) — Listado paginado de usuarios, con los filtros en el cuerpo
 
 ---
 
@@ -3020,16 +3021,16 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
-- **Nombre:** Listado paginado de usuarios
+- **Nombre:** Listado paginado de usuarios (obsoleto)
 - **Operation ID:** `IamUsersController_searchUsers`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [IamUsersController.searchUsers](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
-Listado paginado de usuarios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Obsoleto: usar `POST /iam/users/search`. Un nombre o un correo en la query string queda en los logs de acceso de cualquier proxy.
 
-Contexto declarado en el controlador: UC-01-01 (cara de lectura): listado paginado de usuarios. Se declara antes que las rutas con parámetro para que ninguna de ellas capture un segmento fijo.
+Contexto declarado en el controlador: UC-01-01 (cara de lectura): listado paginado de usuarios. Se declara antes que las rutas con parámetro para que ninguna de ellas capture un segmento fijo. Obsoleto: el cliente usa `POST /iam/users/search`, que lleva el texto en el cuerpo. Se conserva sólo por compatibilidad, con los mismos roles, filtros y respuesta.
 
 ### Descripción del sistema
 
@@ -3097,13 +3098,13 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "mfaStatusConceptId": "00000000-0000-4000-8000-000000000001",
       "emailVerified": true,
       "phoneVerified": true,
-      "lastLoginAt": "2026-07-31T12:00:00.000Z",
+      "lastLoginAt": {},
       "createdAt": "2026-07-31T12:00:00.000Z"
     }
   ],
   "count": 1,
   "limit": 1,
-  "nextCursor": "valor-ejemplo"
+  "nextCursor": {}
 }
 ```
 
@@ -3111,18 +3112,18 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<UserListItemDto>` | Sin restricción adicional declarada | Usuarios de esta página, ordenados por nombre visible. | `[{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","mfaStatusConceptId":"00000000-0000-4000-8000-000000000001","emailVerified":true,"phoneVerified":true,"lastLoginAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
-| `items[].id` | Sí | `string` | formato `uuid` | Identificador del usuario. | `00000000-0000-4000-8000-000000000001` |
-| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `Nombre de ejemplo` |
-| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Estado de la cuenta. | `00000000-0000-4000-8000-000000000001` |
-| `items[].mfaStatusConceptId` | No | `string` | formato `uuid` | Estado del segundo factor. | `00000000-0000-4000-8000-000000000001` |
-| `items[].emailVerified` | Sí | `boolean` | Sin restricción adicional declarada | Si el correo consta verificado. | `true` |
-| `items[].phoneVerified` | Sí | `boolean` | Sin restricción adicional declarada | Si el teléfono consta verificado. | `true` |
-| `items[].lastLoginAt` | No | `string` | formato `date-time`; admite null | Último ingreso registrado. | `2026-07-31T12:00:00.000Z` |
-| `items[].createdAt` | Sí | `string` | formato `date-time` | Alta de la cuenta. | `2026-07-31T12:00:00.000Z` |
-| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
-| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
-| `nextCursor` | No | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
+| `items` | Sí | `array<UserListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","mfaStatusConceptId":"00000000-0000-4000-8000-000000000001","emailVerified":true,"phoneVerified":true,"lastLoginAt":{},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].mfaStatusConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].emailVerified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].phoneVerified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].lastLoginAt` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `nextCursor` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -5360,6 +5361,156 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/iam/users/assisted-registration"
+}
+```
+
+---
+
+## 39. POST /iam/users/search
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Listado paginado de usuarios, con los filtros en el cuerpo
+- **Operation ID:** `IamUsersController_searchUsersByBody`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.searchUsersByBody](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Igual que `GET /iam/users`, pero el texto de búsqueda viaja en el cuerpo y no en la URL. Una clave no declarada responde 400.
+
+Contexto declarado en el controlador: UC-01-01 (cara de lectura): listado paginado de usuarios, con los filtros en el cuerpo. Existe porque el texto de búsqueda es un nombre o un correo, y los parámetros de la URL quedan en los logs de acceso de cualquier proxy, en el historial del navegador y en el `Referer`. Es el camino que usa el cliente (por ejemplo, para elegir al owner en el alta administrativa de una organización); el `GET /iam/users` sigue vivo, obsoleto. Responde `200` y no `201`: no crea nada. Va declarada antes que cualquier ruta `:id`: Nest las resuelve por orden de declaración. Los filtros, los límites y el tope por defecto son los del `GET`; una clave de más responde `400`.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/users/search` en `IamUsersController_searchUsersByBody`. El controlador delega en `IamUsersReadService.searchUsers`. Valida el body como `SearchUsersBodyDto` y consume `application/json`. El tipo de retorno estático es `Promise<SearchUsersResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SearchUsersBodyDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/users/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `q` | No | `string` | Sin restricción adicional declarada | Texto a buscar en el nombre visible o en el correo de acceso | `valor-ejemplo` |
+| `status` | No | `string` | formato `uuid` | Concepto de estado al que acotar | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | No | `integer` | mínimo 1; máximo 500 | Tope de resultados (por defecto 50) | `50` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/users/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "q": "valor-ejemplo",
+  "status": "00000000-0000-4000-8000-000000000001",
+  "cursor": "valor-ejemplo",
+  "limit": 50
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchUsersResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "mfaStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "emailVerified": true,
+      "phoneVerified": true,
+      "lastLoginAt": {},
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": {}
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<UserListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","mfaStatusConceptId":"00000000-0000-4000-8000-000000000001","emailVerified":true,"phoneVerified":true,"lastLoginAt":{},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].mfaStatusConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].emailVerified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].phoneVerified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].lastLoginAt` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `nextCursor` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/search"
 }
 ```
 
