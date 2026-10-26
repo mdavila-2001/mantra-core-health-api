@@ -28,6 +28,7 @@ function build() {
     statusConceptId: DIR.TENANT_PENDING,
     tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PHARMACY,
     legalEntityTypeConceptId: undefined as string | undefined,
+    hasLabUnit: false,
   };
   const tenantsRepo = { findById: fn(async () => tenant) };
   const representative = {
@@ -56,7 +57,21 @@ function build() {
     attachDocument: fn(async () => `doc-${++seq}`),
     attachPowerOfAttorney: fn(async () => `poder-${++seq}`),
   };
+  // `kindOf` imita al real sin leer unidades: farmacia por tipo de tenant,
+  // laboratorio si el test marca `hasLabUnit`.
   const requirements = {
+    kindOf: fn(
+      async (
+        _em: unknown,
+        t: { tenantTypeConceptId?: string; hasLabUnit?: boolean },
+      ) =>
+        t.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY
+          ? 'PHARMACY'
+          : t.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER &&
+              t.hasLabUnit
+            ? 'LABORATORY'
+            : undefined,
+    ),
     liveDocumentsByType: fn(async () => new Map<string, string>()),
     evaluate: fn(async () => ({
       ready: false,
@@ -303,6 +318,50 @@ describe('TenantDocumentCompletionService.pharmacyReadiness', () => {
 
     await expect(
       d.service.pharmacyReadiness('t-1', actor),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+});
+
+describe('TenantDocumentCompletionService.laboratoryReadiness (P51)', () => {
+  it('evalúa los papeles del laboratorio', async () => {
+    const d = build();
+    d.tenant.tenantTypeConceptId = CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER;
+    d.tenant.hasLabUnit = true;
+
+    const res = await d.service.laboratoryReadiness('t-1', actor);
+
+    expect(res).toEqual({
+      ready: false,
+      missing: ['HEALTH_AUTHORITY_CERT_DOC'],
+    });
+    expect(d.requirements.evaluate).toHaveBeenCalledWith(
+      d.tx,
+      d.tenant,
+      'LABORATORY',
+    );
+  });
+
+  it('quien no pertenece a la organización recibe 403 sin leer el tenant', async () => {
+    const d = build();
+    d.tenantAdmin.belongsByMembership.mockResolvedValue(false);
+
+    await expect(
+      d.service.laboratoryReadiness('t-1', actor),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.tenantsRepo.findById).not.toHaveBeenCalled();
+  });
+
+  it('una farmacia, o un centro sin unidad de laboratorio, no es un laboratorio: 422', async () => {
+    const farmacia = build();
+    await expect(
+      farmacia.service.laboratoryReadiness('t-1', actor),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+    const imagenes = build();
+    imagenes.tenant.tenantTypeConceptId =
+      CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER;
+    await expect(
+      imagenes.service.laboratoryReadiness('t-1', actor),
     ).rejects.toBeInstanceOf(PreconditionFailedException);
   });
 });

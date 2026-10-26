@@ -6,8 +6,11 @@ import { LEGAL_ENTITY_TYPE_CONCEPT_BY_CODE } from '../../../common/constants/leg
 import { Addresses } from '../../common/entities/addresses.entity';
 import { PracticeSites } from '../../practice/entities/practice_sites.entity';
 import { Pharmacies } from '../../pharmacy/entities/pharmacies.entity';
+import { DiagnosticUnits } from '../../diagnostic_units/entities/diagnostic_units.entity';
 import {
   PharmacyOperatingRequirementsService,
+  requiredLaboratoryDocuments,
+  requiredOperatingDocuments,
   requiredPharmacyDocuments,
 } from './pharmacy-operating-requirements.service';
 
@@ -58,6 +61,7 @@ function build(
     pharmacy?: unknown;
     site?: unknown;
     address?: unknown;
+    labUnit?: unknown;
   } = {
     pharmacy: { primaryPracticeSiteId: 'ps-1' },
     site: { addressId: 'a-1' },
@@ -69,6 +73,7 @@ function build(
       if (entity === Pharmacies) return rows.pharmacy ?? null;
       if (entity === PracticeSites) return rows.site ?? null;
       if (entity === Addresses) return rows.address ?? null;
+      if (entity === DiagnosticUnits) return rows.labUnit ?? null;
       return null;
     }),
     find: fn(async () => docs),
@@ -220,5 +225,86 @@ describe('PharmacyOperatingRequirementsService.markDocumentsVerified', () => {
     await d.service.markDocumentsVerified(d.em as never, [], 'admin-1');
 
     expect(d.em.find).not.toHaveBeenCalled();
+  });
+});
+
+describe('requisitos del laboratorio (P51)', () => {
+  it('exige SEPREC, licencia de funcionamiento y SEDES, sea cual sea el tipo societario', () => {
+    expect(requiredLaboratoryDocuments()).toEqual([
+      'COMMERCE_REGISTRY_DOC',
+      'OPERATING_LICENSE_DOC',
+      'HEALTH_AUTHORITY_CERT_DOC',
+    ]);
+    expect(requiredOperatingDocuments('LABORATORY', 'le-srl')).toEqual(
+      requiredLaboratoryDocuments(),
+    );
+  });
+
+  it('la farmacia sigue exigiendo sus propios papeles', () => {
+    expect(requiredOperatingDocuments('PHARMACY', 'le-srl')).toEqual(
+      requiredPharmacyDocuments('le-srl'),
+    );
+  });
+
+  it('con los tres papeles el laboratorio puede operar, sin mirar farmacia ni central', async () => {
+    const d = build(
+      [doc('d3', 'dt-seprec'), doc('d4', 'dt-license'), doc('d5', 'dt-sedes')],
+      {},
+    );
+
+    const r = await d.service.evaluate(d.em as never, TENANT, 'LABORATORY');
+
+    expect(r).toEqual({
+      ready: true,
+      missing: [],
+      documentIds: ['d3', 'd4', 'd5'],
+    });
+  });
+
+  it('un SEDES vencido no cuenta y el laboratorio no opera', async () => {
+    const d = build(
+      [
+        doc('d3', 'dt-seprec'),
+        doc('d4', 'dt-license'),
+        doc('d5', 'dt-sedes', 'vs-expired'),
+      ],
+      {},
+    );
+
+    const r = await d.service.evaluate(d.em as never, TENANT, 'LABORATORY');
+
+    expect(r.ready).toBe(false);
+    expect(r.missing).toEqual(['HEALTH_AUTHORITY_CERT_DOC']);
+  });
+
+  it('kindOf: farmacia, laboratorio con unidad de laboratorio, y nada para lo demás', async () => {
+    const conLab = build([], { labUnit: { id: 'u-1' } });
+    const sinLab = build([], {});
+
+    expect(
+      await conLab.service.kindOf(conLab.em as never, {
+        id: 't',
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_PHARMACY,
+      }),
+    ).toBe('PHARMACY');
+    expect(
+      await conLab.service.kindOf(conLab.em as never, {
+        id: 't',
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER,
+      }),
+    ).toBe('LABORATORY');
+    // Centro de imágenes o sin unidad: sin requisitos.
+    expect(
+      await sinLab.service.kindOf(sinLab.em as never, {
+        id: 't',
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER,
+      }),
+    ).toBeUndefined();
+    expect(
+      await sinLab.service.kindOf(sinLab.em as never, {
+        id: 't',
+        tenantTypeConceptId: CONCEPTS.TENANT_TYPE_HOSPITAL,
+      }),
+    ).toBeUndefined();
   });
 });

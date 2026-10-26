@@ -5,6 +5,8 @@ import { LEGAL_ENTITY_TYPE_CONCEPT_BY_CODE } from '../../../common/constants/leg
 import { Addresses } from '../../common/entities/addresses.entity';
 import { PracticeSites } from '../../practice/entities/practice_sites.entity';
 import { Pharmacies } from '../../pharmacy/entities/pharmacies.entity';
+import { DiagnosticUnits } from '../../diagnostic_units/entities/diagnostic_units.entity';
+import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
 import {
   AFFILIATION_DOCUMENT_VALUE_SETS,
   DOCUMENT_TYPE_CODE_BY_ROLE,
@@ -28,6 +30,23 @@ import { AffiliationDocumentConceptsService } from './affiliation-document-conce
  */
 export type PharmacyOperatingRequirement =
   AffiliationDocumentRole | 'PHARMACY_RECORD' | 'HEADQUARTERS_LOCATION';
+
+/**
+ * Las clases de organización que tienen requisitos para operar.
+ *
+ * - `PHARMACY`: tenant de tipo farmacia (P50).
+ * - `LABORATORY`: tenant `DIAGNOSTIC_CENTER` con una unidad diagnóstica de
+ *   laboratorio clínico (P51, punto 6). Un centro de imágenes, o uno que
+ *   todavía no declaró ninguna unidad, no tiene requisitos acá: el proceso
+ *   4.1 del registro es el del laboratorio de sangre.
+ */
+export type OperatingKind = 'PHARMACY' | 'LABORATORY';
+
+/**
+ * Lo que puede faltarle a cualquier clase de organización para operar. Un
+ * laboratorio sólo puede deber papeles: su unidad existe por definición.
+ */
+export type OperatingRequirement = PharmacyOperatingRequirement;
 
 /** Resultado de evaluar a una farmacia contra sus requisitos de operación. */
 export interface PharmacyOperatingReadiness {
@@ -90,6 +109,41 @@ export function requiredPharmacyDocuments(
  * atestigua la plataforma al verificar, y por eso la verificación los marca
  * `VERIFICADO` ({@link PharmacyOperatingRequirementsService.markDocumentsVerified}).
  */
+/**
+ * Los papeles que exige un laboratorio clínico para operar (P51, punto 6).
+ *
+ * Los tres que habilitan a un laboratorio de sangre a atender: la matrícula del
+ * SEPREC, la licencia de funcionamiento municipal y el certificado del SEDES.
+ * Igual que en la farmacia, son obligatorios para operar y no para registrarse:
+ * el alta pública los deja opcionales y se completan con
+ * `POST /tenants/{id}/affiliation-documents`. No dependen del tipo societario.
+ *
+ * @returns Los roles exigidos, en orden estable.
+ */
+export function requiredLaboratoryDocuments(): AffiliationDocumentRole[] {
+  return [
+    'COMMERCE_REGISTRY_DOC',
+    'OPERATING_LICENSE_DOC',
+    'HEALTH_AUTHORITY_CERT_DOC',
+  ];
+}
+
+/**
+ * Los papeles que exige una clase de organización para operar.
+ *
+ * @param kind - Farmacia o laboratorio.
+ * @param legalEntityTypeConceptId - Tipo societario del tenant.
+ * @returns Los roles exigidos, en orden estable.
+ */
+export function requiredOperatingDocuments(
+  kind: OperatingKind,
+  legalEntityTypeConceptId: string | undefined,
+): AffiliationDocumentRole[] {
+  return kind === 'PHARMACY'
+    ? requiredPharmacyDocuments(legalEntityTypeConceptId)
+    : requiredLaboratoryDocuments();
+}
+
 @Injectable()
 export class PharmacyOperatingRequirementsService {
   /**
@@ -113,13 +167,15 @@ export class PharmacyOperatingRequirementsService {
   async evaluate(
     em: EntityManager,
     tenant: { readonly id: string; readonly legalEntityTypeConceptId?: string },
+    kind: OperatingKind = 'PHARMACY',
   ): Promise<PharmacyOperatingReadiness> {
     const concepts = await this.concepts.resolve(em);
     const liveByType = await this.liveDocumentsByType(em, tenant.id);
 
-    const missing: PharmacyOperatingRequirement[] = [];
+    const missing: OperatingRequirement[] = [];
     const documentIds: string[] = [];
-    for (const role of requiredPharmacyDocuments(
+    for (const role of requiredOperatingDocuments(
+      kind,
       tenant.legalEntityTypeConceptId,
     )) {
       const typeConceptId = concepts.documentType.get(
@@ -130,6 +186,9 @@ export class PharmacyOperatingRequirementsService {
       if (docId === undefined) missing.push(role);
       else documentIds.push(docId);
     }
+    if (kind === 'LABORATORY') {
+      return { ready: missing.length === 0, missing, documentIds };
+    }
 
     const pharmacy = await em.findOne(Pharmacies, { tenantId: tenant.id });
     if (!pharmacy) {
@@ -139,6 +198,54 @@ export class PharmacyOperatingRequirementsService {
     }
 
     return { ready: missing.length === 0, missing, documentIds };
+  }
+
+  /**
+   * La clase de organización del tenant a efectos de sus requisitos para
+   * operar, o `undefined` si no tiene ninguno.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenant - Tenant (id y tipo).
+   * @returns `PHARMACY`, `LABORATORY` o `undefined`.
+   */
+  async kindOf(
+    em: EntityManager,
+    tenant: { readonly id: string; readonly tenantTypeConceptId?: string },
+  ): Promise<OperatingKind | undefined> {
+    if (tenant.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY) {
+      return 'PHARMACY';
+    }
+    if (tenant.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER) {
+      return undefined;
+    }
+    const laboratory = await em.findOne(DiagnosticUnits, {
+      tenantId: tenant.id,
+      diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_LABORATORY,
+    });
+    return laboratory ? 'LABORATORY' : undefined;
+  }
+
+  /**
+   * Evalúa al tenant según su clase, o `undefined` si su clase no tiene
+   * requisitos para operar (un hospital, un centro de imágenes…).
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param tenant - Tenant (id, tipo y tipo societario).
+   * @returns La clase y su evaluación, o `undefined`.
+   */
+  async evaluateForTenant(
+    em: EntityManager,
+    tenant: {
+      readonly id: string;
+      readonly tenantTypeConceptId?: string;
+      readonly legalEntityTypeConceptId?: string;
+    },
+  ): Promise<
+    { kind: OperatingKind; readiness: PharmacyOperatingReadiness } | undefined
+  > {
+    const kind = await this.kindOf(em, tenant);
+    if (kind === undefined) return undefined;
+    return { kind, readiness: await this.evaluate(em, tenant, kind) };
   }
 
   /**
