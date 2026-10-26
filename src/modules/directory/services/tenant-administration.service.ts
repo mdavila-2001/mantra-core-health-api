@@ -97,6 +97,20 @@ export class TenantAdministrationService {
   }
 
   /**
+   * Devuelve si el actor tiene membresía activa **en ese tenant**, con
+   * cualquier rol, y nada más: sin el atajo de plataforma. Es el escalón de
+   * lectura de {@link TenantAdministrationService.administersByMembership},
+   * para quien ya resolvió los roles de plataforma con `roleAuthorizesInTenant`.
+   */
+  async belongsByMembership(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<boolean> {
+    return (await this.activeMembershipOf(em, tenantId, actor)) !== null;
+  }
+
+  /**
    * Exige que el actor pueda **leer** el tenant indicado.
    *
    * Es el escalón por debajo de administrar: para consultar la ficha de la

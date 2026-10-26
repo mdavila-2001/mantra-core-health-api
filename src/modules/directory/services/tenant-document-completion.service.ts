@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -6,6 +6,7 @@ import {
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -41,6 +42,9 @@ const FIELD_BY_ROLE: Readonly<
   HEALTH_AUTHORITY_CERT_DOC: 'healthAuthorityCertificateFileId',
   POWER_OF_ATTORNEY_DOC: 'powerOfAttorneyFileId',
 };
+
+/** Roles de plataforma que pueden completar o leer papeles de cualquier organización. */
+const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN'] as const;
 
 /** Código del tipo societario (`SRL`, `UNIPERSONAL`…) a partir de su concepto. */
 function legalEntityTypeCodeOf(
@@ -99,8 +103,8 @@ export class TenantDocumentCompletionService {
    * @param dto - Los `fileId` a vincular, por rol.
    * @param actor - Quien sube.
    * @returns Cuántos y cuáles quedaron registrados.
-   * @throws ResourceNotFoundException si el tenant no existe.
-   * @throws ForbiddenException si el actor no la administra.
+   * @throws ForbiddenException si el actor no la administra (exista o no).
+   * @throws ResourceNotFoundException si el tenant no existe y el actor es plataforma.
    * @throws PreconditionFailedException sin documentos, fuera de PENDING, con
    *   un archivo repetido o con un poder sin representante legal.
    * @throws ConflictException si un papel de ese tipo ya está presentado.
@@ -143,13 +147,15 @@ export class TenantDocumentCompletionService {
     );
 
     return this.em.transactional(async (tx) => {
+      // Autorizar ANTES de buscar el tenant: quien no puede administrarlo
+      // recibe 403 exista o no, así el 404 no revela qué ids existen.
+      await this.assertAuthorized(tx, tenantId, actor, 'administer');
       const tenant = await this.tenantsRepo.findById(tx, tenantId);
       if (!tenant) {
         throw new ResourceNotFoundException('Organización no encontrada', {
           tenantId,
         });
       }
-      await this.tenantAdmin.assertCanAdminister(tx, tenantId, actor);
       if (tenant.statusConceptId !== DIR.TENANT_PENDING) {
         throw new PreconditionFailedException(
           'Los papeles se completan mientras la organización está pendiente de verificación',
@@ -232,13 +238,13 @@ export class TenantDocumentCompletionService {
     actor: AuthenticatedUser,
   ): Promise<PharmacyReadinessResponseDto> {
     const em = this.em.fork();
+    await this.assertAuthorized(em, tenantId, actor, 'read');
     const tenant = await this.tenantsRepo.findById(em, tenantId);
     if (!tenant) {
       throw new ResourceNotFoundException('Organización no encontrada', {
         tenantId,
       });
     }
-    await this.tenantAdmin.assertCanRead(em, tenantId, actor);
     if (tenant.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_PHARMACY) {
       throw new PreconditionFailedException(
         'La organización no es una farmacia',
@@ -247,6 +253,39 @@ export class TenantDocumentCompletionService {
     }
     const readiness = await this.requirements.evaluate(em, tenant);
     return { ready: readiness.ready, missing: [...readiness.missing] };
+  }
+
+  /**
+   * Autoriza por rol de plataforma **con su ámbito** o por membresía.
+   *
+   * No usa `TenantAdministrationService.assertCanAdminister`/`assertCanRead`:
+   * su atajo de plataforma mira `actor.roles` sin `scopedRoles`, y un
+   * `SECURITY_ADMIN` acotado a otra organización pasaría. Acá el rol se
+   * evalúa con `roleAuthorizesInTenant` (la regla del `RolesGuard`) y la
+   * membresía sin atajo, como `PracticeSitesService.assertCanReadPractices`.
+   *
+   * @throws ForbiddenException si no cumple ni por rol ni por membresía.
+   */
+  private async assertAuthorized(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+    mode: 'administer' | 'read',
+  ): Promise<void> {
+    const byRole = PLATFORM_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, tenantId),
+    );
+    if (byRole) return;
+    const byMembership =
+      mode === 'administer'
+        ? await this.tenantAdmin.administersByMembership(em, tenantId, actor)
+        : await this.tenantAdmin.belongsByMembership(em, tenantId, actor);
+    if (byMembership) return;
+    throw new ForbiddenException(
+      mode === 'administer'
+        ? 'Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma'
+        : 'Se requiere pertenecer a la organización, o ser administrador de la plataforma',
+    );
   }
 
   /**

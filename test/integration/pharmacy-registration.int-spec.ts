@@ -253,6 +253,36 @@ describe('P50 · alta pública de farmacia (integración)', () => {
       await em.count(TenantAffiliationDocuments, { tenantId: propia.tenantId }),
     ).toBe(0);
 
+    // 3.3b) Revisión de seguridad: un rol de plataforma acotado a OTRA
+    // organización (`scopedRoles`) no administra ésta, y un tenant que no
+    // existe responde 403 a quien no tiene permiso (no 404).
+    const sidAcotado = `p50-scoped-${ajena.ownerUserId}`;
+    await ensureTestSession(ctx.orm, ajena.ownerUserId, sidAcotado);
+    const tokenAcotado = ctx.app
+      .get(TokenService)
+      .signAccessToken(
+        ajena.ownerUserId,
+        sidAcotado,
+        ['USER', 'SECURITY_ADMIN'],
+        [ajena.tenantId],
+        { scopedRoles: { [ajena.tenantId]: ['SECURITY_ADMIN'] } },
+      );
+    await http()
+      .post(`/tenants/${propia.tenantId}/affiliation-documents`)
+      .set(bearer(tokenAcotado))
+      .send({ healthAuthorityCertificateFileId: sedesAjeno })
+      .expect(403);
+    const inexistente = randomUUID();
+    await http()
+      .post(`/tenants/${inexistente}/affiliation-documents`)
+      .set(bearer(tokenAjeno))
+      .send({ healthAuthorityCertificateFileId: sedesAjeno })
+      .expect(403);
+    await http()
+      .get(`/tenants/${inexistente}/pharmacy-readiness`)
+      .set(bearer(tokenAjeno))
+      .expect(403);
+
     // 3.4) El owner completa los seis papeles.
     const papeles = {
       constitutionFileId: await subirPdf('escritura.pdf'),

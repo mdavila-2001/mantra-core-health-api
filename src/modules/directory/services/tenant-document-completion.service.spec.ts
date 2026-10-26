@@ -38,8 +38,8 @@ function build() {
   };
   const legalRepo = { listLegalRepsByTenant: fn(async () => [representative]) };
   const tenantAdmin = {
-    assertCanAdminister: fn().mockResolvedValue(undefined),
-    assertCanRead: fn().mockResolvedValue(undefined),
+    administersByMembership: fn().mockResolvedValue(true),
+    belongsByMembership: fn().mockResolvedValue(true),
   };
   const concepts = {
     resolve: fn(async () => ({
@@ -202,9 +202,7 @@ describe('TenantDocumentCompletionService.complete', () => {
 
   it('quien no la administra recibe 403 y no se vincula nada', async () => {
     const d = build();
-    d.tenantAdmin.assertCanAdminister.mockRejectedValue(
-      new ForbiddenException('no'),
-    );
+    d.tenantAdmin.administersByMembership.mockResolvedValue(false);
 
     await expect(
       d.service.complete(
@@ -216,8 +214,41 @@ describe('TenantDocumentCompletionService.complete', () => {
     expect(d.documents.attachDocument).not.toHaveBeenCalled();
   });
 
-  it('un tenant inexistente es un 404', async () => {
+  it('un rol de plataforma acotado a OTRA organización no la administra (403)', async () => {
     const d = build();
+    d.tenantAdmin.administersByMembership.mockResolvedValue(false);
+    const scoped = {
+      id: 'sec-1',
+      roles: ['SECURITY_ADMIN'],
+      scopedRoles: { 't-otro': ['SECURITY_ADMIN'] },
+    } as never;
+
+    await expect(
+      d.service.complete(
+        't-1',
+        { healthAuthorityCertificateFileId: SEDES },
+        scoped,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('un rol de plataforma global la administra sin membresía', async () => {
+    const d = build();
+    d.tenantAdmin.administersByMembership.mockResolvedValue(false);
+    const global = { id: 'sec-1', roles: ['SECURITY_ADMIN'] } as never;
+
+    const res = await d.service.complete(
+      't-1',
+      { healthAuthorityCertificateFileId: SEDES },
+      global,
+    );
+
+    expect(res.registered).toBe(1);
+  });
+
+  it('un tenant inexistente sin permiso es 403, no 404: no revela qué ids existen', async () => {
+    const d = build();
+    d.tenantAdmin.administersByMembership.mockResolvedValue(false);
     d.tenantsRepo.findById.mockResolvedValue(null);
 
     await expect(
@@ -226,6 +257,19 @@ describe('TenantDocumentCompletionService.complete', () => {
         { healthAuthorityCertificateFileId: SEDES },
         actor,
       ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.tenantsRepo.findById).not.toHaveBeenCalled();
+  });
+
+  it('un tenant inexistente para la plataforma es un 404', async () => {
+    const d = build();
+    d.tenantsRepo.findById.mockResolvedValue(null);
+
+    await expect(
+      d.service.complete('t-x', { healthAuthorityCertificateFileId: SEDES }, {
+        id: 'sa-1',
+        roles: ['SUPERADMIN'],
+      } as never),
     ).rejects.toBeInstanceOf(ResourceNotFoundException);
   });
 });
@@ -240,7 +284,17 @@ describe('TenantDocumentCompletionService.pharmacyReadiness', () => {
       ready: false,
       missing: ['HEALTH_AUTHORITY_CERT_DOC'],
     });
-    expect(d.tenantAdmin.assertCanRead).toHaveBeenCalled();
+    expect(d.tenantAdmin.belongsByMembership).toHaveBeenCalled();
+  });
+
+  it('quien no pertenece a la organización recibe 403', async () => {
+    const d = build();
+    d.tenantAdmin.belongsByMembership.mockResolvedValue(false);
+
+    await expect(
+      d.service.pharmacyReadiness('t-1', actor),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.tenantsRepo.findById).not.toHaveBeenCalled();
   });
 
   it('para una organización que no es farmacia es un 422', async () => {
