@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -12,6 +19,7 @@ import {
   AccessLogged,
 } from '../../../common';
 import { DiagnosticsOrdersService } from '../services';
+import { ClinicalRecordAccessGuard } from '../../clinical/guards';
 import type { PatientDiagnosticOrdersResponseDto } from '../dto';
 
 /**
@@ -40,6 +48,10 @@ export class DiagnosticsOrdersController {
    * @returns Órdenes e informes diagnósticos.
    */
   @Get(':patientProfileId/orders')
+  // P40: la lectura devuelve las notas que motivan cada orden. El rol y el
+  // tenant no alcanzan: el mismo guard que el alta (`POST
+  // /clinical/service-requests`) exige acceso vigente a la historia.
+  @UseGuards(ClinicalRecordAccessGuard)
   @AccessLogged({
     resourceType: 'DIAGNOSTIC_ORDERS',
     patient: 'param:patientProfileId',

@@ -71,7 +71,11 @@ $ (front) yarn ng test --watch=false --include … (8 patrones)
 $ (front) yarn typecheck → EXIT=0 · npx eslint <tocados> → EXIT=0
 ```
 
-Archivos: `evidencia/int-p23.txt`, `evidencia/int-kill-test.txt`, `evidencia/int-corridas-previas.txt`,
+Después de unir la rama compartida (trae P36, mismo módulo), re-corrido sobre el código unido:
+`yarn test src/modules/scheduling` 34 suites / 719 pruebas PASS; int-spec p23 + fx4 18/18 PASS;
+inventario de scheduling al día — `evidencia/post-merge.txt`.
+
+Archivos: `evidencia/post-merge.txt`, `evidencia/int-p23.txt`, `evidencia/int-kill-test.txt`, `evidencia/int-corridas-previas.txt`,
 `evidencia/unit-lint.txt`, `evidencia/inventario.txt`, `evidencia/front.txt`, `evidencia/api-typecheck.txt`.
 
 ## No cubierto
@@ -103,6 +107,10 @@ Archivos: `evidencia/int-p23.txt`, `evidencia/int-kill-test.txt`, `evidencia/int
   segunda corrida (caché caliente) arrancó en ~30 s.
 - Un `it` del int-spec comparaba `Date` y el driver devuelve texto (`TEST_BUG`): se compara como instante,
   sin aflojar la aserción.
+- El gancho `pre-push` del frontend (construcción de producción) murió por el entorno
+  (`fatal error: all goroutines are asleep - deadlock!`, código 129, máquina compartida). Se construyó
+  aparte con `yarn ng build` → EXIT=0 (`evidencia/front-build.txt`) y se publicó con `SALTAR_BUILD=1`,
+  la vía de escape del propio gancho.
 - No se tocó `generate-slots` de la API (P36 lo cambia): ya omite los instantes que pisan citas
   confirmadas del profesional; el int-spec lo demuestra.
 

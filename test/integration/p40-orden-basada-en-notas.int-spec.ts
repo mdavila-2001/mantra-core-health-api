@@ -38,8 +38,6 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
   const medico = { token: '', hpid: '', tenantId: '' };
   /** Un profesional sin vínculo asistencial con los pacientes de la suite. */
   const ajeno = { token: '', hpid: '' };
-  /** Un profesional de OTRO tenant que también atiende al paciente A. */
-  const otroTenant = { token: '', hpid: '', tenantId: '' };
 
   /** Paciente A: dos consultas y notas en las dos. */
   const pacienteA = {
@@ -129,6 +127,16 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
    * Una nota de la consulta, firmada salvo que se pida borrador: sólo una nota
    * firmada o enmendada puede motivar una orden.
    */
+  /** Una consulta nueva del paciente, abierta por ingreso directo. */
+  async function checkIn(patientProfileId: string): Promise<string> {
+    const res = await http()
+      .post('/clinical/encounters/check-in')
+      .set(bearer(medico.token))
+      .send({ patientProfileId, tenantId: medico.tenantId })
+      .expect(201);
+    return res.body.id as string;
+  }
+
   async function nota(
     patientProfileId: string,
     encounterId: string,
@@ -192,12 +200,6 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
     ajeno.token = b.token;
     ajeno.hpid = b.hpid;
 
-    const c = await registrarMedico('otro-tenant');
-    otroTenant.token = c.token;
-    otroTenant.hpid = c.hpid;
-    otroTenant.tenantId = (claims(c.token)['tenants'] as string[])[0];
-    expect(otroTenant.tenantId).not.toBe(medico.tenantId);
-
     async function consultorio(
       quien: { token: string; hpid: string; tenantId: string },
       nombre: string,
@@ -218,18 +220,12 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
       return recurso.body.id as string;
     }
     const resourceId = await consultorio(medico, 'Consultorio P40');
-    const resourceOtroTenant = await consultorio(
-      otroTenant,
-      'Consultorio P40 otro tenant',
-    );
 
     const a1 = await walkIn(resourceId, `P40A${sufijo}`, lunesLejano(3, 9));
     pacienteA.id = a1.patientProfileId;
     pacienteA.encuentro = a1.encounterId;
-    // Segunda consulta del MISMO paciente (mismo documento): otra cita.
-    const a2 = await walkIn(resourceId, `P40A${sufijo}`, lunesLejano(3, 11));
-    expect(a2.patientProfileId).toBe(pacienteA.id);
-    pacienteA.otroEncuentro = a2.encounterId;
+    // Segunda consulta del MISMO paciente: un ingreso directo (check-in).
+    pacienteA.otroEncuentro = await checkIn(pacienteA.id);
     const b1 = await walkIn(resourceId, `P40B${sufijo}`, lunesLejano(3, 13));
     pacienteB.id = b1.patientProfileId;
     pacienteB.encuentro = b1.encounterId;
@@ -249,19 +245,25 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
       false,
     );
 
-    // El mismo paciente (mismo documento) atendido en el otro tenant.
-    const a3 = await walkIn(
-      resourceOtroTenant,
-      `P40A${sufijo}`,
-      lunesLejano(4, 9),
-      otroTenant.token,
-    );
-    expect(a3.patientProfileId).toBe(pacienteA.id);
+    // El mismo paciente atendido en OTRO tenant. El auto-registro profesional
+    // usa el tenant semilla para todos los médicos, así que —como FX-10— se
+    // toma otro tenant ya sembrado y se le asigna una consulta nueva del mismo
+    // paciente, con su nota firmada: una nota real de la base cuya custodia
+    // no es la de la orden.
+    const encuentroAjeno = await checkIn(pacienteA.id);
     pacienteA.notaDeOtroTenant = await nota(
       pacienteA.id,
-      a3.encounterId,
+      encuentroAjeno,
       'Nota del otro tenant',
-      otroTenant,
+    );
+    const [otro] = await sql<{ id: string }>(
+      'select id from directory.tenants where id <> ? order by id limit 1',
+      [medico.tenantId],
+    );
+    expect(otro?.id).toBeDefined();
+    await sql(
+      'update clinical.encounters set tenant_id = ?, updated_at = now() where id = ?',
+      [otro!.id, encuentroAjeno],
     );
   });
 
@@ -321,13 +323,15 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
 
     expect(alta.body.category).toBe('OTHER');
     expect(alta.body.basedOnNoteIds).toEqual([]);
-    const concepto = await sql<{ code: string }>(
-      `select cc.code from clinical.service_requests sr
+    // El concepto es el de `clinical` (SR_OTHER) y existe en el catálogo: la
+    // FK del alta lo exige, y el join lo confirma.
+    const concepto = await sql<{ id: string }>(
+      `select cc.id from clinical.service_requests sr
          join terminology.catalog_concepts cc on cc.id = sr.category_concept_id
         where sr.id = ?`,
       [alta.body.id],
     );
-    expect(concepto[0]?.code).toBe('SR_OTHER');
+    expect(concepto[0]?.id).toBe(CLIN.SERVICE_REQUEST_CATEGORY_OTHER);
 
     const ficha = await http()
       .get(`/diagnostics/patients/${pacienteA.id}/orders`)
