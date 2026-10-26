@@ -72,7 +72,7 @@ export const accountingIndexes2: readonly IndexTuple[] = [
   ['journal_entry_assignments', 'ix_journal_entry_assignments_asset_line', ['asset_id', 'ledger_entry_id'], false, 'btree'],
   ['journal_entry_assignments', 'ix_journal_entry_assignments_liability_line', ['liability_id', 'ledger_entry_id'], false, 'btree'],
   ['journal_entry_assignments', 'ix_journal_entry_assignments_contract_line', ['contract_id', 'ledger_entry_id'], false, 'btree'],
-  ['journal_transactions', 'uq_journal_transactions_transaction_number', ['transaction_number'], true, 'btree'],
+  ['journal_transactions', 'uq_journal_transactions_practice_id_transaction_number', ['practice_id', 'transaction_number'], true, 'btree'],
   ['journal_transactions', 'ix_journal_transactions_practice_id', ['practice_id'], false, 'btree'],
   ['journal_transactions', 'ix_journal_transactions_transaction_type_concept_id', ['transaction_type_concept_id'], false, 'btree'],
   ['journal_transactions', 'ix_journal_transactions_fiscal_period_id', ['fiscal_period_id'], false, 'btree'],

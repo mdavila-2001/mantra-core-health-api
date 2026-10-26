@@ -12,6 +12,11 @@
 // `data/MANIFEST.json` lista cada archivo con su sha256, bytes y filas.
 // Reconstruir: `zcat data/monographs.part-*.ndjson.gz > monographs.ndjson` (ídem `gsrs-entries`).
 //
+// NO entra el corpus por producto (`--granularity product`, ~2,2 GB; decisión del
+// propietario, 2026-10-26, issue 824): `build-monographs.mjs` lo escribe en
+// `out/product/`, y acá sólo se empaqueta la lista cerrada `PACKABLE`. Si el
+// `monographs.meta.json` de `out/` no es de granularidad `route`, se aborta.
+//
 // Uso: node tools/terminology-import/clinical-pharmacology/pack-data.mjs
 // =============================================================================
 
@@ -28,6 +33,22 @@ import { cpCache, cpOut, openFdaDir } from './lib/paths.mjs';
 const DATA_DIR = ensureDir(join(dirname(fileURLToPath(import.meta.url)), 'data'));
 const MAX_PART_BYTES = 45 * 1024 * 1024;
 const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
+
+/** NDJSON normalizados que se versionan: lista cerrada. El corpus por producto no figura y no puede figurar. */
+export const PACKABLE = Object.freeze(['monographs', 'gsrs-entries']);
+
+/** Lanza si `name` es un corpus por producto o no está en la lista cerrada. */
+export function assertPackable(name) {
+  if (/product/i.test(name)) throw new Error(`«${name}» es un corpus por producto: no se versiona en data/ (issue 824).`);
+  if (!PACKABLE.includes(name)) throw new Error(`«${name}» no está en la lista de lo que se empaqueta (${PACKABLE.join(', ')}).`);
+  return name;
+}
+
+/** El meta de `out/` debe ser de granularidad `route`: un build por producto no se empaqueta. */
+export function assertRouteGranularity(meta) {
+  if (meta?.granularity !== undefined && meta.granularity !== 'route') throw new Error(`out/monographs.meta.json es de granularidad «${meta.granularity}»: sólo se empaqueta la de vía (route).`);
+  return meta;
+}
 
 /** Parte un NDJSON por líneas en trozos cuyo gzip queda bajo el tope. Devuelve los buffers comprimidos. */
 export function splitNdjson(text, maxBytes = MAX_PART_BYTES) {
@@ -59,6 +80,7 @@ export function splitNdjson(text, maxBytes = MAX_PART_BYTES) {
 }
 
 function main() {
+  if (existsSync(cpOut('monographs.meta.json'))) assertRouteGranularity(JSON.parse(readFileSync(cpOut('monographs.meta.json'), 'utf8')));
   for (const name of readdirSync(DATA_DIR)) if (name.endsWith('.gz') || name === 'MANIFEST.json') unlinkSync(join(DATA_DIR, name));
   const manifest = { generatedAt: new Date().toISOString(), note: 'Datos normalizados (no crudos). Ver SOURCES.md y docs/seed-research/clinical-pharmacology.md.', files: [] };
   const add = (name, gz, rows, from) => {
@@ -67,7 +89,7 @@ function main() {
   };
 
   manifest.ndjson = {};
-  for (const name of ['monographs', 'gsrs-entries']) {
+  for (const name of PACKABLE.map(assertPackable)) {
     const ndjson = cpOut(`${name}.ndjson`);
     if (!existsSync(ndjson)) continue;
     const parts = splitNdjson(ndjsonLines(ndjson));

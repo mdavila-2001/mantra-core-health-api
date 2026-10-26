@@ -190,6 +190,25 @@ membresías en `glossary-all-terms` + `glossary-category-<k>` + `glossary-tag-<t
 una vez (value sets y conceptos internos sembrados); si no, aborta con el
 faltante. No actualiza filas existentes.
 
+### Carga masiva de relaciones con evidencia (`lib/bulk-copy.mjs`, TAREA-41 F1.3)
+
+`bulkLoadRelationships(client, { terminologySourceId, codeSystemVersionId, rows })`
+carga **un lote por fuente** en una sola transacción: `COPY … FROM STDIN`
+(`pg-copy-streams`) a una tabla temporal (sin WAL, `ON COMMIT DROP`), valida los
+códigos contra `VS_EVIDENCE_TIER` y `VS_RELATIONSHIP_FREQUENCY` (ids leídos de la
+base por código), hace `INSERT … ON CONFLICT (clave natural) DO UPDATE` en
+`concept_relationships` y `concept_relationship_evidence` (sólo si algo cambió),
+recalcula `strength_score`, `evidence_count`, `best_evidence_tier_concept_id` y
+`frequency_concept_id` con un único `UPDATE … FROM (agregado)` y registra el lote
+en `catalog_import_batches`. `dryRun: true` hace todo y deshace.
+
+- El agregado SQL es la traducción de `strengthOf()` (`lib/glossary-es/strength.mjs`);
+  `test/bulk-copy.test.mjs` prueba la paridad contra Postgres sobre 1 019
+  relaciones (se salta si no hay base).
+- `bench-bulk-copy.mjs --load` carga 1 M de aristas **sintéticas** (fuente
+  `SYNTHETIC_BENCH_F13`) y `--cleanup` las borra enteras. Sólo en desarrollo.
+  Medido el 2026-10-25: 1 000 000 en 76,3 s; re-run 0 filas nuevas.
+
 > [!nota] Rendimiento
 > Las lecturas del glosario (paraguas, categoría o etiqueta) se resuelven enteras
 > en la base con `CatalogConceptsRepository.searchGlossaryPage`: no materializan

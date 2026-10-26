@@ -115,6 +115,7 @@ export class TerminologyFhirController {
    *
    * @param system - Valor de system requerido por la operación.
    * @param code - Valor de code requerido por la operación.
+   * @param user - Usuario autenticado: decide si ve las propiedades `professional`.
    * @returns Resultado de lookup conforme al contrato `Promise<LookupResponseDto>`.
    * @throws Error de dominio cuando no se cumplen las precondiciones de la operación.
    */
@@ -131,6 +132,7 @@ export class TerminologyFhirController {
   lookup(
     @Query('system') system: string,
     @Query('code') code: string,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<LookupResponseDto> {
     // `system` y `code` son la clave completa del concepto: resolver con uno solo
     // devolvería un resultado arbitrario.
@@ -139,6 +141,6 @@ export class TerminologyFhirController {
         '$lookup exige los parámetros system y code',
       );
     }
-    return this.conceptsService.lookupConcept(system, code);
+    return this.conceptsService.lookupConcept(system, code, user);
   }
 }

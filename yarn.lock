@@ -9279,6 +9279,7 @@ __metadata:
     passport-jwt: "npm:^4.0.1"
     pdfkit: "npm:^0.20.2"
     pg: "npm:^8.22.0"
+    pg-copy-streams: "npm:^6.0.6"
     pgvector: "npm:^0.3.0"
     pino: "npm:^10.3.1"
     pino-http: "npm:^11.0.0"
@@ -9825,6 +9826,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"obuf@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "obuf@npm:1.1.2"
+  checksum: 10c0/520aaac7ea701618eacf000fc96ae458e20e13b0569845800fc582f81b386731ab22d55354b4915d58171db00e79cfcd09c1638c02f89577ef092b38c65b7d81
+  languageName: node
+  linkType: hard
+
 "on-exit-leak-free@npm:^2.1.0":
   version: 2.1.2
   resolution: "on-exit-leak-free@npm:2.1.2"
@@ -10123,6 +10131,15 @@ __metadata:
   version: 2.14.0
   resolution: "pg-connection-string@npm:2.14.0"
   checksum: 10c0/c26d85970f782de72b90aa45b4acfa34df90242fc08bc676e8827297164044dbfb40a2cf20b0646bd02662a6b14c5ed27f322db627e41e582f2b705bc41e8b47
+  languageName: node
+  linkType: hard
+
+"pg-copy-streams@npm:^6.0.6":
+  version: 6.0.6
+  resolution: "pg-copy-streams@npm:6.0.6"
+  dependencies:
+    obuf: "npm:^1.1.2"
+  checksum: 10c0/4edefe7395c4adb54a0cd5887cc21441c6e41f731f6c3203c6d6a57b208c5bb1cefded28eaabf0b5dd13fe297ab146ad8270ac8c537b69cd644c51386be231bc
   languageName: node
   linkType: hard
 
