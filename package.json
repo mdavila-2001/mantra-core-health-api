@@ -261,6 +261,7 @@
     "globals": "^17.0.0",
     "jest": "^30.0.0",
     "js-yaml": "^5.2.2",
+    "pg-copy-streams": "^6.0.6",
     "prettier": "^3.4.2",
     "socket.io-client": "^4",
     "source-map-support": "^0.5.21",
