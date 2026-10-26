@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { Public } from '../../../../common';
+import { NotAudited, Public } from '../../../../common';
 import {
   PublicCatalogPageQueryDto,
   PublicOfferedServicePageDto,
@@ -100,6 +100,9 @@ export class PublicCatalogController {
    * se guarda. Responde 200, no 201: no crea ningún recurso.
    */
   @Public()
+  @NotAudited(
+    'Lectura pública sin sesión ni actor: POST sólo para que los renglones de la receta no viajen en la URL; no guarda ni cambia nada.',
+  )
   @Post('public/profiles/f/:slug/branch-availability')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
