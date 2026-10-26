@@ -40,6 +40,7 @@ import {
   DiagnosticsPatientAccessService,
 } from './services';
 import { SuggestedSiteNamesReader } from '../clinical/services/suggested-site-names.reader';
+import { ServiceRequestNotesService } from '../clinical/services/service-request-notes.service';
 import {
   SpecimensRepository,
   LabWorkRepository,
@@ -94,6 +95,8 @@ import {
     ClinicalRefsRepository,
     // Nombre de la sede sugerida en la orden: lectura sin estado, se registra la clase.
     SuggestedSiteNamesReader,
+    // P40: las notas que motivan cada orden, en la ficha diagnóstica.
+    ServiceRequestNotesService,
     // Servicios
     DiagnosticsSpecimensService,
     DiagnosticsLabService,

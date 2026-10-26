@@ -636,6 +636,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "dataType": "valor-ejemplo",
       "valueJson": {
         "clave": "valor"
+      },
+      "sourceAge": {
+        "known": true,
+        "sourceDate": "valor-ejemplo",
+        "retrievedAt": "2026-07-31T12:00:00.000Z"
       }
     }
   ]
@@ -656,10 +661,14 @@ Campos de la respuesta:
 | `designations[].value` | Sí | `string` | Sin restricción adicional declarada | Texto de la designación | `valor-ejemplo` |
 | `designations[].languageConceptId` | No | `string` | Sin restricción adicional declarada | Idioma (concepto) | `es-BO` |
 | `designations[].preferred` | No | `boolean` | Sin restricción adicional declarada | Si es la designación preferida de su idioma | `true` |
-| `properties` | Sí | `array<LookupPropertyDto>` | Sin restricción adicional declarada | Propiedades del concepto | `[{"propertyCode":"CODIGO_EJEMPLO","dataType":"valor-ejemplo","valueJson":{"clave":"valor"}}]` |
+| `properties` | Sí | `array<LookupPropertyDto>` | Sin restricción adicional declarada | Propiedades del concepto | `[{"propertyCode":"CODIGO_EJEMPLO","dataType":"valor-ejemplo","valueJson":{"clave":"valor"},"sourceAge":{"known":true,"sourceDate":"valor-ejemplo","retrievedAt":"2026-07-31T12:00:00.000Z"}}]` |
 | `properties[].propertyCode` | Sí | `string` | Sin restricción adicional declarada | Código de la propiedad | `CODIGO_EJEMPLO` |
 | `properties[].dataType` | No | `string` | Sin restricción adicional declarada | Tipo de dato técnico | `valor-ejemplo` |
 | `properties[].valueJson` | Sí | `object` | Sin restricción adicional declarada | Valor de la propiedad | `{"clave":"valor"}` |
+| `properties[].sourceAge` | No | `PropertySourceAgeDto` | Sin restricción adicional declarada | Antigüedad del dato (estado S7). Solo en las secciones de farmacología clínica. known=false: antigüedad desconocida | `{"known":true,"sourceDate":"valor-ejemplo","retrievedAt":"2026-07-31T12:00:00.000Z"}` |
+| `properties[].sourceAge.known` | No | `boolean` | Sin restricción adicional declarada | Falso si la fuente no publica la fecha de la versión (p. ej. fichas de CIMA de autorización centralizada): la antigüedad es desconocida y la fecha que vale es la de consulta | `true` |
+| `properties[].sourceAge.sourceDate` | No | `string` | Sin restricción adicional declarada | Fecha de la versión de la fuente tal como se cargó (ISO, o mm/aaaa en las fichas de CIMA que solo la traen en el texto). Solo si known es verdadero | `valor-ejemplo` |
+| `properties[].sourceAge.retrievedAt` | No | `string` | formato `date-time` | Cuándo se consultó la fuente | `2026-07-31T12:00:00.000Z` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1639,7 +1648,7 @@ NestJS resuelve `GET /terminology/concepts/{conceptId}/glossary-neighborhood` en
 | `conceptId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lang` | query | No | `string` | valores: `ES`, `EN` | Sin descripción específica en OpenAPI. | `ES` |
 | `perGroup` | query | No | `number` | mínimo 1; máximo 50 | Sin descripción específica en OpenAPI. | `8` |
-| `type` | query | No | `string` | valores: `RELATED_TERM`, `DISEASE`, `PROCEDURE`, `TREATMENT`, `ANATOMY`, `DIAGNOSTIC_TEST`, `SYMPTOM`, `SPECIALTY` | Sin descripción específica en OpenAPI. | `RELATED_TERM` |
+| `type` | query | No | `string` | valores: `RELATED_TERM`, `DISEASE`, `PROCEDURE`, `TREATMENT`, `ANATOMY`, `DIAGNOSTIC_TEST`, `SYMPTOM`, `SPECIALTY`, `DIAGNOSTIC_CRITERION`, `REQUIRED_TEST`, `COMPLICATION`, `RISK_FACTOR`, `REFERRAL_CRITERION` | Sin descripción específica en OpenAPI. | `RELATED_TERM` |
 | `direction` | query | No | `string` | valores: `outgoing`, `incoming` | Sin descripción específica en OpenAPI. | `outgoing` |
 | `offset` | query | No | `number` | mínimo 0 | Sin descripción específica en OpenAPI. | `0` |
 | `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `50` |
@@ -1713,6 +1722,20 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
           "category": {
             "internalCode": "glossary-category-anatomy",
             "name": "Anatomía"
+          },
+          "strength": 1,
+          "frequency": {},
+          "evidenceTier": {},
+          "sourceCodes": [
+            "CODIGO_EJEMPLO"
+          ],
+          "qualifiers": {
+            "sex": "valor-ejemplo",
+            "ageMinDays": 1,
+            "ageMaxDays": 1,
+            "pregnancy": "valor-ejemplo",
+            "careLevel": "valor-ejemplo",
+            "lineOfTherapy": "valor-ejemplo"
           }
         }
       ]
@@ -1733,17 +1756,28 @@ Campos de la respuesta:
 | `focus.category.internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable, como `glossary-category-anatomy`. | `glossary-category-anatomy` |
 | `focus.category.name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la categoría. | `Anatomía` |
 | `focus.shortDefinition` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `groups` | Sí | `array<GlossaryNeighborGroupDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"type":{},"direction":"outgoing","total":1,"items":[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"}}]}]` |
-| `groups[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' | `{}` |
+| `groups` | Sí | `array<GlossaryNeighborGroupDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"type":{},"direction":"outgoing","total":1,"items":[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"},"strength":1,"frequency":{},"evidenceTier":{},"sourceCodes":["CODIGO_EJEMPLO"],"qualifiers":{"sex":"valor-ejemplo","ageMinDays":1,"ageMaxDays":1,"pregnancy":"valor-ejemplo","careLevel":"valor-ejemplo","lineOfTherapy":"valor-ejemplo"}}]}]` |
+| `groups[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' \| 'DIAGNOSTIC_CRITERION' \| 'REQUIRED_TEST' \| 'COMPLICATION' \| 'RISK_FACTOR' \| 'REFERRAL_CRITERION' | `{}` |
 | `groups[].direction` | Sí | `string` | valores: `outgoing`, `incoming` | Sin descripción específica en el contrato OpenAPI. | `outgoing` |
 | `groups[].total` | Sí | `number` | Sin restricción adicional declarada | Tamaño real del grupo, no lo que vino en `items`. | `1` |
-| `groups[].items` | Sí | `array<GlossaryNeighborDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"}}]` |
+| `groups[].items` | Sí | `array<GlossaryNeighborDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"conceptId":"00000000-0000-4000-8000-000000000001","slug":"valor-ejemplo","display":"valor-ejemplo","category":{"internalCode":"glossary-category-anatomy","name":"Anatomía"},"strength":1,"frequency":{},"evidenceTier":{},"sourceCodes":["CODIGO_EJEMPLO"],"qualifiers":{"sex":"valor-ejemplo","ageMinDays":1,"ageMaxDays":1,"pregnancy":"valor-ejemplo","careLevel":"valor-ejemplo","lineOfTherapy":"valor-ejemplo"}}]` |
 | `groups[].items[].conceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `groups[].items[].slug` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `groups[].items[].display` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `groups[].items[].category` | Sí | `ConceptTaxonomyRefDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"internalCode":"glossary-category-anatomy","name":"Anatomía"}` |
 | `groups[].items[].category.internalCode` | Sí | `string` | Sin restricción adicional declarada | Código interno estable, como `glossary-category-anatomy`. | `glossary-category-anatomy` |
 | `groups[].items[].category.name` | Sí | `string` | Sin restricción adicional declarada | Nombre legible de la categoría. | `Anatomía` |
+| `groups[].items[].strength` | No | `number` | Sin restricción adicional declarada | Fuerza de la relación, de 0 a 1 (`strength_score`). Ordena el grupo. | `1` |
+| `groups[].items[].frequency` | No | `object` | Sin restricción adicional declarada | Frecuencia del hallazgo según la mejor evidencia. `EXCLUDED` significa que la fuente lo descarta: no es una relación positiva. | `{}` |
+| `groups[].items[].evidenceTier` | No | `object` | Sin restricción adicional declarada | Mejor nivel de evidencia de la relación. | `{}` |
+| `groups[].items[].sourceCodes` | No | `array<string>` | Sin restricción adicional declarada | Ids de origen de cada evidencia (`source_reference`), sin repetir. | `["CODIGO_EJEMPLO"]` |
+| `groups[].items[].qualifiers` | No | `GlossaryNeighborQualifiersDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"sex":"valor-ejemplo","ageMinDays":1,"ageMaxDays":1,"pregnancy":"valor-ejemplo","careLevel":"valor-ejemplo","lineOfTherapy":"valor-ejemplo"}` |
+| `groups[].items[].qualifiers.sex` | No | `string` | Sin restricción adicional declarada | Código del sexo al que aplica (`sex_concept_id`). | `valor-ejemplo` |
+| `groups[].items[].qualifiers.ageMinDays` | No | `number` | Sin restricción adicional declarada | Edad mínima en días: la menor entre las evidencias. | `1` |
+| `groups[].items[].qualifiers.ageMaxDays` | No | `number` | Sin restricción adicional declarada | Edad máxima en días: la mayor entre las evidencias. | `1` |
+| `groups[].items[].qualifiers.pregnancy` | No | `string` | Sin restricción adicional declarada | Código de aplicabilidad en el embarazo. | `valor-ejemplo` |
+| `groups[].items[].qualifiers.careLevel` | No | `string` | Sin restricción adicional declarada | Código del nivel de atención (`FIRST_LEVEL`, `SECOND_LEVEL`, `THIRD_LEVEL`). | `valor-ejemplo` |
+| `groups[].items[].qualifiers.lineOfTherapy` | No | `string` | Sin restricción adicional declarada | Código de la línea de tratamiento (`FIRST_LINE`, `SECOND_LINE`). | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2167,7 +2201,7 @@ Campos de la respuesta:
 | `edges` | Sí | `array<GlossaryGraphEdgeDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"sourceConceptId":"00000000-0000-4000-8000-000000000001","targetConceptId":"00000000-0000-4000-8000-000000000001","type":{}}]` |
 | `edges[].sourceConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `edges[].targetConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `edges[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' | `{}` |
+| `edges[].type` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido:  \| 'RELATED_TERM' \| 'DISEASE' \| 'PROCEDURE' \| 'TREATMENT' \| 'ANATOMY' \| 'DIAGNOSTIC_TEST' \| 'SYMPTOM' \| 'SPECIALTY' \| 'DIAGNOSTIC_CRITERION' \| 'REQUIRED_TEST' \| 'COMPLICATION' \| 'RISK_FACTOR' \| 'REFERRAL_CRITERION' | `{}` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `possiblyTruncated` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |

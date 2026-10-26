@@ -337,6 +337,21 @@ export const DIAGNOSTIC_CATEGORIES: readonly string[] = [
 export const PATIENT_PORTAL_CATEGORIES: readonly string[] = [
   ...DIAGNOSTIC_CATEGORIES,
   CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+  // P40: la orden de análisis «otro» (`category: 'OTHER'`) también es algo que
+  // el paciente tiene que ir a hacerse.
+  CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
+];
+
+/**
+ * Las categorías que lista la ficha diagnóstica del paciente
+ * (`GET /diagnostics/patients/:id/orders`): las diagnósticas y la orden de
+ * análisis «otro» de C2 (P40). Lista aparte de {@link DIAGNOSTIC_CATEGORIES}
+ * por lo mismo que la del portal: esa alimenta colas y liquidaciones de
+ * laboratorio e imagen, y una orden «otro» no es trabajo de esos equipos.
+ */
+export const PATIENT_CHART_ORDER_CATEGORIES: readonly string[] = [
+  ...DIAGNOSTIC_CATEGORIES,
+  CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
 ];
 
 /**

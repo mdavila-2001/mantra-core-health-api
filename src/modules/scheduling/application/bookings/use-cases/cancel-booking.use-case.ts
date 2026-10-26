@@ -298,7 +298,11 @@ export class CancelBookingUseCase {
         slot.remainingCapacity += 1;
         if (
           slot.scheduleTemplateId === undefined ||
-          slot.scheduleTemplateId === null
+          slot.scheduleTemplateId === null ||
+          // P36: el turno de un horario flexible tampoco estuvo nunca en una
+          // grilla —nació en la hora que pidió el paciente—: reabrirlo
+          // publicaría un turno fijo en una agenda sin turnos.
+          (await this.serviceSlots.isFlexible(tx, slot))
         ) {
           // AG-2: el cupo de una cita puntual muere con ella. Nunca estuvo
           // ofrecido —nació para esa cita— y reabrirlo dejaría un horario

@@ -1,4 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ANALYSIS_CATEGORIES,
+  type AnalysisCategory,
+} from '../../clinical/service-request-category';
 
 /**
  * Una orden diagnóstica del paciente — la fila de `clinical.service_requests`
@@ -27,6 +31,14 @@ export class DiagnosticOrderSummaryDto {
 
   /** Laboratorio o imagenología (concept id). */
   @ApiPropertyOptional({ format: 'uuid' }) categoryConceptId?: string;
+
+  /** P40: categoría de análisis derivada del concepto; ausente = sin clasificar. */
+  @ApiPropertyOptional({ enum: ANALYSIS_CATEGORIES })
+  category?: AnalysisCategory;
+
+  /** P40: notas médicas que motivan la orden, en el orden en que se citaron. */
+  @ApiProperty({ type: [String], format: 'uuid' })
+  basedOnNoteIds!: string[];
 
   /** Estado de la orden (concept id). */
   @ApiProperty({ format: 'uuid' }) statusConceptId!: string;

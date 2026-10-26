@@ -147,6 +147,8 @@ export interface CreateTemplateData {
    * Valor de slot minutes mantenido por la instancia.
    */
   slotMinutes?: number;
+  /** Horario flexible, sin turnos fijos (P36). Ausente ≡ `false`. */
+  flexibleHours?: boolean;
   /**
    * Identificador asociado a booking policy.
    */
@@ -402,6 +404,7 @@ export class SchedulingCatalogRepository {
         validFrom: data.validFrom,
         validTo: data.validTo,
         slotMinutes: data.slotMinutes,
+        flexibleHours: data.flexibleHours ?? false,
         bookingPolicyId: data.bookingPolicyId,
         statusConceptId: data.statusConceptId,
         ...createdBy(data.actorUserId),
@@ -504,6 +507,33 @@ export class SchedulingCatalogRepository {
     scheduleTemplateId: string,
   ): Promise<ScheduleRules[]> {
     return em.find(ScheduleRules, { scheduleTemplateId });
+  }
+
+  /**
+   * Las plantillas publicadas de horario flexible de un recurso (P36), con sus
+   * franjas.
+   *
+   * Es lo que lee la disponibilidad flexible: qué ratos declaró el médico sin
+   * cortarlos en turnos. Una plantilla retirada no ofrece nada.
+   */
+  async findFlexibleTemplatesOfResource(
+    em: EntityManager,
+    resourceId: string,
+    publishedStatusConceptId: string,
+  ): Promise<{ template: ScheduleTemplates; rules: ScheduleRules[] }[]> {
+    const templates = await em.find(ScheduleTemplates, {
+      resourceId,
+      statusConceptId: publishedStatusConceptId,
+      flexibleHours: true,
+    });
+    if (templates.length === 0) return [];
+    const rules = await em.find(ScheduleRules, {
+      scheduleTemplateId: { $in: templates.map((template) => template.id) },
+    });
+    return templates.map((template) => ({
+      template,
+      rules: rules.filter((rule) => rule.scheduleTemplateId === template.id),
+    }));
   }
 
   /**
