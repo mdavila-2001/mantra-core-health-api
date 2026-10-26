@@ -198,6 +198,13 @@ DO $$ BEGIN
         REFERENCES "terminology"."catalog_concepts" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
 
+-- compuesta: pharmacy.pharmacy_products sólo apunta a pharmacy.pharmacy_product_categories del mismo pharmacy_id
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_products"
+        ADD CONSTRAINT "fk_pharmacy_products_pharmacy_product_category_id" FOREIGN KEY ("pharmacy_id", "pharmacy_product_category_id")
+        REFERENCES "pharmacy"."pharmacy_product_categories" ("pharmacy_id", "id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_products"
@@ -218,6 +225,34 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_pharmacy_products_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_categories"
+        ADD CONSTRAINT "fk_pharmacy_product_categories_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_categories"
+        ADD CONSTRAINT "fk_pharmacy_product_categories_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: common.files (requiere schema common)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_images"
+        ADD CONSTRAINT "fk_pharmacy_product_images_image_file_id" FOREIGN KEY ("image_file_id")
+        REFERENCES "common"."files" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_images"
+        ADD CONSTRAINT "fk_pharmacy_product_images_created_by_user_id" FOREIGN KEY ("created_by_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN

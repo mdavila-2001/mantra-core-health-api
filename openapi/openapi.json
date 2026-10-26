@@ -880,7 +880,12 @@
                 "ANATOMY",
                 "DIAGNOSTIC_TEST",
                 "SYMPTOM",
-                "SPECIALTY"
+                "SPECIALTY",
+                "DIAGNOSTIC_CRITERION",
+                "REQUIRED_TEST",
+                "COMPLICATION",
+                "RISK_FACTOR",
+                "REFERRAL_CRITERION"
               ]
             }
           },
@@ -71615,6 +71620,306 @@
           "pharmacy"
         ],
         "description": "Categorías de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "post": {
+        "description": "El nombre es único en la farmacia sin distinguir mayúsculas ni tildes (409).",
+        "operationId": "PharmacyController_createCategory",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PharmacyCategoryNameDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyCategoryItemDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear una categoría de la farmacia",
+        "tags": [
+          "pharmacy"
+        ]
+      }
+    },
+    "/pharmacies/{pharmacyId}/categories/{categoryId}": {
+      "patch": {
+        "operationId": "PharmacyController_renameCategory",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PharmacyCategoryNameDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PharmacyCategoryItemDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Renombrar una categoría de la farmacia",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Renombrar una categoría de la farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "delete": {
+        "operationId": "PharmacyController_deleteCategory",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar una categoría de la farmacia",
+        "tags": [
+          "pharmacy"
+        ],
+        "description": "Eliminar una categoría de la farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/pharmacies/{pharmacyId}/inventory": {
+      "patch": {
+        "description": "Cada línea lleva `stock`/`minStock` **o** `inStock`: las dos juntas, ninguna, un producto repetido, ajeno o retirado es 422 y no se guarda ninguna. Es la declaración del catálogo, no el ledger de existencias.",
+        "operationId": "PharmacyController_updateInventory",
+        "parameters": [
+          {
+            "name": "pharmacyId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PharmacyUpdateInventoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryUpdatedDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Guardar el inventario declarado de varios productos (todo o nada)",
+        "tags": [
+          "pharmacy"
+        ]
       }
     },
     "/pharmacies": {
@@ -71895,7 +72200,7 @@
     },
     "/pharmacies/{pharmacyId}/products/{productId}": {
       "patch": {
-        "description": "Marca, genérico, concentración, empaque y receta: cada uno opcional y `null` lo borra. Precio, categoría, descripción, existencias, estado e imágenes no tienen columna (P47 §3-5) y se rechazan con 400. Un producto retirado responde 422.",
+        "description": "Marca, genérico, concentración, empaque y receta (no en un producto del catálogo universal: 400), y lo que administra la farmacia: precio (Bs, lista `CATALOGO`), categoría por nombre, descripción, existencias o «hay / no hay», estado e imágenes. Cada clave es opcional y `null` borra lo que lo admite. Un retirado sólo acepta `status` PUBLISHED/DRAFT (si no, 422). Devuelve el producto como la lectura de gestión.",
         "operationId": "PharmacyController_updateProduct",
         "parameters": [
           {
@@ -71972,7 +72277,7 @@
             "bearer": []
           }
         ],
-        "summary": "Editar los datos descriptivos de un producto del catálogo",
+        "summary": "Editar un producto del catálogo de la farmacia",
         "tags": [
           "pharmacy"
         ]
@@ -72943,6 +73248,19 @@
             "description": "Sólo lo publicado por esta farmacia (carril A, H5)",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "managed",
+            "required": false,
+            "in": "query",
+            "description": "P47: con `true` (y `pharmacyId`) lista TODO el catálogo de esa farmacia —borradores y retirados— con estado, existencias, umbral e imágenes. Sólo su personal; cualquier otro, 404.",
+            "schema": {
+              "enum": [
+                "true",
+                "false"
+              ],
               "type": "string"
             }
           },
@@ -137823,18 +138141,106 @@
         ],
         "additionalProperties": false
       },
+      "PharmacyCategoryItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "productCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "productCount"
+        ]
+      },
       "PharmacyCategoryListDto": {
         "type": "object",
         "properties": {
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/PharmacyCategoryItemDto"
             }
           }
         },
         "required": [
           "items"
+        ]
+      },
+      "PharmacyCategoryNameDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "PharmacyInventoryLineDto": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stock": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "minStock": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "inStock": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "productId"
+        ],
+        "additionalProperties": false
+      },
+      "PharmacyUpdateInventoryDto": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "minItems": 1,
+            "maxItems": 500,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PharmacyInventoryLineDto"
+            }
+          }
+        },
+        "required": [
+          "lines"
+        ],
+        "additionalProperties": false
+      },
+      "InventoryUpdatedDto": {
+        "type": "object",
+        "properties": {
+          "updated": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "updated"
         ]
       },
       "InitialLicenseDto": {
@@ -138096,6 +138502,61 @@
             "items": {
               "$ref": "#/components/schemas/ProductIdentifierDto"
             }
+          },
+          "unitPrice": {
+            "description": "Precio de venta en bolivianos (número o texto decimal, hasta 2 decimales). Se versiona en la lista pública `CATALOGO` de la farmacia.",
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "example": 12.5
+          },
+          "category": {
+            "type": "string",
+            "description": "Categoría de la vitrina, por nombre (sin distinguir mayúsculas ni tildes). Tiene que ser una de `GET /pharmacies/{pharmacyId}/categories`: otra es 422.",
+            "maxLength": 60
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción para el paciente",
+            "maxLength": 2000
+          },
+          "inStock": {
+            "type": "boolean",
+            "description": "`false` = «no lo tengo» (sin conteo). Junto con `stock` es 422: dirían dos cosas a la vez."
+          },
+          "status": {
+            "type": "string",
+            "description": "Estado: `PUBLISHED` (por defecto) o `DRAFT` (sólo lo ve la farmacia). `WITHDRAWN` no vale en el alta.",
+            "enum": [
+              "PUBLISHED",
+              "DRAFT"
+            ]
+          },
+          "stock": {
+            "type": "number",
+            "description": "Existencias declaradas (sin ellas el producto queda «sin conteo»)",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "minStock": {
+            "type": "number",
+            "description": "Umbral de alerta (sin él, 5)",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "imageFileIds": {
+            "description": "Hasta 3 imágenes (ids de `POST /common/files/upload`, categoría IMAGE, subidas por quien publica)",
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         },
         "required": [
@@ -138138,6 +138599,63 @@
             "type": "boolean",
             "description": "Requiere receta; `null` lo borra",
             "nullable": true
+          },
+          "unitPrice": {
+            "description": "Precio de venta en bolivianos (número o texto decimal, hasta 2 decimales); `null` lo quita. Se versiona en la lista pública `CATALOGO`.",
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true,
+            "example": 12.5
+          },
+          "category": {
+            "type": "string",
+            "description": "Categoría por nombre (una de la farmacia; otra es 422); `null` la quita",
+            "maxLength": 60,
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción para el paciente; `null` la borra",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "inStock": {
+            "type": "boolean",
+            "description": "`false` = «no lo tengo»; `true` vuelve a tenerlo (si el conteo estaba en 0 queda «sin conteo»). Junto con `stock` es 422."
+          },
+          "status": {
+            "type": "string",
+            "description": "`PUBLISHED`, `DRAFT` o `WITHDRAWN` (retira como el DELETE). Un retirado sólo acepta volver a `PUBLISHED`/`DRAFT`.",
+            "enum": [
+              "PUBLISHED",
+              "DRAFT",
+              "WITHDRAWN"
+            ]
+          },
+          "stock": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "minStock": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000
+          },
+          "imageFileIds": {
+            "description": "Las imágenes, completas y en orden: reemplaza las anteriores. Hasta 3; una nueva tiene que ser un archivo IMAGE subido por quien edita.",
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         },
         "additionalProperties": false
@@ -138211,13 +138729,59 @@
           "requiresPrescription": {
             "type": "object",
             "nullable": true
+          },
+          "unitPrice": {
+            "type": "string",
+            "nullable": true,
+            "example": "12.50",
+            "description": "Precio vigente (lista `CATALOGO`, o el menor de sus listas públicas de mostrador). Texto exacto; `null` = sin precio."
+          },
+          "currency": {
+            "type": "string",
+            "nullable": true,
+            "example": "BOB"
+          },
+          "inStock": {
+            "type": "boolean"
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PUBLISHED",
+              "DRAFT",
+              "WITHDRAWN"
+            ]
+          },
+          "stock": {
+            "type": "number",
+            "nullable": true
+          },
+          "minStock": {
+            "type": "number",
+            "nullable": true
+          },
+          "imageFileIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         },
         "required": [
           "id",
           "pharmacyId",
           "pharmacyName",
-          "productCode"
+          "productCode",
+          "inStock"
         ]
       },
       "CreatePriceListDto": {

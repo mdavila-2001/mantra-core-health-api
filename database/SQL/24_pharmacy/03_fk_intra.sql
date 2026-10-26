@@ -27,6 +27,18 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_categories"
+        ADD CONSTRAINT "fk_pharmacy_product_categories_pharmacy_id" FOREIGN KEY ("pharmacy_id")
+        REFERENCES "pharmacy"."pharmacies" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+    ALTER TABLE "pharmacy"."pharmacy_product_images"
+        ADD CONSTRAINT "fk_pharmacy_product_images_pharmacy_product_id" FOREIGN KEY ("pharmacy_product_id")
+        REFERENCES "pharmacy"."pharmacy_products" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
     ALTER TABLE "pharmacy"."pharmacy_product_identifiers"
         ADD CONSTRAINT "fk_pharmacy_product_identifiers_pharmacy_product_id" FOREIGN KEY ("pharmacy_product_id")
         REFERENCES "pharmacy"."pharmacy_products" ("id");

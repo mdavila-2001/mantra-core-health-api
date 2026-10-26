@@ -71,6 +71,11 @@ export const { seeds: PHARMACY_CONCEPT_SEEDS, ids: PHARM } =
       code: 'PHARM_PRODUCT_RETIRED',
       display: 'Pharmacy product retired',
     },
+    // P47: borrador, sólo lo ve la farmacia; no sale en ninguna lectura pública.
+    PRODUCT_DRAFT: {
+      code: 'PHARM_PRODUCT_DRAFT',
+      display: 'Pharmacy product draft',
+    },
 
     // --- Identificadores de producto (pharmacy_product_identifiers) ---
     IDENTIFIER_TYPE_GTIN: {
