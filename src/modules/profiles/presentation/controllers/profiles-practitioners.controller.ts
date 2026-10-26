@@ -271,8 +271,8 @@ export class ProfilesPractitionersController {
     summary: 'Corregir el perfil profesional de otro (titular o plataforma)',
     description:
       '`403` si quien pide no es el titular ni plataforma. `409` ' +
-      '`NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` si se corrige el documento de ' +
-      'una identidad ya verificada.',
+      '`NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` si se corrige el número del ' +
+      'documento de una identidad verificada o con un caso de verificación en curso.',
   })
   @ApiOkResponse({ type: PractitionerProfileSummaryDto })
   updatePractitionerProfile(

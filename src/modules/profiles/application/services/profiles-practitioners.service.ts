@@ -1386,16 +1386,23 @@ export class ProfilesPractitionersService {
         applyCompany(person, dto);
         touch(person, actor.id);
 
-        if (dto.nationalId !== undefined) {
-          await this.fixNationalId(
+        // Si el número cambia, la fila nueva ya nace con el departamento del
+        // mismo cuerpo; corregirlo además sobre la vieja tocaría una fila
+        // cerrada a la que otros registros todavía apuntan.
+        const documentReplaced =
+          dto.nationalId !== undefined &&
+          (await this.fixNationalId(
             tx,
             person.id,
             dto.nationalId,
             dto.issuerAdministrativeAreaConceptId,
             actor.id,
-          );
-        }
-        if (dto.issuerAdministrativeAreaConceptId !== undefined) {
+            now,
+          ));
+        if (
+          !documentReplaced &&
+          dto.issuerAdministrativeAreaConceptId !== undefined
+        ) {
           await this.fixIssuance(
             tx,
             person.id,
@@ -1537,28 +1544,32 @@ export class ProfilesPractitionersService {
   /**
    * Corrige el número del documento de identidad (P28).
    *
-   * ## Sólo mientras la identidad no está verificada
+   * ## Sólo mientras nadie lo verificó ni lo está verificando
    *
    * Una aserción vigente en `identity_assurance` dice «esta persona es la del
    * documento N». Cambiar N después dejaría la aserción hablando de otro
    * documento, y el guard de identidad verificada seguiría dejando pasar a la
-   * cuenta. Por eso, con aserción vigente, 409: la corrección pasa por un caso
-   * de verificación nuevo, no por el perfil.
+   * cuenta. Lo mismo con un caso de verificación **en curso**: lo que se está
+   * revisando es el número de hoy, y cambiarlo a mitad del caso haría que la
+   * aserción final certifique un documento que nadie miró. En los dos casos,
+   * 409 `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY`: la corrección pasa por un
+   * caso nuevo, no por el perfil.
    *
-   * ## En el lugar, como el departamento
+   * ## Cierra y abre, nunca edita el número en el lugar
    *
-   * Se edita la fila vigente `ID_TYPE_NATIONAL` en vez de cerrarla y abrir
-   * otra: es la corrección de un tipeo del mismo documento, no un documento
-   * nuevo, y otras tablas (`tenant_legal_representatives.ci_identifier_id`)
-   * apuntan a esa fila. El rastro queda en la auditoría de la ruta.
-   *
-   * Si la persona no tiene documento vigente, se crea con la misma forma que
-   * escribe el alta, ya con el departamento del mismo cuerpo si vino (lo valida
-   * `fixIssuance`, que corre después en la misma transacción).
+   * `common.identifiers` lleva vigencia (`valid_to`), y hay registros que
+   * apuntan a la fila del documento (`tenant_legal_representatives.
+   * ci_identifier_id`, `tenant_affiliation_documents.identifier_id`). Cambiar
+   * el valor en el lugar alteraría en silencio lo que esos registros dicen.
+   * Se cierra la fila vigente —quien la referencia sigue viendo el número que
+   * declaró— y se abre otra con el número corregido, el departamento del mismo
+   * cuerpo (o el que tenía) y el mismo uso. Mismo patrón que el NIT.
    *
    * No se comprueba que el número esté libre, igual que en el alta del
    * profesional: la misma cédula de dos departamentos distintos son dos
    * documentos, y por valor solo no se distinguen.
+   *
+   * @returns `true` si abrió una fila nueva (el departamento ya viajó en ella).
    */
   private async fixNationalId(
     tx: EntityManager,
@@ -1566,7 +1577,8 @@ export class ProfilesPractitionersService {
     nationalId: string,
     issuerAdministrativeAreaConceptId: string | undefined,
     actorUserId: string,
-  ): Promise<void> {
+    now: Date,
+  ): Promise<boolean> {
     const rows =
       await this.personRecords.findCurrentIdentifiers<PersonIdentifierRecord>(
         tx,
@@ -1575,29 +1587,42 @@ export class ProfilesPractitionersService {
     const document = rows.find(
       (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
     );
-    if (document?.value === nationalId) return;
-    if (await this.personRecords.hasCurrentIdentityAssertion(tx, personId)) {
+    if (document?.value === nationalId) return false;
+    if (
+      (await this.personRecords.hasCurrentIdentityAssertion(tx, personId)) ||
+      (await this.personRecords.hasOpenIdentityCase(tx, personId))
+    ) {
       throw new ConflictException(
-        'El documento no se puede corregir desde el perfil: su identidad ya está verificada con ese número',
+        'El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número',
         {},
         ProfilesErrorReason.NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY,
       );
     }
-    if (!document) {
-      this.personRecords.createIdentifier(tx, {
-        ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
-        ownerId: personId,
-        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-        value: nationalId,
-        useConceptId: CONCEPTS.USE_OFFICIAL,
-        stateConceptId: CONCEPTS.STATE_ACTIVE,
+    // El departamento se valida antes de escribir nada: fuera de
+    // `VS_BO_DEPARTMENT`, 422 y la fila vigente queda como estaba.
+    if (issuerAdministrativeAreaConceptId !== undefined) {
+      await this.administrativeAreas.assertIsAdministrativeArea(
+        tx,
         issuerAdministrativeAreaConceptId,
-        actorUserId,
-      });
-      return;
+      );
     }
-    document.value = nationalId;
-    touch(document, actorUserId);
+    if (document) {
+      document.validTo = now;
+      touch(document, actorUserId);
+    }
+    this.personRecords.createIdentifier(tx, {
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      ownerId: personId,
+      typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+      value: nationalId,
+      useConceptId: CONCEPTS.USE_OFFICIAL,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+      issuerAdministrativeAreaConceptId:
+        issuerAdministrativeAreaConceptId ??
+        document?.issuerAdministrativeAreaConceptId,
+      actorUserId,
+    });
+    return true;
   }
 
   /**

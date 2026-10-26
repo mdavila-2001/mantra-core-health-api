@@ -12,7 +12,6 @@ import { Identifiers } from '../../src/modules/common/entities';
 import { Persons } from '../../src/modules/profiles/entities';
 import { boDepartmentConceptId } from '../../src/common/seed/bo-geography.catalog';
 import { IDA } from '../../src/modules/identity_assurance/identity_assurance.concepts';
-import { IDENTITY_CARD_VERTICAL } from '../../src/modules/identity_assurance/identity_assurance.seed';
 
 /**
  * P28 · el perfil del médico corrige los datos de su registro: sexo al nacer,
@@ -119,13 +118,21 @@ describe('P28 · datos del registro editables desde el perfil del médico (integ
       workEmail: correo,
     });
 
-    // En la base: una sola fila vigente, corregida en el lugar.
+    // En la base: una sola fila vigente, la nueva; la vieja queda cerrada y
+    // con su número intacto — quien la referencia sigue viendo lo declarado.
     const filas = await documentoVigente(titular.personId);
     expect(filas).toHaveLength(1);
     expect(filas[0]).toMatchObject({
       value: corregida,
       issuerAdministrativeAreaConceptId: lapaz,
     });
+    const todas = await ctx.orm.em.fork().find(Identifiers, {
+      ownerId: titular.personId,
+      typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+    });
+    expect(todas).toHaveLength(2);
+    const cerrada = todas.find((fila) => fila.validTo !== null);
+    expect(cerrada?.value).toBe(identidadProfesional(titular.email).nationalId);
     const persona = await ctx.orm.em
       .fork()
       .findOneOrFail(Persons, { id: titular.personId });
@@ -194,33 +201,76 @@ describe('P28 · datos del registro editables desde el perfil del médico (integ
     expect(propio.body.nationalId).toBe(porAdmin);
   });
 
-  it('con la identidad verificada el número responde 409 y no se toca; el departamento sigue corrigiéndose', async () => {
-    // Verificación real por el circuito de identity_assurance: caso, checks,
-    // revisión manual y aprobación — la aserción vigente que mira el guard.
-    const caso = await http()
-      .post('/identity/verification-cases')
-      .set(bearer(ctx.adminToken))
+  it('con un caso de verificación en curso y después verificada, el número responde 409 y no se toca; el departamento sigue corrigiéndose', async () => {
+    // Verificación real por el circuito de autoservicio de identity_assurance,
+    // el mismo que usa el médico: abre su caso con la foto del carnet, el
+    // worker despacha el check y la autoridad responde.
+    const archivo = await http()
+      .post('/common/files')
+      .set(bearer(titular.token))
       .send({
-        identityVerificationPolicyId: IDENTITY_CARD_VERTICAL.policyId,
-        subjectTypeConceptId: IDA.SUBJECT_PRACTITIONER_IDENTITY,
-        subjectEntityId: titular.personId,
+        originalName: 'documento.jpg',
+        category: 'DOCUMENT',
+        // La evidencia de identidad se exige protegida (PHI).
+        sensitivity: 'PHI',
+        mimeType: 'image/jpeg',
+        sizeBytes: 4096,
+        contentHash: `p28-hash-${marca}`,
+        storageUri: 's3://bucket/p28-documento.jpg',
       })
       .expect(201);
-    await http()
-      .post(`/identity/verification-cases/${caso.body.id}/checks:plan`)
-      .set(bearer(ctx.adminToken))
-      .send({ checks: [{ checkTypeConceptId: IDA.CHECK_TYPE_IDENTITY_CARD }] })
+    const abierto = await http()
+      .post('/identity/me/practitioner/identity-verification')
+      .set(bearer(titular.token))
+      .send({ evidenceFileId: archivo.body.id })
       .expect(201);
-    const revision = await http()
-      .post(`/identity/verification-cases/${caso.body.id}/manual-review`)
-      .set(bearer(ctx.adminToken))
-      .send({ reviewReasonConceptId: CONCEPTS.STATE_ACTIVE })
-      .expect(201);
-    await http()
-      .post(`/identity/manual-review/${revision.body.id}/decision`)
-      .set(bearer(ctx.adminToken))
-      .send({ decision: 'APPROVED', decisionReason: 'Documento legible' })
-      .expect(200);
+
+    // Con el caso en curso —todavía nada verificado— el número ya no se
+    // toca: lo que se está revisando es el de hoy.
+    const [enCaso] = await documentoVigente(titular.personId);
+    const enCurso = await http()
+      .patch('/profiles/practitioners/me')
+      .set(bearer(titular.token))
+      .send({ nationalId: 'MEDENCASO1' })
+      .expect(409);
+    expect(enCurso.body.reason).toBe('NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY');
+    const [trasCaso] = await documentoVigente(titular.personId);
+    expect(trasCaso.id).toBe(enCaso.id);
+    expect(trasCaso.value).toBe(enCaso.value);
+
+    // Cierre del caso con su aserción, escrito como fixture en la base real.
+    // El despacho por `/internal/identity/checks/:id/attempts` responde 422
+    // al administrador de pruebas para un caso de autoservicio de otro tenant
+    // (registrado en el REPORTE); lo que este test necesita es el estado
+    // final que deja ese circuito: caso ASSERTED y una aserción vigente sobre
+    // la persona, con las mismas columnas que escribe `IdentityChecksService`.
+    await ctx.orm.em
+      .fork()
+      .getConnection()
+      .execute(
+        `update identity_assurance.identity_verification_cases
+            set status_concept_id = ?, updated_at = now()
+          where id = ?`,
+        [IDA.CASE_ASSERTED, abierto.body.caseId],
+      );
+    await ctx.orm.em
+      .fork()
+      .getConnection()
+      .execute(
+        `insert into identity_assurance.identity_assertions
+           (id, identity_verification_case_id, issuer_identity_authority_id,
+            subject_type_concept_id, subject_entity_id, assertion_type_concept_id,
+            assurance_level_concept_id, issued_at, expires_at, created_at)
+         select gen_random_uuid(), ?, (select id from identity_assurance.identity_authorities order by id limit 1),
+                ?, ?, ?, ?, now(), now() + interval '1 year', now()`,
+        [
+          abierto.body.caseId,
+          IDA.SUBJECT_PRACTITIONER_IDENTITY,
+          titular.personId,
+          IDA.ASSERTION_IDENTITY,
+          IDA.ASSURANCE_LEVEL_IAL2,
+        ],
+      );
 
     const leido = await http()
       .get('/profiles/practitioners/me/summary')

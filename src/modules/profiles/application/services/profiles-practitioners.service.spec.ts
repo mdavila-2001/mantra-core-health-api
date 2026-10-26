@@ -235,6 +235,7 @@ function build() {
   };
   const personRecords = {
     hasCurrentIdentityAssertion: mockFn().mockResolvedValue(false),
+    hasOpenIdentityCase: mockFn().mockResolvedValue(false),
     findCurrentContact: mockFn((...args: any[]) =>
       args[3] === undefined
         ? contactPointsRepo.findCurrentByOwnerAndSystem(...args.slice(0, 3))
@@ -4187,13 +4188,14 @@ describe('ProfilesPractitionersService', () => {
       });
     }
 
-    it('corrige el número en la fila vigente si la identidad no está verificada', async () => {
+    it('cierra la fila vigente y abre otra con el número corregido, sin tocar la vieja', async () => {
       const d = build();
       withOwnProfile(d);
-      const document = {
+      const document: Record<string, unknown> = {
         typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
         value: '765432',
         issuerAdministrativeAreaConceptId: 'LP',
+        validTo: null,
       };
       d.tx.find.mockResolvedValue([document]);
 
@@ -4202,8 +4204,64 @@ describe('ProfilesPractitionersService', () => {
         actor,
       );
 
-      expect(document.value).toBe('7654321');
-      expect(document.issuerAdministrativeAreaConceptId).toBe('LP');
+      // La fila vieja conserva su número —quien la referencia sigue viendo lo
+      // que declaró— y queda cerrada.
+      expect(document.value).toBe('765432');
+      expect(document.validTo).toBeInstanceOf(Date);
+      expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'p1',
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: '7654321',
+          issuerAdministrativeAreaConceptId: 'LP',
+        }),
+      );
+    });
+
+    it('con un caso de verificación en curso responde 409 y no escribe', async () => {
+      const d = build();
+      withOwnProfile(d);
+      const document: Record<string, unknown> = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '765432',
+        validTo: null,
+      };
+      d.tx.find.mockResolvedValue([document]);
+      d.personRecords.hasOpenIdentityCase.mockResolvedValue(true);
+
+      const error = await d.service
+        .updateOwnPractitionerProfile({ nationalId: '7654321' }, actor)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect((error as ConflictException).getResponse()).toMatchObject({
+        reason: 'NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY',
+      });
+      expect(document.validTo).toBeNull();
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un departamento fuera de catálogo junto al número responde 422 sin cerrar la fila', async () => {
+      const d = build();
+      withOwnProfile(d);
+      const document: Record<string, unknown> = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '765432',
+        validTo: null,
+      };
+      d.tx.find.mockResolvedValue([document]);
+      d.administrativeAreas.assertIsAdministrativeArea.mockRejectedValue(
+        new PreconditionFailedException('no es departamento'),
+      );
+
+      await expect(
+        d.service.updateOwnPractitionerProfile(
+          { nationalId: '7654321', issuerAdministrativeAreaConceptId: 'MUNI' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(document.validTo).toBeNull();
       expect(d.identifiersRepo.create).not.toHaveBeenCalled();
     });
 

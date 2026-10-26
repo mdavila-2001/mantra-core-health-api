@@ -199,11 +199,12 @@ export class UpdateOwnPractitionerProfileDto {
    * Número del documento de identidad (P28). Mismo formato que el alta
    * (`RegisterPractitionerDto.nationalId`): letras, dígitos, punto y guion.
    *
-   * Se corrige mientras la identidad de la persona **no** está verificada: un
-   * error de tipeo en la cédula tiene que tener dónde arreglarse. Con una
-   * aserción de identidad vigente responde 409
-   * `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` — lo verificado es ese número, y
-   * cambiarlo dejaría la aserción hablando de otro documento.
+   * Se corrige mientras la identidad de la persona **no** está verificada ni
+   * en verificación: un error de tipeo en la cédula tiene que tener dónde
+   * arreglarse. Con una aserción vigente o un caso abierto responde 409
+   * `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` — lo verificado (o lo que se está
+   * verificando) es ese número. La fila vieja se cierra y se abre otra: lo que
+   * apunta a la vieja no cambia.
    *
    * No se puede borrar: el alta del profesional lo exige. No toca la cuenta: el
    * profesional entra con su correo, no con la CI.
@@ -211,7 +212,7 @@ export class UpdateOwnPractitionerProfileDto {
   @ApiPropertyOptional({
     maxLength: 40,
     description:
-      'Número del documento de identidad. 409 si la identidad ya está verificada.',
+      'Número del documento de identidad. 409 si la identidad está verificada o en verificación.',
   })
   @IsOptional()
   @IsString()
