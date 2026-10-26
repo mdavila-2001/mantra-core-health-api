@@ -4,7 +4,8 @@
   `justin/l41-f4-drug-safety-test` (sobre `origin/test`)
 - Peldaño de evidencia alcanzado: **TESTED**. Tests dirigidos en verde sobre fixtures reales. **La carga en base
   (`--load`, `--load --dry-run`) NO se ejecutó**: en este entorno no hay Postgres ni `cima.ndjson`.
-- Avance: 11 / 12 microtareas HECHO (91,7 %) al escribir este reporte; H4.S1.M2 (push + PR) EN CURSO.
+- Avance: 12 / 12 microtareas HECHO (100 % de lo planificado). Eso no incluye la carga en base, que no se ejecutó.
+- PR: https://github.com/mdavila-2001/mantra-core-health-api/pull/992 (dev) · https://github.com/mdavila-2001/mantra-core-health-api/pull/993 (test)
   F4.4 (LINAME) queda **BLOQUEADO** con evidencia; la carga de interacciones 4.5 queda **BLOQUEADA** (ver Pendiente).
 
 Se continuó el commit WIP `af13a79b` (agente interrumpido, sin verificar), no se reinició. Se verificó todo lo que
@@ -24,13 +25,10 @@ afirmaba y se corrigió lo que no se sostenía (ver Desvíos).
 | H2.S1.M3 | Términos NCBI/NLM verificados y registrados | `curl` + `node --test` | citas coinciden; `ok` «LactMed y LINAME registrados» |
 | H3.S1.M1 | Búsqueda de LINAME en minsalud.gob.bo registrada | `curl …com_finder…` | sólo 2018-2020; 2022/2024/2025 «No se han encontrado resultados» |
 | H4.S1.M1 | Gates | ver Evidencia | todos `EXIT=0` |
+| H4.S1.M2 | Commits limpios en dev y test, push, 2 PR | `git push`, PR | #992, #993 |
 
 ## A medias
-### H4.S1.M2 — Commits, push y PR
-- Qué anda: commits limpios sobre `origin/dev` y `origin/test`.
-- Qué no anda: —
-- Qué falta exactamente: push de las dos ramas y apertura de los dos PR; los enlaces se agregan a este reporte.
-- Dónde quedó: ramas locales `justin/l41-f4-drug-safety-dev` y `justin/l41-f4-drug-safety-test`.
+ninguna
 
 ## Pendiente
 | ID | Estado | Qué lo destraba |

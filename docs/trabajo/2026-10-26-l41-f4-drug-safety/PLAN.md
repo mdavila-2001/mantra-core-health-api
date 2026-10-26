@@ -66,7 +66,7 @@ nada se reconstruye desde terceros.
 | ID | Microtarea | CA | DoD | Estado |
 |---|---|---|---|---|
 | H4.S1.M1 | Gates | salida 0 | `corepack yarn install --immutable`, `typecheck`, `lint` | HECHO |
-| H4.S1.M2 | Commits limpios sobre origin/dev y origin/test, push, 2 PR | PR abiertos | `git log`, URLs de PR | EN CURSO |
+| H4.S1.M2 | Commits limpios sobre origin/dev y origin/test, push, 2 PR | PR abiertos | `git log`, URLs de PR | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
