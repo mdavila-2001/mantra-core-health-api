@@ -389,9 +389,12 @@ export class PractitionerSimpleAccountingService {
   /**
    * Siembra las 26 cuentas generales de la práctica si todavía no las tiene.
    *
-   * Idempotente. Si dos pedidos simultáneos llegan a sembrar, la restricción
-   * única `(practice_id, code)` hace fallar al segundo y el reintento del
-   * cliente ya las encuentra: nunca quedan duplicadas.
+   * Idempotente y segura ante pedidos simultáneos: la siembra es un
+   * `INSERT … ON CONFLICT (practice_id, code) DO NOTHING`
+   * ({@link PractitionerSimpleAccountingRepository.seedAccounts}), de modo que si
+   * dos pedidos llegan a la vez al primer acceso ninguno falla contra el UNIQUE y
+   * la práctica queda con cada cuenta general una sola vez. Nunca pisa una fila
+   * existente: un renombre del doctor sobrevive.
    */
   private async ensureGeneralAccounts(
     em: EntityManager,
@@ -399,17 +402,7 @@ export class PractitionerSimpleAccountingService {
     actorUserId: string,
   ): Promise<void> {
     if ((await this.repo.countSeededAccounts(em, practiceId)) > 0) return;
-    for (const [code, name, accountClass] of GENERAL_ACCOUNTS) {
-      this.repo.createAccount(em, {
-        practiceId,
-        code,
-        name,
-        accountClass,
-        seeded: true,
-        actorUserId,
-      });
-    }
-    await em.flush();
+    await this.repo.seedAccounts(em, practiceId, GENERAL_ACCOUNTS, actorUserId);
   }
 
   private async requireAccount(
