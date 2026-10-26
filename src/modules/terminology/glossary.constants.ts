@@ -150,6 +150,36 @@ export type GlossaryRelationDirection = 'outgoing' | 'incoming';
 export const GLOSSARY_RELATION_DIRECTIONS: readonly GlossaryRelationDirection[] =
   ['outgoing', 'incoming'];
 
+/**
+ * Niveles de evidencia de una relación (TAREA-41 §3.1): los códigos de
+ * `VS_EVIDENCE_TIER`, del más fuerte (T1) al más débil (T4). El vecindario
+ * publica el mejor nivel de cada relación (`best_evidence_tier_concept_id`).
+ */
+export const GLOSSARY_EVIDENCE_TIERS = [
+  'NATIONAL_STANDARD',
+  'CURATED_REFERENCE',
+  'COLLABORATIVE_KNOWLEDGE',
+  'STATISTICAL_LITERATURE',
+] as const;
+export type GlossaryEvidenceTier = (typeof GLOSSARY_EVIDENCE_TIERS)[number];
+
+/**
+ * Frecuencia de un hallazgo en una enfermedad: los códigos de
+ * `VS_RELATIONSHIP_FREQUENCY` (HPO HP:0040280 a HP:0040285). `EXCLUDED` no es
+ * una relación positiva: la fuente **descarta** el hallazgo, y el vecindario
+ * lo publica con esa frecuencia en vez de esconderlo (TAREA-41 F1.4).
+ */
+export const GLOSSARY_RELATION_FREQUENCIES = [
+  'OBLIGATE',
+  'VERY_FREQUENT',
+  'FREQUENT',
+  'OCCASIONAL',
+  'VERY_RARE',
+  'EXCLUDED',
+] as const;
+export type GlossaryRelationFrequency =
+  (typeof GLOSSARY_RELATION_FREQUENCIES)[number];
+
 /** Tipo de relación (API) -> concepto `terminology:relationship:*`. */
 const GLOSSARY_RELATION_TYPE_CONCEPT_ID: Readonly<
   Record<GlossaryRelationType, string>
