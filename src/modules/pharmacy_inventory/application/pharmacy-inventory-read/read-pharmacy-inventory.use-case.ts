@@ -206,7 +206,7 @@ export class ReadPharmacyInventoryUseCase {
     const sites = await this.pharmacyRepo.findActiveSites(em, ownerIds);
 
     const now = new Date();
-    const [availabilityRows, allPriceLists, practiceContext] =
+    const [availabilityRows, locations, allPriceLists, practiceContext] =
       await Promise.all([
         // La regla única de existencias por sede (A1): lotes si la sede los
         // lleva, lo declarado en el catálogo si no.
@@ -215,17 +215,35 @@ export class ReadPharmacyInventoryUseCase {
           sites.map((site) => site.id),
           products.map((product) => product.id),
         ),
+        this.inventoryRepo.findActiveLocationsBySites(
+          em,
+          sites.map((site) => site.id),
+        ),
         this.pharmacyRepo.findCurrentPublicPriceLists(em, ownerIds, now),
         this.resolveAddresses(em, sites),
       ]);
     // El repo ya excluye lo ligado a aseguradora; el filtro acá vuelve a
     // afirmarlo: al directorio sólo llega precio de mostrador.
     const priceLists = allPriceLists.filter(isRetailList);
-    const prices = await this.pharmacyRepo.findCurrentPrices(
-      em,
-      priceLists.map((list) => list.id),
-      products.map((product) => product.id),
-      now,
+    // Las posiciones del libro ya no deciden qué hay (eso es la regla de
+    // arriba): sólo fechan lo que respalda el stock de cada sede que lleva
+    // lotes (`stockUpdatedAt`). Una sede sin lotes no tiene posiciones, y su
+    // fecha queda en `null`: no se inventa una antigüedad.
+    const [positions, prices] = await Promise.all([
+      this.inventoryRepo.findStockPositions(
+        em,
+        locations.map((location) => location.id),
+        products.map((product) => product.id),
+      ),
+      this.pharmacyRepo.findCurrentPrices(
+        em,
+        priceLists.map((list) => list.id),
+        products.map((product) => product.id),
+        now,
+      ),
+    ]);
+    const siteByLocation = new Map(
+      locations.map((location) => [location.id, location.pharmacySiteId]),
     );
     const concepts = await this.pharmacyRepo.findConcepts(
       em,

@@ -184,6 +184,12 @@ describe('PharmacyInventoryReadService', () => {
           name: 'Sede Lejos',
         },
       ]);
+      // Cada sede tiene su ubicación: las posiciones sólo fechan lo
+      // disponible (`stockUpdatedAt`); qué hay lo decide la regla de abajo.
+      d.inventoryRepo.findActiveLocationsBySites.mockResolvedValue([
+        { id: 'loc-cerca', pharmacySiteId: 'site-cerca' },
+        { id: 'loc-lejos', pharmacySiteId: 'site-lejos' },
+      ]);
       // Como el repo real (regla única de existencias por sede, A1): sólo
       // filas disponibles, con la cantidad de la sede.
       d.inventoryRepo.findSiteProductAvailability.mockImplementation(
