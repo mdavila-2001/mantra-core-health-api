@@ -188,7 +188,8 @@ export class ReadPharmacyInventoryUseCase {
     // o retirado simplemente no aparece — y contará como faltante en cada sede.
     const [pharmacies, requested] = await Promise.all([
       this.pharmacyRepo.findVisibleByTenant(em, tenantId),
-      this.pharmacyRepo.findActiveProductsByIds(em, productIds),
+      // Lo que la farmacia marcó «no tengo» no surte un pedido (P47).
+      this.pharmacyRepo.findSellableProductsByIds(em, productIds),
     ]);
     const visiblePharmacyIds = new Set(
       pharmacies.map((pharmacy) => pharmacy.id),
