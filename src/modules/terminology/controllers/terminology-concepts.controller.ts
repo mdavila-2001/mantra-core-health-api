@@ -338,6 +338,7 @@ export class TerminologyConceptsController {
    *
    * @param conceptId - Término a leer.
    * @param lang - Idioma preferido de los textos.
+   * @param user - Usuario autenticado: decide si ve las propiedades `professional`.
    * @returns La ficha completa del término.
    */
   @Get(':conceptId')
@@ -354,9 +355,14 @@ export class TerminologyConceptsController {
   })
   readConcept(
     @Param('conceptId', ParseUUIDPipe) conceptId: string,
+    @CurrentUser() user: AuthenticatedUser,
     @Query('lang') lang?: string,
   ): Promise<ConceptDetailDto> {
-    return this.conceptsService.readConcept(conceptId, parseLanguage(lang));
+    return this.conceptsService.readConcept(
+      conceptId,
+      parseLanguage(lang),
+      user,
+    );
   }
 
   /**
