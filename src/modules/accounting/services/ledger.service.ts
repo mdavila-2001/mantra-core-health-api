@@ -175,9 +175,10 @@ export class LedgerService {
    *   - ROL: el controlador lo restringe a `SECURITY_ADMIN` (`@Roles`), el mismo
    *     rol con autoridad de aprobación; equivale a auto-aprobar el asiento.
    *   - IDEMPOTENCIA: `transactionNumber` es único por práctica (409 si se repite),
-   *     de modo que un reintento no duplica el asiento. El índice único del DDL
-   *     cubre hoy sólo `transaction_number`: su violación (otra práctica o una
-   *     carrera) se traduce al mismo 409 en `flushJournalHeader`.
+   *     de modo que un reintento no duplica el asiento. El mismo número en otra
+   *     práctica es válido (el índice único es `(practice_id, transaction_number)`);
+   *     la carrera entre dos altas del mismo número en la misma práctica viola ese
+   *     índice y se traduce al mismo 409 en `flushJournalHeader`.
    * El posteo efectivo (líneas del mayor + `postedAt`) ocurre aquí, igual que en
    * `post`, aplicando las mismas validaciones (balance de partida doble y periodo
    * ABIERTO).

@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -47,6 +48,7 @@ import {
   AssistedPractitionerRegistrationResponseDto,
   AssistedRegistrationDto,
   AssistedRegistrationResponseDto,
+  SearchUsersBodyDto,
   SearchUsersResponseDto,
   UserDetailResponseDto,
   ListCredentialsResponseDto,
@@ -94,6 +96,10 @@ export class IamUsersController {
    * Se declara antes que las rutas con parámetro para que ninguna de ellas capture
    * un segmento fijo.
    *
+   * Obsoleto: el cliente usa `POST /iam/users/search`, que lleva el texto en el
+   * cuerpo. Se conserva sólo por compatibilidad, con los mismos roles, filtros
+   * y respuesta.
+   *
    * @param query - Texto sobre el nombre visible o el sujeto de la credencial.
    * @param statusConceptId - Estado al que acotar.
    * @param cursor - Cursor opaco de la página anterior.
@@ -102,7 +108,12 @@ export class IamUsersController {
    */
   @Get()
   @Roles('SECURITY_ADMIN')
-  @ApiOperation({ summary: 'Listado paginado de usuarios' })
+  @ApiOperation({
+    summary: 'Listado paginado de usuarios (obsoleto)',
+    description:
+      'Obsoleto: usar `POST /iam/users/search`. Un nombre o un correo en la query string queda en los logs de acceso de cualquier proxy.',
+    deprecated: true,
+  })
   @ApiQuery({
     name: 'q',
     required: false,
@@ -135,6 +146,44 @@ export class IamUsersController {
       statusConceptId,
       cursor,
       limit: limit ?? DEFAULT_USERS_PAGE_SIZE,
+    });
+  }
+
+  /**
+   * UC-01-01 (cara de lectura): listado paginado de usuarios, con los filtros
+   * en el cuerpo.
+   *
+   * Existe porque el texto de búsqueda es un nombre o un correo, y los
+   * parámetros de la URL quedan en los logs de acceso de cualquier proxy, en el
+   * historial del navegador y en el `Referer`. Es el camino que usa el cliente
+   * (por ejemplo, para elegir al owner en el alta administrativa de una
+   * organización); el `GET /iam/users` sigue vivo, obsoleto.
+   *
+   * Responde `200` y no `201`: no crea nada. Va declarada antes que cualquier
+   * ruta `:id`: Nest las resuelve por orden de declaración. Los filtros, los
+   * límites y el tope por defecto son los del `GET`; una clave de más responde
+   * `400`.
+   *
+   * @param body - Filtros de la búsqueda.
+   * @returns Página de usuarios.
+   */
+  @Post('search')
+  @HttpCode(HttpStatus.OK)
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'Listado paginado de usuarios, con los filtros en el cuerpo',
+    description:
+      'Igual que `GET /iam/users`, pero el texto de búsqueda viaja en el cuerpo y no en la URL. Una clave no declarada responde 400.',
+  })
+  @ApiOkResponse({ type: SearchUsersResponseDto })
+  searchUsersByBody(
+    @Body() body: SearchUsersBodyDto,
+  ): Promise<SearchUsersResponseDto> {
+    return this.usersReadService.searchUsers({
+      query: body.q,
+      statusConceptId: body.status,
+      cursor: body.cursor,
+      limit: body.limit ?? DEFAULT_USERS_PAGE_SIZE,
     });
   }
 

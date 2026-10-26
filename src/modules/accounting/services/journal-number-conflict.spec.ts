@@ -15,7 +15,9 @@ import { flushJournalHeader } from './journal-number-conflict';
 import { LedgerService } from './ledger.service';
 import { buildScope, inTenant } from './accounting-scope.testing';
 
-const NUMBER_INDEX = 'uq_journal_transactions_transaction_number';
+const NUMBER_INDEX = 'uq_journal_transactions_practice_id_transaction_number';
+/** Índice global que el patch 2026-10-24 retira: ya no respalda el número. */
+const RETIRED_GLOBAL_INDEX = 'uq_journal_transactions_transaction_number';
 
 /**
  * Error de base como lo entrega el driver: SQLSTATE y restricción en el error,
@@ -33,7 +35,8 @@ function dbError(code: string, constraint: string): Error {
     {
       code,
       constraint,
-      detail: 'Key (transaction_number)=(JT-1) already exists.',
+      detail:
+        'Key (practice_id, transaction_number)=(p1, JT-1) already exists.',
     },
   );
 }
@@ -100,6 +103,13 @@ describe('flushJournalHeader (ACC-02)', () => {
     await expect(flushJournalHeader(tx as any, 'JT-1')).rejects.toBe(other);
   });
 
+  it('el índice global retirado ya no se traduce: el número es único por práctica', async () => {
+    const retired = dbError('23505', RETIRED_GLOBAL_INDEX);
+    const tx = { flush: mockFn().mockRejectedValue(retired) };
+
+    await expect(flushJournalHeader(tx as any, 'JT-1')).rejects.toBe(retired);
+  });
+
   it('un fallo de base que no es de unicidad se propaga intacto', async () => {
     const other = dbError('40001', NUMBER_INDEX);
     const tx = { flush: mockFn().mockRejectedValue(other) };
@@ -121,8 +131,8 @@ describe('LedgerService · número de asiento duplicado en la base (ACC-02)', ()
   } as any;
 
   /**
-   * Servicio con un `flush` que choca con el índice del número, como pasa con el
-   * mismo número en otra práctica o en una carrera.
+   * Servicio con un `flush` que choca con el índice del número, como pasa en la
+   * carrera entre dos altas del mismo número en la misma práctica.
    *
    * @returns El servicio y los dobles que importan.
    */
@@ -135,7 +145,7 @@ describe('LedgerService · número de asiento duplicado en la base (ACC-02)', ()
       fork: mockFn(() => tx),
     };
     const journalRepo = {
-      // La lectura previa es por práctica: no ve el número de otra práctica.
+      // La lectura previa no ve el alta concurrente que aún no se confirmó.
       findByTransactionNumber: mockFn().mockResolvedValue(null),
       createTransaction: mockFn((_em: any, d: any) => ({ id: 't1', ...d })),
       createLedgerEntry: mockFn(),
@@ -169,7 +179,7 @@ describe('LedgerService · número de asiento duplicado en la base (ACC-02)', ()
     return { service, journalRepo, auditTrail };
   }
 
-  it('postJournal: el mismo número en otra práctica responde 409 catalogado, no error de base', async () => {
+  it('postJournal: la carrera sobre el mismo número en la práctica responde 409 catalogado, no error de base', async () => {
     const d = build();
 
     const error = await rejection(d.service.postJournal(body, actor));
@@ -191,6 +201,18 @@ describe('LedgerService · número de asiento duplicado en la base (ACC-02)', ()
     const b = await rejection(byDatabase.service.postJournal(body, actor));
 
     expect(b.getResponse()).toEqual(a.getResponse());
+  });
+
+  it('la lectura previa busca el número dentro de la práctica del asiento', async () => {
+    const d = build();
+
+    await rejection(d.service.postJournal(body, actor));
+
+    expect(d.journalRepo.findByTransactionNumber).toHaveBeenCalledWith(
+      expect.anything(),
+      'p1',
+      'JT-1',
+    );
   });
 
   it('createDraft: la carrera sobre el mismo número responde 409 catalogado', async () => {

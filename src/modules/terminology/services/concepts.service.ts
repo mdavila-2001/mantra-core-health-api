@@ -58,6 +58,11 @@ import {
   type RankedNeighbor,
 } from './glossary-neighbor-evidence';
 import {
+  sourceAgeOf,
+  visibleProperties,
+  type Viewer,
+} from '../pharmacology-audience';
+import {
   LANGUAGE_CONCEPT_BY_CODE,
   definitionPropertyCode,
 } from '../terminology.constants';
@@ -577,10 +582,18 @@ export class ConceptsService {
    * `system` es la URL canónica del sistema de códigos, y el concepto se resuelve
    * contra su versión vigente: una versión borrador todavía no está sellada y sus
    * códigos pueden cambiar.
+   *
+   * Las propiedades con `audience: 'professional'` (las secciones de farmacología
+   * clínica, la posología incluida) solo las ve un sujeto con rol clínico; sin
+   * `actor` no se entrega ninguna. Las secciones llevan además `sourceAge`
+   * (antigüedad del dato) para el estado S7 del front.
+   *
+   * @param actor - Sujeto que consulta; decide qué propiedades puede ver.
    */
   async lookupConcept(
     system: string,
     code: string,
+    actor?: Viewer,
   ): Promise<LookupResponseDto> {
     this.logger.info(
       { operation: 'terminology.concept.lookup', system, code },
@@ -644,11 +657,15 @@ export class ConceptsService {
         languageConceptId: designation.languageConceptId,
         preferred: designation.preferred,
       })),
-      properties: properties.map((property) => ({
-        propertyCode: property.propertyCode,
-        dataType: property.dataType,
-        valueJson: property.valueJson,
-      })),
+      properties: visibleProperties(properties, actor).map((property) => {
+        const sourceAge = sourceAgeOf(property.valueJson);
+        return {
+          propertyCode: property.propertyCode,
+          dataType: property.dataType,
+          valueJson: property.valueJson,
+          ...(sourceAge === undefined ? {} : { sourceAge }),
+        };
+      }),
     };
   }
 
@@ -1440,11 +1457,14 @@ export class ConceptsService {
    *
    * @param conceptId - Término a leer.
    * @param language - Idioma preferido de los textos.
+   * @param actor - Sujeto que consulta. Las propiedades `professional` (secciones de
+   * farmacología clínica) se omiten salvo que tenga un rol clínico; sin `actor`, se omiten.
    * @returns La ficha, con sus etiquetas y sinónimos.
    */
   async readConcept(
     conceptId: string,
     language?: DesignationLanguage,
+    actor?: Viewer,
   ): Promise<ConceptDetailDto> {
     this.logger.info(
       { operation: 'terminology.concept.read', conceptId, language },
@@ -1487,7 +1507,10 @@ export class ConceptsService {
     const { category, tags } = splitCategoryAndTags(conceptLabels);
     const glossaryText = glossaryTexts.get(conceptId);
     const propertyList: Record<string, unknown> = Object.fromEntries(
-      properties.map((property) => [property.propertyCode, property.valueJson]),
+      visibleProperties(properties, actor).map((property) => [
+        property.propertyCode,
+        property.valueJson,
+      ]),
     );
     const image = imageFromProperty(
       propertyList[GLOSSARY_IMAGE_PROPERTY_CODE],

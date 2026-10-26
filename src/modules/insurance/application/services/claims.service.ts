@@ -41,6 +41,7 @@ import {
 } from '../../presentation/dto';
 import { LinkedClaimOrderService } from './linked-claim-order.service';
 import { ClaimCoveragePolicy } from './claim-coverage-policy';
+import { ClaimCareRelationshipGate } from './claim-care-relationship-gate';
 import {
   LinkedClaimAccessService,
   assertLegacyClaimRoles,
@@ -72,6 +73,7 @@ export class ClaimsService {
     private readonly linkedOrders: LinkedClaimOrderService,
     private readonly linkedAccess: LinkedClaimAccessService,
     private readonly coveragePolicy: ClaimCoveragePolicy,
+    private readonly careGate: ClaimCareRelationshipGate,
   ) {
     this.logger.setContext(ClaimsService.name);
   }
@@ -150,6 +152,16 @@ export class ClaimsService {
         );
         if (!coverage)
           throw new ResourceNotFoundException('Cobertura no encontrada');
+        // El paciente de la cobertura tiene que tener relación asistencial
+        // vigente con la organización que cobra (REQ-16-035). Va antes de
+        // cualquier comprobación que hable de la cobertura, y su fallo es el
+        // mismo 404 de «no existe».
+        await this.careGate.assertCareRelationship(
+          tx,
+          coverage,
+          requireTenantId(),
+          new Date(),
+        );
         const plan = await this.catalog.findPlanForCarrier(
           tx,
           coverage.insurancePlanId,
@@ -317,6 +329,8 @@ export class ClaimsService {
    *
    * La cobertura y el plan se contrastan después contra la aseguradora indicada
    * (`findPlanForCarrier`) y las líneas contra el plan (`ClaimCoveragePolicy`).
+   * Antes, `ClaimCareRelationshipGate` exige que el paciente de la cobertura
+   * tenga una relación asistencial vigente con el tenant que cobra.
    *
    * @param tx - Transacción activa.
    * @param actor - Quien presenta el reclamo.

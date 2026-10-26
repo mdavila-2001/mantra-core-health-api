@@ -512,6 +512,181 @@ describe('ConceptsService', () => {
     });
   });
 
+  /**
+   * Farmacología clínica (issue 824): las secciones se cargan con
+   * `audience: 'professional'`, la posología incluida, y solo las ve un rol
+   * clínico. Las que CIMA publica sin fecha llevan `versionUnpublished` y la
+   * lectura las expone como antigüedad desconocida (estado S7).
+   */
+  describe('farmacología clínica: audiencia y antigüedad', () => {
+    const section = (key: string, document: Record<string, unknown>) => ({
+      key,
+      audience: 'professional',
+      language: 'es',
+      text: `texto de ${key}`,
+      retrievedAt: '2026-10-24T17:00:00.000Z',
+      document: { type: 'ficha-tecnica', id: '15419', ...document },
+    });
+    const posology = section('posology', {
+      version: '2026-04-16T10:00:00.000Z',
+    });
+    const undated = section('indications', {
+      version: null,
+      revisionDateInText: null,
+      versionUnpublished: true,
+    });
+    const properties = [
+      {
+        propertyCode: 'pharmacology_atc_level',
+        dataType: 'integer',
+        valueJson: 5,
+      },
+      {
+        propertyCode: 'pharmacology_section_posology',
+        dataType: 'json',
+        valueJson: posology,
+      },
+      {
+        propertyCode: 'pharmacology_section_indications',
+        dataType: 'json',
+        valueJson: undated,
+      },
+    ];
+
+    const buildLookup = () => {
+      const built = build();
+      built.codeSystemsRepo.findByCanonicalUrl.mockResolvedValue({
+        id: 'cs-1',
+      });
+      built.versionsRepo.findDefaultActiveVersion.mockResolvedValue({
+        id: 'v-1',
+      });
+      built.conceptsRepo.findByVersionAndCode.mockResolvedValue({
+        id: 'concept-1',
+        code: 'J01CE09',
+        display: 'Penicilina procaina',
+        stateConceptId: CONCEPTS.TERM_ACTIVE,
+      });
+      built.designationsRepo.findByConcept.mockResolvedValue([]);
+      built.designationsRepo.findPropertiesByConcept.mockResolvedValue(
+        properties,
+      );
+      return built;
+    };
+
+    it.each([
+      ['CLINICIAN', ['CLINICIAN']],
+      ['PRACTITIONER', ['USER', 'PRACTITIONER']],
+      ['SURGEON', ['SURGEON']],
+      ['SUPERADMIN (comodín del guard)', ['SUPERADMIN']],
+    ])(
+      '$lookup: %s ve la posología y las demás secciones professional',
+      async (_name, roles) => {
+        const { service } = buildLookup();
+
+        const result = await service.lookupConcept('http://x', 'J01CE09', {
+          roles,
+        });
+
+        expect(result.properties.map((p) => p.propertyCode)).toEqual([
+          'pharmacology_atc_level',
+          'pharmacology_section_posology',
+          'pharmacology_section_indications',
+        ]);
+      },
+    );
+
+    it.each([
+      ['PATIENT', ['PATIENT']],
+      ['USER', ['USER']],
+      ['SECURITY_ADMIN (administra, no es clínico)', ['SECURITY_ADMIN']],
+      ['sin roles', []],
+    ])(
+      '$lookup: %s NO recibe ninguna sección professional, y el dato de catálogo sí',
+      async (_name, roles) => {
+        const { service } = buildLookup();
+
+        const result = await service.lookupConcept('http://x', 'J01CE09', {
+          roles,
+        });
+
+        expect(result.properties.map((p) => p.propertyCode)).toEqual([
+          'pharmacology_atc_level',
+        ]);
+        expect(JSON.stringify(result)).not.toContain('texto de posology');
+      },
+    );
+
+    it('$lookup: sin sujeto falla cerrado (no entrega secciones professional)', async () => {
+      const { service } = buildLookup();
+
+      const result = await service.lookupConcept('http://x', 'J01CE09');
+
+      expect(result.properties.map((p) => p.propertyCode)).toEqual([
+        'pharmacology_atc_level',
+      ]);
+    });
+
+    it('$lookup: cada sección lleva su antigüedad; la ficha sin fecha es «desconocida» con la fecha de consulta', async () => {
+      const { service } = buildLookup();
+
+      const result = await service.lookupConcept('http://x', 'J01CE09', {
+        roles: ['CLINICIAN'],
+      });
+      const byCode = Object.fromEntries(
+        result.properties.map((p) => [p.propertyCode, p]),
+      );
+
+      expect(byCode['pharmacology_atc_level'].sourceAge).toBeUndefined();
+      expect(byCode['pharmacology_section_posology'].sourceAge).toEqual({
+        known: true,
+        sourceDate: '2026-04-16T10:00:00.000Z',
+        retrievedAt: '2026-10-24T17:00:00.000Z',
+      });
+      expect(byCode['pharmacology_section_indications'].sourceAge).toEqual({
+        known: false,
+        retrievedAt: '2026-10-24T17:00:00.000Z',
+      });
+      // La sección sin fecha no se descarta: llega entera.
+      expect(byCode['pharmacology_section_indications'].valueJson).toBe(
+        undated,
+      );
+    });
+
+    it('la ficha por id omite las secciones professional para quien no es clínico', async () => {
+      const { service, conceptsRepo, designationsRepo } = build();
+      conceptsRepo.findById.mockResolvedValue({
+        id: 'concept-1',
+        code: 'J01CE09',
+        display: 'Penicilina procaina',
+        selectable: true,
+        codeSystemVersionId: 'version-1',
+      });
+      designationsRepo.findByConcept.mockResolvedValue([]);
+      designationsRepo.findPropertiesByConcept.mockResolvedValue(properties);
+
+      const patient = await service.readConcept('concept-1', undefined, {
+        roles: ['PATIENT'],
+      });
+      const anonymous = await service.readConcept('concept-1');
+      const clinician = await service.readConcept('concept-1', undefined, {
+        roles: ['CLINICIAN'],
+      });
+
+      expect(Object.keys(patient.properties)).toEqual([
+        'pharmacology_atc_level',
+      ]);
+      expect(Object.keys(anonymous.properties)).toEqual([
+        'pharmacology_atc_level',
+      ]);
+      expect(Object.keys(clinician.properties)).toEqual([
+        'pharmacology_atc_level',
+        'pharmacology_section_posology',
+        'pharmacology_section_indications',
+      ]);
+    });
+  });
+
   describe('searchConcepts', () => {
     it('devuelve los conceptos con el id que espera el resto del contrato', async () => {
       const { service, conceptsRepo } = build();

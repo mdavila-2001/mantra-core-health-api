@@ -195,6 +195,8 @@ function fixture() {
     orders as never,
     access as never,
     coveragePolicy as never,
+    // Los pedidos vinculados no pasan por la puerta de relación asistencial.
+    { assertCareRelationship: fn() } as never,
   );
   return {
     service,

@@ -9,6 +9,8 @@
 // en el meta para el informe de cobertura.
 //
 // Salida: clinical-pharmacology/out/monographs.ndjson + monographs.meta.json
+// (`--granularity product`: out/product/monographs.product.ndjson + .meta.json,
+// que no se empaqueta en `data/` ni se carga; ver lib/paths.mjs).
 // Uso: node tools/terminology-import/clinical-pharmacology/build-monographs.mjs [--granularity route|product]
 // =============================================================================
 
@@ -21,17 +23,19 @@ import { listJson, parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.
 import { buildGsrsIndex, combineLinks, gsrsDisplayFor, linkUniiSet, moietiesOf, rxnavIndex, uniiForCas } from './lib/gsrs.mjs';
 import { emaIndicationSection, emaRecords, isHumanAuthorised } from './lib/ema.mjs';
 import { dailyMedPointer } from './lib/dailymed.mjs';
-import { emlSections, isCurrentRecommendation } from './lib/eml.mjs';
+import { emlReference, isCurrentRecommendation } from './lib/eml.mjs';
 import { lactmedIdentity, lactmedSections } from './lib/lactmed.mjs';
 import { livertoxIdentity, livertoxSections } from './lib/livertox.mjs';
 import { readAllInputs, readBridge, readDailyMedIdentities, readEma, readEml, readLactmed, readLivertox } from './lib/inputs.mjs';
 import { zipResults } from './lib/json-stream.mjs';
 import { assertSection, atcNameIndex, buildMonograph, hasVersion } from './lib/monograph.mjs';
 import { labelIdentity, openFdaPharmClasses, openFdaSections, referenceLabels } from './lib/openfda.mjs';
-import { MONOGRAPHS_META, MONOGRAPHS_NDJSON, cpOut, ftPath, ftSectionPath, notesPath, openFdaDir } from './lib/paths.mjs';
+import { cpOut, ftPath, ftSectionPath, monographsOutputs, notesPath, openFdaDir } from './lib/paths.mjs';
 
 const { opt, has } = parseArgs();
 const GRANULARITY = opt('--granularity', 'route');
+/** Con `--granularity product` la salida va a `out/product/`: nunca pisa el corpus por vía ni se empaqueta en `data/`. */
+const OUTPUT = monographsOutputs(GRANULARITY);
 /** `--no-cima`: arma sin CIMA (para medir por separado lo que aporta cada fuente en el registro de pasadas). */
 const NO_CIMA = has('--no-cima');
 /** `--no-ema`: arma sin el informe de la EMA (medición por pasada). */
@@ -222,10 +226,11 @@ async function main() {
     }
   }
 
-  // eEML (OMS): indicación (CIE-11) y formulaciones de cada recomendación vigente, por el ATC 5 que asigna la OMS.
+  // eEML (OMS): SÓLO referencias (ids y enlaces) de cada recomendación vigente, por el ATC 5 que asigna la OMS.
+  // Sin texto: la licencia excluye la publicidad o promoción de productos comerciales y no está confirmado el uso (issue 824).
   const emlRaw = NO_EML ? null : readEml();
-  const emlByAtc = new Map();
-  const emlStats = { recommendations: 0, current: 0, withoutAtc5: 0, duplicateSections: 0 };
+  const emlRefsByAtc = new Map();
+  const emlStats = { recommendations: 0, current: 0, withoutAtc5: 0, references: 0 };
   if (emlRaw) {
     emlStats.recommendations = emlRaw.records.length;
     for (const { rec, retrievedAt } of emlRaw.records) {
@@ -235,21 +240,11 @@ async function main() {
         emlStats.withoutAtc5++;
         continue;
       }
-      const rows = emlSections(rec, retrievedAt);
+      const ref = emlReference(rec, retrievedAt);
       for (const code of rec.atc5) {
-        if (!emlByAtc.has(code)) emlByAtc.set(code, new Map());
-        const seen = emlByAtc.get(code);
-        for (const s of rows) {
-          // Misma clave y misma huella en otra recomendación del mismo ATC: se anota en `alsoIn`, no se repite.
-          const k = `${s.key}|${s.textSha256}`;
-          if (seen.has(k)) {
-            const kept = seen.get(k);
-            kept.document.alsoIn = [...(kept.document.alsoIn ?? []), s.document.id];
-            emlStats.duplicateSections++;
-            continue;
-          }
-          seen.set(k, structuredClone(s));
-        }
+        if (!emlRefsByAtc.has(code)) emlRefsByAtc.set(code, []);
+        emlRefsByAtc.get(code).push(ref);
+        emlStats.references++;
         if (!universe.has(code)) universe.set(code, ['who-eeml']);
       }
     }
@@ -410,10 +405,9 @@ async function main() {
       if (pc) fdaPharmClasses.push(pc);
     }
     for (const s of emaByAtc.get(code) ?? []) if (hasVersion(s)) sections.push(assertSection(s));
-    for (const s of emlByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     for (const s of lactmedByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     for (const s of livertoxByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
-    const externalDocuments = fda.pointers.get(code) ?? [];
+    const externalDocuments = [...(fda.pointers.get(code) ?? []), ...(emlRefsByAtc.get(code) ?? [])];
     if (cimaProducts.length === 0 && sections.length === 0 && externalDocuments.length === 0) {
       stats.skippedWithoutData++;
       continue;
@@ -423,7 +417,7 @@ async function main() {
     out.push({ ...buildMonograph({ code, names, cimaProducts, sections, safetyNotes, rxnorm: bridge, fdaPharmClasses, fallbackName, externalDocuments }), universeOrigin: origin });
   }
 
-  await writeNdjson(MONOGRAPHS_NDJSON(), out);
+  await writeNdjson(OUTPUT.ndjson, out);
   const meta = {
     generatedAt: new Date().toISOString(),
     granularity: GRANULARITY,
@@ -442,7 +436,7 @@ async function main() {
     ...stats,
     segundos: Math.round((Date.now() - t0) / 1000),
   };
-  writeJson(MONOGRAPHS_META(), meta, true);
+  writeJson(OUTPUT.meta, meta, true);
   console.log(JSON.stringify(meta, null, 2));
 }
 

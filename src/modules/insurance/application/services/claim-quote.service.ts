@@ -3,7 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import {
   type AuthenticatedUser,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   sumarDecimales,
 } from '../../../../common';
 import {
@@ -19,6 +19,10 @@ import {
   ClaimCoveragePolicy,
   type QuotedCoverageLine,
 } from './claim-coverage-policy';
+import {
+  ClaimCareRelationshipGate,
+  coverageNotFound,
+} from './claim-care-relationship-gate';
 import { assertLegacyClaimRoles } from './linked-claim-access.service';
 
 /**
@@ -40,6 +44,7 @@ export class ClaimQuoteService {
     private readonly coverage: CoverageRepository,
     private readonly catalog: CatalogRepository,
     private readonly policy: ClaimCoveragePolicy,
+    private readonly careGate: ClaimCareRelationshipGate,
   ) {}
 
   /**
@@ -47,7 +52,9 @@ export class ClaimQuoteService {
    * @param actor - Quien consulta.
    * @returns La cotización por línea y los totales.
    * @throws ForbiddenException si el rol no puede cobrar a la aseguradora.
-   * @throws ResourceNotFoundException si la cobertura no existe.
+   * @throws ResourceNotFoundException si la cobertura no existe o su paciente no
+   *   tiene relación asistencial vigente con la organización activa (mismo 404).
+   * @throws PreconditionFailedException 412 `TENANT_REQUIRED` sin organización activa.
    * @throws PreconditionFailedException si la cobertura no es de la aseguradora
    *   indicada o las secuencias de línea se repiten.
    */
@@ -71,8 +78,16 @@ export class ClaimQuoteService {
       em,
       dto.patientCoverageId,
     );
-    if (!coverage)
-      throw new ResourceNotFoundException('Cobertura no encontrada');
+    if (!coverage) throw coverageNotFound();
+    // Misma puerta que el cobro real: sin relación asistencial vigente con la
+    // organización activa, la cotización responde como si la cobertura no
+    // existiera (no hay un `reason` por línea que delate coberturas ajenas).
+    await this.careGate.assertCareRelationship(
+      em,
+      coverage,
+      requireTenantId(),
+      new Date(),
+    );
     const plan = await this.catalog.findPlanForCarrier(
       em,
       coverage.insurancePlanId,
