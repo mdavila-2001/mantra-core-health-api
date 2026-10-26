@@ -2,9 +2,11 @@ import { jest } from '@jest/globals';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../../common';
 import { InsurancePlanBenefits, PatientCoverages } from '../../entities';
 import { INS } from '../../domain/insurance.concepts';
+import { ClaimCareRelationshipGate } from './claim-care-relationship-gate';
 import { ClaimCoveragePolicy } from './claim-coverage-policy';
 import { ClaimQuoteService } from './claim-quote.service';
 
@@ -15,6 +17,8 @@ import { ClaimQuoteService } from './claim-quote.service';
 
 const fn = () => jest.fn<(...args: any[]) => any>();
 const PLAN = 'plan-1';
+const TENANT = '11111111-1111-4111-8111-111111111111';
+const PATIENT = 'patient-1';
 const CONSULT = 'service-consult';
 const SURGERY = 'service-surgery';
 
@@ -40,7 +44,11 @@ const surgeryBenefit = {
 };
 
 function build(
-  options: { benefits?: Record<string, unknown>[]; coverage?: unknown } = {},
+  options: {
+    benefits?: Record<string, unknown>[];
+    coverage?: unknown;
+    hasCareRelationship?: boolean;
+  } = {},
 ) {
   const benefits = options.benefits ?? [consultBenefit];
   const forked = {
@@ -63,8 +71,14 @@ function build(
   const coverage = {
     findCoverage: fn().mockResolvedValue(
       options.coverage === undefined
-        ? { id: 'coverage-1', insurancePlanId: PLAN }
+        ? { id: 'coverage-1', insurancePlanId: PLAN, patientProfileId: PATIENT }
         : options.coverage,
+    ),
+  };
+  // La puerta es la real; sólo el puerto hacia `authz` es un doble.
+  const careRelationships = {
+    hasCareRelationshipForPayment: fn().mockResolvedValue(
+      options.hasCareRelationship ?? true,
     ),
   };
   const catalog = {
@@ -73,13 +87,19 @@ function build(
       currencyConceptId: 'BOB',
     }),
   };
-  const service = new ClaimQuoteService(
+  const raw = new ClaimQuoteService(
     em as never,
     coverage as never,
     catalog as never,
     new ClaimCoveragePolicy(),
+    new ClaimCareRelationshipGate(careRelationships as never),
   );
-  return { service, em, forked, coverage, catalog };
+  // La cotización se pide dentro de la organización activa, como lo deja el interceptor.
+  const service = {
+    quote: (dto: never, actor: never) =>
+      runWithTenant(TENANT, () => raw.quote(dto, actor)),
+  };
+  return { service, raw, em, forked, coverage, catalog, careRelationships };
 }
 
 const billing = { id: 'u-billing', roles: ['BILLING'] } as never;
@@ -144,6 +164,45 @@ describe('ClaimQuoteService', () => {
       await expect(
         service.quote(quoteDto([line(1, CONSULT, '500.00')]), billing),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('paciente sin relación asistencial vigente con la organización → el mismo 404 que una cobertura inexistente', async () => {
+      const unrelated = build({ hasCareRelationship: false });
+      const missing = build({ coverage: null });
+      const dto = quoteDto([line(1, CONSULT, '500.00')]);
+      const a: any = await unrelated.service
+        .quote(dto, billing)
+        .catch((e: unknown) => e);
+      const b: any = await missing.service
+        .quote(dto, billing)
+        .catch((e: unknown) => e);
+      expect(a).toBeInstanceOf(ResourceNotFoundException);
+      expect(a.getStatus()).toBe(b.getStatus());
+      expect(a.getResponse()).toEqual(b.getResponse());
+      // Corre antes de hablar de la aseguradora y del plan.
+      expect(unrelated.catalog.findPlanForCarrier).not.toHaveBeenCalled();
+    });
+
+    it('la relación se pregunta por el paciente de la cobertura y la organización del contexto', async () => {
+      const { service, careRelationships, forked } = build();
+      await service.quote(quoteDto([line(1, CONSULT, '500.00')]), billing);
+      expect(
+        careRelationships.hasCareRelationshipForPayment,
+      ).toHaveBeenCalledWith(forked, {
+        patientProfileId: PATIENT,
+        tenantId: TENANT,
+        at: expect.any(Date),
+      });
+    });
+
+    it('sin organización activa → 412 y no se consulta la relación', async () => {
+      const { raw, careRelationships } = build();
+      await expect(
+        raw.quote(quoteDto([line(1, CONSULT, '500.00')]), billing),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(
+        careRelationships.hasCareRelationshipForPayment,
+      ).not.toHaveBeenCalled();
     });
 
     it('plan que no es de la aseguradora indicada → 422', async () => {
