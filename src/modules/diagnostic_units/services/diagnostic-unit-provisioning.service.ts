@@ -11,7 +11,10 @@ import {
 import { siteCodeBase, uniqueCode } from '../../practice/site-code';
 import type { OwnSiteAddressDto } from '../../practice/dto';
 import { DUNIT } from '../diagnostic_units.concepts';
-import { findDiagnosticUnitModality } from '../diagnostic-unit-modalities';
+import {
+  findDiagnosticUnitModality,
+  resolveDiagnosticUnitType,
+} from '../diagnostic-unit-modalities';
 import {
   DiagnosticUnitsRepository,
   DiagnosticUnitSitesRepository,
@@ -141,8 +144,7 @@ export class DiagnosticUnitProvisioningService {
       owner.tenantCode ??
       siteCodeBase(owner.legalName, 'UNIDAD');
     const unitName = profile.name ?? owner.legalName;
-    const unitTypeConceptId =
-      profile.diagnosticUnitTypeConceptId ?? DUNIT.UNIT_TYPE_IMAGING;
+    const unitTypeConceptId = resolveDiagnosticUnitType(profile);
     const isLaboratory = unitTypeConceptId === DUNIT.UNIT_TYPE_LABORATORY;
 
     // 1) La práctica propia de la unidad: nace ACTIVA con el owner de la

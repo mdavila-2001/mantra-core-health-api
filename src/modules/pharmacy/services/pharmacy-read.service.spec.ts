@@ -57,6 +57,7 @@ function build() {
     findActiveAffiliationDocuments: mockFn().mockResolvedValue([]),
     findIdentifiers: mockFn().mockResolvedValue([]),
     findHeadquartersAddress: mockFn().mockResolvedValue(null),
+    findCurrentOnCallShifts: mockFn().mockResolvedValue([]),
   };
   const service = new PharmacyReadService(em as any, repo as any);
   return { service, repo, fork };
