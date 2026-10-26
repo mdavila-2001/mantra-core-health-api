@@ -32,6 +32,11 @@ export enum SchedulingErrorReason {
   TEMPLATE_NOT_FOUND = 'TEMPLATE_NOT_FOUND',
   TEMPLATE_RESOURCE_NOT_FOUND = 'TEMPLATE_RESOURCE_NOT_FOUND',
   TEMPLATE_HAS_ACTIVE_BOOKINGS = 'TEMPLATE_HAS_ACTIVE_BOOKINGS',
+  /**
+   * Cita por TELECONSULTA fuera de una franja con la telemedicina habilitada
+   * (v4.2.61). Por defecto ninguna franja la tiene: la activa el profesional.
+   */
+  TELEMEDICINE_NOT_ENABLED = 'TELEMEDICINE_NOT_ENABLED',
 
   // Recursos agendables.
   RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
