@@ -1,0 +1,170 @@
+[
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0001155",
+  "glossaryCodes": [
+   "K28",
+   "K28.0"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0001221",
+  "glossaryCodes": [
+   "I85",
+   "I85.0"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0001422",
+  "glossaryCodes": [
+   "E26.0",
+   "E26.01"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0002679",
+  "glossaryCodes": [
+   "I63",
+   "I63.9"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0004375",
+  "glossaryCodes": [
+   "N18.5",
+   "N18.6"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0004592",
+  "glossaryCodes": [
+   "L01",
+   "L01.0"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0004648",
+  "glossaryCodes": [
+   "F01",
+   "F01.5"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0004781",
+  "glossaryCodes": [
+   "I21",
+   "I21.9"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0004795",
+  "glossaryCodes": [
+   "H60",
+   "H60.33"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0005300",
+  "glossaryCodes": [
+   "N18",
+   "N18.9"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0006952",
+  "glossaryCodes": [
+   "H35.1",
+   "H35.17"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0008575",
+  "glossaryCodes": [
+   "F17",
+   "F17.2"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0015454",
+  "glossaryCodes": [
+   "D81.81",
+   "D81.819"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0016158",
+  "glossaryCodes": [
+   "G47.4",
+   "G47.411"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0018092",
+  "glossaryCodes": [
+   "H20.82",
+   "H30.81"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0018623",
+  "glossaryCodes": [
+   "F53",
+   "F53.1"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0019499",
+  "glossaryCodes": [
+   "Q96",
+   "Q96.0"
+  ]
+ },
+ {
+  "kind": "group-spans-several-glossary-concepts",
+  "mondo": "MONDO:0021645",
+  "glossaryCodes": [
+   "I85.0",
+   "I85.01"
+  ]
+ },
+ {
+  "kind": "glossary-concept-in-several-groups",
+  "glossaryCode": "I15",
+  "mondos": [
+   "MONDO:0001200",
+   "MONDO:0005044"
+  ]
+ },
+ {
+  "kind": "glossary-concept-in-several-groups",
+  "glossaryCode": "I40",
+  "mondos": [
+   "MONDO:0002815",
+   "MONDO:0004496"
+  ]
+ },
+ {
+  "kind": "glossary-concept-in-several-groups",
+  "glossaryCode": "K65",
+  "mondos": [
+   "MONDO:0004522",
+   "MONDO:1010128"
+  ]
+ }
+]
