@@ -140745,6 +140745,10 @@
               }
             ]
           },
+          "stockUpdatedAt": {
+            "type": "string",
+            "nullable": true
+          },
           "products": {
             "type": "array",
             "items": {
