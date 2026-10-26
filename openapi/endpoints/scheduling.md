@@ -327,6 +327,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Esta consulta ya tiene una reconsulta agendada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una cita confirmada en ese rato${           clash.resourceName ? ` en «${clash.resourceName}»` : ''         }. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Ese horario no atiende por telemedicina. Habilítela en la franja de su horario de atención o elija otra modalidad. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | La reconsulta es para el paciente de la cita de origen | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | Una reconsulta se agenda para más adelante | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | verdict === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no puede comprometer citas suyas.'         : 'Su vínculo con esta organización ya no está vigente, así que no ' +             'puede aceptar citas suyas. Las citas que ya confirmó siguen ' +             'en pie: hable con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
@@ -521,6 +522,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | Esta consulta ya tiene una reconsulta agendada | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una cita confirmada en ese rato${           clash.resourceName ? ` en «${clash.resourceName}»` : ''         }. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | Ese horario no atiende por telemedicina. Habilítela en la franja de su horario de atención o elija otra modalidad. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | La reconsulta es para el paciente de la cita de origen | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | Una reconsulta se agenda para más adelante | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/create-direct-appointment.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | verdict === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de ' +             'aprobación, así que todavía no puede comprometer citas suyas.'         : 'Su vínculo con esta organización ya no está vigente, así que no ' +             'puede aceptar citas suyas. Las citas que ya confirmó siguen ' +             'en pie: hable con la organización para reactivarlo.' | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
@@ -6032,7 +6034,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
-| `rules` | Sí | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS"}]` |
+| `rules` | Sí | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS","telemedicineEnabled":false}]` |
 | `rules[].dayOfWeek` | Sí | `number` | mínimo 0; máximo 6 | 0 = domingo … 6 = sábado | `1` |
 | `rules[].startTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de inicio HH:MM:SS | `08:00:00` |
 | `rules[].endTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de fin HH:MM:SS | `12:00:00` |
@@ -6040,6 +6042,7 @@ Content-Type: application/json
 | `rules[].capacityPerSlot` | No | `number` | mínimo 1 | Cupos por slot | `1` |
 | `rules[].gapMinutes` | No | `number` | mínimo 0 | Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0 | `1` |
 | `rules[].bookingMode` | No | `string` | valores: `CONSULTATIONS`, `SERVICES`, `MIXED` | Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS | `CONSULTATIONS` |
+| `rules[].telemedicineEnabled` | No | `boolean` | Sin restricción adicional declarada | La franja atiende también por telemedicina. Ausente ≡ false (sólo presencial) | `false` |
 | `slotMinutes` | No | `number` | Sin restricción adicional declarada | Duración por defecto del slot, en minutos | `30` |
 | `bookingPolicyId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
@@ -6065,7 +6068,8 @@ Content-Type: application/json
       "slotMinutes": 5,
       "capacityPerSlot": 1,
       "gapMinutes": 1,
-      "bookingMode": "CONSULTATIONS"
+      "bookingMode": "CONSULTATIONS",
+      "telemedicineEnabled": false
     }
   ],
   "slotMinutes": 30,
@@ -7487,7 +7491,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `name` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
-| `rules` | No | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla. Si viene, reemplaza TODAS las existentes. | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS"}]` |
+| `rules` | No | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla. Si viene, reemplaza TODAS las existentes. | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS","telemedicineEnabled":false}]` |
 | `rules[].dayOfWeek` | No | `number` | mínimo 0; máximo 6 | 0 = domingo … 6 = sábado | `1` |
 | `rules[].startTime` | No | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de inicio HH:MM:SS | `08:00:00` |
 | `rules[].endTime` | No | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de fin HH:MM:SS | `12:00:00` |
@@ -7495,6 +7499,7 @@ Content-Type: application/json
 | `rules[].capacityPerSlot` | No | `number` | mínimo 1 | Cupos por slot | `1` |
 | `rules[].gapMinutes` | No | `number` | mínimo 0 | Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0 | `1` |
 | `rules[].bookingMode` | No | `string` | valores: `CONSULTATIONS`, `SERVICES`, `MIXED` | Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS | `CONSULTATIONS` |
+| `rules[].telemedicineEnabled` | No | `boolean` | Sin restricción adicional declarada | La franja atiende también por telemedicina. Ausente ≡ false (sólo presencial) | `false` |
 | `slotMinutes` | No | `number` | Sin restricción adicional declarada | Duración por defecto del slot, en minutos | `1` |
 | `bookingPolicyId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
@@ -7520,7 +7525,8 @@ Content-Type: application/json
       "slotMinutes": 5,
       "capacityPerSlot": 1,
       "gapMinutes": 1,
-      "bookingMode": "CONSULTATIONS"
+      "bookingMode": "CONSULTATIONS",
+      "telemedicineEnabled": false
     }
   ],
   "slotMinutes": 1,
