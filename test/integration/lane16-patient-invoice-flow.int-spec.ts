@@ -10,10 +10,13 @@ import {
   assertPermanentResidueTarget,
   resolveResetTarget,
 } from './disposable-database';
+import { AUTHZ } from '../../src/modules/authz/authz.concepts';
+import { CareRelationshipsRepository } from '../../src/modules/authz/repositories/care-relationships.repository';
 import { BILL } from '../../src/modules/billing/billing.concepts';
 import { InvoicesRepository } from '../../src/modules/billing/repositories';
 import { PaymentsReceivedRepository } from '../../src/modules/billing/repositories/payments-received.repository';
 import { PaymentsReceivedService } from '../../src/modules/billing/services/payments-received.service';
+import { ClaimCareRelationshipGate } from '../../src/modules/insurance/application/services/claim-care-relationship-gate';
 import { ClaimCoveragePolicy } from '../../src/modules/insurance/application/services/claim-coverage-policy';
 import { ClaimPatientInvoiceService } from '../../src/modules/insurance/application/services/claim-patient-invoice.service';
 import { ClaimQuoteService } from '../../src/modules/insurance/application/services/claim-quote.service';
@@ -22,6 +25,7 @@ import { PatientChargeObjectionService } from '../../src/modules/insurance/appli
 import { PatientConsentValidator } from '../../src/modules/insurance/application/services/patient-consent-validator';
 import { INS } from '../../src/modules/insurance/domain/insurance.concepts';
 import { BillingPatientInvoiceAdapter } from '../../src/modules/insurance/infrastructure/adapters/billing-patient-invoice.adapter';
+import { PatientCareRelationshipAdapter } from '../../src/modules/insurance/infrastructure/adapters/patient-care-relationship.adapter';
 import { NoPatientChargeAcceptanceAdapter } from '../../src/modules/insurance/infrastructure/adapters/no-patient-charge-acceptance.adapter';
 import {
   CatalogRepository,
@@ -37,7 +41,8 @@ import {
  * Qué es real: la base, el ORM, los repositorios, `ClaimsService.submitClaim`,
  * `ClaimCoveragePolicy`, `ClaimQuoteService`, `ClaimPatientInvoiceService`,
  * `PatientChargeObjectionService`, `PaymentsReceivedService`,
- * el adaptador de billing, el `FOR UPDATE` del reclamo y el índice único.
+ * la puerta de relación asistencial (`ClaimCareRelationshipGate` sobre
+ * `authz.care_relationships`, REQ-16-035), el adaptador de billing, el `FOR UPDATE` del reclamo y el índice único.
  *
  * Qué es un doble, y por eso NO queda verificado acá: la capa HTTP (guards,
  * pipes, interceptores de tenant y de auditoría), el outbox (los eventos se
@@ -81,6 +86,8 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
     product: randomUUID(),
     plan: randomUUID(),
     practice: randomUUID(),
+    otherTenant: randomUUID(),
+    practitioner: randomUUID(),
     patient: randomUUID(),
     otherPatient: randomUUID(),
     userBiller: randomUUID(),
@@ -109,6 +116,8 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
   // Plan y cobertura extra de las pruebas de alcance (se retiran al final).
   const extraPlanIds: string[] = [];
   const extraCoverageIds: string[] = [];
+  // Pacientes extra de las pruebas de relación asistencial (se retiran al final).
+  const extraPatientIds: string[] = [];
 
   // Colaboradores.
   const events: Array<{ eventType: string; payloadJson: any }> = [];
@@ -210,6 +219,34 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
   }
   const reasonOf = (error: any) => error?.details?.reason;
 
+  /** Relación asistencial sintética; por defecto ACTIVA, vigente, sin acotar y de la organización que cobra. */
+  async function addRelation(over: {
+    patientProfileId: string;
+    tenantId?: string;
+    statusConceptId?: string;
+    purposeConceptId?: string | null;
+    validFromSql?: string;
+    validToSql?: string | null;
+  }) {
+    await run(
+      `insert into authz.care_relationships
+         (id, tenant_id, patient_profile_id, practitioner_profile_id,
+          relationship_type_concept_id, status_concept_id, purpose_concept_id,
+          valid_from, valid_to, created_at, updated_at)
+       values (?, ?, ?, ?, ?, ?, ?, ${over.validFromSql ?? "now() - interval '1 day'"},
+               ${over.validToSql ?? 'null'}, now(), now())`,
+      [
+        randomUUID(),
+        over.tenantId ?? ids.tenant,
+        over.patientProfileId,
+        ids.practitioner,
+        AUTHZ.CARE_REL_TREATING,
+        over.statusConceptId ?? CONCEPTS.STATE_ACTIVE,
+        over.purposeConceptId ?? null,
+      ],
+    );
+  }
+
   beforeAll(async () => {
     // Antes de abrir una sola conexión: esta prueba deja historial que no se puede
     // borrar (`audit.*` es de sólo inserción), así que no corre contra una base
@@ -241,6 +278,13 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
       INS.DISPUTE_RESOLVED,
       BILL.INVOICE_ISSUED,
       CONCEPTS.USER_ACTIVE,
+      CONCEPTS.STATE_ACTIVE,
+      CONCEPTS.STATE_PENDING,
+      CONCEPTS.STATE_REVOKED,
+      CONCEPTS.STATE_EXPIRED,
+      AUTHZ.CARE_REL_TREATING,
+      AUTHZ.PURPOSE_PAYMENT,
+      AUTHZ.PURPOSE_TREATMENT,
     ];
     const present = await count(
       `select count(*)::int as n from terminology.catalog_concepts where id in (${needed.map(() => '?').join(', ')})`,
@@ -288,6 +332,30 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
         [person, `${mark}-${person.slice(0, 4)}`],
       );
     }
+    // Otra organización: sólo para probar que su relación asistencial no vale aquí.
+    await run(
+      `insert into directory.tenants
+         (id, code, tenant_type_concept_id, legal_name, legal_entity_type_concept_id,
+          status_concept_id, verification_status_concept_id, created_at, updated_at)
+       values (?, ?, ?, ?, ?, ?, ?, now(), now())`,
+      [ids.otherTenant, `${mark}-o`, any, `${mark}-o`, any, any, any],
+    );
+    // Un profesional que atiende al paciente: la relación asistencial es
+    // paciente-profesional y cuenta para la organización de la propia fila.
+    await run(
+      `insert into profiles.persons (id, person_status_concept_id, created_at, updated_at)
+       values (?, ?, now(), now())`,
+      [ids.practitioner, any],
+    );
+    await run(
+      `insert into profiles.health_practitioner_profiles
+         (profile_id, practitioner_code, practitioner_category_concept_id,
+          verification_status_concept_id, practice_status_concept_id, created_at, updated_at)
+       values (?, ?, ?, ?, ?, now(), now())`,
+      [ids.practitioner, `${mark}-doc`, any, any, any],
+    );
+    // El paciente del cobro tiene relación vigente con la organización que cobra.
+    await addRelation({ patientProfileId: ids.patient });
     await run(
       `insert into insurance.insurance_carriers
          (id, tenant_id, carrier_code, legal_name, verification_status_concept_id,
@@ -373,6 +441,10 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
     const coverageRepo = new CoverageRepository();
     const catalogRepo = new CatalogRepository();
     const policy = new ClaimCoveragePolicy();
+    // Puerta real: repositorio y adaptador de verdad contra `authz.care_relationships`.
+    const careGate = new ClaimCareRelationshipGate(
+      new PatientCareRelationshipAdapter(new CareRelationshipsRepository()),
+    );
     const practiceLookup = {
       findActivePracticeIdsForTenant: async (id: string) =>
         id === tenant ? [practice] : [],
@@ -406,12 +478,14 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
       {} as never,
       {} as never,
       policy,
+      careGate,
     );
     quoteService = new ClaimQuoteService(
       em as never,
       coverageRepo,
       catalogRepo,
       policy,
+      careGate,
     );
     const build = (acceptancePort: unknown) =>
       new ClaimPatientInvoiceService(
@@ -575,7 +649,22 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
       await attempt('delete from insurance.insurance_carriers where id = ?', [
         ids.carrier,
       ]);
-      for (const person of [ids.patient, ids.otherPatient]) {
+      await attempt(
+        'delete from authz.care_relationships where practitioner_profile_id = ?',
+        [ids.practitioner],
+      );
+      await attempt(
+        'delete from profiles.health_practitioner_profiles where profile_id = ?',
+        [ids.practitioner],
+      );
+      await attempt('delete from profiles.persons where id = ?', [
+        ids.practitioner,
+      ]);
+      for (const person of [
+        ids.patient,
+        ids.otherPatient,
+        ...extraPatientIds,
+      ]) {
         await attempt(
           'delete from profiles.patient_profiles where profile_id = ?',
           [person],
@@ -586,6 +675,9 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
         ids.practice,
       ]);
       await attempt('delete from directory.tenants where id = ?', [ids.tenant]);
+      await attempt('delete from directory.tenants where id = ?', [
+        ids.otherTenant,
+      ]);
       for (const user of [
         ids.userBiller,
         ids.userPatient,
@@ -751,6 +843,210 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
     });
   });
 
+  describe('relación asistencial con la organización que cobra (REQ-16-035)', () => {
+    const claimsWith = (identifier: string) =>
+      count(
+        'select count(*)::int as n from insurance.insurance_claims where claim_identifier = ?',
+        [identifier],
+      );
+    const claimsOfCoverage = (patientCoverageId: string) =>
+      count(
+        'select count(*)::int as n from insurance.insurance_claims where patient_coverage_id = ?',
+        [patientCoverageId],
+      );
+
+    /** Paciente nuevo con cobertura del mismo plan y, opcionalmente, una relación. */
+    async function patientWithCoverage(
+      relation?: Omit<Parameters<typeof addRelation>[0], 'patientProfileId'>,
+    ) {
+      const person = randomUUID();
+      const patientCoverageId = randomUUID();
+      extraPatientIds.push(person);
+      extraCoverageIds.push(patientCoverageId);
+      await run(
+        `insert into profiles.persons (id, person_status_concept_id, created_at, updated_at)
+         values (?, ?, now(), now())`,
+        [person, INS.CARRIER_ACTIVE],
+      );
+      await run(
+        `insert into profiles.patient_profiles (profile_id, patient_code, created_at, updated_at)
+         values (?, ?, now(), now())`,
+        [person, `${mark}-${person.slice(0, 6)}`],
+      );
+      await run(
+        `insert into insurance.patient_coverages
+           (id, patient_profile_id, insurance_plan_id, member_identifier,
+            verification_status_concept_id, status_concept_id, created_at, updated_at)
+         values (?, ?, ?, ?, ?, ?, now(), now())`,
+        [
+          patientCoverageId,
+          person,
+          plan,
+          `${mark}-${person.slice(0, 6)}`,
+          INS.VERIFY_VERIFIED,
+          INS.CARRIER_ACTIVE,
+        ],
+      );
+      if (relation)
+        await addRelation({ patientProfileId: person, ...relation });
+      return { person, patientCoverageId };
+    }
+
+    const claimFor = (patientCoverageId: string, identifier: string) =>
+      ({
+        insuranceCarrierId: carrier,
+        patientCoverageId,
+        billingProviderEntityId: practice,
+        claimIdentifier: identifier,
+        lines: [
+          {
+            lineSequence: 1,
+            serviceConceptId: consultConcept,
+            billedAmount: '500.00',
+          },
+        ],
+      }) as never;
+    const submitFor = (patientCoverageId: string, identifier: string) =>
+      inTenant(() =>
+        claims.submitClaim(claimFor(patientCoverageId, identifier), biller()),
+      );
+    const quoteFor = (patientCoverageId: string) =>
+      inTenant(() =>
+        quoteService.quote(
+          {
+            insuranceCarrierId: carrier,
+            patientCoverageId,
+            lines: [
+              {
+                lineSequence: 1,
+                serviceConceptId: consultConcept,
+                billedAmount: '500.00',
+              },
+            ],
+          } as never,
+          biller(),
+        ),
+      );
+
+    it('caso feliz: con relación vigente en la organización, cobra y cotiza', async () => {
+      const { patientCoverageId } = await patientWithCoverage({});
+      const identifier = `${mark}-relacion-ok`;
+      const created = await submitFor(patientCoverageId, identifier);
+      expect(created.id).toBeDefined();
+      expect(await claimsWith(identifier)).toBe(1);
+      expect((await quoteFor(patientCoverageId)).canSubmit).toBe(true);
+    });
+
+    it('sin ninguna relación: 404 uniforme, el cobro no se guarda y la cotización responde igual', async () => {
+      const { patientCoverageId } = await patientWithCoverage();
+      const identifier = `${mark}-sin-relacion`;
+      const error = await failureOf(submitFor(patientCoverageId, identifier));
+      expect(error.getStatus()).toBe(404);
+      expect(error.message).toBe('Cobertura no encontrada');
+      expect(await claimsWith(identifier)).toBe(0);
+
+      // Mismo cuerpo que una cobertura que no existe: no delata coberturas ajenas.
+      const missing = await failureOf(
+        submitFor(randomUUID(), `${mark}-inexistente`),
+      );
+      expect(error.getStatus()).toBe(missing.getStatus());
+      expect(error.getResponse()).toEqual(missing.getResponse());
+      const quoted = await failureOf(quoteFor(patientCoverageId));
+      const quotedMissing = await failureOf(quoteFor(randomUUID()));
+      expect(quoted.getStatus()).toBe(404);
+      expect(quoted.getResponse()).toEqual(quotedMissing.getResponse());
+    });
+
+    it('la relación del paciente con otra organización no vale para ésta', async () => {
+      const { patientCoverageId } = await patientWithCoverage({
+        tenantId: ids.otherTenant,
+      });
+      const identifier = `${mark}-relacion-ajena`;
+      const error = await failureOf(submitFor(patientCoverageId, identifier));
+      expect(error.getStatus()).toBe(404);
+      expect(await claimsWith(identifier)).toBe(0);
+      expect((await failureOf(quoteFor(patientCoverageId))).getStatus()).toBe(
+        404,
+      );
+    });
+
+    it('la relación de otro paciente no cuenta', async () => {
+      // `patient` tiene relación; la cobertura de este otro paciente no: el paciente sale de la cobertura.
+      const other = await patientWithCoverage();
+      const error = await failureOf(
+        submitFor(other.patientCoverageId, `${mark}-otro-paciente`),
+      );
+      expect(error.getStatus()).toBe(404);
+    });
+
+    it.each([
+      [
+        'vencida (valid_to ya pasó)',
+        {
+          validFromSql: "now() - interval '10 days'",
+          validToSql: "now() - interval '1 second'",
+        },
+      ],
+      [
+        'todavía no vigente (valid_from futuro)',
+        { validFromSql: "now() + interval '1 day'" },
+      ],
+      ['revocada', { statusConceptId: CONCEPTS.STATE_REVOKED }],
+      ['expirada', { statusConceptId: CONCEPTS.STATE_EXPIRED }],
+      [
+        'pendiente (el paciente aún no la aceptó)',
+        { statusConceptId: CONCEPTS.STATE_PENDING },
+      ],
+      [
+        'acotada a otro propósito (tratamiento)',
+        { purposeConceptId: AUTHZ.PURPOSE_TREATMENT },
+      ],
+    ])(
+      'relación %s: rechazo 404 y no se guarda el cobro',
+      async (name, relation) => {
+        const { patientCoverageId } = await patientWithCoverage(relation);
+        const identifier = `${mark}-${name.slice(0, 8).replace(/\W/g, '')}`;
+        const error = await failureOf(submitFor(patientCoverageId, identifier));
+        expect(error.getStatus()).toBe(404);
+        expect(error.message).toBe('Cobertura no encontrada');
+        expect(await claimsOfCoverage(patientCoverageId)).toBe(0);
+        expect((await failureOf(quoteFor(patientCoverageId))).getStatus()).toBe(
+          404,
+        );
+      },
+    );
+
+    it('relación acotada al pago o con vencimiento futuro: vigente', async () => {
+      const bounded = await patientWithCoverage({
+        purposeConceptId: AUTHZ.PURPOSE_PAYMENT,
+      });
+      const expiring = await patientWithCoverage({
+        validToSql: "now() + interval '1 day'",
+      });
+      for (const { patientCoverageId } of [bounded, expiring]) {
+        const created = await submitFor(
+          patientCoverageId,
+          `${mark}-vigente-${patientCoverageId.slice(0, 6)}`,
+        );
+        expect(created.id).toBeDefined();
+        expect((await quoteFor(patientCoverageId)).canSubmit).toBe(true);
+      }
+    });
+
+    it('una relación vencida y otra vigente: basta la vigente', async () => {
+      const { person, patientCoverageId } = await patientWithCoverage({
+        validFromSql: "now() - interval '10 days'",
+        validToSql: "now() - interval '1 day'",
+      });
+      await addRelation({ patientProfileId: person });
+      const created = await submitFor(
+        patientCoverageId,
+        `${mark}-vencida-y-vigente`,
+      );
+      expect(created.id).toBeDefined();
+    });
+  });
+
   describe('cotización previa (REQ-16-026)', () => {
     it('500 Bs, copago 50, 80 % → paciente 140 y aseguradora 360, y no escribe nada', async () => {
       const before = {
@@ -764,19 +1060,21 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
           'select count(*)::int as n from insurance.claim_disputes',
         ),
       };
-      const result = await quoteService.quote(
-        {
-          insuranceCarrierId: carrier,
-          patientCoverageId: coverageId,
-          lines: [
-            {
-              lineSequence: 1,
-              serviceConceptId: consultConcept,
-              billedAmount: '500.00',
-            },
-          ],
-        } as never,
-        biller(),
+      const result = await inTenant(() =>
+        quoteService.quote(
+          {
+            insuranceCarrierId: carrier,
+            patientCoverageId: coverageId,
+            lines: [
+              {
+                lineSequence: 1,
+                serviceConceptId: consultConcept,
+                billedAmount: '500.00',
+              },
+            ],
+          } as never,
+          biller(),
+        ),
       );
       expect(result).toMatchObject({
         canSubmit: true,
@@ -805,19 +1103,21 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
     });
 
     it('aprobación previa exigida y ausente: no se puede enviar, y el envío real lo rechaza con el mismo motivo', async () => {
-      const result = await quoteService.quote(
-        {
-          insuranceCarrierId: carrier,
-          patientCoverageId: coverageId,
-          lines: [
-            {
-              lineSequence: 1,
-              serviceConceptId: surgeryConcept,
-              billedAmount: '1000.00',
-            },
-          ],
-        } as never,
-        biller(),
+      const result = await inTenant(() =>
+        quoteService.quote(
+          {
+            insuranceCarrierId: carrier,
+            patientCoverageId: coverageId,
+            lines: [
+              {
+                lineSequence: 1,
+                serviceConceptId: surgeryConcept,
+                billedAmount: '1000.00',
+              },
+            ],
+          } as never,
+          biller(),
+        ),
       );
       expect(result.canSubmit).toBe(false);
       expect(result.lines[0]).toMatchObject({
