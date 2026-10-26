@@ -3,7 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS } from '../../../../common';
 import { COMM } from '../../../community/community.concepts';
 import { PHARM } from '../../../pharmacy/pharmacy.concepts';
-import { PINV } from '../../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
+import { siteProductAvailabilitySql } from '../../../pharmacy_inventory/domain/site-product-availability';
 import { PRAC } from '../../../practice/practice.concepts';
 
 /** Un perfil público visible, con lo justo para saber de quién es. */
@@ -43,12 +43,10 @@ export interface PharmacyProductRow {
   /** Precio vigente más bajo en una lista pública, como texto; `null` si no hay. */
   readonly price: string | null;
   readonly currency: string | null;
-  /** Suma de `available_quantity` en las sedes activas, como texto. */
+  /** Suma de lo disponible en las sedes donde está disponible, como texto. */
   readonly availableQuantity: string;
-  /** P47: lo que declara el catálogo (sin «no tengo» y, con conteo, > 0). */
-  readonly declaredInStock: boolean;
-  /** Posiciones del ledger del producto en sedes activas, como texto. */
-  readonly stockPositions: string;
+  /** Sedes activas donde está disponible (regla única de existencias), como texto. */
+  readonly availableSites: string;
 }
 
 /**
@@ -157,6 +155,7 @@ export class PublicCatalogRepository {
     after: KeysetAfter | null,
     take: number,
   ): Promise<PharmacyProductRow[]> {
+    const availability = siteProductAvailabilitySql();
     return em.getConnection().execute(
       `SELECT p.id,
               p.sort_name              AS "sortName",
@@ -167,8 +166,7 @@ export class PublicCatalogRepository {
               price.price              AS price,
               price.currency           AS currency,
               COALESCE(stock.available, 0)::text AS "availableQuantity",
-              p.declared_in_stock      AS "declaredInStock",
-              COALESCE(stock.positions, 0)::text AS "stockPositions"
+              COALESCE(stock.sites, 0)::text AS "availableSites"
          FROM (
                SELECT prod.id,
                       prod.pharmacy_id,
@@ -176,8 +174,6 @@ export class PublicCatalogRepository {
                       prod.strength_text,
                       prod.package_size_text,
                       prod.requires_prescription,
-                      (NOT prod.out_of_stock_declared
-                       AND (prod.stock_quantity IS NULL OR prod.stock_quantity > 0)) AS declared_in_stock,
                       COALESCE(prod.generic_name, med.display, prod.brand_name, prod.product_code) AS sort_name
                  FROM pharmacy.pharmacy_products prod
                  JOIN pharmacy.pharmacies ph
@@ -211,17 +207,13 @@ export class PublicCatalogRepository {
                  LIMIT 1
               ) price ON true
     LEFT JOIN LATERAL (
-                SELECT SUM(st.available_quantity) AS available,
-                       COUNT(st.id) AS positions
-                  FROM pharmacy.pharmacy_sites site
-                  JOIN pharmacy_inventory.inventory_locations loc
-                    ON loc.pharmacy_site_id = site.id
-                   AND loc.status_concept_id = ?
-                  JOIN pharmacy_inventory.inventory_stock_positions st
-                    ON st.inventory_location_id = loc.id
-                   AND st.pharmacy_product_id = p.id
-                 WHERE site.pharmacy_id = p.pharmacy_id
-                   AND site.status_concept_id = ?
+                -- La regla única de disponibilidad por sede (A1): lotes si la
+                -- sede los lleva, lo declarado en el catálogo si no.
+                SELECT SUM(av.available_quantity) AS available,
+                       COUNT(*) AS sites
+                  FROM (${availability.sql}) av
+                 WHERE av.pharmacy_id = p.pharmacy_id
+                   AND av.product_id = p.id
               ) stock ON true
         WHERE (CAST(? AS text) IS NULL
                OR (p.sort_name, p.id) > (CAST(? AS text), CAST(? AS uuid)))
@@ -234,8 +226,7 @@ export class PublicCatalogRepository {
         PHARM.PRODUCT_ACTIVE,
         PHARM.PRICE_LIST_ACTIVE,
         PHARM.PRICE_ACTIVE,
-        PINV.LOCATION_ACTIVE,
-        PHARM.SITE_ACTIVE,
+        ...availability.params,
         after?.sortKey ?? null,
         after?.sortKey ?? null,
         after?.id ?? null,

@@ -14,54 +14,22 @@ const row = (extra: object) =>
     ...extra,
   }) as any;
 
-describe('publicInStock (P31 con el catálogo de P47)', () => {
+describe('publicInStock (P31 con la regla única de existencias por sede)', () => {
   it('sin los datos del catálogo, como antes: lo disponible del ledger', () => {
     expect(publicInStock(row({ availableQuantity: '3' }))).toBe(true);
     expect(publicInStock(row({ availableQuantity: '0' }))).toBe(false);
   });
 
-  it('el «no tengo» del catálogo manda aunque el ledger tenga', () => {
-    expect(
-      publicInStock(
-        row({
-          availableQuantity: '5',
-          stockPositions: '1',
-          declaredInStock: false,
-        }),
-      ),
-    ).toBe(false);
+  it('con la regla única por sede: hay si está disponible en alguna sede activa', () => {
+    expect(publicInStock(row({ availableSites: '1' }))).toBe(true);
+    expect(publicInStock(row({ availableSites: 2 }))).toBe(true);
   });
 
-  it('con ledger, decide lo disponible del ledger', () => {
+  it('con la regla única por sede: ninguna sede lo tiene, no hay aunque el libro sume', () => {
+    // Lo que el libro suma en sedes donde el producto se marcó «no tengo» no
+    // vuelve a contar acá: la sede ya lo excluyó (ver la integración de A1).
     expect(
-      publicInStock(
-        row({
-          availableQuantity: '0',
-          stockPositions: '2',
-          declaredInStock: true,
-        }),
-      ),
+      publicInStock(row({ availableSites: '0', availableQuantity: '5' })),
     ).toBe(false);
-    expect(
-      publicInStock(
-        row({
-          availableQuantity: '4',
-          stockPositions: '2',
-          declaredInStock: true,
-        }),
-      ),
-    ).toBe(true);
-  });
-
-  it('sin ledger, vale la declaración del catálogo', () => {
-    expect(
-      publicInStock(
-        row({
-          availableQuantity: '0',
-          stockPositions: '0',
-          declaredInStock: true,
-        }),
-      ),
-    ).toBe(true);
   });
 });

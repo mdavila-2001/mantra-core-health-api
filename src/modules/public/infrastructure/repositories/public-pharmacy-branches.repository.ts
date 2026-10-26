@@ -3,7 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { normalizeSearchText } from '../../../../common/text/normalize-search-text';
 import { DIR } from '../../../directory/directory.concepts';
 import { PHARM } from '../../../pharmacy/pharmacy.concepts';
-import { PINV } from '../../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
+import { siteProductAvailabilitySql } from '../../../pharmacy_inventory/domain/site-product-availability';
 import {
   containsPattern,
   sqlSearchKey,
@@ -90,8 +90,10 @@ export class PublicPharmacyBranchesRepository {
   }
 
   /**
-   * Los productos **en stock** de las sedes de un tenant que casan con algún
-   * renglón de la receta, con su precio vigente para esa sede.
+   * Los productos **disponibles** de las sedes de un tenant que casan con algún
+   * renglón de la receta, con su precio vigente para esa sede. «Disponible» es
+   * la regla única de {@link siteProductAvailabilitySql}: lotes si la sede los
+   * lleva, lo declarado en el catálogo si no.
    *
    * El filtro por renglón va en SQL (sin tildes ni mayúsculas, «contiene») para
    * no traer el catálogo entero; cuál gana por renglón lo decide el dominio.
@@ -115,6 +117,7 @@ export class PublicPharmacyBranchesRepository {
       .map(() => `${sqlSearchKey(searchText)} LIKE ?`)
       .join(' OR ');
     const sitePlaceholders = siteIds.map(() => '?').join(', ');
+    const availability = siteProductAvailabilitySql();
     return em.getConnection().execute(
       `SELECT stock.site_id            AS "siteId",
               prod.id                  AS "productId",
@@ -126,15 +129,11 @@ export class PublicPharmacyBranchesRepository {
               price.price              AS price,
               price.currency           AS currency
          FROM (
-               SELECT loc.pharmacy_site_id AS site_id,
-                      st.pharmacy_product_id AS product_id
-                 FROM pharmacy_inventory.inventory_locations loc
-                 JOIN pharmacy_inventory.inventory_stock_positions st
-                   ON st.inventory_location_id = loc.id
-                WHERE loc.pharmacy_site_id IN (${sitePlaceholders})
-                  AND loc.status_concept_id = ?
-                GROUP BY loc.pharmacy_site_id, st.pharmacy_product_id
-               HAVING SUM(st.available_quantity) > 0
+               -- La regla única de disponibilidad por sede: lotes si la sede
+               -- los lleva; si no, lo declarado en el catálogo (A1).
+               SELECT av.site_id, av.product_id
+                 FROM (${availability.sql}) av
+                WHERE av.site_id IN (${sitePlaceholders})
               ) stock
          JOIN pharmacy.pharmacy_products prod
            ON prod.id = stock.product_id
@@ -171,8 +170,8 @@ export class PublicPharmacyBranchesRepository {
         ORDER BY stock.site_id ASC, prod.id ASC
         LIMIT ?`,
       [
+        ...availability.params,
         ...siteIds,
-        PINV.LOCATION_ACTIVE,
         PHARM.PRODUCT_ACTIVE,
         tenantId,
         PHARM.PRICE_LIST_ACTIVE,

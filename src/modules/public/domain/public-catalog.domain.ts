@@ -25,25 +25,22 @@ export interface PharmacyProductPureRow {
   readonly availableQuantity: string | number;
   readonly requiresPrescription: boolean | null;
   /**
-   * P47: lo que declara el catálogo de la farmacia (no marcó «no tengo» y, si
-   * lleva conteo, le queda). Ausente = no se consultó.
+   * Sedes activas donde el producto está **disponible** según la regla única
+   * de existencias (`siteProductAvailabilitySql`: lotes si la sede los lleva,
+   * lo declarado en el catálogo si no, y nunca lo marcado «no tengo»).
+   * Ausente = no se consultó.
    */
-  readonly declaredInStock?: boolean;
-  /** Posiciones del ledger de existencias del producto. Ausente = no se consultó. */
-  readonly stockPositions?: string | number;
+  readonly availableSites?: string | number;
 }
 
 /**
- * Si se rotula «hay». La declaración del catálogo manda cuando dice «no
- * tengo»; si la farmacia lleva el ledger de existencias (hay posiciones), lo
- * disponible del ledger decide; si no lo lleva, vale la declaración (P47: una
- * farmacia sin inventario por lotes también vende).
+ * Si se rotula «hay»: si el producto está disponible en alguna sede activa.
+ * La decisión por sede no se repite acá: la toma `siteProductAvailabilitySql`
+ * en la base (defecto A1, 26/10/2026). Sin ese dato, como antes de P47: lo
+ * disponible del libro.
  */
 export function publicInStock(row: PharmacyProductPureRow): boolean {
-  if (row.declaredInStock === false) return false;
-  const ledgerKept =
-    row.stockPositions === undefined || Number(row.stockPositions) > 0;
-  if (!ledgerKept) return row.declaredInStock === true;
+  if (row.availableSites !== undefined) return Number(row.availableSites) > 0;
   return Number(row.availableQuantity) > 0;
 }
 

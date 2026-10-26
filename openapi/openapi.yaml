@@ -98582,6 +98582,7 @@ components:
             - $ref: '#/components/schemas/InventoryConceptDto'
         availableQuantity:
           type: number
+          nullable: true
         price:
           nullable: true
           type: object
