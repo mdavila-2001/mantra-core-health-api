@@ -135,6 +135,7 @@ export class CreateTemplateUseCase {
           // la diferencia entre «no lo dijeron» y «dijeron que no hay respiro».
           gapMinutes: rule.gapMinutes,
           bookingModeConceptId: bandMode(rule.bookingMode),
+          telemedicineEnabled: rule.telemedicineEnabled === true,
           actorUserId: actor.id,
         });
       }
