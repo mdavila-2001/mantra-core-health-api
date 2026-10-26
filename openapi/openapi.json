@@ -101063,6 +101063,16 @@
             "description": "Fecha de inscripción de la matrícula (ISO)",
             "format": "date"
           },
+          "licenseFileId": {
+            "type": "string",
+            "description": "fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document",
+            "format": "uuid"
+          },
+          "sedesLicenseFileId": {
+            "type": "string",
+            "description": "fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document",
+            "format": "uuid"
+          },
           "professionalTitle": {
             "type": "string",
             "maxLength": 100
@@ -101980,6 +101990,16 @@
           },
           "address": {
             "$ref": "#/components/schemas/OwnSiteAddressDto"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "example": "Frente al mercado"
+          },
+          "locationUrl": {
+            "type": "string",
+            "maxLength": 2000,
+            "example": "https://maps.google.com/?q=-17.78,-63.18"
           }
         },
         "required": [
@@ -102338,6 +102358,16 @@
             "type": "string",
             "description": "Fecha de inscripción de la matrícula (ISO)",
             "format": "date"
+          },
+          "licenseFileId": {
+            "type": "string",
+            "description": "fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document",
+            "format": "uuid"
+          },
+          "sedesLicenseFileId": {
+            "type": "string",
+            "description": "fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document",
+            "format": "uuid"
           },
           "professionalTitle": {
             "type": "string",

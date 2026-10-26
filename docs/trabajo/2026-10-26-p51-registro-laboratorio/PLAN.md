@@ -53,18 +53,18 @@ unidad `DU_TYPE_LAB`, central + N sucursales como sedes y como `directory.branch
 y enlace; un `locationUrl` `javascript:` es 400; sucursales en una unidad de imágenes es 422.
 **DoD:** `yarn jest` dirigido · `yarn test:integration laboratory-registration` · typecheck · lint
 de lo tocado · OpenAPI regenerado.
-**Estado:** EN CURSO
+**Estado:** HECHO (ver REPORTE; sin prueba visual)
 
 | ID | Microtarea | CA (binario) | DoD | Estado |
 |---|---|---|---|---|
-| H1.S1.M1 | `resolveDiagnosticUnitType` (D-1) + uso en validador y provisión | sin tipo y sin imagen → LAB | `jest diagnostic-unit-modalities tenant-type-profile diagnostic-unit-provisioning` | TODO |
-| H1.S1.M2 | `DiagnosticUnitBranchDto.description/locationUrl` | `javascript:` → 400 | test de integración | TODO |
-| H1.S1.M3 | Sucursales del laboratorio en `directory.branches` | aparecen en `GET /tenants/{id}/branches` | test de integración | TODO |
-| H1.S1.M4 | Integración con el cuerpo del front, catálogos reales y negativos | 201/400/422/401 | `yarn test:integration test/integration/laboratory-registration.int-spec.ts` | TODO |
-| H1.S1.M5 | OpenAPI regenerado | diff sólo en el DTO | script del repo | TODO |
-| H1.S2.M1 | Front: `description`/`locationUrl` siempre en `iam.client.ts` | spec del cliente | `vitest run iam.client` | TODO |
-| H1.S2.M2 | Front: simulador con el contrato real (idNumber, poder, url http) | spec del handler | `vitest run auth.handlers.laboratory` | TODO |
-| H1.S2.M3 | Front: nota P51 en `PENDIENTES-BACKEND.md` | — | lectura | TODO |
+| H1.S1.M1 | `resolveDiagnosticUnitType` (D-1) + uso en validador y provisión | sin tipo y sin imagen → LAB | `jest diagnostic-unit-modalities tenant-type-profile diagnostic-unit-provisioning` | HECHO |
+| H1.S1.M2 | `DiagnosticUnitBranchDto.description/locationUrl` | `javascript:` → 400 | test de integración | HECHO |
+| H1.S1.M3 | Sucursales del laboratorio en `directory.branches` | aparecen en `GET /tenants/{id}/branches` | test de integración | HECHO |
+| H1.S1.M4 | Integración con el cuerpo del front, catálogos reales y negativos | 201/400/422/401 | `yarn test:integration test/integration/laboratory-registration.int-spec.ts` | HECHO |
+| H1.S1.M5 | OpenAPI regenerado | diff sólo en el DTO | script del repo | HECHO |
+| H1.S2.M1 | Front: `description`/`locationUrl` siempre en `iam.client.ts` | spec del cliente | `ng test --include register-laboratory.spec` | HECHO |
+| H1.S2.M2 | Front: simulador con el contrato real (idNumber, poder, url http) | spec del handler | `ng test --include auth.handlers.laboratory.spec` | HECHO |
+| H1.S2.M3 | Front: nota P51 en `PENDIENTES-BACKEND.md` | — | lectura | DESCARTADO (el archivo vive sólo en la rama `mockup`; la nota va en este reporte) |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
