@@ -22,6 +22,7 @@ import { CLIN } from '../clinical.concepts';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
 import { EncounterSealService } from './encounter-seal.service';
 import { ClinicalReadService } from './clinical-read.service';
+import { AuthzCareRelationshipsService } from '../../authz/services/authz-care-relationships.service';
 // P25 (BR-11): adjuntar un archivo ya subido al encuentro por su ruta clínica,
 // calcado de `ProceduresService.attachFile`.
 import { FilesService } from '../../common/services';
@@ -55,6 +56,7 @@ export class EncountersService {
    * @param logger - Valor de logger requerido por la operación.
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    * @param filesService - Vincula archivos ya subidos al encuentro (P25).
+   * @param careRelationships - Abre la relación asistencial del paciente con huella propia.
    */
   constructor(
     private readonly em: EntityManager,
@@ -65,6 +67,7 @@ export class EncountersService {
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
     private readonly filesService: FilesService,
+    private readonly careRelationships: AuthzCareRelationshipsService,
   ) {
     this.logger.setContext(EncountersService.name);
   }
@@ -213,6 +216,22 @@ export class EncountersService {
         locationIds.push(location.id);
       }
       await tx.flush();
+
+      // La atención de un paciente que reservó por su cuenta respalda la relación
+      // asistencial que luego habilita el cobro con seguro (REQ-16-035). Con un
+      // paciente sin huella propia no se crea nada: la relación la pide el
+      // profesional y la acepta el paciente.
+      if (dto.primaryPractitionerId) {
+        await this.careRelationships.establishFromPatientFootprint(
+          tx,
+          {
+            patientProfileId: dto.patientProfileId,
+            practitionerProfileId: dto.primaryPractitionerId,
+            tenantId: dto.tenantId,
+          },
+          actor,
+        );
+      }
 
       this.logger.info(
         { operation: 'clinical.encounter.check-in', encounterId: encounter.id },

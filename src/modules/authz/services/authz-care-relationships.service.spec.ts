@@ -818,4 +818,100 @@ describe('AuthzCareRelationshipsService', () => {
       );
     });
   });
+
+  describe('establishFromPatientFootprint (REQ-16-035)', () => {
+    const input = {
+      patientProfileId: 'pat-1',
+      practitionerProfileId: 'prac-1',
+      tenantId: ACTIVE_TENANT,
+    };
+
+    it('paciente con huella propia en el tenant: abre la relación ACTIVE sin acotar', async () => {
+      const d = build();
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.create.mockReturnValue({ id: 'cr-9' });
+      const created = await d.service.establishFromPatientFootprint(
+        d.tx as any,
+        input,
+        actor,
+      );
+      expect(created).toBe(true);
+      const data = d.careRepo.create.mock.calls[0][1];
+      expect(data).toMatchObject({
+        tenantId: ACTIVE_TENANT,
+        patientProfileId: 'pat-1',
+        practitionerProfileId: 'prac-1',
+        actorUserId: actor.id,
+      });
+      expect(data.statusConceptId).toBeUndefined();
+      expect(data.purposeConceptId).toBeUndefined();
+      expect(d.auditTrail.record).toHaveBeenCalledWith(
+        d.tx,
+        actor,
+        expect.objectContaining({
+          action: 'CARE_RELATIONSHIP_ESTABLISHED_FROM_FOOTPRINT',
+          entityId: 'cr-9',
+        }),
+      );
+    });
+
+    it('paciente sin huella propia: no crea nada (la relación la pide el profesional y la acepta el paciente)', async () => {
+      const d = build();
+      d.scopeRepo.patientHasFootprintInTenant.mockResolvedValue(false);
+      const created = await d.service.establishFromPatientFootprint(
+        d.tx as any,
+        input,
+        actor,
+      );
+      expect(created).toBe(false);
+      expect(d.careRepo.create).not.toHaveBeenCalled();
+      expect(d.auditTrail.record).not.toHaveBeenCalled();
+    });
+
+    it('paciente inexistente: no crea nada', async () => {
+      const d = build();
+      const created = await d.service.establishFromPatientFootprint(
+        d.tx as any,
+        { ...input, patientProfileId: 'otro' },
+        actor,
+      );
+      expect(created).toBe(false);
+      expect(d.careRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('ya hay una relación ACTIVE con ese profesional en el tenant: no duplica', async () => {
+      const d = build();
+      d.careRepo.findActiveInTenant.mockResolvedValue({ id: 'existing' });
+      const created = await d.service.establishFromPatientFootprint(
+        d.tx as any,
+        input,
+        actor,
+      );
+      expect(created).toBe(false);
+      expect(d.careRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el tenant indicado no es el activo: no crea nada', async () => {
+      const d = build();
+      const created = await d.service.establishFromPatientFootprint(
+        d.tx as any,
+        { ...input, tenantId: 'otro-tenant' },
+        actor,
+      );
+      expect(created).toBe(false);
+      expect(d.scopeRepo.patientHasFootprintInTenant).not.toHaveBeenCalled();
+      expect(d.careRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('sin tenant en el contexto: no crea nada', async () => {
+      const d = build();
+      const created = await d.rawService.establishFromPatientFootprint(
+        d.tx as any,
+        input,
+        actor,
+      );
+      expect(created).toBe(false);
+      expect(d.careRepo.create).not.toHaveBeenCalled();
+    });
+  });
 });

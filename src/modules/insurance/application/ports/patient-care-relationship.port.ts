@@ -11,7 +11,7 @@ export interface PatientCareRelationshipPort {
    * @param query.patientProfileId - Paciente de la cobertura.
    * @param query.tenantId - Organización que cobra.
    * @param query.at - Instante contra el que se mide la vigencia.
-   * @returns `true` si hay una relación asistencial vigente, sin acotar o acotada al pago.
+   * @returns `true` si hay una relación asistencial vigente, sin acotar o acotada al pago o al tratamiento.
    */
   hasCareRelationshipForPayment(
     em: EntityManager,

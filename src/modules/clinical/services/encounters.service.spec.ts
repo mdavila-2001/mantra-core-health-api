@@ -61,6 +61,11 @@ function build() {
     createLink: mockFn().mockResolvedValue({ id: 'link-1' }),
     listLinkedFilesOf: mockFn().mockResolvedValue({ items: [], count: 0 }),
   };
+  // La relación asistencial por huella propia se cubre en el spec de `authz`;
+  // acá sólo se prueba que el check-in la pida.
+  const careRelationships = {
+    establishFromPatientFootprint: mockFn().mockResolvedValue(false),
+  };
   const service = new EncountersService(
     em as any,
     encountersRepo,
@@ -70,6 +75,7 @@ function build() {
     logger as any,
     clinicalRead as any,
     filesService as any,
+    careRelationships as any,
   );
   return {
     service,
@@ -80,6 +86,7 @@ function build() {
     seal,
     clinicalRead,
     filesService,
+    careRelationships,
   };
 }
 
@@ -168,6 +175,59 @@ describe('EncountersService', () => {
       expect(res.status).toBe(CLIN.ENCOUNTER_IN_PROGRESS);
       expect(d.encountersRepo.createParticipant).not.toHaveBeenCalled();
       expect(d.tx.flush).toHaveBeenCalledTimes(2);
+    });
+
+    it('pide la relación asistencial del profesional principal en la transacción del check-in', async () => {
+      const d = build();
+      d.encountersRepo.create.mockReturnValue(encounter());
+      await d.service.checkIn(
+        {
+          patientProfileId: 'p1',
+          tenantId: 't1',
+          primaryPractitionerId: 'hp1',
+        },
+        actor,
+      );
+      expect(
+        d.careRelationships.establishFromPatientFootprint,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        {
+          patientProfileId: 'p1',
+          practitionerProfileId: 'hp1',
+          tenantId: 't1',
+        },
+        actor,
+      );
+    });
+
+    it('sin profesional principal no pide ninguna relación asistencial', async () => {
+      const d = build();
+      d.encountersRepo.create.mockReturnValue(encounter());
+      await d.service.checkIn(
+        { patientProfileId: 'p1', tenantId: 't1' },
+        actor,
+      );
+      expect(
+        d.careRelationships.establishFromPatientFootprint,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('un encuentro reutilizado de la cita no pide relación asistencial', async () => {
+      const d = build();
+      d.encountersRepo.findByAppointmentId.mockResolvedValue([encounter()]);
+      await d.service.checkIn(
+        {
+          patientProfileId: 'p1',
+          tenantId: 't1',
+          appointmentId: 'appt1',
+          primaryPractitionerId: 'hp1',
+        },
+        actor,
+      );
+      expect(
+        d.careRelationships.establishFromPatientFootprint,
+      ).not.toHaveBeenCalled();
     });
 
     it('creates participants and a location when provided', async () => {

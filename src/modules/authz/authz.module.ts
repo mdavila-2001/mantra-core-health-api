@@ -135,6 +135,9 @@ import {
     // para exigir una relación asistencial ACTIVE antes de compartir un
     // resultado con un profesional.
     CareRelationshipsRepository,
+    // El check-in de `clinical` abre la relación asistencial del paciente que
+    // reservó por su cuenta (`establishFromPatientFootprint`), en su transacción.
+    AuthzCareRelationshipsService,
     AuthzPdpService,
     // AG-31 (BR-26): `pharma_lab` necesita asignar/consultar MEDICAL_VISITOR al
     // vincular o desvincular un visitador, en la misma transacción del caso de

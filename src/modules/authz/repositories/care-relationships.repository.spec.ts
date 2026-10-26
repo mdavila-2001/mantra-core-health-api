@@ -72,11 +72,29 @@ describe('CareRelationshipsRepository.hasActiveInTenantAt', () => {
       patientProfileId: 'pat-1',
       tenantId: 't1',
       at: AT,
-      purposeConceptId: PAYMENT,
+      purposeConceptIds: [PAYMENT],
     });
     const filter = d.em.count.mock.calls[0][1];
     expect(filter.$and[1]).toEqual({
       $or: [{ purposeConceptId: null }, { purposeConceptId: PAYMENT }],
+    });
+  });
+
+  it('con varios propósitos cuentan las sin acotar y las acotadas a cualquiera de ellos', async () => {
+    const d = build(1);
+    await d.repo.hasActiveInTenantAt(d.em as any, {
+      patientProfileId: 'pat-1',
+      tenantId: 't1',
+      at: AT,
+      purposeConceptIds: [PAYMENT, 'treatment'],
+    });
+    const filter = d.em.count.mock.calls[0][1];
+    expect(filter.$and[1]).toEqual({
+      $or: [
+        { purposeConceptId: null },
+        { purposeConceptId: PAYMENT },
+        { purposeConceptId: 'treatment' },
+      ],
     });
   });
 });

@@ -118,7 +118,12 @@ FKs como columnas `uuid` planas.
   fabricara el vínculo y concediera accesos sobre una historia ajena. Tampoco cuentan
   las relaciones, accesos ni representaciones, que son lo que esta comprobación
   protege. Un paciente sin cuenta, o sin huella propia, entra por la solicitud de
-  relación (abajo), que el paciente acepta. Los duplicados de acceso clínico,
+  relación (abajo), que el paciente acepta. El check-in
+  (`POST /clinical/encounters/check-in`) con profesional principal abre además la
+  relación `ACTIVE` sin acotar de ese profesional (`establishFromPatientFootprint`)
+  **sólo cuando el paciente tiene huella propia** en el tenant activo: la relación nace
+  de un acto del paciente, no del personal, y sin esa huella el check-in no crea nada.
+  Esa relación es la que exige el cobro con seguro (REQ-16-035). Los duplicados de acceso clínico,
   relación asistencial (activa o pendiente) y representación legal se buscan sólo en
   el tenant activo (`findActiveInTenant`/`findPendingInTenant`) y su 409 no lleva
   `details`: una fila de otra organización ni bloquea ni se delata. Todo lo

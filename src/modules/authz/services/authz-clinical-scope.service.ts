@@ -107,6 +107,31 @@ export class AuthzClinicalScopeService {
   }
 
   /**
+   * ¿El paciente existe y tiene una huella propia en el tenant? Es la misma
+   * comprobación de `assertPatientInTenant`, que acá se responde con un booleano
+   * en lugar de un 404.
+   *
+   * @param tx - Transacción activa.
+   * @param patientProfileId - Paciente a comprobar.
+   * @param tenantId - Tenant activo.
+   * @returns `true` si el paciente existe y dejó una huella propia en el tenant.
+   */
+  async patientHasOwnFootprint(
+    tx: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+  ): Promise<boolean> {
+    return (
+      (await this.scopeRepo.patientExists(tx, patientProfileId)) &&
+      (await this.scopeRepo.patientHasFootprintInTenant(
+        tx,
+        patientProfileId,
+        tenantId,
+      ))
+    );
+  }
+
+  /**
    * Exige sólo que el paciente exista. Es para la solicitud de relación que un
    * profesional le hace a un paciente encontrado en el padrón: el paciente aún no
    * tiene vínculo con el tenant y la relación nace `PENDING`, sin conceder nada

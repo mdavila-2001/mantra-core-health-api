@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ConflictException,
+  getCurrentTenantId,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
@@ -313,6 +314,66 @@ export class AuthzCareRelationshipsService {
       patientProfileId,
     );
     return link?.userId;
+  }
+
+  /**
+   * Abre la relación asistencial `ACTIVE` que respalda el cuidado que el tenant
+   * activo da a un paciente, **sólo si el paciente dejó una huella propia en él**
+   * (una reserva hecha por su cuenta o su autorregistro: la misma prueba de
+   * `assertPatientInTenant`). Así la relación nace de un acto del paciente y no del
+   * personal, y no se salta la aceptación que exige `requestCareRelationship`.
+   *
+   * No hace nada —y no lanza— cuando el tenant indicado no es el activo, el paciente
+   * no tiene huella propia o ya hay una relación `ACTIVE` con ese profesional en
+   * el tenant: quien atiende a un paciente sin huella propia pide la relación por
+   * `POST /authz/care-relationships` y el paciente la acepta. Corre en la
+   * transacción del llamador.
+   *
+   * @param tx - Transacción del llamador (el check-in).
+   * @param input - Paciente, profesional que atiende y tenant de la atención.
+   * @param actor - Quien registra la atención.
+   * @returns `true` si creó la relación; `false` si no correspondía crearla.
+   */
+  async establishFromPatientFootprint(
+    tx: EntityManager,
+    input: {
+      patientProfileId: string;
+      practitionerProfileId: string;
+      tenantId: string;
+    },
+    actor: AuthenticatedUser,
+  ): Promise<boolean> {
+    const { patientProfileId, practitionerProfileId, tenantId } = input;
+    if (getCurrentTenantId() !== tenantId) return false;
+    if (
+      !(await this.scope.patientHasOwnFootprint(tx, patientProfileId, tenantId))
+    ) {
+      return false;
+    }
+    const existing = await this.careRepo.findActiveInTenant(
+      tx,
+      patientProfileId,
+      practitionerProfileId,
+      tenantId,
+    );
+    if (existing) return false;
+
+    const rel = this.careRepo.create(tx, {
+      tenantId,
+      patientProfileId,
+      practitionerProfileId,
+      relationshipTypeConceptId: CARE_REL_TYPE_CONCEPT.TREATING,
+      validFrom: new Date(),
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+    await this.auditTrail.record(tx, actor, {
+      action: 'CARE_RELATIONSHIP_ESTABLISHED_FROM_FOOTPRINT',
+      entity: 'care_relationship',
+      entityId: rel.id,
+      tenantId,
+    });
+    return true;
   }
 
   /** Establece una relación asistencial practicante↔paciente. */

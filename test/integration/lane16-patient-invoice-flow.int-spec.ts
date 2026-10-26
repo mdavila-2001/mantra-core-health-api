@@ -12,6 +12,10 @@ import {
 } from './disposable-database';
 import { AUTHZ } from '../../src/modules/authz/authz.concepts';
 import { CareRelationshipsRepository } from '../../src/modules/authz/repositories/care-relationships.repository';
+import { AuthzClinicalScopeRepository } from '../../src/modules/authz/repositories/authz-clinical-scope.repository';
+import { AuthzCareRelationshipsService } from '../../src/modules/authz/services/authz-care-relationships.service';
+import { AuthzClinicalScopeService } from '../../src/modules/authz/services/authz-clinical-scope.service';
+import { PROF } from '../../src/modules/profiles/profiles.concepts';
 import { BILL } from '../../src/modules/billing/billing.concepts';
 import { InvoicesRepository } from '../../src/modules/billing/repositories';
 import { PaymentsReceivedRepository } from '../../src/modules/billing/repositories/payments-received.repository';
@@ -118,6 +122,8 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
   const extraCoverageIds: string[] = [];
   // Pacientes extra de las pruebas de relación asistencial (se retiran al final).
   const extraPatientIds: string[] = [];
+  // Cuentas de usuario de los pacientes con huella propia (se retiran al final).
+  const extraUserIds: string[] = [];
 
   // Colaboradores.
   const events: Array<{ eventType: string; payloadJson: any }> = [];
@@ -285,6 +291,10 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
       AUTHZ.CARE_REL_TREATING,
       AUTHZ.PURPOSE_PAYMENT,
       AUTHZ.PURPOSE_TREATMENT,
+      AUTHZ.PURPOSE_OPERATIONS,
+      AUTHZ.PURPOSE_EMERGENCY,
+      PROF.ACCOUNT_LINK_ACTIVE,
+      CONCEPTS.MEMBERSHIP_ACTIVE,
     ];
     const present = await count(
       `select count(*)::int as n from terminology.catalog_concepts where id in (${needed.map(() => '?').join(', ')})`,
@@ -660,6 +670,16 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
       await attempt('delete from profiles.persons where id = ?', [
         ids.practitioner,
       ]);
+      for (const user of extraUserIds) {
+        await attempt(
+          'delete from directory.tenant_memberships where user_id = ?',
+          [user],
+        );
+        await attempt(
+          'delete from profiles.person_account_links where user_id = ?',
+          [user],
+        );
+      }
       for (const person of [
         ids.patient,
         ids.otherPatient,
@@ -682,6 +702,7 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
         ids.userBiller,
         ids.userPatient,
         ids.userOtherPatient,
+        ...extraUserIds,
       ]) {
         await attempt('delete from iam.users where id = ?', [user]);
       }
@@ -998,9 +1019,10 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
         { statusConceptId: CONCEPTS.STATE_PENDING },
       ],
       [
-        'acotada a otro propósito (tratamiento)',
-        { purposeConceptId: AUTHZ.PURPOSE_TREATMENT },
+        'acotada a otro propósito (operaciones)',
+        { purposeConceptId: AUTHZ.PURPOSE_OPERATIONS },
       ],
+      ['acotada a emergencia', { purposeConceptId: AUTHZ.PURPOSE_EMERGENCY }],
     ])(
       'relación %s: rechazo 404 y no se guarda el cobro',
       async (name, relation) => {
@@ -1016,14 +1038,17 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
       },
     );
 
-    it('relación acotada al pago o con vencimiento futuro: vigente', async () => {
+    it('relación acotada al pago o al tratamiento, o con vencimiento futuro: vigente', async () => {
       const bounded = await patientWithCoverage({
         purposeConceptId: AUTHZ.PURPOSE_PAYMENT,
+      });
+      const treatment = await patientWithCoverage({
+        purposeConceptId: AUTHZ.PURPOSE_TREATMENT,
       });
       const expiring = await patientWithCoverage({
         validToSql: "now() + interval '1 day'",
       });
-      for (const { patientCoverageId } of [bounded, expiring]) {
+      for (const { patientCoverageId } of [bounded, treatment, expiring]) {
         const created = await submitFor(
           patientCoverageId,
           `${mark}-vigente-${patientCoverageId.slice(0, 6)}`,
@@ -1044,6 +1069,153 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
         `${mark}-vencida-y-vigente`,
       );
       expect(created.id).toBeDefined();
+    });
+
+    describe('el check-in abre la relación asistencial del paciente con huella propia', () => {
+      // Reales: `AuthzCareRelationshipsService.establishFromPatientFootprint`, la
+      // política de alcance y sus lecturas, el repositorio y la tabla. Doble: la
+      // auditoría WORM, el outbox y los avisos (no entran en esta regla). El
+      // check-in HTTP que la invoca no se ejerce acá: se cubre por unitaria.
+      const careService = () =>
+        new AuthzCareRelationshipsService(
+          orm.em as never,
+          new CareRelationshipsRepository(),
+          {} as never,
+          {} as never,
+          { record: async () => undefined } as never,
+          { publishDomainEvent: async () => undefined } as never,
+          { emitInApp: async () => ({ suppressed: false }) } as never,
+          new AuthzClinicalScopeService(new AuthzClinicalScopeRepository()),
+          logger as never,
+        );
+
+      /** Paciente con cobertura y, si se pide, una cuenta activa con membresía en la organización. */
+      async function patientWithFootprint(
+        membership: 'self' | 'invited-by-staff' | 'none',
+      ) {
+        const { person, patientCoverageId } = await patientWithCoverage();
+        if (membership === 'none') return { person, patientCoverageId };
+        const user = randomUUID();
+        extraUserIds.push(user);
+        await run(
+          `insert into iam.users (id, status_concept_id, display_name, created_at, updated_at)
+           values (?, ?, ?, now(), now())`,
+          [user, CONCEPTS.USER_ACTIVE, `${mark}-cuenta`],
+        );
+        await run(
+          `insert into profiles.person_account_links
+             (id, person_id, user_id, link_type_concept_id, verification_status_concept_id,
+              valid_from, status_concept_id, created_at, updated_at)
+           values (?, ?, ?, ?, ?, now() - interval '1 day', ?, now(), now())`,
+          [
+            randomUUID(),
+            person,
+            user,
+            INS.CARRIER_ACTIVE,
+            INS.CARRIER_ACTIVE,
+            PROF.ACCOUNT_LINK_ACTIVE,
+          ],
+        );
+        await run(
+          `insert into directory.tenant_memberships
+             (id, user_id, tenant_id, tenant_role_concept_id, status_concept_id,
+              access_scope_concept_id, start_date, invited_by_user_id, created_at, updated_at)
+           values (?, ?, ?, ?, ?, ?, now() - interval '1 day', ?, now(), now())`,
+          [
+            randomUUID(),
+            user,
+            ids.tenant,
+            INS.CARRIER_ACTIVE,
+            CONCEPTS.MEMBERSHIP_ACTIVE,
+            INS.CARRIER_ACTIVE,
+            membership === 'self' ? null : userBiller,
+          ],
+        );
+        return { person, patientCoverageId };
+      }
+
+      const checkIn = (
+        patientProfileId: string,
+        tenantId: string = ids.tenant,
+      ) =>
+        inTenant(() =>
+          orm.em.fork().transactional((tx) =>
+            careService().establishFromPatientFootprint(
+              tx as never,
+              {
+                patientProfileId,
+                practitionerProfileId: ids.practitioner,
+                tenantId,
+              },
+              biller(),
+            ),
+          ),
+        );
+      const relationsOf = (patientProfileId: string) =>
+        all<{ status_concept_id: string; purpose_concept_id: string | null }>(
+          `select status_concept_id, purpose_concept_id from authz.care_relationships
+           where patient_profile_id = ? and tenant_id = ?`,
+          [patientProfileId, ids.tenant],
+        );
+
+      it('paciente que se autorregistró: el check-in abre la relación y el cobro pasa', async () => {
+        const { person, patientCoverageId } =
+          await patientWithFootprint('self');
+        const identifier = `${mark}-antes-checkin`;
+        expect(
+          (
+            await failureOf(submitFor(patientCoverageId, identifier))
+          ).getStatus(),
+        ).toBe(404);
+
+        expect(await checkIn(person)).toBe(true);
+
+        const relations = await relationsOf(person);
+        expect(relations).toHaveLength(1);
+        expect(relations[0].status_concept_id).toBe(CONCEPTS.STATE_ACTIVE);
+        expect(relations[0].purpose_concept_id).toBeNull();
+        const created = await submitFor(
+          patientCoverageId,
+          `${mark}-tras-checkin`,
+        );
+        expect(created.id).toBeDefined();
+        expect((await quoteFor(patientCoverageId)).canSubmit).toBe(true);
+      });
+
+      it('un segundo check-in con el mismo profesional no duplica la relación', async () => {
+        const { person } = await patientWithFootprint('self');
+        expect(await checkIn(person)).toBe(true);
+        expect(await checkIn(person)).toBe(false);
+        expect(await relationsOf(person)).toHaveLength(1);
+      });
+
+      it('paciente sin cuenta ni huella: el check-in no crea nada y el cobro se rechaza', async () => {
+        const { person, patientCoverageId } =
+          await patientWithFootprint('none');
+        expect(await checkIn(person)).toBe(false);
+        expect(await relationsOf(person)).toHaveLength(0);
+        const error = await failureOf(
+          submitFor(patientCoverageId, `${mark}-sin-huella`),
+        );
+        expect(error.getStatus()).toBe(404);
+      });
+
+      it('membresía que dio de alta el personal: no es huella propia y no se crea nada', async () => {
+        const { person, patientCoverageId } =
+          await patientWithFootprint('invited-by-staff');
+        expect(await checkIn(person)).toBe(false);
+        expect(await relationsOf(person)).toHaveLength(0);
+        const error = await failureOf(
+          submitFor(patientCoverageId, `${mark}-alta-personal`),
+        );
+        expect(error.getStatus()).toBe(404);
+      });
+
+      it('tenant del check-in distinto del activo: no se crea nada', async () => {
+        const { person } = await patientWithFootprint('self');
+        expect(await checkIn(person, ids.otherTenant)).toBe(false);
+        expect(await relationsOf(person)).toHaveLength(0);
+      });
     });
   });
 
