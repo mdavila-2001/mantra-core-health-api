@@ -49,6 +49,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
     };
     const usersRepo = { create: fn(() => ({ id: 'user-1' })) };
     const credentialsRepo = {
+      lockSubjectForRegistration: fn().mockResolvedValue(undefined),
       findLivePasswordBySubject: fn().mockResolvedValue(null),
       createPassword: fn(),
     };
@@ -383,6 +384,21 @@ describe('IamOrganizationSelfRegistrationService', () => {
       ConflictException,
     );
     expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+  });
+
+  // Sin el cerrojo, dos altas simultáneas con el mismo correo pasarían las dos
+  // la comprobación.
+  it('locks the owner email inside the transaction before checking for a live credential', async () => {
+    const d = build();
+
+    await d.service.registerOrganization(dto);
+
+    const lock = d.credentialsRepo.lockSubjectForRegistration;
+    const check = d.credentialsRepo.findLivePasswordBySubject;
+    expect(lock).toHaveBeenCalledWith(d.tx, dto.owner.email);
+    expect(lock.mock.invocationCallOrder[0]).toBeLessThan(
+      check.mock.invocationCallOrder[0],
+    );
   });
 
   it('keeps the organization when the verification email cannot be queued', async () => {
