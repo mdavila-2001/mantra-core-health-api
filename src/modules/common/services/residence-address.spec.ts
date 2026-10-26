@@ -40,6 +40,28 @@ function buildConcepts(
 describe('createResidenceAddress', () => {
   const tx = {} as any;
 
+  it('deriva el departamento también del código INE que siembra la API (geo:bo:municipality:*)', async () => {
+    const { repo, rows } = buildRepo();
+    const santaCruz = 'concept-santa-cruz';
+    const concepts = buildConcepts({
+      [santaCruz]: {
+        code: 'geo:bo:municipality:070101',
+        display: 'Santa Cruz de la Sierra',
+      },
+    });
+
+    const wrote = await createResidenceAddress(repo, tx, concepts, {
+      personId: 'person-1',
+      municipalityConceptId: santaCruz,
+      actorUserId: 'user-1',
+    });
+
+    expect(wrote).toBe(true);
+    expect(rows[0].administrativeAreaConceptId).toBe(
+      boDepartmentConceptId('SC'),
+    );
+  });
+
   it('deriva el departamento del municipio, sin recibirlo', async () => {
     const { repo, rows } = buildRepo();
     const sacaba = 'concept-sacaba';

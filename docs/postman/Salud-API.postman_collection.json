@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1582 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1582 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1584 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1584 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -310,7 +310,7 @@
                 "register-organization"
               ]
             },
-            "description": "Alta pública desde cero: crea en una transacción el usuario owner con su credencial y rol, el tenant, la membresía que los une y el token de verificación de email. La organización queda pendiente de verificación por la plataforma, pero el owner puede iniciar sesión de inmediato.\n\n`tenantType` es obligatorio y cada tipo exige lo suyo: PAYER el bloque `payer` (que crea la aseguradora) y BROKER el bloque `broker` (que crea el corredor); los territoriales —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER y HEALTH_BUSINESS— país y jurisdicción.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `IamAuthController_registerOrganization`",
+            "description": "Alta pública desde cero: crea en una transacción el usuario owner con su credencial y rol, el tenant, la membresía que los une y el token de verificación de email. La organización queda pendiente de verificación por la plataforma, pero el owner puede iniciar sesión de inmediato.\n\n`tenantType` es obligatorio y cada tipo exige lo suyo: PAYER el bloque `payer` (que crea la aseguradora) y BROKER el bloque `broker` (que crea el corredor); los territoriales —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER y HEALTH_BUSINESS— país y jurisdicción.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `IamAuthController_registerOrganization`",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"organization\": {\n    \"code\": \"ORG-{{$timestamp}}\",\n    \"legalName\": \"Organización de prueba {{$timestamp}}\",\n    \"tenantType\": \"PROVIDER\",\n    \"countryConceptId\": \"{{countryConceptId}}\",\n    \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n  },\n  \"owner\": {\n    \"email\": \"owner-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de prueba\"\n  }\n}",
@@ -622,6 +622,63 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"organization\": {\n    \"code\": \"HOS-{{$timestamp}}\",\n    \"legalName\": \"Hospital de prueba {{$timestamp}}\",\n    \"tenantType\": \"HOSPITAL\",\n    \"countryConceptId\": \"{{countryConceptId}}\",\n    \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n  },\n  \"owner\": {\n    \"email\": \"hos-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de hospital\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{registerOrganizationId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.registerOrganizationId);",
+                  "  if (id) pm.environment.set('registerOrganizationId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Organización CLINIC · clínica",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/iam/auth/register-organization",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "iam",
+                "auth",
+                "register-organization"
+              ]
+            },
+            "description": "Alta de clínica. Mismo endpoint y mismo cuerpo que el PROVIDER: los tipos territoriales solo exigen país y jurisdicción, que es lo que determina bajo qué regulador operan. No materializan fila propia —operan por sus sedes— a diferencia de PAYER y BROKER.\n\nCuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `IamAuthController_registerOrganization`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organization\": {\n    \"code\": \"CLI-{{$timestamp}}\",\n    \"legalName\": \"Clínica de prueba {{$timestamp}}\",\n    \"tenantType\": \"CLINIC\",\n    \"countryConceptId\": \"{{countryConceptId}}\",\n    \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n  },\n  \"owner\": {\n    \"email\": \"cli-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de clínica\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -21859,7 +21916,7 @@
                 "description": "Crear una nota clínica versionada (borrador SOAP). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /charts/notes`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ChartNotesController_createNote`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"chiefComplaintText\": \"chiefComplaintText-ejemplo\",\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
+                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"chiefComplaintText\": \"chiefComplaintText-ejemplo\",\n  \"entries\": [\n    {\n      \"label\": \"Presión arterial\",\n      \"value\": \"120/80\"\n    }\n  ],\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -22134,7 +22191,7 @@
                 "description": "Enmendar una nota firmada (addendum versionado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /charts/notes/{noteId}/amendments`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ChartNotesController_amendNote`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"amendmentReasonText\": \"2026-01-01T00:00:00.000Z\",\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
+                  "raw": "{\n  \"amendmentReasonText\": \"2026-01-01T00:00:00.000Z\",\n  \"entries\": [\n    {\n      \"label\": \"Presión arterial\",\n      \"value\": \"120/80\"\n    }\n  ],\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -22352,7 +22409,7 @@
                 "description": "Editar borrador creando una nueva versión inmutable. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /charts/notes/{noteId}/versions`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ChartNotesController_addVersion`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"chiefComplaintText\": \"chiefComplaintText-ejemplo\",\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
+                  "raw": "{\n  \"chiefComplaintText\": \"chiefComplaintText-ejemplo\",\n  \"entries\": [\n    {\n      \"label\": \"Presión arterial\",\n      \"value\": \"120/80\"\n    }\n  ],\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -45519,7 +45576,7 @@
       ]
     },
     {
-      "name": "iam (38)",
+      "name": "iam (39)",
       "item": [
         {
           "name": "iam-auth",
@@ -46716,7 +46773,7 @@
           "name": "iam-users",
           "item": [
             {
-              "name": "GET /iam/users · Listado paginado de usuarios",
+              "name": "GET /iam/users · Listado paginado de usuarios (obsoleto)",
               "request": {
                 "method": "GET",
                 "header": [
@@ -46763,7 +46820,7 @@
                     }
                   ]
                 },
-                "description": "Listado paginado de usuarios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /iam/users`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `IamUsersController_searchUsers`"
+                "description": "Obsoleto: usar `POST /iam/users/search`. Un nombre o un correo en la query string queda en los logs de acceso de cualquier proxy.\n\n`GET /iam/users`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `IamUsersController_searchUsers`"
               },
               "response": [],
               "event": [
@@ -46954,6 +47011,66 @@
                     "exec": [
                       "pm.test('status 201', function () {",
                       "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{userId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.userId);",
+                      "  if (id) pm.environment.set('userId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /iam/users/search · Listado paginado de usuarios, con los filtros en el cuerpo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/users/search",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "users",
+                    "search"
+                  ]
+                },
+                "description": "Igual que `GET /iam/users`, pero el texto de búsqueda viaja en el cuerpo y no en la URL. Una clave no declarada responde 400.\n\n`POST /iam/users/search`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `IamUsersController_searchUsersByBody`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"q\": \"q-ejemplo\",\n  \"cursor\": \"cursor-ejemplo\",\n  \"limit\": 50\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
                       "});",
                       "",
                       "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{userId}}.",
@@ -92244,7 +92361,7 @@
       ]
     },
     {
-      "name": "tenants (26)",
+      "name": "tenants (27)",
       "item": [
         {
           "name": "directory-tenants",
@@ -92945,6 +93062,61 @@
                       "  const list = Array.isArray(body) ? body : (body.childTenants || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('childTenantId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /tenants/{tenantId}/laboratory-readiness · Requisitos pendientes para que el laboratorio opere",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/tenants/:tenantId/laboratory-readiness",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tenants",
+                    ":tenantId",
+                    "laboratory-readiness"
+                  ],
+                  "variable": [
+                    {
+                      "key": "tenantId",
+                      "value": "{{tenantId}}",
+                      "description": "Identificador de ruta · variable `{{tenantId}}`"
+                    }
+                  ]
+                },
+                "description": "403 si no pertenece a la organización; 422 si no es un laboratorio.\n\n`GET /tenants/{tenantId}/laboratory-readiness`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `TenantsController_getLaboratoryReadiness`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.laboratoryReadiness || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('laboratoryReadinessId', first.id);",
                       "}"
                     ]
                   }

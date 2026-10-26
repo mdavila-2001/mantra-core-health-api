@@ -9,6 +9,7 @@ No business logic lives here. Response bodies are DTOs.
 | Method + path                                 | UC       | Guard            | Code |
 | --------------------------------------------- | -------- | ---------------- | ---- |
 | `POST /iam/users`                             | UC-01-01 | `SECURITY_ADMIN` | 201  |
+| `POST /iam/users/search`                      | UC-01-01 | `SECURITY_ADMIN` | 200  |
 | `POST /iam/users/:id/credentials/federated`   | UC-01-02 | `SECURITY_ADMIN` | 201  |
 | `POST /iam/users/:id/credentials/:cid/revoke` | UC-01-09 | `SECURITY_ADMIN` | 200  |
 | `POST /iam/users/:id/mfa-factors`             | UC-01-03 | authenticated    | 201  |

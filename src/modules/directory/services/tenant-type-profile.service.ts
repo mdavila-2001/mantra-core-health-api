@@ -143,7 +143,7 @@ export class TenantTypeProfileService {
       );
     }
     // Todos los tipos territoriales —prestador, universidad, farmacia y las
-    // cuatro institucionales— deben decir dónde operan: es lo que determina bajo
+    // cinco institucionales— deben decir dónde operan: es lo que determina bajo
     // qué regulador lo hacen. Los de seguros no, porque su regulador viaja en su
     // propio bloque.
     if (TERRITORIAL_TENANT_TYPES.includes(tenantType)) {

@@ -368,6 +368,64 @@ describe('PharmacyInventoryReadService', () => {
       });
     });
 
+    it('dates each site by the oldest stock position that backs what it has available', async () => {
+      const d = build();
+      withTwoSites(d);
+      const at = (iso: string) => new Date(iso);
+      d.inventoryRepo.findStockPositions.mockResolvedValue([
+        {
+          inventoryLocationId: 'loc-cerca',
+          pharmacyProductId: 'prod-1',
+          availableQuantity: '5',
+          updatedAt: at('2026-10-25T08:00:00.000Z'),
+        },
+        // Sin cantidad disponible no respalda nada: su fecha vieja no cuenta.
+        {
+          inventoryLocationId: 'loc-cerca',
+          pharmacyProductId: 'prod-2',
+          availableQuantity: '0',
+          updatedAt: at('2026-01-01T00:00:00.000Z'),
+        },
+        {
+          inventoryLocationId: 'loc-lejos',
+          pharmacyProductId: 'prod-1',
+          availableQuantity: '5',
+          updatedAt: at('2026-10-25T09:00:00.000Z'),
+        },
+        // La más vieja de las que respaldan stock es la que manda.
+        {
+          inventoryLocationId: 'loc-lejos',
+          pharmacyProductId: 'prod-2',
+          availableQuantity: '2',
+          updatedAt: at('2026-10-22T09:00:00.000Z'),
+        },
+      ]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.availability(['prod-1', 'prod-2'], undefined),
+      );
+
+      const far = result.items.find((item) => item.siteId === 'site-lejos')!;
+      const nearby = result.items.find((item) => item.siteId === 'site-cerca')!;
+      expect(far.stockUpdatedAt).toBe('2026-10-22T09:00:00.000Z');
+      expect(nearby.stockUpdatedAt).toBe('2026-10-25T08:00:00.000Z');
+    });
+
+    it('leaves the stock date null when no position declares one', async () => {
+      const d = build();
+      withTwoSites(d);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.availability(['prod-1', 'prod-2'], undefined),
+      );
+
+      // Sin fecha no se inventa una antigüedad.
+      expect(result.items.map((item) => item.stockUpdatedAt)).toEqual([
+        null,
+        null,
+      ]);
+    });
+
     it('sums money exactly instead of drifting in floating point', async () => {
       const d = build();
       withTwoSites(d);

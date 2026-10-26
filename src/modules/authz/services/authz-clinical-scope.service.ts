@@ -93,17 +93,36 @@ export class AuthzClinicalScopeService {
     patientProfileId: string,
     tenantId: string,
   ): Promise<void> {
+    // Sin vínculo no se distingue «no existe» de «es de otra organización»: es el mismo 404.
+    if (!(await this.isPatientInTenant(tx, patientProfileId, tenantId))) {
+      throw this.notFound(PATIENT_OUT_OF_SCOPE);
+    }
+  }
+
+  /**
+   * ¿El paciente existe y tiene vínculo comprobable con el tenant? Es la misma
+   * prueba de `assertPatientInTenant`, para quien debe decidir en vez de fallar.
+   *
+   * @param tx - Transacción activa.
+   * @param patientProfileId - Paciente de la base de acceso.
+   * @param tenantId - Tenant activo.
+   * @returns `true` si el perfil de paciente existe y deja huella propia en el tenant.
+   */
+  async isPatientInTenant(
+    tx: EntityManager,
+    patientProfileId: string,
+    tenantId: string,
+  ): Promise<boolean> {
     // La huella puede ser de una persona que no es paciente (una cuenta de personal
     // con membresía): el perfil de paciente tiene que existir además.
-    const linked =
+    return (
       (await this.scopeRepo.patientExists(tx, patientProfileId)) &&
       (await this.scopeRepo.patientHasFootprintInTenant(
         tx,
         patientProfileId,
         tenantId,
-      ));
-    // Sin vínculo no se distingue «no existe» de «es de otra organización»: es el mismo 404.
-    if (!linked) throw this.notFound(PATIENT_OUT_OF_SCOPE);
+      ))
+    );
   }
 
   /**

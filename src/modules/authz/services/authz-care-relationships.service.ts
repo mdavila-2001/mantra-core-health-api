@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ConflictException,
+  getCurrentTenantId,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
@@ -64,6 +65,13 @@ const REPRESENTATION_TYPE_CONCEPT: Record<LegalRepresentationType, string> = {
   ATTORNEY: AUTHZ.REPRESENTATION_ATTORNEY,
   CURATOR: AUTHZ.REPRESENTATION_CURATOR,
 };
+
+/** Una solicitud `PENDING` creada y todavía sin avisar al paciente. */
+export interface CareRelationshipRequestNotice {
+  relId: string;
+  patientProfileId: string;
+  tenantId: string;
+}
 
 /**
  * Relación asistencial (C-06 / CAN-AUTH-001) y representación legal del paciente
@@ -181,30 +189,15 @@ export class AuthzCareRelationshipsService {
       return { relId: rel.id, tenantId };
     });
 
-    const recipientUserId = await this.resolvePatientUserId(
-      dto.patientProfileId,
-    );
-    if (recipientUserId) {
-      await this.notifications.emitInApp({
-        recipientUserId,
-        category: 'CLINICAL',
-        subject: 'Un profesional pide ver su historia clínica',
-        bodyText:
-          dto.reasonText ??
-          'Un profesional le encontró en la red y pide su autorización para ver su expediente. Puede elegir qué áreas autorizar, o rechazarlo.',
-        destination: { type: 'CARE_RELATIONSHIP_REQUEST', id: relId },
+    await this.notifyRequest(
+      {
+        relId,
+        patientProfileId: dto.patientProfileId,
         tenantId,
-        actorUserId: actor.id,
-      });
-    } else {
-      this.logger.warn(
-        {
-          operation: 'authz.care-relationship.request.notify-missing',
-          patientProfileId: dto.patientProfileId,
-        },
-        'No se encontró cuenta activa del paciente: la solicitud queda creada sin notificación',
-      );
-    }
+        reasonText: dto.reasonText,
+      },
+      actor,
+    );
 
     return { id: relId, status: CONCEPTS.STATE_PENDING, createdAt: new Date() };
   }
@@ -298,6 +291,144 @@ export class AuthzCareRelationshipsService {
 
       return { ok: true, affected: 1 };
     });
+  }
+
+  /**
+   * Deja constancia, en la misma transacción del check-in de un encuentro, de la
+   * relación asistencial entre cada profesional que atiende y el paciente.
+   *
+   * El cobro con seguro la exige (REQ-16-035) y ningún otro flujo de atención la
+   * creaba. Que el check-in la cree **no** puede probar el vínculo por sí
+   * mismo: `POST /clinical/encounters/check-in` lo hace el personal para
+   * cualquier paciente existente, y aceptarlo dejaría que un tenant ajeno se
+   * fabricara el vínculo y luego cobrara (`patientHasFootprintInTenant`). Por
+   * eso, por cada profesional sin relación ACTIVA ni solicitud PENDING en el
+   * tenant:
+   *
+   * - si el paciente deja huella propia en el tenant, nace `ACTIVE` y acotada a
+   *   `PAYMENT`: habilita cobrar y nada más, no abre la historia clínica (el PDP
+   *   y la lectura clínica descartan una relación acotada a otro propósito);
+   * - si no, nace `PENDING` como una solicitud que el propio paciente responde:
+   *   no concede nada hasta que acepta.
+   *
+   * No hace nada si el tenant del encuentro no es el activo del actor, o si el
+   * encuentro no nombra ningún profesional.
+   *
+   * @param tx - Transacción del check-in: la relación nace o no nace con el encuentro.
+   * @param input - Paciente, tenant del encuentro y profesionales que lo atienden.
+   * @param actor - Quien abre el encuentro.
+   * @returns Las solicitudes `PENDING` creadas, para avisar al paciente tras el commit.
+   */
+  async recordEncounterCareRelationships(
+    tx: EntityManager,
+    input: {
+      patientProfileId: string;
+      tenantId: string;
+      practitionerProfileIds: readonly string[];
+    },
+    actor: AuthenticatedUser,
+  ): Promise<CareRelationshipRequestNotice[]> {
+    const { patientProfileId, tenantId } = input;
+    // El tenant del cuerpo del check-in no se persiste por su cuenta: sólo vale
+    // si coincide con el del contexto verificado.
+    if (getCurrentTenantId() !== tenantId) return [];
+
+    const practitioners = [...new Set(input.practitionerProfileIds)];
+    if (practitioners.length === 0) return [];
+
+    const ownFootprint = await this.scope.isPatientInTenant(
+      tx,
+      patientProfileId,
+      tenantId,
+    );
+    const requested: CareRelationshipRequestNotice[] = [];
+    for (const practitionerProfileId of practitioners) {
+      const active = await this.careRepo.findActiveInTenant(
+        tx,
+        patientProfileId,
+        practitionerProfileId,
+        tenantId,
+      );
+      if (active) continue;
+      const pending = await this.careRepo.findPendingInTenant(
+        tx,
+        patientProfileId,
+        practitionerProfileId,
+        tenantId,
+      );
+      if (pending) continue;
+
+      const rel = this.careRepo.create(tx, {
+        tenantId,
+        patientProfileId,
+        practitionerProfileId,
+        relationshipTypeConceptId: CARE_REL_TYPE_CONCEPT.TREATING,
+        validFrom: new Date(),
+        actorUserId: actor.id,
+        ...(ownFootprint
+          ? { purposeConceptId: CARE_REL_PURPOSE_CONCEPT.PAYMENT }
+          : { statusConceptId: CONCEPTS.STATE_PENDING }),
+      });
+      await tx.flush();
+      await this.auditTrail.record(tx, actor, {
+        action: ownFootprint
+          ? 'CARE_RELATIONSHIP_ESTABLISHED_BY_ENCOUNTER'
+          : 'CARE_RELATIONSHIP_REQUESTED_BY_ENCOUNTER',
+        entity: 'care_relationship',
+        entityId: rel.id,
+        tenantId,
+      });
+      if (!ownFootprint) {
+        requested.push({ relId: rel.id, patientProfileId, tenantId });
+      }
+    }
+    return requested;
+  }
+
+  /**
+   * Avisa al paciente de las solicitudes que dejó `recordEncounterCareRelationships`.
+   * Va después del commit del encuentro: no existe aviso de una solicitud que se
+   * deshizo.
+   *
+   * @param notices - Las solicitudes `PENDING` creadas.
+   * @param actor - Quien abrió el encuentro.
+   */
+  async notifyEncounterCareRelationshipRequests(
+    notices: readonly CareRelationshipRequestNotice[],
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    for (const notice of notices) await this.notifyRequest(notice, actor);
+  }
+
+  /** Avisa in-app al paciente titular de una solicitud de acceso a su expediente. */
+  private async notifyRequest(
+    notice: CareRelationshipRequestNotice & { reasonText?: string },
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const recipientUserId = await this.resolvePatientUserId(
+      notice.patientProfileId,
+    );
+    if (recipientUserId) {
+      await this.notifications.emitInApp({
+        recipientUserId,
+        category: 'CLINICAL',
+        subject: 'Un profesional pide ver su historia clínica',
+        bodyText:
+          notice.reasonText ??
+          'Un profesional le encontró en la red y pide su autorización para ver su expediente. Puede elegir qué áreas autorizar, o rechazarlo.',
+        destination: { type: 'CARE_RELATIONSHIP_REQUEST', id: notice.relId },
+        tenantId: notice.tenantId,
+        actorUserId: actor.id,
+      });
+    } else {
+      this.logger.warn(
+        {
+          operation: 'authz.care-relationship.request.notify-missing',
+          patientProfileId: notice.patientProfileId,
+        },
+        'No se encontró cuenta activa del paciente: la solicitud queda creada sin notificación',
+      );
+    }
   }
 
   /** Resuelve el `userId` de la cuenta activa de un perfil de paciente. */
