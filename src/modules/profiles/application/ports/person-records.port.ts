@@ -13,6 +13,8 @@ export interface PersonRecordsPort {
     em: EntityManager,
     personId: string,
   ): Promise<boolean>;
+  /** Si hay un caso de verificación de identidad en curso sobre la persona. */
+  hasOpenIdentityCase(em: EntityManager, personId: string): Promise<boolean>;
   findCurrentContact<T>(
     em: EntityManager,
     ownerId: string,

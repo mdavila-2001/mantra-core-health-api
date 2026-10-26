@@ -67,6 +67,7 @@ import {
   PerformerSelectionValidator,
   PerformerSiteReader,
   SuggestedSiteNamesReader,
+  ServiceRequestNotesService,
 } from './services';
 import { PerformerSiteDbReader } from './services/performer-site-db.reader';
 import {
@@ -199,6 +200,8 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     { provide: PerformerSiteReader, useClass: PerformerSiteDbReader },
     PerformerSelectionValidator,
     SuggestedSiteNamesReader,
+    // P40: notas que motivan la orden; sin estado, también la provee `diagnostics`.
+    ServiceRequestNotesService,
     PersonAccountLinksRepository,
     PatientProfilesRepository,
     PatientPortalProxiesRepository,

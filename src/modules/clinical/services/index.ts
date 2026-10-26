@@ -10,6 +10,8 @@ export * from './service-requests.service';
 export * from './performer-site.reader';
 export * from './performer-selection.validator';
 export * from './suggested-site-names.reader';
+// P40: las notas que motivan una orden de análisis (`basedOnNoteIds`).
+export * from './service-request-notes.service';
 export * from './duplicate-study-detector';
 export * from './diagnostic-reports.service';
 export * from './conditions.service';

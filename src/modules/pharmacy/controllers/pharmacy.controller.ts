@@ -32,11 +32,15 @@ import {
   PharmacyPricingService,
   PharmacyIntegrationService,
   PharmacyCatalogService,
-  PharmacyStaffReadService,
+  PharmacyCategoriesService,
   PharmacyOpeningHoursService,
 } from '../services';
 import {
   CatalogProjectionDto,
+  CategoryNameDto,
+  InventoryUpdatedDto,
+  PharmacyCategoryItemDto,
+  UpdateInventoryDto,
   ConnectionResponseDto,
   CreateConnectionDto,
   CreateOnCallShiftDto,
@@ -93,11 +97,11 @@ export class PharmacyController {
     private readonly pricingService: PharmacyPricingService,
     private readonly integrationService: PharmacyIntegrationService,
     private readonly catalogService: PharmacyCatalogService,
-    private readonly staffReadService: PharmacyStaffReadService,
+    private readonly categoriesService: PharmacyCategoriesService,
     private readonly openingHoursService: PharmacyOpeningHoursService,
   ) {}
 
-  /** P47: categorías de la farmacia (el modelo todavía no las guarda: lista vacía). */
+  /** P47 D8: categorías de la farmacia, con cuántos productos vivos usan cada una. */
   @Get(':pharmacyId/categories')
   @ApiOperation({ summary: 'Categorías de la farmacia (sólo su personal)' })
   @ApiOkResponse({ type: PharmacyCategoryListDto })
@@ -105,7 +109,93 @@ export class PharmacyController {
     @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PharmacyCategoryListDto> {
-    return this.staffReadService.listCategories(pharmacyId, actor);
+    return this.categoriesService.list(pharmacyId, actor);
+  }
+
+  /** P47 D8: crea una categoría. 409 si el nombre ya existe. */
+  @Audited({
+    action: 'PHARMACY_CATEGORY_CREATED',
+    entity: 'pharmacy_product_category',
+    entityId: 'result.id',
+  })
+  @Post(':pharmacyId/categories')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Crear una categoría de la farmacia',
+    description:
+      'El nombre es único en la farmacia sin distinguir mayúsculas ni tildes (409).',
+  })
+  @ApiOkResponse({ type: PharmacyCategoryItemDto })
+  createCategory(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Body() dto: CategoryNameDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyCategoryItemDto> {
+    return this.categoriesService.create(pharmacyId, dto.name, actor);
+  }
+
+  /** P47 D8: renombra una categoría; los productos la siguen. */
+  @Audited({
+    action: 'PHARMACY_CATEGORY_RENAMED',
+    entity: 'pharmacy_product_category',
+    entityId: 'param:categoryId',
+  })
+  @Patch(':pharmacyId/categories/:categoryId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Renombrar una categoría de la farmacia' })
+  @ApiOkResponse({ type: PharmacyCategoryItemDto })
+  renameCategory(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('categoryId', ParseUUIDPipe) categoryId: string,
+    @Body() dto: CategoryNameDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyCategoryItemDto> {
+    return this.categoriesService.rename(
+      pharmacyId,
+      categoryId,
+      dto.name,
+      actor,
+    );
+  }
+
+  /** P47 D8: elimina una categoría sin productos vivos (con productos, 409). */
+  @Audited({
+    action: 'PHARMACY_CATEGORY_DELETED',
+    entity: 'pharmacy_product_category',
+    entityId: 'param:categoryId',
+  })
+  @Delete(':pharmacyId/categories/:categoryId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Eliminar una categoría de la farmacia' })
+  deleteCategory(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Param('categoryId', ParseUUIDPipe) categoryId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<StatusResultDto> {
+    return this.categoriesService.remove(pharmacyId, categoryId, actor);
+  }
+
+  /** P47 D7: existencias de varios productos de una vez, todo o nada. */
+  @Audited({
+    action: 'PHARMACY_INVENTORY_UPDATED',
+    entity: 'pharmacy',
+    entityId: 'param:pharmacyId',
+  })
+  @Patch(':pharmacyId/inventory')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Guardar el inventario declarado de varios productos (todo o nada)',
+    description:
+      'Cada línea lleva `stock`/`minStock` **o** `inStock`: las dos juntas, ninguna, un producto repetido, ajeno o retirado es 422 y no se guarda ninguna. Es la declaración del catálogo, no el ledger de existencias.',
+  })
+  @ApiOkResponse({ type: InventoryUpdatedDto })
+  updateInventory(
+    @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
+    @Body() dto: UpdateInventoryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<InventoryUpdatedDto> {
+    return this.productsService.updateInventory(pharmacyId, dto, actor);
   }
 
   /** P34: 24 h y turnos de guardia de cada sede (sólo su personal). */
@@ -276,9 +366,9 @@ export class PharmacyController {
   @Patch(':pharmacyId/products/:productId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Editar los datos descriptivos de un producto del catálogo',
+    summary: 'Editar un producto del catálogo de la farmacia',
     description:
-      'Marca, genérico, concentración, empaque y receta: cada uno opcional y `null` lo borra. Precio, categoría, descripción, existencias, estado e imágenes no tienen columna (P47 §3-5) y se rechazan con 400. Un producto retirado responde 422.',
+      'Marca, genérico, concentración, empaque y receta (no en un producto del catálogo universal: 400), y lo que administra la farmacia: precio (Bs, lista `CATALOGO`), categoría por nombre, descripción, existencias o «hay / no hay», estado e imágenes. Cada clave es opcional y `null` borra lo que lo admite. Un retirado sólo acepta `status` PUBLISHED/DRAFT (si no, 422). Devuelve el producto como la lectura de gestión.',
   })
   @ApiOkResponse({ type: PharmacyProductReadDto })
   updateProduct(

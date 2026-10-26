@@ -135,3 +135,5 @@ export {
 } from './scheduling-walk-in.dto';
 
 export * from './scheduling-service-offerings.dto';
+
+export * from './scheduling-flexible.dto';

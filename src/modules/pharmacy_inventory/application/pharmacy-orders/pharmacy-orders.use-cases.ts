@@ -390,7 +390,9 @@ export class PharmacyOrdersUseCases {
       }
 
       const productIds = dto.lines.map((line) => line.productId);
-      const products = await this.pharmacyRepo.findActiveProductsByIds(
+      // Un producto que la farmacia marcó «no tengo» no se reserva en un
+      // pedido nuevo (P47): para el paciente es lo mismo que no estar.
+      const products = await this.pharmacyRepo.findSellableProductsByIds(
         tx,
         productIds,
       );
@@ -400,7 +402,7 @@ export class PharmacyOrdersUseCases {
           .map((product) => product.id),
       );
       const unknown = productIds.filter((id) => !sellable.has(id));
-      // Producto inexistente, retirado o de otra farmacia: el mismo 404.
+      // Producto inexistente, retirado, sin stock declarado o de otra farmacia: el mismo 404.
       if (unknown.length > 0) {
         throw new ResourceNotFoundException(
           'Producto no disponible en la sede',

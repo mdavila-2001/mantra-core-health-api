@@ -8,8 +8,10 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PharmacyProductsService } from './pharmacy-products.service';
-import { BadRequestException } from '@nestjs/common';
+import { PharmacyReadService } from './pharmacy-read.service';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -74,10 +76,31 @@ function build() {
     findVademecumConceptIdByAtc: mockFn().mockResolvedValue(null),
   };
   const identifiersRepo = { create: mockFn() };
-  const pricesRepo = { findActiveByProduct: mockFn().mockResolvedValue([]) };
+  const pricesRepo = {
+    findActiveByProduct: mockFn().mockResolvedValue([]),
+    findActiveByListAndProduct: mockFn().mockResolvedValue([]),
+    maxVersionNumber: mockFn().mockResolvedValue(0),
+    create: mockFn(),
+  };
   const mappingsRepo = { findActiveByProduct: mockFn().mockResolvedValue([]) };
   const readRepo = { findConcepts: mockFn().mockResolvedValue([]) };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const pharmacyCatalogRepo = {
+    findCurrentPrices: mockFn().mockResolvedValue(new Map()),
+    findCategoriesByIds: mockFn().mockResolvedValue([]),
+    findImageFileIds: mockFn().mockResolvedValue(new Map()),
+    lockCatalogPriceList: mockFn().mockResolvedValue(null),
+    createCatalogPriceList: mockFn(() => ({ id: 'list-catalogo' })),
+    replaceImages: mockFn().mockResolvedValue(undefined),
+  };
+  const categories = { resolveByName: mockFn() };
+  const attachableFiles = { assertUsableBy: mockFn() };
+  // La proyección es la real: el PATCH responde como la lectura de gestión.
+  const readService = new PharmacyReadService(
+    {} as any,
+    readRepo as any,
+    pharmacyCatalogRepo as any,
+  );
   const service = new PharmacyProductsService(
     em as any,
     pharmaciesRepo as any,
@@ -88,9 +111,16 @@ function build() {
     readRepo as any,
     catalogRepo as any,
     logger as any,
+    pharmacyCatalogRepo as any,
+    categories as any,
+    readService,
+    attachableFiles as any,
   );
   return {
     service,
+    pharmacyCatalogRepo,
+    categories,
+    attachableFiles,
     tx,
     pharmaciesRepo,
     productsRepo,
@@ -569,6 +599,15 @@ describe('PharmacyProductsService', () => {
         dosageForm: null,
         medication: { code: 'MESH-AMOX', display: 'Amoxicilina' },
         requiresPrescription: true,
+        unitPrice: null,
+        currency: null,
+        inStock: true,
+        category: null,
+        description: null,
+        status: 'PUBLISHED',
+        stock: null,
+        minStock: null,
+        imageFileIds: [],
       });
       expect(product).toMatchObject({ updatedByUserId: 'admin-1' });
       expect(d.tx.flush).toHaveBeenCalledTimes(1);
@@ -707,6 +746,266 @@ describe('PharmacyProductsService', () => {
       expect(retireError.reason).toBe(NOT_AVAILABLE);
       expect(d.productsRepo.findById).not.toHaveBeenCalled();
       expect(d.pricesRepo.findActiveByProduct).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('catálogo de la farmacia (P47 §3-5)', () => {
+    const pharmacy = { id: 'ph1', tenantId: T1, legalName: 'Andina SRL' };
+    function product(overrides: Record<string, unknown> = {}) {
+      return {
+        id: 'pr1',
+        pharmacyId: 'ph1',
+        productCode: 'P-1',
+        brandName: 'Amoxil',
+        statusConceptId: PHARM.PRODUCT_ACTIVE,
+        outOfStockDeclared: false,
+        ...overrides,
+      } as any;
+    }
+    function given(d: ReturnType<typeof build>, row: unknown) {
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue(pharmacy);
+      d.productsRepo.findById.mockResolvedValue(row);
+    }
+    const patch = (d: ReturnType<typeof build>, dto: any) =>
+      inTenant(() => d.service.updateProduct('ph1', 'pr1', dto, actor));
+
+    it('el primer precio crea la lista CATALOGO y versiona en ella, como texto exacto', async () => {
+      const d = build();
+      given(d, product());
+      await patch(d, { unitPrice: 12.5 });
+      expect(d.pharmacyCatalogRepo.createCatalogPriceList).toHaveBeenCalledWith(
+        d.tx,
+        'ph1',
+        'admin-1',
+      );
+      expect(d.pricesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          pharmacyPriceListId: 'list-catalogo',
+          pharmacyProductId: 'pr1',
+          versionNumber: 1,
+          unitAmount: '12.50',
+          statusConceptId: PHARM.PRICE_ACTIVE,
+        }),
+      );
+    });
+
+    it('el mismo importe otra vez no crea una versión nueva (reintento idempotente)', async () => {
+      const d = build();
+      given(d, product());
+      d.pharmacyCatalogRepo.lockCatalogPriceList.mockResolvedValue({
+        id: 'list-catalogo',
+      });
+      d.pricesRepo.findActiveByListAndProduct.mockResolvedValue([
+        { unitAmount: '12.50', statusConceptId: PHARM.PRICE_ACTIVE },
+      ]);
+      await patch(d, { unitPrice: '12.5' });
+      expect(d.pricesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un precio nuevo supersede el vigente y toma max+1', async () => {
+      const d = build();
+      given(d, product());
+      const previous = {
+        unitAmount: '12.50',
+        statusConceptId: PHARM.PRICE_ACTIVE,
+      } as any;
+      d.pharmacyCatalogRepo.lockCatalogPriceList.mockResolvedValue({
+        id: 'list-catalogo',
+      });
+      d.pricesRepo.findActiveByListAndProduct.mockResolvedValue([previous]);
+      d.pricesRepo.maxVersionNumber.mockResolvedValue(3);
+      await patch(d, { unitPrice: 14 });
+      expect(previous.statusConceptId).toBe(PHARM.PRICE_SUPERSEDED);
+      expect(previous.effectiveTo).toBeInstanceOf(Date);
+      expect(d.pricesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ versionNumber: 4, unitAmount: '14.00' }),
+      );
+    });
+
+    it('unitPrice null quita el precio vigente sin crear otro', async () => {
+      const d = build();
+      given(d, product());
+      const previous = {
+        unitAmount: '9.00',
+        statusConceptId: PHARM.PRICE_ACTIVE,
+      } as any;
+      d.pharmacyCatalogRepo.lockCatalogPriceList.mockResolvedValue({ id: 'l' });
+      d.pricesRepo.findActiveByListAndProduct.mockResolvedValue([previous]);
+      await patch(d, { unitPrice: null });
+      expect(previous.statusConceptId).toBe(PHARM.PRICE_SUPERSEDED);
+      expect(d.pricesRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('la categoría se resuelve sólo entre las de esta farmacia; otra es 422 y no cambia nada', async () => {
+      const d = build();
+      const row = product();
+      given(d, row);
+      d.categories.resolveByName.mockRejectedValue(
+        new PreconditionFailedException(
+          'La categoría no es una de las de su farmacia',
+        ),
+      );
+      await expect(patch(d, { category: 'Ajena' })).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      expect(d.categories.resolveByName).toHaveBeenCalledWith(
+        d.tx,
+        'ph1',
+        'Ajena',
+      );
+      expect(row.pharmacyProductCategoryId).toBeUndefined();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('existencias e «hay» juntas son 422', async () => {
+      const d = build();
+      given(d, product());
+      await expect(
+        patch(d, { stock: 3, inStock: true }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('«no tengo» marca el producto y «tengo» con conteo en 0 lo deja sin conteo', async () => {
+      const d = build();
+      const row = product({ stockQuantity: 0 });
+      given(d, row);
+      await patch(d, { inStock: false });
+      expect(row.outOfStockDeclared).toBe(true);
+      await patch(d, { inStock: true });
+      expect(row.outOfStockDeclared).toBe(false);
+      expect(row.stockQuantity).toBeNull();
+    });
+
+    it('status WITHDRAWN retira en cascada como el DELETE', async () => {
+      const d = build();
+      const row = product();
+      given(d, row);
+      const price = { statusConceptId: PHARM.PRICE_ACTIVE } as any;
+      d.pricesRepo.findActiveByProduct.mockResolvedValue([price]);
+      const res = await patch(d, { status: 'WITHDRAWN' });
+      expect(row.statusConceptId).toBe(PHARM.PRODUCT_RETIRED);
+      expect(price.statusConceptId).toBe(PHARM.PRICE_SUPERSEDED);
+      expect(res.status).toBe('WITHDRAWN');
+    });
+
+    it('un retirado vuelve con status PUBLISHED; sin status sigue siendo 422', async () => {
+      const d = build();
+      const row = product({ statusConceptId: PHARM.PRODUCT_RETIRED });
+      given(d, row);
+      await expect(patch(d, { description: 'x' })).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      const res = await patch(d, { status: 'PUBLISHED' });
+      expect(row.statusConceptId).toBe(PHARM.PRODUCT_ACTIVE);
+      expect(res.status).toBe('PUBLISHED');
+    });
+
+    it('una imagen nueva pasa por la regla de archivos adjuntables; la ajena se rechaza y nada se reemplaza', async () => {
+      const d = build();
+      given(d, product());
+      d.attachableFiles.assertUsableBy.mockRejectedValue(
+        new ForbiddenException('La imagen del producto no le pertenece'),
+      );
+      await expect(
+        patch(d, { imageFileIds: ['11111111-1111-4111-8111-111111111111'] }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.attachableFiles.assertUsableBy).toHaveBeenCalledWith(
+        d.tx,
+        '11111111-1111-4111-8111-111111111111',
+        actor,
+        expect.objectContaining({ operation: 'pharmacy.product.images' }),
+        expect.anything(),
+      );
+      expect(d.pharmacyCatalogRepo.replaceImages).not.toHaveBeenCalled();
+    });
+
+    it('un archivo propio que no es de categoría IMAGE se rechaza con 422', async () => {
+      const d = build();
+      given(d, product());
+      d.attachableFiles.assertUsableBy.mockResolvedValue({
+        file: { categoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT },
+      });
+      await expect(
+        patch(d, { imageFileIds: ['11111111-1111-4111-8111-111111111111'] }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.pharmacyCatalogRepo.replaceImages).not.toHaveBeenCalled();
+    });
+
+    it('las imágenes que ya tenía se conservan sin volver a preguntar', async () => {
+      const d = build();
+      given(d, product());
+      d.pharmacyCatalogRepo.findImageFileIds.mockResolvedValue(
+        new Map([['pr1', ['f-old']]]),
+      );
+      d.attachableFiles.assertUsableBy.mockResolvedValue({
+        file: { categoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE },
+      });
+      await patch(d, { imageFileIds: ['f-old', 'f-new'] });
+      expect(d.attachableFiles.assertUsableBy).toHaveBeenCalledTimes(1);
+      expect(d.pharmacyCatalogRepo.replaceImages).toHaveBeenCalledWith(
+        d.tx,
+        'pr1',
+        ['f-old', 'f-new'],
+        'admin-1',
+      );
+    });
+  });
+
+  describe('updateInventory (P47 D7)', () => {
+    const run = (d: ReturnType<typeof build>, lines: any[]) =>
+      inTenant(() => d.service.updateInventory('ph1', { lines }, actor));
+
+    it('guarda todas las líneas válidas', async () => {
+      const d = build();
+      const a = { id: 'a', outOfStockDeclared: true, stockQuantity: 0 } as any;
+      const b = { id: 'b', outOfStockDeclared: false, stockQuantity: 4 } as any;
+      (d.tx as any).find = mockFn().mockResolvedValue([a, b]);
+      const res = await run(d, [
+        { productId: 'a', stock: 7, minStock: 2 },
+        { productId: 'b', inStock: false },
+      ]);
+      expect(res).toEqual({ updated: 2 });
+      expect(a).toMatchObject({
+        stockQuantity: 7,
+        minStockQuantity: 2,
+        outOfStockDeclared: false,
+      });
+      expect(b).toMatchObject({ stockQuantity: 4, outOfStockDeclared: true });
+    });
+
+    it.each([
+      ['un producto que no es del catálogo', [{ productId: 'x', stock: 1 }]],
+      [
+        'existencias e «hay» a la vez',
+        [{ productId: 'a', stock: 1, inStock: true }],
+      ],
+      ['una línea sin nada que cambiar', [{ productId: 'a' }]],
+      [
+        'un producto repetido',
+        [
+          { productId: 'a', stock: 1 },
+          { productId: 'a', stock: 2 },
+        ],
+      ],
+    ])('%s es 422 y no se guarda ninguna línea', async (_label, lines) => {
+      const d = build();
+      const a = { id: 'a', outOfStockDeclared: false, stockQuantity: 5 } as any;
+      (d.tx as any).find = mockFn().mockResolvedValue([a]);
+      await expect(run(d, lines)).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      expect(a.stockQuantity).toBe(5);
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('la farmacia ajena es el 404 de siempre', async () => {
+      const d = build();
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue(null);
+      await expect(
+        run(d, [{ productId: 'a', stock: 1 }]),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
   });
 });
