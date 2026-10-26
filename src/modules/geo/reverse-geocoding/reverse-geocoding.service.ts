@@ -32,6 +32,13 @@ export interface ReverseGeocodingConfig {
   /** Separación mínima entre consultas: la política pública es 1 por segundo. */
   readonly minIntervalMs: number;
   readonly cacheSize: number;
+  /**
+   * Cuántos pedidos pueden esperar turno a la vez. La ruta es pública: sin
+   * tope, muchas IPs —cada una dentro de su límite por minuto— alargarían la
+   * cola sin fin y cada pedido esperaría minutos. Lleno, se responde 503 al
+   * instante y el alta sigue con la calle a mano.
+   */
+  readonly maxQueued: number;
 }
 
 export function loadReverseGeocodingConfig(
@@ -51,6 +58,7 @@ export function loadReverseGeocodingConfig(
     timeoutMs: entero(env.GEOCODING_TIMEOUT_MS, 4000),
     minIntervalMs: entero(env.GEOCODING_MIN_INTERVAL_MS, 1100),
     cacheSize: entero(env.GEOCODING_CACHE_SIZE, 2000),
+    maxQueued: entero(env.GEOCODING_MAX_QUEUED, 10),
   };
 }
 
@@ -113,6 +121,7 @@ export class ReverseGeocodingService {
   private readonly cache = new Map<string, ReverseGeocodingResult>();
   private cola: Promise<unknown> = Promise.resolve();
   private ultimaConsulta = 0;
+  private enEspera = 0;
 
   constructor(
     private readonly logger: PinoLogger,
@@ -143,6 +152,15 @@ export class ReverseGeocodingService {
   }
 
   private enCola<T>(tarea: () => Promise<T>): Promise<T> {
+    if (this.enEspera >= this.config.maxQueued) {
+      return Promise.reject(
+        serviceUnavailableWithReason(
+          'No pudimos traer el nombre de la calle. Puede escribirla a mano.',
+          SystemErrorReason.GEOCODING_PROVIDER_UNAVAILABLE,
+        ),
+      );
+    }
+    this.enEspera += 1;
     const siguiente = this.cola.then(async () => {
       const falta =
         this.ultimaConsulta + this.config.minIntervalMs - this.ahora();
@@ -152,7 +170,9 @@ export class ReverseGeocodingService {
     });
     // La cola sigue aunque una consulta falle.
     this.cola = siguiente.catch(() => undefined);
-    return siguiente;
+    return siguiente.finally(() => {
+      this.enEspera -= 1;
+    });
   }
 
   private async consultar(

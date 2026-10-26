@@ -183,6 +183,37 @@ describe('ReverseGeocodingService', () => {
     expect((await service.reverse(-17.8, -63.2)).line).toBe('Calle 2');
   });
 
+  it('inválido: con la cola llena responde 503 al instante, sin salir a la red', async () => {
+    let soltar: () => void = () => undefined;
+    const http = jest.fn(
+      () =>
+        new Promise<{ address: Record<string, string> }>((resolve) => {
+          soltar = () => resolve({ address: { road: 'Calle 1' } });
+        }),
+    );
+    const { service } = crear(http as unknown as ReverseGeocodingHttp);
+
+    const enCurso = Array.from({ length: config.maxQueued }, (_, i) =>
+      service.reverse(-17 - i / 100, -63),
+    );
+    await expect(service.reverse(-18.5, -64)).rejects.toBeInstanceOf(
+      ServiceUnavailableException,
+    );
+
+    // Los que ya esperaban se atienden; al vaciarse, la cola vuelve a aceptar.
+    for (let i = 0; i < config.maxQueued; i += 1) {
+      await new Promise((r) => setImmediate(r));
+      soltar();
+    }
+    await Promise.all(enCurso);
+    soltar = () => undefined;
+    const despues = service.reverse(-19, -65);
+    await new Promise((r) => setImmediate(r));
+    soltar();
+    expect((await despues).found).toBe(true);
+    expect(http).toHaveBeenCalledTimes(config.maxQueued + 1);
+  });
+
   it('inválido: un punto fuera de Bolivia no pasa la validación del cuerpo', () => {
     const madrid = plainToInstance(ReverseGeocodingRequestDto, {
       latitude: 40.41,
