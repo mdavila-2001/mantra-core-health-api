@@ -99,6 +99,36 @@ describe('PharmacyReadController', () => {
         limit: 10,
       });
     });
+
+    it('P34: openNow=true pide sólo las abiertas ahora', async () => {
+      const d = build();
+      await d.controller.listSites(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'true',
+      );
+      expect(d.readService.listSites).toHaveBeenCalledWith({
+        search: undefined,
+        origin: undefined,
+        limit: 50,
+        openNow: true,
+      });
+    });
+
+    it('P34: openNow que no es true/false es un 400', () => {
+      const d = build();
+      expect(() =>
+        d.controller.listSites(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          'si',
+        ),
+      ).toThrow(BadRequestException);
+    });
   });
 
   describe('searchProducts (carril A, H5)', () => {

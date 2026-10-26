@@ -658,6 +658,19 @@ export class PharmacySiteListItemDto {
    */
   @ApiProperty()
   productCount!: number;
+
+  /**
+   * P34: la sede declaró abrir 24 h (`true`/`false`); `null` = no lo declaró.
+   */
+  @ApiPropertyOptional({ type: Boolean, nullable: true })
+  open24h!: boolean | null;
+
+  /**
+   * P34: fin (instante UTC) del turno de guardia vigente, o `null` si la sede no
+   * está de turno ahora. Un turno vencido nunca aparece.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time', nullable: true })
+  onCallUntil!: string | null;
 }
 
 /** Las sedes publicadas del tenant activo, sueltas. */

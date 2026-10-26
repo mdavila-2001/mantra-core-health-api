@@ -37,6 +37,12 @@ function build() {
     mapProduct: mockFn(),
   };
   const catalogService = { projectCatalog: mockFn() };
+  const openingHoursService = {
+    getOpeningHours: mockFn(),
+    setOpen24h: mockFn(),
+    createShift: mockFn(),
+    cancelShift: mockFn(),
+  };
 
   const controller = new PharmacyController(
     pharmaciesService as any,
@@ -46,9 +52,11 @@ function build() {
     integrationService as any,
     catalogService as any,
     { listCategories: mockFn() } as any,
+    openingHoursService as any,
   );
   return {
     controller,
+    openingHoursService,
     pharmaciesService,
     sitesService,
     productsService,
@@ -59,6 +67,54 @@ function build() {
 }
 
 describe('PharmacyController', () => {
+  describe('P34 · horario declarado', () => {
+    it('delega la lectura del horario', async () => {
+      const d = build();
+      d.openingHoursService.getOpeningHours.mockResolvedValue({ sites: [] });
+      await expect(d.controller.getOpeningHours('ph1', actor)).resolves.toEqual(
+        {
+          sites: [],
+        },
+      );
+      expect(d.openingHoursService.getOpeningHours).toHaveBeenCalledWith(
+        'ph1',
+        actor,
+      );
+    });
+
+    it('delega la declaración de 24 h', async () => {
+      const d = build();
+      await d.controller.setOpen24h('ph1', 's1', { open24h: null }, actor);
+      expect(d.openingHoursService.setOpen24h).toHaveBeenCalledWith(
+        'ph1',
+        's1',
+        { open24h: null },
+        actor,
+      );
+    });
+
+    it('delega el alta y la cancelación de un turno', async () => {
+      const d = build();
+      const dto = {
+        startsAt: '2026-10-26T20:00:00-04:00',
+        endsAt: '2026-10-27T08:00:00-04:00',
+      };
+      await d.controller.createOnCallShift('ph1', 's1', dto, actor);
+      expect(d.openingHoursService.createShift).toHaveBeenCalledWith(
+        'ph1',
+        's1',
+        dto,
+        actor,
+      );
+      await d.controller.cancelOnCallShift('ph1', 'sh1', actor);
+      expect(d.openingHoursService.cancelShift).toHaveBeenCalledWith(
+        'ph1',
+        'sh1',
+        actor,
+      );
+    });
+  });
+
   it('delegates createPharmacy (UC-24-01)', async () => {
     const d = build();
     const dto = {

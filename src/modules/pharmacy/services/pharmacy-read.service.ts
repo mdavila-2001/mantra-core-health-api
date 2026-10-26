@@ -215,11 +215,16 @@ export class PharmacyReadService {
    *
    * @param query - Texto, origen (para ordenar por distancia) y tope.
    */
-  async listSites(query: {
-    search?: string;
-    origin?: GeoPoint;
-    limit: number;
-  }): Promise<PharmacySiteListResponseDto> {
+  async listSites(
+    query: {
+      search?: string;
+      origin?: GeoPoint;
+      limit: number;
+      /** P34: sólo las abiertas ahora (24 h declaradas o de turno vigente). */
+      openNow?: boolean;
+    },
+    now: Date = new Date(),
+  ): Promise<PharmacySiteListResponseDto> {
     const tenantId = marketplaceTenantScope();
     const em = this.em.fork();
     const pharmacies = await this.readRepo.findVisibleByTenant(em, tenantId);
@@ -230,7 +235,22 @@ export class PharmacyReadService {
       this.readRepo.findActiveSites(em, pharmacyIds),
       this.readRepo.findActiveProductOwners(em, pharmacyIds),
     ]);
-    const { addressBySite } = await this.resolveSiteContext(em, sites, []);
+    const [{ addressBySite }, shifts] = await Promise.all([
+      this.resolveSiteContext(em, sites, []),
+      this.readRepo.findCurrentOnCallShifts(
+        em,
+        sites.map((site) => site.id),
+        now,
+      ),
+    ]);
+    // El turno vigente que termina más tarde, por sede.
+    const onCallUntil = new Map<string, Date>();
+    for (const shift of shifts) {
+      const known = onCallUntil.get(shift.pharmacySiteId);
+      if (!known || shift.endsAt > known) {
+        onCallUntil.set(shift.pharmacySiteId, shift.endsAt);
+      }
+    }
 
     const pharmacyById = new Map(
       pharmacies.map((pharmacy) => [pharmacy.id, pharmacy]),
@@ -259,8 +279,14 @@ export class PharmacyReadService {
           homeDeliveryAvailable: site.homeDeliveryAvailable ?? null,
           pickupAvailable: site.pickupAvailable ?? null,
           productCount: productCount.get(pharmacy.id) ?? 0,
+          open24h: site.open24h ?? null,
+          onCallUntil: onCallUntil.get(site.id)?.toISOString() ?? null,
         };
       })
+      .filter(
+        (item) =>
+          !query.openNow || item.open24h === true || item.onCallUntil !== null,
+      )
       .filter(
         (item) =>
           term === undefined ||

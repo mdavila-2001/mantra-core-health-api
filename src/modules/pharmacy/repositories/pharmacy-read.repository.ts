@@ -12,6 +12,7 @@ import { CatalogConcepts } from '../../terminology/entities';
 import {
   Pharmacies,
   PharmacyLicenses,
+  PharmacyOnCallShifts,
   PharmacyPriceLists,
   PharmacyProductPrices,
   PharmacyProducts,
@@ -203,6 +204,24 @@ export class PharmacyReadRepository {
       statusConceptId: PHARM.PRICE_ACTIVE,
       effectiveFrom: { $lte: now },
       $or: [{ effectiveTo: null }, { effectiveTo: { $gt: now } }],
+    });
+  }
+
+  /**
+   * Turnos de guardia activos y vigentes en `now` de las sedes (P34). Un turno
+   * vencido o cancelado no sale de acá: el filtro está en la consulta.
+   */
+  findCurrentOnCallShifts(
+    em: EntityManager,
+    siteIds: readonly string[],
+    now: Date,
+  ): Promise<PharmacyOnCallShifts[]> {
+    if (siteIds.length === 0) return Promise.resolve([]);
+    return em.find(PharmacyOnCallShifts, {
+      pharmacySiteId: { $in: [...siteIds] },
+      statusConceptId: PHARM.ON_CALL_SHIFT_ACTIVE,
+      startsAt: { $lte: now },
+      endsAt: { $gt: now },
     });
   }
 
