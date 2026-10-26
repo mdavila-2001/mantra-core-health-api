@@ -95,6 +95,24 @@ export class Addresses {
   longitude?: string;
 
   /**
+   * El nombre que la persona le pone a la dirección («Casa», «Oficina»).
+   * Modelo v4.2.61 (libreta de direcciones del paciente).
+   */
+  @Property({ columnType: 'varchar', nullable: true })
+  label?: string;
+
+  /**
+   * La que se ofrece primero. Una sola preferida vigente por dueño: lo
+   * garantiza `uq_addresses_owner_preferred` en la base (v4.2.61).
+   */
+  @Property({
+    fieldName: 'is_preferred',
+    columnType: 'boolean',
+    default: false,
+  })
+  isPreferred: boolean = false;
+
+  /**
    * Valor de valid from mantenido por la instancia.
    */
   @Property({ fieldName: 'valid_from', columnType: 'date', nullable: true })

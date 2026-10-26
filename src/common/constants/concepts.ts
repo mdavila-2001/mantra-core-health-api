@@ -461,6 +461,11 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
   // varias direcciones por persona vía `use_concept_id`; lo que faltaba era el
   // concepto, no la columna.
   ADDR_USE_WORK: def('common:addr-use:work', 'ADDR_WORK', 'Work address'),
+  // La libreta de direcciones del paciente (modelo v4.2.61): las ubicaciones
+  // que guarda además de su domicilio —«Casa de mi mamá», «Oficina»—, como en
+  // una app de pedidos, para los envíos. No es ni HOME ni WORK: el domicilio
+  // vigente sigue siendo uno solo y es el que usa la ficha.
+  ADDR_USE_SAVED: def('common:addr-use:saved', 'ADDR_SAVED', 'Saved address'),
   ADDR_TYPE_POSTAL: def('common:addr-type:postal', 'POSTAL', 'Postal'),
   COUNTRY_PE: def('common:country:pe', 'PE', 'Peru'),
   // ALoVida es una plataforma boliviana (SEGIP, catálogo de municipios del

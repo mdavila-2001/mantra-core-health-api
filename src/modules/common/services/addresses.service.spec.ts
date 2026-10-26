@@ -29,6 +29,7 @@ describe('AddressesService', () => {
     const repo = {
       create: fn(),
       findCurrentByOwnerAndUse: fn(),
+      findCurrentByOwnerAndUses: fn(),
       closeCurrent: fn(),
     };
     const service = new AddressesService(em as never, repo, logger as never);
