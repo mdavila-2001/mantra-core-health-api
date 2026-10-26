@@ -16,7 +16,7 @@
 // =============================================================================
 
 import { deterministicId, foldForSearch, slugify } from '../../../terminology-import/lib/glossary-es/common.mjs';
-import { conceptId } from '../../../terminology-import/lib/glossary-es/load-plan.mjs';
+import { conceptId, md5uuid } from '../../../terminology-import/lib/glossary-es/load-plan.mjs';
 
 export const NATIONAL_STANDARD = 'NATIONAL_STANDARD';
 
@@ -38,7 +38,35 @@ export const RELATION_TYPE_CONCEPT_ID = Object.freeze({
   RISK_FACTOR: deterministicId('terminology:relationship:risk-factor'),
   REFERRAL_CRITERION: deterministicId('terminology:relationship:referral-criterion'),
   SPECIALTY: deterministicId('terminology:relationship:specialty'),
+  CARE_LEVEL: deterministicId('terminology:relationship:care-level'),
 });
+
+/** Opción de `nivel_de_atencion` → código de `VS_CARE_LEVEL`. */
+const CARE_LEVEL_CODE = Object.freeze({ 'nivel i': 'FIRST_LEVEL', 'nivel ii': 'SECOND_LEVEL', 'nivel iii': 'THIRD_LEVEL' });
+
+/**
+ * Entre homónimos (el mismo nombre en varias fuentes del glosario), qué fuente
+ * gana. Decisión del propietario (2026-10-26): elegir el mejor sin borrar los
+ * demás; la fusión real es por equivalencia declarada (F3.1), nunca por nombre.
+ * Más bajo = mejor; lo que no figura va al final.
+ */
+const SOURCE_RANK = Object.freeze([
+  'glossary-curated-es',
+  'cie10es-',
+  'wikidata-',
+  'medlineplus-es',
+  'loinc-es',
+  'inlasa-',
+  'cima',
+]);
+
+export function sourceRank(codeSystem) {
+  const i = SOURCE_RANK.findIndex((prefix) => (codeSystem ?? '').startsWith(prefix));
+  return i === -1 ? SOURCE_RANK.length : i;
+}
+
+/** Para criterios y referencia, qué categoría describe mejor un hallazgo. */
+const FINDING_CATEGORY_RANK = Object.freeze(['signs-symptoms', 'lab', 'imaging', 'diagnostic-test', 'anatomy', 'other']);
 
 /** Categorías del glosario que cuentan como «estudio» para las opciones compuestas (F2.2 paso 4). */
 const STUDY_CATEGORIES = new Set(['diagnostic-test', 'lab', 'imaging']);
@@ -100,62 +128,112 @@ export function icd10CodesOf(form) {
 /**
  * Índice de designaciones: texto normalizado → conceptos que lo llevan.
  *
- * @param {Iterable<{conceptId: string, text: string, categoryKey: string|null}>} designations - Las que
- *   no tienen categoría sólo registran el concepto (para la búsqueda por CIE-10).
+ * @param {Iterable<{conceptId: string, text: string, categoryKey: string|null, codeSystem?: string, relationCount?: number}>} designations
+ *   Las que no tienen categoría sólo registran el concepto (para la búsqueda por CIE-10).
  */
 export function buildDesignationIndex(designations) {
   const byText = new Map();
   const conceptIds = new Set();
-  for (const { conceptId: id, text, categoryKey } of designations) {
+  for (const { conceptId: id, text, categoryKey, codeSystem, relationCount } of designations) {
     conceptIds.add(id);
     const key = normalizeOption(text);
     // Sin categoría del glosario no es un término que el mapa pueda mostrar:
     // no compite como candidato (sí cuenta para encontrar la enfermedad por CIE-10).
     if (!key || !categoryKey) continue;
     const list = byText.get(key) ?? [];
-    if (!list.some((c) => c.conceptId === id)) list.push({ conceptId: id, categoryKey: categoryKey ?? null });
+    if (!list.some((c) => c.conceptId === id)) {
+      list.push({ conceptId: id, categoryKey, rank: sourceRank(codeSystem), relationCount: relationCount ?? 0 });
+    }
     byText.set(key, list);
   }
   return { byText, conceptIds };
 }
 
 /**
+ * El mejor de varios homónimos: la categoría que mejor describe el campo, la
+ * fuente mejor rankeada, el que más relaciones tiene y, para que sea total, el id.
+ */
+function bestCandidate(candidates, relationType) {
+  const findingField = relationType === 'DIAGNOSTIC_CRITERION' || relationType === 'REFERRAL_CRITERION';
+  const categoryRank = (c) => {
+    if (!findingField) return 0;
+    const i = FINDING_CATEGORY_RANK.indexOf(c.categoryKey);
+    return i === -1 ? FINDING_CATEGORY_RANK.length : i;
+  };
+  return [...candidates].sort(
+    (a, b) =>
+      categoryRank(a) - categoryRank(b) ||
+      a.rank - b.rank ||
+      b.relationCount - a.relationCount ||
+      a.conceptId.localeCompare(b.conceptId),
+  )[0];
+}
+
+/**
  * Concepto de una opción, o el motivo por el que no se mapea.
- * Sólo coincidencia exacta; la opción compuesta «Estudio: hallazgo» se mapea al
- * estudio si el texto antes de los dos puntos es exactamente un estudio.
+ * Sólo coincidencia exacta del nombre. Entre homónimos se elige el mejor
+ * (`bestCandidate`) y se informa cuántos había. La opción compuesta
+ * «Estudio: hallazgo» de un examen exigido se mapea al estudio; en un criterio
+ * no, porque el hallazgo es lo que importa (va como término literal).
  */
 export function resolveOption(index, option, relationType) {
   const allowed = ALLOWED_CATEGORIES[relationType];
   const exact = (index.byText.get(normalizeOption(option)) ?? []).filter((c) => !allowed || allowed.has(c.categoryKey));
   if (exact.length === 1) return { conceptId: exact[0].conceptId, matchedBy: 'exact' };
-  if (exact.length > 1) return { reason: 'ambiguous', candidates: exact.map((c) => c.conceptId) };
+  if (exact.length > 1) {
+    return { conceptId: bestCandidate(exact, relationType).conceptId, matchedBy: 'best-of-homonyms', candidates: exact.map((c) => c.conceptId) };
+  }
   const colon = option.indexOf(':');
-  if (colon > 0 && (relationType === 'REQUIRED_TEST' || relationType === 'DIAGNOSTIC_CRITERION')) {
+  if (colon > 0 && relationType === 'REQUIRED_TEST') {
     const studies = (index.byText.get(normalizeOption(option.slice(0, colon))) ?? []).filter((c) =>
       STUDY_CATEGORIES.has(c.categoryKey),
     );
-    if (studies.length === 1) return { conceptId: studies[0].conceptId, matchedBy: 'study-prefix' };
+    if (studies.length > 0) return { conceptId: bestCandidate(studies, relationType).conceptId, matchedBy: 'study-prefix' };
   }
   return { reason: 'no-match', candidates: [] };
 }
 
 /**
+ * Término literal de una viñeta de la norma que no tiene un término exacto en
+ * el glosario. No se recorta ni se parafrasea: el texto es la viñeta. La misma
+ * viñeta en varias fichas es UN término, y por eso une a las enfermedades que
+ * la comparten. Id determinista por el texto normalizado.
+ */
+export function literalFinding(option) {
+  const key = normalizeOption(option);
+  const id = md5uuid(`mantra:nnac:finding:${key}`);
+  return { conceptId: id, code: `nnac-finding-${id.slice(0, 8)}`, display: option.trim() };
+}
+
+/**
  * Filas de evidencia normativa de una ficha y su cola de revisión.
  *
- * @returns {{ rows: object[], unmapped: object[], blocker: string|null, diseaseConceptId: string|null }}
+ * @param {object} [options]
+ * @param {boolean} [options.literalFindings=false] - Crear un término literal
+ *   para cada viñeta sin término exacto, en vez de mandarla a revisión.
+ * @param {Map<string, string>} [options.careLevelIds] - Código de `VS_CARE_LEVEL` → concepto.
+ * @returns {{ rows: object[], unmapped: object[], literals: Map<string, object>, blocker: string|null, diseaseConceptId: string|null }}
  */
-export function nnacRelations(form, index) {
+export function nnacRelations(form, index, { literalFindings = false, careLevelIds = new Map() } = {}) {
   const edition = editionOf(form);
-  if (!edition) return { rows: [], unmapped: [], blocker: 'sin-fecha-de-vigencia', diseaseConceptId: null };
+  const literals = new Map();
+  if (!edition) return { rows: [], unmapped: [], literals, blocker: 'sin-fecha-de-vigencia', diseaseConceptId: null };
   const disease = icd10CodesOf(form)
     .map(icd10ConceptId)
     .find((id) => index.conceptIds.has(id));
-  if (!disease) return { rows: [], unmapped: [], blocker: 'sin-concepto-cie10', diseaseConceptId: null };
+  if (!disease) return { rows: [], unmapped: [], literals, blocker: 'sin-concepto-cie10', diseaseConceptId: null };
+
+  // Nivel de atención de la ficha. Si es uno solo, califica a los exámenes
+  // exigidos; si son varios, la exigencia vale en todos y no se acota.
+  const levels = (form.fields.find((f) => f.code === 'nivel_de_atencion')?.options ?? [])
+    .map((o) => careLevelIds.get(CARE_LEVEL_CODE[normalizeOption(o)]))
+    .filter(Boolean);
+  const singleLevel = levels.length === 1 ? levels[0] : undefined;
 
   const rows = [];
   const unmapped = [];
   const seen = new Set();
-  const push = (type, other, fromDisease, ordinal, option, fieldName) => {
+  const push = (type, other, fromDisease, ordinal, option, fieldName, matchedBy) => {
     const [source, target] = fromDisease ? [disease, other] : [other, disease];
     const key = `${type}|${source}|${target}`;
     if (source === target || seen.has(key)) return;
@@ -173,6 +251,8 @@ export function nnacRelations(form, index) {
       citationLocator: `${edition.locator} · ${fieldName}`,
       validFrom: edition.validFrom,
       validTo: edition.validTo,
+      ...(type === 'REQUIRED_TEST' && singleLevel ? { careLevelConceptId: singleLevel } : {}),
+      matchedBy,
     });
   };
 
@@ -182,7 +262,11 @@ export function nnacRelations(form, index) {
     (field.options ?? []).forEach((option, i) => {
       const resolved = resolveOption(index, option, relation.type);
       if (resolved.conceptId) {
-        push(relation.type, resolved.conceptId, relation.fromDisease, i + 1, option, field.code);
+        push(relation.type, resolved.conceptId, relation.fromDisease, i + 1, option, field.code, resolved.matchedBy);
+      } else if (literalFindings && normalizeOption(option)) {
+        const literal = literalFinding(option);
+        if (!literals.has(literal.conceptId)) literals.set(literal.conceptId, literal);
+        push(relation.type, literal.conceptId, relation.fromDisease, i + 1, option, field.code, 'literal');
       } else {
         unmapped.push({ form: form.code, field: field.code, option, reason: resolved.reason, candidates: resolved.candidates });
       }
@@ -193,11 +277,18 @@ export function nnacRelations(form, index) {
     const specialty = (index.byText.get(normalizeOption(form.specialty.display)) ?? []).filter(
       (c) => c.categoryKey === 'specialty',
     );
-    if (specialty.length === 1) push('SPECIALTY', specialty[0].conceptId, true, 1, form.specialty.display, 'specialty');
-    else unmapped.push({ form: form.code, field: 'specialty', option: form.specialty.display, reason: specialty.length ? 'ambiguous' : 'no-match', candidates: specialty.map((c) => c.conceptId) });
+    if (specialty.length > 0) {
+      push('SPECIALTY', bestCandidate(specialty, 'SPECIALTY').conceptId, true, 1, form.specialty.display, 'specialty', 'exact');
+    } else unmapped.push({ form: form.code, field: 'specialty', option: form.specialty.display, reason: specialty.length ? 'ambiguous' : 'no-match', candidates: specialty.map((c) => c.conceptId) });
   }
 
-  return { rows, unmapped, blocker: null, diseaseConceptId: disease };
+  const levelField = form.fields.find((f) => f.code === 'nivel_de_atencion');
+  (levelField?.options ?? []).forEach((option, i) => {
+    const level = careLevelIds.get(CARE_LEVEL_CODE[normalizeOption(option)]);
+    if (level) push('CARE_LEVEL', level, true, i + 1, option, 'nivel_de_atencion', 'value-set');
+  });
+
+  return { rows, unmapped, literals, blocker: null, diseaseConceptId: disease };
 }
 
 /** Porcentaje de opciones mapeadas por campo, para la métrica de cierre de F2. */
