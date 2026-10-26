@@ -21,6 +21,8 @@ import {
   GeofenceEventsRepository,
   TripsRepository,
 } from './repositories';
+import { ReverseGeocodingController } from './reverse-geocoding/reverse-geocoding.controller';
+import { ReverseGeocodingService } from './reverse-geocoding/reverse-geocoding.service';
 
 /**
  * Módulo Geo (13): geolocalización y tracking móvil — sujetos rastreados,
@@ -34,6 +36,7 @@ import {
     GeoTrackingSessionsController,
     GeoGeofencesController,
     GeoTripsController,
+    ReverseGeocodingController,
   ],
   providers: [
     // Repositorios
@@ -48,6 +51,7 @@ import {
     GeoTrackingSessionsService,
     GeoGeofencesService,
     GeoTripsService,
+    ReverseGeocodingService,
   ],
 })
 export class GeoModule {}

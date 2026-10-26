@@ -1335,6 +1335,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    CONCEPTS.ADDR_USE_SAVED,
+    {
+      display: 'Dirección guardada',
+      definition:
+        'Otra ubicación que la persona guarda en su libreta, además de su domicilio.',
+    },
+  ],
+  [
     CONCEPTS.ADDR_TYPE_POSTAL,
     {
       display: 'Dirección postal',

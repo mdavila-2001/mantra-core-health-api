@@ -52,6 +52,10 @@ export interface CreateAddressData {
   latitude?: string;
   /** Longitud del punto, si se conoce. */
   longitude?: string;
+  /** Nombre que le pone la persona (libreta de direcciones, v4.2.61). */
+  label?: string;
+  /** La que se ofrece primero; una sola vigente por dueño (índice único). */
+  isPreferred?: boolean;
 }
 
 /**
@@ -104,6 +108,31 @@ export class AddressesRepository {
    * @param actorUserId - Quién la cierra, para la auditoría.
    * @returns La misma dirección, ya cerrada.
    */
+  /**
+   * Las direcciones vigentes de un dueño con alguno de los usos pedidos.
+   *
+   * Es la lectura de la libreta del paciente: domicilio, trabajo y las que
+   * guardó. Vigente con el mismo criterio que {@link findCurrentByOwnerAndUse}.
+   * Acotada por dueño y por uso, así que no crece sin límite: el alta escribe
+   * una de cada tipo y la libreta tiene tope.
+   */
+  async findCurrentByOwnerAndUses(
+    em: EntityManager,
+    ownerId: string,
+    useConceptIds: readonly string[],
+  ): Promise<Addresses[]> {
+    const now = new Date();
+    return em.find(
+      Addresses,
+      {
+        ownerId,
+        useConceptId: { $in: [...useConceptIds] },
+        $or: [{ validTo: null }, { validTo: { $gt: now } }],
+      },
+      { orderBy: { createdAt: 'asc', id: 'asc' } },
+    );
+  }
+
   closeCurrent(
     address: Addresses,
     validTo: Date,
@@ -130,6 +159,8 @@ export class AddressesRepository {
         typeConceptId: data.typeConceptId,
         latitude: data.latitude,
         longitude: data.longitude,
+        label: data.label,
+        isPreferred: data.isPreferred ?? false,
         ...createdBy(data.actorUserId),
         // `partial: true`: la columna `row_version` (version: true) tiene DEFAULT en
         // BD y la gestiona MikroORM; el tipo la exigiría sin este relajo.
