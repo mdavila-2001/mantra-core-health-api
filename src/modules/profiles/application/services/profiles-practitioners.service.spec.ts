@@ -4174,6 +4174,154 @@ describe('ProfilesPractitionersService', () => {
     });
   });
 
+  describe('P28: número del documento del médico', () => {
+    function withOwnProfile(d: ReturnType<typeof build>) {
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: 'p1' });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'p1',
+        practitionerCode: 'X',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'p1',
+        displayName: 'Ana',
+      });
+    }
+
+    it('corrige el número en la fila vigente si la identidad no está verificada', async () => {
+      const d = build();
+      withOwnProfile(d);
+      const document = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '765432',
+        issuerAdministrativeAreaConceptId: 'LP',
+      };
+      d.tx.find.mockResolvedValue([document]);
+
+      await d.service.updateOwnPractitionerProfile(
+        { nationalId: '7654321' },
+        actor,
+      );
+
+      expect(document.value).toBe('7654321');
+      expect(document.issuerAdministrativeAreaConceptId).toBe('LP');
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('con la identidad verificada responde 409 y no toca el número', async () => {
+      const d = build();
+      withOwnProfile(d);
+      const document = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '765432',
+      };
+      d.tx.find.mockResolvedValue([document]);
+      d.personRecords.hasCurrentIdentityAssertion.mockResolvedValue(true);
+
+      const error = await d.service
+        .updateOwnPractitionerProfile({ nationalId: '7654321' }, actor)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect((error as ConflictException).getResponse()).toMatchObject({
+        reason: 'NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY',
+      });
+      expect(document.value).toBe('765432');
+    });
+
+    it('mandar el mismo número no es una corrección: no consulta la verificación', async () => {
+      const d = build();
+      withOwnProfile(d);
+      d.tx.find.mockResolvedValue([
+        { typeConceptId: CONCEPTS.ID_TYPE_NATIONAL, value: '7654321' },
+      ]);
+      d.personRecords.hasCurrentIdentityAssertion.mockResolvedValue(true);
+
+      await d.service.updateOwnPractitionerProfile(
+        { nationalId: '7654321' },
+        actor,
+      );
+
+      expect(
+        d.personRecords.hasCurrentIdentityAssertion,
+      ).not.toHaveBeenCalledWith(d.tx, 'p1');
+    });
+
+    it('sin documento vigente lo crea con la forma del alta', async () => {
+      const d = build();
+      withOwnProfile(d);
+      d.tx.find.mockResolvedValue([]);
+
+      await d.service.updateOwnPractitionerProfile(
+        { nationalId: '7654321', issuerAdministrativeAreaConceptId: 'SCZ' },
+        actor,
+      );
+
+      expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'p1',
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: '7654321',
+          issuerAdministrativeAreaConceptId: 'SCZ',
+        }),
+      );
+    });
+  });
+
+  describe('P28: corrección del perfil por la plataforma (:profileId)', () => {
+    it('aplica el mismo PATCH sobre el perfil indicado tras comprobar la titularidad', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'p2',
+        practitionerCode: 'X',
+      });
+      const practitioner = { profileId: 'p2', practitionerCode: 'X' } as Record<
+        string,
+        unknown
+      >;
+      d.practitionersRepo.findById.mockResolvedValue(practitioner);
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'p2',
+        displayName: 'Bea',
+      });
+      d.tx.find.mockResolvedValue([]);
+
+      await d.service
+        .updatePractitionerProfile(
+          'p2',
+          { professionalBio: 'Corregida' },
+          actor,
+        )
+        .catch(() => undefined);
+
+      expect(d.ownership.assertOwnsPractitionerProfile).toHaveBeenCalledWith(
+        d.tx,
+        'p2',
+        actor,
+      );
+      expect(practitioner.professionalBio).toBe('Corregida');
+    });
+
+    it('un profesional sobre el perfil de otro recibe 403 y no escribe', async () => {
+      const d = build();
+      const practitioner = { profileId: 'p2' } as Record<string, unknown>;
+      d.practitionersRepo.findById.mockResolvedValue(practitioner);
+      d.ownership.assertOwnsPractitionerProfile.mockRejectedValue(
+        new ForbiddenException('no'),
+      );
+
+      await expect(
+        d.service.updatePractitionerProfile(
+          'p2',
+          { nationalId: '1234567' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(practitioner.professionalBio).toBeUndefined();
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+  });
+
   /**
    * **Las fichas de directorio no pueden declarar dónde atienden.**
    *
