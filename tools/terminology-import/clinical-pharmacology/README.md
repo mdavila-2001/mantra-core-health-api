@@ -15,16 +15,22 @@ pierde al cerrar la sesión): `pack-data.mjs` lo copia comprimido a `data/`, en 
 45 MB, con `data/MANIFEST.json` (sha256, bytes y filas por archivo). Hacer push después de cada
 pasada. Reconstruir: `zcat data/monographs.part-*.ndjson.gz > monographs.ndjson`.
 
+Solo se versiona el corpus **por principio activo** (decisión del propietario, 2026-10-26): el corpus por
+producto (`--granularity product`, ~2,2 GB) se arma en `out/product/`, nunca entra en `data/` y no lo carga el
+cargador. De la eEML solo se guardan referencias (ids y enlaces), no su texto. Toda sección es
+`audience: 'professional'`.
+
 ```sh
 # Con proxy de salida, anteponer NODE_USE_ENV_PROXY=1 a los fetch-*.mjs (el fetch de Node no lee HTTPS_PROXY).
 D=tools/terminology-import/clinical-pharmacology
 node $D/fetch-cima.mjs --plan                 # cuántos pedidos faltan
 node $D/fetch-cima.mjs                        # listado, detalle, maestra ATC, fichas completas, notas (reanudable)
-node $D/fetch-cima.mjs --granularity product  # pasada exhaustiva: todas las fichas segmentadas
+node $D/fetch-cima.mjs --granularity product  # pasada exhaustiva: todas las fichas segmentadas (a la caché, fuera de git)
 node $D/fetch-rxnorm.mjs                      # ATC 5 → RxCUI → UNII (por código)
 node $D/fetch-openfda.mjs                     # particiones de drug/label (descarga masiva, ~1,8 GB)
 node $D/fetch-gsrs.mjs                        # sustancias FDA GSRS → out/gsrs-entries.ndjson (puente UNII ↔ WHO-ATC)
-node $D/build-monographs.mjs                  # sin red → out/monographs.ndjson
+node $D/build-monographs.mjs                  # sin red → out/monographs.ndjson (por principio activo y vías: lo que se versiona)
+node $D/build-monographs.mjs --granularity product  # sin red → out/product/monographs.product.ndjson (~2,2 GB; no se versiona ni se carga)
 node $D/coverage-report.mjs                   # out/coverage.json + coverage.md
 node $D/load-clinical-pharmacology.mjs --dry-run
 node $D/load-clinical-pharmacology.mjs        # .env DB_*; idempotente; --no-prune para no retirar filas superadas
