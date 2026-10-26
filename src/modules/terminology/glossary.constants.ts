@@ -113,9 +113,11 @@ export interface GlossaryBilingualText {
 // --- Relaciones tipadas -----------------------------------------------------
 
 /**
- * Los ocho tipos de relación del glosario, aditivos a `REL_IS_A`/`REL_PART_OF`
+ * Los tipos de relación del glosario, aditivos a `REL_IS_A`/`REL_PART_OF`
  * (que siguen sirviendo a la jerarquía genérica del catálogo). `SYMPTOM` y
- * `SPECIALTY` se sumaron el 2026-10-01 con las relaciones de Wikidata.
+ * `SPECIALTY` se sumaron el 2026-10-01 con las relaciones de Wikidata; los
+ * cinco normativos (`DIAGNOSTIC_CRITERION` … `REFERRAL_CRITERION`), con la
+ * capa NNAC de TAREA-41 F2, que los carga con evidencia T1.
  */
 export type GlossaryRelationType =
   | 'RELATED_TERM'
@@ -125,7 +127,12 @@ export type GlossaryRelationType =
   | 'ANATOMY'
   | 'DIAGNOSTIC_TEST'
   | 'SYMPTOM'
-  | 'SPECIALTY';
+  | 'SPECIALTY'
+  | 'DIAGNOSTIC_CRITERION'
+  | 'REQUIRED_TEST'
+  | 'COMPLICATION'
+  | 'RISK_FACTOR'
+  | 'REFERRAL_CRITERION';
 
 /** Todos los tipos de relación del glosario, para `enum` de Swagger y validación. */
 export const GLOSSARY_RELATION_TYPES: readonly GlossaryRelationType[] = [
@@ -137,6 +144,11 @@ export const GLOSSARY_RELATION_TYPES: readonly GlossaryRelationType[] = [
   'DIAGNOSTIC_TEST',
   'SYMPTOM',
   'SPECIALTY',
+  'DIAGNOSTIC_CRITERION',
+  'REQUIRED_TEST',
+  'COMPLICATION',
+  'RISK_FACTOR',
+  'REFERRAL_CRITERION',
 ];
 
 /**
@@ -192,6 +204,11 @@ const GLOSSARY_RELATION_TYPE_CONCEPT_ID: Readonly<
   DIAGNOSTIC_TEST: CONCEPTS.REL_DIAGNOSTIC_TEST,
   SYMPTOM: CONCEPTS.REL_SYMPTOM,
   SPECIALTY: CONCEPTS.REL_SPECIALTY,
+  DIAGNOSTIC_CRITERION: CONCEPTS.REL_DIAGNOSTIC_CRITERION,
+  REQUIRED_TEST: CONCEPTS.REL_REQUIRED_TEST,
+  COMPLICATION: CONCEPTS.REL_COMPLICATION,
+  RISK_FACTOR: CONCEPTS.REL_RISK_FACTOR,
+  REFERRAL_CRITERION: CONCEPTS.REL_REFERRAL_CRITERION,
 };
 
 /** El concepto `relationship_type_concept_id` de un tipo de relación del glosario. */
