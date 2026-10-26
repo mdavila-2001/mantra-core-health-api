@@ -714,6 +714,8 @@ CREATE INDEX IF NOT EXISTS "ix_employee_payments_created_by_user_id" ON "account
 
 CREATE INDEX IF NOT EXISTS "ix_employee_payments_updated_by_user_id" ON "accounting"."employee_payments" ("updated_by_user_id");
 
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_practitioner_simple_accounts_practice_code" ON "accounting"."practitioner_simple_accounts" ("practice_id", "code");
+
 CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_accounts_practice_id" ON "accounting"."practitioner_simple_accounts" ("practice_id");
 
 CREATE INDEX IF NOT EXISTS "ix_practitioner_simple_accounts_created_by_user_id" ON "accounting"."practitioner_simple_accounts" ("created_by_user_id");
