@@ -9,3 +9,4 @@ export * from './patient-statements.repository';
 export * from './dunning.repository';
 export * from './kpi-snapshots.repository';
 export * from './service-catalog.repository';
+export * from './patient-spending.repository';

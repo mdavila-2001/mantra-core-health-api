@@ -7,11 +7,17 @@ import { INS } from '../../insurance/domain/insurance.concepts';
 import { CatalogConceptsRepository } from '../../terminology/repositories';
 import { DiagnosticUnitProvisioningService } from '../../diagnostic_units/services';
 import { DUNIT } from '../../diagnostic_units/diagnostic_units.concepts';
-import { isDiagnosticUnitModality } from '../../diagnostic_units/diagnostic-unit-modalities';
 import {
+  isDiagnosticUnitModality,
+  resolveDiagnosticUnitType,
+} from '../../diagnostic_units/diagnostic-unit-modalities';
+import {
+  BRANCH_TYPE_CONCEPT_BY_CODE,
+  DIR,
   TERRITORIAL_TENANT_TYPES,
   type TenantTypeCode,
 } from '../directory.concepts';
+import { BranchesRepository } from '../repositories/branches.repository';
 import {
   LEGAL_ENTITY_TYPE_BY_CODE,
   LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO,
@@ -95,12 +101,14 @@ export class TenantTypeProfileService {
    * @param catalogRepo - Repositorio del catálogo de seguros (carriers/brokers).
    * @param conceptsRepo - Catálogo de terminología, para validar los `*ConceptId` declarados.
    * @param addressesRepo - Repositorio de `common.addresses`, para la casa matriz del PAYER.
+   * @param branchesRepo - `directory.branches`, para las sucursales del laboratorio (P51).
    */
   constructor(
     private readonly catalogRepo: CatalogRepository,
     private readonly conceptsRepo: CatalogConceptsRepository,
     private readonly diagnosticUnitProvisioning: DiagnosticUnitProvisioningService,
     private readonly addressesRepo: AddressesRepository,
+    private readonly branchesRepo: BranchesRepository,
   ) {}
 
   /**
@@ -200,13 +208,18 @@ export class TenantTypeProfileService {
         );
       }
 
+      // Con el tipo resuelto, no el declarado: un laboratorio que no manda
+      // el tipo es laboratorio (P51, D-1) y puede declarar sucursales.
+      const resolvedUnitTypeConceptId = resolveDiagnosticUnitType(
+        input.diagnosticUnit,
+      );
       if (
         (input.diagnosticUnit.branches?.length ?? 0) > 0 &&
-        unitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY
+        resolvedUnitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY
       ) {
         throw new PreconditionFailedException(
           'Las sucursales sólo se declaran en una unidad de laboratorio clínico',
-          { diagnosticUnitTypeConceptId: unitTypeConceptId },
+          { diagnosticUnitTypeConceptId: resolvedUnitTypeConceptId },
         );
       }
 
@@ -363,12 +376,104 @@ export class TenantTypeProfileService {
         input.diagnosticUnit,
         actorUserId,
       );
+      if (
+        resolveDiagnosticUnitType(input.diagnosticUnit) ===
+        DUNIT.UNIT_TYPE_LABORATORY
+      ) {
+        this.registerLaboratoryBranches(
+          tx,
+          tenantId,
+          input.diagnosticUnit,
+          actorUserId,
+        );
+      }
       return provisioned.unitId;
     }
 
     // PROVIDER no tiene fila propia: su realidad operativa son las sedes y los
     // servicios de salud, que se crean después con su propio caso de uso.
     return undefined;
+  }
+
+  /**
+   * Las sucursales del laboratorio en `directory.branches` (P51, D-4).
+   *
+   * La provisión de la unidad ya las creó como sedes de práctica y de unidad
+   * (toma de muestras); esto las suma al registro de sucursales de la
+   * organización, que es lo que lista y edita la pestaña Sucursales del
+   * portal (`GET /tenants/{id}/branches`) y el único lugar con columna para
+   * la descripción y el enlace de mapa (P54). Mismo criterio que el alta de
+   * farmacia: la casa central entra sólo si trae su punto en el mapa; el
+   * código sale del nombre, sin repetirse dentro del alta (el tenant es nuevo,
+   * no hay códigos previos con qué chocar).
+   *
+   * @param tx - Transacción del alta.
+   * @param tenantId - Tenant recién creado.
+   * @param unit - Bloque `diagnosticUnit` declarado.
+   * @param actorUserId - Autor de las filas.
+   */
+  private registerLaboratoryBranches(
+    tx: EntityManager,
+    tenantId: string,
+    unit: DiagnosticUnitProfileDto,
+    actorUserId: string,
+  ): void {
+    const used = new Set<string>();
+    const codeOf = (name: string): string => {
+      const base =
+        name
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toUpperCase()
+          .replace(/[^A-Z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 90) || 'SUCURSAL';
+      let code = base;
+      for (let n = 2; used.has(code); n += 1) code = `${base}-${n}`;
+      used.add(code);
+      return code;
+    };
+    const timeZone = unit.primarySite?.timeZone;
+    const add = (item: {
+      name: string;
+      latitude?: number;
+      longitude?: number;
+      description?: string;
+      locationUrl?: string;
+    }): void => {
+      this.branchesRepo.create(tx, {
+        tenantId,
+        code: codeOf(item.name),
+        name: item.name,
+        branchTypeConceptId: BRANCH_TYPE_CONCEPT_BY_CODE.OFFICE,
+        statusConceptId: DIR.BRANCH_ACTIVE,
+        timeZone,
+        latitude:
+          item.latitude !== undefined ? String(item.latitude) : undefined,
+        longitude:
+          item.longitude !== undefined ? String(item.longitude) : undefined,
+        description: item.description,
+        locationUrl: item.locationUrl,
+        actorUserId,
+      });
+    };
+    const central = unit.primarySite?.address;
+    if (central?.latitude !== undefined && central.longitude !== undefined) {
+      add({
+        name: unit.primarySite?.name ?? 'Sede central',
+        latitude: central.latitude,
+        longitude: central.longitude,
+      });
+    }
+    for (const branch of unit.branches ?? []) {
+      add({
+        name: branch.name,
+        latitude: branch.address?.latitude,
+        longitude: branch.address?.longitude,
+        description: branch.description,
+        locationUrl: branch.locationUrl,
+      });
+    }
   }
 
   /**

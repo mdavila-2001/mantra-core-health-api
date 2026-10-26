@@ -1132,6 +1132,11 @@ const TENANT_ESCRIBE_EN: readonly { table: string; column: string }[] = [
   // El orden relativo a `tenant_affiliation_documents` es indiferente: la
   // recursión por FK borra al representante antes del corte de ciclos.
   { table: 'directory.tenant_legal_representatives', column: 'tenant_id' },
+  // Sucursales del alta (P51: las del laboratorio; P50: las de la farmacia):
+  // `materializeProfile` y el alta de farmacia las crean en
+  // `directory.branches` con FK al tenant; sin esta entrada el borrado del
+  // tenant revienta con 23503 nombrando `branches`.
+  { table: 'directory.branches', column: 'tenant_id' },
 ];
 
 /**

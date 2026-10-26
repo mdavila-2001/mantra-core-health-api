@@ -24,6 +24,27 @@ export interface PharmacyProductPureRow {
   readonly currency: string | null;
   readonly availableQuantity: string | number;
   readonly requiresPrescription: boolean | null;
+  /**
+   * P47: lo que declara el catálogo de la farmacia (no marcó «no tengo» y, si
+   * lleva conteo, le queda). Ausente = no se consultó.
+   */
+  readonly declaredInStock?: boolean;
+  /** Posiciones del ledger de existencias del producto. Ausente = no se consultó. */
+  readonly stockPositions?: string | number;
+}
+
+/**
+ * Si se rotula «hay». La declaración del catálogo manda cuando dice «no
+ * tengo»; si la farmacia lleva el ledger de existencias (hay posiciones), lo
+ * disponible del ledger decide; si no lo lleva, vale la declaración (P47: una
+ * farmacia sin inventario por lotes también vende).
+ */
+export function publicInStock(row: PharmacyProductPureRow): boolean {
+  if (row.declaredInStock === false) return false;
+  const ledgerKept =
+    row.stockPositions === undefined || Number(row.stockPositions) > 0;
+  if (!ledgerKept) return row.declaredInStock === true;
+  return Number(row.availableQuantity) > 0;
 }
 
 /** Proyección pública pura de un servicio: campo por campo, nada interno. */
@@ -54,7 +75,7 @@ export function formatPublicProduct(row: PharmacyProductPureRow) {
     therapeuticGroup: null,
     price: row.price,
     currency: row.price === null ? null : row.currency,
-    inStock: Number(row.availableQuantity) > 0,
+    inStock: publicInStock(row),
     requiresPrescription: row.requiresPrescription === true,
   };
 }
