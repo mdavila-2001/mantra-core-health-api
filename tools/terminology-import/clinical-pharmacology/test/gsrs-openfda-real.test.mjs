@@ -157,30 +157,36 @@ test('DailyMed real: identidad, UNII del principio activo y secciones LOINC de p
 });
 
 // --- OMS eEML real: JSON-LD de recomendaciones 17, 41 y 143 (consultadas el 2026-10-24) -------------
-import { EML_SOURCE, emlRecommendation, emlSections, isCurrentRecommendation, recommendationIdsFromHome } from '../lib/eml.mjs';
+// Decisión del propietario (2026-10-26, issue 824): de la eEML sólo se guardan referencias (ids y enlaces), sin su texto.
+import { EML_SOURCE, emlRecommendation, emlReference, isCurrentRecommendation, recommendationIdsFromHome } from '../lib/eml.mjs';
 
-test('eEML real: ATC 5 asignado por la OMS, indicación CIE-11 y formulaciones literales, sin ATC no se enlaza', () => {
+test('eEML real: ATC 5 asignado por la OMS, referencia con ids y enlaces SIN texto, sin ATC no se enlaza', () => {
   const raw = read('eml-recommendations-real.json');
   const atropine = emlRecommendation('41', raw['41']);
   assert.deepEqual(atropine.atc5, ['A03BA01']);
   assert.equal(atropine.guidelineDate, '2025-05-09');
   assert.deepEqual(atropine.icd11, { code: 'PH53', uri: 'http://id.who.int/icd/entity/938040061' });
   assert.ok(isCurrentRecommendation(atropine));
-  const [ind, forms] = emlSections(atropine, WHEN).map(assertSection);
-  assert.equal(ind.source, EML_SOURCE);
-  assert.equal(ind.key, 'indications');
-  assert.equal(ind.text, 'Exposure to or harmful effects of undetermined intent of pesticides');
-  assert.deepEqual(ind.codes, [{ system: 'ICD-11', code: 'PH53', uri: 'http://id.who.int/icd/entity/938040061' }]);
-  assert.equal(ind.document.effectiveDate, '2025-05-09');
-  assert.match(ind.license, /Licence: CC BY 3\.0 IGO/);
-  assert.match(ind.disclaimer, /The PDF versions are the binding versions/);
-  assert.equal(forms.key, 'pharmaceutical_form');
-  assert.equal(forms.text, 'Parenteral > General injections > unspecified: 1 mg in 1 mL ampoule or vial (sulfate)');
+  const ref = emlReference(atropine, WHEN);
+  assert.equal(ref.source, EML_SOURCE);
+  assert.equal(ref.document.id, '41');
+  assert.equal(ref.document.url, 'https://list.essentialmeds.org/recommendations/41');
+  assert.equal(ref.document.jsonUrl, 'https://list.essentialmeds.org/recommendations/41.jsonld');
+  assert.equal(ref.document.effectiveDate, '2025-05-09');
+  assert.deepEqual(ref.atc5, ['A03BA01']);
+  assert.deepEqual(ref.icd11, { code: 'PH53', uri: 'http://id.who.int/icd/entity/938040061' });
+  assert.equal(ref.license, 'CC BY 3.0 IGO');
+  assert.match(ref.textWithheld, /Texto no copiado/);
+  assert.equal(ref.retrievedAt, WHEN);
+  // Nada del texto de la OMS: ni la indicación, ni las formulaciones, ni los nombres de medicamentos.
+  const serialized = JSON.stringify(ref);
+  for (const text of ['Exposure to or harmful effects', 'pesticides', 'ampoule', 'sulfate', 'atropine']) assert.ok(!serialized.toLowerCase().includes(text.toLowerCase()), `la referencia no debe contener «${text}»`);
+  for (const field of ['text', 'textSha256', 'html', 'tables', 'indication', 'drugUnit', 'title']) assert.equal(field in ref || field in ref.document, false, `sin campo «${field}»`);
+  assert.ok(!('indication' in atropine) && !('drugUnit' in atropine), 'el registro normalizado ya no extrae el texto');
 
   const iron = emlRecommendation('143', raw['143']);
-  assert.deepEqual(iron.atc5, ['B03AA02', 'B03AA07'], 'varios ATC: cuenta en cada uno');
-  const ironForms = emlSections(iron, WHEN).find((s) => s.key === 'pharmaceutical_form');
-  assert.equal(ironForms.text, 'Oral > Liquid: 25 mg per  mL elemental iron; 9 mg per  mL elemental iron\n\nOral > Solid > tablet: 60 to 65 mg elemental iron', 'literal, doble espacio incluido');
+  assert.deepEqual(iron.atc5, ['B03AA02', 'B03AA07'], 'varios ATC: la referencia cuenta en cada uno');
+  assert.deepEqual(emlReference(iron, WHEN).atc5, ['B03AA02', 'B03AA07']);
 
   const codeine = emlRecommendation('17', raw['17']);
   assert.deepEqual(codeine.atc5, [], 'la OMS no asigna ATC a esta recomendación: no se enlaza por nombre');

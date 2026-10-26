@@ -7,8 +7,10 @@
 //      los ids de recomendación.
 //   2. JSON-LD oficial de cada recomendación (`/recommendations/<id>.jsonld`).
 //
-// Se guarda en clinical-pharmacology/cache/eml/ con la portada, su sha256 y la
-// fecha de consulta. Reanudable: lo ya bajado no se vuelve a pedir.
+// Se guarda en clinical-pharmacology/cache/eml/ (fuera de git) con la portada, su
+// sha256 y la fecha de consulta. Reanudable: lo ya bajado no se vuelve a pedir.
+// De la eEML sólo se usan identificadores y enlaces (lib/eml.mjs): el JSON-LD
+// crudo de la caché no se versiona ni se carga.
 //
 // Uso: NODE_USE_ENV_PROXY=1 node tools/terminology-import/clinical-pharmacology/fetch-eml.mjs
 // =============================================================================
@@ -38,7 +40,7 @@ async function main() {
     fetched: recs.length,
     byStatus: recs.reduce((a, r) => ({ ...a, [r.status ?? 'null']: (a[r.status ?? 'null'] ?? 0) + 1 }), {}),
     currentWithAtc5: current.filter((r) => r.atc5.length).length,
-    currentWithoutAtc5: current.filter((r) => !r.atc5.length).map((r) => ({ id: r.id, atcRaw: r.atcRaw, medicines: r.medicines.map((m) => m.name) })),
+    currentWithoutAtc5: current.filter((r) => !r.atc5.length).map((r) => ({ id: r.id, atcRaw: r.atcRaw, medicines: r.medicines.map((m) => m.id) })),
     atc5: new Set(current.flatMap((r) => r.atc5)).size,
     latestGuidelineDate: current.map((r) => r.guidelineDate).filter(Boolean).sort().at(-1) ?? null,
     http: http.stats,

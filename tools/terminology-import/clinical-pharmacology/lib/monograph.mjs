@@ -10,7 +10,7 @@
 // =============================================================================
 
 import { atcAncestors, atcLevel, cimaFormsAndRoutes } from './cima.mjs';
-import { requiredCoverage } from './sections.mjs';
+import { AUDIENCE_PROFESSIONAL, requiredCoverage } from './sections.mjs';
 
 /**
  * Nombres ATC por código, con su fuente. Prioridad: maestra ATC de CIMA, luego
@@ -97,6 +97,8 @@ export function buildMonograph({ code, names, cimaProducts = [], sections = [], 
 export function assertSection(s) {
   const need = ['key', 'source', 'language', 'text', 'textSha256', 'retrievedAt', 'license', 'citation'];
   for (const k of need) if (s[k] == null || s[k] === '') throw new Error(`Sección sin «${k}»: ${s.source}/${s.document?.id}/${s.section?.number}`);
+  // Posología incluida: sólo `professional` (decisión del propietario, 2026-10-26, issue 824). Sin audiencia no se publica.
+  if (s.audience !== AUDIENCE_PROFESSIONAL) throw new Error(`Sección sin audiencia «${AUDIENCE_PROFESSIONAL}»: ${s.source}/${s.document?.id}/${s.section?.number}`);
   if (!s.document?.id || !s.document?.url) throw new Error(`Sección sin documento: ${s.source}/${s.section?.number}`);
   if (!s.section?.number) throw new Error(`Sección sin número oficial: ${s.source}/${s.document.id}`);
   if (!hasVersion(s)) throw new Error(`Sección sin versión ni fecha del documento: ${s.source}/${s.document.id}/${s.section.number}`);

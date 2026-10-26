@@ -23,7 +23,8 @@ import { createHash } from 'node:crypto';
 
 import { deterministicId } from '../../lib/glossary-es/common.mjs';
 import { CONCEPT, md5uuid } from '../../lib/glossary-es/load-plan.mjs';
-import { sectionPropertyCode } from './sections.mjs';
+import { EML_SOURCE, emlReferencesFromSections } from './eml.mjs';
+import { AUDIENCE_PROFESSIONAL, sectionPropertyCode } from './sections.mjs';
 
 export const CODE_SYSTEM = 'clinical-pharmacology';
 /**
@@ -85,8 +86,30 @@ function prop(conceptCode, code, dataType, value, discriminator = sha(value)) {
 /** Clave estable de una sección: fuente, documento, versión, número y huella de TODO el valor (texto y procedencia). */
 export const sectionDiscriminator = (s) => `${s.source}:${s.document.id}:${s.document.version ?? s.document.effectiveDate ?? ''}:${s.section.number}:${sha(s)}`;
 
+/**
+ * La monografía tal como se carga. Dos garantías que no dependen de cómo se armó el corpus:
+ *   - eEML: sólo referencias. Las filas de sección de la eEML de un corpus anterior a la decisión del
+ *     propietario (2026-10-26, issue 824) se reemplazan por referencias sin texto (`externalDocuments`).
+ *   - Audiencia: toda sección, la posología incluida, es `professional`; si no, no se carga.
+ */
+export function loadableMonograph(m) {
+  for (const s of m.sections) {
+    if (s.audience !== AUDIENCE_PROFESSIONAL) throw new Error(`Sección sin audiencia «${AUDIENCE_PROFESSIONAL}» en ${m.code}: ${s.source}/${s.document?.id}/${s.section?.number}`);
+  }
+  if (!m.sections.some((s) => s.source === EML_SOURCE)) return m;
+  const known = new Set((m.externalDocuments ?? []).filter((d) => d.source === EML_SOURCE).map((d) => String(d.document.id)));
+  const coverage = Object.fromEntries(Object.entries(m.coverage ?? {}).filter(([source]) => source !== EML_SOURCE));
+  return {
+    ...m,
+    sections: m.sections.filter((s) => s.source !== EML_SOURCE),
+    coverage,
+    externalDocuments: [...(m.externalDocuments ?? []), ...emlReferencesFromSections(m.sections).filter((r) => !known.has(r.document.id))],
+  };
+}
+
 /** Propiedades de una monografía (ATC 5). Lo que no hay no genera fila. */
-export function monographProperties(m) {
+export function monographProperties(source) {
+  const m = loadableMonograph(source);
   const out = [prop(m.code, PROPERTY.ATC_LEVEL, 'integer', 5, '5'), prop(m.code, PROPERTY.ATC_PATH, 'json', m.atcPath)];
   if (m.displaySource) out.push(prop(m.code, PROPERTY.NAME_SOURCE, 'string', m.displaySource));
   if (m.cima) {
