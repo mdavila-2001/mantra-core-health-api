@@ -1887,6 +1887,7 @@ describe('SchedulingCatalogService', () => {
           'tpl-1',
           CONCEPTS.TEMPLATE_RETIRED,
           'u-1',
+          CONCEPTS.SLOT_BLOCKED,
         );
         expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_RETIRED);
         // Los tres cupos con cita se conservan: ninguna cita se toca.

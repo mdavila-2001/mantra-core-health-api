@@ -908,16 +908,35 @@ export class SchedulingCatalogRepository {
     }
   }
 
+  /**
+   * Retira la plantilla: suelta los cupos libres y cierra los que tienen historia.
+   *
+   * ## Cambiar de horario con citas, sin carreras (P23)
+   *
+   * - **Los cupos se toman `FOR UPDATE` antes de mirar sus citas**, en el mismo
+   *   orden que el resto del módulo (`startAt`). Una retención o una reserva
+   *   concurrente toma el mismo cupo con `findSlotForUpdate`: o termina antes y
+   *   este retiro ve su cita —y conserva el cupo—, o espera y encuentra el cupo
+   *   borrado o cerrado. Sin el bloqueo, la cita llegaba entre la lectura y el
+   *   borrado, y el retiro entero caía por la FK hacia `bookable_slots`.
+   * - **Los cupos conservados quedan `keptSlotStatusConceptId`** (`SLOT_BLOCKED`):
+   *   siguen sosteniendo su cita, pero dejan de ofrecerse. Quedaban abiertos, y un
+   *   cupo del horario retirado cuya cita se cancelaba —o que sólo tenía historia,
+   *   o capacidad para más de una— volvía a ofrecerse con la hora y la duración
+   *   viejas, al lado del cupo nuevo del mismo instante: el turno de las 08:00
+   *   terminando a las 08:30 y una doble reserva posible. Cancelar, reprogramar
+   *   o proponer no reabren un cupo bloqueado, y retenerlo se rechaza.
+   */
   async retireTemplate(
     em: EntityManager,
     scheduleTemplateId: string,
     retiredStatusConceptId: string,
     actorUserId: string,
+    keptSlotStatusConceptId: string,
   ): Promise<{ releasedSlots: number; keptSlots: number }> {
-    const slots = await em.find(
-      BookableSlots,
-      { scheduleTemplateId },
-      { fields: ['id'] },
+    const slots = await this.findSlotsOfTemplateForUpdate(
+      em,
+      scheduleTemplateId,
     );
 
     let releasedSlots = 0;
@@ -948,6 +967,16 @@ export class SchedulingCatalogRepository {
       ]);
       const freeOnes = ids.filter((id) => !untouchable.has(id));
       keptSlots = ids.length - freeOnes.length;
+
+      for (const slot of slots) {
+        if (
+          untouchable.has(slot.id) &&
+          slot.statusConceptId !== keptSlotStatusConceptId
+        ) {
+          slot.statusConceptId = keptSlotStatusConceptId;
+          touch(slot, actorUserId);
+        }
+      }
 
       if (freeOnes.length > 0) {
         await em.nativeDelete(SlotHolds, {
