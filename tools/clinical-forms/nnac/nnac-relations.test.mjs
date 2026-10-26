@@ -18,6 +18,7 @@ import {
   editionOf,
   icd10CodesOf,
   icd10ConceptId,
+  literalFinding,
   nnacRelations,
   normalizeOption,
   resolveOption,
@@ -80,14 +81,20 @@ const index = buildDesignationIndex([
   { conceptId: medInterna, text: 'Medicina interna', categoryKey: 'specialty' },
 ]);
 
-test('mapeo exacto, ambigüedad a revisión y estudio por prefijo', () => {
+test('mapeo exacto, mejor de los homónimos y estudio por prefijo sólo en exámenes', () => {
   assert.deepEqual(resolveOption(index, 'Hemograma completo', 'REQUIRED_TEST'), { conceptId: hemograma, matchedBy: 'exact' });
-  assert.equal(resolveOption(index, 'Fiebre alta', 'DIAGNOSTIC_CRITERION').reason, 'ambiguous');
-  assert.deepEqual(
-    resolveOption(index, 'Radiografía de tórax: condensación homogénea y bien delimitada en un lóbulo/ patrón alveolar', 'DIAGNOSTIC_CRITERION'),
-    { conceptId: rxTorax, matchedBy: 'study-prefix' },
-  );
-  // El prefijo sólo vale si es un estudio y para los campos donde tiene sentido.
+  // Dos «Fiebre alta»: en un criterio gana el de «signos y síntomas», y se informan los dos.
+  assert.deepEqual(resolveOption(index, 'Fiebre alta', 'DIAGNOSTIC_CRITERION'), {
+    conceptId: fiebre,
+    matchedBy: 'best-of-homonyms',
+    candidates: [fiebre, fiebreHomonima],
+  });
+  assert.deepEqual(resolveOption(index, 'Radiografía de tórax: condensación lobar', 'REQUIRED_TEST'), {
+    conceptId: rxTorax,
+    matchedBy: 'study-prefix',
+  });
+  // En un criterio el hallazgo importa más que el estudio: no se recorta al prefijo.
+  assert.equal(resolveOption(index, 'Radiografía de tórax: condensación homogénea y bien delimitada en un lóbulo/ patrón alveolar', 'DIAGNOSTIC_CRITERION').reason, 'no-match');
   assert.equal(resolveOption(index, 'Radiografía de tórax: algo', 'COMPLICATION').reason, 'no-match');
   // Nunca por similitud: «Hemograma» a secas no es «Hemograma completo».
   assert.equal(resolveOption(index, 'Hemograma', 'REQUIRED_TEST').reason, 'no-match');
@@ -108,6 +115,7 @@ test('NNAC 2025: filas T1 con cita literal, ubicación y vigencia', () => {
     citationLocator: 'NNAC 2025 (RM 0456, 30/09/2025), capítulo 21, pág. 199 · examenes_solicitados',
     validFrom: '2025-09-30',
     validTo: null,
+    matchedBy: 'exact',
   });
   assert.ok(out.rows.some((r) => r.relationshipTypeConceptId === RELATION_TYPE_CONCEPT_ID.SPECIALTY && r.targetConceptId === medInterna));
   // Toda opción no mapeada queda en la cola con su campo; ninguna se pierde.
@@ -149,4 +157,48 @@ test('ficha sin exámenes: sin REQUIRED_TEST y cobertura por campo coherente', (
 
 test('CSV escapa comillas', () => {
   assert.equal(csvLine(['a', 'dice "no"', null]), '"a","dice ""no""",""');
+});
+
+test('homónimos: gana la mejor fuente y, a igual fuente, el que más relaciones tiene', () => {
+  const idx = buildDesignationIndex([
+    { conceptId: 'a', text: 'Asma', categoryKey: 'disease', codeSystem: 'medlineplus-es', relationCount: 12 },
+    { conceptId: 'b', text: 'Asma', categoryKey: 'disease', codeSystem: 'cie10es-diagnosticos-2026', relationCount: 71 },
+    { conceptId: 'c', text: 'Sepsis', categoryKey: 'disease', codeSystem: 'medlineplus-es', relationCount: 3 },
+    { conceptId: 'd', text: 'Sepsis', categoryKey: 'disease', codeSystem: 'medlineplus-es', relationCount: 9 },
+  ]);
+  assert.equal(resolveOption(idx, 'Asma', 'COMPLICATION').conceptId, 'b');
+  assert.equal(resolveOption(idx, 'Sepsis', 'COMPLICATION').conceptId, 'd');
+});
+
+test('viñeta sin término exacto: término literal, el mismo en todas las fichas que la traen', () => {
+  const a = literalFinding('Tos productiva con esputo purulento');
+  const b = literalFinding('  tos productiva con esputo PURULENTO. ');
+  assert.equal(a.conceptId, b.conceptId);
+  assert.equal(a.display, 'Tos productiva con esputo purulento');
+  const out = nnacRelations(nac2025, index, { literalFindings: true });
+  assert.equal(out.unmapped.filter((u) => u.field !== 'specialty').length, 0);
+  const literalRow = out.rows.find((r) => r.citationText === 'Tos productiva con esputo purulento');
+  assert.equal(literalRow.matchedBy, 'literal');
+  assert.equal(literalRow.targetConceptId, a.conceptId);
+  assert.ok(out.literals.has(a.conceptId));
+  // Sin la opción, la viñeta va a revisión como antes.
+  assert.ok(nnacRelations(nac2025, index).unmapped.some((u) => u.option === 'Tos productiva con esputo purulento'));
+});
+
+test('nivel de atención: una relación por nivel y, con un único nivel, califica los exámenes', () => {
+  const levels = new Map([
+    ['FIRST_LEVEL', 'l1'],
+    ['SECOND_LEVEL', 'l2'],
+    ['THIRD_LEVEL', 'l3'],
+  ]);
+  const careRows = (form) =>
+    nnacRelations(form, index, { careLevelIds: levels }).rows.filter((r) => r.relationshipTypeConceptId === RELATION_TYPE_CONCEPT_ID.CARE_LEVEL);
+  assert.deepEqual(careRows(nac2025).map((r) => r.targetConceptId), ['l1', 'l2', 'l3']);
+  const soloTercer = {
+    ...nac2025,
+    fields: nac2025.fields.map((f) => (f.code === 'nivel_de_atencion' ? { ...f, options: ['Nivel III'] } : f)),
+  };
+  const test3 = nnacRelations(soloTercer, index, { careLevelIds: levels }).rows.find((r) => r.targetConceptId === hemograma);
+  assert.equal(test3.careLevelConceptId, 'l3');
+  assert.equal(nnacRelations(nac2025, index, { careLevelIds: levels }).rows.find((r) => r.targetConceptId === hemograma).careLevelConceptId, undefined);
 });

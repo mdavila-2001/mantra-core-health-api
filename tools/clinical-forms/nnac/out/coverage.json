@@ -1,36 +1,49 @@
 {
   "forms": 231,
-  "rows": 543,
+  "rows": 4755,
+  "literals": 3007,
+  "matchedBy": {
+    "literal": 3435,
+    "exact": 557,
+    "value-set": 562,
+    "best-of-homonyms": 188,
+    "study-prefix": 13
+  },
   "byField": {
     "criterios_clinicos": {
-      "mapped": 221,
-      "unmapped": 2028,
-      "percent": 9.8
+      "mapped": 2248,
+      "unmapped": 0,
+      "percent": 100
     },
     "specialty": {
-      "mapped": 147,
-      "unmapped": 67,
-      "percent": 68.7
+      "mapped": 177,
+      "unmapped": 37,
+      "percent": 82.7
+    },
+    "nivel_de_atencion": {
+      "mapped": 562,
+      "unmapped": 0,
+      "percent": 100
     },
     "examenes_solicitados": {
-      "mapped": 70,
-      "unmapped": 609,
-      "percent": 10.3
+      "mapped": 678,
+      "unmapped": 0,
+      "percent": 100
     },
     "complicaciones": {
-      "mapped": 58,
-      "unmapped": 252,
-      "percent": 18.7
+      "mapped": 310,
+      "unmapped": 0,
+      "percent": 100
     },
     "criterios_de_referencia": {
-      "mapped": 19,
-      "unmapped": 467,
-      "percent": 3.9
+      "mapped": 486,
+      "unmapped": 0,
+      "percent": 100
     },
     "factores_de_riesgo": {
-      "mapped": 28,
-      "unmapped": 267,
-      "percent": 9.5
+      "mapped": 294,
+      "unmapped": 0,
+      "percent": 100
     }
   },
   "blockers": [
