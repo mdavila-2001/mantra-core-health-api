@@ -45,6 +45,10 @@ export interface PharmacyProductRow {
   readonly currency: string | null;
   /** Suma de `available_quantity` en las sedes activas, como texto. */
   readonly availableQuantity: string;
+  /** P47: lo que declara el catálogo (sin «no tengo» y, con conteo, > 0). */
+  readonly declaredInStock: boolean;
+  /** Posiciones del ledger del producto en sedes activas, como texto. */
+  readonly stockPositions: string;
 }
 
 /**
@@ -162,7 +166,9 @@ export class PublicCatalogRepository {
               p.requires_prescription  AS "requiresPrescription",
               price.price              AS price,
               price.currency           AS currency,
-              COALESCE(stock.available, 0)::text AS "availableQuantity"
+              COALESCE(stock.available, 0)::text AS "availableQuantity",
+              p.declared_in_stock      AS "declaredInStock",
+              COALESCE(stock.positions, 0)::text AS "stockPositions"
          FROM (
                SELECT prod.id,
                       prod.pharmacy_id,
@@ -170,6 +176,8 @@ export class PublicCatalogRepository {
                       prod.strength_text,
                       prod.package_size_text,
                       prod.requires_prescription,
+                      (NOT prod.out_of_stock_declared
+                       AND (prod.stock_quantity IS NULL OR prod.stock_quantity > 0)) AS declared_in_stock,
                       COALESCE(prod.generic_name, med.display, prod.brand_name, prod.product_code) AS sort_name
                  FROM pharmacy.pharmacy_products prod
                  JOIN pharmacy.pharmacies ph
@@ -203,7 +211,8 @@ export class PublicCatalogRepository {
                  LIMIT 1
               ) price ON true
     LEFT JOIN LATERAL (
-                SELECT SUM(st.available_quantity) AS available
+                SELECT SUM(st.available_quantity) AS available,
+                       COUNT(st.id) AS positions
                   FROM pharmacy.pharmacy_sites site
                   JOIN pharmacy_inventory.inventory_locations loc
                     ON loc.pharmacy_site_id = site.id

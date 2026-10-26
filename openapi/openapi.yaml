@@ -47454,6 +47454,393 @@ paths:
       description: >-
         Categorías de la farmacia (sólo su personal). Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+    post:
+      description: El nombre es único en la farmacia sin distinguir mayúsculas ni tildes (409).
+      operationId: PharmacyController_createCategory
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PharmacyCategoryNameDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacyCategoryItemDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Crear una categoría de la farmacia
+      tags:
+        - pharmacy
+  /pharmacies/{pharmacyId}/categories/{categoryId}:
+    patch:
+      operationId: PharmacyController_renameCategory
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: categoryId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PharmacyCategoryNameDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacyCategoryItemDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Renombrar una categoría de la farmacia
+      tags:
+        - pharmacy
+      description: >-
+        Renombrar una categoría de la farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+    delete:
+      operationId: PharmacyController_deleteCategory
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: categoryId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Eliminar una categoría de la farmacia
+      tags:
+        - pharmacy
+      description: >-
+        Eliminar una categoría de la farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/inventory:
+    patch:
+      description: >-
+        Cada línea lleva `stock`/`minStock` **o** `inStock`: las dos juntas, ninguna, un producto repetido, ajeno o
+        retirado es 422 y no se guarda ninguna. Es la declaración del catálogo, no el ledger de existencias.
+      operationId: PharmacyController_updateInventory
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PharmacyUpdateInventoryDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryUpdatedDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Guardar el inventario declarado de varios productos (todo o nada)
+      tags:
+        - pharmacy
+  /pharmacies/{pharmacyId}/opening-hours:
+    get:
+      description: >-
+        Sólo el personal de la farmacia (o la plataforma). Los turnos ya terminados o cancelados no se listan. Las horas
+        vienen en UTC y en la hora local de la sede (`timeZone`, `America/La_Paz` por defecto).
+      operationId: PharmacyController_getOpeningHours
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacyOpeningHoursDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: 'Horario declarado de las sedes: 24 h y turnos vigentes y próximos'
+      tags:
+        - pharmacy
+  /pharmacies/{pharmacyId}/sites/{siteId}/open-24h:
+    put:
+      description: '`open24h: null` vuelve a «no declarado». Una sede de otra farmacia responde 404 igual que una inexistente.'
+      operationId: PharmacyController_setOpen24h
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: siteId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PharmacySetOpen24hDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacySiteOpeningHoursDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Declarar si la sede abre las 24 horas
+      tags:
+        - pharmacy
+  /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts:
+    post:
+      description: >-
+        Horas ISO-8601 con desplazamiento obligatorio. Como mucho 72 h, no ya terminado, a no más de 62 días: si no, 422
+        `ON_CALL_SHIFT_WINDOW_INVALID`. Solapado con otro turno activo de la sede: 409 `ON_CALL_SHIFT_OVERLAP`.
+      operationId: PharmacyController_createOnCallShift
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: siteId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PharmacyCreateOnCallShiftDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacyOnCallShiftDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Registrar un turno de guardia de la sede
+      tags:
+        - pharmacy
+  /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel:
+    post:
+      operationId: PharmacyController_cancelOnCallShift
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: shiftId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacyOnCallShiftDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Cancelar un turno de guardia (deja de publicarse)
+      tags:
+        - pharmacy
+      description: >-
+        Cancelar un turno de guardia (deja de publicarse). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /pharmacies:
     post:
       operationId: PharmacyController_createPharmacy
@@ -47639,9 +48026,10 @@ paths:
   /pharmacies/{pharmacyId}/products/{productId}:
     patch:
       description: >-
-        Marca, genérico, concentración, empaque y receta: cada uno opcional y `null` lo borra. Precio, categoría,
-        descripción, existencias, estado e imágenes no tienen columna (P47 §3-5) y se rechazan con 400. Un producto
-        retirado responde 422.
+        Marca, genérico, concentración, empaque y receta (no en un producto del catálogo universal: 400), y lo que
+        administra la farmacia: precio (Bs, lista `CATALOGO`), categoría por nombre, descripción, existencias o «hay /
+        no hay», estado e imágenes. Cada clave es opcional y `null` borra lo que lo admite. Un retirado sólo acepta
+        `status` PUBLISHED/DRAFT (si no, 422). Devuelve el producto como la lectura de gestión.
       operationId: PharmacyController_updateProduct
       parameters:
         - name: pharmacyId
@@ -47689,7 +48077,7 @@ paths:
           $ref: '#/components/responses/GatewayTimeout'
       security:
         - bearer: []
-      summary: Editar los datos descriptivos de un producto del catálogo
+      summary: Editar un producto del catálogo de la farmacia
       tags:
         - pharmacy
     delete:
@@ -48220,6 +48608,15 @@ paths:
           description: Tope del listado (por defecto 50)
           schema:
             type: number
+        - name: openNow
+          required: false
+          in: query
+          description: 'P34: `true` deja sólo las sedes abiertas ahora (24 h declaradas o de turno vigente)'
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+            type: string
       responses:
         '200':
           description: ''
@@ -48335,6 +48732,17 @@ paths:
           schema:
             format: uuid
             type: string
+        - name: managed
+          required: false
+          in: query
+          description: >-
+            P47: con `true` (y `pharmacyId`) lista TODO el catálogo de esa farmacia —borradores y retirados— con estado,
+            existencias, umbral e imágenes. Sólo su personal; cualquier otro, 404.
+          schema:
+            enum:
+              - 'true'
+              - 'false'
+            type: string
         - name: limit
           required: false
           in: query
@@ -48412,6 +48820,74 @@ paths:
         - pharmacy-directory
       description: >-
         Consultar los precios públicos vigentes de una sede. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /public/pharmacies/open-now:
+    get:
+      operationId: PharmacyPublicController_openNow
+      parameters:
+        - name: mode
+          required: false
+          in: query
+          description: '`any` (por defecto): 24 h o de turno · `24h`: sólo 24 h · `on-call`: sólo de turno'
+          schema:
+            enum:
+              - any
+              - 24h
+              - on-call
+            type: string
+        - name: city
+          required: false
+          in: query
+          description: Ciudad de la sede (sin distinguir mayúsculas)
+          schema:
+            type: string
+        - name: lat
+          required: false
+          in: query
+          description: Latitud WGS84 para ordenar por distancia (va con lng)
+          schema:
+            type: string
+        - name: lng
+          required: false
+          in: query
+          description: Longitud WGS84 para ordenar por distancia (va con lat)
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Tamaño de página (por defecto 20, máx. 50)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicOpenNowPageDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      summary: 'Farmacias abiertas ahora: 24 h o de turno vigente'
+      tags:
+        - pharmacy-public
+      description: >-
+        Farmacias abiertas ahora: 24 h o de turno vigente. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /public/medications:
     get:
@@ -53248,6 +53724,83 @@ paths:
       tags:
         - public-catalog
       security: []
+  /public/profiles/f/{slug}/branches:
+    get:
+      description: >-
+        Sin sesión. Sedes activas de las farmacias activas y verificadas del tenant dueño de la ficha, por ciudad y
+        nombre, con su punto si lo tiene. Un slug inexistente, oculto o de otro tipo responde 404.
+      operationId: PublicCatalogController_pharmacyBranches
+      parameters:
+        - name: slug
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      summary: Sucursales de una farmacia, desde su ficha pública
+      tags:
+        - public-catalog
+  /public/profiles/f/{slug}/branch-availability:
+    post:
+      description: >-
+        Sin sesión. Cuerpo { items: string[] (1-20, texto libre), lat?, lng? }. Sólo cuenta lo que está en stock; un
+        agotado es faltante. Orden del servidor: primero las completas, después la más cercana en línea recta. No guarda
+        nada. Un slug inexistente, oculto o de otro tipo responde 404.
+      operationId: PublicCatalogController_pharmacyBranchAvailability
+      parameters:
+        - name: slug
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicPrescriptionAvailabilityDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      summary: Disponibilidad de una receta en las sucursales de una farmacia
+      tags:
+        - public-catalog
   /qa/environments:
     post:
       description: '`isProductionSafe` decide si los payloads capturados se guardan en claro.'
@@ -67132,6 +67685,14 @@ components:
           type: string
           description: Fecha de inscripción de la matrícula (ISO)
           format: date
+        licenseFileId:
+          type: string
+          description: fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document
+          format: uuid
+        sedesLicenseFileId:
+          type: string
+          description: fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document
+          format: uuid
         professionalTitle:
           type: string
           maxLength: 100
@@ -67850,6 +68411,14 @@ components:
           example: Sucursal Equipetrol
         address:
           $ref: '#/components/schemas/OwnSiteAddressDto'
+        description:
+          type: string
+          maxLength: 1000
+          example: Frente al mercado
+        locationUrl:
+          type: string
+          maxLength: 2000
+          example: https://maps.google.com/?q=-17.78,-63.18
       required:
         - name
       additionalProperties: false
@@ -68135,6 +68704,14 @@ components:
           type: string
           description: Fecha de inscripción de la matrícula (ISO)
           format: date
+        licenseFileId:
+          type: string
+          description: fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document
+          format: uuid
+        sedesLicenseFileId:
+          type: string
+          description: fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document
+          format: uuid
         professionalTitle:
           type: string
           maxLength: 100
@@ -95043,15 +95620,190 @@ components:
         - currencyConceptId
         - allocatedOn
       additionalProperties: false
+    PharmacyCategoryItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        productCount:
+          type: number
+      required:
+        - id
+        - name
+        - productCount
     PharmacyCategoryListDto:
       type: object
       properties:
         items:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/PharmacyCategoryItemDto'
       required:
         - items
+    PharmacyCategoryNameDto:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 60
+      required:
+        - name
+      additionalProperties: false
+    PharmacyInventoryLineDto:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+        stock:
+          type: number
+          minimum: 0
+          maximum: 1000000
+        minStock:
+          type: number
+          minimum: 0
+          maximum: 1000000
+        inStock:
+          type: boolean
+      required:
+        - productId
+      additionalProperties: false
+    PharmacyUpdateInventoryDto:
+      type: object
+      properties:
+        lines:
+          minItems: 1
+          maxItems: 500
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyInventoryLineDto'
+      required:
+        - lines
+      additionalProperties: false
+    InventoryUpdatedDto:
+      type: object
+      properties:
+        updated:
+          type: number
+      required:
+        - updated
+    PharmacyOnCallShiftDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        siteId:
+          type: string
+          format: uuid
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        startsAtLocal:
+          type: string
+          example: '2026-10-26T20:00:00-04:00'
+        endsAtLocal:
+          type: string
+          example: '2026-10-27T08:00:00-04:00'
+        timeZone:
+          type: string
+          example: America/La_Paz
+        source:
+          type: string
+          enum:
+            - PHARMACY
+            - PLATFORM
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - CANCELLED
+        current:
+          type: boolean
+      required:
+        - id
+        - siteId
+        - startsAt
+        - endsAt
+        - startsAtLocal
+        - endsAtLocal
+        - timeZone
+        - source
+        - status
+        - current
+    PharmacySiteOpeningHoursDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        siteName:
+          type: string
+        timeZone:
+          type: string
+          example: America/La_Paz
+        open24h:
+          type: boolean
+          nullable: true
+        shifts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyOnCallShiftDto'
+      required:
+        - siteId
+        - siteName
+        - timeZone
+        - open24h
+        - shifts
+    PharmacyOpeningHoursDto:
+      type: object
+      properties:
+        pharmacyId:
+          type: string
+          format: uuid
+        asOf:
+          type: string
+          format: date-time
+        sites:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacySiteOpeningHoursDto'
+      required:
+        - pharmacyId
+        - asOf
+        - sites
+    PharmacySetOpen24hDto:
+      type: object
+      properties:
+        open24h:
+          type: boolean
+          nullable: true
+          description: '`true`: abre las 24 h · `false`: no · `null`: retira la declaración (vuelve a «no declarado»)'
+      required:
+        - open24h
+      additionalProperties: false
+    PharmacyCreateOnCallShiftDto:
+      type: object
+      properties:
+        startsAt:
+          type: string
+          description: Inicio, ISO-8601 con desplazamiento obligatorio (p. ej. `2026-10-26T20:00:00-04:00`)
+          example: '2026-10-26T20:00:00-04:00'
+        endsAt:
+          type: string
+          description: Fin (exclusivo), ISO-8601 con desplazamiento obligatorio. Como mucho 72 h después del inicio
+          example: '2026-10-27T08:00:00-04:00'
+      required:
+        - startsAt
+        - endsAt
+      additionalProperties: false
     InitialLicenseDto:
       type: object
       properties:
@@ -95255,6 +96007,50 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ProductIdentifierDto'
+        unitPrice:
+          description: >-
+            Precio de venta en bolivianos (número o texto decimal, hasta 2 decimales). Se versiona en la lista pública
+            `CATALOGO` de la farmacia.
+          oneOf:
+            - type: number
+            - type: string
+          example: 12.5
+        category:
+          type: string
+          description: >-
+            Categoría de la vitrina, por nombre (sin distinguir mayúsculas ni tildes). Tiene que ser una de `GET
+            /pharmacies/{pharmacyId}/categories`: otra es 422.
+          maxLength: 60
+        description:
+          type: string
+          description: Descripción para el paciente
+          maxLength: 2000
+        inStock:
+          type: boolean
+          description: '`false` = «no lo tengo» (sin conteo). Junto con `stock` es 422: dirían dos cosas a la vez.'
+        status:
+          type: string
+          description: 'Estado: `PUBLISHED` (por defecto) o `DRAFT` (sólo lo ve la farmacia). `WITHDRAWN` no vale en el alta.'
+          enum:
+            - PUBLISHED
+            - DRAFT
+        stock:
+          type: number
+          description: Existencias declaradas (sin ellas el producto queda «sin conteo»)
+          minimum: 0
+          maximum: 1000000
+        minStock:
+          type: number
+          description: Umbral de alerta (sin él, 5)
+          minimum: 0
+          maximum: 1000000
+        imageFileIds:
+          description: Hasta 3 imágenes (ids de `POST /common/files/upload`, categoría IMAGE, subidas por quien publica)
+          maxItems: 3
+          type: array
+          items:
+            type: string
+            format: uuid
       required:
         - productCode
       additionalProperties: false
@@ -95289,6 +96085,56 @@ components:
           type: boolean
           description: Requiere receta; `null` lo borra
           nullable: true
+        unitPrice:
+          description: >-
+            Precio de venta en bolivianos (número o texto decimal, hasta 2 decimales); `null` lo quita. Se versiona en
+            la lista pública `CATALOGO`.
+          oneOf:
+            - type: number
+            - type: string
+          nullable: true
+          example: 12.5
+        category:
+          type: string
+          description: Categoría por nombre (una de la farmacia; otra es 422); `null` la quita
+          maxLength: 60
+          nullable: true
+        description:
+          type: string
+          description: Descripción para el paciente; `null` la borra
+          maxLength: 2000
+          nullable: true
+        inStock:
+          type: boolean
+          description: >-
+            `false` = «no lo tengo»; `true` vuelve a tenerlo (si el conteo estaba en 0 queda «sin conteo»). Junto con
+            `stock` es 422.
+        status:
+          type: string
+          description: >-
+            `PUBLISHED`, `DRAFT` o `WITHDRAWN` (retira como el DELETE). Un retirado sólo acepta volver a
+            `PUBLISHED`/`DRAFT`.
+          enum:
+            - PUBLISHED
+            - DRAFT
+            - WITHDRAWN
+        stock:
+          type: number
+          minimum: 0
+          maximum: 1000000
+        minStock:
+          type: number
+          minimum: 0
+          maximum: 1000000
+        imageFileIds:
+          description: >-
+            Las imágenes, completas y en orden: reemplaza las anteriores. Hasta 3; una nueva tiene que ser un archivo
+            IMAGE subido por quien edita.
+          maxItems: 3
+          type: array
+          items:
+            type: string
+            format: uuid
       additionalProperties: false
     PharmacyConceptDto:
       type: object
@@ -95338,11 +96184,48 @@ components:
         requiresPrescription:
           type: object
           nullable: true
+        unitPrice:
+          type: string
+          nullable: true
+          example: '12.50'
+          description: >-
+            Precio vigente (lista `CATALOGO`, o el menor de sus listas públicas de mostrador). Texto exacto; `null` =
+            sin precio.
+        currency:
+          type: string
+          nullable: true
+          example: BOB
+        inStock:
+          type: boolean
+        category:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum:
+            - PUBLISHED
+            - DRAFT
+            - WITHDRAWN
+        stock:
+          type: number
+          nullable: true
+        minStock:
+          type: number
+          nullable: true
+        imageFileIds:
+          type: array
+          items:
+            type: string
+            format: uuid
       required:
         - id
         - pharmacyId
         - pharmacyName
         - productCode
+        - inStock
     CreatePriceListDto:
       type: object
       properties:
@@ -95803,6 +96686,13 @@ components:
           nullable: true
         productCount:
           type: number
+        open24h:
+          type: boolean
+          nullable: true
+        onCallUntil:
+          type: string
+          format: date-time
+          nullable: true
       required:
         - siteId
         - siteName
@@ -96058,6 +96948,96 @@ components:
         - pharmacyName
         - items
         - count
+    PublicOnCallNowDto:
+      type: object
+      properties:
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        endsAtLocal:
+          type: string
+          example: '2026-10-27T08:00:00-04:00'
+        source:
+          type: string
+          enum:
+            - PHARMACY
+            - PLATFORM
+      required:
+        - startsAt
+        - endsAt
+        - endsAtLocal
+        - source
+    PublicOpenNowItemDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        siteName:
+          type: string
+        pharmacyName:
+          type: string
+        pharmacySlug:
+          type: string
+        addressText:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          nullable: true
+        longitude:
+          type: number
+          nullable: true
+        distanceKm:
+          type: number
+          nullable: true
+        open24h:
+          type: boolean
+        onCall:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PublicOnCallNowDto'
+        timeZone:
+          type: string
+          example: America/La_Paz
+      required:
+        - siteId
+        - siteName
+        - pharmacyName
+        - pharmacySlug
+        - open24h
+        - timeZone
+    PublicOpenNowPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicOpenNowItemDto'
+        nextCursor:
+          type: string
+          nullable: true
+        asOf:
+          type: string
+          format: date-time
+        asOfLocal:
+          type: string
+          example: '2026-10-26T03:00:00-04:00'
+        timeZone:
+          type: string
+          example: America/La_Paz
+      required:
+        - items
+        - asOf
+        - asOfLocal
+        - timeZone
     PublicMedicationCardDto:
       type: object
       properties:
@@ -100083,6 +101063,32 @@ components:
           description: Puntos a restituir
       required:
         - reason
+      additionalProperties: false
+    PublicPrescriptionAvailabilityDto:
+      type: object
+      properties:
+        items:
+          minItems: 1
+          maxItems: 20
+          example:
+            - Paracetamol 500 mg
+            - Losartán
+          description: 'Texto libre: una receta de papel no trae ids de producto. Vacíos y repetidos (sin tildes) se ignoran.'
+          type: array
+          items:
+            type: string
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+          example: -17.78
+        lng:
+          type: number
+          minimum: -180
+          maximum: 180
+          example: -63.18
+      required:
+        - items
       additionalProperties: false
     CreateEnvironmentDto:
       type: object

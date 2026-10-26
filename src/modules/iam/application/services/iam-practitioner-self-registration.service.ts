@@ -422,6 +422,30 @@ export class IamPractitionerSelfRegistrationService {
       );
     }
 
+    // P29: el respaldo del SEDES va pegado a SU fila. Sin el número no hay fila
+    // donde dejarlo, y aceptarlo igual sería tirarlo en silencio, que es el
+    // defecto que estos dos campos vienen a cerrar. Y un mismo archivo no
+    // respalda las dos habilitaciones: la segunda reclamada fallaría igual,
+    // pero con un mensaje que no dice por qué.
+    if (
+      dto.sedesLicenseFileId !== undefined &&
+      dto.sedesLicenseNumber === undefined
+    ) {
+      throw new PreconditionFailedException(
+        'El archivo del registro del SEDES necesita su número de registro',
+        { field: 'sedesLicenseFileId' },
+      );
+    }
+    if (
+      dto.licenseFileId !== undefined &&
+      dto.licenseFileId === dto.sedesLicenseFileId
+    ) {
+      throw new PreconditionFailedException(
+        'La matrícula y el registro del SEDES no pueden compartir el mismo archivo',
+        { field: 'sedesLicenseFileId' },
+      );
+    }
+
     // Una foto que no se puede leer se rechaza acá, antes de escribir nada.
     // Antes se descartaba en silencio y el alta respondía 201 sin la foto que
     // el profesional había cargado.
@@ -629,6 +653,24 @@ export class IamPractitionerSelfRegistrationService {
       await tx.flush();
 
       // 4) Licencia y título, ambos pendientes de validación.
+      //
+      // P29: los respaldos de las dos habilitaciones se reclaman ANTES de crear
+      // sus filas y dentro de esta transacción, con las mismas reglas que el
+      // PDF de cada título: si el archivo no existe, ya tiene dueño o no es un
+      // PDF, el alta entera se revierte en vez de nacer sin el respaldo que la
+      // persona creyó adjuntar.
+      const licenseFileId = await this.claimLicenseDocument(
+        tx,
+        dto.licenseFileId,
+        user.id,
+        'La matrícula profesional',
+      );
+      const sedesLicenseFileId = await this.claimLicenseDocument(
+        tx,
+        dto.sedesLicenseFileId,
+        user.id,
+        'El registro del SEDES',
+      );
       const license = this.profiles.createJurisdictionAuthorization(tx, {
         practitionerProfileId: person.id,
         jurisdictionConceptId:
@@ -643,6 +685,7 @@ export class IamPractitionerSelfRegistrationService {
           ? new Date(dto.licenseIssueDate)
           : undefined,
         stateConceptId: PROF.AUTH_PENDING,
+        fileId: licenseFileId,
         actorUserId: user.id,
       });
       // El registro del SEDES es una SEGUNDA habilitación, no un título. El
@@ -659,6 +702,7 @@ export class IamPractitionerSelfRegistrationService {
               jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
               licenseNumber: dto.sedesLicenseNumber,
               stateConceptId: PROF.AUTH_PENDING,
+              fileId: sedesLicenseFileId,
               actorUserId: user.id,
             });
       // La credencial sólo nace si se declara un título de verdad. Dejó de ser
@@ -1128,6 +1172,42 @@ export class IamPractitionerSelfRegistrationService {
       );
       return undefined;
     }
+  }
+
+  /**
+   * P29 — reclama el PDF de una habilitación (matrícula o SEDES) para la cuenta
+   * recién creada. Mismas reglas que el PDF de un título del alta: sólo PDF,
+   * categoría DOCUMENT, y el archivo pasa a ser del profesional. Sin archivo
+   * no hace nada.
+   *
+   * @param tx - La transacción del alta.
+   * @param fileId - El id devuelto por `upload-registration-document`, o nada.
+   * @param ownerUserId - La cuenta recién creada.
+   * @param subject - Cómo se nombra el respaldo en el error.
+   * @returns El mismo id, ya reclamado, o `undefined`.
+   */
+  private async claimLicenseDocument(
+    tx: EntityManager,
+    fileId: string | undefined,
+    ownerUserId: string,
+    subject: string,
+  ): Promise<string | undefined> {
+    if (fileId === undefined) return undefined;
+    await this.files.claimAnonymousUpload(
+      tx,
+      fileId,
+      { tenantId: SEED.tenantId, ownerUserId },
+      {
+        allowedMimeTypes: ['application/pdf'],
+        allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        operation: 'iam.practitioner.self-register.license',
+      },
+      {
+        subject,
+        notFound: `${subject}: el archivo no fue encontrado`,
+      },
+    );
+    return fileId;
   }
 
   /**
