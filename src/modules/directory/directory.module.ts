@@ -112,6 +112,10 @@ import {
     // representante y las gerencias de la ficha de la farmacia con la misma
     // lectura que `GET /tenants/me`.
     DirectoryReadService,
+    // `PharmacyOperatingRequirementsService` lo necesita `identity_assurance`:
+    // un tenant verificado por una autoridad externa sólo se activa si cumple
+    // los mismos requisitos para operar que exige `POST /tenants/:id/verify`.
+    PharmacyOperatingRequirementsService,
   ],
 })
 export class DirectoryModule {}

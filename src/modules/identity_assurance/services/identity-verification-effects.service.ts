@@ -8,6 +8,7 @@ import {
   JurisdictionAuthorizationsRepository,
 } from '../../profiles/infrastructure/repositories';
 import { TenantsRepository } from '../../directory/repositories';
+import { PharmacyOperatingRequirementsService } from '../../directory/services/pharmacy-operating-requirements.service';
 import { DIR } from '../../directory/directory.concepts';
 import { CommunityVerificationService } from '../../community/services';
 import { COMM } from '../../community/community.concepts';
@@ -52,6 +53,7 @@ export class IdentityVerificationEffectsService {
    * @param practitionersRepo - Valor de practitioners repo requerido por la operación.
    * @param tenantsRepo - Valor de tenants repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param operatingRequirements - Requisitos para operar de farmacias y laboratorios.
    */
   constructor(
     private readonly authorizationsRepo: JurisdictionAuthorizationsRepository,
@@ -59,6 +61,7 @@ export class IdentityVerificationEffectsService {
     private readonly tenantsRepo: TenantsRepository,
     private readonly verification: CommunityVerificationService,
     private readonly logger: PinoLogger,
+    private readonly operatingRequirements: PharmacyOperatingRequirementsService,
   ) {
     this.logger.setContext(IdentityVerificationEffectsService.name);
   }
@@ -244,6 +247,36 @@ export class IdentityVerificationEffectsService {
         'Verified institution case points to a tenant that no longer exists',
       );
       return;
+    }
+
+    // P50 y P51: activar una farmacia o un laboratorio pendiente exige sus
+    // papeles (y, la farmacia, el punto de su casa central), igual que la
+    // verificación de la plataforma (`DirectoryTenantsService.verify`). El
+    // veredicto de la autoridad prueba la identidad de la institución, no que
+    // presentó la licencia o el certificado sanitario: sin este control, este
+    // camino la dejaba operando sin ellos. Si faltan, el caso de verificación
+    // se cierra igual —la identidad sí quedó probada— pero el tenant sigue
+    // pendiente, sin sello público, y el motivo queda en el log.
+    if (tenant.statusConceptId === DIR.TENANT_PENDING) {
+      const operating = await this.operatingRequirements.evaluateForTenant(
+        tx,
+        tenant,
+      );
+      if (operating && !operating.readiness.ready) {
+        this.logger.warn(
+          {
+            operation: 'ida.effects.tenant',
+            tenantId,
+            reason:
+              operating.kind === 'PHARMACY'
+                ? 'pharmacy-not-ready'
+                : 'laboratory-not-ready',
+            missing: operating.readiness.missing,
+          },
+          'Institution identity verified but kept pending: operating requirements missing',
+        );
+        return;
+      }
     }
 
     tenant.verificationStatusConceptId = CONCEPTS.TENANT_VERIFIED;
