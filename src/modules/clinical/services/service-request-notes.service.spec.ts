@@ -1,7 +1,8 @@
 import { jest } from '@jest/globals';
 import { ServiceRequestNotesService } from './service-request-notes.service';
 import { PreconditionFailedException } from '../../../common';
-import { ServiceRequestNotes } from '../entities';
+import { Encounters, ServiceRequestNotes } from '../entities';
+import { CHART } from '../../chart/chart.concepts';
 
 /**
  * Ejecuta la operación mock fn.
@@ -11,18 +12,51 @@ import { ServiceRequestNotes } from '../entities';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-const NOTE_A = { id: 'n-a', patientProfileId: 'p1', encounterId: 'enc-1' };
-const NOTE_B = { id: 'n-b', patientProfileId: 'p1', encounterId: 'enc-2' };
-const NOTE_OTHER = { id: 'n-x', patientProfileId: 'p2', encounterId: 'enc-9' };
+const SIGNED = CHART.NOTE_LIFECYCLE_SIGNED;
+const NOTE_A = {
+  id: 'n-a',
+  patientProfileId: 'p1',
+  encounterId: 'enc-1',
+  lifecycleStatusConceptId: SIGNED,
+};
+const NOTE_B = {
+  id: 'n-b',
+  patientProfileId: 'p1',
+  encounterId: 'enc-2',
+  lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_AMENDED,
+};
+const NOTE_OTHER = {
+  id: 'n-x',
+  patientProfileId: 'p2',
+  encounterId: 'enc-9',
+  lifecycleStatusConceptId: SIGNED,
+};
+/** Encuentro → tenant. `enc-t2` es del mismo paciente pero de otro tenant. */
+const ENCOUNTERS = [
+  { id: 'enc-1', tenantId: 't1' },
+  { id: 'enc-2', tenantId: 't1' },
+  { id: 'enc-9', tenantId: 't1' },
+  { id: 'enc-t2', tenantId: 't2' },
+];
 
 /**
- * Un EntityManager con las cabeceras de nota sembradas.
+ * Un EntityManager con las cabeceras de nota sembradas; los encuentros salen
+ * de {@link ENCOUNTERS}.
  *
- * @param rows - Filas que devuelve `find`.
+ * @param rows - Filas que devuelve `find` para las notas (o los vínculos).
  * @returns El doble del EntityManager.
  */
 function em(rows: unknown[]) {
-  return { find: mockFn().mockResolvedValue(rows), create: mockFn() };
+  return {
+    find: mockFn((entity: unknown, where: any) =>
+      Promise.resolve(
+        entity === Encounters
+          ? ENCOUNTERS.filter((e) => where.id.$in.includes(e.id))
+          : rows,
+      ),
+    ),
+    create: mockFn(),
+  };
 }
 
 /** Atrapa el rechazo para mirar su `reason`. */
@@ -41,23 +75,30 @@ describe('ServiceRequestNotesService (P40)', () => {
     it('acepta notas del mismo paciente y del mismo encuentro', async () => {
       const m = em([NOTE_A]);
       await expect(
-        service.assertUsable(m as any, ['n-a'], 'p1', 'enc-1'),
+        service.assertUsable(m as any, ['n-a'], 'p1', 't1', 'enc-1'),
       ).resolves.toBeUndefined();
-      expect(m.find).toHaveBeenCalledTimes(1);
+      // Una consulta por lote para las notas y otra para sus encuentros.
+      expect(m.find).toHaveBeenCalledTimes(2);
     });
 
     it('sin lista no consulta la base', async () => {
       const m = em([]);
-      await service.assertUsable(m as any, [], 'p1', 'enc-1');
+      await service.assertUsable(m as any, [], 'p1', 't1', 'enc-1');
       expect(m.find).not.toHaveBeenCalled();
     });
 
     it('una nota de otro paciente responde igual que una inexistente', async () => {
       const ajena = await reasonOf(
-        service.assertUsable(em([NOTE_OTHER]) as any, ['n-x'], 'p1', 'enc-1'),
+        service.assertUsable(
+          em([NOTE_OTHER]) as any,
+          ['n-x'],
+          'p1',
+          't1',
+          'enc-1',
+        ),
       );
       const inexistente = await reasonOf(
-        service.assertUsable(em([]) as any, ['n-zz'], 'p1', 'enc-1'),
+        service.assertUsable(em([]) as any, ['n-zz'], 'p1', 't1', 'enc-1'),
       );
       expect(ajena).toBe('BASED_ON_NOTE_NOT_FOUND');
       expect(inexistente).toBe('BASED_ON_NOTE_NOT_FOUND');
@@ -70,15 +111,63 @@ describe('ServiceRequestNotesService (P40)', () => {
             em([NOTE_A, NOTE_B]) as any,
             ['n-a', 'n-b'],
             'p1',
+            't1',
             'enc-1',
           ),
         ),
       ).toBe('BASED_ON_NOTE_ENCOUNTER_MISMATCH');
     });
 
+    it.each([
+      ['de otro tenant', { ...NOTE_A, encounterId: 'enc-t2' }],
+      [
+        'sin encuentro (no prueba custodia)',
+        { ...NOTE_A, encounterId: undefined },
+      ],
+      [
+        'en borrador',
+        { ...NOTE_A, lifecycleStatusConceptId: CHART.NOTE_LIFECYCLE_DRAFT },
+      ],
+      [
+        'con confidencialidad restringida',
+        { ...NOTE_A, confidentialityConceptId: 'conf-restringida' },
+      ],
+    ])(
+      'una nota %s responde igual que una inexistente',
+      async (_caso, nota) => {
+        expect(
+          await reasonOf(
+            service.assertUsable(em([nota]) as any, ['n-a'], 'p1', 't1'),
+          ),
+        ).toBe('BASED_ON_NOTE_NOT_FOUND');
+      },
+    );
+
+    it('confidencialidad normal sí sirve', async () => {
+      await expect(
+        service.assertUsable(
+          em([
+            {
+              ...NOTE_A,
+              confidentialityConceptId: CHART.DOC_CONFIDENTIALITY_NORMAL,
+            },
+          ]) as any,
+          ['n-a'],
+          'p1',
+          't1',
+          'enc-1',
+        ),
+      ).resolves.toBeUndefined();
+    });
+
     it('una orden sin encuentro sólo exige el mismo paciente', async () => {
       await expect(
-        service.assertUsable(em([NOTE_A, NOTE_B]) as any, ['n-a', 'n-b'], 'p1'),
+        service.assertUsable(
+          em([NOTE_A, NOTE_B]) as any,
+          ['n-a', 'n-b'],
+          'p1',
+          't1',
+        ),
       ).resolves.toBeUndefined();
     });
   });

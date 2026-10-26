@@ -38,6 +38,8 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
   const medico = { token: '', hpid: '', tenantId: '' };
   /** Un profesional sin vínculo asistencial con los pacientes de la suite. */
   const ajeno = { token: '', hpid: '' };
+  /** Un profesional de OTRO tenant que también atiende al paciente A. */
+  const otroTenant = { token: '', hpid: '', tenantId: '' };
 
   /** Paciente A: dos consultas y notas en las dos. */
   const pacienteA = {
@@ -46,6 +48,9 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
     otroEncuentro: '',
     nota: '',
     notaDeOtraConsulta: '',
+    notaEnBorrador: '',
+    /** Nota del MISMO paciente escrita en una consulta de otro tenant. */
+    notaDeOtroTenant: '',
   };
   /** Paciente B: una consulta con una nota. */
   const pacienteB = { id: '', encuentro: '', nota: '' };
@@ -96,10 +101,11 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
     resourceId: string,
     nationalId: string,
     cuando: Date,
+    token = medico.token,
   ): Promise<{ patientProfileId: string; encounterId: string }> {
     const res = await http()
       .post('/scheduling/appointments/walk-in')
-      .set(bearer(medico.token))
+      .set(bearer(token))
       .send({
         patient: {
           name: 'Paciente',
@@ -119,21 +125,36 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
     };
   }
 
+  /**
+   * Una nota de la consulta, firmada salvo que se pida borrador: sólo una nota
+   * firmada o enmendada puede motivar una orden.
+   */
   async function nota(
     patientProfileId: string,
     encounterId: string,
     texto: string,
+    autor: { token: string; hpid: string } = medico,
+    firmar = true,
   ): Promise<string> {
     const res = await http()
       .post('/charts/notes')
-      .set(bearer(medico.token))
+      .set(bearer(autor.token))
       .send({
         patientProfileId,
-        authorProfileId: medico.hpid,
+        authorProfileId: autor.hpid,
         encounterId,
         chiefComplaintText: texto,
       })
       .expect(201);
+    if (firmar) {
+      await http()
+        .post(
+          `/charts/notes/${res.body.noteId}/versions/${res.body.versionId}/sign`,
+        )
+        .set(bearer(autor.token))
+        .send({ signerProfileId: autor.hpid })
+        .expect(201);
+    }
     return res.body.noteId as string;
   }
 
@@ -171,20 +192,36 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
     ajeno.token = b.token;
     ajeno.hpid = b.hpid;
 
-    const recurso = await http()
-      .post('/scheduling/resources')
-      .set(bearer(medico.token))
-      .send({
-        tenantId: medico.tenantId,
-        resourceType: 'PRACTITIONER',
-        resourceRefType: 'health_practitioner_profiles',
-        resourceRefId: medico.hpid,
-        name: 'Consultorio P40',
-        timeZone: 'America/La_Paz',
-        capacity: 1,
-      })
-      .expect(201);
-    const resourceId = recurso.body.id as string;
+    const c = await registrarMedico('otro-tenant');
+    otroTenant.token = c.token;
+    otroTenant.hpid = c.hpid;
+    otroTenant.tenantId = (claims(c.token)['tenants'] as string[])[0];
+    expect(otroTenant.tenantId).not.toBe(medico.tenantId);
+
+    async function consultorio(
+      quien: { token: string; hpid: string; tenantId: string },
+      nombre: string,
+    ): Promise<string> {
+      const recurso = await http()
+        .post('/scheduling/resources')
+        .set(bearer(quien.token))
+        .send({
+          tenantId: quien.tenantId,
+          resourceType: 'PRACTITIONER',
+          resourceRefType: 'health_practitioner_profiles',
+          resourceRefId: quien.hpid,
+          name: nombre,
+          timeZone: 'America/La_Paz',
+          capacity: 1,
+        })
+        .expect(201);
+      return recurso.body.id as string;
+    }
+    const resourceId = await consultorio(medico, 'Consultorio P40');
+    const resourceOtroTenant = await consultorio(
+      otroTenant,
+      'Consultorio P40 otro tenant',
+    );
 
     const a1 = await walkIn(resourceId, `P40A${sufijo}`, lunesLejano(3, 9));
     pacienteA.id = a1.patientProfileId;
@@ -204,6 +241,28 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
       'Control',
     );
     pacienteB.nota = await nota(pacienteB.id, pacienteB.encuentro, 'Tos');
+    pacienteA.notaEnBorrador = await nota(
+      pacienteA.id,
+      pacienteA.encuentro,
+      'Borrador',
+      medico,
+      false,
+    );
+
+    // El mismo paciente (mismo documento) atendido en el otro tenant.
+    const a3 = await walkIn(
+      resourceOtroTenant,
+      `P40A${sufijo}`,
+      lunesLejano(4, 9),
+      otroTenant.token,
+    );
+    expect(a3.patientProfileId).toBe(pacienteA.id);
+    pacienteA.notaDeOtroTenant = await nota(
+      pacienteA.id,
+      a3.encounterId,
+      'Nota del otro tenant',
+      otroTenant,
+    );
   });
 
   afterAll(async () => {
@@ -303,6 +362,30 @@ describe('P40 · orden de análisis basada en notas (integración)', () => {
     expect(inexistente.body.message).toBe(res.body.message);
 
     expect(await ordenesDe(pacienteA.id)).toBe(antes);
+  });
+
+  it('NEGATIVO · una nota del MISMO paciente pero de otro tenant da 422 sin revelar que existe', async () => {
+    const antes = await ordenesDe(pacienteA.id);
+    // Sin encuentro en la orden: así sólo la custodia puede rechazarla.
+    const res = await pedir({
+      patientProfileId: pacienteA.id,
+      codeConceptId: CLIN.STUDY_GLICEMIA,
+      basedOnNoteIds: [pacienteA.notaDeOtroTenant],
+    }).expect(422);
+
+    expect(res.body.reason).toBe('BASED_ON_NOTE_NOT_FOUND');
+    expect(await ordenesDe(pacienteA.id)).toBe(antes);
+  });
+
+  it('NEGATIVO · una nota en borrador no motiva una orden (422, mismo motivo)', async () => {
+    const res = await pedir({
+      patientProfileId: pacienteA.id,
+      encounterId: pacienteA.encuentro,
+      codeConceptId: CLIN.STUDY_GLICEMIA,
+      basedOnNoteIds: [pacienteA.notaEnBorrador],
+    }).expect(422);
+
+    expect(res.body.reason).toBe('BASED_ON_NOTE_NOT_FOUND');
   });
 
   it('NEGATIVO · una nota del paciente pero de otra consulta da 422', async () => {

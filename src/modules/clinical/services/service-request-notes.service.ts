@@ -2,8 +2,15 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { PreconditionFailedException } from '../../../common';
 import { ClinicalNoteHeaders } from '../../chart/entities';
-import { ServiceRequestNotes } from '../entities';
+import { Encounters, ServiceRequestNotes } from '../entities';
+import { CHART } from '../../chart/chart.concepts';
 import { ClinicalErrorReason } from '../clinical.error-reasons';
+
+/** Una nota sólo motiva una orden cuando ya no puede cambiar: firmada o enmendada. */
+const FINAL_LIFECYCLES: ReadonlySet<string> = new Set([
+  CHART.NOTE_LIFECYCLE_SIGNED,
+  CHART.NOTE_LIFECYCLE_AMENDED,
+]);
 
 /**
  * P40 (carril C2): las notas médicas que motivan una orden de análisis
@@ -19,36 +26,82 @@ export class ServiceRequestNotesService {
   /**
    * Lanza 422 si alguna nota no sirve como motivo de la orden.
    *
-   * Una nota inexistente y una nota de **otro paciente** responden igual
-   * (`BASED_ON_NOTE_NOT_FOUND`): distinguirlas le diría al cliente que ese id
-   * existe en otra historia —mismo criterio que el encuentro de la orden—.
-   * Si la orden tiene encuentro, la nota tiene que ser de ese encuentro
-   * (`BASED_ON_NOTE_ENCOUNTER_MISMATCH`); una orden sin encuentro sólo exige
-   * el mismo paciente.
+   * Una nota sirve si, a la vez:
+   * - existe y es del **mismo paciente**;
+   * - cuelga de un encuentro del **tenant custodio de la orden**: la cabecera
+   *   de la nota no tiene tenant propio, así que la custodia se prueba por su
+   *   encuentro, y una nota sin encuentro no puede probarla;
+   * - está **firmada o enmendada** (un borrador todavía puede cambiar);
+   * - no tiene confidencialidad restringida (cualquier valor distinto de
+   *   `DOC_CONF_NORMAL`).
+   *
+   * Todas esas fallas responden igual (`BASED_ON_NOTE_NOT_FOUND`): distinguirlas
+   * le diría al cliente que ese id existe en otra historia, en otro tenant o
+   * con otro estado. Recién superadas, si la orden tiene encuentro y la nota es
+   * de otra consulta, `BASED_ON_NOTE_ENCOUNTER_MISMATCH`.
    *
    * @param em - Transacción activa del alta.
    * @param noteIds - Notas citadas, sin repetidos (lo garantiza el DTO).
    * @param patientProfileId - Paciente de la orden.
+   * @param custodianTenantId - Tenant custodio de la orden.
    * @param encounterId - Encuentro de la orden, si lo tiene.
    */
   async assertUsable(
     em: EntityManager,
     noteIds: readonly string[],
     patientProfileId: string,
+    custodianTenantId: string,
     encounterId?: string | null,
   ): Promise<void> {
     if (noteIds.length === 0) return;
     const notes = await em.find(
       ClinicalNoteHeaders,
       { id: { $in: [...noteIds] } },
-      { fields: ['id', 'patientProfileId', 'encounterId'] },
+      {
+        fields: [
+          'id',
+          'patientProfileId',
+          'encounterId',
+          'lifecycleStatusConceptId',
+          'confidentialityConceptId',
+        ],
+      },
+    );
+    const encounterIds = [
+      ...new Set(
+        notes
+          .map((note) => note.encounterId)
+          .filter((id): id is string => id !== undefined && id !== null),
+      ),
+    ];
+    const encounters =
+      encounterIds.length === 0
+        ? []
+        : await em.find(
+            Encounters,
+            { id: { $in: encounterIds } },
+            { fields: ['id', 'tenantId'] },
+          );
+    const tenantOf = new Map(
+      encounters.map(
+        (encounter) => [encounter.id, encounter.tenantId] as const,
+      ),
     );
     const byId = new Map(notes.map((note) => [note.id, note] as const));
+
     for (const noteId of noteIds) {
       const note = byId.get(noteId);
-      if (!note || note.patientProfileId !== patientProfileId) {
+      const usable =
+        note !== undefined &&
+        note.patientProfileId === patientProfileId &&
+        !!note.encounterId &&
+        tenantOf.get(note.encounterId) === custodianTenantId &&
+        FINAL_LIFECYCLES.has(note.lifecycleStatusConceptId) &&
+        (!note.confidentialityConceptId ||
+          note.confidentialityConceptId === CHART.DOC_CONFIDENTIALITY_NORMAL);
+      if (!usable) {
         throw new PreconditionFailedException(
-          'La nota médica citada no existe en la historia de este paciente',
+          'La nota médica citada no está disponible como motivo de esta orden',
           { noteId },
           ClinicalErrorReason.BASED_ON_NOTE_NOT_FOUND,
         );

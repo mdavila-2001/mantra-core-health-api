@@ -273,6 +273,7 @@ export class ServiceRequestsService {
           tx,
           basedOnNoteIds,
           dto.patientProfileId,
+          dto.custodianTenantId,
           dto.encounterId,
         );
       }

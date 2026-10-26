@@ -335,6 +335,7 @@ describe('ServiceRequestsService (UC-08-05)', () => {
         d.tx,
         ['n2', 'n1'],
         'p1',
+        't1',
         'enc-1',
       );
       expect(d.basedOnNotes.link).toHaveBeenCalledWith(

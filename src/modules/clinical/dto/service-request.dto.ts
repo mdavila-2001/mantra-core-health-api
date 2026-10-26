@@ -108,8 +108,10 @@ export class CreateServiceRequestDto {
   @ApiPropertyOptional({
     description:
       'Notas médicas (chart.clinical_note_headers) que motivan la orden. Cada una ' +
-      'debe ser del mismo paciente y, si la orden tiene encuentro, del mismo ' +
-      'encuentro (422 BASED_ON_NOTE_NOT_FOUND / BASED_ON_NOTE_ENCOUNTER_MISMATCH)',
+      'debe ser del mismo paciente, de un encuentro del tenant custodio, firmada o ' +
+      'enmendada y sin confidencialidad restringida (si no, 422 BASED_ON_NOTE_NOT_FOUND, ' +
+      'sin distinguir el motivo); y, si la orden tiene encuentro, del mismo encuentro ' +
+      '(422 BASED_ON_NOTE_ENCOUNTER_MISMATCH)',
     type: [String],
     format: 'uuid',
     maxItems: MAX_BASED_ON_NOTES,
