@@ -142795,7 +142795,8 @@
             ]
           },
           "availableQuantity": {
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "price": {
             "nullable": true,

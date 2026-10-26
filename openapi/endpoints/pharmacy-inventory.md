@@ -573,7 +573,7 @@ Campos de la respuesta:
 | `items[].products[].medication` | No | `InventoryConceptDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"}` |
 | `items[].products[].medication.code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `items[].products[].medication.display` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `items[].products[].availableQuantity` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].products[].availableQuantity` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `items[].products[].price` | No | `AvailabilityPriceDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"unitAmount":"valor-ejemplo","patientAmount":{},"currency":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"priceListCode":"CODIGO_EJEMPLO"}` |
 | `items[].products[].price.unitAmount` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].products[].price.patientAmount` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |

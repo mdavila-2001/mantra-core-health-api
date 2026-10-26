@@ -177,6 +177,7 @@ describe('P47 · catálogo de la farmacia (DB real)', () => {
       PHARM.PRODUCT_ACTIVE,
       PHARM.PRICE_LIST_TYPE_PUBLIC,
       PHARM.PHARMACY_ACTIVE,
+      PHARM.SITE_ACTIVE,
       CONCEPTS.CURRENCY_BOB,
       CONCEPTS.FILE_CATEGORY_IMAGE,
       CONCEPTS.FILE_CATEGORY_DOCUMENT,
@@ -227,6 +228,39 @@ describe('P47 · catálogo de la farmacia (DB real)', () => {
         ],
       );
     }
+    // La disponibilidad pública es por sede (regla única de existencias, A1
+    // del 26/10/2026): una farmacia real nace con su «Casa central» (P50). Sin
+    // sede no hay dónde estar disponible. A la de A se le da la suya, sin
+    // inventario por lotes: vale lo declarado en el catálogo.
+    const practiceA = randomUUID();
+    const practiceSiteA = randomUUID();
+    await run(
+      `insert into practice.practices
+         (id, tenant_id, code, name, type_concept_id, admin_user_id, status_concept_id,
+          created_at, updated_at)
+       values (?, ?, ?, ?, ?, ?, ?, now(), now())`,
+      [practiceA, ids.tenantA, `${mark}-PR`, mark, any, ids.userA, any],
+    );
+    await run(
+      `insert into practice.practice_sites
+         (id, practice_id, code, name, site_type_concept_id, status_concept_id,
+          created_at, updated_at)
+       values (?, ?, ?, ?, ?, ?, now(), now())`,
+      [practiceSiteA, practiceA, `${mark}-PS`, mark, any, any],
+    );
+    await run(
+      `insert into pharmacy.pharmacy_sites
+         (id, pharmacy_id, practice_site_id, code, name, status_concept_id,
+          created_at, updated_at)
+       values (?, ?, ?, ?, 'Casa central', ?, now(), now())`,
+      [
+        randomUUID(),
+        ids.pharmacyA,
+        practiceSiteA,
+        `${mark}-CC`,
+        PHARM.SITE_ACTIVE,
+      ],
+    );
     await insertFile(
       ids.fileA,
       ids.tenantA,
