@@ -19,7 +19,6 @@ import {
   PharmacySites,
 } from '../entities';
 import { PHARM } from '../pharmacy.concepts';
-import type { FilterQuery } from '@mikro-orm/core';
 import { SELLABLE_STOCK_FILTER } from '../services/pharmacy-catalog-rules';
 
 /** Acotaciones de la búsqueda de productos del directorio. */
@@ -209,7 +208,7 @@ export class PharmacyReadRepository {
       id: { $in: [...ids] },
       statusConceptId: PHARM.PRODUCT_ACTIVE,
       ...SELLABLE_STOCK_FILTER,
-    } as FilterQuery<PharmacyProducts>);
+    });
   }
 
   /**
