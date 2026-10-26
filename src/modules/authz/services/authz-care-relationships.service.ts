@@ -6,6 +6,7 @@ import {
   ConflictException,
   getCurrentTenantId,
   PreconditionFailedException,
+  roleAuthorizesInTenant,
   ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
@@ -317,17 +318,27 @@ export class AuthzCareRelationshipsService {
   }
 
   /**
-   * Abre la relación asistencial `ACTIVE` que respalda el cuidado que el tenant
-   * activo da a un paciente, **sólo si el paciente dejó una huella propia en él**
-   * (una reserva hecha por su cuenta o su autorregistro: la misma prueba de
+   * Abre la relación asistencial `ACTIVE` que respalda el cobro del tenant activo
+   * por la atención de un paciente, **sólo si el paciente dejó una huella propia en
+   * él** (una reserva hecha por su cuenta o su autorregistro: la misma prueba de
    * `assertPatientInTenant`). Así la relación nace de un acto del paciente y no del
    * personal, y no se salta la aceptación que exige `requestCareRelationship`.
    *
-   * No hace nada —y no lanza— cuando el tenant indicado no es el activo, el paciente
-   * no tiene huella propia o ya hay una relación `ACTIVE` con ese profesional en
-   * el tenant: quien atiende a un paciente sin huella propia pide la relación por
-   * `POST /authz/care-relationships` y el paciente la acepta. Corre en la
-   * transacción del llamador.
+   * La relación nace acotada a `PAYMENT`: habilita el cobro con seguro (REQ-16-035)
+   * y nada más. No abre la historia clínica (`ClinicalReadService` descarta las
+   * relaciones acotadas) ni concede acceso por el PDP a otros propósitos; para eso
+   * el profesional la pide y el paciente la acepta.
+   *
+   * No hace nada —y no lanza— cuando:
+   * - el tenant indicado no es el activo;
+   * - el actor no es el propio profesional ni `CLINICIAN` (los mismos que pueden dar
+   *   de alta una relación directa);
+   * - el paciente no tiene huella propia;
+   * - ya hay una relación `ACTIVE` con ese profesional en el tenant, o el paciente
+   *   ya decidió sobre ella (solicitud `PENDING` sin responder, o relación
+   *   `REVOKED`/rechazada): no se la reabre por el check-in.
+   *
+   * Corre en la transacción del llamador.
    *
    * @param tx - Transacción del llamador (el check-in).
    * @param input - Paciente, profesional que atiende y tenant de la atención.
@@ -345,6 +356,14 @@ export class AuthzCareRelationshipsService {
   ): Promise<boolean> {
     const { patientProfileId, practitionerProfileId, tenantId } = input;
     if (getCurrentTenantId() !== tenantId) return false;
+    const isThePractitioner =
+      actor.practitionerProfileId === practitionerProfileId;
+    if (
+      !isThePractitioner &&
+      !roleAuthorizesInTenant(actor, 'CLINICIAN', tenantId)
+    ) {
+      return false;
+    }
     if (
       !(await this.scope.patientHasOwnFootprint(tx, patientProfileId, tenantId))
     ) {
@@ -357,12 +376,23 @@ export class AuthzCareRelationshipsService {
       tenantId,
     );
     if (existing) return false;
+    if (
+      await this.careRepo.hasPendingOrRevokedInTenant(
+        tx,
+        patientProfileId,
+        practitionerProfileId,
+        tenantId,
+      )
+    ) {
+      return false;
+    }
 
     const rel = this.careRepo.create(tx, {
       tenantId,
       patientProfileId,
       practitionerProfileId,
       relationshipTypeConceptId: CARE_REL_TYPE_CONCEPT.TREATING,
+      purposeConceptId: AUTHZ.PURPOSE_PAYMENT,
       validFrom: new Date(),
       actorUserId: actor.id,
     });

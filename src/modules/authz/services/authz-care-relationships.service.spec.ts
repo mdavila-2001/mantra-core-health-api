@@ -15,6 +15,7 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { AuthzErrorReason } from '../authz.error-reasons';
+import { AUTHZ } from '../authz.concepts';
 import {
   ACTIVE_TENANT,
   buildClinicalScope,
@@ -39,6 +40,7 @@ function build() {
   const careRepo = {
     findActiveInTenant: mockFn(),
     findPendingInTenant: mockFn().mockResolvedValue(null),
+    hasPendingOrRevokedInTenant: mockFn().mockResolvedValue(false),
     findById: mockFn(),
     findByPatient: mockFn().mockResolvedValue([]),
     findPendingByPatient: mockFn().mockResolvedValue([]),
@@ -825,15 +827,16 @@ describe('AuthzCareRelationshipsService', () => {
       practitionerProfileId: 'prac-1',
       tenantId: ACTIVE_TENANT,
     };
+    const clinician = { id: 'doc-1', roles: ['CLINICIAN'] } as any;
 
-    it('paciente con huella propia en el tenant: abre la relación ACTIVE sin acotar', async () => {
+    it('paciente con huella propia en el tenant: abre la relación ACTIVE acotada a PAYMENT', async () => {
       const d = build();
       d.careRepo.findActiveInTenant.mockResolvedValue(null);
       d.careRepo.create.mockReturnValue({ id: 'cr-9' });
       const created = await d.service.establishFromPatientFootprint(
         d.tx as any,
         input,
-        actor,
+        clinician,
       );
       expect(created).toBe(true);
       const data = d.careRepo.create.mock.calls[0][1];
@@ -841,13 +844,13 @@ describe('AuthzCareRelationshipsService', () => {
         tenantId: ACTIVE_TENANT,
         patientProfileId: 'pat-1',
         practitionerProfileId: 'prac-1',
-        actorUserId: actor.id,
+        actorUserId: clinician.id,
+        purposeConceptId: AUTHZ.PURPOSE_PAYMENT,
       });
       expect(data.statusConceptId).toBeUndefined();
-      expect(data.purposeConceptId).toBeUndefined();
       expect(d.auditTrail.record).toHaveBeenCalledWith(
         d.tx,
-        actor,
+        clinician,
         expect.objectContaining({
           action: 'CARE_RELATIONSHIP_ESTABLISHED_FROM_FOOTPRINT',
           entityId: 'cr-9',
@@ -861,7 +864,7 @@ describe('AuthzCareRelationshipsService', () => {
       const created = await d.service.establishFromPatientFootprint(
         d.tx as any,
         input,
-        actor,
+        clinician,
       );
       expect(created).toBe(false);
       expect(d.careRepo.create).not.toHaveBeenCalled();
@@ -873,7 +876,7 @@ describe('AuthzCareRelationshipsService', () => {
       const created = await d.service.establishFromPatientFootprint(
         d.tx as any,
         { ...input, patientProfileId: 'otro' },
-        actor,
+        clinician,
       );
       expect(created).toBe(false);
       expect(d.careRepo.create).not.toHaveBeenCalled();
@@ -885,7 +888,7 @@ describe('AuthzCareRelationshipsService', () => {
       const created = await d.service.establishFromPatientFootprint(
         d.tx as any,
         input,
-        actor,
+        clinician,
       );
       expect(created).toBe(false);
       expect(d.careRepo.create).not.toHaveBeenCalled();
@@ -896,7 +899,7 @@ describe('AuthzCareRelationshipsService', () => {
       const created = await d.service.establishFromPatientFootprint(
         d.tx as any,
         { ...input, tenantId: 'otro-tenant' },
-        actor,
+        clinician,
       );
       expect(created).toBe(false);
       expect(d.scopeRepo.patientHasFootprintInTenant).not.toHaveBeenCalled();
@@ -908,10 +911,69 @@ describe('AuthzCareRelationshipsService', () => {
       const created = await d.rawService.establishFromPatientFootprint(
         d.tx as any,
         input,
-        actor,
+        clinician,
       );
       expect(created).toBe(false);
       expect(d.careRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el paciente ya decidió (solicitud pendiente o relación revocada): no se reabre desde el check-in', async () => {
+      const d = build();
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.hasPendingOrRevokedInTenant.mockResolvedValue(true);
+      const created = await d.service.establishFromPatientFootprint(
+        d.tx as any,
+        input,
+        clinician,
+      );
+      expect(created).toBe(false);
+      expect(d.careRepo.hasPendingOrRevokedInTenant).toHaveBeenCalledWith(
+        d.tx,
+        'pat-1',
+        'prac-1',
+        ACTIVE_TENANT,
+      );
+      expect(d.careRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un PRACTITIONER solo puede abrirla para sí mismo', async () => {
+      const d = build();
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.create.mockReturnValue({ id: 'cr-9' });
+      const other = {
+        id: 'u-2',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'prac-2',
+      } as any;
+      expect(
+        await d.service.establishFromPatientFootprint(
+          d.tx as any,
+          input,
+          other,
+        ),
+      ).toBe(false);
+      expect(d.careRepo.create).not.toHaveBeenCalled();
+
+      const self = {
+        id: 'u-1',
+        roles: ['PRACTITIONER'],
+        practitionerProfileId: 'prac-1',
+      } as any;
+      expect(
+        await d.service.establishFromPatientFootprint(d.tx as any, input, self),
+      ).toBe(true);
+    });
+
+    it('un actor sin ser el profesional ni CLINICIAN no la abre', async () => {
+      const d = build();
+      expect(
+        await d.service.establishFromPatientFootprint(
+          d.tx as any,
+          input,
+          actor,
+        ),
+      ).toBe(false);
+      expect(d.scopeRepo.patientHasFootprintInTenant).not.toHaveBeenCalled();
     });
   });
 });

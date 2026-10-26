@@ -339,9 +339,10 @@ Vigente es: estado `ACTIVE`, `valid_from` no posterior al momento del cobro, `va
 de la propia fila igual al tenant activo y, si la relación está acotada a un propósito, que sea `PAYMENT` o `TREATMENT`
 (una relación sin acotar también vale; una acotada a operaciones o emergencia no). Cuenta cualquier profesional de la
 organización. La relación nace en el check-in (`POST /clinical/encounters/check-in`, con profesional principal) cuando
-el paciente tiene huella propia en la organización (reservó por su cuenta o se autorregistró); con un paciente sin esa
-huella el check-in no la crea y el cobro se rechaza hasta que el profesional la pide (`POST /authz/care-relationships/request`)
-y el paciente la acepta. El
+el paciente tiene huella propia en la organización (reservó por su cuenta o se autorregistró), quien registra es el propio
+profesional o un `CLINICIAN`, y el paciente no revocó ni tiene pendiente una relación con ese profesional. Nace acotada a
+`PAYMENT`: habilita el cobro y no abre la historia clínica. Con un paciente sin esa huella el check-in no la crea y el cobro
+se rechaza hasta que el profesional la pide (`POST /authz/care-relationships/request`) y el paciente la acepta. El
 paciente sale de la cobertura, nunca del cuerpo. Sin relación vigente la respuesta es el mismo 404 «Cobertura no
 encontrada» de una cobertura inexistente, antes de comparar aseguradora o plan, para que el cobro no sirva para
 descubrir coberturas ajenas. Los reclamos vinculados a un pedido de farmacia o diagnóstico y la factura al paciente

@@ -1134,9 +1134,16 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
         return { person, patientCoverageId };
       }
 
+      const clinician = () =>
+        ({
+          id: userBiller,
+          roles: ['CLINICIAN'],
+          tenantIds: [tenant],
+        }) as never;
       const checkIn = (
         patientProfileId: string,
         tenantId: string = ids.tenant,
+        actor: never = clinician(),
       ) =>
         inTenant(() =>
           orm.em.fork().transactional((tx) =>
@@ -1147,7 +1154,7 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
                 practitionerProfileId: ids.practitioner,
                 tenantId,
               },
-              biller(),
+              actor,
             ),
           ),
         );
@@ -1158,7 +1165,7 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
           [patientProfileId, ids.tenant],
         );
 
-      it('paciente que se autorregistró: el check-in abre la relación y el cobro pasa', async () => {
+      it('paciente que se autorregistró: el check-in abre la relación acotada al pago y el cobro pasa', async () => {
         const { person, patientCoverageId } =
           await patientWithFootprint('self');
         const identifier = `${mark}-antes-checkin`;
@@ -1173,7 +1180,8 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
         const relations = await relationsOf(person);
         expect(relations).toHaveLength(1);
         expect(relations[0].status_concept_id).toBe(CONCEPTS.STATE_ACTIVE);
-        expect(relations[0].purpose_concept_id).toBeNull();
+        // Acotada al pago: habilita el cobro y no abre la historia clínica.
+        expect(relations[0].purpose_concept_id).toBe(AUTHZ.PURPOSE_PAYMENT);
         const created = await submitFor(
           patientCoverageId,
           `${mark}-tras-checkin`,
@@ -1209,6 +1217,54 @@ describe('Protección al paciente en el cobro con seguro (DB real)', () => {
           submitFor(patientCoverageId, `${mark}-alta-personal`),
         );
         expect(error.getStatus()).toBe(404);
+      });
+
+      it('el paciente revocó la relación: el check-in no la reabre', async () => {
+        const { person, patientCoverageId } =
+          await patientWithFootprint('self');
+        await addRelation({
+          patientProfileId: person,
+          statusConceptId: CONCEPTS.STATE_REVOKED,
+        });
+        expect(await checkIn(person)).toBe(false);
+        expect(
+          (await relationsOf(person)).map((row) => row.status_concept_id),
+        ).toEqual([CONCEPTS.STATE_REVOKED]);
+        const error = await failureOf(
+          submitFor(patientCoverageId, `${mark}-revocada-y-checkin`),
+        );
+        expect(error.getStatus()).toBe(404);
+      });
+
+      it('hay una solicitud pendiente del profesional: el check-in no crea otra relación', async () => {
+        const { person } = await patientWithFootprint('self');
+        await addRelation({
+          patientProfileId: person,
+          statusConceptId: CONCEPTS.STATE_PENDING,
+        });
+        expect(await checkIn(person)).toBe(false);
+        expect(await relationsOf(person)).toHaveLength(1);
+      });
+
+      it('quien hace el check-in no es el profesional ni CLINICIAN: no se crea nada', async () => {
+        const { person } = await patientWithFootprint('self');
+        const otherPractitioner = {
+          id: userBiller,
+          roles: ['PRACTITIONER'],
+          practitionerProfileId: randomUUID(),
+          tenantIds: [tenant],
+        } as never;
+        expect(await checkIn(person, ids.tenant, otherPractitioner)).toBe(
+          false,
+        );
+        expect(await relationsOf(person)).toHaveLength(0);
+        const self = {
+          id: userBiller,
+          roles: ['PRACTITIONER'],
+          practitionerProfileId: ids.practitioner,
+          tenantIds: [tenant],
+        } as never;
+        expect(await checkIn(person, ids.tenant, self)).toBe(true);
       });
 
       it('tenant del check-in distinto del activo: no se crea nada', async () => {

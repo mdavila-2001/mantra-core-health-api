@@ -98,3 +98,27 @@ describe('CareRelationshipsRepository.hasActiveInTenantAt', () => {
     });
   });
 });
+
+describe('CareRelationshipsRepository.hasPendingOrRevokedInTenant', () => {
+  it('filtra por paciente, profesional y tenant, y cuenta solo PENDING y REVOKED', async () => {
+    const d = build(1);
+    await expect(
+      d.repo.hasPendingOrRevokedInTenant(d.em as any, 'pat-1', 'prac-1', 't1'),
+    ).resolves.toBe(true);
+    expect(d.em.count).toHaveBeenCalledWith(CareRelationships, {
+      patientProfileId: 'pat-1',
+      practitionerProfileId: 'prac-1',
+      tenantId: 't1',
+      statusConceptId: {
+        $in: [CONCEPTS.STATE_PENDING, CONCEPTS.STATE_REVOKED],
+      },
+    });
+  });
+
+  it('ninguna fila: false (una relación EXPIRED no cuenta)', async () => {
+    const d = build(0);
+    await expect(
+      d.repo.hasPendingOrRevokedInTenant(d.em as any, 'pat-1', 'prac-1', 't1'),
+    ).resolves.toBe(false);
+  });
+});

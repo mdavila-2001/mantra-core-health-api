@@ -152,6 +152,30 @@ export class CareRelationshipsRepository {
     return count > 0;
   }
 
+  /**
+   * ¿Hay, entre el paciente y el practicante en el tenant, una solicitud sin
+   * responder o una relación que se revocó (o el paciente rechazó)? Es lo que
+   * impide reabrir por otra vía una relación sobre la que el paciente ya decidió.
+   * Una relación vencida por su propia ventana (`EXPIRED`) no cuenta: lapsó, no
+   * se la negaron.
+   */
+  async hasPendingOrRevokedInTenant(
+    em: EntityManager,
+    patientProfileId: string,
+    practitionerProfileId: string,
+    tenantId: string,
+  ): Promise<boolean> {
+    const count = await em.count(CareRelationships, {
+      patientProfileId,
+      practitionerProfileId,
+      tenantId,
+      statusConceptId: {
+        $in: [CONCEPTS.STATE_PENDING, CONCEPTS.STATE_REVOKED],
+      },
+    });
+    return count > 0;
+  }
+
   /** Solicitud PENDIENTE concreta (paciente, practicante), evita duplicados. */
   findPending(
     em: EntityManager,
