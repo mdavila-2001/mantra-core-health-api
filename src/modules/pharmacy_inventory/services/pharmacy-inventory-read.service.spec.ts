@@ -56,6 +56,7 @@ function build() {
     findActiveSites: mockFn().mockResolvedValue([]),
     findActiveSiteById: mockFn().mockResolvedValue(null),
     findActiveProductsByIds: mockFn().mockResolvedValue([]),
+    findSellableProductsByIds: mockFn().mockResolvedValue([]),
     findCurrentPublicPriceLists: mockFn().mockResolvedValue([]),
     findCurrentPrices: mockFn().mockResolvedValue([]),
     findPracticeSites: mockFn().mockResolvedValue([]),
@@ -160,8 +161,9 @@ describe('PharmacyInventoryReadService', () => {
     /** Dos sedes con stock y direcciones; la más lejana tiene TODO. */
     function withTwoSites(d: ReturnType<typeof build>) {
       d.pharmacyRepo.findVisibleByTenant.mockResolvedValue([PHARMACY]);
-      // Como el repo real: sólo devuelve los ids pedidos que existen activos.
-      d.pharmacyRepo.findActiveProductsByIds.mockImplementation(
+      // Como el repo real: sólo devuelve los ids pedidos que existen activos
+      // y vendibles (sin el «no tengo» del catálogo, P47).
+      d.pharmacyRepo.findSellableProductsByIds.mockImplementation(
         async (_em: unknown, ids: readonly string[]) =>
           [product('prod-1'), product('prod-2')].filter((row) =>
             ids.includes(row.id),

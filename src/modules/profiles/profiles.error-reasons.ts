@@ -59,6 +59,11 @@ export enum ProfilesErrorReason {
   ACCOUNT_WITHOUT_PRACTITIONER_PROFILE = 'ACCOUNT_WITHOUT_PRACTITIONER_PROFILE',
   /** No existe el perfil profesional pedido. */
   PRACTITIONER_PROFILE_NOT_FOUND = 'PRACTITIONER_PROFILE_NOT_FOUND',
+  /**
+   * El número del documento no se corrige desde el perfil porque la identidad
+   * de la persona ya está verificada contra él (P28).
+   */
+  NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY = 'NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY',
   /** El `practitioner_code` declarado ya pertenece a otro profesional. */
   PRACTITIONER_CODE_ALREADY_IN_USE = 'PRACTITIONER_CODE_ALREADY_IN_USE',
   /** Verificar una credencial exige declarar la fuente consultada. */

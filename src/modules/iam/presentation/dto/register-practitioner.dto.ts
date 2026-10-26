@@ -248,6 +248,42 @@ export class RegisterPractitionerDto {
   licenseIssueDate?: string;
 
   /**
+   * El respaldo de la matrícula —el PDF del carnet del colegio—, precargado
+   * por `POST /iam/auth/upload-registration-document`.
+   *
+   * P29: el formulario del alta ya ofrecía el selector y el archivo se tiraba
+   * en silencio al crear la cuenta, porque este cuerpo no tenía dónde llevarlo.
+   * Va como referencia, igual que `fileId` de cada título: el alta lo reclama
+   * para el usuario recién creado en la misma transacción y lo deja en
+   * `profiles.jurisdiction_authorizations.file_id` (modelo v4.2.12).
+   *
+   * Opcional: el padrón se declara, no se prueba.
+   */
+  @ApiPropertyOptional({
+    description:
+      'fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  licenseFileId?: string;
+
+  /**
+   * El respaldo del registro del SEDES, con las mismas reglas que
+   * {@link licenseFileId}. Exige {@link sedesLicenseNumber}: sin la
+   * habilitación no hay fila donde dejar el archivo, y aceptarlo igual sería
+   * volver a tirarlo en silencio (422).
+   */
+  @ApiPropertyOptional({
+    description:
+      'fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  sedesLicenseFileId?: string;
+
+  /**
    * Título profesional visible (p. ej. "Dra.", "Lic.").
    */
   @ApiPropertyOptional({ maxLength: 100 })

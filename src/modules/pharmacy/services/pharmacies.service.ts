@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -13,6 +13,7 @@ import {
   PharmacyLicensesRepository,
 } from '../repositories';
 import { PHARM } from '../pharmacy.concepts';
+import { PharmacyCategoriesService } from './pharmacy-categories.service';
 import {
   requireManagedPharmacy,
   resolvePharmacyOwnerTenantId,
@@ -49,6 +50,9 @@ export class PharmaciesService {
     private readonly pharmaciesRepo: PharmaciesRepository,
     private readonly licensesRepo: PharmacyLicensesRepository,
     private readonly logger: PinoLogger,
+    // P47: las seis categorías de partida de la farmacia nueva. Opcional para
+    // que los dobles de prueba que no las ejercitan no tengan que armarlo.
+    @Optional() private readonly categories?: PharmacyCategoriesService,
   ) {
     this.logger.setContext(PharmaciesService.name);
   }
@@ -119,6 +123,7 @@ export class PharmaciesService {
         actorUserId: actor.id,
       });
       await tx.flush();
+      await this.categories?.provisionDefaults(tx, pharmacy.id, actor.id);
 
       this.logger.info(
         {

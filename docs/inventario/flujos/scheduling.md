@@ -4895,27 +4895,37 @@ flowchart TD
   n48 --> n49
   n50["Llama a SchedulingCatalogRepository.retireTemplate"]:::llamada
   n49 --> n50
-  n51[("LEE scheduling.bookable_slots")]:::efecto
+  n51["Llama a SchedulingCatalogRepository.findSlotsOfTemplateForUpdate"]:::llamada
   n50 --> n51
-  n52{"slots.length › 0"}:::decision
+  n52[("LEE scheduling.bookable_slots")]:::efecto
   n51 --> n52
-  n53[("LEE scheduling.appointment_bookings · LEE scheduling.booking_reschedules")]:::efecto
-  n52 -->|"sí"| n53
-  n54{"freeOnes.length › 0"}:::decision
-  n53 --> n54
-  n55[("BORRA scheduling.slot_holds · BORRA scheduling.bookable_slots")]:::efecto
-  n54 -->|"sí"| n55
-  n56[("LEE scheduling.schedule_templates")]:::efecto
-  n55 --> n56
-  n54 -->|"no"| n56
-  n52 -->|"no"| n56
-  n57{"template"}:::decision
-  n56 --> n57
-  n58[("ACTUALIZA scheduling.schedule_templates")]:::efecto
-  n57 -->|"sí"| n58
-  n59(("200 Responde con éxito")):::ok
-  n58 --> n59
-  n57 -->|"no"| n59
+  n53{"slots.length › 0"}:::decision
+  n52 --> n53
+  n54[("LEE scheduling.appointment_bookings · LEE scheduling.booking_reschedules")]:::efecto
+  n53 -->|"sí"| n54
+  n55["Repite: por cada const slot de slots"]:::bucle
+  n54 --> n55
+  n56{"untouchable.has(slot.id) && slot.statusConceptId !== keptSlotStatusConceptId"}:::decision
+  n55 -->|"cada elemento"| n56
+  n57[("ACTUALIZA scheduling.bookable_slots")]:::efecto
+  n56 -->|"sí"| n57
+  n58{"freeOnes.length › 0"}:::decision
+  n57 --> n58
+  n56 -->|"no"| n58
+  n55 -->|"al terminar"| n58
+  n59[("BORRA scheduling.slot_holds · BORRA scheduling.bookable_slots")]:::efecto
+  n58 -->|"sí"| n59
+  n60[("LEE scheduling.schedule_templates")]:::efecto
+  n59 --> n60
+  n58 -->|"no"| n60
+  n53 -->|"no"| n60
+  n61{"template"}:::decision
+  n60 --> n61
+  n62[("ACTUALIZA scheduling.schedule_templates")]:::efecto
+  n61 -->|"sí"| n62
+  n63(("200 Responde con éxito")):::ok
+  n62 --> n63
+  n61 -->|"no"| n63
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

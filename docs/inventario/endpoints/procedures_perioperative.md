@@ -5,7 +5,7 @@
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 32 (32 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 26 · BAJO 6
-- **Tablas distintas que tocan:** 79
+- **Tablas distintas que tocan:** 81
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/procedures-perioperative.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -36,7 +36,7 @@
 | 22 | POST | `/procedure-cases/{id}/operative-steps` | Registrar un paso operatorio | MEDIO | 2 | SURGEON, PERIOP_NURSE, PERIOP_ADMIN |
 | 23 | POST | `/procedure-cases/{id}/pacu-stays` | Admitir al paciente en recuperación | MEDIO | 3 | PERIOP_NURSE, ANESTHESIOLOGIST, PERIOP_ADMIN |
 | 24 | POST | `/procedure-cases/{id}/preoperative-assessments` | Registrar la valoración preoperatoria y sus puntuaciones de riesgo | MEDIO | 11 | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN |
-| 25 | POST | `/procedure-cases/{id}/preoperative-orders` | Indicar una orden preoperatoria para el caso | MEDIO | 28 | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN |
+| 25 | POST | `/procedure-cases/{id}/preoperative-orders` | Indicar una orden preoperatoria para el caso | MEDIO | 30 | ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN |
 | 26 | POST | `/procedure-cases/{id}/preoperative-orders/verify` | Verificar las órdenes preoperatorias | MEDIO | 2 | ANESTHESIOLOGIST, PERIOP_NURSE, PERIOP_ADMIN |
 | 27 | POST | `/procedure-cases/{id}/safety-checklists/{checklistId}/responses` | Responder una fase del checklist quirúrgico | MEDIO | 6 | PERIOP_NURSE, SURGEON, ANESTHESIOLOGIST, PERIOP_ADMIN |
 | 28 | POST | `/procedure-cases/{id}/specimens` | Registrar una muestra tomada en la intervención | MEDIO | 2 | SURGEON, PERIOP_NURSE, PERIOP_ADMIN |
@@ -2912,7 +2912,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /procedure-cases/{id}/preoperative-orders` la atiende `PeriopController.createPreoperativeOrder` (src/modules/procedures_perioperative/controllers/periop.controller.ts:279). Exige sesión con alguno de los roles ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CreatePreoperativeOrderDto` (4 campos, 1 obligatorio). Delega en `PeriopPreopService.createOrder`. Crea filas en clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages, procedures_perioperative.preoperative_orders. Actualiza iam.devices. Lee billing.service_catalog, clinical.diagnostic_reports, clinical.encounters, clinical.service_requests, diagnostics.diagnostic_report_versions, directory.tenants, forms.form_instances, iam.devices y 12 más. Publica ServiceRequestPlaced.
+`POST /procedure-cases/{id}/preoperative-orders` la atiende `PeriopController.createPreoperativeOrder` (src/modules/procedures_perioperative/controllers/periop.controller.ts:279). Exige sesión con alguno de los roles ANESTHESIOLOGIST, SURGEON, PERIOP_ADMIN. Valida el cuerpo como `CreatePreoperativeOrderDto` (4 campos, 1 obligatorio). Delega en `PeriopPreopService.createOrder`. Crea filas en clinical.service_request_notes, clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages, procedures_perioperative.preoperative_orders. Actualiza iam.devices. Lee billing.service_catalog, chart.clinical_note_headers, clinical.diagnostic_reports, clinical.encounters, clinical.service_requests, diagnostics.diagnostic_report_versions, directory.tenants, forms.form_instances y 13 más. Publica ServiceRequestPlaced.
 
 ### Requerimientos
 
@@ -2931,8 +2931,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.service_catalog` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → PerformerSelectionValidator.resolve → PerformerSiteDbReader.offersProcedureWithPrice | `src/modules/clinical/services/performer-site-db.reader.ts:40` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestNotesService.assertUsable | `src/modules/clinical/services/service-request-notes.service.ts:57` |
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:131` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.assertEncounterBelongsToPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestNotesService.assertUsable | `src/modules/clinical/services/service-request-notes.service.ts:80` |
+| `clinical.service_request_notes` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestNotesService.link | `src/modules/clinical/services/service-request-notes.service.ts:136` |
 | `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:104` |
 | `clinical.service_requests` | LEE | LEE | POR_SQL | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:104` |
 | `diagnostics.diagnostic_report_versions` | LEE | LEE | DIRECTA | PeriopController.createPreoperativeOrder → PeriopPreopService.createOrder → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate → DuplicateStudyDetector.releasedVersionOf | `src/modules/clinical/services/duplicate-study-detector.ts:375` |
@@ -2963,7 +2965,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:305` |
+| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:356` |
 
 ### Parámetros
 
@@ -3018,7 +3020,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado; PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/procedures_perioperative.md).

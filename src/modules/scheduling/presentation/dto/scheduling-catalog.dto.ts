@@ -417,6 +417,27 @@ export class CreateTemplateDto {
   @IsOptional()
   @IsISO8601()
   validTo?: string;
+
+  /**
+   * Horario flexible, sin turnos fijos (P36, propietario 18/09/2026).
+   *
+   * `true` ≡ la plantilla declara cuándo se atiende pero **no se corta en
+   * turnos**: `generate-slots` no materializa cupos de consulta para ella y el
+   * paciente pide la hora que quiera dentro de la franja con
+   * `POST /scheduling/resources/{id}/flexible-holds`. `slotMinutes` pasa a ser
+   * cuánto se reserva por paciente. Ausente ≡ turnos fijos, como siempre.
+   *
+   * No se cambia con `PATCH`: pasar una agenda viva de un modo al otro es
+   * retirar y volver a publicar.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Horario flexible: sin turnos fijos, el paciente elige la hora dentro de la franja. slotMinutes es lo que se reserva por paciente. Ausente ≡ false',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  flexibleHours?: boolean;
 }
 
 /**
@@ -563,6 +584,16 @@ export class TemplateDetailDto {
   @ApiProperty({ required: false })
   slotMinutes?: number;
 
+  /**
+   * Horario flexible (P36): sin turnos fijos, el paciente pide la hora dentro
+   * de la franja. Viaja siempre —`false` en toda plantilla de turnos fijos—
+   * para que la pantalla no tenga que adivinar qué significa su ausencia.
+   */
+  @ApiProperty({
+    description: 'true cuando el horario es flexible, sin turnos fijos',
+  })
+  flexibleHours!: boolean;
+
   /** Desde cuándo rige. */
   @ApiProperty({ required: false, format: 'date-time' })
   validFrom?: string;
@@ -669,6 +700,12 @@ export class TemplateResponseDto {
    */
   @ApiProperty({ description: 'Franjas creadas' })
   ruleCount!: number;
+
+  /** Horario flexible (P36), tal como quedó publicado. */
+  @ApiProperty({
+    description: 'true cuando el horario es flexible, sin turnos fijos',
+  })
+  flexibleHours!: boolean;
 
   /**
    * Identificador asociado a status concept.

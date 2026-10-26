@@ -126,7 +126,9 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
     expect(ordersRepo.findOrdersForPatientPortal.mock.calls[0]).toHaveLength(4);
   });
 
-  it('pide laboratorio, imagenología y procedimientos, no toda orden de servicio', async () => {
+  // P40 suma la orden de análisis «otro» de C2: también es algo que el paciente
+  // tiene que ir a hacerse. Derivaciones e interconsultas siguen fuera.
+  it('pide laboratorio, imagenología, procedimientos y análisis «otro», no toda orden de servicio', async () => {
     const { service, ordersRepo } = build();
 
     await service.listOwnOrders(USER, 50);
@@ -137,8 +139,30 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
         CLIN.SERVICE_REQUEST_CATEGORY_LAB,
         DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
         CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+        CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
       ].sort(),
     );
+  });
+
+  it('P40: cada orden trae su categoría textual y ninguna nota del médico', async () => {
+    const { service, ordersRepo } = build();
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([
+      order('lab-1'),
+      {
+        ...order('proc-1'),
+        categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+      },
+      { ...order('sin-1'), categoryConceptId: undefined },
+    ]);
+
+    const res = await service.listOwnOrders(USER, 50);
+
+    expect(res.items.map((item) => item.category)).toEqual([
+      'LAB',
+      'OTHER',
+      undefined,
+    ]);
+    expect(res.items.every((item) => !('basedOnNoteIds' in item))).toBe(true);
   });
 
   it('el mostrador sigue siendo de laboratorio e imagenología: los procedimientos no entran', () => {

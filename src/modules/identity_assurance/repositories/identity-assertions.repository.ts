@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { IdentityAssertions } from '../entities';
+import { IdentityAssertions, IdentityVerificationCases } from '../entities';
 import { IDA } from '../identity_assurance.concepts';
 
 /** Sujetos cuya aserción prueba la identidad de una persona. */
@@ -42,6 +42,45 @@ export function findCurrentIdentityAssertionForPerson(
     revokedAt: null,
     // Una aserción sin caducidad no expira; con caducidad, debe estar vigente.
     $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }],
+  });
+}
+
+/**
+ * Estados de un caso de verificación que todavía puede terminar en una
+ * aserción: abierto, en verificación, en riesgo, en revisión manual y
+ * verificado-sin-asertar. Los terminales (rechazado, asertado, revocado,
+ * expirado) no cuentan: el asertado ya lo cubre la aserción vigente.
+ */
+const NON_TERMINAL_CASE_STATES = [
+  IDA.CASE_OPEN,
+  IDA.CASE_IN_VERIFICATION,
+  IDA.CASE_AT_RISK,
+  IDA.CASE_MANUAL_REVIEW,
+  IDA.CASE_VERIFIED,
+];
+
+/**
+ * Caso de verificación de identidad **en curso** sobre una persona (P28).
+ *
+ * Lo consulta el perfil antes de dejar corregir el número del documento: si
+ * hay un caso abierto, lo que se está verificando es el número actual, y
+ * cambiarlo a mitad del caso dejaría que la aserción final hable de un
+ * documento que nadie revisó. Suelta por la misma razón que
+ * {@link findCurrentIdentityAssertionForPerson}: `profiles` no puede inyectar
+ * repositorios de este módulo sin cerrar un ciclo.
+ *
+ * @param em - Contexto de persistencia o transacción activa.
+ * @param personId - Identificador de la persona sujeto del caso.
+ * @returns Un caso no terminal, o `null` si no hay ninguno.
+ */
+export function findOpenIdentityCaseForPerson(
+  em: EntityManager,
+  personId: string,
+): Promise<IdentityVerificationCases | null> {
+  return em.findOne(IdentityVerificationCases, {
+    subjectTypeConceptId: { $in: PERSON_SUBJECT_TYPES },
+    subjectEntityId: personId,
+    statusConceptId: { $in: NON_TERMINAL_CASE_STATES },
   });
 }
 
