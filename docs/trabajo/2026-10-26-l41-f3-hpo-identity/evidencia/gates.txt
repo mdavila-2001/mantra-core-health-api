@@ -1,0 +1,110 @@
+$ corepack yarn install --immutable
+➤ YN0000: · Done in 2s 315ms
+INSTALL_EXIT=0
+
+$ node --test "tools/terminology-import/test/**/*.test.mjs"
+# (node --test tools/terminology-import/test/ con directorio falla en Node v22.22.0: MODULE_NOT_FOUND)
+ok 1 - copyField: null, escapes de control y fechas
+ok 2 - copyLine: una columna por campo del staging, en orden
+ok 3 - cada código del value set de frecuencia tiene puntaje en la fórmula
+ok 4 - strengthReferenceRows exige los 4 niveles y las 6 frecuencias
+ok 5 - paridad: el agregado SQL del cargador da lo mismo que strengthOf() # SKIP sin Postgres (DB_* del .env): paridad no ejecutada
+ok 6 - SSSOM: sólo exactMatch con sujeto MONDO; prefijos canónicos
+ok 7 - grupo MONDO: OMIM y ORPHA del mismo grupo resuelven al mismo concepto (pivote del catálogo \#688)
+ok 8 - código sin grupo MONDO no se inventa: DECIPHER:16 queda sin resolver
+ok 9 - reuso del glosario por código CIE-10: una sola ficha → se reusa su id
+ok 10 - conflicto real: MONDO:0001155 abarca K28 y K28.0 del glosario → revisión, sin concepto
+ok 11 - conflicto de código en dos grupos (lógica, entrada mínima): el código no resuelve
+ok 12 - tasa de duplicados por etiqueta, total y entre categorías
+ok 13 - frecuencia: término HP, n/m (con numerador) y % (sin numerador)
+ok 14 - inicio: sólo rangos definidos por el término HPO
+ok 15 - filtros: aspecto I fuera, ORPHA fuera (entra por Orphanet en F3.3), DECIPHER sin grupo
+ok 16 - filas: forma de bulk-copy, tipo SYMPTOM, sin ordinal, sentido enfermedad → fenotipo
+ok 17 - nivel: sin PMID (referencia = registro OMIM) queda T3; PMID múltiple es T2
+ok 18 - 0/2 → EXCLUDED: strengthOf la descarta
+ok 19 - sexo e inicio: el sexo no se inventa (sin mapa queda null y se cuenta); con mapa se resuelve
+ok 20 - mismo PMID con distinta población (inicio) → dos evidencias, no una
+ok 21 - mismo PMID y población, distinta frecuencia (líneas 45561/45562) → sufijo estable, no colapsa
+ok 22 - babelon: sólo rdfs:label OFFICIAL en castellano
+ok 23 - deterministicId replica exacta de src/common/constants/concepts.ts
+ok 24 - md5uuid equivale a md5(key)::uuid de Postgres
+ok 25 - slugify y htmlToText
+ok 26 - CIE-10-ES diagnósticos: jerarquía, marcadores y categoría desde el capítulo
+ok 27 - CIE-10-ES procedimientos: categoría por sección ICD-10-PCS
+ok 28 - taxonomías: ATC, capítulos y grupos MedlinePlus
+ok 29 - CIMA: un término por VTM, ficha técnica verbatim con cita, fotos y ATC
+ok 30 - MedlinePlus: tema en español con resumen verbatim, sinónimos, MeSH del tema inglés
+ok 31 - MedlinePlus pruebas: «¿Qué es…?» verbatim, «Otros nombres» como sinónimos, categoría lab
+ok 32 - Wikidata/Commons: atribución y licencia; unión sólo por código idéntico
+ok 33 - LOINC ES (CSV SINTÉTICO): parser por cabecera y error explícito si faltan columnas
+ok 34 - plan de carga: membresías a los value sets del glosario con los ids del backend
+ok 35 - Anatomía Wikidata: verificación de dominio y de ids de propiedad
+ok 36 - Wikidata: aristas agregadas por enfermedad+destino, con todos los códigos de cada lado
+ok 37 - Wikidata: resolución por código idéntico, una ficha por Q-id y relaciones en los dos sentidos
+ok 38 - Wikidata: etiquetas en inglés copiadas al castellano y etiquetas duplicadas
+ok 39 - CIE-10: nivel de glosario, jerarquía oficial y bloques del capítulo R
+ok 40 - Etiquetas estructurales: capítulo TA98 y mayoría de enfermedades vinculadas
+ok 41 - Wikidata: identidad CIE-10 ↔ MeSH une la ficha CIE-10-ES con MedlinePlus y cita la definición prestada
+ok 42 - INLASA: análisis a pacientes con código oficial y precio en Bs; nombre verbatim aparte y sólo la caja cambia
+ok 43 - HL7 THO v2-0487 (recorte real): verbatim, deprecado no seleccionable, procedencia completa
+ok 44 - UCUM (recortes reales): une ucum-lhc y ucum-common por código, sin inventar nombres
+ok 45 - LOINC (CSV SINTÉTICO): dominios, exclusiones, miembros de panel, variante ES
+ok 46 - LOINC: cabeceras ausentes abortan mostrando las reales
+ok 47 - LOINC: ids y property_code idénticos a import-loinc.mjs (enriquece, no duplica)
+ok 48 - dominios: reglas por CLASS/CLASSTYPE; lo no reconocido queda sin dominio
+ok 49 - relaciones: un miembro repetido en el mismo panel conserva cada posición (NLM 41200-7 repite 50546-1 en 273 y 274)
+ok 50 - plan de carga: relaciones dentro del plan, value sets y conteos deterministas
+ok 51 - FONASA MLE (recorte real): prefijos homogéneos, exclusión terapéutica explícita, nombre oficial verbatim
+ok 52 - SIGTAP (recorte real): sólo grupo 02, categoría con nombres oficiales, genética gana a laboratorio
+ok 53 - TUSS (recorte real): 4.03 laboratorio; 4.08.13 y 40502210 excluidos; consultas fuera
+ok 54 - PAMI (recorte real): código rellenado a 6 dígitos; 77621 es capítulo 07, no laboratorio
+ok 55 - ICD-10-PCS (recorte real): B imagen, C1 imagen, C7 terapia fuera, 4A y F0 evaluaciones funcionales
+ok 56 - GTR (recorte real): sólo la versión vigente, con tipo, genes, condiciones y categoría mayor oficial
+ok 57 - CUPS (recorte real): «Qué es» oficial como definición, prefijos verificados, 5 dígitos fuera, exclusión terapéutica
+ok 58 - ICD-10-PCS + CIE-10-ES: designación oficial en castellano sólo por igualdad exacta de código
+ok 59 - LOINC vía tx.fhir.org: el nombre corto es-AR (FSN) se corta en los seis ejes sólo si son exactamente seis
+ok 60 - ICD-10-PCS FY2027 (recorte real de cms.gov): order file de ancho fijo y nombres oficiales de sección y tipo
+ok 61 - PAMI (recorte real del CSV oficial de datos.pami.org.ar): nombre verbatim, módulo y valor en pesos
+ok 62 - LOINC vía tx.fhir.org + NLM (recorte real, LOINC 2.82): clase, ORDER_OBS, castellano oficial, ejes ES y miembros de panel
+ok 63 - CDISC SDTM (recorte real de NCI EVS): concepto por término de codelist, nombre del par «Test Name», dominio por codelist
+ok 64 - NPU (recorte real de IFCC, una fila por especialidad): texto verbatim, partes oficiales, laboratorio
+ok 65 - CIMA: un medicamento autorizado queda vigente, seleccionable y con sólo ATC nivel 5
+ok 66 - CIMA: revocado o suspendido no es seleccionable
+ok 67 - CIMA: lo que la fuente no declara queda en null
+ok 68 - ANVISA: inactivo no es seleccionable, el titular pierde el CNPJ y no se inventa concentración
+ok 69 - ANVISA: una fila sin nº de registro no tiene identidad y se descarta
+ok 70 - INVIMA: filas por presentación×ingrediente se agrupan en un producto por registro
+ok 71 - INVIMA: la muestra médica no entra como presentación vendible
+ok 72 - ids: mismo (codeSystem, code) → mismo uuid; distinta fuente → distinto
+ok 73 - ATC: sólo nivel 5 exacto
+ok 74 - CSV: comillas, comillas escapadas, saltos de línea y BOM
+ok 75 - plan de carga: el id del concepto es el id del registro y no se repite entre fuentes
+ok 76 - plan de carga: re-generar el plan da exactamente los mismos ids (idempotencia)
+ok 77 - propiedades: lo que la fuente no declara no genera fila, y los booleanos van como boolean
+ok 78 - plan de carga: un code system sin definición falla en voz alta
+ok 79 - los 6 grados de frecuencia T2
+ok 80 - piso T1: la norma nacional vale al menos 0,9
+ok 81 - T3 sin frecuencia: 0,3
+ok 82 - techo T4: la co-ocurrencia nunca alcanza 0,25 ni supera a lo curado
+ok 83 - T2 sin frecuencia: valor documentado
+ok 84 - varias fuentes: máximo + 0,05 por fuente independiente adicional, techo 1
+ok 85 - lo curado que la descarta manda sobre lo colaborativo que la menciona
+ok 86 - si otra evidencia curada la afirma, no queda descartada
+ok 87 - sin evidencias: fuerza 0 y sin nivel
+ok 88 - valores desconocidos fallan en vez de inventar un puntaje
+1..88
+# tests 88
+# suites 0
+# pass 87
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 337.393861
+TEST_EXIT=0
+
+$ corepack yarn typecheck
+TC_EXIT=0
+
+$ corepack yarn lint
+LINT_EXIT=0

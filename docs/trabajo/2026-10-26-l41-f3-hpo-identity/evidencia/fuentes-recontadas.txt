@@ -1,0 +1,31 @@
+Recuento independiente (sesión 2026-10-26) sobre los archivos reales recién bajados.
+Mismo SHA-256 que volumes.md → misma versión que la medición.
+
+sha256 (16 primeros): phenotype.hpoa e89aa39c8f97bf5a · mondo.sssom.tsv ec15afdb32fab3d3
+                      mondo.obo 2631e8e165d41def · hp-es.babelon.tsv 00972e33775a0340
+
+$ awk (phenotype.hpoa, filas de datos por aspecto y base)
+read 286651 notP 17745
+DECIPHER 294
+ORPHA 116471
+OMIM 152141
+#version: 2026-09-02
+→ coincide con volumes.md (read 286 651, notPhenotypeAspect 17 745, OMIM/DECIPHER/ORPHA idénticos)
+
+$ node (readObo + parseMondoSssom, mismo filtro que measure-sources.mjs)
+equivalentTo 118366 sssom vigentes 107523 clases vigentes 32134
+→ coincide con volumes.md (118 366 · 107 523 · 32 134)
+  (el SSSOM trae 109 712 exactMatch con sujeto MONDO; 2189 son de clases obsoletas y se descartan)
+
+$ awk (hp-es.babelon.tsv: predicado / estado / idioma)
+  19932 rdfs:label	OFFICIAL	es
+→ el archivo real sólo trae filas OFFICIAL; el caso negativo del test es sintético a propósito.
+
+Recortes de test (fixtures/f3) comparados línea por línea con el original según `fixture-lines`:
+phenotype.hpoa.cut   ok=14 bad=0
+mondo.sssom.cut.tsv  ok=39 bad=0
+hp-es.babelon.cut.tsv ok=12 bad=0
+
+No re-ejecutado en esta sesión: Orphanet (product4/9/1) ni las cifras que dependen del glosario
+(reusos 1984, conflictos 21, tasas de duplicados): exigen el build ndjson del glosario. Esas cifras
+vienen de la corrida del agente anterior (volumes.json).
