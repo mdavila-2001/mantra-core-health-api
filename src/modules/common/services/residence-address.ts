@@ -2,26 +2,13 @@ import { BadRequestException } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { CONCEPTS } from '../../../common';
-import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
+import {
+  boDepartmentConceptId,
+  departmentSiglaOfMunicipalityCode,
+} from '../../../common/seed/bo-geography.catalog';
 import type { CatalogConceptsRepository } from '../../terminology/repositories';
 import type { Addresses } from '../entities';
 import type { AddressesRepository } from '../repositories';
-
-/**
- * La sigla del departamento, a partir del `code` del municipio.
- *
- * Los 340 municipios de `VS_BO_MUNICIPALITY` —los que de verdad sembró el
- * generador del modelo, ver el aviso arriba de `writeAddress`— codifican
- * `<SIGLA>-<NOMBRE>` (`SC-SANTA_CRUZ_DE_LA_SIERRA`, `LP-EL_ALTO`...);
- * verificado contra los 340 códigos de Neon, sin una sola excepción. No hay
- * una relación explícita municipio→departamento en
- * `terminology.concept_relationships` —se buscó y no existe—, así que esto
- * es lo único que hay para derivarlo sin inventar un vínculo que el modelo
- * no declara.
- */
-function departmentSiglaFromMunicipalityCode(code: string): string | undefined {
-  return code.match(/^([A-Z]{2})-/)?.[1];
-}
 
 /** Lo que hace falta para escribir una dirección de una persona. */
 export interface ResidenceAddressData {
@@ -90,6 +77,10 @@ export interface ResidenceAddressData {
  * («no pertenece al catálogo») por comparar contra el juego equivocado. Ningún
  * uuid pasaba las dos capas a la vez. El departamento no tiene este problema
  * —`geo:bo:department:SC` sí está sembrado— así que su derivación no cambió.
+ *
+ * Una base sembrada por la propia API (`BoGeographySeedService`, que corre en el
+ * arranque) sí trae el esquema `geo:bo:municipality:<INE>`; el departamento se
+ * deriva de las dos formas de código con `departmentSiglaOfMunicipalityCode`.
  *
  * No hace nada si no se eligió municipio: el domicilio es opcional y una
  * dirección con país y nada más no es un dato, es una fila.
@@ -167,7 +158,7 @@ async function writeAddress(
     );
   }
   const departmentSigla = municipality
-    ? departmentSiglaFromMunicipalityCode(municipality.code)
+    ? departmentSiglaOfMunicipalityCode(municipality.code)
     : undefined;
 
   repo.create(tx, {

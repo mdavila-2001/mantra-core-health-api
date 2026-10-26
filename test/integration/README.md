@@ -72,6 +72,30 @@ No se debe ejecutar esa variante contra una base compartida. En staging o
 producción se proporcionan `DB_APP_USER` y `DB_APP_PASSWORD` reales y se omite
 `RLS_TEST_BOOTSTRAP_LOCAL_ROLE`.
 
+## Limpieza, residuo permanente y prerrequisitos de entorno
+
+- **`audit.audit_log` es WORM** (`trg_forbid_mutation`) y tiene FK a
+  `directory.tenants` y a `iam.users`: un tenant o una cuenta que generó
+  auditoría no se puede borrar, y ni el trigger ni la FK se tocan desde una
+  prueba. Las cuentas se anonimizan (como en UC-01-12). Un tenant fijado por la
+  bitácora queda como residuo permanente, y `deleteRegisteredOrganizations` sólo
+  lo admite en una base descartable (`assertPermanentResidueTarget`: host local y
+  nombre con `test`, `ci`, `tmp`, `scratch`, `smoke` o `disposable`, o
+  `ALLOW_PERMANENT_TEST_RESIDUE=yes`); sobre una base compartida falla nombrando
+  la tabla WORM. Las suites que registran organizaciones
+  (`insurance-campaigns`, `insurance-plan-administration`, ...) quedan sujetas a
+  esa regla; para no acumular residuo, usá una base nueva por corrida.
+- La primera corrida sobre una base vacía ejecuta la cadena de seeds del
+  arranque (minutos, hasta ~15 con la máquina cargada): pasá
+  `--testTimeout=900000`. Las siguientes ya la encuentran sembrada.
+- `agenda-mensajeria-relacion` (H2.S1.M1) verifica con `git merge-base
+--is-ancestor` que un commit de septiembre sea ancestro de `HEAD`: necesita el
+  historial completo (`git fetch --unshallow`); en un clon superficial da un
+  falso rojo.
+- `insurance-campaigns` ya no exige el catálogo ICD-10-CM importado: crea (y
+  borra al final) un concepto `I10` sintético si el real no está
+  (`icd10-fixture.ts`).
+
 ## Criterios de mantenimiento
 
 - Toda dependencia de red, credencial, dataset precargado o mutación destructiva
