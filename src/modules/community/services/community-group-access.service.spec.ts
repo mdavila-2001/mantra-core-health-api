@@ -340,6 +340,7 @@ describe('CommunityGroupAccessService (P7)', () => {
     it.each([
       CONCEPTS.TENANT_TYPE_PROVIDER,
       CONCEPTS.TENANT_TYPE_HOSPITAL,
+      CONCEPTS.TENANT_TYPE_CLINIC,
       CONCEPTS.TENANT_TYPE_MEDICAL_OFFICE,
     ])('la organización médica (%s) sí puede', async (type) => {
       const d = build();

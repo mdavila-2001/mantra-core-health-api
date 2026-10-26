@@ -331,7 +331,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE.
+Sin `@Roles`: el servicio autoriza por rol clínico o por ser OWNER/ADMIN de la organización (A-6). Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE; quien administra la organización recibe todas las suyas.
 
 Contexto declarado en el controlador: Prácticas activas del tenant. Abierta a los actores clínicos y de programación, no sólo a `SECURITY_ADMIN`: es el primer paso para resolver el quirófano que exige programar una intervención, y sin él ese uuid había que averiguarlo fuera del sistema. Sólo devuelve identificación y estado, no configuración.
 
@@ -356,7 +356,6 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SURGERY_SCHEDULER`, `PERIOP_ADMIN`, `SURGEON`, `ANESTHESIOLOGIST`, `PERIOP_NURSE`, `SCHEDULING_ADMIN`, `PRACTITIONER`, `CLINICIAN`, `ACCOUNTING_APPROVER`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
@@ -408,7 +407,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2445,7 +2444,7 @@ Ejemplo de error normalizado:
 
 Listar las sedes de una práctica. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
 
-Contexto declarado en el controlador: Sedes de una práctica.
+Contexto declarado en el controlador: Sedes de una práctica. Sin `@Roles`: lee quien tiene un rol de programación o clínica y quien administra la organización dueña (A-6), que decide el servicio. Un `@Roles` global no ve la membresía y le cerraba la puerta al dueño del centro.
 
 ### Descripción del sistema
 
@@ -2470,7 +2469,6 @@ Authorization: Bearer <access_token_jwt>
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SURGERY_SCHEDULER`, `PERIOP_ADMIN`, `SURGEON`, `ANESTHESIOLOGIST`, `PERIOP_NURSE`, `SCHEDULING_ADMIN`.
 - Deben ser UUID válidos: `practiceId`.
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
@@ -2526,7 +2524,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/practice/services/practice-sites.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

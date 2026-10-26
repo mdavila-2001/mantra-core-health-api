@@ -594,6 +594,10 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'HOSPITAL',
     'Hospital',
   ),
+  // Clínica: establecimiento privado con internación, de menor escala que un
+  // hospital. Contrato compartido con el modelo y el front: el código es
+  // `CLINIC` y el concepto `directory:tenant-type:clinic`.
+  TENANT_TYPE_CLINIC: def('directory:tenant-type:clinic', 'CLINIC', 'Clinic'),
   TENANT_TYPE_MEDICAL_OFFICE: def(
     'directory:tenant-type:medical-office',
     'MEDICAL_OFFICE',
