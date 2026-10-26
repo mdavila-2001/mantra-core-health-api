@@ -106,25 +106,10 @@ export class PracticesController {
    * del sistema. Sólo devuelve identificación y estado, no configuración.
    */
   @Get()
-  @Roles(
-    'SECURITY_ADMIN',
-    'SURGERY_SCHEDULER',
-    'PERIOP_ADMIN',
-    'SURGEON',
-    'ANESTHESIOLOGIST',
-    'PERIOP_NURSE',
-    'SCHEDULING_ADMIN',
-    // Los roles clínicos generales, que faltaban: sin ellos un médico no puede
-    // ni saber en qué práctica trabaja, y las lecturas del mayor —que cuelgan
-    // todas de un `practiceId`— quedan inalcanzables para él.
-    'PRACTITIONER',
-    'CLINICIAN',
-    'ACCOUNTING_APPROVER',
-  )
   @ApiOperation({
     summary: 'Listar las prácticas activas del tenant',
     description:
-      'Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE.',
+      'Sin `@Roles`: el servicio autoriza por rol clínico o por ser OWNER/ADMIN de la organización (A-6). Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE; quien administra la organización recibe todas las suyas.',
   })
   listPractices(
     @CurrentUser() actor: AuthenticatedUser,
@@ -169,22 +154,20 @@ export class PracticesController {
     );
   }
 
-  /** Sedes de una práctica. */
+  /**
+   * Sedes de una práctica.
+   *
+   * Sin `@Roles`: lee quien tiene un rol de programación o clínica y quien
+   * administra la organización dueña (A-6), que decide el servicio. Un `@Roles`
+   * global no ve la membresía y le cerraba la puerta al dueño del centro.
+   */
   @Get(':practiceId/sites')
-  @Roles(
-    'SECURITY_ADMIN',
-    'SURGERY_SCHEDULER',
-    'PERIOP_ADMIN',
-    'SURGEON',
-    'ANESTHESIOLOGIST',
-    'PERIOP_NURSE',
-    'SCHEDULING_ADMIN',
-  )
   @ApiOperation({ summary: 'Listar las sedes de una práctica' })
   listSites(
     @Param('practiceId', ParseUUIDPipe) practiceId: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<SiteSummaryDto[]> {
-    return this.sitesService.listSites(practiceId, requireTenantId());
+    return this.sitesService.listSites(practiceId, requireTenantId(), actor);
   }
 
   /**
