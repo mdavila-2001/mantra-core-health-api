@@ -204,8 +204,9 @@ export class DiagnosticUnitPrimarySiteDto {
  * Una sucursal de un laboratorio, declarada en el alta.
  *
  * Nace como una sede más de la unidad diagnóstica, con rol de punto de toma
- * de muestras. Descripción y enlace de mapa NO se aceptan: `practice_sites`
- * no tiene dónde guardarlos (P54, pendiente en el modelo).
+ * de muestras, y además como fila de `directory.branches` —lo que lista la
+ * pestaña Sucursales del portal—, que es donde viven la descripción y el
+ * enlace de mapa (P54). Mismas reglas que `pharmacy.branches[]` (P51, D-4).
  */
 export class DiagnosticUnitBranchDto {
   /** Nombre de la sucursal, tal como la va a ver el paciente. */
@@ -221,6 +222,27 @@ export class DiagnosticUnitBranchDto {
   @ValidateNested()
   @Type(() => OwnSiteAddressDto)
   address?: OwnSiteAddressDto;
+
+  /** Descripción libre de la sucursal (horario, referencia, servicios). */
+  @ApiPropertyOptional({ maxLength: 1000, example: 'Frente al mercado' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  /**
+   * Enlace de mapa (Google Maps, OpenStreetMap…). Sólo `http`/`https`: la UI
+   * ya rechaza `javascript:`, pero la UI no es una barrera.
+   */
+  @ApiPropertyOptional({
+    maxLength: 2000,
+    example: 'https://maps.google.com/?q=-17.78,-63.18',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  @Matches(/^https?:\/\//i, { message: 'locationUrl debe ser http o https' })
+  locationUrl?: string;
 }
 
 /**
@@ -262,10 +284,9 @@ export class DiagnosticUnitProfileDto {
   name?: string;
 
   /**
-   * Tipo de unidad: por imágenes o de laboratorio clínico. Por defecto,
-   * imágenes — es la única de las dos que este alta público sirve hoy; el
-   * laboratorio de sangre tiene su propio módulo pendiente (ver handoff del
-   * front).
+   * Tipo de unidad: por imágenes o de laboratorio clínico. Si no viene, se
+   * infiere (P51, D-1): alguna modalidad de imágenes → imágenes; si no
+   * —sólo `DU_MODALITY_LAB`, sucursales o nada— → laboratorio clínico.
    */
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()

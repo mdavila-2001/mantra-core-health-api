@@ -5,8 +5,10 @@ import {
   ResourceNotFoundException,
   runWithTenant,
 } from '../../../common';
+import { PHARM } from '../pharmacy.concepts';
 import {
   daysUntil,
+  describeActivity,
   PharmacyStaffReadService,
 } from './pharmacy-staff-read.service';
 
@@ -37,16 +39,37 @@ function build() {
     findLicenses: mockFn().mockResolvedValue([]),
     findSitesByIds: mockFn().mockResolvedValue([]),
     findConcepts: mockFn().mockResolvedValue([]),
+    findCatalogProducts: mockFn().mockResolvedValue([]),
   };
   const tenantAdmin = { assertCanRead: mockFn().mockResolvedValue(undefined) };
   const directoryRead = { readRepresentation: mockFn().mockResolvedValue({}) };
+  const catalogRepo = {
+    findCurrentPrices: mockFn().mockResolvedValue(new Map()),
+    listCategories: mockFn().mockResolvedValue([]),
+    findRecentActivity: mockFn().mockResolvedValue([]),
+  };
+  const readService = {
+    toCatalogDtos: mockFn(async (_em: unknown, rows: any[]) =>
+      rows.map((row) => ({ id: row.id })),
+    ),
+  };
   const service = new PharmacyStaffReadService(
     em as any,
     repo as any,
     tenantAdmin as any,
     directoryRead as any,
+    catalogRepo as any,
+    readService as any,
   );
-  return { service, repo, tenantAdmin, directoryRead, fork };
+  return {
+    service,
+    repo,
+    tenantAdmin,
+    directoryRead,
+    fork,
+    catalogRepo,
+    readService,
+  };
 }
 
 describe('PharmacyStaffReadService', () => {
@@ -246,6 +269,180 @@ describe('PharmacyStaffReadService', () => {
     it('is null without an end date', () => {
       expect(daysUntil(undefined, now)).toBeNull();
       expect(daysUntil(null, now)).toBeNull();
+    });
+  });
+
+  describe('catálogo de gestión (P47)', () => {
+    it('managed: todo el catálogo de SU farmacia, con el recorte declarado', async () => {
+      const d = build();
+      d.repo.findByIdInTenant.mockResolvedValue(pharmacy());
+      d.repo.findCatalogProducts.mockResolvedValue([
+        { id: 'a' },
+        { id: 'b' },
+        { id: 'c' },
+      ]);
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.listManagedProducts('ph-1', { search: 'amo' }, 2, ACTOR),
+      );
+      expect(d.repo.findCatalogProducts).toHaveBeenCalledWith(
+        d.fork,
+        'ph-1',
+        { search: 'amo' },
+        3,
+      );
+      expect(d.readService.toCatalogDtos).toHaveBeenCalledWith(
+        d.fork,
+        [{ id: 'a' }, { id: 'b' }],
+        expect.any(Map),
+        true,
+      );
+      expect(res).toEqual({
+        items: [{ id: 'a' }, { id: 'b' }],
+        limit: 2,
+        truncated: true,
+      });
+    });
+
+    it('managed: alguien de fuera de la organización recibe el 404, no el catálogo', async () => {
+      const d = build();
+      d.repo.findByIdInTenant.mockResolvedValue(pharmacy());
+      d.tenantAdmin.assertCanRead.mockRejectedValue(
+        new ForbiddenException('fuera'),
+      );
+      await expect(
+        runWithTenant('tenant-a', () =>
+          d.service.listManagedProducts('ph-1', {}, 50, ACTOR),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.repo.findCatalogProducts).not.toHaveBeenCalled();
+    });
+
+    it('el resumen cuenta por estado y existencias, y valora en centavos exactos', async () => {
+      const d = build();
+      d.repo.findByIdInTenant.mockResolvedValue(pharmacy());
+      const base = {
+        outOfStockDeclared: false,
+        pharmacyProductCategoryId: 'cat-1',
+      };
+      const products = [
+        // publicado, 3 unidades a 0.10 → 0.30 (0.1 × 3 en coma flotante no da 0.3)
+        {
+          id: 'p1',
+          statusConceptId: PHARM.PRODUCT_ACTIVE,
+          stockQuantity: 3,
+          ...base,
+        },
+        // publicado bajo umbral por defecto (5): 2 unidades a 10.20 → 20.40
+        {
+          id: 'p2',
+          statusConceptId: PHARM.PRODUCT_ACTIVE,
+          stockQuantity: 2,
+          ...base,
+        },
+        // publicado «no tengo»
+        {
+          id: 'p3',
+          statusConceptId: PHARM.PRODUCT_ACTIVE,
+          stockQuantity: 9,
+          ...base,
+          outOfStockDeclared: true,
+        },
+        // publicado sin conteo: hay, pero no suma al valor
+        {
+          id: 'p4',
+          statusConceptId: PHARM.PRODUCT_ACTIVE,
+          stockQuantity: null,
+          ...base,
+          pharmacyProductCategoryId: null,
+        },
+        {
+          id: 'p5',
+          statusConceptId: PHARM.PRODUCT_DRAFT,
+          stockQuantity: 1,
+          ...base,
+        },
+        {
+          id: 'p6',
+          statusConceptId: PHARM.PRODUCT_RETIRED,
+          stockQuantity: 1,
+          ...base,
+        },
+      ];
+      (d.fork as any).find = mockFn().mockResolvedValue(products);
+      d.catalogRepo.findCurrentPrices.mockResolvedValue(
+        new Map([
+          ['p1', { amount: '0.10', currency: 'BOB' }],
+          ['p2', { amount: '10.20', currency: 'BOB' }],
+          ['p3', { amount: '5.00', currency: 'BOB' }],
+          ['p4', { amount: '7.00', currency: 'BOB' }],
+        ]),
+      );
+      d.catalogRepo.listCategories.mockResolvedValue([
+        { id: 'cat-1', name: 'Medicamentos' },
+      ]);
+
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.getSummary('ph-1', ACTOR),
+      );
+
+      expect(res).toMatchObject({
+        published: 4,
+        drafts: 1,
+        withdrawn: 1,
+        outOfStock: 1,
+        lowStock: 2,
+        inventoryValue: '20.70',
+        byCategory: [
+          { category: 'Medicamentos', count: 4 },
+          { category: 'Sin categoría', count: 1 },
+        ],
+      });
+      expect(d.catalogRepo.findRecentActivity).toHaveBeenCalledWith(
+        d.fork,
+        'tenant-a',
+        8,
+      );
+    });
+
+    it('la actividad nombra el producto y la categoría vigentes, y en genérico lo que ya no existe', () => {
+      const at = new Date('2026-10-26T10:00:00Z');
+      const res = describeActivity(
+        [
+          {
+            id: '1',
+            action: 'PHARMACY_PRODUCT_PUBLISHED',
+            entityId: 'p1',
+            recordedAt: at,
+          },
+          {
+            id: '2',
+            action: 'PHARMACY_CATEGORY_RENAMED',
+            entityId: 'c1',
+            recordedAt: at,
+          },
+          {
+            id: '3',
+            action: 'PHARMACY_CATEGORY_DELETED',
+            entityId: 'c9',
+            recordedAt: at,
+          },
+          {
+            id: '4',
+            action: 'PHARMACY_PRODUCT_UPDATED',
+            entityId: 'gone',
+            recordedAt: at,
+          },
+        ],
+        [{ id: 'p1', brandName: 'Amoxil' } as any],
+        new Map([['c1', 'Bienestar']]),
+      );
+      expect(res.map((r) => [r.kind, r.text])).toEqual([
+        ['ALTA', 'Cargó «Amoxil».'],
+        ['CATEGORIA', 'Renombró la categoría «Bienestar».'],
+        ['CATEGORIA', 'Eliminó una categoría.'],
+        ['EDICION', 'Editó un producto.'],
+      ]);
+      expect(res[0].at).toBe('2026-10-26T10:00:00.000Z');
     });
   });
 });

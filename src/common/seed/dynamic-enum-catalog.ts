@@ -1224,13 +1224,14 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'service-request-category',
     name: 'Categoría del estudio',
     description:
-      'A qué prestador va la orden: laboratorio de análisis, centro de imagen, anatomía patológica o procedimiento.',
+      'A qué prestador va la orden: laboratorio de análisis, centro de imagen, anatomía patológica, procedimiento u otro estudio.',
     concepts: [
       CLIN.SERVICE_REQUEST_CATEGORY_LAB,
       CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
       CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
       CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
       CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
+      CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
     ],
     targets: ['clinical.service_requests.category_concept_id'],
   },

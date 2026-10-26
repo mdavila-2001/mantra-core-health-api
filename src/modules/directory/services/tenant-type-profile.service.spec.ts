@@ -37,11 +37,15 @@ describe('TenantTypeProfileService', () => {
     const addressesRepo = {
       create: fn(() => ({ id: 'address-1' })),
     };
+    const branchesRepo = {
+      create: fn(() => ({ id: 'branch-1' })),
+    };
     const service = new TenantTypeProfileService(
       catalogRepo as never,
       conceptsRepo as never,
       diagnosticUnitProvisioning as never,
       addressesRepo as never,
+      branchesRepo as never,
     );
     return {
       service,
@@ -49,6 +53,7 @@ describe('TenantTypeProfileService', () => {
       conceptsRepo,
       diagnosticUnitProvisioning,
       addressesRepo,
+      branchesRepo,
       tx: {} as never,
     };
   }
@@ -305,7 +310,24 @@ describe('TenantTypeProfileService', () => {
       ).not.toThrow();
     });
 
-    it('rechaza sucursales en una unidad de imágenes (el tipo por defecto)', () => {
+    it('acepta sucursales sin tipo declarado: sin modalidades de imagen la unidad es de laboratorio (P51, D-1)', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Laboratorio Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: {
+            modalityConceptIds: [DUNIT.MODALITY_LABORATORY],
+            branches: [{ name: 'Sucursal Norte' }],
+          },
+        }),
+      ).not.toThrow();
+    });
+
+    it('rechaza sucursales en una unidad de imágenes declarada', () => {
       const { service } = build();
 
       expect(() =>
@@ -314,7 +336,27 @@ describe('TenantTypeProfileService', () => {
           legalName: 'Centro de Imagen Z',
           countryConceptId: 'country-1',
           jurisdictionConceptId: 'jur-1',
-          diagnosticUnit: { branches: [{ name: 'Sucursal Norte' }] },
+          diagnosticUnit: {
+            diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_IMAGING,
+            branches: [{ name: 'Sucursal Norte' }],
+          },
+        }),
+      ).toThrow(PreconditionFailedException);
+    });
+
+    it('rechaza sucursales sin tipo declarado cuando las modalidades son de imagen', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Centro de Imagen Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: {
+            modalityConceptIds: [DUNIT.MODALITY_XRAY],
+            branches: [{ name: 'Sucursal Norte' }],
+          },
         }),
       ).toThrow(PreconditionFailedException);
     });
@@ -354,6 +396,38 @@ describe('TenantTypeProfileService', () => {
           invalidModalities: [inventedModality],
         });
       }
+    });
+  });
+
+  describe('assertProfileMatchesType · PHARMACY (P50)', () => {
+    it('acepta el bloque pharmacy en una farmacia', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'PHARMACY',
+          legalName: 'Farmacia Central S.R.L.',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          pharmacy: { latitude: -17.78, longitude: -63.18 },
+        }),
+      ).not.toThrow();
+    });
+
+    it('rechaza el bloque pharmacy con un tipo que no es PHARMACY', () => {
+      const { service } = build();
+
+      expect(() =>
+        service.assertProfileMatchesType({
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Laboratorio Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          pharmacy: { branches: [] },
+        }),
+      ).toThrow(
+        'El bloque `pharmacy` sólo corresponde a un tenant de tipo PHARMACY',
+      );
     });
   });
 
@@ -680,6 +754,104 @@ describe('TenantTypeProfileService', () => {
         {},
         'admin-de-plataforma',
       );
+    });
+
+    it('registra la central con punto y cada sucursal del laboratorio en directory.branches (P51, D-4)', async () => {
+      const { service, branchesRepo, tx } = build();
+
+      await service.materializeProfile(
+        tx,
+        'tenant-7',
+        {
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Laboratorio Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: {
+            modalityConceptIds: [DUNIT.MODALITY_LABORATORY],
+            primarySite: {
+              name: 'Casa central',
+              address: {
+                lines: ['Av. 1'],
+                latitude: -17.78,
+                longitude: -63.18,
+              },
+            },
+            branches: [
+              {
+                name: 'Sucursal Norte',
+                address: {
+                  lines: ['Calle 2'],
+                  latitude: -17.7,
+                  longitude: -63.1,
+                },
+                description: 'Frente al mercado',
+                locationUrl: 'https://maps.example/norte',
+              },
+              { name: 'Sucursal Norte' },
+            ],
+          },
+        },
+        'actor-1',
+      );
+
+      expect(branchesRepo.create).toHaveBeenCalledTimes(3);
+      expect(branchesRepo.create).toHaveBeenNthCalledWith(
+        1,
+        tx,
+        expect.objectContaining({
+          tenantId: 'tenant-7',
+          code: 'CASA-CENTRAL',
+          name: 'Casa central',
+          latitude: '-17.78',
+          longitude: '-63.18',
+        }),
+      );
+      expect(branchesRepo.create).toHaveBeenNthCalledWith(
+        2,
+        tx,
+        expect.objectContaining({
+          code: 'SUCURSAL-NORTE',
+          description: 'Frente al mercado',
+          locationUrl: 'https://maps.example/norte',
+          latitude: '-17.7',
+          longitude: '-63.1',
+        }),
+      );
+      // Mismo nombre dos veces: el código no se repite dentro del alta.
+      expect(branchesRepo.create).toHaveBeenNthCalledWith(
+        3,
+        tx,
+        expect.objectContaining({ code: 'SUCURSAL-NORTE-2' }),
+      );
+    });
+
+    it('no registra sucursales de directorio para una unidad de imágenes', async () => {
+      const { service, branchesRepo, tx } = build();
+
+      await service.materializeProfile(
+        tx,
+        'tenant-8',
+        {
+          tenantType: 'DIAGNOSTIC_CENTER',
+          legalName: 'Centro de Imagen Z',
+          countryConceptId: 'country-1',
+          jurisdictionConceptId: 'jur-1',
+          diagnosticUnit: {
+            modalityConceptIds: [DUNIT.MODALITY_XRAY],
+            primarySite: {
+              address: {
+                lines: ['Av. 1'],
+                latitude: -17.78,
+                longitude: -63.18,
+              },
+            },
+          },
+        },
+        'actor-1',
+      );
+
+      expect(branchesRepo.create).not.toHaveBeenCalled();
     });
 
     it('no crea la unidad si DIAGNOSTIC_CENTER no declaró diagnosticUnit', async () => {

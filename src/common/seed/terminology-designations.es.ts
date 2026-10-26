@@ -2082,6 +2082,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
+    {
+      display: 'Otro estudio',
+      definition:
+        'Orden de análisis que no es de laboratorio ni de imagen; quien la ejecuta se elige aparte.',
+    },
+  ],
+  [
     CLIN.STUDY_HEMOGRAMA,
     {
       display: 'Hemograma completo',

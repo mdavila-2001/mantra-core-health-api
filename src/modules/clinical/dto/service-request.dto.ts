@@ -1,6 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  ArrayMaxSize,
+  ArrayUnique,
+  IsArray,
   IsBoolean,
+  IsIn,
   IsOptional,
   IsString,
   IsUUID,
@@ -8,6 +12,13 @@ import {
   MinLength,
   ValidateIf,
 } from 'class-validator';
+import {
+  ANALYSIS_CATEGORIES,
+  type AnalysisCategory,
+} from '../service-request-category';
+
+/** Tope de notas citadas por orden: más es un listado, no un motivo. */
+export const MAX_BASED_ON_NOTES = 20;
 
 /** Cuerpo de `POST /clinical/service-requests` (UC-08-05). */
 export class CreateServiceRequestDto {
@@ -73,6 +84,44 @@ export class CreateServiceRequestDto {
   @IsOptional()
   @IsUUID()
   categoryConceptId?: string;
+
+  /**
+   * P40 (carril C2): la categoría de análisis en texto. Se guarda como su
+   * concepto; si viaja junto con `categoryConceptId`, los dos tienen que
+   * decir lo mismo.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Categoría de análisis (C2). Se resuelve a categoryConceptId (LAB → SR_LAB, ' +
+      'IMAGING → SR_IMAGING, OTHER → SR_OTHER). Si viaja con categoryConceptId y no ' +
+      'coinciden: 422 SERVICE_REQUEST_CATEGORY_MISMATCH',
+    enum: ANALYSIS_CATEGORIES,
+  })
+  @IsOptional()
+  @IsIn(ANALYSIS_CATEGORIES)
+  category?: AnalysisCategory;
+
+  /**
+   * P40 (carril C2): las notas médicas que motivan la orden, en el orden en
+   * que se citan.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Notas médicas (chart.clinical_note_headers) que motivan la orden. Cada una ' +
+      'debe ser del mismo paciente, de un encuentro del tenant custodio, firmada o ' +
+      'enmendada y sin confidencialidad restringida (si no, 422 BASED_ON_NOTE_NOT_FOUND, ' +
+      'sin distinguir el motivo); y, si la orden tiene encuentro, del mismo encuentro ' +
+      '(422 BASED_ON_NOTE_ENCOUNTER_MISMATCH)',
+    type: [String],
+    format: 'uuid',
+    maxItems: MAX_BASED_ON_NOTES,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_BASED_ON_NOTES)
+  @ArrayUnique()
+  @IsUUID(undefined, { each: true })
+  basedOnNoteIds?: string[];
 
   /**
    * Identificador asociado a priority concept.
@@ -216,6 +265,26 @@ export class ServiceRequestResponseDto {
     nullable: true,
   })
   formInstanceId?: string | null;
+
+  /**
+   * P40: categoría de análisis derivada del concepto; ausente = sin clasificar.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría',
+    enum: ANALYSIS_CATEGORIES,
+  })
+  category?: AnalysisCategory;
+
+  /**
+   * P40: notas médicas que motivan la orden, en el orden en que se citaron.
+   */
+  @ApiProperty({
+    description: 'Notas médicas que motivan la orden (vacío = ninguna)',
+    type: [String],
+    format: 'uuid',
+  })
+  basedOnNoteIds!: string[];
 
   /**
    * Valor de status mantenido por la instancia.

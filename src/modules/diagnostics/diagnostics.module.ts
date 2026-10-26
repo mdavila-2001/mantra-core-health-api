@@ -11,6 +11,10 @@ import { ServiceRequests, DiagnosticReports } from '../clinical/entities';
 // dónde vive un acceso compartido (`authz`).
 import { ProfilesModule } from '../profiles/profiles.module';
 import { AuthzModule } from '../authz/authz.module';
+// P40: `ClinicalRecordAccessGuard` en la ficha diagnóstica; Nest lo resuelve en
+// este contenedor y necesita `ClinicalReadService`, que `ClinicalModule` exporta
+// (mismo criterio que `chart` y `clinical_ext`).
+import { ClinicalModule } from '../clinical/clinical.module';
 // Bytes de un archivo ya autorizado por contexto (`FileUploadService`); lo exporta
 // `CommonModule`. La descarga del resultado del titular (CL-40) lo necesita.
 import { CommonModule } from '../common/common.module';
@@ -40,6 +44,7 @@ import {
   DiagnosticsPatientAccessService,
 } from './services';
 import { SuggestedSiteNamesReader } from '../clinical/services/suggested-site-names.reader';
+import { ServiceRequestNotesService } from '../clinical/services/service-request-notes.service';
 import {
   SpecimensRepository,
   LabWorkRepository,
@@ -67,6 +72,7 @@ import {
     ]),
     ProfilesModule,
     AuthzModule,
+    ClinicalModule,
     CommonModule,
     DirectoryAuthorizationModule,
   ],
@@ -94,6 +100,8 @@ import {
     ClinicalRefsRepository,
     // Nombre de la sede sugerida en la orden: lectura sin estado, se registra la clase.
     SuggestedSiteNamesReader,
+    // P40: las notas que motivan cada orden, en la ficha diagnóstica.
+    ServiceRequestNotesService,
     // Servicios
     DiagnosticsSpecimensService,
     DiagnosticsLabService,

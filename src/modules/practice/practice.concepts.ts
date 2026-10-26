@@ -54,6 +54,12 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
       code: 'PR_TYPE_INSURER',
       display: 'Insurer practice type',
     },
+    // P50: la práctica propia de una farmacia, de la que cuelgan su casa central
+    // y sus sucursales como sedes físicas (`pharmacy_sites.practice_site_id`).
+    PRACTICE_TYPE_PHARMACY: {
+      code: 'PR_TYPE_PHARMACY',
+      display: 'Pharmacy practice type',
+    },
     PRACTICE_ACTIVE: { code: 'PR_ACTIVE', display: 'Practice active' },
 
     // --- practice_sites --------------------------------------------------------

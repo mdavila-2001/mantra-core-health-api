@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `pharmacy`.
- * 64 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 77 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const pharmacyForeignKeys: readonly ForeignKeyTuple[] = [
@@ -16,6 +16,7 @@ export const pharmacyForeignKeys: readonly ForeignKeyTuple[] = [
   ['pharmacies', 'tenant_id', 'directory', 'tenants', 'id'],
   ['pharmacies', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['pharmacies', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['pharmacies', 'primary_practice_site_id', 'practice', 'practice_sites', 'id'],
   ['pharmacy_external_product_mappings', 'created_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_external_product_mappings', 'pharmacy_integration_connection_id', 'pharmacy', 'pharmacy_integration_connections', 'id'],
   ['pharmacy_external_product_mappings', 'pharmacy_product_id', 'pharmacy', 'pharmacy_products', 'id'],
@@ -38,6 +39,11 @@ export const pharmacyForeignKeys: readonly ForeignKeyTuple[] = [
   ['pharmacy_licenses', 'pharmacy_site_id', 'pharmacy', 'pharmacy_sites', 'id'],
   ['pharmacy_licenses', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_licenses', 'verification_status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['pharmacy_on_call_shifts', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['pharmacy_on_call_shifts', 'pharmacy_site_id', 'pharmacy', 'pharmacy_sites', 'id'],
+  ['pharmacy_on_call_shifts', 'source_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['pharmacy_on_call_shifts', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['pharmacy_on_call_shifts', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_price_lists', 'created_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_price_lists', 'currency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['pharmacy_price_lists', 'insurer_tenant_id', 'directory', 'tenants', 'id'],
@@ -46,6 +52,12 @@ export const pharmacyForeignKeys: readonly ForeignKeyTuple[] = [
   ['pharmacy_price_lists', 'price_list_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['pharmacy_price_lists', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['pharmacy_price_lists', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['pharmacy_product_categories', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['pharmacy_product_categories', 'pharmacy_id', 'pharmacy', 'pharmacies', 'id'],
+  ['pharmacy_product_categories', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['pharmacy_product_images', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['pharmacy_product_images', 'image_file_id', 'common', 'files', 'id'],
+  ['pharmacy_product_images', 'pharmacy_product_id', 'pharmacy', 'pharmacy_products', 'id'],
   ['pharmacy_products', 'created_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_products', 'dosage_form_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['pharmacy_products', 'inventory_item_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -54,6 +66,7 @@ export const pharmacyForeignKeys: readonly ForeignKeyTuple[] = [
   ['pharmacy_products', 'pharmacy_id', 'pharmacy', 'pharmacies', 'id'],
   ['pharmacy_products', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['pharmacy_products', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['pharmacy_products', 'pharmacy_product_category_id', 'pharmacy', 'pharmacy_product_categories', 'id'],
   ['pharmacy_product_identifiers', 'assigning_authority_tenant_id', 'directory', 'tenants', 'id'],
   ['pharmacy_product_identifiers', 'created_by_user_id', 'iam', 'users', 'id'],
   ['pharmacy_product_identifiers', 'identifier_type_concept_id', 'terminology', 'catalog_concepts', 'id'],

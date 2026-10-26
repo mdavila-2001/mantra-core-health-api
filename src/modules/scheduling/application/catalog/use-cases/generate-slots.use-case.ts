@@ -85,6 +85,16 @@ export class GenerateSlotsUseCase {
       const zone = resource?.timeZone ?? 'UTC';
       if (resource) this.access.assertActorResource(resource, actor);
 
+      // Horario flexible (P36): no hay grilla que materializar. El cupo nace
+      // al retener, en la hora que pidió el paciente
+      // (`SchedulingFlexibleBookingService`). Generar una grilla encima
+      // ofrecería turnos fijos que el médico dijo que no quiere. Se responde
+      // igual 200 con cero: el alta en cadena del front no tiene que saber
+      // de este caso para terminar.
+      if (template.flexibleHours === true) {
+        return { templateId, created: 0, skipped: 0, omittedByCommitments: 0 };
+      }
+
       // REGLA MADRE (AG-1): los cupos que caerían sobre un compromiso del
       // profesional no se generan. Se cargan UNA vez para toda la ventana —
       // consultar por cupo sería un viaje a la base por cada media hora—.
