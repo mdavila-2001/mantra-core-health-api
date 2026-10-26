@@ -49,14 +49,14 @@ contra `mantra_p39` · `yarn typecheck` 0 · front: specs dirigidos verdes.
 | H1.S2.M2 | DTO de entrada con límites y sin HTML en create/addVersion/amend | casos válidos, borde e inválidos en `notes.dto.spec.ts` | `yarn test src/modules/chart/dto` | HECHO |
 | H1.S2.M3 | Servicio guarda filas por versión y las sella | spec `chart-notes-entries.service.spec.ts` | `yarn test src/modules/chart` | HECHO |
 | H1.S2.M4 | Lecturas (expediente, colección, portal) devuelven `entries` | spec del mapeo + integración | idem + int-spec | HECHO |
-| H1.S2.M5 | Integración real con 403 negativo | `p39-nota-medica-filas.int-spec.ts` verde | `yarn test:integration …` | ver REPORTE |
-| H1.S2.M6 | OpenAPI regenerado | `openapi.json` declara `entries` en los 3 cuerpos | `yarn docs:openapi:generate` | ver REPORTE |
+| H1.S2.M5 | Integración real con 403 negativo | `p39-nota-medica-filas.int-spec.ts` verde | `yarn test:integration …` | HECHO |
+| H1.S2.M6 | OpenAPI regenerado | `openapi.json` declara `entries` en los 3 cuerpos | `yarn docs:openapi:generate` | HECHO |
 
 ### H1.S3 — Frontend
 | ID | Microtarea | CA (binario) | DoD (comando) | Estado |
 |---|---|---|---|---|
-| H1.S3.M1 | El cliente manda `entries` tal cual a la API real; se quitan las notas «sólo el simulador» | spec del cliente | `ng test --include chart-notes.client.spec.ts` | ver REPORTE |
-| H1.S3.M2 | El simulador sirve el contrato de la API (sin extensión `entries`, rechaza HTML) | contrato regenerado + specs del simulador | `gen-mock-contract.mjs` + specs | ver REPORTE |
+| H1.S3.M1 | El cliente manda `entries` tal cual a la API real; se quitan las notas «sólo el simulador» | spec del cliente | `ng test --include chart-notes.client.spec.ts` | HECHO |
+| H1.S3.M2 | El simulador sirve el contrato de la API (sin extensión `entries`, rechaza HTML) | contrato regenerado + specs del simulador | `gen-mock-contract.mjs` + specs | HECHO |
 
 ## Riesgos y bloqueos previstos
 | Riesgo | Impacto | Mitigación |
