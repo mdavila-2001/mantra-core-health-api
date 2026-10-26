@@ -104,6 +104,52 @@ export class CareRelationshipsRepository {
     });
   }
 
+  /**
+   * ¿Tiene el paciente una relación asistencial vigente en el tenant, con
+   * cualquier profesional?
+   *
+   * Vigente es lo mismo que exige el PDP (`AuthzPdpService`, caso 6c) y las
+   * lecturas que ya reusan la tabla: estado `ACTIVE`, `valid_from` no posterior
+   * a `at` y `valid_to` nulo o posterior a `at` (el límite superior es
+   * exclusivo). Una relación acotada a un propósito sólo vale para ese mismo
+   * propósito: sin `purposeConceptId` se aceptan únicamente las relaciones sin
+   * acotar; con él, las sin acotar y las acotadas a él.
+   *
+   * Sólo cuenta el `tenant_id` de la propia fila: una relación que el paciente
+   * tiene con un profesional de otra organización no vale para ésta. Las
+   * solicitudes `PENDING` (el paciente aún no aceptó), las revocadas y las
+   * vencidas no cuentan.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param query - Paciente, tenant, instante de vigencia y propósito pedido.
+   * @returns `true` si hay al menos una relación vigente.
+   */
+  async hasActiveInTenantAt(
+    em: EntityManager,
+    query: {
+      patientProfileId: string;
+      tenantId: string;
+      at: Date;
+      purposeConceptId?: string;
+    },
+  ): Promise<boolean> {
+    const purposes: (string | null)[] = [null];
+    if (query.purposeConceptId) purposes.push(query.purposeConceptId);
+    const count = await em.count(CareRelationships, {
+      patientProfileId: query.patientProfileId,
+      tenantId: query.tenantId,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+      validFrom: { $lte: query.at },
+      $and: [
+        { $or: [{ validTo: null }, { validTo: { $gt: query.at } }] },
+        {
+          $or: purposes.map((purposeConceptId) => ({ purposeConceptId })),
+        },
+      ],
+    });
+    return count > 0;
+  }
+
   /** Solicitud PENDIENTE concreta (paciente, practicante), evita duplicados. */
   findPending(
     em: EntityManager,

@@ -39,7 +39,8 @@ Importa (`iam.module.ts`): `ProfilesModule`, `CommonModule`, `MessagingModule`, 
 | `POST /iam/auth/logout` | sesión | `iam-auth` |
 | `POST /iam/auth/logout-all` | sesión | `iam-auth` |
 | `POST /iam/auth/sessions/purge` | SECURITY_ADMIN | `iam-auth` |
-| `GET /iam/users` | SECURITY_ADMIN | `iam-users` |
+| `GET /iam/users` (obsoleto: usar `POST /iam/users/search`) | SECURITY_ADMIN | `iam-users` |
+| `POST /iam/users/search` | SECURITY_ADMIN | `iam-users` |
 | `GET /iam/users/:id` | SECURITY_ADMIN | `iam-users` |
 | `GET /iam/users/:id/credentials` | SECURITY_ADMIN | `iam-users` |
 | `GET /iam/users/:id/devices` | SECURITY_ADMIN | `iam-users` |

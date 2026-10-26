@@ -10,11 +10,13 @@ formas y vías; todo lo clínico **literal** de una fuente oficial y citado.
 
 El catálogo **no está saturado** según su protocolo: ninguna de las nueve pasadas con fuente nueva
 aportó 0. El aporte en ATC 5 baja de una pasada a otra (105 → 18), pero la regla de cierre pide dos
-pasadas seguidas con 0. Lo que queda abierto, y las decisiones que dependen del propietario, están
-en el issue 824 (https://github.com/mdavila-2001/mantra-core-health-api/issues/824).
+pasadas seguidas con 0. Lo que queda abierto es la saturación y está en el issue 824
+(https://github.com/mdavila-2001/mantra-core-health-api/issues/824). Las cuatro decisiones del
+propietario están tomadas y se aplican como dice «Decisiones del propietario».
 
 - **Pasada 7 (CIMA exhaustiva):** da 0 ATC 5 nuevos, pero +134 574 secciones de otros titulares.
-  `data/` no la incluye: pesa unos 485 MB gz y la granularidad es una decisión del propietario.
+  `data/` no la incluye: el corpus por producto pesa unos 485 MB gz y el propietario decidió versionar
+  solo el corpus por principio activo.
 - **Fuentes evaluadas sin pasada:** están en la sección del mismo nombre. Ninguna se puede usar sin
   una decisión o sin un parser de PDF validado.
 
@@ -29,6 +31,63 @@ Hosts:
 
 Nota técnica: el `fetch` de Node no usa `HTTPS_PROXY` por sí solo; en entornos con proxy hay que
 correr los fetchers con `NODE_USE_ENV_PROXY=1` (Node ≥ 22.21).
+
+## Decisiones del propietario
+
+Tomadas el 2026-10-26 (issue 824). Cada una la hace cumplir el código y la cubre una prueba
+(`tools/terminology-import/clinical-pharmacology/test/decisiones-824.test.mjs`; la lectura, los specs de
+`src/modules/terminology`).
+
+### 1. Posología solo para el personal clínico
+
+- **Audiencia.** Toda sección, la posología incluida, lleva `audience: 'professional'` en su
+  `value_json`. Los normalizadores de cada fuente la escriben; `assertSection` (armado) y
+  `loadableMonograph` (carga) rechazan cualquier sección sin ella.
+- **Corpus de `data/`.** Sus 78 972 secciones, y las 4 270 de posología, son `professional`.
+- **Fuera del glosario.** El code system no es miembro de ningún value set del glosario, y el corte S3
+  (sin posología para pacientes) sigue vigente.
+- **Lectura.** `GET /terminology/CodeSystem/$lookup` y `GET /terminology/concepts/:conceptId` omiten las
+  filas `professional` salvo que el sujeto tenga un rol clínico (los asistenciales del catálogo de
+  actores, o `SUPERADMIN`). Un `PATIENT`, un `USER` o un `SECURITY_ADMIN` no las ven, y sin sujeto no se
+  entrega ninguna. La regla está en `src/modules/terminology/pharmacology-audience.ts`.
+- **Esquema.** No hay columna de visibilidad: la audiencia vive dentro de `value_json`, que es lo que
+  la API filtra.
+
+### 2. Solo por principio activo en `data/`
+
+- **Qué se versiona.** Monografías por (principio activo, vías), `--granularity route`.
+- **El corpus por producto** (`--granularity product`, ~2,2 GB, ~485 MB gz) no se versiona:
+  `build-monographs.mjs` lo escribe en `out/product/` (junto a `glossary-data-build/`, fuera del repo),
+  `pack-data.mjs` solo empaqueta una lista cerrada (`monographs`, `gsrs-entries`) y aborta si el meta de
+  `out/` no es de granularidad `route`, y `.gitignore` cierra `data/*product*` y `out/`.
+- **Tampoco se carga:** el cargador lee `out/monographs.ndjson`.
+- **`fetch-cima.mjs --granularity product`** sigue bajando las fichas a la caché (fuera de git).
+
+### 3. eEML: solo referencias
+
+- **Qué se guarda.** Por cada recomendación vigente con ATC 5: id, URL, URL del JSON-LD, fecha de la
+  decisión, ATC 5 de la OMS, ids de los medicamentos, código CIE-11 con su URI y los rótulos `list` e
+  `includedInEmlc`. Va en `pharmacology_external_documents`, igual que los SPL de DailyMed cuyo texto no
+  se redistribuye, con la licencia (`CC BY 3.0 IGO`) y su enlace.
+- **Qué no.** Indicación, descripción, formulaciones, rótulo de la sección de la lista ni nombres de
+  medicamentos. `emlRecommendation` ya no los extrae, y no existen filas de sección de la eEML.
+- **Por qué.** La licencia excluye el uso «in conjunction with the advertising or promotion of commercial
+  products» y no está confirmado con la OMS que esta aplicación quede fuera de ese supuesto.
+- **Corpus anterior.** Los `data/monographs.part-*` traen todavía las 1 568 filas de texto de la pasada 5.
+  `loadableMonograph` las reemplaza al planificar la carga: las filas de la eEML salen del plan y entran
+  988 referencias en 509 monografías (83 de ellas quedan solo con referencias).
+
+### 4. Fichas de CIMA sin fecha: se cargan marcadas
+
+- **Marca.** Una ficha que CIMA publica sin fecha (autorización centralizada de la UE) entra con
+  `document.versionUnpublished: true`, `versionNote` y, en la cita, «sin fecha de versión publicada por
+  CIMA». Vale la fecha de consulta (`retrievedAt`).
+- **Admisión.** `hasVersion` la admite con la marca y la fecha de consulta; sin ninguna de las dos, la
+  sección no se publica.
+- **Medido en `data/`:** 11 552 secciones de 738 fichas llevan la marca.
+- **Lectura.** `$lookup` agrega a cada sección `sourceAge`: `{ known, sourceDate?, retrievedAt }`.
+  `known: false` es la antigüedad desconocida que el front muestra en su estado S7; `sourceDate` es la
+  fecha de la fuente cuando se conoce. El valor de la sección llega entero.
 
 ## Pasadas
 
@@ -51,9 +110,9 @@ PR 835 (pasadas 6–9).
 | 2 | 16:46 | **RxNav** (ATC 5 → RxCUI IN/MIN → UNII) para desambiguar el GSRS | **+104** (−7, ver abajo) | **+2 252** |
 | 3 | 17:15 | **CIMA** (AEMPS): fichas técnicas por sección, en castellano, una de referencia por (principios, vía); maestra ATC (7 358 códigos, nombres de los 5 niveles) | **+1 432** (neto) | **+46 100** |
 | 4 | 17:21 | **EMA**, informe «Medicines output»: indicación de cada medicamento de autorización centralizada, por el ATC que asigna la EMA | **+59** | **+1 401** |
-| 5 | 17:48 | **OMS eEML**: indicación (con código CIE-11) y formulaciones de cada recomendación vigente, por el ATC que asigna la OMS | **+88** | **+1 568** |
+| 5 | 17:48 | **OMS eEML**: cada recomendación vigente, por el ATC que asigna la OMS. Medida cuando aportaba texto (indicación con CIE-11 y formulaciones); hoy son referencias, sin secciones | **+88** | **+1 568** |
 | 6 | 18:36 | **DailyMed (NLM)**: UNII del SPL para etiquetas que openFDA trae sin bloque armonizado; puntero (sin texto) para las que sólo están en DailyMed | **+51** | **+4 331** |
-| 7 | 18:43 | **CIMA exhaustiva** (`--granularity product`): todas las fichas de todos los titulares, sin repetir texto ya publicado para el ATC | **0** | **+134 574** |
+| 7 | 18:43 | **CIMA exhaustiva** (`--granularity product`): todas las fichas de todos los titulares, sin repetir texto ya publicado para el ATC. Corpus aparte, fuera de `data/` | **0** | **+134 574** |
 | 8 | 18:56 | **LactMed (NICHD/NLM)**: secciones de lactancia, enlazadas por los UNII del registro | **+105** | **+4 586** |
 | 9 | 19:05 | **LiverTox (NIDDK/NLM)**: secciones de hepatotoxicidad, enlazadas por CAS → UNII (CAS PRIMARY del GSRS) | **+18** | **+1 836** |
 
@@ -93,9 +152,9 @@ midió contra esa base.
   autorizados (`inUse`), sólo por código: 854 etiquetas recuperadas.
 - **Fichas sin fecha de versión.** CIMA no publica fecha de revisión en **788 fichas**
   (medicamentos de autorización centralizada de la UE).
-  - Sus 11 552 secciones (tras el dedupe) se publican con `versionUnpublished: true` y la nota
-    explícita en la cita.
-  - La fecha que vale es la de consulta (`lib/cima.mjs#cimaSections`).
+  - Se cargan marcadas: sus 11 552 secciones en el corpus por vía (738 fichas) llevan
+    `versionUnpublished: true` y la nota explícita en la cita.
+  - La fecha que vale es la de consulta (`lib/cima.mjs#cimaSections`); ver «Decisiones del propietario».
 - **468 medicamentos de CIMA sin ATC 5:** no se enlazan.
 - **Nombres:** los 5 niveles ATC tienen nombre oficial AEMPS en castellano. En nivel 5, 2 668 de
   2 709.
@@ -111,12 +170,13 @@ midió contra esa base.
 - **Recomendaciones:** las 1 132 vigentes de la portada (`statusForIndication: AddedToEml`).
   - 948 con ATC 5, que suman 509 códigos distintos.
   - 184 sin ATC asignado por la OMS (p. ej. codeína): **no se enlazan por nombre**.
-- **Dedupe:** 408 secciones repetidas entre recomendaciones del mismo ATC quedan en
-  `document.alsoIn`.
-- **Fuente vinculante.** La propia eEML advierte que la versión vinculante es el PDF de la EML 2025;
-  la advertencia y la atribución CC BY 3.0 IGO van literales en cada fila.
-- **ATC 5 nuevos (88):** p. ej. A07EA01, B05AX01–03, G03AC03, J04AD03, J05AR27, J07AF01. En la
-  LINAME, los esenciales sin monografía bajan de 75 a 58.
+- **Solo referencias.** Cada recomendación con ATC 5 es una referencia (ids y enlaces) en la monografía
+  de cada uno de sus ATC 5; ver «Decisiones del propietario», punto 3. No hay filas de sección ni dedupe
+  por huella.
+- **Medida con texto.** La pasada se midió cuando la eEML aportaba su indicación y sus formulaciones:
+  88 ATC 5 nuevos (p. ej. A07EA01, B05AX01–03, G03AC03, J04AD03, J05AR27, J07AF01), y en la LINAME los
+  esenciales sin monografía bajaban de 75 a 58. Con referencias, esos ATC 5 conservan su monografía,
+  sin secciones de la eEML.
 
 ### Pasada 6 (DailyMed)
 
@@ -135,8 +195,8 @@ midió contra esa base.
 - **ATC 5 nuevos:** 0. Todos los principios ya tenían ficha de referencia.
 - **Secciones nuevas:** +134 574 con texto distinto, la misma sección con otra redacción de otro
   titular. El dedupe por huella evitó 172 995 repeticiones exactas.
-- **Tamaño:** NDJSON de 2,2 GB, unos 485 MB gz. `data/` no lo incluye: la granularidad es una
-  decisión del propietario (issue 824).
+- **Tamaño:** NDJSON de 2,2 GB, unos 485 MB gz. `data/` no lo incluye y el armado lo escribe en
+  `out/product/` (ver «Decisiones del propietario», punto 2).
 
 ### Pasada 8 (LactMed)
 
@@ -185,13 +245,15 @@ Nombre mostrado del ATC 5:
 o la LINAME. Pueden ser códigos retirados o tan nuevos que la AEMPS no los publica todavía; no se
 corrigen a mano.
 
-Requisitos cubiertos, por fuente. Una monografía es «completa» si una sola fuente cubre los diez:
+Requisitos cubiertos, por fuente. Una monografía es «completa» si una sola fuente cubre los diez. La
+columna de la eEML cuenta cero porque sus referencias no son secciones; con texto, la pasada 5 había
+medido 509 indicaciones:
 
-| Requisito | CIMA (2 158) | openFDA (1 490) | EMA (822) | eEML (509) | LactMed (1 131) | LiverTox (657) |
+| Requisito | CIMA (2 158) | openFDA (1 490) | EMA (822) | eEML (509, solo referencias) | LactMed (1 131) | LiverTox (657) |
 |---|---:|---:|---:|---:|---:|---:|
 | Mecanismo de acción | 2 151 | 1 395 | 0 | 0 | 0 | 0 |
 | Farmacocinética | 1 989 | 1 393 | 0 | 0 | 0 | 0 |
-| Indicaciones | 2 152 | 1 486 | 822 | 509 | 0 | 0 |
+| Indicaciones | 2 152 | 1 486 | 822 | 0 | 0 | 0 |
 | Posología | 1 836 | 1 488 | 0 | 0 | 0 | 0 |
 | Contraindicaciones | 2 156 | 1 393 | 0 | 0 | 0 | 0 |
 | Advertencias | 2 152 | 1 457 | 0 | 0 | 0 | 0 |
@@ -260,8 +322,13 @@ la descripción de los PR 730 y 835.
 - **Tamaño de `concept_properties`, recién cargado:** 342 MB con la pasada 5 y 374 MB con la 9.
 - **Integridad del texto:** de las 78 972 secciones de la pasada 9, ninguna tiene un `textSha256`
   distinto del sha256 del texto guardado.
-- **Atribuciones:** ninguna fila de la eEML carece de su atribución y su advertencia. Ninguna de
-  LactMed ni de LiverTox carece de «Courtesy of the U.S. National Library of Medicine».
+- **Atribuciones:** ninguna de LactMed ni de LiverTox carece de «Courtesy of the U.S. National Library
+  of Medicine». La eEML no tiene filas de texto que atribuir: sus referencias llevan la licencia y su
+  enlace.
+- **Plan de carga del corpus de `data/` (sin base):** `planFor` sobre las 2 883 monografías planifica
+  77 404 filas de sección (78 972 menos las 1 568 de la eEML), ninguna de la eEML, 988 referencias de la
+  eEML en 509 monografías, 4 270 de posología (todas `professional`) y 11 552 con
+  `versionUnpublished`. Ninguna fila del plan contiene texto de la eEML.
 - **DailyMed:** ningún puntero lleva texto.
 - **`validate-links`:** 429 de los 483 ATC 5 de `vademecum` tienen monografía y su `concept_map`.
 - **`drug-treatments`** (ya en `dev`): enlazados por RxCUI o UNII, sin base de datos.

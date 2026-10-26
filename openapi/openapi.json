@@ -880,7 +880,12 @@
                 "ANATOMY",
                 "DIAGNOSTIC_TEST",
                 "SYMPTOM",
-                "SPECIALTY"
+                "SPECIALTY",
+                "DIAGNOSTIC_CRITERION",
+                "REQUIRED_TEST",
+                "COMPLICATION",
+                "RISK_FACTOR",
+                "REFERRAL_CRITERION"
               ]
             }
           },
@@ -1926,6 +1931,8 @@
     },
     "/iam/users": {
       "get": {
+        "deprecated": true,
+        "description": "Obsoleto: usar `POST /iam/users/search`. Un nombre o un correo en la query string queda en los logs de acceso de cualquier proxy.",
         "operationId": "IamUsersController_searchUsers",
         "parameters": [
           {
@@ -1993,11 +2000,10 @@
             "bearer": []
           }
         ],
-        "summary": "Listado paginado de usuarios",
+        "summary": "Listado paginado de usuarios (obsoleto)",
         "tags": [
           "iam-users"
-        ],
-        "description": "Listado paginado de usuarios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+        ]
       },
       "post": {
         "operationId": "IamUsersController_createUser",
@@ -2054,6 +2060,71 @@
           "iam-users"
         ],
         "description": "Crear un usuario con credencial de contraseña y rol inicial. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/iam/users/search": {
+      "post": {
+        "description": "Igual que `GET /iam/users`, pero el texto de búsqueda viaja en el cuerpo y no en la URL. Una clave no declarada responde 400.",
+        "operationId": "IamUsersController_searchUsersByBody",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchUsersBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchUsersResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listado paginado de usuarios, con los filtros en el cuerpo",
+        "tags": [
+          "iam-users"
+        ]
       }
     },
     "/iam/users/{id}": {
@@ -100706,6 +100777,100 @@
         ],
         "additionalProperties": false
       },
+      "SearchUsersBodyDto": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string",
+            "description": "Texto a buscar en el nombre visible o en el correo de acceso"
+          },
+          "status": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Concepto de estado al que acotar"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Cursor opaco devuelto por la página anterior"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Tope de resultados (por defecto 50)",
+            "default": 50,
+            "minimum": 1,
+            "maximum": 500
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "statusConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "mfaStatusConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "phoneVerified": {
+            "type": "boolean"
+          },
+          "lastLoginAt": {
+            "type": "object",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "statusConceptId",
+          "emailVerified",
+          "phoneVerified",
+          "createdAt"
+        ]
+      },
+      "SearchUsersResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserListItemDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          },
+          "nextCursor": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "count",
+          "limit"
+        ]
+      },
       "AssistedRegistrationDto": {
         "type": "object",
         "properties": {
@@ -101991,7 +102156,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cuatro institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan.",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cinco institucionales (HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan.",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -101999,6 +102164,7 @@
               "UNIVERSITY",
               "PHARMACY",
               "HOSPITAL",
+              "CLINIC",
               "MEDICAL_OFFICE",
               "NURSING",
               "HEALTH_OTHER",
@@ -107509,7 +107675,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto.",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto.",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -107517,6 +107683,7 @@
               "UNIVERSITY",
               "PHARMACY",
               "HOSPITAL",
+              "CLINIC",
               "MEDICAL_OFFICE",
               "NURSING",
               "HEALTH_OTHER",
@@ -107719,7 +107886,7 @@
           },
           "tenantType": {
             "type": "string",
-            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto.",
+            "description": "Tipo de organización. Obligatorio: cada tipo exige sus propios datos (PAYER el bloque `payer`, BROKER el bloque `broker`; el resto —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER, HEALTH_BUSINESS, DIAGNOSTIC_CENTER— país y jurisdicción). Esta puerta administrativa no acepta todavía el bloque `diagnosticUnit` de DIAGNOSTIC_CENTER: la unidad diagnóstica se materializa con sus valores por defecto.",
             "enum": [
               "PROVIDER",
               "PAYER",
@@ -107727,6 +107894,7 @@
               "UNIVERSITY",
               "PHARMACY",
               "HOSPITAL",
+              "CLINIC",
               "MEDICAL_OFFICE",
               "NURSING",
               "HEALTH_OTHER",

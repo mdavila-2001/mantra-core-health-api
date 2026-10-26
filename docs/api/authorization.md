@@ -59,6 +59,10 @@ Una ruta que **escribe** con un dueño que viaja en el cuerpo y sin comprobació
 fuentes de datos (`/health/data-sources*`, topología interna) exigen un rol de administración.
 `POST /terminology/ConceptMap/$translate` comparte ruta entre la consulta (cualquier sesión) y el
 curado de un mapeo, que exige `SECURITY_ADMIN`, `TERMINOLOGY_ENGINEER` o `SUPERADMIN` en el servicio.
+`GET /terminology/CodeSystem/$lookup` y `GET /terminology/concepts/:conceptId` filtran por audiencia las
+propiedades de farmacología clínica: las filas con `audience: 'professional'` (posología incluida) las
+reciben solo los roles asistenciales del catálogo de actores (`baseRole: 'CLINICAL'`) y el `SUPERADMIN`
+de plataforma; un `PATIENT`, un `USER` o un `SECURITY_ADMIN` no (`src/modules/terminology/pharmacology-audience.ts`).
 
 **Roles que no se siembran.** Los roles de negocio, plataforma y servicio que las rutas exigen se
 siembran en `authz.roles` desde `authz.platform-roles.seed.ts` (y los `*.roles.ts` de cada módulo):

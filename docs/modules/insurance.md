@@ -331,6 +331,29 @@ La ruta de disputas sirve a dos actores y despacha por **quién es el actor**, n
 (`domain/actor-kind.ts`). `@PlatformTenantOptional('PATIENT')` evita exigirle una organización al
 paciente; el personal sin rol de paciente conserva la resolución de tenant de siempre.
 
+**Relación asistencial con quien cobra (REQ-16-035).** El modelo no guarda el tenant del paciente, y aseguradora
+y prestador son organizaciones distintas, así que el cobro directo (`POST /insurance-claims` sin pedido vinculado)
+y la cotización exigen que el paciente de la cobertura tenga una relación asistencial vigente con la organización
+activa (`ClaimCareRelationshipGate`, que consulta `authz.care_relationships` por `PatientCareRelationshipPort`).
+Vigente es: estado `ACTIVE`, `valid_from` no posterior al momento del cobro, `valid_to` nulo o posterior, `tenant_id`
+de la propia fila igual al tenant activo y, si la relación está acotada a un propósito, que sea `PAYMENT` (el mismo
+criterio del PDP; una relación sin acotar también vale). Cuenta cualquier profesional de la organización. El
+paciente sale de la cobertura, nunca del cuerpo. Sin relación vigente la respuesta es el mismo 404 «Cobertura no
+encontrada» de una cobertura inexistente, antes de comparar aseguradora o plan, para que el cobro no sirva para
+descubrir coberturas ajenas. Los reclamos vinculados a un pedido de farmacia o diagnóstico y la factura al paciente
+de un reclamo ya presentado no pasan por esta puerta.
+
+La relación la deja el check-in de un encuentro (`POST /clinical/encounters/check-in`,
+`AuthzCareRelationshipsService.recordEncounterCareRelationships`), en la misma transacción, por cada profesional
+del encuentro (el principal y los participantes) que aún no tiene una relación `ACTIVE` ni una solicitud `PENDING`
+en el tenant. Un check-in lo hace el personal para cualquier paciente existente, así que por sí solo no prueba el
+vínculo: si el paciente deja huella propia en el tenant (la misma comprobación de `authz`, ver
+`patientHasFootprintInTenant`), la relación nace `ACTIVE`, de tipo `TREATING`, acotada a `PAYMENT` (habilita cobrar
+y no abre la historia clínica) y sin `valid_to`; si no, nace `PENDING` como una solicitud que el paciente responde
+(se le avisa in-app tras el commit) y no habilita el cobro hasta que la acepta. Un paciente de mostrador sin cuenta
+ni huella propia no se puede cobrar hasta entonces. Un check-in cuyo `tenantId` no es el activo del actor, o sin
+ningún profesional, no deja relación. La cita y el check-in de agenda (`scheduling`) no la crean.
+
 **Capas.** La regla pura vive en `domain/patient-billing-enforcer.ts` (sin imports). Billing se alcanza
 sólo por `PatientBillingPort`, cuyo adaptador `billing-patient-invoice.adapter.ts` es el único archivo del
 módulo que importa `billing`. El aviso al paciente sale por `PatientNoticePort` después de confirmar la

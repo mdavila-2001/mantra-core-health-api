@@ -4,6 +4,7 @@ import { validate, type ValidationError } from 'class-validator';
 
 import { RegisterOrganizationDto } from './register-organization.dto';
 import { DUNIT } from '../../../diagnostic_units/diagnostic_units.concepts';
+import { CONCEPTS } from '../../../../common/constants/concepts';
 import {
   TENANT_TYPE_CODES,
   TENANT_TYPE_CONCEPT_BY_CODE,
@@ -551,5 +552,120 @@ describe('RegisterOrganizationDto · representante legal y gerencias · nombre e
         },
       }),
     ).toEqual([]);
+  });
+});
+
+/**
+ * Organización médica: las cinco institucionales de salud y los bordes de las
+ * validaciones del alta. `CLINIC` («Clínica») es el código que faltaba: el
+ * formulario lo ofrecía y el DTO lo rechazaba con 400.
+ */
+describe('RegisterOrganizationDto · organización médica por tipo y bordes', () => {
+  const MEDICAL_ORGANIZATION = {
+    organization: {
+      code: 'CLINICA_Z',
+      legalName: 'Clínica Z S.R.L.',
+      tenantType: 'CLINIC',
+      countryConceptId: '22222222-2222-4222-8222-222222222222',
+      jurisdictionConceptId: '33333333-3333-4333-8333-333333333333',
+    },
+    owner: MINIMAL_REGISTRATION.owner,
+  };
+
+  /** El alta médica con un cambio en `organization`. */
+  const withOrganization = (changes: Record<string, unknown>) => ({
+    ...MEDICAL_ORGANIZATION,
+    organization: { ...MEDICAL_ORGANIZATION.organization, ...changes },
+  });
+
+  /** El alta médica con un cambio en `owner`. */
+  const withOwner = (changes: Record<string, unknown>) => ({
+    ...MEDICAL_ORGANIZATION,
+    owner: { ...MEDICAL_ORGANIZATION.owner, ...changes },
+  });
+
+  it.each(['HOSPITAL', 'CLINIC', 'MEDICAL_OFFICE', 'NURSING', 'HEALTH_OTHER'])(
+    'acepta %s con país y jurisdicción',
+    async (tenantType) => {
+      expect(
+        await propertiesWithError(withOrganization({ tenantType })),
+      ).toEqual([]);
+    },
+  );
+
+  it('CLINIC es un código propio con su concepto, distinto de HOSPITAL', () => {
+    expect(TENANT_TYPE_CODES).toContain('CLINIC');
+    expect(TENANT_TYPE_CONCEPT_BY_CODE.CLINIC).toBe(
+      CONCEPTS.TENANT_TYPE_CLINIC,
+    );
+    expect(TENANT_TYPE_CONCEPT_BY_CODE.CLINIC).not.toBe(
+      TENANT_TYPE_CONCEPT_BY_CODE.HOSPITAL,
+    );
+  });
+
+  it('rechaza CLINICA: el código del contrato es CLINIC', async () => {
+    expect(
+      await propertiesWithError(withOrganization({ tenantType: 'CLINICA' })),
+    ).toEqual(['organization.tenantType']);
+  });
+
+  it('code: acepta 3 y 100 caracteres, rechaza 2 y 101', async () => {
+    expect(
+      await propertiesWithError(withOrganization({ code: 'C'.repeat(3) })),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(withOrganization({ code: 'C'.repeat(100) })),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(withOrganization({ code: 'C'.repeat(2) })),
+    ).toEqual(['organization.code']);
+    expect(
+      await propertiesWithError(withOrganization({ code: 'C'.repeat(101) })),
+    ).toEqual(['organization.code']);
+  });
+
+  it('legalName y tradeName: aceptan 300 caracteres, rechazan 301', async () => {
+    expect(
+      await propertiesWithError(
+        withOrganization({
+          legalName: 'L'.repeat(300),
+          tradeName: 'T'.repeat(300),
+        }),
+      ),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(
+        withOrganization({ legalName: 'L'.repeat(301) }),
+      ),
+    ).toEqual(['organization.legalName']);
+    expect(
+      await propertiesWithError(
+        withOrganization({ tradeName: 'T'.repeat(301) }),
+      ),
+    ).toEqual(['organization.tradeName']);
+  });
+
+  it('password: acepta 8 y 200 caracteres, rechaza 7 y 201', async () => {
+    expect(
+      await propertiesWithError(withOwner({ password: 'p'.repeat(8) })),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(withOwner({ password: 'p'.repeat(200) })),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(withOwner({ password: 'p'.repeat(7) })),
+    ).toEqual(['owner.password']);
+    expect(
+      await propertiesWithError(withOwner({ password: 'p'.repeat(201) })),
+    ).toEqual(['owner.password']);
+  });
+
+  it('owner.name: acepta 100 caracteres, rechaza 101', async () => {
+    expect(
+      await propertiesWithError(withOwner({ name: 'N'.repeat(100) })),
+    ).toEqual([]);
+    expect(
+      await propertiesWithError(withOwner({ name: 'N'.repeat(101) })),
+    ).toEqual(['owner.name']);
   });
 });
