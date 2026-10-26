@@ -416,7 +416,8 @@ export class PracticeSitesService {
 
   /**
    * Exige que el actor pueda leer las prácticas o las sedes del tenant: un rol de la lista, el comodín
-   * `SUPERADMIN` de plataforma, o ser `OWNER`/`ADMIN` activo de ese tenant.
+   * `SUPERADMIN` de plataforma, o ser `OWNER`/`ADMIN` activo de ese tenant por su membresía. Un rol de
+   * plataforma acotado a otro tenant (`scopedRoles`) no autoriza acá, igual que no autorizaba en el `RolesGuard`.
    *
    * La respuesta para quien no cumple es el mismo 403 `ROLE_INSUFFICIENT` que daba el `RolesGuard`, de modo que
    * el contrato de error no cambia. El tenant es el del contexto verificado, nunca uno que venga en la petición.
@@ -435,7 +436,8 @@ export class PracticeSitesService {
     const byRole =
       roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined) ||
       roles.some((role) => roleAuthorizesInTenant(actor, role, tenantId));
-    const administers = await this.tenantAdministration.canAdminister(
+    // Sólo la membresía: los roles de plataforma ya se evaluaron arriba con el ámbito de `scopedRoles`.
+    const administers = await this.tenantAdministration.administersByMembership(
       this.em,
       tenantId,
       actor,

@@ -74,6 +74,22 @@ export class TenantAdministrationService {
     actor: AuthenticatedUser,
   ): Promise<boolean> {
     if (this.isPlatform(actor)) return true;
+    return this.administersByMembership(em, tenantId, actor);
+  }
+
+  /**
+   * Devuelve si el actor es `OWNER` o `ADMIN` **activo de ese tenant**, y nada más.
+   *
+   * A diferencia de {@link TenantAdministrationService.canAdminister}, no tiene el atajo de plataforma:
+   * `isPlatform` mira `actor.roles` sin ver `scopedRoles`, así que un `SECURITY_ADMIN` acotado a otro tenant
+   * pasaría. Lo usa quien ya resolvió los roles de plataforma con `roleAuthorizesInTenant` (que sí respeta el
+   * ámbito) y sólo necesita saber si la membresía alcanza.
+   */
+  async administersByMembership(
+    em: EntityManager,
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<boolean> {
     const membership = await this.activeMembershipOf(em, tenantId, actor);
     return Boolean(
       membership && ADMIN_TENANT_ROLES.has(membership.tenantRoleConceptId),
