@@ -72,6 +72,26 @@ function build() {
       documentIds: ['doc-1'],
     }),
     markDocumentsVerified: mockFn().mockResolvedValue(undefined),
+    // P51: misma clasificación que el servicio real, sin la lectura de la
+    // unidad: un DIAGNOSTIC_CENTER cuenta acá como laboratorio.
+    evaluateForTenant: mockFn(
+      async (
+        tx: unknown,
+        t: { tenantTypeConceptId?: string },
+      ): Promise<unknown> => {
+        const kind =
+          t.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_PHARMACY
+            ? 'PHARMACY'
+            : t.tenantTypeConceptId === CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER
+              ? 'LABORATORY'
+              : undefined;
+        if (kind === undefined) return undefined;
+        return {
+          kind,
+          readiness: await pharmacyRequirements.evaluate(tx, t, kind),
+        };
+      },
+    ),
   };
   const service = new DirectoryTenantsService(
     em as any,
@@ -600,6 +620,65 @@ describe('DirectoryTenantsService', () => {
         'user-plat',
       );
       expect(pharmacy.publicProfileId).toBe('pub-1');
+    });
+  });
+
+  describe('verify · laboratorio sin papeles no opera (P51)', () => {
+    const actor = { id: 'user-plat', roles: ['SECURITY_ADMIN'] } as any;
+    const labTenant = () => ({
+      id: 'ten-lab',
+      code: 'LAB-1',
+      legalName: 'Laboratorio Sur SRL',
+      statusConceptId: DIR.TENANT_PENDING,
+      tenantTypeConceptId: CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER,
+      createdAt: new Date(),
+    });
+
+    it('rechaza con 422 nombrando los papeles del laboratorio que faltan', async () => {
+      const d = build();
+      const tenant = labTenant();
+      d.tenantsRepo.findById.mockResolvedValue(tenant);
+      d.pharmacyRequirements.evaluate.mockResolvedValue({
+        ready: false,
+        missing: ['COMMERCE_REGISTRY_DOC', 'HEALTH_AUTHORITY_CERT_DOC'],
+        documentIds: [],
+      });
+
+      const error = await d.service
+        .verify('ten-lab', {} as any, actor)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as PreconditionFailedException).getResponse()).toEqual(
+        expect.objectContaining({
+          message: expect.stringContaining('El laboratorio'),
+          details: expect.objectContaining({
+            missing: ['COMMERCE_REGISTRY_DOC', 'HEALTH_AUTHORITY_CERT_DOC'],
+          }),
+        }),
+      );
+      expect(d.pharmacyRequirements.evaluate).toHaveBeenCalledWith(
+        d.tx,
+        tenant,
+        'LABORATORY',
+      );
+      expect(tenant.statusConceptId).toBe(DIR.TENANT_PENDING);
+      expect(d.publicProfiles.projectOrganization).not.toHaveBeenCalled();
+    });
+
+    it('con los tres papeles, activa el tenant y los marca verificados', async () => {
+      const d = build();
+      const tenant = labTenant();
+      d.tenantsRepo.findById.mockResolvedValue(tenant);
+
+      await d.service.verify('ten-lab', {} as any, actor);
+
+      expect(tenant.statusConceptId).toBe(CONCEPTS.TENANT_ACTIVE);
+      expect(d.pharmacyRequirements.markDocumentsVerified).toHaveBeenCalledWith(
+        d.tx,
+        ['doc-1'],
+        'user-plat',
+      );
     });
   });
 });

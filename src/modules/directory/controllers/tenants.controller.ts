@@ -52,6 +52,7 @@ import {
   UpdateTenantDto,
   CompleteAffiliationDocumentsDto,
   CompleteAffiliationDocumentsResponseDto,
+  LaboratoryReadinessResponseDto,
   PharmacyReadinessResponseDto,
 } from '../dto';
 
@@ -181,6 +182,23 @@ export class TenantsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PharmacyReadinessResponseDto> {
     return this.documentCompletion.pharmacyReadiness(tenantId, actor);
+  }
+
+  /**
+   * P51: lo que le falta a un laboratorio para que la plataforma pueda
+   * verificarlo (SEPREC, licencia de funcionamiento y SEDES).
+   */
+  @Get(':tenantId/laboratory-readiness')
+  @ApiOperation({
+    summary: 'Requisitos pendientes para que el laboratorio opere',
+    description:
+      '403 si no pertenece a la organización; 422 si no es un laboratorio.',
+  })
+  getLaboratoryReadiness(
+    @Param('tenantId', ParseUUIDPipe) tenantId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<LaboratoryReadinessResponseDto> {
+    return this.documentCompletion.laboratoryReadiness(tenantId, actor);
   }
 
   @Get(':tenantId')

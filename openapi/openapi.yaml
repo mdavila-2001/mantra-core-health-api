@@ -9153,6 +9153,38 @@ paths:
       description: >-
         Requisitos pendientes para que la farmacia opere. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /tenants/{tenantId}/laboratory-readiness:
+    get:
+      description: 403 si no pertenece a la organización; 422 si no es un laboratorio.
+      operationId: TenantsController_getLaboratoryReadiness
+      parameters:
+        - name: tenantId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Requisitos pendientes para que el laboratorio opere
+      tags:
+        - directory-tenants
   /tenants/{tenantId}/child-tenants:
     get:
       operationId: TenantsController_listChildTenants

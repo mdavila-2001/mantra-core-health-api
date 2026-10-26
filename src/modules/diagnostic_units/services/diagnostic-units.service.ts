@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   touch,
@@ -31,6 +32,7 @@ import {
 } from '../dto';
 import { DUNIT } from '../diagnostic_units.concepts';
 import type { DiagnosticUnits } from '../entities';
+import { Tenants } from '../../directory/entities';
 import { DiagnosticUnitScopeService } from './diagnostic-unit-scope.service';
 import { PublicProfileProjectionService } from '../../community/services';
 
@@ -240,6 +242,8 @@ export class DiagnosticUnitsService {
           { unitId },
         );
       }
+
+      await this.assertLaboratoryMayOperate(tx, unit);
 
       unit.verificationStatusConceptId = DUNIT.VERIFICATION_VERIFIED;
       if (!unit.publicProfileId) {
@@ -487,6 +491,49 @@ export class DiagnosticUnitsService {
   }
 
   /** Carga una unidad y valida que exista y esté ACTIVA (precondición común). */
+  /**
+   * P51, punto 6: un laboratorio clínico de una organización `DIAGNOSTIC_CENTER`
+   * no se publica (ni recibe órdenes como unidad verificada) mientras su
+   * organización no esté verificada por la plataforma. Esa verificación es la
+   * que exige la matrícula del SEPREC, la licencia de funcionamiento y el
+   * certificado del SEDES (`PharmacyOperatingRequirementsService`), así que
+   * publicar la unidad antes saltaría los papeles. Una unidad de imágenes o de
+   * otro tipo de organización sigue como antes.
+   *
+   * @param tx - Transacción de la verificación.
+   * @param unit - Unidad a publicar.
+   * @throws PreconditionFailedException (422) si la organización no está verificada.
+   */
+  private async assertLaboratoryMayOperate(
+    tx: EntityManager,
+    unit: DiagnosticUnits,
+  ): Promise<void> {
+    if (unit.diagnosticUnitTypeConceptId !== DUNIT.UNIT_TYPE_LABORATORY) return;
+    const tenant = await tx.findOne(Tenants, { id: unit.tenantId });
+    if (
+      tenant?.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_DIAGNOSTIC_CENTER ||
+      tenant.verificationStatusConceptId === CONCEPTS.TENANT_VERIFIED
+    ) {
+      return;
+    }
+    this.logger.warn(
+      {
+        operation: 'diagnostic_units.unit.verify',
+        unitId: unit.id,
+        reason: 'laboratory-tenant-not-verified',
+      },
+      'Rejected: laboratory organization is not verified',
+    );
+    throw new PreconditionFailedException(
+      'El laboratorio no se publica hasta que la plataforma verifique a su organización con la matrícula del SEPREC, la licencia de funcionamiento y el certificado del SEDES',
+      {
+        unitId: unit.id,
+        tenantId: unit.tenantId,
+        reason: 'TENANT_NOT_VERIFIED',
+      },
+    );
+  }
+
   private async loadActiveUnit(
     tx: EntityManager,
     unitId: string,

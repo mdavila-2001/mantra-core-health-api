@@ -101,3 +101,25 @@ export class PharmacyReadinessResponseDto {
   })
   missing!: string[];
 }
+
+/**
+ * Lo que le falta a un laboratorio para operar (P51): los roles de documento
+ * `COMMERCE_REGISTRY_DOC` (SEPREC), `OPERATING_LICENSE_DOC` y
+ * `HEALTH_AUTHORITY_CERT_DOC` (SEDES) que todavía no presentó.
+ */
+export class LaboratoryReadinessResponseDto {
+  /** `true` si la plataforma ya puede verificarlo. */
+  @ApiProperty()
+  ready!: boolean;
+
+  /** Los papeles que faltan, en orden estable. */
+  @ApiProperty({
+    type: [String],
+    enum: [
+      'COMMERCE_REGISTRY_DOC',
+      'OPERATING_LICENSE_DOC',
+      'HEALTH_AUTHORITY_CERT_DOC',
+    ],
+  })
+  missing!: string[];
+}

@@ -24,10 +24,14 @@ import {
 import type {
   CompleteAffiliationDocumentsDto,
   CompleteAffiliationDocumentsResponseDto,
+  LaboratoryReadinessResponseDto,
   PharmacyReadinessResponseDto,
 } from '../dto';
 import { AffiliationDocumentConceptsService } from './affiliation-document-concepts.service';
-import { PharmacyOperatingRequirementsService } from './pharmacy-operating-requirements.service';
+import {
+  PharmacyOperatingRequirementsService,
+  type OperatingKind,
+} from './pharmacy-operating-requirements.service';
 import { TenantAdministrationService } from './tenant-administration.service';
 import { TenantAffiliationDocumentsService } from './tenant-affiliation-documents.service';
 
@@ -237,6 +241,32 @@ export class TenantDocumentCompletionService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<PharmacyReadinessResponseDto> {
+    return this.readiness(tenantId, actor, 'PHARMACY');
+  }
+
+  /**
+   * P51: lo que le falta a un laboratorio para que la plataforma pueda
+   * verificarlo (matrícula del SEPREC, licencia de funcionamiento y
+   * certificado del SEDES). 422 si la organización no es un laboratorio
+   * (un `DIAGNOSTIC_CENTER` sin unidad de laboratorio clínico tampoco lo es).
+   *
+   * @param tenantId - Organización.
+   * @param actor - Quien consulta: miembro de la organización o plataforma.
+   * @returns Si puede operar y qué falta.
+   */
+  async laboratoryReadiness(
+    tenantId: string,
+    actor: AuthenticatedUser,
+  ): Promise<LaboratoryReadinessResponseDto> {
+    return this.readiness(tenantId, actor, 'LABORATORY');
+  }
+
+  /** Lectura común de los requisitos para operar, por clase de organización. */
+  private async readiness(
+    tenantId: string,
+    actor: AuthenticatedUser,
+    kind: OperatingKind,
+  ): Promise<{ ready: boolean; missing: string[] }> {
     const em = this.em.fork();
     await this.assertAuthorized(em, tenantId, actor, 'read');
     const tenant = await this.tenantsRepo.findById(em, tenantId);
@@ -245,13 +275,15 @@ export class TenantDocumentCompletionService {
         tenantId,
       });
     }
-    if (tenant.tenantTypeConceptId !== CONCEPTS.TENANT_TYPE_PHARMACY) {
+    if ((await this.requirements.kindOf(em, tenant)) !== kind) {
       throw new PreconditionFailedException(
-        'La organización no es una farmacia',
+        kind === 'PHARMACY'
+          ? 'La organización no es una farmacia'
+          : 'La organización no es un laboratorio',
         { tenantId },
       );
     }
-    const readiness = await this.requirements.evaluate(em, tenant);
+    const readiness = await this.requirements.evaluate(em, tenant, kind);
     return { ready: readiness.ready, missing: [...readiness.missing] };
   }
 
