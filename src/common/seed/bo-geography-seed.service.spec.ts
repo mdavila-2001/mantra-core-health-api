@@ -24,6 +24,7 @@ import {
   boMunicipalityConceptId,
   boMunicipalityValueSetId,
   boMunicipalityVersionId,
+  departmentSiglaOfMunicipalityCode,
 } from './bo-geography.catalog';
 
 /** Id determinista de cada conjunto, por su clave natural. */
@@ -448,5 +449,41 @@ describe('BoGeographySeedService', () => {
         /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
       );
     });
+  });
+});
+
+describe('departmentSiglaOfMunicipalityCode', () => {
+  it('lee la sigla de la forma <SIGLA>-<NOMBRE> del generador del modelo', () => {
+    expect(
+      departmentSiglaOfMunicipalityCode('SC-SANTA_CRUZ_DE_LA_SIERRA'),
+    ).toBe('SC');
+  });
+
+  it('deriva la sigla de la forma INE que siembra la API, para los nueve departamentos', () => {
+    for (const [prefijo, sigla] of BO_DEPARTMENT_BY_INE_PREFIX) {
+      expect(
+        departmentSiglaOfMunicipalityCode(`geo:bo:municipality:${prefijo}0101`),
+      ).toBe(sigla);
+    }
+  });
+
+  it('el código de cada municipio sembrado resuelve a su propio departamento', () => {
+    for (const municipality of BO_MUNICIPALITIES) {
+      expect(
+        departmentSiglaOfMunicipalityCode(
+          boMunicipalityConceptCode(municipality.ine),
+        ),
+      ).toBe(municipality.department);
+    }
+  });
+
+  it('devuelve undefined ante un código que no sigue ninguna de las dos formas', () => {
+    expect(departmentSiglaOfMunicipalityCode('geo:bo:municipality:99')).toBe(
+      undefined,
+    );
+    expect(
+      departmentSiglaOfMunicipalityCode('geo:bo:municipality:990101'),
+    ).toBe(undefined);
+    expect(departmentSiglaOfMunicipalityCode('cualquier-cosa')).toBe(undefined);
   });
 });
