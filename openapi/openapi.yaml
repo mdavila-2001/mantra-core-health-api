@@ -97017,6 +97017,9 @@ components:
           type: object
           allOf:
             - $ref: '#/components/schemas/InventoryConceptDto'
+        stockUpdatedAt:
+          type: string
+          nullable: true
         products:
           type: array
           items:
