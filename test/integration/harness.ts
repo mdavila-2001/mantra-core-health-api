@@ -29,9 +29,11 @@ import { SeedBootstrapService } from '../../src/common/seed/seed-bootstrap.servi
 import { boDepartmentConceptId } from '../../src/common/seed/bo-geography.catalog';
 import {
   assertDisposableResetTarget,
+  assertPermanentResidueTarget,
   assertServerIdentity,
   resolveResetTarget,
 } from './disposable-database';
+import { qualifiedViolationTable } from './cleanup-errors';
 
 /**
  * Identidad ficticia obligatoria para altas profesionales en integración.
@@ -368,7 +370,10 @@ async function seedFixtures(orm: MikroORM): Promise<void> {
  *
  * El `JwtStrategy` exige que el `sid` del token corresponda a una sesión activa
  * y vigente del mismo usuario (MCH-004). Es idempotente: si la sesión existe se
- * reactiva y se le extiende la vigencia.
+ * reactiva, se le extiende la vigencia y se la reasigna a `userId`: una corrida
+ * que murió a medias deja la fila `session-…` con el usuario de entonces, y sin
+ * reasignarla el `JwtStrategy` rechaza con 401 al usuario nuevo de las corridas
+ * siguientes.
  *
  * @param orm - ORM del contexto de pruebas.
  * @param userId - Dueño de la sesión; debe existir en `iam.users` y estar activo.
@@ -387,7 +392,8 @@ export async function ensureTestSession(
        (id, user_id, token_id, state_concept_id, expires_at, created_at, updated_at)
      values (gen_random_uuid(), ?, ?, ?, now() + interval '1 day', now(), now())
      on conflict (token_id) do update
-       set state_concept_id = excluded.state_concept_id,
+       set user_id = excluded.user_id,
+           state_concept_id = excluded.state_concept_id,
            expires_at = excluded.expires_at,
            updated_at = now()`,
       [userId, sid, CONCEPTS.STATE_ACTIVE],
@@ -669,6 +675,8 @@ async function deleteWithDependents(
   for (const id of pending) visited.add(`${table}:${id}`);
 
   let borradas = 0;
+  // Hijas que se borran DESPUÉS de esta tabla, no antes. Ver `esDependenciaCircular`.
+  const diferidas: { tabla: string; ids: string[] }[] = [];
   for (const edge of graph.edges.filter((e) => e.parentTable === table)) {
     if (!graph.primaryKey.has(edge.childTable)) continue;
     const referidos = await client.query<{
@@ -694,6 +702,13 @@ async function deleteWithDependents(
          from ${edge.childTable} where "${edge.childColumn}"::text = any($1::text[])`,
       [claves],
     );
+    if (esDependenciaCircular(graph, edge)) {
+      diferidas.push({
+        tabla: edge.childTable,
+        ids: hijas.rows.map((r) => r.id),
+      });
+      continue;
+    }
     borradas += await deleteWithDependents(
       client,
       graph,
@@ -727,7 +742,48 @@ async function deleteWithDependents(
     `delete from ${table} where "${pk}"::text = any($1::text[])`,
     [pending],
   );
-  return borradas + (res.rowCount ?? 0);
+  borradas += res.rowCount ?? 0;
+
+  // Ya sin las filas de las que dependían: ahora sí se pueden borrar ellas.
+  for (const { tabla, ids: hijasDiferidas } of diferidas) {
+    borradas += await deleteWithDependents(
+      client,
+      graph,
+      tabla,
+      hijasDiferidas,
+      visited,
+    );
+  }
+  return borradas;
+}
+
+/**
+ * Si la arista `padre ← hija` cierra un ciclo con una dependencia obligatoria
+ * en sentido contrario: la hija admite NULL en su referencia al padre, pero el
+ * padre exige a la hija en alguna columna NOT NULL.
+ *
+ * Es el caso de `chart.clinical_note_headers` y `chart.clinical_note_versions`:
+ * la versión apunta a su nota con `clinical_note_id NOT NULL` y la nota apunta a
+ * su versión vigente con `current_version_id` (nullable). Si el recorrido llega
+ * por las versiones y baja a las notas «hijas», la nota ve que sus versiones ya
+ * están visitadas (siguen vivas, esperando que termine la llamada de arriba),
+ * las salta y su `delete` choca con `fk_clinical_note_versions_clinical_note_id`.
+ * El orden correcto es el inverso: anular la referencia nullable, borrar al
+ * padre y recién después borrar a esas hijas, que ya no tienen quién las retenga.
+ */
+function esDependenciaCircular(
+  graph: SchemaGraph,
+  edge: ForeignKeyEdge,
+): boolean {
+  return (
+    edge.childNullable &&
+    graph.edges.some(
+      (back) =>
+        back.parentTable === edge.childTable &&
+        back.childTable === edge.parentTable &&
+        !back.childNullable,
+    )
+  );
 }
 
 /**
@@ -900,6 +956,9 @@ const OWNER_SIN_FK = [
  *   limpia por `owner_id`.
  * @param descripcion - Cómo nombrar el fixture en el mensaje del `throw`
  *   final ("de profesional", "de organización"...).
+ * @param conservadas - Cuentas que no se borran aunque ninguna tabla WORM las
+ *   nombre, porque una fila que quien llama deja viva las referencia; se
+ *   anonimizan igual que las fijadas por la bitácora.
  * @throws Si algo sobrevive al borrado: un huérfano en silencio es
  *   exactamente el defecto que este helper existe para impedir.
  */
@@ -910,6 +969,7 @@ async function deleteAccounts(
   userIds: readonly string[],
   personIds: readonly string[],
   descripcion: string,
+  conservadas: ReadonlySet<string> = new Set(),
 ): Promise<void> {
   for (const { table, column } of CUENTA_ESCRIBE_EN) {
     const pk = graph.primaryKey.get(table);
@@ -939,6 +999,7 @@ async function deleteAccounts(
     client,
     graph,
     userIds,
+    conservadas,
   );
   const borrables = userIds.filter((id) => !anonimizadas.has(id));
 
@@ -950,13 +1011,14 @@ async function deleteAccounts(
   } catch (err) {
     const pgErr = err as {
       code?: string;
+      schema?: string;
       table?: string;
       constraint?: string;
       detail?: string;
       message: string;
     };
     if (pgErr.code === '23503') {
-      const tablaHija = pgErr.table ?? '(desconocida)';
+      const tablaHija = qualifiedViolationTable(pgErr);
       if (graph.noBorrables.has(tablaHija)) {
         throw new Error(
           `No se pudo limpiar iam.users: "${tablaHija}" es WORM (trigger forbid) ` +
@@ -1006,25 +1068,19 @@ async function deleteAccounts(
  * @param client - Conexión ya abierta.
  * @param graph - El grafo de FK, ya leído.
  * @param userIds - Las cuentas del fixture.
+ * @param conservadas - Cuentas que además hay que conservar (anonimizadas) porque
+ *   una fila que la limpieza deja viva las nombra, como un tenant fijado por la
+ *   bitácora (`created_by_user_id`).
  * @returns Las cuentas anonimizadas; el resto se puede borrar.
  */
 async function anonymizeWormPinnedAccounts(
   client: pg.Client,
   graph: SchemaGraph,
   userIds: readonly string[],
+  conservadas: ReadonlySet<string> = new Set(),
 ): Promise<Set<string>> {
-  const fijadas = new Set<string>();
-  const aristasWorm = graph.edges.filter(
-    (e) => e.parentTable === 'iam.users' && graph.noBorrables.has(e.childTable),
-  );
-  for (const edge of aristasWorm) {
-    const { rows } = await client.query<{ id: string }>(
-      `select distinct "${edge.childColumn}"::text as id from ${edge.childTable}
-        where "${edge.childColumn}"::text = any($1::text[])`,
-      [userIds],
-    );
-    for (const r of rows) fijadas.add(r.id);
-  }
+  const fijadas = await wormPinnedIds(client, graph, 'iam.users', userIds);
+  for (const id of conservadas) fijadas.add(id);
   if (fijadas.size === 0) return fijadas;
 
   await client.query(
@@ -1037,6 +1093,41 @@ async function anonymizeWormPinnedAccounts(
       where id::text = any($1::text[])`,
     [[...fijadas], CONCEPTS.USER_ANONYMIZED],
   );
+  return fijadas;
+}
+
+/**
+ * Cuáles de las filas dadas de `parentTable` nombra alguna tabla WORM.
+ *
+ * Las tablas WORM y sus FKs salen del grafo ya leído del catálogo, no de una
+ * lista escrita a mano. Una fila así no se puede borrar mientras la bitácora la
+ * nombre: el trigger lo prohíbe y la FK lo impide, y ninguna de las dos se
+ * debilita desde una prueba.
+ *
+ * @param client - Conexión ya abierta.
+ * @param graph - El grafo de FK, ya leído.
+ * @param parentTable - Tabla madre, calificada por esquema (`iam.users`).
+ * @param ids - Claves primarias candidatas, como texto.
+ * @returns Las claves que alguna tabla WORM sigue nombrando.
+ */
+async function wormPinnedIds(
+  client: pg.Client,
+  graph: SchemaGraph,
+  parentTable: string,
+  ids: readonly string[],
+): Promise<Set<string>> {
+  const fijadas = new Set<string>();
+  const aristasWorm = graph.edges.filter(
+    (e) => e.parentTable === parentTable && graph.noBorrables.has(e.childTable),
+  );
+  for (const edge of aristasWorm) {
+    const { rows } = await client.query<{ id: string }>(
+      `select distinct "${edge.childColumn}"::text as id from ${edge.childTable}
+        where "${edge.childColumn}"::text = any($1::text[])`,
+      [ids],
+    );
+    for (const r of rows) fijadas.add(r.id);
+  }
   return fijadas;
 }
 
@@ -1194,21 +1285,51 @@ export async function deleteRegisteredOrganizations(
       );
     }
 
+    // Un tenant que la bitácora inmutable nombra (`audit.audit_log.tenant_id`,
+    // desde `@Audited` obligatorio, #621) no se puede borrar: el trigger WORM lo
+    // prohíbe y la FK lo impide, y ninguna de las dos se desactiva acá. Queda como
+    // residuo permanente, igual que la cuenta anonimizada de UC-01-12, y por eso
+    // sólo se admite en una base que se declare descartable (la misma guarda que
+    // usan las suites que dejan historial en `audit.*`). Sobre una base
+    // compartida la limpieza falla con el motivo, sin tocar el tenant.
+    const fijados = await wormPinnedIds(
+      client,
+      graph,
+      'directory.tenants',
+      tenantIds,
+    );
+    if (fijados.size > 0) {
+      try {
+        assertPermanentResidueTarget(
+          resolveResetTarget(process.env),
+          process.env,
+        );
+      } catch (err) {
+        throw new Error(
+          `No se pudo limpiar directory.tenants: ${fijados.size} organización(es) ` +
+            `siguen nombradas por una tabla WORM (trigger forbid, p. ej. ` +
+            `audit.audit_log) y no se pueden borrar. ${(err as Error).message}`,
+        );
+      }
+    }
+    const borrables = tenantIds.filter((id) => !fijados.has(id));
+
     try {
       await client.query(
         `delete from directory.tenants where id::text = any($1::text[])`,
-        [tenantIds],
+        [borrables],
       );
     } catch (err) {
       const pgErr = err as {
         code?: string;
+        schema?: string;
         table?: string;
         constraint?: string;
         detail?: string;
         message: string;
       };
       if (pgErr.code === '23503') {
-        const tablaHija = pgErr.table ?? '(desconocida)';
+        const tablaHija = qualifiedViolationTable(pgErr);
         if (graph.noBorrables.has(tablaHija)) {
           throw new Error(
             `No se pudo limpiar directory.tenants: "${tablaHija}" es WORM ` +
@@ -1227,7 +1348,7 @@ export async function deleteRegisteredOrganizations(
 
     const { rows: resto } = await client.query<{ total: string }>(
       `select count(*)::text as total from directory.tenants where id::text = any($1::text[])`,
-      [tenantIds],
+      [borrables],
     );
     const pendientes = Number(resto[0]?.total ?? 0);
     if (pendientes > 0) {
@@ -1235,6 +1356,23 @@ export async function deleteRegisteredOrganizations(
         `La limpieza dejó ${pendientes} organización(es) en la base compartida.`,
       );
     }
+
+    // Los tenants que quedan siguen nombrando a quien los creó
+    // (`created_by_user_id`/`updated_by_user_id`): esas cuentas se anonimizan en
+    // vez de borrarse, o el `delete from iam.users` chocaría con esa FK.
+    const { rows: autores } =
+      fijados.size === 0
+        ? { rows: [] as { id: string }[] }
+        : await client.query<{ id: string }>(
+            `select distinct u::text as id
+               from directory.tenants t,
+                    unnest(array[t.created_by_user_id, t.updated_by_user_id]) as u
+              where t.id::text = any($1::text[]) and u is not null`,
+            [[...fijados]],
+          );
+    const conservadas = new Set(
+      autores.map((r) => r.id).filter((id) => userIds.includes(id)),
+    );
 
     // El representante legal y las gerencias (subtarea 1.4): sus vínculos ya
     // se borraron en el bucle de arriba; sus personas, todavía no.
@@ -1253,6 +1391,7 @@ export async function deleteRegisteredOrganizations(
       userIds,
       personIds,
       'de organización',
+      conservadas,
     );
   } finally {
     await client.end();
