@@ -5972,6 +5972,83 @@
         "description": "Editar la presentación del propio perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/profiles/practitioners/{profileId}": {
+      "patch": {
+        "description": "`403` si quien pide no es el titular ni plataforma. `409` `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` si se corrige el número del documento de una identidad verificada o con un caso de verificación en curso.",
+        "operationId": "ProfilesPractitionersController_updatePractitionerProfile",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOwnPractitionerProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PractitionerProfileSummaryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Corregir el perfil profesional de otro (titular o plataforma)",
+        "tags": [
+          "profiles-practitioners"
+        ]
+      }
+    },
     "/profiles/practitioners/{profileId}/photo": {
       "put": {
         "operationId": "ProfilesPractitionersController_setPractitionerPhoto",
@@ -88383,6 +88460,145 @@
         ]
       }
     },
+    "/scheduling/resources/{id}/flexible-availability": {
+      "get": {
+        "description": "Se calculan en lectura a partir de las franjas de las plantillas flexibles de la agenda y del tiempo ocupado del profesional en todas sus sedes. No reserva nada. Una agenda sin horario flexible responde la lista vacía.",
+        "operationId": "SchedulingFlexibleController_availability",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Horas que se pueden pedir en un horario flexible",
+        "tags": [
+          "scheduling"
+        ]
+      }
+    },
+    "/scheduling/resources/{id}/flexible-holds": {
+      "post": {
+        "description": "Crea el cupo de la hora pedida, con el tiempo por paciente de la plantilla, y lo retiene bajo el candado del profesional. 409 si la hora ya no está libre; 422 si no cae en una franja flexible o ya pasó. Se confirma con POST /scheduling/holds/{token}/confirm o /request.",
+        "operationId": "SchedulingFlexibleController_placeHold",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFlexibleHoldDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retener una hora de un horario flexible",
+        "tags": [
+          "scheduling"
+        ]
+      }
+    },
     "/admin/portal/version": {
       "get": {
         "operationId": "AdminPortalController_version",
@@ -105009,6 +105225,10 @@
           "nationalId": {
             "type": "string"
           },
+          "identityVerified": {
+            "type": "boolean",
+            "description": "Sólo en la lectura propia"
+          },
           "issuerAdministrativeAreaConceptId": {
             "type": "string",
             "format": "uuid",
@@ -105197,6 +105417,11 @@
               "UNKNOWN"
             ],
             "description": "Sexo asignado al nacer"
+          },
+          "nationalId": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Número del documento de identidad. 409 si la identidad está verificada o en verificación."
           },
           "issuerAdministrativeAreaConceptId": {
             "type": "string",
@@ -110732,6 +110957,24 @@
             "type": "string",
             "description": "Categoría (concept id)",
             "format": "uuid"
+          },
+          "category": {
+            "type": "string",
+            "description": "Categoría de análisis (C2). Se resuelve a categoryConceptId (LAB → SR_LAB, IMAGING → SR_IMAGING, OTHER → SR_OTHER). Si viaja con categoryConceptId y no coinciden: 422 SERVICE_REQUEST_CATEGORY_MISMATCH",
+            "enum": [
+              "LAB",
+              "IMAGING",
+              "OTHER"
+            ]
+          },
+          "basedOnNoteIds": {
+            "description": "Notas médicas (chart.clinical_note_headers) que motivan la orden. Cada una debe ser del mismo paciente, de un encuentro del tenant custodio, firmada o enmendada y sin confidencialidad restringida (si no, 422 BASED_ON_NOTE_NOT_FOUND, sin distinguir el motivo); y, si la orden tiene encuentro, del mismo encuentro (422 BASED_ON_NOTE_ENCOUNTER_MISMATCH)",
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           },
           "priorityConceptId": {
             "type": "string",
@@ -129239,6 +129482,14 @@
           "categoryConceptId": {
             "type": "string",
             "format": "uuid"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "LAB",
+              "IMAGING",
+              "OTHER"
+            ]
           },
           "statusConceptId": {
             "type": "string",
@@ -148149,6 +148400,11 @@
           "validTo": {
             "type": "string",
             "format": "date-time"
+          },
+          "flexibleHours": {
+            "type": "boolean",
+            "description": "Horario flexible: sin turnos fijos, el paciente elige la hora dentro de la franja. slotMinutes es lo que se reserva por paciente. Ausente ≡ false",
+            "default": false
           }
         },
         "required": [
@@ -149123,6 +149379,25 @@
         },
         "required": [
           "resourceId",
+          "startAt"
+        ],
+        "additionalProperties": false
+      },
+      "CreateFlexibleHoldDto": {
+        "type": "object",
+        "properties": {
+          "startAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "La hora que pidió el paciente, en un minuto entero, dentro de una franja flexible"
+          },
+          "patientProfileId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Paciente para el que se reserva"
+          }
+        },
+        "required": [
           "startAt"
         ],
         "additionalProperties": false

@@ -5,7 +5,7 @@
 - **Bloque:** Clínico y Diagnóstico (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:29`)
 - **Operaciones:** 42 (42 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 1 · MEDIO 30 · BAJO 11
-- **Tablas distintas que tocan:** 90
+- **Tablas distintas que tocan:** 91
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/clinical.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -51,7 +51,7 @@
 | 37 | GET | `/clinical/prescriptions/{id}/pdf` | Descargar el PDF oficial de una receta | BAJO | 30 | CLINICIAN, PRACTITIONER, PATIENT |
 | 38 | POST | `/clinical/procedures` | Registrar un procedimiento | MEDIO | 7 | CLINICIAN, PRACTITIONER |
 | 39 | POST | `/clinical/procedures/{id}/attachments` | Adjuntar un archivo ya subido a un procedimiento | MEDIO | 21 | CLINICIAN, PRACTITIONER |
-| 40 | POST | `/clinical/service-requests` | Crear una orden de servicio | MEDIO | 27 | CLINICIAN, PRACTITIONER |
+| 40 | POST | `/clinical/service-requests` | Crear una orden de servicio | MEDIO | 29 | CLINICIAN, PRACTITIONER |
 | 41 | POST | `/clinical/service-requests/duplicate-check` | Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26) | BAJO | 26 | CLINICIAN, PRACTITIONER |
 | 42 | GET | `/public/prescriptions/{id}/verify` | Verificar la autenticidad de una receta por su sello | BAJO | 2 | pública |
 
@@ -4900,7 +4900,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /clinical/service-requests` la atiende `ClinicalOrdersController.createServiceRequest` (src/modules/clinical/controllers/clinical-orders.controller.ts:82). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateServiceRequestDto` (15 campos, 3 obligatorios). Delega en `ServiceRequestsService.create`. Crea filas en clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages. Actualiza iam.devices. Lee billing.service_catalog, clinical.diagnostic_reports, clinical.encounters, clinical.service_requests, diagnostics.diagnostic_report_versions, directory.tenants, forms.form_instances, iam.devices y 12 más. Publica ServiceRequestPlaced.
+`POST /clinical/service-requests` la atiende `ClinicalOrdersController.createServiceRequest` (src/modules/clinical/controllers/clinical-orders.controller.ts:82). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Valida el cuerpo como `CreateServiceRequestDto` (17 campos, 3 obligatorios). Delega en `ServiceRequestsService.create`. Crea filas en clinical.service_request_notes, clinical.service_requests, messaging.domain_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, messaging.outbox_messages. Actualiza iam.devices. Lee billing.service_catalog, chart.clinical_note_headers, clinical.diagnostic_reports, clinical.encounters, clinical.service_requests, diagnostics.diagnostic_report_versions, directory.tenants, forms.form_instances y 13 más. Publica ServiceRequestPlaced.
 
 ### Requerimientos
 
@@ -4918,8 +4918,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.service_catalog` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → PerformerSelectionValidator.resolve → PerformerSiteDbReader.offersProcedureWithPrice | `src/modules/clinical/services/performer-site-db.reader.ts:40` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestNotesService.assertUsable | `src/modules/clinical/services/service-request-notes.service.ts:57` |
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:131` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsService.assertEncounterBelongsToPatient → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestNotesService.assertUsable | `src/modules/clinical/services/service-request-notes.service.ts:80` |
+| `clinical.service_request_notes` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestNotesService.link | `src/modules/clinical/services/service-request-notes.service.ts:136` |
 | `clinical.service_requests` | ESCRIBE | CREA | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsRepository.create | `src/modules/clinical/repositories/service-requests.repository.ts:104` |
 | `clinical.service_requests` | LEE | LEE | POR_SQL | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:104` |
 | `diagnostics.diagnostic_report_versions` | LEE | LEE | DIRECTA | ClinicalOrdersController.createServiceRequest → ServiceRequestsService.create → ServiceRequestsService.resolveDuplicateDecision → DuplicateStudyDetector.findDuplicate → DuplicateStudyDetector.releasedVersionOf | `src/modules/clinical/services/duplicate-study-detector.ts:375` |
@@ -4949,27 +4951,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:305` |
+| Evento de dominio | `ServiceRequestPlaced` | `src/modules/clinical/services/service-requests.service.ts:356` |
 
 ### Cuerpo — DTO `CreateServiceRequestDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `custodianTenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant custodio (directory.tenants) | `src/modules/clinical/dto/service-request.dto.ts:22` |
-| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Paciente (profiles.patient_profiles) | `src/modules/clinical/dto/service-request.dto.ts:32` |
-| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro en curso | `src/modules/clinical/dto/service-request.dto.ts:40` |
-| `formInstanceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Instancia CERRADA del formulario médico (forms.form_instances) de la que sale la orden. Opcional: desde la historia se emite sin formulario. Si viaja, debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no) | `src/modules/clinical/dto/service-request.dto.ts:54` |
-| `codeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Código del servicio pedido (concept id) | `src/modules/clinical/dto/service-request.dto.ts:64` |
-| `categoryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Categoría (concept id) | `src/modules/clinical/dto/service-request.dto.ts:75` |
-| `priorityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Prioridad (concept id) | `src/modules/clinical/dto/service-request.dto.ts:86` |
-| `requesterProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional solicitante | `src/modules/clinical/dto/service-request.dto.ts:97` |
-| `performerTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant ejecutante | `src/modules/clinical/dto/service-request.dto.ts:105` |
-| `performerSelectionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Quién ejecuta la orden (concept id del conjunto `service-request-performer-selection`: SR_PERF_SELF, SR_PERF_ORGANIZATION, SR_PERF_PATIENT_CHOICE). Es una recomendación, no un candado; omitido = que elija el paciente | `src/modules/clinical/dto/service-request.dto.ts:117` |
-| `performerPractitionerProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Médico ejecutor. Obligatorio con SR_PERF_SELF (debe ser quien pide la orden); prohibido con los otros modos | `src/modules/clinical/dto/service-request.dto.ts:129` |
-| `suggestedPracticeSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden | `src/modules/clinical/dto/service-request.dto.ts:141` |
-| `previousDiagnosticReportId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason. | `src/modules/clinical/dto/service-request.dto.ts:157` |
-| `reusePreviousReport` | `boolean` | No | — | `@ValidateIf( (o: CreateServiceRequestDto) => o.reusePreviousReport !== undefined, )` `@IsBoolean()` | Reutilizar el informe previo detectado en vez de repetir el estudio | `src/modules/clinical/dto/service-request.dto.ts:172` |
-| `duplicateOverrideReason` | `string` | No | longitud mínima 20; longitud máxima 1000 | `@ValidateIf( (o: CreateServiceRequestDto) => o.duplicateOverrideReason !== undefined, )` `@IsString()` `@MinLength(20, { message: 'La justificación clínica requiere al menos 20 caracteres', })` `@MaxLength(1000)` | Justificación clínica formal para repetir un estudio duplicado (mínimo 20 caracteres) | `src/modules/clinical/dto/service-request.dto.ts:192` |
+| `custodianTenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant custodio (directory.tenants) | `src/modules/clinical/dto/service-request.dto.ts:33` |
+| `patientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Paciente (profiles.patient_profiles) | `src/modules/clinical/dto/service-request.dto.ts:43` |
+| `encounterId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Encuentro en curso | `src/modules/clinical/dto/service-request.dto.ts:51` |
+| `formInstanceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Instancia CERRADA del formulario médico (forms.form_instances) de la que sale la orden. Opcional: desde la historia se emite sin formulario. Si viaja, debe existir, estar cerrada y ser del mismo encuentro (422 PRECONDITION_FAILED si no) | `src/modules/clinical/dto/service-request.dto.ts:65` |
+| `codeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Código del servicio pedido (concept id) | `src/modules/clinical/dto/service-request.dto.ts:75` |
+| `categoryConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Categoría (concept id) | `src/modules/clinical/dto/service-request.dto.ts:86` |
+| `category` | `string` | No | valores: LAB, IMAGING, OTHER | `@IsOptional()` `@IsIn(ANALYSIS_CATEGORIES)` | Categoría de análisis (C2). Se resuelve a categoryConceptId (LAB → SR_LAB, IMAGING → SR_IMAGING, OTHER → SR_OTHER). Si viaja con categoryConceptId y no coinciden: 422 SERVICE_REQUEST_CATEGORY_MISMATCH | `src/modules/clinical/dto/service-request.dto.ts:102` |
+| `basedOnNoteIds` | `array<string>` | No | formato uuid; máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(MAX_BASED_ON_NOTES)` `@ArrayUnique()` `@IsUUID(undefined, { each: true })` | Notas médicas (chart.clinical_note_headers) que motivan la orden. Cada una debe ser del mismo paciente, de un encuentro del tenant custodio, firmada o enmendada y sin confidencialidad restringida (si no, 422 BASED_ON_NOTE_NOT_FOUND, sin distinguir el motivo); y, si la orden tiene encuentro, del mismo encuentro (422 BASED_ON_NOTE_ENCOUNTER_MISMATCH) | `src/modules/clinical/dto/service-request.dto.ts:124` |
+| `priorityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Prioridad (concept id) | `src/modules/clinical/dto/service-request.dto.ts:135` |
+| `requesterProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Profesional solicitante | `src/modules/clinical/dto/service-request.dto.ts:146` |
+| `performerTenantId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tenant ejecutante | `src/modules/clinical/dto/service-request.dto.ts:154` |
+| `performerSelectionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Quién ejecuta la orden (concept id del conjunto `service-request-performer-selection`: SR_PERF_SELF, SR_PERF_ORGANIZATION, SR_PERF_PATIENT_CHOICE). Es una recomendación, no un candado; omitido = que elija el paciente | `src/modules/clinical/dto/service-request.dto.ts:166` |
+| `performerPractitionerProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Médico ejecutor. Obligatorio con SR_PERF_SELF (debe ser quien pide la orden); prohibido con los otros modos | `src/modules/clinical/dto/service-request.dto.ts:178` |
+| `suggestedPracticeSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden | `src/modules/clinical/dto/service-request.dto.ts:190` |
+| `previousDiagnosticReportId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason. | `src/modules/clinical/dto/service-request.dto.ts:206` |
+| `reusePreviousReport` | `boolean` | No | — | `@ValidateIf( (o: CreateServiceRequestDto) => o.reusePreviousReport !== undefined, )` `@IsBoolean()` | Reutilizar el informe previo detectado en vez de repetir el estudio | `src/modules/clinical/dto/service-request.dto.ts:221` |
+| `duplicateOverrideReason` | `string` | No | longitud mínima 20; longitud máxima 1000 | `@ValidateIf( (o: CreateServiceRequestDto) => o.duplicateOverrideReason !== undefined, )` `@IsString()` `@MinLength(20, { message: 'La justificación clínica requiere al menos 20 caracteres', })` `@MaxLength(1000)` | Justificación clínica formal para repetir un estudio duplicado (mínimo 20 caracteres) | `src/modules/clinical/dto/service-request.dto.ts:241` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -4991,6 +4995,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "formInstanceId": "00000000-0000-4000-8000-000000000001",
   "codeConceptId": "00000000-0000-4000-8000-000000000001",
   "categoryConceptId": "00000000-0000-4000-8000-000000000001",
+  "category": "LAB",
+  "basedOnNoteIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ],
   "priorityConceptId": "00000000-0000-4000-8000-000000000001",
   "requesterProfileId": "00000000-0000-4000-8000-000000000001",
   "performerTenantId": "00000000-0000-4000-8000-000000000001",
@@ -5009,16 +5017,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/service-request.dto.ts:201` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/clinical/dto/service-request.dto.ts:207` |
-| `formInstanceId` | `string` | No | formato uuid; admite null | — | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `src/modules/clinical/dto/service-request.dto.ts:218` |
-| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:224` |
-| `intent` | `string` | Sí | formato uuid | — | Intención (concept id) | `src/modules/clinical/dto/service-request.dto.ts:230` |
-| `performerSelectionConceptId` | `string` | Sí | formato uuid | — | Modo de ejecutor recomendado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:239` |
-| `performerPractitionerProfileId` | `string` | Sí | formato uuid; admite null | — | Médico ejecutor, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:245` |
-| `suggestedPracticeSiteId` | `string` | Sí | formato uuid; admite null | — | Sede sugerida, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:251` |
-| `suggestedPracticeSiteName` | `string` | Sí | admite null | — | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `src/modules/clinical/dto/service-request.dto.ts:257` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/service-request.dto.ts:263` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/clinical/dto/service-request.dto.ts:250` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | Identificador asociado a patient profile. | `src/modules/clinical/dto/service-request.dto.ts:256` |
+| `formInstanceId` | `string` | No | formato uuid; admite null | — | Instancia del formulario médico de la que salió la orden (nulo = sin formulario) | `src/modules/clinical/dto/service-request.dto.ts:267` |
+| `category` | `object` | No | — | — | Categoría de análisis derivada de categoryConceptId. Ausente = la orden no declara categoría | `src/modules/clinical/dto/service-request.dto.ts:277` |
+| `basedOnNoteIds` | `array<string>` | Sí | formato uuid | — | Notas médicas que motivan la orden (vacío = ninguna) | `src/modules/clinical/dto/service-request.dto.ts:287` |
+| `status` | `string` | Sí | formato uuid | — | Estado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:293` |
+| `intent` | `string` | Sí | formato uuid | — | Intención (concept id) | `src/modules/clinical/dto/service-request.dto.ts:299` |
+| `performerSelectionConceptId` | `string` | Sí | formato uuid | — | Modo de ejecutor recomendado (concept id) | `src/modules/clinical/dto/service-request.dto.ts:308` |
+| `performerPractitionerProfileId` | `string` | Sí | formato uuid; admite null | — | Médico ejecutor, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:314` |
+| `suggestedPracticeSiteId` | `string` | Sí | formato uuid; admite null | — | Sede sugerida, o `null`. | `src/modules/clinical/dto/service-request.dto.ts:320` |
+| `suggestedPracticeSiteName` | `string` | Sí | admite null | — | Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. | `src/modules/clinical/dto/service-request.dto.ts:326` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/clinical/dto/service-request.dto.ts:332` |
 
 ### Respuestas posibles
 
@@ -5029,7 +5039,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/clinical.md).
@@ -5041,6 +5051,7 @@ El árbol de decisión completo está en [flujos](../flujos/clinical.md).
 | INTEGRACION | `test/integration/hardening/mch-027.int-spec.ts:69` |
 | INTEGRACION | `test/integration/lab-reception-inbox.int-spec.ts:158` |
 | INTEGRACION | `test/integration/medical-centers.int-spec.ts:755` |
+| INTEGRACION | `test/integration/p40-orden-basada-en-notas.int-spec.ts:163` |
 | INTEGRACION | `test/integration/patient-diagnostic-orders.int-spec.ts:87` |
 | CONTROLADOR | `src/modules/clinical/controllers/clinical-orders.controller.spec.ts:36` |
 
@@ -5098,7 +5109,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `clinical.diagnostic_reports` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:131` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → EncountersRepository.findById | `src/modules/clinical/repositories/encounters.repository.ts:169` |
 | `clinical.service_requests` | LEE | LEE | POR_SQL | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → DuplicateStudyDetector.findDuplicate | `src/modules/clinical/services/duplicate-study-detector.ts:104` |
-| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ServiceRequestsService.resolveCodeConceptId | `src/modules/clinical/services/service-requests.service.ts:468` |
+| `diagnostic_units.diagnostic_study_offerings` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ServiceRequestsService.resolveCodeConceptId | `src/modules/clinical/services/service-requests.service.ts:521` |
 | `diagnostics.diagnostic_report_versions` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → DuplicateStudyDetector.findDuplicate → DuplicateStudyDetector.releasedVersionOf | `src/modules/clinical/services/duplicate-study-detector.ts:375` |
 | `directory.tenants` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → DuplicateStudyDetector.findActiveOrderWithoutReport → DuplicateStudyDetector.providerName | `src/modules/clinical/services/duplicate-study-detector.ts:425` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ClinicalOrdersController.checkDuplicateStudy → ServiceRequestsService.checkDuplicate → ClinicalReadService.assertCanReadHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
