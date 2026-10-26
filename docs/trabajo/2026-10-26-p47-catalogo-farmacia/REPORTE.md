@@ -62,6 +62,22 @@ insertar el producto. Corregido pasando el contexto de transacción; corrida sig
 falló sólo en la limpieza: `pharmacy_product_prices_history` es append-only y retiene por FK; la prueba ahora usa el
 guard de residuo permanente, como la de contabilidad.
 
+### Tras el merge con la rama compartida (08:xx)
+
+```text
+$ yarn ng test --watch=false --include … (front, tras merge con P34/P37/otros)
+ Test Files  1 failed | 107 passed (108)
+      Tests  1 failed | 1293 passed (1294)
+ FAIL src/app/core/mock/handlers/received-services.handlers.spec.ts > … > un paciente no lee los servicios de otro
+$ yarn typecheck (front)  → EXIT=0
+$ yarn build (front, aparte del hook por memoria) → EXIT=0 ; push con SALTAR_BUILD=1
+$ yarn test src/modules/pharmacy src/modules/public src/modules/pharmacy_inventory (API tras merge) → 51 suites, 601 tests PASS
+```
+
+El fallo de `received-services.handlers.spec.ts` no es de P47 (archivo de «Servicios recibidos», commit
+`bdec2a69d`, no tocado aquí). Varias corridas de `ng test` murieron con SIGHUP (exit 129, esbuild «all goroutines are
+asleep») al heredar la sesión; con `setsid` corrió completo.
+
 ## Seguridad (regla 90.6) — hallazgos MEDIUM del revisor
 
 1. **Categoría de otra farmacia.** Amenaza: colgar a un producto la categoría de otra farmacia (FK simple).
