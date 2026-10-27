@@ -92671,6 +92671,25 @@ components:
         - latitude
         - longitude
       additionalProperties: false
+    ReverseGeocodingAdminAreasDto:
+      type: object
+      properties:
+        level1:
+          type: string
+          description: 'Nivel 1: departamento, estado o región'
+          example: Santa Cruz
+        level2:
+          type: string
+          description: 'Nivel 2: provincia o condado'
+          example: Provincia Andrés Ibáñez
+        level3:
+          type: string
+          description: 'Nivel 3: municipio o ciudad'
+          example: Santa Cruz de la Sierra
+        district:
+          type: string
+          description: Distrito o zona dentro del municipio
+          example: Equipetrol
     ReverseGeocodingResponseDto:
       type: object
       properties:
@@ -92688,6 +92707,12 @@ components:
           type: string
         city:
           type: string
+        countryCode:
+          type: string
+          description: País del punto, ISO 3166-1 alfa-2 en mayúsculas
+          example: BO
+        adminAreas:
+          $ref: '#/components/schemas/ReverseGeocodingAdminAreasDto'
         attribution:
           type: string
           description: Atribución que exige la licencia de los datos

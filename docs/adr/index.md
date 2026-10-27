@@ -34,6 +34,7 @@
 | [0024](ADR-0024-portal-admin-catalogo-de-datos.md) | Portal administrativo — catálogo de datos como módulo propio con jobs durables | Aceptado (desvío declarado de 0021) |
 | [0025](ADR-0025-qa-runner-en-servidor.md) | QA Lab ejecuta en el servidor, con destinos aprobados y aprobación ligada al plan | Aceptado (desvío declarado de 0021) |
 | [0026](ADR-0026-molde-de-modulo-ddd.md) | Molde de módulo por capas (DDD) con puertos hacia otros contextos | Aceptado (piloto: scheduling) |
+| [0028](ADR-0028-direcciones-multipais.md) | Direcciones multipaís: país, tres niveles administrativos y distrito para cualquier país | Propuesto (etapa 1 en código; etapa 2 de modelo pendiente) |
 
 ## Cómo añadir un ADR nuevo
 

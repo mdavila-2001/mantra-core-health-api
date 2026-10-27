@@ -35,6 +35,33 @@ export class ReverseGeocodingRequestDto {
   longitude!: number;
 }
 
+/** Ver `AdminAreas` en el servicio: los niveles de cualquier país. */
+export class ReverseGeocodingAdminAreasDto {
+  @ApiPropertyOptional({
+    description: 'Nivel 1: departamento, estado o región',
+    example: 'Santa Cruz',
+  })
+  level1?: string;
+
+  @ApiPropertyOptional({
+    description: 'Nivel 2: provincia o condado',
+    example: 'Provincia Andrés Ibáñez',
+  })
+  level2?: string;
+
+  @ApiPropertyOptional({
+    description: 'Nivel 3: municipio o ciudad',
+    example: 'Santa Cruz de la Sierra',
+  })
+  level3?: string;
+
+  @ApiPropertyOptional({
+    description: 'Distrito o zona dentro del municipio',
+    example: 'Equipetrol',
+  })
+  district?: string;
+}
+
 export class ReverseGeocodingResponseDto {
   @ApiProperty({
     description: '`false` si no se conoce ninguna calle en ese punto',
@@ -55,6 +82,15 @@ export class ReverseGeocodingResponseDto {
 
   @ApiPropertyOptional()
   city?: string;
+
+  @ApiPropertyOptional({
+    description: 'País del punto, ISO 3166-1 alfa-2 en mayúsculas',
+    example: 'BO',
+  })
+  countryCode?: string;
+
+  @ApiPropertyOptional({ type: ReverseGeocodingAdminAreasDto })
+  adminAreas?: ReverseGeocodingAdminAreasDto;
 
   @ApiProperty({ description: 'Atribución que exige la licencia de los datos' })
   attribution!: string;
