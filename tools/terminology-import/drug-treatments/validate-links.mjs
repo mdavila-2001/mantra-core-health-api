@@ -19,24 +19,36 @@ import { join } from 'node:path';
 
 import { BUILD_DIR, nowIso, writeJson } from '../lib/glossary-es/common.mjs';
 import { linkStats, mergeTargets, resolveTargets } from './lib/link.mjs';
-import { DB_CONFIG, readAssertions } from './load-drug-treatments.mjs';
+import { DB_CONFIG, assertionChunks } from './load-drug-treatments.mjs';
 
 const args = process.argv.slice(2);
 const TARGETS = mergeTargets(args.includes('--targets') ? JSON.parse(readFileSync(args[args.indexOf('--targets') + 1], 'utf8')) : {});
 
 async function main() {
-  const assertions = readAssertions();
   const client = new pg.Client(DB_CONFIG);
   await client.connect();
   try {
-    const { map, used, existingCodeSystems } = await resolveTargets(client, assertions, TARGETS);
-    const perSource = linkStats(assertions, map);
-    const drugsWithoutMatch = new Set();
-    for (const a of assertions) {
-      if (a.drug.combination) continue;
-      if (![...a.drug.codes, ...a.crosswalk.drug].some((c) => map.has(`${c.system}:${c.code}`))) drugsWithoutMatch.add(a.pairKey.split('|')[0]);
+    const perSource = {};
+    const drugsMatched = new Set();
+    const drugsAll = new Set();
+    let used = null;
+    let existingCodeSystems = null;
+    for await (const { assertions } of assertionChunks()) {
+      const r = await resolveTargets(client, assertions, TARGETS);
+      used ??= r.used;
+      existingCodeSystems ??= r.existingCodeSystems;
+      for (const [k, v] of Object.entries(linkStats(assertions, r.map))) {
+        const l = (perSource[k] ??= { assertions: 0, drug: 0, condition: 0, both: 0 });
+        for (const f of Object.keys(l)) l[f] += v[f];
+      }
+      for (const a of assertions) {
+        if (a.drug.combination) continue;
+        drugsAll.add(a.pairKey.split('|')[0]);
+        if ([...a.drug.codes, ...a.crosswalk.drug].some((c) => r.map.has(`${c.system}:${c.code}`))) drugsMatched.add(a.pairKey.split('|')[0]);
+      }
     }
-    const report = { generatedAt: nowIso(), targets: TARGETS, used, existingCodeSystems, perSource, drugsWithoutCatalogMatch: drugsWithoutMatch.size };
+    // Un fármaco (clave canónica) cuenta como «sin match» solo si NINGUNA de sus afirmaciones enlazó.
+    const report = { generatedAt: nowIso(), targets: TARGETS, used, existingCodeSystems, perSource, drugsTotal: drugsAll.size, drugsWithCatalogMatch: drugsMatched.size, drugsWithoutCatalogMatch: drugsAll.size - drugsMatched.size };
     writeJson(join(BUILD_DIR, 'drug-treatments-links.json'), report, true);
     console.log(JSON.stringify(report, null, 2));
   } finally {

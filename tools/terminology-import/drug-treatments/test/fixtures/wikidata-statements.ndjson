@@ -1,0 +1,5 @@
+{"property": "P2175", "statement": "Q1002165-07C474BD-8815-462F-8FB4-549E4F35688C", "subject": "Q1002165", "object": "Q3286546", "rank": "NormalRank", "statedIn": ["Q56863002"]}
+{"property": "P2176", "statement": "Q1004647-146B07C3-2E84-4C3B-848C-DB959D27173A", "subject": "Q1004647", "object": "Q11426176", "rank": "NormalRank", "statedIn": ["Q56863002"]}
+{"property": "P2175", "statement": "Q1001106-11ed8d53-4a32-7d7d-f64d-6f88eb6a8f5c", "subject": "Q1001106", "object": "Q949302", "rank": "NormalRank", "statedIn": []}
+{"property": "P2175", "statement": "Q165399-c7e9e6c6-41b3-f8bd-25b7-38dda98ffce6", "subject": "Q165399", "object": "Q84263196", "rank": "DeprecatedRank", "statedIn": ["Q105069507"]}
+{"property": "P2176", "statement": "Q105091160-411cb6bc-4698-388b-0736-d376f7a28240", "subject": "Q105091160", "object": "Q192553", "rank": "NormalRank", "statedIn": ["Q90384106"]}

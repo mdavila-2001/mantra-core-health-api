@@ -36,6 +36,8 @@ export const PROPERTY = {
   SOURCE_LICENSE: 'source_license',
   SOURCE_REPOSITORY: 'source_repository',
   SOURCE_COMMIT: 'source_commit',
+  SOURCE_RELEASE: 'source_release',
+  SOURCE_FILE_URL: 'source_file_url',
   SOURCE_FILE: 'source_file',
   SOURCE_FILE_SHA256: 'source_file_sha256',
   TYPE_DEFINITION_EN: 'relation_type_definition_en',
@@ -116,6 +118,8 @@ export function propertiesFor(a) {
     ...text(PROPERTY.SOURCE_LICENSE, a.source.license),
     ...text(PROPERTY.SOURCE_REPOSITORY, a.source.repo),
     ...text(PROPERTY.SOURCE_COMMIT, a.source.commit),
+    ...text(PROPERTY.SOURCE_RELEASE, a.source.release),
+    ...text(PROPERTY.SOURCE_FILE_URL, a.source.fileUrl),
     ...text(PROPERTY.SOURCE_FILE, a.source.file),
     ...text(PROPERTY.SOURCE_FILE_SHA256, a.source.fileSha256),
   ];
@@ -125,7 +129,7 @@ export function propertiesFor(a) {
 export function assertionsPlan(sourceKey, assertions) {
   const def = SOURCES[sourceKey];
   const internalCode = assertionCodeSystem(sourceKey);
-  const base = codeSystemPlan(internalCode, `Afirmaciones publicadas fármaco → enfermedad: ${def.name}`, def.commit);
+  const base = codeSystemPlan(internalCode, `Afirmaciones publicadas fármaco → enfermedad: ${def.name}`, def.commit ?? def.versionTag);
   return {
     ...base,
     source: sourcePlan(`DRUG_TREATMENTS_${sourceKey.toUpperCase().replace(/-/g, '_')}`, def),

@@ -20,16 +20,25 @@ const read = (name) => readFileSync(join(FIX, name), 'utf8');
 const prov = (file) => ({ version: 'v-test', retrievedAt: '2026-10-24T00:00:00.000Z', commit: 'c0ffee', file, fileSha256: 'abc' });
 const keys = (codes) => codes.map((c) => `${c.system}:${c.code}`);
 
-test('cada fuente declara repo, commit fijado, versión, licencia y archivos', () => {
+test('cada fuente declara versión y licencia; las de GitHub, repo y commit fijado; las de HTTP, URL y versión etiquetada', () => {
   for (const [key, def] of Object.entries(SOURCES)) {
-    assert.match(def.repo, /^https:\/\/github\.com\/.+\.git$/, key);
-    assert.match(def.commit, /^[0-9a-f]{40}$/, key);
     for (const k of ['name', 'owner', 'version', 'license']) assert.ok(def[k], `${key}.${k}`);
     assert.ok(Object.keys(def.files).length > 0, key);
+    if (def.transport === 'http') {
+      assert.ok(def.versionTag, `${key}.versionTag`);
+      assert.ok(def.licenseUrl, `${key}.licenseUrl`);
+      assert.ok(Object.keys(def.urls ?? {}).length > 0, `${key}.urls`);
+      for (const url of Object.values(def.urls)) assert.match(url, /^https:\/\//, key);
+    } else {
+      assert.match(def.repo, /^https:\/\/github\.com\/.+\.git$/, key);
+      assert.match(def.commit, /^[0-9a-f]{40}$/, key);
+    }
   }
   for (const [key, def] of Object.entries(RELATION_TYPES)) {
     assert.ok(SOURCES[def.source], key);
-    assert.ok(['positive', 'negative', 'investigational'].includes(def.polarity), key);
+    assert.ok(['positive', 'negative', 'investigational', 'diagnostic', 'conditional'].includes(def.polarity), key);
+    assert.ok(key.startsWith(`${def.source}:`), key);
+    assert.ok(def.definitionEn && def.labelEs, key);
   }
 });
 

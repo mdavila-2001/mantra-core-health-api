@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<terminology>
+	<namespace>
+		<name>MED-RT</name>
+		<code>2.16.840.1.113883.6.345</code>
+		<version>2026.10.05</version>
+		<authority>Apelon, Inc.</authority>
+	</namespace>
+	<referencedNamespace>
+		<name>RxNorm</name>
+		<code>2.16.840.1.113883.6.88</code>
+		<version>2026.09.08.26AA</version>
+		<authority>National Library of Medicine</authority>
+	</referencedNamespace>
+	<referencedNamespace>
+		<name>MeSH</name>
+		<code>2.16.840.1.113883.6.177</code>
+		<version>2026_2026.07.01</version>
+		<authority>National Library of Medicine</authority>
+	</referencedNamespace>
+	<referencedNamespace>
+		<name>SNOMED CT US Edition</name>
+		<code>2.16.840.1.113883.6.96</code>
+		<version>2026.09.26AA</version>
+		<authority>National Library of Medicine</authority>
+	</referencedNamespace>
+	<proptype type="C">
+		<namespace>MED-RT</namespace>
+		<name>CTY</name>
+	</proptype>
+	<proptype type="C">
+		<namespace>MED-RT</namespace>
+		<name>NUI</name>
+	</proptype>
+		<association>
+		<namespace>MED-RT</namespace>
+		<name>may_treat</name>
+		<from_namespace>RxNorm</from_namespace>
+		<from_name>palivizumab</from_name>
+		<from_code>194279</from_code>
+		<to_namespace>MeSH</to_namespace>
+		<to_name>Respiratory Syncytial Virus Infections</to_name>
+		<to_code>M0027589</to_code>
+		<qualifier>
+			<namespace>MED-RT</namespace>
+			<name>Authority</name>
+			<value>FMTSME</value>
+		</qualifier>
+	</association>
+	<association>
+		<namespace>MED-RT</namespace>
+		<name>may_prevent</name>
+		<from_namespace>MED-RT</from_namespace>
+		<from_name>Respiratory Syncytial Virus Anti-F Protein Monoclonal Antibody [EPC]</from_name>
+		<from_code>N0000175623</from_code>
+		<to_namespace>MeSH</to_namespace>
+		<to_name>Respiratory Syncytial Virus Infections</to_name>
+		<to_code>M0027589</to_code>
+		<qualifier>
+			<namespace>MED-RT</namespace>
+			<name>Authority</name>
+			<value>FMTSME</value>
+		</qualifier>
+	</association>
+	<association>
+		<namespace>MED-RT</namespace>
+		<name>may_prevent</name>
+		<from_namespace>RxNorm</from_namespace>
+		<from_name>clesrovimab</from_name>
+		<from_code>2716802</from_code>
+		<to_namespace>MeSH</to_namespace>
+		<to_name>Respiratory Syncytial Virus Infections</to_name>
+		<to_code>M0027589</to_code>
+		<qualifier>
+			<namespace>MED-RT</namespace>
+			<name>Authority</name>
+			<value>MEDRT</value>
+		</qualifier>
+	</association>
+	<association>
+		<namespace>MED-RT</namespace>
+		<name>may_treat</name>
+		<from_namespace>RxNorm</from_namespace>
+		<from_name>sertraline</from_name>
+		<from_code>36437</from_code>
+		<to_namespace>MeSH</to_namespace>
+		<to_name>Depressive Disorder</to_name>
+		<to_code>M0006033</to_code>
+		<qualifier>
+			<namespace>MED-RT</namespace>
+			<name>Authority</name>
+			<value>MEDRT</value>
+		</qualifier>
+	</association>
+	<association>
+		<namespace>MED-RT</namespace>
+		<name>CI_with</name>
+		<from_namespace>RxNorm</from_namespace>
+		<from_name>deserpidine</from_name>
+		<from_code>62174</from_code>
+		<to_namespace>MeSH</to_namespace>
+		<to_name>Depressive Disorder</to_name>
+		<to_code>M0006033</to_code>
+		<qualifier>
+			<namespace>MED-RT</namespace>
+			<name>Authority</name>
+			<value>MEDRT</value>
+		</qualifier>
+	</association>
+	<association>
+		<namespace>MED-RT</namespace>
+		<name>CI_with</name>
+		<from_namespace>RxNorm</from_namespace>
+		<from_name>reserpine</from_name>
+		<from_code>9260</from_code>
+		<to_namespace>MeSH</to_namespace>
+		<to_name>Depressive Disorder</to_name>
+		<to_code>M0006033</to_code>
+		<qualifier>
+			<namespace>MED-RT</namespace>
+			<name>Authority</name>
+			<value>MEDRT</value>
+		</qualifier>
+	</association>
+	<association>
+		<namespace>MED-RT</namespace>
+		<name>may_diagnose</name>
+		<from_namespace>RxNorm</from_namespace>
+		<from_name>dexamethasone acetate</from_name>
+		<from_code>22690</from_code>
+		<to_namespace>MeSH</to_namespace>
+		<to_name>Depressive Disorder</to_name>
+		<to_code>M0006033</to_code>
+		<qualifier>
+			<namespace>MED-RT</namespace>
+			<name>Authority</name>
+			<value>MEDRT</value>
+		</qualifier>
+	</association>
+	<association>
+		<namespace>MED-RT</namespace>
+		<name>induces</name>
+		<from_namespace>RxNorm</from_namespace>
+		<from_name>pentylenetetrazole</from_name>
+		<from_code>8015</from_code>
+		<to_namespace>MeSH</to_namespace>
+		<to_name>Epilepsy</to_name>
+		<to_code>M0007564</to_code>
+		<qualifier>
+			<namespace>MED-RT</namespace>
+			<name>Authority</name>
+			<value>MEDRT</value>
+		</qualifier>
+	</association>
+	<association>
+		<namespace>MED-RT</namespace>
+		<name>has_MoA</name>
+		<from_namespace>RxNorm</from_namespace>
+		<from_name>prasterone sodium sulfate</from_name>
+		<from_code>1366962</from_code>
+		<to_namespace>MED-RT</to_namespace>
+		<to_name>Cellular or Molecular Interactions [MoA]</to_name>
+		<to_code>N0000000223</to_code>
+		<qualifier>
+			<namespace>MED-RT</namespace>
+			<name>Authority</name>
+			<value>MEDRT</value>
+		</qualifier>
+	</association>
+</terminology>

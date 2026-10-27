@@ -20,7 +20,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { BUILD_DIR, ndjsonPath, nowIso, writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
-import { drugCentralIndex, mondoIndex, withCrosswalk } from './lib/crosswalk.mjs';
+import { drugCentralIndex, extendDrugCentralIndex, mondoIndex, withCrosswalk } from './lib/crosswalk.mjs';
+import { OPEN_PARSERS, openCrosswalks } from './lib/build-open.mjs';
+import { readManifest as readHttpManifest } from './lib/http-files.mjs';
 import { drugCentralIdentifiers, parseDrugCentral2016, parseDrugMechDb, parseLabeledIn, parseMaxo, parsePharmacotherapyDb } from './lib/parsers.mjs';
 import { PASSES, coverage } from './lib/report.mjs';
 import { CROSSWALKS, SOURCES, cloneDirName } from './lib/sources.mjs';
@@ -39,7 +41,7 @@ function sourceFile(manifest, key, fileKey) {
   };
 }
 
-const PARSE = {
+const PARSE_GIT = {
   labeledin: (m) => {
     const expert = sourceFile(m, 'labeledin', 'expert');
     const crowd = sourceFile(m, 'labeledin', 'crowd');
@@ -65,20 +67,27 @@ const PARSE = {
   },
 };
 
+const PARSE = { ...PARSE_GIT, ...OPEN_PARSERS };
+
 async function main() {
   const t0 = Date.now();
   if (!existsSync(MANIFEST)) throw new Error(`Falta ${MANIFEST}. Corré fetch-sources.mjs.`);
   const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'));
   const mondo = mondoIndex(sourceFile(manifest, 'mondo', 'sssom').text);
   const drugCentral = drugCentralIndex(drugCentralIdentifiers(sourceFile(manifest, 'drugcentral-2016', 'identifiers').text));
+  const httpManifest = readHttpManifest();
+  const open = openCrosswalks(httpManifest);
+  // Identificadores de DrugCentral 2027 (CC BY-SA 4.0): suman códigos sin pisar los de 2016 (CC BY 4.0); cada código lleva su `via`.
+  if (open.drugCentralIdentifiers) extendDrugCentralIndex(drugCentral, open.drugCentralIdentifiers, 'drugcentral-identifiers-2027');
+  console.log(`[build] cruces abiertos: ${open.used.join(', ') || 'ninguno'}`);
 
   const all = [];
   const perSource = {};
   for (const pass of PASSES) {
     for (const key of pass.sources) {
-      const { assertions, stats } = PARSE[key](manifest);
+      const { assertions, stats } = PARSE[key](PARSE_GIT[key] ? manifest : httpManifest);
       perSource[key] = { pass: pass.number, stats };
-      for (const a of assertions) all.push(withCrosswalk(a, { mondo, drugCentral }));
+      for (const a of assertions) all.push(withCrosswalk(a, { mondo, drugCentral, mesh: open.mesh, atc: open.atc }));
       console.log(`[build] pasada ${pass.number} · ${key}: ${assertions.length} afirmaciones`);
     }
   }
@@ -92,7 +101,7 @@ async function main() {
     buildDir: BUILD_DIR,
     assertions: all.length,
     sources: Object.fromEntries(Object.entries(perSource).map(([k, v]) => [k, { ...v, ...SOURCES[k], files: undefined }])),
-    crosswalks: Object.fromEntries(Object.entries(CROSSWALKS).map(([k, v]) => [k, { name: v.name, repo: v.repo, commit: v.commit, version: v.version, license: v.license }])),
+    crosswalks: Object.fromEntries(Object.entries(CROSSWALKS).filter(([k]) => !CROSSWALKS[k].transport || open.used.includes(k)).map(([k, v]) => [k, { name: v.name, repo: v.repo, commit: v.commit, version: v.version, license: v.license }])),
     regla: 'Cada afirmación conserva el tipo que declara su fuente. Los códigos agregados por cruce van en crosswalk con via y predicate. Nada se deduce por nombre.',
     segundos: Math.round((Date.now() - t0) / 1000),
   };

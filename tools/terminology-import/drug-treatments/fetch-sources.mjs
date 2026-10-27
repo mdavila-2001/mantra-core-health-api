@@ -17,7 +17,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { cacheDir, ensureDir, nowIso, sha256File, writeJson } from '../lib/glossary-es/common.mjs';
-import { CROSSWALKS, SOURCES, cloneDirName } from './lib/sources.mjs';
+import { CROSSWALKS, SOURCES, cloneDirName, isHttp } from './lib/sources.mjs';
 
 export const CACHE = cacheDir('drug-treatments');
 export const MANIFEST = join(CACHE, 'manifest.json');
@@ -56,6 +56,7 @@ async function main() {
   // Las fuentes que comparten repo y commit comparten clon: se juntan sus archivos.
   const byDir = new Map();
   for (const [key, def] of Object.entries(all)) {
+    if (isHttp(def)) continue; // las fuentes HTTP las baja fetch-open-sources.mjs
     const dirName = cloneDirName(key);
     const entry = byDir.get(dirName) ?? { def, keys: [], paths: new Set() };
     entry.keys.push(key);

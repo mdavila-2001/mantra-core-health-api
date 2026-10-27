@@ -25,7 +25,8 @@
 
 import 'dotenv/config';
 import pg from 'pg';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { createReadStream, existsSync, readdirSync, readFileSync } from 'node:fs';
+import { createInterface } from 'node:readline';
 import { join } from 'node:path';
 import { gunzipSync } from 'node:zlib';
 
@@ -34,7 +35,6 @@ import { CONCEPT, md5uuid } from '../lib/glossary-es/load-plan.mjs';
 import { DATA_DIR } from './export-data.mjs';
 import { linkStats, mergeTargets, resolveTargets } from './lib/link.mjs';
 import { assertionsPlan, relationshipsFor, typesPlan } from './lib/load-plan.mjs';
-import { SOURCES } from './lib/sources.mjs';
 
 const args = process.argv.slice(2);
 const APPLY = args.includes('--apply');
@@ -49,20 +49,39 @@ export const DB_CONFIG = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
-/** Del build local si existe; si no, de las partes versionadas en `data/` (export-data.mjs). */
-export function readAssertions() {
+/**
+ * Afirmaciones por TROZOS de una sola fuente (el corpus ya pasa de 300 000 y no entra entero en memoria
+ * junto con sus propiedades). Del build local si existe; si no, de las partes versionadas en `data/`.
+ * El archivo está ordenado por pasada y fuente: una fuente es contigua, así que se emite un trozo cuando
+ * cambia la fuente o se llega a `size`.
+ */
+export async function* assertionChunks({ size = 4000 } = {}) {
+  let sourceKey = null;
+  let buffer = [];
+  const flush = function* () {
+    if (buffer.length > 0) yield { sourceKey, assertions: buffer };
+    buffer = [];
+  };
+  const push = function* (a) {
+    if (a.source.key !== sourceKey || buffer.length >= size) {
+      yield* flush();
+      sourceKey = a.source.key;
+    }
+    buffer.push(a);
+  };
   const path = ndjsonPath('drug-treatments');
-  if (existsSync(path)) return readNdjson(path);
-  const parts = existsSync(DATA_DIR) ? readdirSync(DATA_DIR).filter((f) => /^drug-treatments-\d{3}\.ndjson\.gz$/.test(f)).sort() : [];
-  if (parts.length === 0) throw new Error(`Falta ${path} y no hay partes en ${DATA_DIR}. Corré build-drug-treatments.mjs.`);
-  console.log(`[load] leyendo ${parts.length} partes versionadas de ${DATA_DIR}`);
-  return parts.flatMap((f) =>
-    gunzipSync(readFileSync(join(DATA_DIR, f)))
-      .toString('utf8')
-      .split('\n')
-      .filter((l) => l.trim() !== '')
-      .map((l) => JSON.parse(l)),
-  );
+  if (existsSync(path)) {
+    const rl = createInterface({ input: createReadStream(path, { encoding: 'utf8' }), crlfDelay: Infinity });
+    for await (const line of rl) if (line.trim() !== '') yield* push(JSON.parse(line));
+  } else {
+    const parts = existsSync(DATA_DIR) ? readdirSync(DATA_DIR).filter((f) => /^drug-treatments-\d{3}\.ndjson\.gz$/.test(f)).sort() : [];
+    if (parts.length === 0) throw new Error(`Falta ${path} y no hay partes en ${DATA_DIR}. Corré build-drug-treatments.mjs.`);
+    console.log(`[load] leyendo ${parts.length} partes versionadas de ${DATA_DIR}`);
+    for (const f of parts) {
+      for (const l of gunzipSync(readFileSync(join(DATA_DIR, f))).toString('utf8').split('\n')) if (l.trim() !== '') yield* push(JSON.parse(l));
+    }
+  }
+  yield* flush();
 }
 
 async function insertMany(client, table, columns, tuples, casts) {
@@ -112,29 +131,16 @@ async function ensureCodeSystem(client, plan) {
   return { sourceId: src[0].id, versionId: csv[0].id };
 }
 
+/** Carga un plan (el de todo un code system o el de un trozo). Una transacción por llamada; idempotente. */
 async function loadPlan(client, plan, relationships) {
-  const startedAt = new Date();
   await client.query('BEGIN');
   try {
     const { sourceId, versionId } = await ensureCodeSystem(client, plan);
     for (const c of plan.concepts) c[1] = versionId;
-    const r = { codeSystem: plan.codeSystem.internalCode };
+    const r = { codeSystem: plan.codeSystem.internalCode, sourceId, versionId };
     r.concepts = await insertMany(client, 'catalog_concepts', ['id', 'code_system_version_id', 'code', 'display', 'definition', 'state_concept_id'], plan.concepts, ['uuid', 'uuid', null, null, null, 'uuid']);
     r.properties = await insertMany(client, 'concept_properties', ['id', 'concept_id', 'property_code', 'data_type', 'value_json'], plan.properties, ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb']);
     r.relationships = await insertMany(client, 'concept_relationships', ['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'], relationships, ['uuid', 'uuid', 'uuid', 'uuid', null]);
-    await client.query(
-      `INSERT INTO terminology.catalog_import_batches (id, source_id, code_system_version_id, started_at, finished_at, total_read, total_inserted, total_errors, checksum, recorded_at)
-       VALUES ($1::uuid, $2::uuid, $3::uuid, $4, now(), $5, $6, 0, $7, now())`,
-      [
-        md5uuid(`mantra:drug-treatments:batch:${plan.codeSystem.internalCode}:${startedAt.toISOString()}`),
-        sourceId,
-        versionId,
-        startedAt,
-        plan.concepts.length,
-        r.concepts + r.properties + r.relationships,
-        md5uuid(plan.concepts.map((c) => c[0]).join('|')),
-      ],
-    );
     await client.query('COMMIT');
     return r;
   } catch (err) {
@@ -143,18 +149,30 @@ async function loadPlan(client, plan, relationships) {
   }
 }
 
+/** Un lote de importación por code system, con el total leído y lo insertado en esta corrida (como load-medicine-catalog.mjs). */
+async function recordBatch(client, plan, totals, startedAt) {
+  await client.query(
+    `INSERT INTO terminology.catalog_import_batches (id, source_id, code_system_version_id, started_at, finished_at, total_read, total_inserted, total_errors, checksum, recorded_at)
+     VALUES ($1::uuid, $2::uuid, $3::uuid, $4, now(), $5, $6, 0, $7, now())`,
+    [md5uuid(`mantra:drug-treatments:batch:${totals.codeSystem}:${startedAt.toISOString()}`), totals.sourceId, totals.versionId, startedAt, totals.read, totals.concepts + totals.properties + totals.relationships, md5uuid(`${totals.codeSystem}:${totals.read}`)],
+  );
+}
+
 async function main() {
   const t0 = Date.now();
   console.log(`=== Tratamientos farmacológicos → terminology.* ${APPLY ? '(CARGA REAL)' : '(DRY-RUN, sin base)'} ===`);
-  const assertions = readAssertions();
   const types = typesPlan();
-  const plans = Object.keys(SOURCES)
-    .map((key) => assertionsPlan(key, assertions.filter((a) => a.source.key === key)))
-    .filter((p) => p.concepts.length > 0);
-  const summary = [types, ...plans].map((p) => ({ codeSystem: p.codeSystem.internalCode, version: p.version.version, concepts: p.concepts.length, properties: p.properties.length }));
-  console.log(JSON.stringify(summary, null, 2));
 
   if (!APPLY) {
+    const counts = {};
+    for await (const { sourceKey, assertions } of assertionChunks()) {
+      const plan = assertionsPlan(sourceKey, assertions);
+      const c = (counts[sourceKey] ??= { codeSystem: plan.codeSystem.internalCode, version: plan.version.version, concepts: 0, properties: 0 });
+      c.concepts += plan.concepts.length;
+      c.properties += plan.properties.length;
+    }
+    const summary = [{ codeSystem: types.codeSystem.internalCode, version: types.version.version, concepts: types.concepts.length, properties: types.properties.length }, ...Object.values(counts)];
+    console.log(JSON.stringify(summary, null, 2));
     writeJson(join(BUILD_DIR, 'drug-treatments-load-plan.dry-run.json'), { generatedAt: nowIso(), summary, targets: TARGETS }, true);
     console.log('DRY-RUN: no se tocó ninguna base. Las relaciones estructurales se calculan contra la base en --apply.');
     return;
@@ -162,18 +180,39 @@ async function main() {
 
   const client = new pg.Client(DB_CONFIG);
   await client.connect();
-  const result = [];
+  const totals = new Map();
+  const linked = {};
   try {
     const { rows } = await client.query('SELECT id FROM terminology.catalog_concepts WHERE id = $1::uuid', [CONCEPT.TERM_ACTIVE]);
     if (rows.length !== 1) throw new Error('Falta el concepto interno «estado activo»: arrancá la API una vez para que siembre terminology.');
-    const { map, used } = await resolveTargets(client, assertions, TARGETS);
-    console.log(`[load] destinos usados por sistema: ${JSON.stringify(used)}`);
-    result.push(await loadPlan(client, types, []));
-    for (const plan of plans) result.push(await loadPlan(client, plan, plan.assertions.flatMap((a) => relationshipsFor(a, map))));
-    console.log(`[load] enlace: ${JSON.stringify(linkStats(assertions, map))}`);
+    const startedAt = new Date();
+    const add = (plan, r, read) => {
+      const t = totals.get(r.codeSystem) ?? { codeSystem: r.codeSystem, sourceId: r.sourceId, versionId: r.versionId, read: 0, concepts: 0, properties: 0, relationships: 0, plan };
+      t.read += read;
+      for (const k of ['concepts', 'properties', 'relationships']) t[k] += r[k];
+      totals.set(r.codeSystem, t);
+    };
+    add(types, await loadPlan(client, types, []), types.concepts.length);
+    let usedTargets = null;
+    for await (const { sourceKey, assertions } of assertionChunks()) {
+      const { map, used } = await resolveTargets(client, assertions, TARGETS);
+      usedTargets ??= used;
+      const plan = assertionsPlan(sourceKey, assertions);
+      const r = await loadPlan(client, plan, assertions.flatMap((a) => relationshipsFor(a, map)));
+      add(plan, r, assertions.length);
+      for (const [k, v] of Object.entries(linkStats(assertions, map))) {
+        const l = (linked[k] ??= { assertions: 0, drug: 0, condition: 0, both: 0 });
+        for (const f of Object.keys(l)) l[f] += v[f];
+      }
+      process.stdout.write(`\r[load] ${sourceKey}: ${totals.get(plan.codeSystem.internalCode).read} afirmaciones   `);
+    }
+    console.log(`\n[load] destinos usados por sistema: ${JSON.stringify(usedTargets)}`);
+    for (const t of totals.values()) await recordBatch(client, t.plan, t, startedAt);
+    console.log(`[load] enlace: ${JSON.stringify(linked)}`);
   } finally {
     await client.end();
   }
+  const result = [...totals.values()].map(({ plan, sourceId, versionId, read, ...rest }) => ({ ...rest, read }));
   console.log('\n=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===');
   console.log(JSON.stringify({ result, segundos: Math.round((Date.now() - t0) / 1000) }, null, 2));
 }

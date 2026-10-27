@@ -14,7 +14,9 @@
 // castellano es traducción propia (`labelEsOfficial: false`).
 // =============================================================================
 
-export const SOURCES = {
+import { OPEN_CROSSWALKS, OPEN_RELATION_TYPES, OPEN_SOURCES } from './open-sources.mjs';
+
+const GIT_SOURCES = {
   labeledin: {
     name: 'LabeledIn — indicaciones rotuladas en fichas de la FDA (NLM/NCBI)',
     owner: 'National Library of Medicine, NCBI (Khare R, Li J, Lu Z)',
@@ -80,8 +82,7 @@ export const SOURCES = {
   },
 };
 
-/** Cruces publicados para resolver códigos. No aportan relaciones fármaco → enfermedad. */
-export const CROSSWALKS = {
+const GIT_CROSSWALKS = {
   mondo: {
     name: 'MONDO — mapeos SSSOM (skos:exactMatch)',
     owner: 'Monarch Initiative',
@@ -94,10 +95,19 @@ export const CROSSWALKS = {
   },
 };
 
+/** Fuentes de GitHub (con `repo` y `commit` fijado) más las abiertas por HTTP (ver open-sources.mjs). */
+export const SOURCES = { ...GIT_SOURCES, ...OPEN_SOURCES };
+
+/** Cruces publicados para resolver códigos. No aportan relaciones fármaco → enfermedad. */
+export const CROSSWALKS = { ...GIT_CROSSWALKS, ...OPEN_CROSSWALKS };
+
+export const isHttp = (def) => def.transport === 'http';
+
 /** Clave de cada fuente/cruce → carpeta del clon (fuentes que comparten repo comparten clon). */
 export function cloneDirName(key) {
   const def = SOURCES[key] ?? CROSSWALKS[key];
   if (!def) throw new Error(`fuente desconocida: ${key}`);
+  if (isHttp(def)) throw new Error(`${key} se baja por HTTP: no tiene clon (ver fetch-open-sources.mjs)`);
   return def.repo.replace(/^https:\/\/github\.com\//, '').replace(/\.git$/, '').replace('/', '__') + '@' + def.commit.slice(0, 12);
 }
 
@@ -105,7 +115,7 @@ export function cloneDirName(key) {
  * Tipos de relación, uno por tipo que declara la fuente. `polarity: negative`
  * marca lo que la fuente publica como «no indicado»: nunca se lee como tratamiento.
  */
-export const RELATION_TYPES = {
+const GIT_RELATION_TYPES = {
   'labeledin:expert-label-indication': {
     source: 'labeledin',
     polarity: 'positive',
@@ -185,6 +195,8 @@ export const RELATION_TYPES = {
     labelEs: 'En estudio (anotación MAxO con sustancia CHEBI)',
   },
 };
+
+export const RELATION_TYPES = { ...GIT_RELATION_TYPES, ...OPEN_RELATION_TYPES };
 
 /** Tipos estructurales de la afirmación (no clínicos). */
 export const STRUCTURAL_TYPES = {

@@ -13,6 +13,12 @@ import { RELATION_TYPES } from './sources.mjs';
 export const PASSES = [
   { number: 1, sources: ['labeledin', 'pharmacotherapydb', 'drugcentral-2016', 'drugmechdb'] },
   { number: 2, sources: ['maxo'] },
+  // Pasadas del 2026-10-27 (fuentes que antes devolvían 403 del proxy). Las pasadas 3 a 5 del registro
+  // histórico (docs/seed-research/drug-treatments.md) midieron fuentes que no se cargaron.
+  { number: 6, sources: ['medrt'] },
+  { number: 7, sources: ['chembl', 'drugcentral', 'wikidata'] },
+  { number: 8, sources: ['eeml', 'ema', 'opentargets'] },
+  { number: 9, sources: ['civic', 'clinicaltrials'] },
 ];
 
 const inc = (obj, key, n = 1) => (obj[key] = (obj[key] ?? 0) + n);

@@ -1,0 +1,7 @@
+Category	Name of medicine	EMA product number	Medicine status	International non-proprietary name (INN) / common name	Active substance	Therapeutic area (MeSH)	ATC code (human)	Medicine URL
+Human	Humalog	EMEA/H/C/000088	Authorised	insulin lispro	insulin lispro	Diabetes Mellitus	A10AB04;A10AD04	https://www.ema.europa.eu/en/medicines/human/EPAR/humalog
+Human	Instanyl	EMEA/H/C/000959	Authorised	fentanyl	Fentanyl citrate	Pain;Cancer	N02AB03	https://www.ema.europa.eu/en/medicines/human/EPAR/instanyl
+Human	Pemetrexed medac	EMEA/H/C/003905	Withdrawn	pemetrexed	pemetrexed	Carcinoma, Non-Small-Cell Lung;Mesothelioma	L01BA04	https://www.ema.europa.eu/en/medicines/human/EPAR/pemetrexed-medac
+Veterinary	Stemyca	EMEA/V/C/006713	Opinion	equine umbilical cord mesenchymal stem cells	equine umbilical cord mesenchymal stem cells			https://www.ema.europa.eu/en/medicines/veterinary/EPAR/stemyca
+Human	Mylotarg	EMEA/H/C/004204	Authorised	gemtuzumab ozogamicin	gemtuzumab ozogamicin	Leukemia, Myeloid, Acute		https://www.ema.europa.eu/en/medicines/human/EPAR/mylotarg
+Human	Rezdiffra	EMEA/H/C/006220	Authorised	resmetirom	resmetirom	Non-alcoholic Fatty Liver Disease;Liver Cirrhosis	A05	https://www.ema.europa.eu/en/medicines/human/EPAR/rezdiffra

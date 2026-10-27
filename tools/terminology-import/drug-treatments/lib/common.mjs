@@ -30,6 +30,13 @@ export const SYSTEM = {
   ICD11: 'ICD11',
   NCIT: 'NCIT',
   EFO: 'EFO',
+  ATC: 'ATC',
+  MESH_CONCEPT: 'MESH_CONCEPT',
+  MEDRT_NUI: 'MEDRT_NUI',
+  WIKIDATA: 'WIKIDATA',
+  HPO: 'HPO',
+  ICD11MMS: 'ICD11MMS',
+  MESH_HEADING: 'MESH_HEADING',
 };
 
 const PATTERNS = {
@@ -50,6 +57,15 @@ const PATTERNS = {
   ICD11: /^\d+$/,
   NCIT: /^C\d+$/,
   EFO: /^\d{7}$/,
+  // ATC nivel 5 (sustancia química). Solo el código: los nombres de clase son de la OMS y no se guardan.
+  ATC: /^[A-Z]\d{2}[A-Z]{2}\d{2}$/,
+  MESH_CONCEPT: /^M\d{7,9}$/,
+  MEDRT_NUI: /^N\d{10}$/,
+  WIKIDATA: /^Q\d+$/,
+  HPO: /^\d{7}$/,
+  ICD11MMS: /^[0-9A-Z]{4}(\.[0-9A-Z]{1,3})?$/,
+  // Encabezado MeSH tal cual lo publica la fuente (texto, no identificador). Se resuelve a descriptor solo por igualdad exacta.
+  MESH_HEADING: /^\S.*\S$/,
 };
 
 /** Un código normalizado o `null` si no tiene la forma del sistema (nunca se "arregla"). */
@@ -80,6 +96,8 @@ const PREFIX = {
   EFO: 'EFO',
   CHEBI: 'CHEBI',
   DB: 'DRUGBANK',
+  HP: 'HPO',
+  NCIt: 'NCIT',
 };
 
 export function curie(raw) {
@@ -117,9 +135,12 @@ export function makeAssertion({ source, recordId, uri, type, drug, condition, ev
   const conditionCodes = uniqueCodes(condition.codes);
   if (drugCodes.length === 0) throw new Error(`${source}:${recordId} sin código de fármaco`);
   if (conditionCodes.length === 0) throw new Error(`${source}:${recordId} sin código de enfermedad`);
-  for (const k of ['version', 'retrievedAt', 'commit', 'file', 'fileSha256']) {
+  // Fuente de GitHub: commit fijado. Fuente HTTP: lanzamiento (`release`) y URL del archivo.
+  const http = def.transport === 'http';
+  for (const k of ['version', 'retrievedAt', http ? 'release' : 'commit', 'file', 'fileSha256']) {
     if (!provenance?.[k]) throw new Error(`${source}:${recordId} sin procedencia «${k}»`);
   }
+  if (http && !provenance.fileUrl) throw new Error(`${source}:${recordId} sin procedencia «fileUrl»`);
   if (!uri) throw new Error(`${source}:${recordId} sin URI`);
   return {
     id: assertionId(source, recordId),
@@ -131,8 +152,9 @@ export function makeAssertion({ source, recordId, uri, type, drug, condition, ev
       version: provenance.version,
       retrievedAt: provenance.retrievedAt,
       license: def.license,
-      repo: def.repo,
-      commit: provenance.commit,
+      repo: def.repo ?? null,
+      commit: provenance.commit ?? null,
+      ...(http ? { release: provenance.release, fileUrl: provenance.fileUrl } : {}),
       file: provenance.file,
       fileSha256: provenance.fileSha256,
     },

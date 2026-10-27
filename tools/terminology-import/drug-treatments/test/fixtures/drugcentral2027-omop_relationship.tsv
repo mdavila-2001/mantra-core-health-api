@@ -1,0 +1,14 @@
+id	struct_id	concept_id	relationship_name	concept_name	umls_cui	cui_semantic_type
+136592	4275	21000604	contraindication	Diabetes mellitus	C0011849	T047
+136894	4275	21000404	contraindication	Sarcoidosis	C0036202	T047
+137690	4275	21001432	contraindication	Hypertensive disorder	C0020538	T047
+137691	4275	21002383	off-label use	Impotence	C0242350	T047
+138911	4275	21003278	contraindication	Hyperglycemia	C0020456	T047
+134630	1540	21001105	indication	Epilepsy	C0014544	T047
+138032	1540	21001089	indication	Lennox-Gastaut syndrome	C0238111	T047
+139236	1540	21001101	indication	Simple partial seizure	C0234974	T047
+133213	348	21002783	indication	Systemic Dermatomyositis		
+133133	466	21000679	off-label use	Vitamin D deficiency	C0042870	T047
+132496	4830	40249309	reduce risk	Cardiovascular event	C1320716	T033
+173377	1311	21000814	symptomatic treatment	Hb SS disease	C0002895	T047
+173422	5271	40249335	diagnosis	Adult growth hormone deficiency	C1720505	T047

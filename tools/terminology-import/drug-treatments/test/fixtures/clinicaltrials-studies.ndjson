@@ -1,0 +1,6 @@
+{"n": "NCT00000440", "p": ["PHASE2"], "s": "COMPLETED", "t": ["DRUG"], "c": [["D000437", "Alcoholism"]], "i": [["D009271", "Naltrexone"], ["D020280", "Sertraline"]]}
+{"n": "NCT00000438", "p": ["PHASE4"], "s": "COMPLETED", "t": ["DRUG"], "c": [["D000437", "Alcoholism"]], "i": [["D009271", "Naltrexone"]]}
+{"n": "NCT00000102", "p": ["PHASE1", "PHASE2"], "s": "COMPLETED", "t": ["DRUG"], "c": [["D000312", "Adrenal Hyperplasia, Congenital"]], "i": [["D009543", "Nifedipine"]]}
+{"n": "NCT00769587", "p": [], "s": "COMPLETED", "t": ["DRUG"], "c": [["D011230", "Precancerous Conditions"], ["D034721", "Mastocytosis, Systemic"]], "i": [["D013792", "Thalidomide"]]}
+{"n": "NCT00000936", "p": ["PHASE3"], "s": "TERMINATED", "t": ["DRUG"], "c": [], "i": [["D016572", "Cyclosporine"]]}
+{"n": "NCT00000120", "p": ["PHASE3"], "s": "COMPLETED", "t": ["DRUG"], "c": [["D002690", "Chlamydia Infections"], ["D009878", "Ophthalmia Neonatorum"]], "i": []}
