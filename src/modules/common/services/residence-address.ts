@@ -134,6 +134,28 @@ export function createWorkAddress(
  * El cuerpo compartido por los dos usos: lo único que los distingue es el
  * concepto de uso.
  */
+/** Una dirección de la libreta: la de {@link ResidenceAddressData} con nombre y preferencia. */
+export interface SavedAddressData extends ResidenceAddressData {
+  readonly label?: string;
+  readonly isPreferred?: boolean;
+}
+
+/**
+ * Guarda una dirección de la libreta del paciente (uso `ADDR_USE_SAVED`).
+ *
+ * Mismo camino que el domicilio —municipio validado contra el catálogo,
+ * departamento derivado, `city` legible—, más el nombre y la preferencia.
+ * Devuelve la fila creada, o `null` si no había nada que guardar.
+ */
+export async function createSavedAddress(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  concepts: CatalogConceptsRepository,
+  data: SavedAddressData,
+): Promise<Addresses | null> {
+  return writeAddressRow(repo, tx, concepts, data, CONCEPTS.ADDR_USE_SAVED);
+}
+
 async function writeAddress(
   repo: AddressesRepository,
   tx: EntityManager,
@@ -141,12 +163,24 @@ async function writeAddress(
   data: ResidenceAddressData,
   useConceptId: string,
 ): Promise<boolean> {
+  return (
+    (await writeAddressRow(repo, tx, concepts, data, useConceptId)) !== null
+  );
+}
+
+async function writeAddressRow(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  concepts: CatalogConceptsRepository,
+  data: SavedAddressData,
+  useConceptId: string,
+): Promise<Addresses | null> {
   const coordinates = coordinatesOf(data);
 
   // Sin municipio, sin calle y sin coordenadas no hay dirección: una fila con
   // país y nada más no es un dato, es una fila.
   if (!data.municipalityConceptId && !data.lines && !coordinates) {
-    return false;
+    return null;
   }
 
   const municipality = data.municipalityConceptId
@@ -161,7 +195,7 @@ async function writeAddress(
     ? departmentSiglaOfMunicipalityCode(municipality.code)
     : undefined;
 
-  repo.create(tx, {
+  return repo.create(tx, {
     ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
     ownerId: data.personId,
     countryConceptId: CONCEPTS.COUNTRY_BO,
@@ -179,9 +213,10 @@ async function writeAddress(
     longitude: coordinates?.longitude,
     useConceptId,
     typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
+    label: data.label,
+    isPreferred: data.isPreferred,
     actorUserId: data.actorUserId,
   });
-  return true;
 }
 
 /**

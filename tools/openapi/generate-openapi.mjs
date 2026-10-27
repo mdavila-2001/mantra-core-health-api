@@ -152,6 +152,9 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['put', '/iam/onboarding-drafts/{formType}/{draftId}'],
   ['delete', '/iam/onboarding-drafts/{formType}/{draftId}'],
   ['post', '/telemetry/onboarding-events'],
+  // Calle desde el punto del mapa en el alta (`reverse-geocoding.controller.ts`,
+  // `@Public()`, 2026-10-26).
+  ['post', '/public/geo/reverse'],
 ];
 
 function markPublicOperations(document) {

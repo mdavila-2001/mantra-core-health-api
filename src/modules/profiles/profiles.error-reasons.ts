@@ -19,6 +19,12 @@ export enum ProfilesErrorReason {
   ACCOUNT_WITHOUT_LINKED_PERSON = 'ACCOUNT_WITHOUT_LINKED_PERSON',
   /** No existe el perfil de paciente pedido (o la persona vinculada no lo tiene). */
   PATIENT_PROFILE_NOT_FOUND = 'PATIENT_PROFILE_NOT_FOUND',
+  /** La dirección pedida no existe, no está vigente o no es de quien la pide. */
+  PATIENT_ADDRESS_NOT_FOUND = 'PATIENT_ADDRESS_NOT_FOUND',
+  /** El domicilio no se borra desde la libreta: el alta lo exige y la ficha lo usa. */
+  PATIENT_HOME_ADDRESS_REQUIRED = 'PATIENT_HOME_ADDRESS_REQUIRED',
+  /** Se llegó al tope de direcciones guardadas. */
+  PATIENT_ADDRESS_BOOK_FULL = 'PATIENT_ADDRESS_BOOK_FULL',
   /** El padrón no se puede listar sin nombre, código o documento. */
   PATIENT_SEARCH_CRITERIA_REQUIRED = 'PATIENT_SEARCH_CRITERIA_REQUIRED',
   /** No existe la persona (`profiles.persons`) referenciada. */

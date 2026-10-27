@@ -781,7 +781,11 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'address-use',
     name: 'Uso de la dirección',
     description: 'En qué ámbito se usa la dirección.',
-    concepts: [CONCEPTS.ADDR_USE_HOME, CONCEPTS.ADDR_USE_WORK],
+    concepts: [
+      CONCEPTS.ADDR_USE_HOME,
+      CONCEPTS.ADDR_USE_WORK,
+      CONCEPTS.ADDR_USE_SAVED,
+    ],
     defaultConceptId: CONCEPTS.ADDR_USE_HOME,
     targets: ['common.addresses.use_concept_id'],
   },

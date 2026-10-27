@@ -65,6 +65,11 @@ export enum SystemErrorReason {
    * de programación, no una condición del request; el cuerpo público no lo expone.
    */
   AUTHENTICATION_NOT_APPLIED = 'AUTHENTICATION_NOT_APPLIED',
+  /**
+   * 503: el geocodificador externo (lat/lng → calle) no respondió a tiempo o
+   * respondió con error. El alta sigue: la calle se escribe a mano.
+   */
+  GEOCODING_PROVIDER_UNAVAILABLE = 'GEOCODING_PROVIDER_UNAVAILABLE',
   /** 503: `/readiness` — alguna dependencia obligatoria no responde. */
   SYSTEM_READINESS_DEPENDENCY_UNAVAILABLE = 'SYSTEM_READINESS_DEPENDENCY_UNAVAILABLE',
   /**

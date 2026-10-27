@@ -1,4 +1,5 @@
 import { deterministicId } from '../constants/concepts';
+import { BO_EMPLOYERS_SEPREC } from './bo-employers-seprec.catalog.generated';
 import {
   valueSetCanonicalUrl,
   valueSetId,
@@ -125,6 +126,26 @@ export interface BoEmployerSeed {
    * entra por el mismo campo.
    */
   readonly sector: string;
+  /**
+   * De dónde sale la entrada, cuando sale de un registro oficial.
+   *
+   * Sólo la llevan las empresas importadas de un extracto del SEPREC
+   * (`bo-employers-seprec.catalog.generated.ts`); la lista curada de arriba
+   * declara su procedencia en el comentario de este archivo.
+   */
+  readonly provenance?: BoEmployerProvenance;
+}
+
+/** Procedencia de una empresa importada del directorio del SEPREC. */
+export interface BoEmployerProvenance {
+  /** Número de registro (matrícula) en el SEPREC. */
+  readonly registry: string;
+  readonly department: string;
+  readonly municipality: string;
+  /** Nombre de la fuente, tal como lo trae el extracto. */
+  readonly source: string;
+  /** Fecha de la consulta, `AAAA-MM-DD`. */
+  readonly retrievedOn: string;
 }
 
 /**
@@ -2114,7 +2135,17 @@ export const BO_EMPLOYERS: readonly BoEmployerSeed[] = [
   },
   { code: 'WWF_BOLIVIA', name: 'WWF Bolivia', sector: 'ONG y fundaciones' },
 
-  /* --- Las salidas, siempre al final --- */
+  /* --- Directorio del SEPREC (pedido del propietario, 2026-10-26) ---
+     Generadas desde `tools/bolivia-datasets/data/seprec/` por
+     `scripts/gen-bo-employers-seprec-catalog.py`; ampliar es sumar un CSV y
+     regenerar. Su `code` es `SEPREC_<registro>`, que no choca con los de
+     arriba. */
+  ...BO_EMPLOYERS_SEPREC,
+
+  /* --- Las salidas, al final del catálogo ---
+     El alta muestra igual `OTRA` primero en su buscador (pedido del cliente
+     del 2026-10-26, como «Otra ocupación»): eso lo ordena la pantalla, no el
+     `ordinal` de acá. */
   {
     code: 'INDEPENDIENTE',
     name: 'Trabajo por mi cuenta (independiente)',

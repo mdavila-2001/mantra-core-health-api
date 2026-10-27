@@ -5348,6 +5348,333 @@
         "description": "Registrar defunción y anonimización de una persona. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/profiles/patients/me/addresses": {
+      "get": {
+        "operationId": "PatientAddressBookController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatientAddressDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar las propias direcciones (la preferida primero)",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Listar las propias direcciones (la preferida primero). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "post": {
+        "operationId": "PatientAddressBookController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePatientAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatientAddressDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Guardar una dirección nueva",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Guardar una dirección nueva. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/patients/me/addresses/{id}": {
+      "patch": {
+        "operationId": "PatientAddressBookController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePatientAddressDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatientAddressDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Corregir una dirección (cierra la vigente y abre otra)",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Corregir una dirección (cierra la vigente y abre otra). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      },
+      "delete": {
+        "operationId": "PatientAddressBookController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatientAddressDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Quitar una dirección guardada o la del trabajo",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Quitar una dirección guardada o la del trabajo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
+    "/profiles/patients/me/addresses/{id}/preferred": {
+      "put": {
+        "operationId": "PatientAddressBookController_prefer",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PatientAddressDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marcar la dirección que se ofrece primero",
+        "tags": [
+          "profiles-patients"
+        ],
+        "description": "Marcar la dirección que se ofrece primero. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/profiles/patients/me/dependent-requests": {
       "post": {
         "operationId": "ProfilesDependentRequestsController_requestDependentLink",
@@ -58771,6 +59098,61 @@
         "description": "Cerrar un viaje con distancia/duración. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/public/geo/reverse": {
+      "post": {
+        "description": "Sin sesión. 503 si el proveedor no responde: el alta sigue con la calle a mano. Nunca inventa una dirección.",
+        "operationId": "ReverseGeocodingController_reverse",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReverseGeocodingRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReverseGeocodingResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "summary": "Nombre de la calle de un punto en Bolivia",
+        "tags": [
+          "geo"
+        ],
+        "security": []
+      }
+    },
     "/graph/projections/nodes/upsert": {
       "post": {
         "description": "Idempotente por la clave de origen. Un evento con versión anterior se descarta (`stale`). Los identificadores entran sólo hasheados.",
@@ -101000,6 +101382,10 @@
       "description": "Operaciones del dominio funcional forms values. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "geo",
+      "description": "Operaciones del dominio funcional geo. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "geo-geofences",
       "description": "Operaciones del dominio funcional geo geofences. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -105102,6 +105488,125 @@
             "type": "boolean",
             "description": "Anonimiza la PII (borrado lógico del display_name) al registrar",
             "default": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "PatientAddressDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "HOME",
+              "WORK",
+              "SAVED"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "description": "Nombre para mostrar: el que puso la persona, o «Casa» / «Trabajo» para domicilio y trabajo."
+          },
+          "lines": {
+            "type": "string",
+            "description": "Calle, número y referencia"
+          },
+          "city": {
+            "type": "string",
+            "description": "Ciudad, derivada del municipio"
+          },
+          "municipalityConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Municipio (VS_BO_MUNICIPALITY)"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Viaja siempre junto a la latitud"
+          },
+          "isPreferred": {
+            "type": "boolean",
+            "description": "Si es la que se ofrece primero"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "isPreferred"
+        ]
+      },
+      "CreatePatientAddressDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 60,
+            "example": "Casa de mi mamá"
+          },
+          "municipalityConceptId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Municipio (VS_BO_MUNICIPALITY)"
+          },
+          "lines": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "isPreferred": {
+            "type": "boolean",
+            "description": "Marcarla como la que se ofrece primero"
+          }
+        },
+        "required": [
+          "label",
+          "municipalityConceptId"
+        ],
+        "additionalProperties": false
+      },
+      "UpdatePatientAddressDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 60,
+            "description": "Sólo para las guardadas: domicilio y trabajo tienen nombre fijo."
+          },
+          "municipalityConceptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lines": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "Vacío para quitarla"
+          },
+          "latitude": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
           }
         },
         "additionalProperties": false
@@ -134288,6 +134793,59 @@
         },
         "additionalProperties": false
       },
+      "ReverseGeocodingRequestDto": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "minimum": -23.5,
+            "maximum": -9.2
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -70,
+            "maximum": -57
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "additionalProperties": false
+      },
+      "ReverseGeocodingResponseDto": {
+        "type": "object",
+        "properties": {
+          "found": {
+            "type": "boolean",
+            "description": "`false` si no se conoce ninguna calle en ese punto"
+          },
+          "line": {
+            "type": "string",
+            "example": "Calle Guapay 3861, Equipetrol"
+          },
+          "road": {
+            "type": "string"
+          },
+          "houseNumber": {
+            "type": "string"
+          },
+          "neighbourhood": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "attribution": {
+            "type": "string",
+            "description": "Atribución que exige la licencia de los datos"
+          }
+        },
+        "required": [
+          "found",
+          "attribution"
+        ]
+      },
       "NodeIdentifierDto": {
         "type": "object",
         "properties": {
@@ -154997,9 +155555,76 @@
         },
         "additionalProperties": false
       },
+      "OnboardingEventDto": {
+        "type": "object",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "start",
+              "step_view",
+              "field_interaction",
+              "field_error",
+              "abandon",
+              "complete"
+            ]
+          },
+          "formType": {
+            "type": "string"
+          },
+          "draftId": {
+            "type": "string"
+          },
+          "stepIndex": {
+            "type": "number"
+          },
+          "stepKey": {
+            "type": "string"
+          },
+          "fieldKey": {
+            "type": "string"
+          },
+          "interactionType": {
+            "type": "string",
+            "enum": [
+              "focus",
+              "blur",
+              "change",
+              "error"
+            ]
+          },
+          "errorCategory": {
+            "type": "string"
+          },
+          "durationMs": {
+            "type": "number"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventType",
+          "formType",
+          "draftId",
+          "stepIndex",
+          "timestamp"
+        ],
+        "additionalProperties": false
+      },
       "IngestOnboardingEventsDto": {
         "type": "object",
-        "properties": {},
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnboardingEventDto"
+            }
+          }
+        },
+        "required": [
+          "events"
+        ],
         "additionalProperties": false
       },
       "OpenSubjectDto": {
