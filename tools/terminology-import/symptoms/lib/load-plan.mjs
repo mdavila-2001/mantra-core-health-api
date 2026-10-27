@@ -62,6 +62,19 @@ export const CODE_SYSTEMS = {
     canonicalUrl: 'http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl',
     caseSensitive: true,
   },
+  // Subconjunto C23 de MeSH. Es un code system propio (no `mesh`) a propósito:
+  // `seed-diseases` carga `mesh` como claves de enfermedad y el árbol C de
+  // enfermedades; las dos cargas no se pisan y el cruce es por el mismo
+  // descriptor (D######). La fuente es la misma (NLM_MESH).
+  'mesh-c23': {
+    sourceCode: 'NLM_MESH',
+    sourceName: 'Medical Subject Headings (MeSH) — U.S. National Library of Medicine',
+    owner: 'U.S. National Library of Medicine',
+    officialUrl: 'https://www.nlm.nih.gov/mesh/',
+    name: 'Subconjunto de signos, síntomas y condiciones patológicas de MeSH (árbol C23)',
+    canonicalUrl: 'https://mantracore.health/fhir/CodeSystem/mesh-c23',
+    caseSensitive: true,
+  },
 };
 
 export const conceptId = (cs, code) => md5uuid(`mantra:symptoms:concept:${cs}:${code}`);
@@ -123,6 +136,7 @@ export function propertiesFor(row, labelOf) {
     ...js('xrefs', row.xrefs.map((x) => `${x.system}:${x.code}`)),
     ...js('body_systems', row.systems.map((s) => { const l = labelOf(row.codeSystem, s); return { code: s, en: l.en ?? row.systemLabels?.[s] ?? null, es: l.es ?? null }; })),
     ...str('subontology', row.subontology),
+    ...js('mesh_tree_numbers', row.treeNumbers ?? null),
     ...js('semantic_types', row.semanticTypes ?? null),
     ...str('scope_rule', row.scopeRule ?? null),
     ...js('source_comments', row.comments?.length ? row.comments : null),
@@ -147,6 +161,15 @@ export function isARelationships(row) {
 export function mapsFor(row, codesBySystem) {
   const out = [];
   for (const x of row.xrefs) {
+    if (x.system === 'MESH' && row.codeSystem !== 'mesh-c23' && codesBySystem['mesh-c23']?.has(x.code)) {
+      out.push({
+        id: md5uuid(`mantra:symptoms:map:${row.codeSystem}:${row.code}:mesh-c23:${x.code}`),
+        source: conceptId(row.codeSystem, row.code),
+        target: conceptId('mesh-c23', x.code),
+        context: `xref declarado por ${row.codeSystem.toUpperCase()} ${row.code} (database_cross_reference)`,
+        version: row.version,
+      });
+    }
     if (x.system === 'NCIT' && row.codeSystem !== 'ncit' && codesBySystem.ncit?.has(x.code)) {
       out.push({
         id: md5uuid(`mantra:symptoms:map:${row.codeSystem}:${row.code}:ncit:${x.code}`),

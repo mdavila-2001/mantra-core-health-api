@@ -169,19 +169,23 @@ test('plan de términos: display ES oficial, sólo sinónimos EXACT como designa
 test('plan de relaciones: NOT → SYMPTOM_EXCLUDED, aspecto I fuera, frecuencia HPO resuelta', () => {
   const { rows } = parseHpoa(fx('phenotype-excerpt.hpoa'), PROV);
   const codes = { hpo: new Set(['HP:0430043', 'HP:0000768', 'HP:0001263', 'HP:0008305', 'HP:0040281']) };
-  const plan = relationsPlan(rows, {
+  const ctx = {
     resolveDisease: (curie) => ({ conceptId: `d:${curie}`, via: null }),
     resolvePhenotype: phenotypeResolver(codes),
     sourceIdOf: () => 'src',
+    versionIdOf: () => 'ver',
+    tierIdOf: (c) => `tier:${c}`,
+    frequencyIdOf: (c) => `freq:${c}`,
     excludedTypeAvailable: true,
-  });
+  };
+  const plan = relationsPlan(rows, ctx);
   assert.equal(plan.stats.notPhenotype, 1);
   assert.equal(plan.relationships.length, 4);
   assert.equal(plan.relationships.find((r) => r[1] === 'd:ORPHA:199310')[3], REL.SYMPTOM_EXCLUDED);
-  const orpha = plan.evidence.find((e) => JSON.parse(e[17]).diseaseAsPublished === 'ORPHA:558');
-  assert.equal(orpha[8], 'HP:0040281');
-  assert.equal(orpha[9], conceptId('hpo', 'HP:0040281'));
-  const withoutExcluded = relationsPlan(rows, { resolveDisease: (c) => ({ conceptId: c, via: null }), resolvePhenotype: phenotypeResolver(codes), sourceIdOf: () => 's', excludedTypeAvailable: false });
+  const orpha = plan.evidence.find((e) => /database_id=ORPHA:558/.test(e.citationText));
+  assert.match(orpha.citationText, /frequency=HP:0040281/);
+  assert.equal(orpha.frequencyConceptId, 'freq:VERY_FREQUENT');
+  const withoutExcluded = relationsPlan(rows, { ...ctx, excludedTypeAvailable: false });
   assert.equal(withoutExcluded.stats.negatedSkipped, 1);
   assert.ok(withoutExcluded.relationships.every((r) => r[3] === REL.SYMPTOM));
 });

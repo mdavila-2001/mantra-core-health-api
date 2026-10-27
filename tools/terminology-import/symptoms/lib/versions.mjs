@@ -18,8 +18,12 @@ function head(path, bytes = 65536) {
 
 /** @returns {string|null} */
 export function readDeclaredVersion(source, path) {
+  if (source.fixedVersion) return source.fixedVersion;
   const text = head(path);
   switch (source.versionFrom) {
+    case 'orphadata-jdbor':
+      // <JDBOR date="2026-06-23 07:57:18" version="1.3.42 / 4.1.8 [2025-03-03]" ...>
+      return text.match(/<JDBOR date="(\d{4}-\d{2}-\d{2})/)?.[1] ?? null;
     case 'obo-data-version':
       return text.match(/^data-version: (.+)$/m)?.[1].trim() ?? null;
     case 'obographs-versionInfo':

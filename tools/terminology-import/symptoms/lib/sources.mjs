@@ -28,6 +28,21 @@ const MONARCH = 'https://storage.googleapis.com/data-public-monarchinitiative';
 // se pudo abrir desde el entorno de la corrida: ver SOURCES.md.
 export const HPO_LICENSE = 'HPO license — https://hpo.jax.org/app/license (declarada en hp.json, dcterms:license)';
 
+/** Lo que DECLARA el propio archivo (`<Licence>` del XML de Orphadata). */
+export const ORPHADATA_LICENSE = 'CC BY 4.0 (declarada en el XML: Licence/ShortIdentifier CC-BY-4.0, https://creativecommons.org/licenses/by/4.0/legalcode); citar «Orphadata: Free access data from Orphanet. © INSERM 1999. Available on http://www.orphadata.com»';
+/** Términos de uso de NLM para MeSH (https://www.nlm.nih.gov/databases/download/terms_and_conditions_mesh.html, revisados el 2026-10-27). */
+export const MESH_LICENSE = 'NLM provee MeSH libremente, sin cargos ni regalías: hay que citar a NLM como fuente de forma clara, no insinuar su aval y, al redistribuir, indicar la versión de MeSH usada (Terms and Conditions MeSH, última revisión 2018-10-04). No cubre los archivos de traducción (MTMS). «Courtesy of the U.S. National Library of Medicine»';
+export const WIKIDATA_LICENSE = 'CC0 1.0 (Wikidata: datos estructurados en dominio público; https://www.wikidata.org/wiki/Wikidata:Licensing)';
+
+/** Todos los ítems de Wikidata que declaran un id de HPO (P3841), con el calificador de tipo de mapeo (P4390) si lo tienen. */
+export const WIKIDATA_P3841_QUERY = `SELECT ?item ?hpo ?rel ?itemLabelEn ?itemLabelEs WHERE {
+  ?item p:P3841 ?st .
+  ?st ps:P3841 ?hpo .
+  OPTIONAL { ?st pq:P4390 ?rel }
+  OPTIONAL { ?item rdfs:label ?itemLabelEn FILTER(LANG(?itemLabelEn)="en") }
+  OPTIONAL { ?item rdfs:label ?itemLabelEs FILTER(LANG(?itemLabelEs)="es") }
+}`;
+
 /**
  * `file` es relativo a SOURCES_DIR. `versionFrom` dice cómo se lee la versión
  * del propio archivo (no de la URL «latest»).
@@ -100,6 +115,39 @@ export const SOURCE_FILES = [
     owner: 'HPO / Monarch Initiative — anotaciones de enfermedades comunes (Groza et al. 2015, AJHG, PMC4572507)',
     license: HPO_LICENSE,
     versionFrom: 'retrieved-at',
+  },
+  // --- Huecos cerrados el 2026-10-27 (carril C2): antes bloqueados por el proxy de red ---
+  {
+    key: 'orphadata-en-product4',
+    file: 'orphadata/en_product4.xml',
+    url: 'https://www.orphadata.com/data/xml/en_product4.xml',
+    owner: 'Orphanet (INSERM) — Orphadata, producto 4: fenotipos HPO de enfermedades raras',
+    license: ORPHADATA_LICENSE,
+    versionFrom: 'orphadata-jdbor',
+  },
+  {
+    key: 'orphadata-es-product4',
+    file: 'orphadata/es_product4.xml',
+    url: 'https://www.orphadata.com/data/xml/es_product4.xml',
+    owner: 'Orphanet (INSERM) — Orphadata, producto 4 en castellano',
+    license: ORPHADATA_LICENSE,
+    versionFrom: 'orphadata-jdbor',
+  },
+  {
+    key: 'mesh-desc',
+    file: 'mesh/desc2026.zip',
+    url: 'https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.zip',
+    owner: 'U.S. National Library of Medicine — Medical Subject Headings (MeSH)',
+    license: MESH_LICENSE,
+    fixedVersion: '2026',
+  },
+  {
+    key: 'wikidata-p3841',
+    file: 'wikidata/p3841-hpo-ids.json',
+    url: `https://query.wikidata.org/sparql?format=json&query=${encodeURIComponent(WIKIDATA_P3841_QUERY)}`,
+    owner: 'Wikidata (Wikimedia Foundation) — propiedad P3841 «Human Phenotype Ontology ID»',
+    license: WIKIDATA_LICENSE,
+    fixedVersion: 'consulta en vivo',
   },
   {
     key: 'monarch-hpoa-edges',

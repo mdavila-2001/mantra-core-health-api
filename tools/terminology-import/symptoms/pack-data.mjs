@@ -13,6 +13,9 @@
 // - `data/MANIFEST.json`: filas, bytes y SHA-256 de cada parte y del original.
 //
 // Uso: node tools/terminology-import/symptoms/pack-data.mjs
+//      node tools/terminology-import/symptoms/pack-data.mjs --only relations-orphadata,terms-mesh-c23,crosswalk-wikidata-hpo,gap-coverage.json,saturation-gaps.json
+//        (--only agrega o reemplaza SOLO esos archivos y deja intactos los demás partes y
+//         el resto del MANIFEST: así un corpus nuevo no re-escribe 20 MB que no cambiaron)
 // Inverso: unpack-data.mjs
 // =============================================================================
 
@@ -24,7 +27,7 @@ import { DATA_DIR, OUT_DIR } from './lib/sources.mjs';
 
 export const PART_LIMIT = 45 * 1024 * 1024;
 /** Reportes chicos que acompañan al corpus. */
-const EXTRA_JSON = ['coverage.json', 'saturation.json'];
+const EXTRA_JSON = ['coverage.json', 'saturation.json', 'gap-coverage.json', 'saturation-gaps.json'];
 
 const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 const gzip = (buf) => gzipSync(buf, { level: 9 });
@@ -53,12 +56,25 @@ export function splitByLines(text, limit = PART_LIMIT) {
 }
 
 function main() {
+  const only = process.argv.includes('--only') ? new Set(process.argv[process.argv.indexOf('--only') + 1].split(',')) : null;
   const ndDir = join(OUT_DIR, 'ndjson');
   if (!existsSync(ndDir)) throw new Error(`Falta ${ndDir}: corré build-symptoms-corpus.mjs`);
-  if (existsSync(DATA_DIR)) for (const f of readdirSync(DATA_DIR)) if (f.endsWith('.gz') || f === 'MANIFEST.json') rmSync(join(DATA_DIR, f));
   mkdirSync(DATA_DIR, { recursive: true });
-  const manifest = { generatedFrom: 'build-symptoms-corpus.mjs', files: [] };
+  const manifestPath = join(DATA_DIR, 'MANIFEST.json');
+  let manifest = { generatedFrom: 'build-symptoms-corpus.mjs', files: [] };
+  if (only) {
+    manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+    manifest.generatedFrom = 'build-symptoms-corpus.mjs + build-gap-sources.mjs';
+    // Se reemplazan sólo las entradas nombradas: se borran sus partes viejas y su entrada.
+    for (const f of manifest.files.filter((x) => only.has(x.name) || only.has(x.name.replace(/\.ndjson$/, '')))) {
+      for (const part of f.parts) rmSync(join(DATA_DIR, part.file), { force: true });
+    }
+    manifest.files = manifest.files.filter((x) => !(only.has(x.name) || only.has(x.name.replace(/\.ndjson$/, ''))));
+  } else if (existsSync(DATA_DIR)) {
+    for (const f of readdirSync(DATA_DIR)) if (f.endsWith('.gz') || f === 'MANIFEST.json') rmSync(join(DATA_DIR, f));
+  }
   for (const name of readdirSync(ndDir).filter((f) => f.endsWith('.ndjson')).sort()) {
+    if (only && !only.has(name) && !only.has(name.replace(/\.ndjson$/, ''))) continue;
     const raw = readFileSync(join(ndDir, name));
     const parts = splitByLines(raw.toString('utf8'));
     const base = name.replace(/\.ndjson$/, '');
@@ -73,6 +89,7 @@ function main() {
     console.log(`[pack] ${name}: ${entry.rows} filas → ${entry.parts.map((p) => `${p.file} (${(p.gzBytes / 1048576).toFixed(1)} MB)`).join(', ')}`);
   }
   for (const name of EXTRA_JSON) {
+    if (only && !only.has(name)) continue;
     const p = join(OUT_DIR, name);
     if (!existsSync(p)) continue;
     const raw = readFileSync(p);
@@ -80,7 +97,8 @@ function main() {
     writeFileSync(join(DATA_DIR, `${name}.gz`), gz);
     manifest.files.push({ name, rows: null, bytes: raw.length, sha256: sha256(raw), parts: [{ file: `${name}.gz`, rows: null, gzBytes: gz.length, gzSha256: sha256(gz) }] });
   }
-  writeFileSync(join(DATA_DIR, 'MANIFEST.json'), JSON.stringify(manifest, null, 2) + '\n');
+  manifest.files.sort((a, b) => a.name.localeCompare(b.name));
+  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
   const total = manifest.files.reduce((n, f) => n + f.parts.reduce((m, p) => m + p.gzBytes, 0), 0);
   console.log(`[pack] ${manifest.files.length} archivos, ${(total / 1048576).toFixed(1)} MB comprimidos en ${DATA_DIR}`);
 }

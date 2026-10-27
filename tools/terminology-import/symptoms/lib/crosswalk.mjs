@@ -59,6 +59,7 @@ export function termOverlaps(newRows, previousRows) {
     put(`${r.codeSystem}:${r.code}`, `${r.codeSystem}:${r.code}`);
     for (const x of r.xrefs ?? []) {
       if (x.system === 'NCIT') put(`ncit:${x.code}`, `${r.codeSystem}:${r.code} xref NCIT:${x.code}`);
+      if (x.system === 'MESH') put(`mesh-c23:${x.code}`, `${r.codeSystem}:${r.code} xref MESH:${x.code}`);
       if (x.system === 'UMLS' || x.system === 'UMLS_CUI') put(`umls:${x.code}`, `${r.codeSystem}:${r.code} UMLS ${x.code}`);
     }
   }

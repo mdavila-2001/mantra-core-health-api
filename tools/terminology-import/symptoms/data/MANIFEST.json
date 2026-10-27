@@ -1,6 +1,34 @@
 {
-  "generatedFrom": "build-symptoms-corpus.mjs",
+  "generatedFrom": "build-symptoms-corpus.mjs + build-gap-sources.mjs",
   "files": [
+    {
+      "name": "coverage.json",
+      "rows": null,
+      "bytes": 31392,
+      "sha256": "1e28aeadc891e3c50374279a81cecb1390deba5425500cbb9897de7f1e88c8e8",
+      "parts": [
+        {
+          "file": "coverage.json.gz",
+          "rows": null,
+          "gzBytes": 4884,
+          "gzSha256": "30c563280793a250cd8b49ff60f860870c977dfbb0e30a9d012a7142df61fea8"
+        }
+      ]
+    },
+    {
+      "name": "crosswalk-wikidata-hpo.ndjson",
+      "rows": 4876,
+      "bytes": 2500496,
+      "sha256": "19808145fcad956be195d3a4171a4d3a50c8d90b56e086b10126ff4ec884c26c",
+      "parts": [
+        {
+          "file": "crosswalk-wikidata-hpo.ndjson.gz",
+          "rows": 4876,
+          "gzBytes": 185603,
+          "gzSha256": "3a5bd3d390f74eb4ecc3bfa91dcc34bae77b653ea91359a4ea4b9cdec168812f"
+        }
+      ]
+    },
     {
       "name": "disease-equivalences.ndjson",
       "rows": 74548,
@@ -12,6 +40,20 @@
           "rows": 74548,
           "gzBytes": 478822,
           "gzSha256": "6cb2a983d92cfcd3326aa7e1e1a598c02e571f2d8f53575acaa18b4633b595fd"
+        }
+      ]
+    },
+    {
+      "name": "gap-coverage.json",
+      "rows": null,
+      "bytes": 3256,
+      "sha256": "bec6a5fc633de2a1fb10b1577f0ac72f975488024093c6f3b5174d1953f2238f",
+      "parts": [
+        {
+          "file": "gap-coverage.json.gz",
+          "rows": null,
+          "gzBytes": 1192,
+          "gzSha256": "cae5cc588ff9e2b5404f2f0df3a01f1989d9ab302bb5874d8a7a1013f10595a4"
         }
       ]
     },
@@ -72,6 +114,48 @@
       ]
     },
     {
+      "name": "relations-orphadata.ndjson",
+      "rows": 116661,
+      "bytes": 155616184,
+      "sha256": "735f3db7f7115c30e4d136701f04a0824f1d7fd50aac475421d2a697931f52b8",
+      "parts": [
+        {
+          "file": "relations-orphadata.ndjson.gz",
+          "rows": 116661,
+          "gzBytes": 6690947,
+          "gzSha256": "1ad0a06d432635ca4f8e16a9e9cd824c7772837bac8ad61bbd10c70b85f87257"
+        }
+      ]
+    },
+    {
+      "name": "saturation-gaps.json",
+      "rows": null,
+      "bytes": 3917,
+      "sha256": "26db0e09f83a1d1bc43394334f78147a550779cdc6127795f22a9c8d47e803ce",
+      "parts": [
+        {
+          "file": "saturation-gaps.json.gz",
+          "rows": null,
+          "gzBytes": 1195,
+          "gzSha256": "9e0184992bdbf6792f90b09059ec6445db7d56e81ca454cbdbbcb9db58616168"
+        }
+      ]
+    },
+    {
+      "name": "saturation.json",
+      "rows": null,
+      "bytes": 1220,
+      "sha256": "15f6ef7c67306fe102f4fafcd4f8990331079136fcaca650fc6f8c340d93fb14",
+      "parts": [
+        {
+          "file": "saturation.json.gz",
+          "rows": null,
+          "gzBytes": 484,
+          "gzSha256": "17903e11bcc020c8529f15a5386263a7ea44c78c5450e4ecff658f480caf00e6"
+        }
+      ]
+    },
+    {
       "name": "terms-hpo.ndjson",
       "rows": 19894,
       "bytes": 19082528,
@@ -82,6 +166,20 @@
           "rows": 19894,
           "gzBytes": 2399253,
           "gzSha256": "80b1f35d94e09d7ee24fbd74271b6926fbf6e1a38005bbf16c4764c3a5f46e79"
+        }
+      ]
+    },
+    {
+      "name": "terms-mesh-c23.ndjson",
+      "rows": 966,
+      "bytes": 1696699,
+      "sha256": "a2e4c348b94b723f76e2d0fe7348e43c568f5c490522a0982541123d6dad2132",
+      "parts": [
+        {
+          "file": "terms-mesh-c23.ndjson.gz",
+          "rows": 966,
+          "gzBytes": 226987,
+          "gzSha256": "9971039381ed4b0e224247345949737bb4707de6d7d62a6441da5979907e0518"
         }
       ]
     },
@@ -110,34 +208,6 @@
           "rows": 895,
           "gzBytes": 60471,
           "gzSha256": "00d0d669da60ca6f7fda2fff3ee629691d3f7b4fad617fcbd3fa26027100336f"
-        }
-      ]
-    },
-    {
-      "name": "coverage.json",
-      "rows": null,
-      "bytes": 31392,
-      "sha256": "1e28aeadc891e3c50374279a81cecb1390deba5425500cbb9897de7f1e88c8e8",
-      "parts": [
-        {
-          "file": "coverage.json.gz",
-          "rows": null,
-          "gzBytes": 4884,
-          "gzSha256": "30c563280793a250cd8b49ff60f860870c977dfbb0e30a9d012a7142df61fea8"
-        }
-      ]
-    },
-    {
-      "name": "saturation.json",
-      "rows": null,
-      "bytes": 1220,
-      "sha256": "15f6ef7c67306fe102f4fafcd4f8990331079136fcaca650fc6f8c340d93fb14",
-      "parts": [
-        {
-          "file": "saturation.json.gz",
-          "rows": null,
-          "gzBytes": 484,
-          "gzSha256": "17903e11bcc020c8529f15a5386263a7ea44c78c5450e4ecff658f480caf00e6"
         }
       ]
     }

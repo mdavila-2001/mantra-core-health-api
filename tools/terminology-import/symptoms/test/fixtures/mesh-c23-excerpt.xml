@@ -1,0 +1,489 @@
+<?xml version="1.0"?>
+<!DOCTYPE DescriptorRecordSet SYSTEM "https://www.nlm.nih.gov/databases/dtd/nlmdescriptorrecordset_20260101.dtd">
+<!-- RECORTE de desc2026.xml (MeSH 2026, NLM): registros completos salvo AllowableQualifiersList -->
+<DescriptorRecordSet LanguageCode = "eng">
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D013568</DescriptorUI>
+  <DescriptorName>
+   <String>Pathological Conditions, Signs and Symptoms</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>05</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>used for searching; INDEXER: Do not use; CATALOGER: Do not use
+  </Annotation>
+  <HistoryNote>2000(1998); use explode 1970-1997
+  </HistoryNote>
+  <PublicMeSHNote>2000; see SYMPTOMS AND GENERAL PATHOLOGY 1998-1999
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>C23</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0020949</ConceptUI>
+    <ConceptName>
+     <String>Pathological Conditions, Signs and Symptoms</String>
+    </ConceptName>
+    <ScopeNote>Abnormal anatomical or physiological conditions and objective or subjective manifestations of disease, not classified as disease or syndrome.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T365741</TermUI>
+      <String>Pathological Conditions, Signs and Symptoms</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>11</Month>
+       <Day>03</Day>
+      </DateCreated>
+      <EntryVersion>PATHOL CONDITIONS SIGNS SYMPTOMS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2000)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T039899</TermUI>
+      <String>Symptoms and General Pathology</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>SYMPTOMS GENERAL PATHOL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D006470</DescriptorUI>
+  <DescriptorName>
+   <String>Hemorrhage</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2001</Year>
+   <Month>07</Month>
+   <Day>25</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <!-- AllowableQualifiersList recortada -->
+  <Annotation>general or unspecified; prefer specifics; coordinate with organ/disease term, not organ /blood supply; consider also terms for presence of blood within cavities, as HEMOTHORAX; HEMATOCOLPOS; etc.
+  </Annotation>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D001815</DescriptorUI>
+     <DescriptorName>
+      <String>Bloodletting</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D018962</DescriptorUI>
+     <DescriptorName>
+      <String>Phlebotomy</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>C23.550.414</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0010152</ConceptUI>
+    <ConceptName>
+     <String>Hemorrhage</String>
+    </ConceptName>
+    <ScopeNote>Bleeding or escape of blood from a vessel.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T019524</TermUI>
+      <String>Hemorrhage</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+       <ThesaurusID>POPLINE (1978)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T019524</TermUI>
+      <String>Hemorrhages</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T019523</TermUI>
+      <String>Bleeding</String>
+      <DateCreated>
+       <Year>1989</Year>
+       <Month>03</Month>
+       <Day>30</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1990)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D012816</DescriptorUI>
+  <DescriptorName>
+   <String>Signs and Symptoms</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>02</Month>
+   <Day>28</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>INDEXER: Do not use
+  </Annotation>
+  <HistoryNote>1998
+  </HistoryNote>
+  <PublicMeSHNote>1998
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>C23.888</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0019845</ConceptUI>
+    <ConceptName>
+     <String>Signs and Symptoms</String>
+    </ConceptName>
+    <ScopeNote>Clinical manifestations that can be either objective when observed by a physician, or subjective when perceived by the patient.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T037797</TermUI>
+      <String>Signs and Symptoms</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>SIGNS SYMPTOMS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T037797</TermUI>
+      <String>Symptoms and Signs</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D012817</DescriptorUI>
+  <DescriptorName>
+   <String>Signs and Symptoms, Digestive</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2015</Year>
+   <Month>06</Month>
+   <Day>05</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Annotation>INDEXER: Do not use
+  </Annotation>
+  <HistoryNote>98; use explode 1970-97
+  </HistoryNote>
+  <NLMClassificationNumber>WI 143</NLMClassificationNumber>
+  <OnlineNote>consider also specific digestive diseases in C6
+  </OnlineNote>
+  <PublicMeSHNote>98
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>specific sign or symptom (1966-1997)</PreviousIndexing>
+  </PreviousIndexingList>
+  <TreeNumberList>
+   <TreeNumber>C23.888.821</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0019846</ConceptUI>
+    <ConceptName>
+     <String>Signs and Symptoms, Digestive</String>
+    </ConceptName>
+    <ScopeNote>Digestive system manifestations of diseases of the gastrointestinal system or of other organs.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T037798</TermUI>
+      <String>Signs and Symptoms, Digestive</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>SIGNS SYMPTOMS DIGESTIVE</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D003967</DescriptorUI>
+  <DescriptorName>
+   <String>Diarrhea</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2013</Year>
+   <Month>07</Month>
+   <Day>09</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <!-- AllowableQualifiersList recortada -->
+  <Annotation>in infants = DIARRHEA, INFANTILE + appropriate check tags
+  </Annotation>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D000930</DescriptorUI>
+     <DescriptorName>
+      <String>Antidiarrheals</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D015532</DescriptorUI>
+     <DescriptorName>
+      <String>Rehydration Solutions</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>C23.888.821.214</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0006212</ConceptUI>
+    <ConceptName>
+     <String>Diarrhea</String>
+    </ConceptName>
+    <ScopeNote>An increased liquidity or decreased consistency of FECES, such as running stool. Fecal consistency is related to the ratio of water-holding capacity of insoluble solids to total water, rather than the amount of water present. Diarrhea is not hyperdefecation or increased fecal weight.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T012017</TermUI>
+      <String>Diarrhea</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1963)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T012017</TermUI>
+      <String>Diarrheas</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000001</DescriptorUI>
+  <DescriptorName>
+   <String>Calcimycin</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2023</Year>
+   <Month>02</Month>
+   <Day>26</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1984</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <!-- AllowableQualifiersList recortada -->
+  <HistoryNote>91(75); was A 23187 1975-90 (see under ANTIBIOTICS 1975-83)
+  </HistoryNote>
+  <OnlineNote>use CALCIMYCIN to search A 23187 1975-90
+  </OnlineNote>
+  <PublicMeSHNote>91; was A 23187 1975-90 (see under ANTIBIOTICS 1975-83)
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Antibiotics (1973-1974)</PreviousIndexing>
+   <PreviousIndexing>Carboxylic Acids (1973-1974)</PreviousIndexing>
+  </PreviousIndexingList>
+    <PharmacologicalActionList>
+     <PharmacologicalAction>
+      <DescriptorReferredTo>
+       <DescriptorUI>D000900</DescriptorUI>
+        <DescriptorName>
+         <String>Anti-Bacterial Agents</String>
+        </DescriptorName>
+      </DescriptorReferredTo>
+     </PharmacologicalAction>
+     <PharmacologicalAction>
+      <DescriptorReferredTo>
+       <DescriptorUI>D061207</DescriptorUI>
+        <DescriptorName>
+         <String>Calcium Ionophores</String>
+        </DescriptorName>
+      </DescriptorReferredTo>
+     </PharmacologicalAction>
+    </PharmacologicalActionList>
+  <TreeNumberList>
+   <TreeNumber>D02.355.291.933.125</TreeNumber>
+   <TreeNumber>D02.540.576.625.125</TreeNumber>
+   <TreeNumber>D03.633.100.221.173</TreeNumber>
+   <TreeNumber>D04.345.241.654.125</TreeNumber>
+   <TreeNumber>D04.345.674.625.125</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0000001</ConceptUI>
+    <ConceptName>
+     <String>Calcimycin</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>37H9VM9WZL</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>An ionophorous, polyether antibiotic from Streptomyces chartreusensis. It binds and transports CALCIUM and other divalent cations across membranes and uncouples oxidative phosphorylation while inhibiting ATPase of rat liver mitochondria. The substance is used mostly as a biochemical tool to study the role of divalent cations in various biological systems.
+    </ScopeNote>
+    <RelatedRegistryNumberList>
+     <RelatedRegistryNumber>52665-69-7 (Calcimycin)</RelatedRegistryNumber>
+    </RelatedRegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000001</Concept1UI>
+     <Concept2UI>M0353609</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T000002</TermUI>
+      <String>Calcimycin</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>FDA SRS (2014)</ThesaurusID>
+       <ThesaurusID>NLM (1975)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001124965</TermUI>
+      <String>4-Benzoxazolecarboxylic acid, 5-(methylamino)-2-((3,9,11-trimethyl-8-(1-methyl-2-oxo-2-(1H-pyrrol-2-yl)ethyl)-1,7-dioxaspiro(5.5)undec-2-yl)methyl)-, (6S-(6alpha(2S*,3S*),8beta(R*),9beta,11alpha))-</String>
+      <DateCreated>
+       <Year>2022</Year>
+       <Month>09</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2024)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0353609</ConceptUI>
+    <ConceptName>
+     <String>A-23187</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000001</Concept1UI>
+     <Concept2UI>M0353609</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="LAB"  RecordPreferredTermYN="N">
+      <TermUI>T000001</TermUI>
+      <String>A-23187</String>
+      <DateCreated>
+       <Year>1990</Year>
+       <Month>03</Month>
+       <Day>08</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="LAB"  RecordPreferredTermYN="N">
+      <TermUI>T000001</TermUI>
+      <String>A 23187</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000003</TermUI>
+      <String>Antibiotic A23187</String>
+      <DateCreated>
+       <Year>1990</Year>
+       <Month>03</Month>
+       <Day>08</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000003</TermUI>
+      <String>A23187, Antibiotic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="LAB"  RecordPreferredTermYN="N">
+      <TermUI>T000004</TermUI>
+      <String>A23187</String>
+      <DateCreated>
+       <Year>1974</Year>
+       <Month>11</Month>
+       <Day>11</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+</DescriptorRecordSet>

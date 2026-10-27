@@ -1,0 +1,150 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "hpo",
+   "rel",
+   "itemLabelEn",
+   "itemLabelEs"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q584265"
+    },
+    "itemLabelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "trastorno encefálico"
+    },
+    "itemLabelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "nervous system malformations"
+    },
+    "hpo": {
+     "type": "literal",
+     "value": "HP:0000707"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q580290"
+    },
+    "itemLabelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "atrofia muscular espinal"
+    },
+    "itemLabelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "spinal muscular atrophy"
+    },
+    "hpo": {
+     "type": "literal",
+     "value": "HP:0007269"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q6279182"
+    },
+    "itemLabelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Convulsión epiléptica"
+    },
+    "itemLabelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "seizure"
+    },
+    "hpo": {
+     "type": "literal",
+     "value": "HP:0001250"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q38933"
+    },
+    "itemLabelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "fiebre"
+    },
+    "itemLabelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "fever"
+    },
+    "hpo": {
+     "type": "literal",
+     "value": "HP:0001945"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1640998"
+    },
+    "itemLabelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "hiperqueratosis"
+    },
+    "itemLabelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "hyperkeratosis"
+    },
+    "hpo": {
+     "type": "literal",
+     "value": "HP:000962"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1963588"
+    },
+    "itemLabelEs": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "enfermedad hematológica"
+    },
+    "itemLabelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "hematopoietic system disease"
+    },
+    "hpo": {
+     "type": "literal",
+     "value": "HP:0001871"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q29019857"
+    },
+    "itemLabelEn": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "abnormal brain imaging"
+    },
+    "hpo": {
+     "type": "literal",
+     "value": "HP:0012638"
+    }
+   }
+  ]
+ }
+}

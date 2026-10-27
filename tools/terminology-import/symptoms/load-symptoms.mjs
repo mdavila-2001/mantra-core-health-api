@@ -2,7 +2,7 @@
 // =============================================================================
 // ETL de síntomas, etapa 2 (load de TÉRMINOS): corpus NDJSON → `terminology.*`.
 //
-// Por cada sistema (hpo, symp, ncit):
+// Por cada sistema (hpo, symp, ncit, mesh-c23):
 //   terminology_sources / code_systems / code_system_versions
 //   catalog_concepts        code, display (castellano oficial o nombre de la fuente)
 //   concept_designations    preferida EN, preferida ES (si es oficial), sinónimos EXACT EN
@@ -41,8 +41,10 @@ const args = process.argv.slice(2);
 if (args.includes('--dry-run') && args.includes('--apply')) throw new Error('Use --dry-run o --apply, no ambos.');
 const DRY_RUN = !args.includes('--apply');
 const GLOSSARY = args.includes('--glossary');
-const SYSTEMS = args.includes('--systems') ? args[args.indexOf('--systems') + 1].split(',') : ['hpo', 'symp', 'ncit'];
-const LICENSE = { hpo: SOURCE_FILES.find((s) => s.key === 'hpo-json').license, symp: SOURCE_FILES.find((s) => s.key === 'symp').license, ncit: SOURCE_FILES.find((s) => s.key === 'ncit').license };
+// mesh-c23 (cierre de huecos 2026-10-27) entra por defecto si el corpus lo trae.
+const DEFAULT_SYSTEMS = ['hpo', 'symp', 'ncit', ...(existsSync(join(OUT_DIR, 'ndjson', 'terms-mesh-c23.ndjson')) ? ['mesh-c23'] : [])];
+const SYSTEMS = args.includes('--systems') ? args[args.indexOf('--systems') + 1].split(',') : DEFAULT_SYSTEMS;
+const LICENSE = { hpo: SOURCE_FILES.find((s) => s.key === 'hpo-json').license, symp: SOURCE_FILES.find((s) => s.key === 'symp').license, ncit: SOURCE_FILES.find((s) => s.key === 'ncit').license, 'mesh-c23': SOURCE_FILES.find((s) => s.key === 'mesh-desc').license };
 
 function readTerms(cs) {
   const p = join(OUT_DIR, 'ndjson', `terms-${cs}.ndjson`);

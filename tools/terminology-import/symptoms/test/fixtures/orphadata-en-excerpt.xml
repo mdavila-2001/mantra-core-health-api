@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JDBOR date="2026-06-23 07:57:18" version="1.3.42 / 4.1.8 [2025-03-03]" copyright="Orphanet (c) 2026" dbserver="jdbc:sybase:Tds:canard.orpha.net:2020">
+  <Availability> 
+    <Licence>
+      <FullName lang="en">Creative Commons Attribution 4.0 International</FullName>
+      <ShortIdentifier>CC-BY-4.0</ShortIdentifier>
+      <LegalCode>https://creativecommons.org/licenses/by/4.0/legalcode</LegalCode>
+    </Licence>
+  </Availability>
+  <HPODisorderSetStatusList count="4">  <!-- RECORTE del archivo real: 4 de las 4357 enfermedades, con sólo las asociaciones indicadas -->
+    <HPODisorderSetStatus id="1">
+      <Disorder id="2">
+        <OrphaCode>58</OrphaCode>
+        <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&amp;Expert=58</ExpertLink>
+        <Name lang="en">Alexander disease</Name>
+        <DisorderType id="21394">
+          <Name lang="en">Disease</Name>
+        </DisorderType>
+        <DisorderGroup id="36547">
+          <Name lang="en">Disorder</Name>
+        </DisorderGroup>
+        <HPODisorderAssociationList count="61">
+                    <HPODisorderAssociation id="554366">
+            <HPO id="4">
+              <HPOId>HP:0000256</HPOId>
+              <HPOTerm>Macrocephaly</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28412">
+              <Name lang="en">Very frequent (99-80%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria/>
+          </HPODisorderAssociation>
+          <HPODisorderAssociation id="554367">
+            <HPO id="18">
+              <HPOId>HP:0001249</HPOId>
+              <HPOTerm>Intellectual disability</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28412">
+              <Name lang="en">Very frequent (99-80%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria/>
+          </HPODisorderAssociation>
+          <HPODisorderAssociation id="554368">
+            <HPO id="19">
+              <HPOId>HP:0001250</HPOId>
+              <HPOTerm>Seizure</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28412">
+              <Name lang="en">Very frequent (99-80%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria/>
+          </HPODisorderAssociation>
+</HPODisorderAssociationList>
+      </Disorder>
+      <Source/>
+      <ValidationStatus>y</ValidationStatus>
+      <Online>y</Online>
+      <ValidationDate>2016-06-01 00:00:00.0</ValidationDate>
+    </HPODisorderSetStatus>
+    <HPODisorderSetStatus id="36">
+      <Disorder id="59">
+        <OrphaCode>261</OrphaCode>
+        <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&amp;Expert=261</ExpertLink>
+        <Name lang="en">Emery-Dreifuss muscular dystrophy</Name>
+        <DisorderType id="21394">
+          <Name lang="en">Disease</Name>
+        </DisorderType>
+        <DisorderGroup id="36547">
+          <Name lang="en">Disorder</Name>
+        </DisorderGroup>
+        <HPODisorderAssociationList count="44">
+                    <HPODisorderAssociation id="564711">
+            <HPO id="18">
+              <HPOId>HP:0001249</HPOId>
+              <HPOTerm>Intellectual disability</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28440">
+              <Name lang="en">Excluded (0%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria/>
+          </HPODisorderAssociation>
+</HPODisorderAssociationList>
+      </Disorder>
+      <Source>5969090[PMID]_10838246[PMID]_10377322[PMID]_4697975[PMID]_17620497[PMID]_15148145[PMID]_17761684[PMID]_19716112[PMID]_21391237[PMID]</Source>
+      <ValidationStatus>y</ValidationStatus>
+      <Online>y</Online>
+      <ValidationDate>2018-06-18 00:00:00.0</ValidationDate>
+    </HPODisorderSetStatus>
+    <HPODisorderSetStatus id="51">
+      <Disorder id="109">
+        <OrphaCode>558</OrphaCode>
+        <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&amp;Expert=558</ExpertLink>
+        <Name lang="en">Marfan syndrome</Name>
+        <DisorderType id="21394">
+          <Name lang="en">Disease</Name>
+        </DisorderType>
+        <DisorderGroup id="36547">
+          <Name lang="en">Disorder</Name>
+        </DisorderGroup>
+        <HPODisorderAssociationList count="68">
+                    <HPODisorderAssociation id="588354">
+            <HPO id="104">
+              <HPOId>HP:0000768</HPOId>
+              <HPOTerm>Pectus carinatum</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28412">
+              <Name lang="en">Very frequent (99-80%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria id="28454">
+              <Name lang="en">Diagnostic criterion</Name>
+            </DiagnosticCriteria>
+          </HPODisorderAssociation>
+</HPODisorderAssociationList>
+      </Disorder>
+      <Source>30726024[PMID]_30573797[PMID]_26621648[PMID]_25323262[PMID]</Source>
+      <ValidationStatus>y</ValidationStatus>
+      <Online>y</Online>
+      <ValidationDate>2023-09-20 00:00:00.0</ValidationDate>
+    </HPODisorderSetStatus>
+    <HPODisorderSetStatus id="127">
+      <Disorder id="260">
+        <OrphaCode>116</OrphaCode>
+        <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&amp;Expert=116</ExpertLink>
+        <Name lang="en">Beckwith-Wiedemann syndrome</Name>
+        <DisorderType id="21401">
+          <Name lang="en">Malformation syndrome</Name>
+        </DisorderType>
+        <DisorderGroup id="36547">
+          <Name lang="en">Disorder</Name>
+        </DisorderGroup>
+        <HPODisorderAssociationList count="85">
+                    <HPODisorderAssociation id="652151">
+            <HPO id="1245">
+              <HPOId>HP:0008186</HPOId>
+              <HPOTerm>Adrenocortical cytomegaly</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28426">
+              <Name lang="en">Occasional (29-5%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria id="28447">
+              <Name lang="en">Pathognomonic sign</Name>
+            </DiagnosticCriteria>
+          </HPODisorderAssociation>
+</HPODisorderAssociationList>
+      </Disorder>
+      <Source>20301568[PMID]_842515[PMID]_1872243[PMID]_7604127[PMID]_9083309[PMID]_10755868[PMID]_11124932[PMID]_12584548[PMID]_12970646[PMID]_14568801[PMID]_15580204[PMID]_15811927[PMID]_16370286[PMID]_25085994[PMID]_26367199[PMID]_22015620[PMID]_14231762[PMID]</Source>
+      <ValidationStatus>y</ValidationStatus>
+      <Online>y</Online>
+      <ValidationDate>2024-02-16 00:00:00.0</ValidationDate>
+    </HPODisorderSetStatus>
+  </HPODisorderSetStatusList>
+</JDBOR>
