@@ -64,6 +64,15 @@ function main() {
       execFileSync('unzip', ['-oq', dest, '-d', join(SOURCES_DIR, src.unzipTo)], { stdio: 'inherit' });
       entry.unzippedTo = join(SOURCES_DIR, src.unzipTo);
     }
+    // Zips que el editor re-publica con otros bytes (MeSH): lo que se fija es el archivo de adentro.
+    if (src.expectedInner) {
+      entry.inner = {};
+      for (const [rel, expected] of Object.entries(src.expectedInner)) {
+        const got = sha256File(join(SOURCES_DIR, src.unzipTo, rel));
+        if (got !== expected) throw new Error(`${src.key}: ${rel} dentro del zip tiene SHA-256 ${got} ≠ esperado ${expected}. No se usa.`);
+        entry.inner[rel] = got;
+      }
+    }
     entries.push(entry);
     console.log(`[ok] ${src.key} ${entry.bytes} B sha256=${entry.sha256.slice(0, 12)}…`);
   }

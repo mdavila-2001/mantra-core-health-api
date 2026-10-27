@@ -31,6 +31,9 @@ import { parseProduct1, parseProduct3, parseProduct7 } from './orphanet.mjs';
 const EXCLUDED_XREF_PREFIXES = new Set(['SCTID', 'SNOMEDCT', 'SNOMEDCT_US']);
 const isSnomed = (prefix) => EXCLUDED_XREF_PREFIXES.has(prefix) || prefix.startsWith('SNOMEDCT_US_');
 
+/** GARD publica el id con 7 dígitos (`GARD:0017890`); MONDO también, Orphanet y DOID lo citan sin ceros: mismo número, mismo código. */
+export const gardCode = (digits) => `GARD:${String(digits).padStart(7, '0')}`;
+
 /** Prefijo de CURIE de una ontología → { cs, code } del catálogo, o null si queda como referencia. */
 export function normalizeCurie(curie) {
   const i = curie.indexOf(':');
@@ -73,6 +76,12 @@ export function normalizeCurie(curie) {
       return /^\d+$/.test(local) ? { cs: 'icd11-foundation', code: local } : null;
     case 'ICD10CM':
       return { cs: 'icd10cm', code: local, external: true };
+    case 'GARD':
+      return /^\d+$/.test(local) ? { cs: 'gard', code: gardCode(local) } : null;
+    case 'NANDO':
+      return /^\d{7}$/.test(local) ? { cs: 'nando', code: `NANDO:${local}` } : null;
+    case 'ONCOTREE':
+      return /^[A-Z0-9_]+$/.test(local) ? { cs: 'oncotree', code: local } : null;
     default:
       return null;
   }
@@ -86,7 +95,7 @@ const EQUIV_BY_SKOS = {
   'skos:relatedMatch': null,
 };
 
-function pushDesignation(list, value, lang, preferred) {
+export function pushDesignation(list, value, lang, preferred) {
   if (!value) return;
   const v = value.trim();
   if (!v || list.some((d) => d.value === v && d.lang === lang)) return;
@@ -122,6 +131,14 @@ async function oboTerms(path, prefix) {
     if (t.id.startsWith(`${prefix}:`)) terms.push(t);
   });
   return { header, terms };
+}
+
+/** `http://purl.obolibrary.org/obo/MONDO_0005391` → `MONDO:0005391`; otro IRI queda tal cual. */
+export function iriToCurie(iri) {
+  const m = /^http:\/\/purl\.obolibrary\.org\/obo\/([A-Za-z]+)_(.+)$/.exec(iri);
+  if (m) return `${m[1]}:${m[2]}`;
+  const e = /^http:\/\/www\.ebi\.ac\.uk\/efo\/(EFO)_(\d+)$/.exec(iri);
+  return e ? `${e[1]}:${e[2]}` : iri;
 }
 
 /** Xrefs no normalizables → referencia `{ prefix: [ids] }` (sin SNOMED). */
@@ -293,6 +310,7 @@ const ORPHA_TARGET = {
   UMLS: (r) => (/^C\d{7}$/.test(r) ? { cs: 'umls', code: r } : null),
   MeSH: (r) => (/^[CD]\d+$/.test(r) ? { cs: 'mesh', code: r } : null),
   MONDO: (r) => ({ cs: 'mondo', code: `MONDO:${r.padStart(7, '0')}` }),
+  GARD: (r) => (/^\d+$/.test(r) ? { cs: 'gard', code: gardCode(r) } : null),
 };
 const ORPHA_EQUIV = { E: 'equivalent', NTBT: 'wider', BTNT: 'narrower', ND: 'inexact' };
 const INACTIVE_FLAGS = new Set(['obsolete', 'deprecated', 'inactive', 'historical', 'obsolete-with-resources']);
@@ -404,7 +422,7 @@ export function readOrphanet(paths) {
  * (URL + SHA-256) en `code_system_versions.checksum` / `_systems.json`: repetirlos
  * en cada uno de los ~180 000 conceptos duplicaba el peso de la tabla.
  */
-function provenance(meta, version, sourceId, cs, code = sourceId) {
+export function provenance(meta, version, sourceId, cs, code = sourceId) {
   return {
     source: SYSTEMS[cs].sourceCode,
     sourceId,
@@ -424,6 +442,11 @@ function provenance(meta, version, sourceId, cs, code = sourceId) {
 export function buildIcd11Mms(files, meta) {
   const tab = parseSimpleTabulation(files.tabulation);
   const to10 = parse11To10(files.map11To10);
+  // Tabulación oficial de la OMS en castellano (misma release): título verbatim de la OMS por URI de linealización.
+  const es = files.tabulationEs ? parseSimpleTabulation(files.tabulationEs) : null;
+  const esByUri = es ? new Map(es.rows.map((r) => [r.linearizationUri, r])) : null;
+  let esMissing = 0;
+  let esTitleEnMismatch = 0;
   const codeByFoundation = new Map(tab.rows.filter((r) => r.foundationUri).map((r) => [r.foundationUri, mmsCode(r)]));
   const records = [];
   for (const r of tab.rows) {
@@ -433,6 +456,15 @@ export function buildIcd11Mms(files, meta) {
     const fid = foundationId(r.foundationUri);
     if (fid) xrefs.push({ cs: 'icd11-foundation', code: fid, equivalence: 'equivalent', context: 'who:mms Foundation URI' });
     if (r.code && to10.map.has(r.code)) xrefs.push({ cs: 'icd10-who', code: to10.map.get(r.code), equivalence: null, context: `who:11To10MapToOneCategory ${to10.version}` });
+    const designations = [{ value: r.title, lang: 'en', preferred: true }];
+    if (esByUri) {
+      const e = esByUri.get(r.linearizationUri);
+      if (!e) esMissing += 1;
+      else {
+        if (e.titleEn !== r.title) esTitleEnMismatch += 1;
+        pushDesignation(designations, e.title, 'es', true);
+      }
+    }
     records.push({
       cs: 'icd11-mms',
       code,
@@ -441,7 +473,7 @@ export function buildIcd11Mms(files, meta) {
       definition: null,
       definitionLang: null,
       definitionRefs: [],
-      designations: [{ value: r.title, lang: 'en', preferred: true }],
+      designations,
       parents: parentCode ? [parentCode] : [],
       status: 'active',
       replacedBy: null,
@@ -471,7 +503,15 @@ export function buildIcd11Mms(files, meta) {
     if (!prev) merged.set(r.code, r);
     else prev.parents = [...new Set([...prev.parents, ...r.parents])];
   }
-  return { version: '2026-01', tabulationVersion: tab.version, records: [...merged.values()], excluded: {}, map11To10Version: to10.version };
+  return {
+    version: '2026-01',
+    tabulationVersion: tab.version,
+    tabulationEsVersion: es?.version ?? null,
+    spanish: es ? { rows: es.rows.length, missingInSpanishFile: esMissing, titleEnDiffersFromEnglishFile: esTitleEnMismatch } : null,
+    records: [...merged.values()],
+    excluded: {},
+    map11To10Version: to10.version,
+  };
 }
 
 // --- EFO (sólo clases propias EFO_ bajo «disease» MONDO:0000001) ------------------
@@ -520,5 +560,11 @@ export async function buildEfo(file, meta) {
       provenance: provenance(meta, version, code, 'efo-disease'),
     });
   }
-  return { version, records, excluded: { notDiseaseOrImported: terms.length - records.length } };
+  // Clases EFO propias que EFO retiró: qué dice EFO (reemplazo) para quien todavía las cita (p. ej. MONDO).
+  const notes = {};
+  for (const t of terms) {
+    if (!t.obsolete || !native(t.id)) continue;
+    notes[`efo-disease|EFO:${t.id.slice(8)}`] = { reason: `obsoleta en EFO ${version}`, replacedBy: (t.replacedBy ?? []).map(iriToCurie) };
+  }
+  return { version, records, excluded: { notDiseaseOrImported: terms.length - records.length }, notes };
 }

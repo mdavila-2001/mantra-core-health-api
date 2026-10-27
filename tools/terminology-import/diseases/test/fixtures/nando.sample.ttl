@@ -1,0 +1,66 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix nando: <http://nanbyodata.jp/ontology/NANDO_> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+
+<http://nanbyodata.jp/ontology/NANDO_0000001>
+    dcterms:identifier "NANDO:0000001" ;
+    a owl:Class ;
+    rdfs:label "Intractable disease"@en, "なんびょう"@ja-Hira, "難病"@ja ;
+    rdfs:subClassOf owl:Thing ;
+    skos:prefLabel "難病"@ja .
+
+<http://nanbyodata.jp/ontology/NANDO_0000002>
+    dcterms:identifier "NANDO:0000002" ;
+    a owl:Class ;
+    rdfs:label "Obsolete class"@en, "obsolete class"@ja ;
+    rdfs:subClassOf owl:Thing ;
+    rdfs:subClassof <http://nanbyodata.jp/ontology/NANDO_0000002> ;
+    owl:deprecated true ;
+    skos:prefLabel "obsolete class"@ja .
+
+<http://nanbyodata.jp/ontology/NANDO_1000001>
+    dcterms:identifier "NANDO:1000001" ;
+    a owl:Class ;
+    rdfs:label "Designated intractable disease"@en, "していなんびょう"@ja-Hira, "指定難病"@ja ;
+    rdfs:subClassOf <http://nanbyodata.jp/ontology/NANDO_0000001> ;
+    skos:prefLabel "指定難病"@ja .
+
+<http://nanbyodata.jp/ontology/NANDO_1100001>
+    dcterms:identifier "NANDO:1100001" ;
+    a owl:Class ;
+    rdfs:label "Neuromuscular disease"@en, "しんけい・きんしっかん"@ja-Hira, "神経・筋疾患"@ja ;
+    rdfs:subClassOf <http://nanbyodata.jp/ontology/NANDO_1000001> ;
+    skos:closeMatch obo:MONDO_0019056 ;
+    skos:prefLabel "神経・筋疾患"@ja .
+
+<http://nanbyodata.jp/ontology/NANDO_1200001>
+    nando:hasNotificationNumber "1" ;
+    dcterms:description "通常成人男性に発症する、遺伝性下位運動ニューロン疾患である。四肢の筋力低下及び筋萎縮、球麻痺を主症状とし、女性化乳房など軽度のアンドロゲン不全症や耐糖能異常、脂質異常症などを合併する。筋力低下の発症は通常30～60歳頃で、経過は緩徐進行性である。国際名称は Spinal and Bulbar Muscular Atrophy （SBMA）であるが、Kennedy diseaseとも呼ばれる。"@ja ;
+    dcterms:identifier "NANDO:1200001" ;
+    dcterms:source <https://www.nanbyou.or.jp/wp-content/uploads/upload_files/File/001-201704-kojin.pdf> ;
+    a owl:Class ;
+    rdfs:label "Spinal and bulbar muscular atrophy"@en, "きゅうせきずいせいきんいしゅくしょう"@ja-Hira, "球脊髄性筋萎縮症"@ja ;
+    rdfs:seeAlso <http://syndromefinder.ncchd.go.jp/UR-DBMS/SyndromeDetail.php?winid=1&recid=3567>, <https://www.mhlw.go.jp/file/06-Seisakujouhou-10900000-Kenkoukyoku/0000157680.docx>, <https://www.nanbyou.or.jp/entry/234> ;
+    rdfs:subClassOf <http://nanbyodata.jp/ontology/NANDO_1100001> ;
+    skos:altLabel "KAS"@ja, "Kennedy disease"@en, "Kennedy-Alter-Sung症候群"@ja, "SBMA"@en ;
+    skos:closeMatch obo:MONDO_0010735, obo:MONDO_0016113 ;
+    skos:prefLabel "球脊髄性筋萎縮症"@ja .
+
+<http://nanbyodata.jp/ontology/NANDO_2201386>
+    rdfs:seeAlso <https://www.kegg.jp/dbget-bin/www_bget?ds_ja:H00541> .
+
+<http://nanbyodata.jp/ontology/nando.owl#>
+    dc:creator "Atsuo Kikuchi", "Hiroshi Masuya", "Kota Ninomiya", "Orion Buske", "Ryota Yamada", "Shuichi Kawashima", "Soichi Ogishima", "Tatsuya Kushida", "Terue Takatsuki", "Toshiaki Katayama", "Toyofumi Fujiwara", "Yasunori Yamamoto" ;
+    dcterms:created "2021-7-23T00:00:00"^^xsd:dateTime ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:modified "2023-11-27T00:00:00"^^xsd:dateTime ;
+    a owl:Ontology ;
+    owl:versionIRI <http://nanbyodata.jp/version1.0.0> ;
+    owl:versionInfo "1.0.0" .

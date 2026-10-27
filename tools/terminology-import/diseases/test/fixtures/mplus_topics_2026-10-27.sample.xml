@@ -1,0 +1,1148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE health-topics PUBLIC "-//NLM//DTD health-topics //EN" "https://medlineplus.gov/xml/mplus_topics.dtd">
+<health-topic meta-desc="An abortion is a medical procedure to end a pregnancy. It uses medicine or surgery to remove the embryo or fetus and placenta from the uterus. " title="Abortion" url="https://medlineplus.gov/abortion.html" id="122" language="English" date-created="03/19/2002">
+<also-called>Induced Abortion</also-called>
+<full-summary>&lt;p&gt;An induced abortion is a procedure to end a pregnancy. It can be done two different ways:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://medlineplus.gov/ency/article/007382.htm"&gt;Medication abortion&lt;/a&gt; (also called medical abortion)&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://medlineplus.gov/ency/article/002912.htm"&gt;Procedural abortion&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;An induced abortion is different from a spontaneous abortion. That is the loss of a pregnancy before the 20th week of pregnancy. It is more commonly known as a &lt;a href="https://medlineplus.gov/miscarriage.html"&gt;miscarriage&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you are thinking of having an induced abortion, talk with your health care provider. Your provider can explain how the procedures are done, as well as the risks and benefits of each.&lt;/p&gt;</full-summary>
+<group url="https://medlineplus.gov/pregnancyandreproduction.html" id="20">Pregnancy and Reproduction</group>
+<group url="https://medlineplus.gov/femalereproductivesystem.html" id="42">Female Reproductive System</group>
+<language-mapped-topic url="https://medlineplus.gov/spanish/abortion.html" id="2238" language="Spanish">Aborto</language-mapped-topic>
+<mesh-heading>
+<descriptor id="D000028">Abortion, Induced</descriptor>
+</mesh-heading>
+<other-language vernacular-name="简体中文" url="https://medlineplus.gov/languages/abortion.html#Chinese, Simplified (Mandarin dialect)">Chinese, Simplified (Mandarin dialect)</other-language>
+<other-language vernacular-name="繁體中文" url="https://medlineplus.gov/languages/abortion.html#Chinese, Traditional (Cantonese dialect)">Chinese, Traditional (Cantonese dialect)</other-language>
+<other-language vernacular-name="हिन्दी" url="https://medlineplus.gov/languages/abortion.html#Hindi">Hindi</other-language>
+<other-language vernacular-name="español" url="https://medlineplus.gov/spanish/abortion.html">Spanish</other-language>
+<other-language vernacular-name="español" url="https://medlineplus.gov/languages/abortion.html#Spanish">Spanish</other-language>
+<other-language vernacular-name="Tiếng Việt" url="https://medlineplus.gov/languages/abortion.html#Vietnamese">Vietnamese</other-language>
+<site title="Abortion - medication" url="https://medlineplus.gov/ency/article/007382.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/007382.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Abortion - procedure" url="https://medlineplus.gov/ency/article/002912.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/002912.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Abortion - procedure - aftercare" url="https://medlineplus.gov/ency/patientinstructions/000658.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/patientinstructions/000658.htm">
+<information-category>Patient Handouts</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Abortion Care" url="https://www.acog.org/womens-health/faqs/induced-abortion" language-mapped-url="https://www.acog.org/Patients/Search-Patient-Education-Pamphlets-Spanish/Files/El-aborto-provocado">
+<information-category>Learn More</information-category>
+<organization>American College of Obstetricians and Gynecologists</organization>
+</site>
+<site title="Could an Elective Abortion Raise the Risk of Problems in a Future Pregnancy?" url="https://www.mayoclinic.org/healthy-lifestyle/getting-pregnant/expert-answers/abortion/faq-20058551?p=1" language-mapped-url="https://www.mayoclinic.org/es/healthy-lifestyle/getting-pregnant/expert-answers/abortion/faq-20058551?p=1">
+<information-category>Learn More</information-category>
+<organization>Mayo Foundation for Medical Education and Research</organization>
+</site>
+<site title="D and C" url="https://medlineplus.gov/ency/article/002914.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/002914.htm">
+<information-category>Learn More</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Dilation and Curettage (D&amp;C)" url="https://www.mayoclinic.org/tests-procedures/dilation-and-curettage/about/pac-20384910?p=1">
+<information-category>Learn More</information-category>
+<organization>Mayo Foundation for Medical Education and Research</organization>
+</site>
+<site title="Ending a Pregnancy" url="https://familydoctor.org/ending-a-pregnancy/" language-mapped-url="https://es.familydoctor.org/ponerle-fin-a-un-embarazo/">
+<information-category>Learn More</information-category>
+<organization>American Academy of Family Physicians</organization>
+</site>
+<site title="Ending pregnancy with medicines" url="https://medlineplus.gov/ency/patientinstructions/000835.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/patientinstructions/000835.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Medical Abortion" url="https://www.mayoclinic.org/tests-procedures/medical-abortion/about/pac-20394687?p=1" language-mapped-url="https://www.mayoclinic.org/es/tests-procedures/medical-abortion/about/pac-20394687?p=1">
+<information-category>Learn More</information-category>
+<organization>Mayo Foundation for Medical Education and Research</organization>
+</site>
+<site title="Pregnancy Choices: Raising the Baby, Adoption, and Abortion" url="https://www.acog.org/womens-health/faqs/pregnancy-choices-raising-the-baby-adoption-and-abortion">
+<information-category>Learn More</information-category>
+<organization>American College of Obstetricians and Gynecologists</organization>
+</site>
+<site title="Induced abortion" url="https://pubmed.ncbi.nlm.nih.gov/?term=%22Abortion%2C+Induced%22%5Bmajr%3Anoexp%5D+AND+humans%5Bmh%5D+AND+english%5Bla%5D+AND+%22last+1+Year%22+%5Bedat%5D+AND+%28patient+education+handout%5Bpt%5D+OR+guideline%5Bpt%5D+OR+clinical+trial%5Bpt%5D%29++NOT+%28letter%5Bpt%5D+OR+case+reports%5Bpt%5D+OR+editorial%5Bpt%5D+OR+comment%5Bpt%5D%29+AND+free+full+text%5Bsb%5D+">
+<information-category>Journal Articles</information-category>
+</site>
+<site title="Questions and Answers on Mifepristone for Medical Termination of Pregnancy Through Ten Weeks Gestation" url="https://www.fda.gov/drugs/postmarket-drug-safety-information-patients-and-providers/questions-and-answers-mifepristone-medical-termination-pregnancy-through-ten-weeks-gestation">
+<information-category>Learn More</information-category>
+<organization>Food and Drug Administration</organization>
+</site>
+<site title="What to Do When Your Pregnancy Is Unexpected" url="https://familydoctor.org/what-to-do-when-your-pregnancy-is-unexpected/" language-mapped-url="https://es.familydoctor.org/que-hacer-cuando-su-embarazo-es-inesperado/">
+<information-category>Learn More</information-category>
+<organization>American Academy of Family Physicians</organization>
+</site>
+</health-topic>
+<health-topic meta-desc="Un aborto es un procedimiento médico para terminar un embarazo. Usa medicinas o cirugía para retirar el embrión o el feto y la placenta del útero." title="Aborto" url="https://medlineplus.gov/spanish/abortion.html" id="2238" language="Spanish" date-created="10/31/2006">
+<also-called>Aborto inducido</also-called>
+<also-called>Aborto provocado</also-called>
+<also-called>Aborto terapéutico</also-called>
+<also-called>Interrupción del embarazo</also-called>
+<full-summary>&lt;p&gt;Un aborto inducido es un procedimiento para terminar un embarazo. Se puede hacer de dos maneras diferentes:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href="https://medlineplus.gov/spanish/ency/article/007382.htm"&gt;Aborto con medicamentos&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="https://medlineplus.gov/spanish/ency/article/002912.htm"&gt;Aborto quirúrgico&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Un aborto inducido es diferente de un aborto espontáneo. Es la pérdida de un embarazo antes de la semana 20 de embarazo. Se le conoce más comúnmente como &lt;a href="https://medlineplus.gov/spanish/miscarriage.html"&gt;pérdida del embarazo&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Si está pensando en hacerse un aborto inducido, hable con su profesional de la salud. Su proveedor puede explicarle cómo se realizan los procedimientos, así como los riesgos y beneficios de cada tipo.&lt;/p&gt;</full-summary>
+<group url="https://medlineplus.gov/spanish/pregnancyandreproduction.html" id="20">Embarazo y reproducción</group>
+<group url="https://medlineplus.gov/spanish/femalereproductivesystem.html" id="42">Sistema reproductor femenino</group>
+<language-mapped-topic url="https://medlineplus.gov/abortion.html" id="122" language="English">Abortion</language-mapped-topic>
+<see-reference>Embriotomía</see-reference>
+<site title="Aborto médico" url="https://www.mayoclinic.org/es/tests-procedures/medical-abortion/about/pac-20394687?p=1" language-mapped-url="https://www.mayoclinic.org/tests-procedures/medical-abortion/about/pac-20394687?p=1">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Fundación Mayo para la Educación y la Investigación Médica</organization>
+</site>
+<site title="Aborto: Medicamento" url="https://medlineplus.gov/spanish/ency/article/007382.htm" language-mapped-url="https://medlineplus.gov/ency/article/007382.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Aborto: Procedimiento" url="https://medlineplus.gov/spanish/ency/article/002912.htm" language-mapped-url="https://medlineplus.gov/ency/article/002912.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Aborto: Procedimiento y cuidados posteriores" url="https://medlineplus.gov/spanish/ency/patientinstructions/000658.htm" language-mapped-url="https://medlineplus.gov/ency/patientinstructions/000658.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Dilatación y legrado" url="https://medlineplus.gov/spanish/ency/article/002914.htm" language-mapped-url="https://medlineplus.gov/ency/article/002914.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Serie del procedimiento de dilatación y legrado" url="https://medlineplus.gov/spanish/ency/esp_presentations/100013_1.htm" language-mapped-url="https://medlineplus.gov/ency/presentations/100013_1.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Terminación del embarazo con medicamentos" url="https://medlineplus.gov/spanish/ency/patientinstructions/000835.htm" language-mapped-url="https://medlineplus.gov/ency/patientinstructions/000835.htm">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="¿Podría un aborto aumentar el riesgo de problemas en un embarazo posterior?" url="https://www.mayoclinic.org/es/healthy-lifestyle/getting-pregnant/expert-answers/abortion/faq-20058551?p=1" language-mapped-url="https://www.mayoclinic.org/healthy-lifestyle/getting-pregnant/expert-answers/abortion/faq-20058551?p=1">
+<information-category>Más información</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Fundación Mayo para la Educación y la Investigación Médica</organization>
+</site>
+</health-topic>
+<health-topic meta-desc="Anemia occurs when your blood doesn't carry enough oxygen to the rest of your body. Read about conditions that lead to it and treatments available." title="Anemia" url="https://medlineplus.gov/anemia.html" id="139" language="English" date-created="09/02/1999">
+<also-called>Iron poor blood</also-called>
+<full-summary>&lt;p&gt;If you have anemia, your blood does not carry enough oxygen to the rest of your body.  The most common cause of anemia is not having enough &lt;a href="https://medlineplus.gov/iron.html"&gt;iron&lt;/a&gt;. Your body needs iron to make hemoglobin. Hemoglobin is an iron-rich protein that gives the red color to blood. It carries oxygen from the lungs to the rest of the body.&lt;/p&gt;
+
+&lt;p&gt;Anemia has three main causes: blood loss, lack of red blood cell production, and high rates of red blood cell destruction.&lt;/p&gt;
+
+&lt;p&gt;Conditions that may lead to anemia include:&lt;/p&gt;&lt;ul&gt;
+&lt;li&gt;Heavy periods&lt;/li&gt;
+&lt;li&gt;Pregnancy&lt;/li&gt;
+&lt;li&gt;Ulcers&lt;/li&gt;
+&lt;li&gt;Colon polyps or colon cancer&lt;/li&gt;
+&lt;li&gt;Inherited disorders&lt;/li&gt;
+&lt;li&gt;A diet that does not have enough iron, &lt;a href="https://medlineplus.gov/folicacid.html"&gt;folic acid&lt;/a&gt; or &lt;a href="https://medlineplus.gov/bvitamins.html"&gt;vitamin B12&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Blood disorders such as &lt;a href="https://medlineplus.gov/sicklecelldisease.html"&gt;sickle cell anemia&lt;/a&gt; and &lt;a href="https://medlineplus.gov/thalassemia.html"&gt;thalassemia&lt;/a&gt;, or cancer&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://medlineplus.gov/aplasticanemia.html"&gt;Aplastic anemia&lt;/a&gt;, a condition that can be inherited or acquired&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://medlineplus.gov/g6pddeficiency.html"&gt;G6PD deficiency&lt;/a&gt;, a metabolic disorder&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Anemia can make you feel tired, cold, dizzy, and irritable. You may be short of breath or have a headache.&lt;/p&gt;
+
+&lt;p&gt;Your doctor will diagnose anemia with a physical exam and blood tests. Treatment depends on the kind of anemia you have.&lt;/p&gt;
+
+&lt;p class=""&gt;NIH: National Heart, Lung, and Blood Institute&lt;/p&gt;</full-summary>
+<group url="https://medlineplus.gov/bloodheartandcirculation.html" id="7">Blood, Heart and Circulation</group>
+<language-mapped-topic url="https://medlineplus.gov/spanish/anemia.html" id="1743" language="Spanish">Anemia</language-mapped-topic>
+<mesh-heading>
+<descriptor id="D000740">Anemia</descriptor>
+</mesh-heading>
+<other-language vernacular-name="العربية" url="https://medlineplus.gov/languages/anemia.html#Arabic">Arabic</other-language>
+<other-language vernacular-name="简体中文" url="https://medlineplus.gov/languages/anemia.html#Chinese, Simplified (Mandarin dialect)">Chinese, Simplified (Mandarin dialect)</other-language>
+<other-language vernacular-name="français" url="https://medlineplus.gov/languages/anemia.html#French">French</other-language>
+<other-language vernacular-name="हिन्दी" url="https://medlineplus.gov/languages/anemia.html#Hindi">Hindi</other-language>
+<other-language vernacular-name="日本語" url="https://medlineplus.gov/languages/anemia.html#Japanese">Japanese</other-language>
+<other-language vernacular-name="한국어" url="https://medlineplus.gov/languages/anemia.html#Korean">Korean</other-language>
+<other-language vernacular-name="नेपाली" url="https://medlineplus.gov/languages/anemia.html#Nepali">Nepali</other-language>
+<other-language vernacular-name="Русский" url="https://medlineplus.gov/languages/anemia.html#Russian">Russian</other-language>
+<other-language vernacular-name="Af-Soomaali " url="https://medlineplus.gov/languages/anemia.html#Somali">Somali</other-language>
+<other-language vernacular-name="español" url="https://medlineplus.gov/spanish/anemia.html">Spanish</other-language>
+<other-language vernacular-name="español" url="https://medlineplus.gov/languages/anemia.html#Spanish">Spanish</other-language>
+<primary-institute url="http://www.nhlbi.nih.gov/">National Heart, Lung, and Blood Institute</primary-institute>
+<related-topic url="https://medlineplus.gov/aplasticanemia.html" id="5955">Aplastic Anemia</related-topic>
+<related-topic url="https://medlineplus.gov/bvitamins.html" id="5376">B Vitamins</related-topic>
+<related-topic url="https://medlineplus.gov/folicacid.html" id="1611">Folic Acid</related-topic>
+<related-topic url="https://medlineplus.gov/g6pddeficiency.html" id="6155">G6PD Deficiency</related-topic>
+<related-topic url="https://medlineplus.gov/iron.html" id="5542">Iron</related-topic>
+<related-topic url="https://medlineplus.gov/sicklecelldisease.html" id="402">Sickle Cell Disease</related-topic>
+<related-topic url="https://medlineplus.gov/thalassemia.html" id="4239">Thalassemia</related-topic>
+<see-reference>Iron Deficiency Anemia</see-reference>
+<site title="Aase syndrome" url="https://medlineplus.gov/ency/article/001662.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/001662.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Anemia" url="https://medlineplus.gov/ency/article/000560.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000560.htm">
+<information-category>Patient Handouts</information-category>
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Anemia" url="https://www.healthinaging.org/a-z-topic/anemia">
+<information-category>Older Adults</information-category>
+<organization>AGS Health in Aging Foundation</organization>
+</site>
+<site title="Anemia" url="https://familydoctor.org/condition/anemia/" language-mapped-url="https://es.familydoctor.org/condicion/anemia-es/">
+<information-category>Start Here</information-category>
+<organization>American Academy of Family Physicians</organization>
+</site>
+<site title="Anemia (For Parents)" url="https://kidshealth.org/en/parents/anemia.html" language-mapped-url="https://kidshealth.org/es/parents/anemia-esp-1.html">
+<information-category>Children</information-category>
+<organization>Nemours Foundation</organization>
+</site>
+<site title="Anemia and Pregnancy" url="https://www.hematology.org/education/patients/anemia/pregnancy">
+<information-category>Women</information-category>
+<organization>American Society of Hematology</organization>
+</site>
+<site title="Anemia caused by low iron - children" url="https://medlineplus.gov/ency/article/007134.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/007134.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Anemia caused by low iron - infants and toddlers" url="https://medlineplus.gov/ency/article/007618.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/007618.htm">
+<information-category>Patient Handouts</information-category>
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Anemia Causes and Risk Factors" url="https://www.nhlbi.nih.gov/health/anemia/causes" language-mapped-url="https://www.nhlbi.nih.gov/es/salud/anemia/causas">
+<information-category>Prevention and Risk Factors</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Anemia Diagnosis" url="https://www.nhlbi.nih.gov/health/anemia/diagnosis" language-mapped-url="https://www.nhlbi.nih.gov/es/salud/anemia/diagnostico">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Anemia Due to Excessive Bleeding" url="https://www.merckmanuals.com/home/blood-disorders/anemia/anemia-due-to-excessive-bleeding" language-mapped-url="https://www.merckmanuals.com/es-us/hogar/trastornos-de-la-sangre/anemia/anemia-debida-a-un-sangrado-excesivo">
+<information-category>Specifics</information-category>
+<organization>Merck &amp; Co., Inc.</organization>
+</site>
+<site title="Anemia in Chronic Kidney Disease" url="https://www.niddk.nih.gov/health-information/kidney-disease/anemia" language-mapped-url="https://www.niddk.nih.gov/health-information/informacion-de-la-salud/enfermedades-rinones/anemia">
+<information-category>Related Issues</information-category>
+<organization>National Institute of Diabetes and Digestive and Kidney Diseases</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Anemia in the Newborn" url="https://www.merckmanuals.com/home/children-s-health-issues/blood-problems-in-newborns/anemia-in-the-newborn" language-mapped-url="https://www.merckmanuals.com/es-us/hogar/salud-infantil/problemas-sangu%C3%ADneos-en-el-reci%C3%A9n-nacido/anemia-en-el-reci%C3%A9n-nacido">
+<information-category>Children</information-category>
+<organization>Merck &amp; Co., Inc.</organization>
+</site>
+<site title="Anemia of chronic disease" url="https://medlineplus.gov/ency/article/000565.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000565.htm">
+<information-category>Patient Handouts</information-category>
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Anemia of Inflammation or Chronic Disease" url="https://www.niddk.nih.gov/health-information/blood-diseases/anemia-inflammation-chronic-disease" language-mapped-url="https://www.niddk.nih.gov/health-information/informacion-de-la-salud/enfermedades-sangre/anemia-pori-inflamacion-enfermedad-cronica">
+<information-category>Specifics</information-category>
+<organization>National Institute of Diabetes and Digestive and Kidney Diseases</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Anemia Prevalence: United States, August 2021-August 2023" url="https://www.cdc.gov/nchs/products/databriefs/db519.htm">
+<information-category>Statistics and Research</information-category>
+<organization>Centers for Disease Control and Prevention</organization>
+</site>
+<site title="Anemia Symptoms" url="https://www.nhlbi.nih.gov/health/anemia/symptoms" language-mapped-url="https://www.nhlbi.nih.gov/es/salud/anemia/sintomas">
+<information-category>Symptoms</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Anemia Treatment and Management" url="https://www.nhlbi.nih.gov/health/anemia/treatment" language-mapped-url="https://www.nhlbi.nih.gov/es/salud/anemia/tratamiento">
+<information-category>Treatments and Therapies</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Antiparietal cell antibody test" url="https://medlineplus.gov/ency/article/003351.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003351.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Blood Smear" url="https://medlineplus.gov/lab-tests/blood-smear/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/frotis-de-sangre/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Blood Tests" url="https://www.nhlbi.nih.gov/health/blood-tests" language-mapped-url="https://www.nhlbi.nih.gov/es/salud/analisis-de-sangre">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Bone marrow biopsy" url="https://medlineplus.gov/ency/article/003934.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003934.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Bone Marrow Tests" url="https://medlineplus.gov/lab-tests/bone-marrow-tests/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/prueba-de-la-medula-osea/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="ClinicalTrials.gov: Anemia" url="https://clinicaltrials.gov/search?cond=%22Anemia%22&amp;aggFilters=status:not%20rec">
+<information-category>Clinical Trials</information-category>
+<organization>National Institutes of Health</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="ClinicalTrials.gov: Anemia, Iron-Deficiency" url="https://clinicaltrials.gov/search?cond=%22Anemia,+Iron-Deficiency%22&amp;aggFilters=status:not%20rec">
+<information-category>Clinical Trials</information-category>
+<organization>National Institutes of Health</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Complete Blood Count (CBC)" url="https://medlineplus.gov/lab-tests/complete-blood-count-cbc/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/conteo-sanguineo-completo/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Congenital dyserythropoietic anemia: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/congenital-dyserythropoietic-anemia">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Craving and Chewing Ice: A Sign of Anemia?" url="https://www.mayoclinic.org/diseases-conditions/iron-deficiency-anemia/expert-answers/chewing-ice/faq-20057982?p=1" language-mapped-url="https://www.mayoclinic.org/es/diseases-conditions/iron-deficiency-anemia/expert-answers/chewing-ice/faq-20057982?p=1">
+<information-category>Related Issues</information-category>
+<organization>Mayo Foundation for Medical Education and Research</organization>
+</site>
+<site title="Diamond-Blackfan Anemia (For Parents)" url="https://kidshealth.org/en/parents/diamond-blackfan-anemia.html" language-mapped-url="https://kidshealth.org/es/parents/diamond-blackfan-anemia.html">
+<information-category>Children</information-category>
+<organization>Nemours Foundation</organization>
+</site>
+<site title="Diamond-Blackfan anemia: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/diamond-blackfan-anemia">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Donath-Landsteiner test" url="https://medlineplus.gov/ency/article/003668.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003668.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Drug-induced immune hemolytic anemia" url="https://medlineplus.gov/ency/article/000578.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000578.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Erythropoietin test" url="https://medlineplus.gov/ency/article/003683.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003683.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="FastStats: Anemia or Iron Deficiency" url="https://www.cdc.gov/nchs/fastats/anemia.htm">
+<information-category>Statistics and Research</information-category>
+<organization>National Center for Health Statistics</organization>
+</site>
+<site title="Febrile (warm) and cold agglutinins" url="https://medlineplus.gov/ency/article/003549.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003549.htm">
+<information-category>Patient Handouts</information-category>
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Ferritin blood test" url="https://medlineplus.gov/ency/article/003490.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003490.htm">
+<information-category>Patient Handouts</information-category>
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Ferritin Blood Test" url="https://medlineplus.gov/lab-tests/ferritin-blood-test/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/prueba-de-sangre-de-ferritina/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Folate-deficiency anemia" url="https://medlineplus.gov/ency/article/000551.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000551.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Ghosal hematodiaphyseal dysplasia: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/ghosal-hematodiaphyseal-dysplasia">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Glucose phosphate isomerase deficiency: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/glucose-phosphate-isomerase-deficiency">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Haptoglobin (HP) Test" url="https://medlineplus.gov/lab-tests/haptoglobin-hp-test/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/prueba-de-haptoglobina/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Haptoglobin blood test" url="https://medlineplus.gov/ency/article/003634.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003634.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Hemoglobin C disease" url="https://medlineplus.gov/ency/article/000572.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000572.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Hemoglobin C, S-C, and E Diseases" url="https://www.merckmanuals.com/home/blood-disorders/anemia/hemoglobin-c-s-c-and-e-diseases" language-mapped-url="https://www.merckmanuals.com/es-us/hogar/trastornos-de-la-sangre/anemia/enfermedades-de-la-hemoglobina-c-s-c-y-e">
+<information-category>Specifics</information-category>
+<organization>Merck &amp; Co., Inc.</organization>
+</site>
+<site title="Hemoglobin electrophoresis" url="https://medlineplus.gov/ency/article/003639.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003639.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Hemoglobin Electrophoresis" url="https://medlineplus.gov/lab-tests/hemoglobin-electrophoresis/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/electroforesis-de-hemoglobina/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Hemolytic Anemia" url="https://www.nhlbi.nih.gov/health/anemia/hemolytic-anemia" language-mapped-url="https://www.nhlbi.nih.gov/es/salud/anemia/anemia-hemolitica">
+<information-category>Specifics</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Hemolytic anemia" url="https://medlineplus.gov/ency/article/000571.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000571.htm">
+<information-category>Patient Handouts</information-category>
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Hemolytic anemia caused by chemicals and toxins" url="https://medlineplus.gov/ency/article/000590.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000590.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Hemolytic crisis" url="https://medlineplus.gov/ency/article/003270.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003270.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Hereditary folate malabsorption: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/hereditary-folate-malabsorption/">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Hereditary spherocytic anemia" url="https://medlineplus.gov/ency/article/000530.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000530.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Hereditary Spherocytosis" url="https://kidshealth.org/en/parents/hereditary-spherocytosis.html" language-mapped-url="https://kidshealth.org/es/parents/hereditary-spherocytosis.html">
+<information-category>Children</information-category>
+<organization>Nemours Foundation</organization>
+</site>
+<site title="Hereditary spherocytosis: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/hereditary-spherocytosis">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Hypochromic microcytic anemia with iron overload: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/hypochromic-microcytic-anemia-with-iron-overload">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Imerslund-Gräsbeck syndrome: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/imerslund-grasbeck-syndrome">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Immune hemolytic anemia" url="https://medlineplus.gov/ency/article/000576.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000576.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Iron" url="https://ods.od.nih.gov/factsheets/Iron-Consumer/" language-mapped-url="https://ods.od.nih.gov/factsheets/Iron-DatosEnEspanol/">
+<information-category>Treatments and Therapies</information-category>
+<organization>National Institutes of Health, Office of Dietary Supplements</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Iron deficiency anemia" url="https://medlineplus.gov/ency/article/000584.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000584.htm">
+<information-category>Patient Handouts</information-category>
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Iron Tests" url="https://medlineplus.gov/lab-tests/iron-tests/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/pruebas-de-hierro/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Iron-Deficiency Anemia" url="https://womenshealth.gov/a-z-topics/iron-deficiency-anemia" language-mapped-url="https://espanol.womenshealth.gov/a-z-topics/iron-deficiency-anemia">
+<information-category>Women</information-category>
+<organization>Department of Health and Human Services, Office on Women's Health</organization>
+</site>
+<site title="Iron-Deficiency Anemia" url="https://kidshealth.org/en/parents/ida.html" language-mapped-url="https://kidshealth.org/es/parents/ida.html">
+<information-category>Children</information-category>
+<organization>Nemours Foundation</organization>
+</site>
+<site title="Iron-Deficiency Anemia" url="https://www.nhlbi.nih.gov/health/anemia/iron-deficiency-anemia" language-mapped-url="https://www.nhlbi.nih.gov/es/salud/anemia/anemia-ferropenica">
+<information-category>Specifics</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Iron-refractory iron deficiency anemia: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/iron-refractory-iron-deficiency-anemia">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Lactate Dehydrogenase (LDH) Isoenzymes Test" url="https://medlineplus.gov/lab-tests/lactate-dehydrogenase-ldh-isoenzymes-test/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/examen-de-isoenzimas-de-la-lactato-deshidrogenasa-ldh/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Lactate Dehydrogenase (LDH) Test" url="https://medlineplus.gov/lab-tests/lactate-dehydrogenase-ldh-test/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/prueba-de-lactato-deshidrogenasa-ldh/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Lactate dehydrogenase test" url="https://medlineplus.gov/ency/article/003471.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003471.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="LDH isoenzyme blood test" url="https://medlineplus.gov/ency/article/003499.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003499.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Majeed syndrome: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/majeed-syndrome">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Managing Anemia When You Have Cancer" url="https://www.cancer.org/cancer/side-effects/low-blood-counts/anemia.html" language-mapped-url="https://www.cancer.org/es/cancer/efectos-secundarios/recuentos-sanguineos-bajos/anemia.html">
+<information-category>Related Issues</information-category>
+<organization>American Cancer Society</organization>
+</site>
+<site title="Mucolipidosis type IV: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/mucolipidosis-type-iv/">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="National Heart, Lung, and Blood Institute" url="https://www.nhlbi.nih.gov/">
+<information-category>Find an Expert</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="National Institute of Diabetes and Digestive and Kidney Diseases" url="https://www.niddk.nih.gov">
+<information-category>Find an Expert</information-category>
+<organization>National Institute of Diabetes and Digestive and Kidney Diseases</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Paroxysmal cold hemoglobinuria (PCH)" url="https://medlineplus.gov/ency/article/000557.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000557.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Paroxysmal nocturnal hemoglobinuria (PNH)" url="https://medlineplus.gov/ency/article/000534.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000534.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Paroxysmal Nocturnal Hemoglobinuria (PNH)" url="https://www.aamds.org/pnh">
+<information-category>Specifics</information-category>
+<organization>Aplastic Anemia and MDS International Foundation</organization>
+</site>
+<site title="Paroxysmal nocturnal hemoglobinuria: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/paroxysmal-nocturnal-hemoglobinuria">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Pernicious anemia" url="https://medlineplus.gov/ency/article/000569.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000569.htm">
+<information-category>Patient Handouts</information-category>
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Phosphoglycerate kinase deficiency: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/phosphoglycerate-kinase-deficiency/">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Plummer-Vinson syndrome" url="https://medlineplus.gov/ency/article/001158.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/001158.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Anemia" url="https://pubmed.ncbi.nlm.nih.gov/?term=%22Anemia%22%5Bmajr%3Anoexp%5D+AND+humans%5Bmh%5D+AND+english%5Bla%5D+AND+%22last+1+Year%22+%5Bedat%5D+AND+%28patient+education+handout%5Bpt%5D+OR+guideline%5Bpt%5D+OR+clinical+trial%5Bpt%5D%29++NOT+%28letter%5Bpt%5D+OR+case+reports%5Bpt%5D+OR+editorial%5Bpt%5D+OR+comment%5Bpt%5D%29+AND+free+full+text%5Bsb%5D+">
+<information-category>Journal Articles</information-category>
+</site>
+<site title="Pyruvate kinase blood test" url="https://medlineplus.gov/ency/article/003357.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003357.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Pyruvate kinase deficiency" url="https://medlineplus.gov/ency/article/001197.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/001197.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Pyruvate Kinase Deficiency (For Parents)" url="https://kidshealth.org/en/parents/pyruvate-kinase-deficiency.html" language-mapped-url="https://kidshealth.org/es/parents/pyruvate-kinase-deficiency.html">
+<information-category>Children</information-category>
+<organization>Nemours Foundation</organization>
+</site>
+<site title="Pyruvate kinase deficiency: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/pyruvate-kinase-deficiency">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Red Blood Cell (RBC) Indices" url="https://medlineplus.gov/lab-tests/red-blood-cell-rbc-indices/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/indices-de-globulos-rojos/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Reticulocyte Count" url="https://medlineplus.gov/lab-tests/reticulocyte-count/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/conteo-de-reticulocitos/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Schilling test" url="https://medlineplus.gov/ency/article/003572.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003572.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Serum free hemoglobin test" url="https://medlineplus.gov/ency/article/003677.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003677.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Serum iron test" url="https://medlineplus.gov/ency/article/003488.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003488.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Stool guaiac test" url="https://medlineplus.gov/ency/article/003393.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003393.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Subacute combined degeneration" url="https://medlineplus.gov/ency/article/000723.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000723.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Sugar-water hemolysis test" url="https://medlineplus.gov/ency/article/003673.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003673.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Thiamine-responsive megaloblastic anemia syndrome: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/thiamine-responsive-megaloblastic-anemia-syndrome">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Total iron binding capacity" url="https://medlineplus.gov/ency/article/003489.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003489.htm">
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Treatments for Blood Disorders" url="https://www.nhlbi.nih.gov/health/blood-bone-marrow-treatments" language-mapped-url="https://www.nhlbi.nih.gov/es/salud/sangre-y-medula-osea-tratamientos">
+<information-category>Treatments and Therapies</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="TRNT1 deficiency: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/trnt1-deficiency">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Vitamin B Test" url="https://medlineplus.gov/lab-tests/vitamin-b-test/" language-mapped-url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/prueba-de-vitamina-b/">
+<information-category>Diagnosis and Tests</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Vitamin B12" url="https://ods.od.nih.gov/factsheets/VitaminB12-Consumer/" language-mapped-url="https://ods.od.nih.gov/factsheets/VitaminB12-DatosEnEspanol/">
+<information-category>Treatments and Therapies</information-category>
+<organization>National Institutes of Health, Office of Dietary Supplements</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Vitamin B12 deficiency anemia" url="https://medlineplus.gov/ency/article/000574.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/000574.htm">
+<information-category>Patient Handouts</information-category>
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Vitamin B12 level" url="https://medlineplus.gov/ency/article/003705.htm" language-mapped-url="https://medlineplus.gov/spanish/ency/article/003705.htm">
+<information-category>Patient Handouts</information-category>
+<information-category>Encyclopedia</information-category>
+<organization>Medical Encyclopedia</organization>
+</site>
+<site title="Vitamin B12-Deficiency Anemia" url="https://www.nhlbi.nih.gov/health/anemia/vitamin-b12-deficiency-anemia" language-mapped-url="https://www.nhlbi.nih.gov/es/salud/anemia/anemia-por-deficiencia-de-vitamina-b12">
+<information-category>Specifics</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Vitamin Deficiency Anemia" url="https://www.mayoclinic.org/diseases-conditions/vitamin-deficiency-anemia/symptoms-causes/syc-20355025?p=1" language-mapped-url="https://www.mayoclinic.org/es/diseases-conditions/vitamin-deficiency-anemia/symptoms-causes/syc-20355025?p=1">
+<information-category>Specifics</information-category>
+<organization>Mayo Foundation for Medical Education and Research</organization>
+</site>
+<site title="What Is Anemia?" url="https://www.nhlbi.nih.gov/health/anemia" language-mapped-url="https://www.nhlbi.nih.gov/es/salud/anemia">
+<information-category>Start Here</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="X-linked sideroblastic anemia: MedlinePlus Genetics" url="https://medlineplus.gov/genetics/condition/x-linked-sideroblastic-anemia">
+<information-category>Genetics</information-category>
+<organization>National Library of Medicine</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Your Guide to Anemia" url="https://www.nhlbi.nih.gov/resources/your-guide-anemia">
+<information-category>Start Here</information-category>
+<organization>National Heart, Lung, and Blood Institute</organization>
+<standard-description>PDF</standard-description>
+<standard-description>NIH</standard-description>
+</site>
+</health-topic>
+<health-topic meta-desc="La anemia ocurre cuando la sangre no transporta suficiente oxígeno al cuerpo. Entérese sobre síntomas y tratamiento de la anemia. " title="Anemia" url="https://medlineplus.gov/spanish/anemia.html" id="1743" language="Spanish" date-created="07/21/2002">
+<full-summary>&lt;p&gt;Si tiene anemia, es debido a que su sangre no está transportando suficiente oxígeno al resto de su cuerpo. La causa más común de anemia es no tener suficiente &lt;a href="https://medlineplus.gov/spanish/iron.html"&gt;hierro&lt;/a&gt;. El cuerpo necesita este mineral para producir hemoglobina. La hemoglobina es una proteína rica en hierro que da a la sangre su color rojo y transporta oxígeno desde los pulmones al resto del cuerpo. &lt;/p&gt;
+
+&lt;p&gt;Las tres causas principales de anemia son: pérdida de sangre, no producir glóbulos rojos y destrucción de estos a gran velocidad. &lt;/p&gt;
+
+&lt;p&gt;Los problemas médicos que pueden causar anemia pueden ser:&lt;/p&gt;&lt;ul&gt;
+&lt;li&gt;Períodos menstruales muy abundantes&lt;/li&gt;
+&lt;li&gt;Embarazo&lt;/li&gt;
+&lt;li&gt;Ulceras&lt;/li&gt;
+&lt;li&gt;Pólipos en el colon o cáncer del colon&lt;/li&gt;
+&lt;li&gt; Trastornos hereditarios&lt;/li&gt;
+&lt;li&gt;Una dieta que no contiene suficiente hierro, &lt;a href="https://medlineplus.gov/spanish/folicacid.html"&gt;ácido fólico&lt;/a&gt; o &lt;a href="https://medlineplus.gov/spanish/bvitamins.html"&gt;vitamina B 12&lt;/a&gt; &lt;/li&gt;
+&lt;li&gt;Algunos trastornos, tales como &lt;a href="https://medlineplus.gov/spanish/anemia.html"&gt;anemia falciforme&lt;/a&gt;, &lt;a href="https://medlineplus.gov/spanish/thalassemia.html"&gt;talasemia&lt;/a&gt; o cáncer &lt;/li&gt;
+&lt;li&gt;&lt;a href="https://medlineplus.gov/spanish/aplasticanemia.html"&gt;Anemia aplásica&lt;/a&gt;, una afección que puede ser hereditaria o adquirida&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://medlineplus.gov/spanish/g6pddeficiency.html"&gt;Deficiencia de glucosa -6- fosfato-deshidrogenasa&lt;/a&gt; &lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;p&gt;La anemia puede hacerlo sentirse débil, tener frío, estar mareado e irritable. También puede sentir dificultad para respirar o dolores de cabeza. &lt;/p&gt;
+
+&lt;p&gt;El doctor diagnosticará la enfermedad a través de un examen físico y de sangre. El tratamiento depende del tipo de anemia que usted tenga.  &lt;/p&gt;
+
+&lt;p class=""&gt;NIH: Instituto Nacional del Corazón, los Pulmones y la Sangre&lt;/p&gt;</full-summary>
+<group url="https://medlineplus.gov/spanish/bloodheartandcirculation.html" id="7">Sangre, corazón y circulación</group>
+<language-mapped-topic url="https://medlineplus.gov/anemia.html" id="139" language="English">Anemia</language-mapped-topic>
+<primary-institute url="https://medlineplus.gov/spanish/nihinstitutes.html#NHLBI">Instituto Nacional del Corazón, los Pulmones y la Sangre</primary-institute>
+<related-topic url="https://medlineplus.gov/spanish/aplasticanemia.html" id="5956">Anemia aplásica</related-topic>
+<related-topic url="https://medlineplus.gov/spanish/sicklecelldisease.html" id="2146">Enfermedad de células falciformes</related-topic>
+<related-topic url="https://medlineplus.gov/spanish/g6pddeficiency.html" id="6156">G6PD</related-topic>
+<related-topic url="https://medlineplus.gov/spanish/iron.html" id="5543">Hierro en la dieta</related-topic>
+<related-topic url="https://medlineplus.gov/spanish/thalassemia.html" id="4240">Talasemia</related-topic>
+<related-topic url="https://medlineplus.gov/spanish/bvitamins.html" id="5377">Vitaminas B</related-topic>
+<related-topic url="https://medlineplus.gov/spanish/folicacid.html" id="1907">Ácido fólico</related-topic>
+<see-reference>Glóbulos rojos, Falta de</see-reference>
+<see-reference>Hemoglobina baja</see-reference>
+<see-reference>Hierro, Falta de</see-reference>
+<see-reference>Sangre, deficiencia de</see-reference>
+<site title="Aglutinas frías y febriles (calientes)" url="https://medlineplus.gov/spanish/ency/article/003549.htm" language-mapped-url="https://medlineplus.gov/ency/article/003549.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia" url="https://medlineplus.gov/spanish/ency/article/000560.htm" language-mapped-url="https://medlineplus.gov/ency/article/000560.htm">
+<information-category>Comience aquí</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia" url="https://nacersano.marchofdimes.org/embarazo/anemia.aspx" language-mapped-url="https://www.marchofdimes.org/find-support/topics/pregnancy/anemia">
+<information-category>Mujeres</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Fundación de Niños con Defectos de Nacimiento March of Dimes</organization>
+</site>
+<site title="Anemia (niveles bajos de glóbulos rojos)" url="https://www.cancer.org/es/cancer/efectos-secundarios/recuentos-sanguineos-bajos/anemia.html" language-mapped-url="https://www.cancer.org/cancer/side-effects/low-blood-counts/anemia.html">
+<information-category>Spanish/Español</information-category>
+<information-category>Asuntos relacionados</information-category>
+<organization>Sociedad Americana Contra el Cáncer</organization>
+</site>
+<site title="Anemia causada por bajo nivel de hierro en bebés y niños pequeños" url="https://medlineplus.gov/spanish/ency/article/007618.htm" language-mapped-url="https://medlineplus.gov/ency/article/007618.htm">
+<information-category>Spanish/Español</information-category>
+<information-category>Niños/as</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia causada por bajo nivel de hierro en los niños" url="https://medlineplus.gov/spanish/ency/article/007134.htm" language-mapped-url="https://medlineplus.gov/ency/article/007134.htm">
+<information-category>Spanish/Español</information-category>
+<information-category>Niños/as</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia de Diamond-Blackfan" url="https://kidshealth.org/es/parents/diamond-blackfan-anemia.html" language-mapped-url="https://kidshealth.org/en/parents/diamond-blackfan-anemia.html">
+<information-category>Spanish/Español</information-category>
+<information-category>Niños/as</information-category>
+<organization>Fundación Nemours</organization>
+</site>
+<site title="Anemia de Diamond-Blackfan" url="https://rarediseases.info.nih.gov/espanol/12933/anemia-de-diamond-blackfan/">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Centro de Información sobre Enfermedades Genéticas y Raras</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Anemia debida a un sangrado excesivo" url="https://www.merckmanuals.com/es-us/hogar/trastornos-de-la-sangre/anemia/anemia-debida-a-un-sangrado-excesivo" language-mapped-url="https://www.merckmanuals.com/home/blood-disorders/anemia/anemia-due-to-excessive-bleeding">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Merck &amp; Co., Inc.</organization>
+</site>
+<site title="Anemia en el recién nacido" url="https://www.merckmanuals.com/es-us/hogar/salud-infantil/problemas-sangu%C3%ADneos-en-el-reci%C3%A9n-nacido/anemia-en-el-reci%C3%A9n-nacido" language-mapped-url="https://www.merckmanuals.com/home/children-s-health-issues/blood-problems-in-newborns/anemia-in-the-newborn">
+<information-category>Spanish/Español</information-category>
+<information-category>Niños/as</information-category>
+<organization>Merck &amp; Co., Inc.</organization>
+</site>
+<site title="Anemia en la enfermedad renal crónica" url="https://www.niddk.nih.gov/health-information/informacion-de-la-salud/enfermedades-rinones/anemia" language-mapped-url="https://www.niddk.nih.gov/health-information/kidney-disease/anemia">
+<information-category>Spanish/Español</information-category>
+<information-category>Asuntos relacionados</information-category>
+<organization>Instituto Nacional de la Diabetes y las Enfermedades Digestivas y Renales</organization>
+</site>
+<site title="Anemia en niños y adolescentes: Preguntas frecuentes de los padres" url="https://www.healthychildren.org/Spanish/health-issues/conditions/chronic/Paginas/anemia-and-your-child.aspx">
+<information-category>Spanish/Español</information-category>
+<information-category>Niños/as</information-category>
+<organization>Academia Americana de Pediatría</organization>
+</site>
+<site title="Anemia esferocítica congénita" url="https://medlineplus.gov/spanish/ency/article/000530.htm" language-mapped-url="https://medlineplus.gov/ency/article/000530.htm">
+<information-category>Spanish/Español</information-category>
+<information-category>Niños/as</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia ferropénica" url="https://medlineplus.gov/spanish/ency/article/000584.htm" language-mapped-url="https://medlineplus.gov/ency/article/000584.htm">
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia ferropénica (por falta de hierro)" url="https://kidshealth.org/es/parents/ida.html" language-mapped-url="https://kidshealth.org/en/parents/ida.html">
+<information-category>Spanish/Español</information-category>
+<information-category>Niños/as</information-category>
+<organization>Fundación Nemours</organization>
+</site>
+<site title="Anemia hemolítica" url="https://medlineplus.gov/spanish/ency/article/000571.htm" language-mapped-url="https://medlineplus.gov/ency/article/000571.htm">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia hemolítica" url="https://www.nhlbi.nih.gov/es/salud/anemia/anemia-hemolitica" language-mapped-url="https://www.nhlbi.nih.gov/health/anemia/hemolytic-anemia">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Instituto Nacional del Corazón, los Pulmones y la Sangre</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Anemia hemolítica causada por químicos y toxinas" url="https://medlineplus.gov/spanish/ency/article/000590.htm" language-mapped-url="https://medlineplus.gov/ency/article/000590.htm">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia hemolítica inmunitaria" url="https://medlineplus.gov/spanish/ency/article/000576.htm" language-mapped-url="https://medlineplus.gov/ency/article/000576.htm">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia hemolítica inmunitaria inducida por medicamentos" url="https://medlineplus.gov/spanish/ency/article/000578.htm" language-mapped-url="https://medlineplus.gov/ency/article/000578.htm">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia perniciosa" url="https://medlineplus.gov/spanish/ency/article/000569.htm" language-mapped-url="https://medlineplus.gov/ency/article/000569.htm">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia por deficiencia de folato" url="https://medlineplus.gov/spanish/ency/article/000551.htm" language-mapped-url="https://medlineplus.gov/ency/article/000551.htm">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia por deficiencia de hierro" url="https://www.nhlbi.nih.gov/es/salud/anemia/anemia-ferropenica" language-mapped-url="https://www.nhlbi.nih.gov/health/anemia/iron-deficiency-anemia">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Instituto Nacional del Corazón, los Pulmones y la Sangre</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Anemia por deficiencia de vitamina B12" url="https://medlineplus.gov/spanish/ency/article/000574.htm" language-mapped-url="https://medlineplus.gov/ency/article/000574.htm">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia por deficiencia de vitamina B12" url="https://www.nhlbi.nih.gov/es/salud/anemia/anemia-por-deficiencia-de-vitamina-b12" language-mapped-url="https://www.nhlbi.nih.gov/health/anemia/vitamin-b12-deficiency-anemia">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Instituto Nacional del Corazón, los Pulmones y la Sangre</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Anemia por deficiencia de vitaminas" url="https://www.mayoclinic.org/es/diseases-conditions/vitamin-deficiency-anemia/symptoms-causes/syc-20355025?p=1" language-mapped-url="https://www.mayoclinic.org/diseases-conditions/vitamin-deficiency-anemia/symptoms-causes/syc-20355025?p=1">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Fundación Mayo para la Educación y la Investigación Médica</organization>
+</site>
+<site title="Anemia por enfermedad crónica" url="https://medlineplus.gov/spanish/ency/article/000565.htm" language-mapped-url="https://medlineplus.gov/ency/article/000565.htm">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Anemia por inflamación o enfermedad crónica" url="https://www.niddk.nih.gov/health-information/informacion-de-la-salud/enfermedades-sangre/anemia-pori-inflamacion-enfermedad-cronica" language-mapped-url="https://www.niddk.nih.gov/health-information/blood-diseases/anemia-inflammation-chronic-disease">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Instituto Nacional de la Diabetes y las Enfermedades Digestivas y Renales</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Anemia: tratamiento y control" url="https://www.nhlbi.nih.gov/es/salud/anemia/tratamiento" language-mapped-url="https://www.nhlbi.nih.gov/health/anemia/treatment">
+<information-category>Spanish/Español</information-category>
+<information-category>Tratamientos y terapias</information-category>
+<organization>Instituto Nacional del Corazón, los Pulmones y la Sangre</organization>
+</site>
+<site title="Análisis de sangre" url="https://www.nhlbi.nih.gov/es/salud/analisis-de-sangre" language-mapped-url="https://www.nhlbi.nih.gov/health/blood-tests">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Instituto Nacional del Corazón, los Pulmones y la Sangre</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Biopsia de médula ósea" url="https://medlineplus.gov/spanish/ency/article/003934.htm" language-mapped-url="https://medlineplus.gov/ency/article/003934.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Capacidad total de fijación del hierro" url="https://medlineplus.gov/spanish/ency/article/003489.htm" language-mapped-url="https://medlineplus.gov/ency/article/003489.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Conteo de reticulocitos" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/conteo-de-reticulocitos/" language-mapped-url="https://medlineplus.gov/lab-tests/reticulocyte-count/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Conteo sanguíneo completo (CSC)" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/conteo-sanguineo-completo/" language-mapped-url="https://medlineplus.gov/lab-tests/complete-blood-count-cbc/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Criohemoglobinuria paroxística (CHP)" url="https://medlineplus.gov/spanish/ency/article/000557.htm" language-mapped-url="https://medlineplus.gov/ency/article/000557.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Crisis hemolítica" url="https://medlineplus.gov/spanish/ency/article/003270.htm" language-mapped-url="https://medlineplus.gov/ency/article/003270.htm">
+<information-category>Spanish/Español</information-category>
+<information-category>Asuntos relacionados</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Deficiencia de piruvato quinasa (para padres)" url="https://kidshealth.org/es/parents/pyruvate-kinase-deficiency.html" language-mapped-url="https://kidshealth.org/en/parents/pyruvate-kinase-deficiency.html">
+<information-category>Spanish/Español</information-category>
+<information-category>Asuntos relacionados</information-category>
+<organization>Fundación Nemours</organization>
+</site>
+<site title="Deficiencia de piruvatocinasa" url="https://medlineplus.gov/spanish/ency/article/001197.htm" language-mapped-url="https://medlineplus.gov/ency/article/001197.htm">
+<information-category>Spanish/Español</information-category>
+<information-category>Asuntos relacionados</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Degeneración combinada subaguda" url="https://medlineplus.gov/spanish/ency/article/000723.htm" language-mapped-url="https://medlineplus.gov/ency/article/000723.htm">
+<information-category>Spanish/Español</information-category>
+<information-category>Asuntos relacionados</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Desear intensamente y masticar hielo: ¿un signo de anemia?" url="https://www.mayoclinic.org/es/diseases-conditions/iron-deficiency-anemia/expert-answers/chewing-ice/faq-20057982?p=1" language-mapped-url="https://www.mayoclinic.org/diseases-conditions/iron-deficiency-anemia/expert-answers/chewing-ice/faq-20057982?p=1">
+<information-category>Spanish/Español</information-category>
+<information-category>Asuntos relacionados</information-category>
+<organization>Fundación Mayo para la Educación y la Investigación Médica</organization>
+</site>
+<site title="Electroforesis de hemoglobina" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/electroforesis-de-hemoglobina/" language-mapped-url="https://medlineplus.gov/lab-tests/hemoglobin-electrophoresis/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Electroforesis de hemoglobina" url="https://medlineplus.gov/spanish/ency/article/003639.htm" language-mapped-url="https://medlineplus.gov/ency/article/003639.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Enfermedad de la hemoglobina C" url="https://medlineplus.gov/spanish/ency/article/000572.htm" language-mapped-url="https://medlineplus.gov/ency/article/000572.htm">
+<information-category>Spanish/Español</information-category>
+<information-category>Asuntos relacionados</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Enfermedades de la hemoglobina C, S-C y E" url="https://www.merckmanuals.com/es-us/hogar/trastornos-de-la-sangre/anemia/enfermedades-de-la-hemoglobina-c-s-c-y-e" language-mapped-url="https://www.merckmanuals.com/home/blood-disorders/anemia/hemoglobin-c-s-c-and-e-diseases">
+<information-category>Asuntos específicos</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Merck &amp; Co., Inc.</organization>
+</site>
+<site title="Esferocitosis hereditaria" url="https://kidshealth.org/es/parents/hereditary-spherocytosis.html" language-mapped-url="https://kidshealth.org/en/parents/hereditary-spherocytosis.html">
+<information-category>Spanish/Español</information-category>
+<information-category>Niños/as</information-category>
+<organization>Fundación Nemours</organization>
+</site>
+<site title="Examen de anticuerpos anticélulas parietales" url="https://medlineplus.gov/spanish/ency/article/003351.htm" language-mapped-url="https://medlineplus.gov/ency/article/003351.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Examen de deshidrogenasa láctica" url="https://medlineplus.gov/spanish/ency/article/003471.htm" language-mapped-url="https://medlineplus.gov/ency/article/003471.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Examen de Donath-Landsteiner" url="https://medlineplus.gov/spanish/ency/article/003668.htm" language-mapped-url="https://medlineplus.gov/ency/article/003668.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Examen de eritropoyetina" url="https://medlineplus.gov/spanish/ency/article/003683.htm" language-mapped-url="https://medlineplus.gov/ency/article/003683.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Examen de ferritina en la sangre" url="https://medlineplus.gov/spanish/ency/article/003490.htm" language-mapped-url="https://medlineplus.gov/ency/article/003490.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Examen de guayacol en heces" url="https://medlineplus.gov/spanish/ency/article/003393.htm" language-mapped-url="https://medlineplus.gov/ency/article/003393.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Examen de haptoglobina en la sangre" url="https://medlineplus.gov/spanish/ency/article/003634.htm" language-mapped-url="https://medlineplus.gov/ency/article/003634.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Examen de hemoglobina libre en el suero" url="https://medlineplus.gov/spanish/ency/article/003677.htm" language-mapped-url="https://medlineplus.gov/ency/article/003677.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Examen de hemólisis en sacarosa" url="https://medlineplus.gov/spanish/ency/article/003673.htm" language-mapped-url="https://medlineplus.gov/ency/article/003673.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Examen de hierro sérico" url="https://medlineplus.gov/spanish/ency/article/003488.htm" language-mapped-url="https://medlineplus.gov/ency/article/003488.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Examen de isoenzimas de la lactato deshidrogenasa (LDH)" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/examen-de-isoenzimas-de-la-lactato-deshidrogenasa-ldh/" language-mapped-url="https://medlineplus.gov/lab-tests/lactate-dehydrogenase-ldh-isoenzymes-test/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Examen de piruvatocinasa en la sangre" url="https://medlineplus.gov/spanish/ency/article/003357.htm" language-mapped-url="https://medlineplus.gov/ency/article/003357.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Examen de Schilling" url="https://medlineplus.gov/spanish/ency/article/003572.htm" language-mapped-url="https://medlineplus.gov/ency/article/003572.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Frotis de sangre" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/frotis-de-sangre/" language-mapped-url="https://medlineplus.gov/lab-tests/blood-smear/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Hemoglobinuria paroxística nocturna" url="https://medlineplus.gov/spanish/ency/article/000534.htm" language-mapped-url="https://medlineplus.gov/ency/article/000534.htm">
+<information-category>Spanish/Español</information-category>
+<information-category>Asuntos relacionados</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Hierro" url="https://ods.od.nih.gov/factsheets/Iron-DatosEnEspanol/" language-mapped-url="https://ods.od.nih.gov/factsheets/Iron-Consumer/">
+<information-category>Viviendo con...</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Oficina de Suplementos Dietéticos de los NIH</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Isoenzimas de la DHL prueba de sangre" url="https://medlineplus.gov/spanish/ency/article/003499.htm" language-mapped-url="https://medlineplus.gov/ency/article/003499.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Nivel de vitamina B12" url="https://medlineplus.gov/spanish/ency/article/003705.htm" language-mapped-url="https://medlineplus.gov/ency/article/003705.htm">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>NON-DISPLAY (Patient Handout)</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Prueba de haptoglobina" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/prueba-de-haptoglobina/" language-mapped-url="https://medlineplus.gov/lab-tests/haptoglobin-hp-test/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Prueba de la médula ósea" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/prueba-de-la-medula-osea/" language-mapped-url="https://medlineplus.gov/lab-tests/bone-marrow-tests/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Prueba de lactato deshidrogenasa (LDH)" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/prueba-de-lactato-deshidrogenasa-ldh/" language-mapped-url="https://medlineplus.gov/lab-tests/lactate-dehydrogenase-ldh-test/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Prueba de sangre de ferritina" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/prueba-de-sangre-de-ferritina/" language-mapped-url="https://medlineplus.gov/lab-tests/ferritin-blood-test/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Prueba de vitamina B" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/prueba-de-vitamina-b/" language-mapped-url="https://medlineplus.gov/lab-tests/vitamin-b-test/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Pruebas de hierro" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/pruebas-de-hierro/" language-mapped-url="https://medlineplus.gov/lab-tests/iron-tests/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Síndrome de Aase" url="https://medlineplus.gov/spanish/ency/article/001662.htm" language-mapped-url="https://medlineplus.gov/ency/article/001662.htm">
+<information-category>Spanish/Español</information-category>
+<information-category>Asuntos relacionados</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Síndrome de Plummer-Vinson (membrana esofágica)" url="https://medlineplus.gov/spanish/ency/article/001158.htm" language-mapped-url="https://medlineplus.gov/ency/article/001158.htm">
+<information-category>Spanish/Español</information-category>
+<information-category>Asuntos relacionados</information-category>
+<organization>Enciclopedia Médica</organization>
+</site>
+<site title="Síntomas de la anemia" url="https://www.nhlbi.nih.gov/es/salud/anemia/sintomas" language-mapped-url="https://www.nhlbi.nih.gov/health/anemia/symptoms">
+<information-category>Comience aquí</information-category>
+<information-category>Spanish/Español</information-category>
+<information-category>Síntomas</information-category>
+<organization>Instituto Nacional del Corazón, los Pulmones y la Sangre</organization>
+</site>
+<site title="Trasplante de células madre sanguíneas y de médula ósea" url="https://llsorg.widen.net/view/pdf/wwxaxksbp7/booklet_ES_BloodMarrow_ps40s.pdf" language-mapped-url="http://www.lls.org/content/nationalcontent/resourcecenter/freeeducationmaterials/treatments/pdf/bloodmarrowstemcelltransplantation.pdf">
+<information-category>Spanish/Español</information-category>
+<information-category>Tratamientos y terapias</information-category>
+<organization>Blood Cancer United</organization>
+<standard-description>PDF</standard-description>
+</site>
+<site title="Tratamientos para trastornos sanguíneos" url="https://www.nhlbi.nih.gov/es/salud/sangre-y-medula-osea-tratamientos" language-mapped-url="https://www.nhlbi.nih.gov/health/blood-bone-marrow-treatments">
+<information-category>Spanish/Español</information-category>
+<information-category>Tratamientos y terapias</information-category>
+<organization>Instituto Nacional del Corazón, los Pulmones y la Sangre</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Vitamina B12" url="https://ods.od.nih.gov/factsheets/VitaminB12-DatosEnEspanol/" language-mapped-url="https://ods.od.nih.gov/factsheets/VitaminB12-Consumer/">
+<information-category>Viviendo con...</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Oficina de Suplementos Dietéticos de los NIH</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="¿Cómo sabrá su médico que usted tiene anemia?" url="https://www.nhlbi.nih.gov/es/salud/anemia/diagnostico" language-mapped-url="https://www.nhlbi.nih.gov/health/anemia/diagnosis">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Instituto Nacional del Corazón, los Pulmones y la Sangre</organization>
+</site>
+<site title="¿Qué causa la anemia?" url="https://www.nhlbi.nih.gov/es/salud/anemia/causas" language-mapped-url="https://www.nhlbi.nih.gov/health/anemia/causes">
+<information-category>Comience aquí</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Instituto Nacional del Corazón, los Pulmones y la Sangre</organization>
+</site>
+<site title="¿Qué es la anemia?" url="https://www.nhlbi.nih.gov/es/salud/anemia" language-mapped-url="https://www.nhlbi.nih.gov/health/anemia">
+<information-category>Comience aquí</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Instituto Nacional del Corazón, los Pulmones y la Sangre</organization>
+<standard-description>NIH</standard-description>
+</site>
+<site title="Índices de glóbulos rojos" url="https://medlineplus.gov/spanish/pruebas-de-laboratorio/indices-de-globulos-rojos/" language-mapped-url="https://medlineplus.gov/lab-tests/red-blood-cell-rbc-indices/">
+<information-category>Diagnóstico y exámenes</information-category>
+<information-category>Spanish/Español</information-category>
+<organization>Biblioteca Nacional de Medicina</organization>
+<standard-description>NIH</standard-description>
+</site>
+</health-topic>
+</health-topics>

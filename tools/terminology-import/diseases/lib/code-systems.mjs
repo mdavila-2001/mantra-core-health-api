@@ -47,14 +47,50 @@ export const SYSTEMS = {
     uri: (code) => `http://purl.obolibrary.org/obo/${code.replace(':', '_')}`,
   },
   'ncit-disease': {
-    // No se llama «NCI Thesaurus» a secas: es un subconjunto, no la edición oficial (términos de uso de NCI EVS).
-    name: 'Subconjunto C2991 «Disease or Disorder» de la NCIt OBO Edition',
+    // No se llama «NCI Thesaurus» a secas: es un subconjunto (los términos de uso de NCI EVS reservan el nombre).
+    name: 'Subconjunto C2991 «Disease or Disorder» del NCI Thesaurus (NCI EVS 26.09d, archivo plano oficial)',
     sourceCode: 'NCI_NCIT',
     owner: 'National Cancer Institute — Enterprise Vocabulary Services',
     officialUrl: 'https://evs.nci.nih.gov/',
     license: LICENSES.NCIT,
     codeFormat: 'C2985',
     uri: (code) => `http://purl.obolibrary.org/obo/NCIT_${code}`,
+  },
+  'ncit-xref': {
+    name: 'NCI Thesaurus (NCI EVS 26.09d) — conceptos que citan otras fuentes de enfermedades y que están fuera de C2991, o retirados',
+    sourceCode: 'NCI_NCIT',
+    owner: 'National Cancer Institute — Enterprise Vocabulary Services',
+    officialUrl: 'https://evs.nci.nih.gov/',
+    license: LICENSES.NCIT,
+    codeFormat: 'C3367',
+    uri: (code) => `http://purl.obolibrary.org/obo/NCIT_${code}`,
+  },
+  gard: {
+    name: 'GARD — Genetic and Rare Diseases Information Center (NCATS/NIH), lista oficial de enfermedades',
+    sourceCode: 'NIH_NCATS_GARD',
+    owner: 'National Center for Advancing Translational Sciences (NCATS), NIH',
+    officialUrl: 'https://rarediseases.info.nih.gov/',
+    license: LICENSES.GARD,
+    codeFormat: 'GARD:0017890',
+    uri: (code) => `https://rarediseases.info.nih.gov/?gard_id=${code.replace(/^GARD:/, '')}`,
+  },
+  nando: {
+    name: 'NANDO — Nanbyo Disease Ontology (enfermedades intratables de Japón)',
+    sourceCode: 'DBCLS_NANDO',
+    owner: 'Database Center for Life Science (DBCLS) / NIBIOHN, Japón',
+    officialUrl: 'https://nanbyodata.jp/',
+    license: LICENSES.NANDO,
+    codeFormat: 'NANDO:1200001',
+    uri: (code) => `http://nanbyodata.jp/ontology/${code.replace(':', '_')}`,
+  },
+  oncotree: {
+    name: 'OncoTree — tipos tumorales (Memorial Sloan Kettering Cancer Center)',
+    sourceCode: 'MSK_ONCOTREE',
+    owner: 'Memorial Sloan Kettering Cancer Center',
+    officialUrl: 'https://oncotree.mskcc.org/',
+    license: LICENSES.ONCOTREE,
+    codeFormat: 'LUAD (tipo) · LUNG (tejido)',
+    uri: () => null,
   },
   'efo-disease': {
     name: 'Experimental Factor Ontology — enfermedades propias de EFO',
@@ -116,13 +152,15 @@ export const SYSTEMS = {
     uri: () => null,
   },
   mesh: {
-    name: 'MeSH (NLM) — descriptores citados por MONDO, Orphanet y DOID',
+    name: 'MeSH 2026 (NLM) — descriptores de enfermedad (árbol C y F03), enfermedades raras (SCR) y los citados por otras fuentes',
     sourceCode: 'NLM_MESH',
     owner: 'U.S. National Library of Medicine',
     officialUrl: 'https://www.nlm.nih.gov/mesh/',
-    license: 'Sólo el identificador. MeSH es de libre uso con atribución, pero su descarga (nlmpubs.nlm.nih.gov) no es accesible desde esta red.',
-    codeFormat: 'D003920',
-    keyOnly: true,
+    license: LICENSES.MESH,
+    codeFormat: 'D003920 (descriptor) · C531599 (concepto suplementario, SCR)',
+    // Archivos oficiales de NLM (desc/supp 2026). Si una fuente cita un UI que MeSH 2026 ya no tiene, queda como
+    // clave (código sin nombre) en este mismo sistema.
+    keyFallback: true,
     uri: (code) => `http://id.nlm.nih.gov/mesh/${code}`,
   },
   umls: {
@@ -148,6 +186,8 @@ export const EXTERNAL_TARGETS = {
   // CIE-10-ES (glosario): misma codificación que ICD-10-CM, del que es la
   // traducción oficial del Ministerio de Sanidad. Slug de cie10es.mjs.
   'cie10es-dx': (code) => md5uuid(`mantra:glossary-es:concept:cie10es-dx-${slugify(code)}`),
+  // Tema de MedlinePlus en español (import-medlineplus-es.mjs): slug `medlineplus-es-<id del tema>`.
+  'medlineplus-es': (id) => md5uuid(`mantra:glossary-es:concept:medlineplus-es-${id}`),
 };
 
 export const KEY_VERSION = 'xref-keys';

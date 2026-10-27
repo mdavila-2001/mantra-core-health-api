@@ -1,0 +1,103 @@
+[
+ {
+  "id": 21052,
+  "name": "10q22.3q23.3 microduplication syndrome",
+  "encodedName": "10q223q233-microduplication-syndrome",
+  "synonyms": [
+   "dup(10)(q22.3q23.3)",
+   " trisomy 10q22.3q23.3"
+  ],
+  "tagsDiseaseCategory": [
+   "Genetics",
+   "Congenital Abnormality"
+  ],
+  "tagsAccount": [
+   "Chromosomal Anomaly"
+  ],
+  "tagsSpecialist": [
+   "Genetics",
+   "Pediatrics"
+  ],
+  "tagsCause": []
+ },
+ {
+  "id": 5528,
+  "name": "11p partial monosomy syndrome",
+  "encodedName": "11p-partial-monosomy-syndrome",
+  "spanishId": 13723,
+  "spanishName": "sindrome-wagr",
+  "synonyms": [
+   "chromosome 11p13 deletion syndrome",
+   " del(11)(p13)",
+   " deletion 11p13",
+   " monosomy 11p13",
+   " wagr (wilms tumor, aniridia, genitourinary anomalies and mental retardation) syndrome",
+   " wagr (wilms tumour, aniridia, genitourinary anomalies and mental retardation) syndrome",
+   " wagr 11p13 deletion syndrome",
+   " wagr complex",
+   " wagr syndrome",
+   " wagr syndrome/11p deletion syndrome",
+   " wilms tumor-aniridia-genital anomalies-retardation syndrome",
+   " wilms tumor-aniridia-genitourinary anomalies-intellectual disability syndrome",
+   " wilms tumor, aniridia, genitourinary anomalies and developmental delay syndrome",
+   " wilms tumor, aniridia, genitourinary anomalies and mental retardation syndrome",
+   " wilms tumor, aniridia, genitourinary anomalies and mental retardation syndrome, autosomal dominant, somatic mutation",
+   " wilms tumour, aniridia, genitourinary anomalies and mental retardation syndrome"
+  ],
+  "tagsDiseaseCategory": [
+   "Genetics",
+   "Neurology",
+   "Nephrology",
+   "Endocrine",
+   "Congenital Abnormality",
+   "Urogenital Disorders"
+  ],
+  "tagsAccount": [
+   "Chromosomal Anomaly",
+   "Nephrology",
+   "Glaucoma"
+  ],
+  "tagsSpecialist": [
+   "Cancer - Oncologist",
+   "Genetics",
+   "Neurology",
+   "Ophthalmology",
+   "Nephrology",
+   "Endocrine",
+   "Obstetrics / Gynecology",
+   "Urologist",
+   "Anterior segment of Eye",
+   "Neurodevelopmental disabilities",
+   "Pediatrics"
+  ],
+  "tagsCause": []
+ },
+ {
+  "id": 17890,
+  "name": "14q32 duplication syndrome",
+  "encodedName": "14q32-duplication-syndrome",
+  "synonyms": [
+   "chromosome 14q32 duplication syndrome, 700-kb",
+   " dup(14)q(32)",
+   " myeloproliferative neoplasms, familial, susceptibility to",
+   " predisposition to adult-onset myeloproliferative neoplasm due to 14q32 duplication",
+   " trisomy 14q32"
+  ],
+  "tagsDiseaseCategory": [
+   "Cancer",
+   "Genetics",
+   "Hematology",
+   "Congenital Abnormality"
+  ],
+  "tagsAccount": [
+   "Chromosomal Anomaly",
+   "Myeloid hemopathy"
+  ],
+  "tagsSpecialist": [
+   "Cancer - Oncologist",
+   "Genetics",
+   "Hematology"
+  ],
+  "tagsCause": []
+ }
+]

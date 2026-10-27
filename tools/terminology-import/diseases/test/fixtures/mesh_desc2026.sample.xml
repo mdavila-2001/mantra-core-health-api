@@ -1,0 +1,633 @@
+<?xml version="1.0"?>
+<!DOCTYPE DescriptorRecordSet SYSTEM "https://www.nlm.nih.gov/databases/dtd/nlmdescriptorrecordset_20260101.dtd">
+<DescriptorRecordSet LanguageCode = "eng">
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000130</DescriptorUI>
+  <DescriptorName>
+   <String>Achondroplasia</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2013</Year>
+   <Month>07</Month>
+   <Day>08</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+    <NLMClassificationNumber>WE 250</NLMClassificationNumber>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D051498</DescriptorUI>
+     <DescriptorName>
+      <String>Receptor, Fibroblast Growth Factor, Type 3</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>C05.116.099.343.110</TreeNumber>
+   <TreeNumber>C05.116.099.708.017</TreeNumber>
+   <TreeNumber>C16.320.240.500</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0000205</ConceptUI>
+    <ConceptName>
+     <String>Achondroplasia</String>
+    </ConceptName>
+    <ScopeNote>An autosomal dominant disorder that is the most frequent form of short-limb dwarfism. Affected individuals exhibit short stature caused by rhizomelic shortening of the limbs, characteristic facies with frontal bossing and mid-face hypoplasia, exaggerated lumbar lordosis, limitation of elbow extension, GENU VARUM, and trident hand. (Online Mendelian Inheritance in Man, http://www.ncbi.nlm.nih.gov/Omim, MIM#100800, April 20, 2001)
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000205</Concept1UI>
+     <Concept2UI>M0567458</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T000387</TermUI>
+      <String>Achondroplasia</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+       <ThesaurusID>OMIM (2013)</ThesaurusID>
+       <ThesaurusID>ORD (2010)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000387</TermUI>
+      <String>Achondroplasias</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0567458</ConceptUI>
+    <ConceptName>
+     <String>Achondroplasia, Severe, With Developmental Delay And Acanthosis Nigricans</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0000205</Concept1UI>
+     <Concept2UI>M0567458</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T809866</TermUI>
+      <String>Achondroplasia, Severe, With Developmental Delay And Acanthosis Nigricans</String>
+      <DateCreated>
+       <Year>2011</Year>
+       <Month>11</Month>
+       <Day>15</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>OMIM (2013)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T823974</TermUI>
+      <String>SADDAN</String>
+      <DateCreated>
+       <Year>2012</Year>
+       <Month>06</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+       <ThesaurusID>OMIM (2013)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T823974</TermUI>
+      <String>SADDANs</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="ACX"  RecordPreferredTermYN="N">
+      <TermUI>T774184</TermUI>
+      <String>SADDAN Dysplasia</String>
+      <DateCreated>
+       <Year>2010</Year>
+       <Month>07</Month>
+       <Day>12</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+       <ThesaurusID>NLM (2012)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="ACX"  RecordPreferredTermYN="N">
+      <TermUI>T774184</TermUI>
+      <String>Dysplasia, SADDAN</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="ACX"  RecordPreferredTermYN="N">
+      <TermUI>T774184</TermUI>
+      <String>Dysplasias, SADDAN</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="ACX"  RecordPreferredTermYN="N">
+      <TermUI>T774184</TermUI>
+      <String>SADDAN Dysplasias</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T774186</TermUI>
+      <String>Severe Achondroplasia with Developmental Delay and Acanthosis Nigricans</String>
+      <DateCreated>
+       <Year>2010</Year>
+       <Month>07</Month>
+       <Day>12</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+       <ThesaurusID>NLM (2012)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T842409</TermUI>
+      <String>Skeleton-Skin-Brain Syndrome</String>
+      <DateCreated>
+       <Year>2013</Year>
+       <Month>04</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T842409</TermUI>
+      <String>Skeleton Skin Brain Syndrome</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T842409</TermUI>
+      <String>Skeleton-Skin-Brain Syndromes</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T842409</TermUI>
+      <String>Syndrome, Skeleton-Skin-Brain</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T842409</TermUI>
+      <String>Syndromes, Skeleton-Skin-Brain</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D001523</DescriptorUI>
+  <DescriptorName>
+   <String>Mental Disorders</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2020</Year>
+   <Month>02</Month>
+   <Day>21</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1998</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+    <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D028642</DescriptorUI>
+     <DescriptorName>
+      <String>Persons with Psychiatric Disorders</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
+  <TreeNumberList>
+   <TreeNumber>F03</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0002289</ConceptUI>
+    <ConceptName>
+     <String>Mental Disorders</String>
+    </ConceptName>
+    <ScopeNote>Psychiatric illness or diseases manifested by breakdowns in the adaptational process expressed primarily as abnormalities of thought, feeling, and behavior producing either distress or impairment of function.
+    </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0002289</Concept1UI>
+     <Concept2UI>M0002288</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0002289</Concept1UI>
+     <Concept2UI>M0002290</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="BRD">
+     <Concept1UI>M0002289</Concept1UI>
+     <Concept2UI>M000606130</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T004427</TermUI>
+      <String>Mental Disorders</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>MENTAL DIS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T004427</TermUI>
+      <String>Mental Disorder</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000956613</TermUI>
+      <String>Psychiatric Disorders</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>05</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2020)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000956613</TermUI>
+      <String>Psychiatric Disorder</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000956614</TermUI>
+      <String>Psychiatric Diseases</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>05</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2020)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000956614</TermUI>
+      <String>Psychiatric Disease</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000956615</TermUI>
+      <String>Psychiatric Illness</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>05</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2020)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000956615</TermUI>
+      <String>Psychiatric Illnesses</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000997526</TermUI>
+      <String>Mental Illness</String>
+      <DateCreated>
+       <Year>2019</Year>
+       <Month>11</Month>
+       <Day>19</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2021)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000997526</TermUI>
+      <String>Illness, Mental</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000997526</TermUI>
+      <String>Mental Illnesses</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0002288</ConceptUI>
+    <ConceptName>
+     <String>Behavior Disorders</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0002289</Concept1UI>
+     <Concept2UI>M0002288</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T004426</TermUI>
+      <String>Behavior Disorders</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>05</Month>
+       <Day>23</Day>
+      </DateCreated>
+      <EntryVersion>BEHAVIOR DIS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>BIOETHICS (1974)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0002290</ConceptUI>
+    <ConceptName>
+     <String>Diagnosis, Psychiatric</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="REL">
+     <Concept1UI>M0002289</Concept1UI>
+     <Concept2UI>M0002290</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T004428</TermUI>
+      <String>Diagnosis, Psychiatric</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>05</Month>
+       <Day>23</Day>
+      </DateCreated>
+      <EntryVersion>DIAG PSYCHIATRIC</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1998)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T004429</TermUI>
+      <String>Psychiatric Diagnosis</String>
+      <DateCreated>
+       <Year>1997</Year>
+       <Month>05</Month>
+       <Day>23</Day>
+      </DateCreated>
+      <EntryVersion>PSYCHIATRIC DIAG</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>BIOETHICS (1974)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M000606130</ConceptUI>
+    <ConceptName>
+     <String>Mental Disorders, Severe</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="BRD">
+     <Concept1UI>M0002289</Concept1UI>
+     <Concept2UI>M000606130</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000880681</TermUI>
+      <String>Mental Disorders, Severe</String>
+      <DateCreated>
+       <Year>2015</Year>
+       <Month>05</Month>
+       <Day>28</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2016)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000880681</TermUI>
+      <String>Mental Disorder, Severe</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000880681</TermUI>
+      <String>Severe Mental Disorder</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000880681</TermUI>
+      <String>Severe Mental Disorders</String>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000820</DescriptorUI>
+  <DescriptorName>
+   <String>Animal Diseases</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2016</Year>
+   <Month>07</Month>
+   <Day>01</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1966</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+    <Annotation>general or unspecified only; coordinate  with specific animal (IM); do not index when a  disease/vet is indexed (e.g. STREPTOCOCCAL INFECTIONS /vet) or when a disease term treed under ANIMAL DISEASES  is indexed (e.g. FOOT ROT; DOG DISEASES); do not index for experimental studies of disease in animals
+  </Annotation>
+  <HistoryNote>66; was see under VETERINARY MEDICINE &amp; ZOONOSES 1963-65
+  </HistoryNote>
+  <PublicMeSHNote>66; was see under VETERINARY MEDICINE &amp; ZOONOSES 1963-65
+  </PublicMeSHNote>
+  <TreeNumberList>
+   <TreeNumber>C22</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0001223</ConceptUI>
+    <ConceptName>
+     <String>Animal Diseases</String>
+    </ConceptName>
+    <ScopeNote>Diseases that occur in VERTEBRATE animals.
+    </ScopeNote>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T002429</TermUI>
+      <String>Animal Diseases</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <EntryVersion>ANIMAL DIS</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T002428</TermUI>
+      <String>Diseases, Animal</String>
+      <DateCreated>
+       <Year>1989</Year>
+       <Month>11</Month>
+       <Day>29</Day>
+      </DateCreated>
+      <EntryVersion>DIS ANIMAL</EntryVersion>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+<DescriptorRecord DescriptorClass = "1">
+  <DescriptorUI>D000001</DescriptorUI>
+  <DescriptorName>
+   <String>Calcimycin</String>
+  </DescriptorName>
+  <LastUpdated>
+   <Year>2023</Year>
+   <Month>02</Month>
+   <Day>26</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1984</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+    <HistoryNote>91(75); was A 23187 1975-90 (see under ANTIBIOTICS 1975-83)
+  </HistoryNote>
+  <OnlineNote>use CALCIMYCIN to search A 23187 1975-90
+  </OnlineNote>
+  <PublicMeSHNote>91; was A 23187 1975-90 (see under ANTIBIOTICS 1975-83)
+  </PublicMeSHNote>
+  <PreviousIndexingList>
+   <PreviousIndexing>Antibiotics (1973-1974)</PreviousIndexing>
+   <PreviousIndexing>Carboxylic Acids (1973-1974)</PreviousIndexing>
+  </PreviousIndexingList>
+      <TreeNumberList>
+   <TreeNumber>D02.355.291.933.125</TreeNumber>
+   <TreeNumber>D02.540.576.625.125</TreeNumber>
+   <TreeNumber>D03.633.100.221.173</TreeNumber>
+   <TreeNumber>D04.345.241.654.125</TreeNumber>
+   <TreeNumber>D04.345.674.625.125</TreeNumber>
+  </TreeNumberList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0000001</ConceptUI>
+    <ConceptName>
+     <String>Calcimycin</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>37H9VM9WZL</RegistryNumber>
+    </RegistryNumberList>
+    <ScopeNote>An ionophorous, polyether antibiotic from Streptomyces chartreusensis. It binds and transports CALCIUM and other divalent cations across membranes and uncouples oxidative phosphorylation while inhibiting ATPase of rat liver mitochondria. The substance is used mostly as a biochemical tool to study the role of divalent cations in various biological systems.
+    </ScopeNote>
+    <RelatedRegistryNumberList>
+     <RelatedRegistryNumber>52665-69-7 (Calcimycin)</RelatedRegistryNumber>
+    </RelatedRegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000001</Concept1UI>
+     <Concept2UI>M0353609</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T000002</TermUI>
+      <String>Calcimycin</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>FDA SRS (2014)</ThesaurusID>
+       <ThesaurusID>NLM (1975)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T001124965</TermUI>
+      <String>4-Benzoxazolecarboxylic acid, 5-(methylamino)-2-((3,9,11-trimethyl-8-(1-methyl-2-oxo-2-(1H-pyrrol-2-yl)ethyl)-1,7-dioxaspiro(5.5)undec-2-yl)methyl)-, (6S-(6alpha(2S*,3S*),8beta(R*),9beta,11alpha))-</String>
+      <DateCreated>
+       <Year>2022</Year>
+       <Month>09</Month>
+       <Day>22</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2024)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0353609</ConceptUI>
+    <ConceptName>
+     <String>A-23187</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000001</Concept1UI>
+     <Concept2UI>M0353609</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="LAB"  RecordPreferredTermYN="N">
+      <TermUI>T000001</TermUI>
+      <String>A-23187</String>
+      <DateCreated>
+       <Year>1990</Year>
+       <Month>03</Month>
+       <Day>08</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="LAB"  RecordPreferredTermYN="N">
+      <TermUI>T000001</TermUI>
+      <String>A 23187</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000003</TermUI>
+      <String>Antibiotic A23187</String>
+      <DateCreated>
+       <Year>1990</Year>
+       <Month>03</Month>
+       <Day>08</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1991)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000003</TermUI>
+      <String>A23187, Antibiotic</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="LAB"  RecordPreferredTermYN="N">
+      <TermUI>T000004</TermUI>
+      <String>A23187</String>
+      <DateCreated>
+       <Year>1974</Year>
+       <Month>11</Month>
+       <Day>11</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>UNK (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </DescriptorRecord>
+</DescriptorRecordSet>

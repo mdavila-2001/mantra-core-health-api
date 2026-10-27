@@ -1,0 +1,8 @@
+﻿10ClassKind	Depth	icd10Code	icd10Chapter	icd10Title	11ClassKind	Depth	ICD-11 Foundation URI	Linearization (release) URI	icd11Code	icd11Chapter	icd11Title	2026-Jan-17
+category	1	A00	I	Cholera	category	1	http://id.who.int/icd/entity/257068234	http://id.who.int/icd/release/11/2026-01/mms/257068234	1A00	01	Cholera
+category	2	A00.0	I	Cholera due to Vibrio cholerae 01, biovar cholerae	category	1	http://id.who.int/icd/entity/1205958647	http://id.who.int/icd/release/11/2026-01/mms/257068234	1A00&XN8P1	01	Cholera [Vibrio cholerae O1, biovar cholerae]
+category	2	A00.9	I	Cholera, unspecified	category	1	http://id.who.int/icd/entity/257068234	http://id.who.int/icd/release/11/2026-01/mms/257068234	1A00	01	Cholera
+category	1	A01	I	Typhoid and paratyphoid fevers	category	2	http://id.who.int/icd/entity/1528414070	http://id.who.int/icd/release/11/2026-01/mms/1528414070/unspecified	1A07.Z	01	Typhoid fever, unspecified
+category	1	A01	I	Typhoid and paratyphoid fevers	category	1	http://id.who.int/icd/entity/1780040028	http://id.who.int/icd/release/11/2026-01/mms/1780040028	1A08	01	Paratyphoid fever
+category	2	A01.0	I	Typhoid fever	category	2	http://id.who.int/icd/entity/1528414070	http://id.who.int/icd/release/11/2026-01/mms/1528414070/unspecified	1A07.Z	01	Typhoid fever, unspecified
+category	2	A04.0	I	Enteropathogenic Escherichia coli infection	category	2	http://id.who.int/icd/entity/2099226249	http://id.who.int/icd/release/11/2026-01/mms/2099226249	1A03.0	01	Enteropathogenic Escherichia coli infection

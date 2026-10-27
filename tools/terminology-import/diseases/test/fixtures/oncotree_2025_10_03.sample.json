@@ -1,0 +1,89 @@
+{
+ "TISSUE": {
+  "code": "TISSUE",
+  "color": null,
+  "name": "Tissue",
+  "mainType": null,
+  "externalReferences": {
+   "UMLS": [
+    "C0040300"
+   ],
+   "NCI": [
+    "C12801"
+   ]
+  },
+  "tissue": null,
+  "children": {
+   "LUNG": {
+    "code": "LUNG",
+    "color": "Gainsboro",
+    "name": "Lung",
+    "mainType": "Lung Cancer",
+    "externalReferences": {
+     "UMLS": [
+      "C0024109"
+     ],
+     "NCI": [
+      "C12468"
+     ]
+    },
+    "tissue": "Lung",
+    "children": {
+     "NSCLC": {
+      "code": "NSCLC",
+      "color": "Gainsboro",
+      "name": "Non-Small Cell Lung Cancer",
+      "mainType": "Non-Small Cell Lung Cancer",
+      "externalReferences": {
+       "UMLS": [
+        "C0007131"
+       ],
+       "NCI": [
+        "C2926"
+       ]
+      },
+      "tissue": "Lung",
+      "children": {
+       "LUAD": {
+        "code": "LUAD",
+        "color": "Gainsboro",
+        "name": "Lung Adenocarcinoma",
+        "mainType": "Non-Small Cell Lung Cancer",
+        "externalReferences": {
+         "UMLS": [
+          "C0152013"
+         ],
+         "NCI": [
+          "C3512"
+         ]
+        },
+        "tissue": "Lung",
+        "children": {},
+        "parent": "NSCLC",
+        "history": [],
+        "level": 3,
+        "revocations": [],
+        "precursors": []
+       }
+      },
+      "parent": "LUNG",
+      "history": [],
+      "level": 2,
+      "revocations": [],
+      "precursors": []
+     }
+    },
+    "parent": "TISSUE",
+    "history": [],
+    "level": 1,
+    "revocations": [],
+    "precursors": []
+   }
+  },
+  "parent": null,
+  "history": [],
+  "level": 0,
+  "revocations": [],
+  "precursors": []
+ }
+}

@@ -17,35 +17,54 @@ const ROW_START = /^(http:\/\/id\.who\.int\/icd\/entity\/\d+)?\thttp:\/\/id\.who
 
 const unquote = (s) => (s.startsWith('"') && s.endsWith('"') ? s.slice(1, -1).replace(/""/g, '"') : s);
 
-/** Tabulación simple → { version, rows: [...] }. */
+/**
+ * Tabulación simple → { version, rows: [...] }. Las columnas se ubican por el nombre del encabezado: el
+ * archivo en castellano trae una columna más (`TitleEN`, el título inglés) antes de `Title` (el título
+ * en castellano), así que las posiciones no son las del archivo en inglés.
+ */
 export function parseSimpleTabulation(path) {
   const text = readFileSync(path, 'utf8').replace(/^﻿/, '');
   const lines = text.split(/\r?\n/);
   const header = lines[0].split('\t');
   const versionCell = header.find((h) => h.startsWith('Version:'));
+  const at = (name) => header.indexOf(name);
+  const col = {
+    title: at('Title'),
+    titleEn: at('TitleEN'),
+    classKind: at('ClassKind'),
+    depth: at('DepthInKind'),
+    residual: at('IsResidual'),
+    chapter: at('ChapterNo'),
+    leaf: at('isLeaf'),
+    primary: at('Primary tabulation'),
+    grouping1: at('Grouping1'),
+    note: at('CodingNote'),
+  };
   const records = [];
   for (const line of lines.slice(1)) {
     if (ROW_START.test(line)) records.push(line);
     else if (records.length && line !== '') records[records.length - 1] += `\n${line}`;
   }
+  const clean = (v) => unquote(v).replace(/^(- )+/, '').trim();
   const rows = records.map((rec) => {
     const f = rec.split('\t');
     const last = f[f.length - 1];
     const parent = last.startsWith(ENTITY) ? last : null;
-    const note = f.slice(17, parent ? f.length - 1 : f.length).join('\t').trim();
+    const note = f.slice(col.note, parent ? f.length - 1 : f.length).join('\t').trim();
     return {
       foundationUri: f[0] || null,
       linearizationUri: f[1],
       code: f[2] || null,
       blockId: f[3] || null,
-      title: unquote(f[4]).replace(/^(- )+/, '').trim(),
-      classKind: f[5],
-      depthInKind: Number(f[6]),
-      isResidual: f[7] === 'True',
-      chapterNo: f[8],
-      isLeaf: f[10] === 'True',
-      primaryTabulation: f[11] === 'True' ? true : f[11] === 'False' ? false : null,
-      groupings: f.slice(12, 17).filter(Boolean),
+      title: clean(f[col.title]),
+      titleEn: col.titleEn >= 0 ? clean(f[col.titleEn]) : null,
+      classKind: f[col.classKind],
+      depthInKind: Number(f[col.depth]),
+      isResidual: f[col.residual] === 'True',
+      chapterNo: f[col.chapter],
+      isLeaf: f[col.leaf] === 'True',
+      primaryTabulation: f[col.primary] === 'True' ? true : f[col.primary] === 'False' ? false : null,
+      groupings: f.slice(col.grouping1, col.grouping1 + 5).filter(Boolean),
       codingNote: note ? unquote(note) : null,
       parentUri: parent,
     };

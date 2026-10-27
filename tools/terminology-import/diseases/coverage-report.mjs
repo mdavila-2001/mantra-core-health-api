@@ -21,8 +21,7 @@ import { join } from 'node:path';
 
 import { BUILD_DIR, nowIso, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
 import { SYSTEMS } from './lib/code-systems.mjs';
-import { measureGard, measureHetionet, measureMeshC, measureMonarchEdges, measureNando, measureOncotree } from './lib/measure.mjs';
-import { readObo } from './lib/obo.mjs';
+import { measureHetionet, measureMonarchEdges } from './lib/measure.mjs';
 import { addToSnapshot } from './lib/snapshot.mjs';
 import { MEASURE_FILES, NDJSON_DIR, SOURCES_DIR } from './lib/sources.mjs';
 
@@ -39,18 +38,19 @@ export const PASSES = [
   { cs: 'icd11-mms' },
   { cs: 'efo-disease' },
   { citer: 'hpo-annotations' },
-  { measure: 'nando' },
+  { cs: 'nando' }, // pasada 8: antes sólo medida; desde el 2026-10-27 se carga (CC BY 4.0 declarada en el propio archivo)
   { citer: 'phenopacket-store' },
-  { measure: 'oncotree' },
+  { cs: 'oncotree' }, // pasada 10: ídem (CC BY 4.0 en el README del repositorio)
   { measure: 'hetionet' },
   { citer: 'who-icd10-to-icd11', cs: 'icd10-who' },
-  { measure: 'mesh-c' },
-  { measure: 'gard' },
+  { cs: 'mesh' }, // pasada 13: ahora el MeSH oficial de NLM (antes, una conversión de terceros sin números de árbol)
+  { cs: 'gard' }, // pasada 14: ahora la lista oficial de GARD (antes, una conversión de terceros)
   { citer: 'hpo-common-diseases' },
   { measure: 'monarch-clingen' },
   { measure: 'monarch-clinvar' },
   { measure: 'monarch-alliance' },
   { measure: 'monarch-cureid' },
+  { cs: 'ncit-xref' }, // pasada 20: conceptos de NCIt que citan las demás fuentes, fuera de C2991 o retirados
 ];
 const SYSTEM_PASSES = PASSES.filter((p) => p.cs && !p.citer).map((p) => p.cs);
 const DEDUP_EQUIVALENCES = new Set(['equivalent', null]);
@@ -210,6 +210,12 @@ export function computeCoverage(bySystem, citations = {}, measured = {}) {
     return Object.fromEntries(roots.map((root) => [`${root} ${name.get(root) ?? ''}`.trim(), d[root].size]));
   };
   const childrenOf = (cs, parent) => active(cs).filter((r) => r.parents.includes(parent)).map((r) => r.code);
+  // MeSH: descriptores por raíz de árbol (C01…C26, F03); un descriptor cuenta en cada raíz donde está.
+  chapters.mesh = {};
+  for (const r of active('mesh')) {
+    for (const root of new Set((r.properties.mesh_tree_numbers ?? []).map((t) => t.split('.')[0]).filter((t) => /^(C\d\d|F03)$/.test(t)))) chapters.mesh[root] = (chapters.mesh[root] ?? 0) + 1;
+    if (r.properties.mesh_record_kind === 'supplemental-concept-record') chapters.mesh['SCR (enfermedad rara)'] = (chapters.mesh['SCR (enfermedad rara)'] ?? 0) + 1;
+  }
   chapters.mondo = branch('mondo', [...childrenOf('mondo', 'MONDO:7770006'), 'MONDO:7770007', 'MONDO:7770008']);
   chapters.doid = branch('doid', childrenOf('doid', 'DOID:4'));
   chapters['ncit-disease'] = branch('ncit-disease', childrenOf('ncit-disease', 'C2991'));
@@ -241,7 +247,7 @@ function toMarkdown(c) {
   lines.push('', `MONDO vigentes con al menos una equivalencia publicada hacia otro sistema cargado: ${c.mondoWithEquivalentInAnotherSystem}.`);
   lines.push('', '## CIE-11 MMS por capítulo', '', '| Capítulo | Bloques | Categorías | Categorías enlazadas a MONDO |', '|---|---:|---:|---:|');
   for (const [k, v] of Object.entries(c.chapters['icd11-mms'])) lines.push(`| ${k} | ${v.block} | ${v.category} | ${v.linkedToMondo} |`);
-  for (const cs of ['orphanet', 'mondo', 'doid', 'ncit-disease']) {
+  for (const cs of ['orphanet', 'mondo', 'doid', 'ncit-disease', 'mesh']) {
     lines.push('', `## ${cs} por rama (un concepto puede estar en varias)`, '', '| Rama | Conceptos |', '|---|---:|');
     for (const [k, v] of Object.entries(c.chapters[cs]).sort((a, b) => b[1] - a[1])) lines.push(`| ${k} | ${v} |`);
   }
@@ -256,17 +262,9 @@ async function main() {
   const { citations } = JSON.parse(readFileSync(join(BUILD_DIR, 'diseases-citations.json'), 'utf8'));
   const measuredPath = (k) => join(SOURCES_DIR, MEASURE_FILES.find((f) => f.key === k).file);
   const measured = {
-    nando: measureNando(measuredPath('nando'), bySystem.mondo),
-    oncotree: measureOncotree(measuredPath('oncotree'), bySystem.mondo),
     hetionet: measureHetionet(measuredPath('hetionet'), bySystem.doid),
-    gard: measureGard(measuredPath('gard'), bySystem.doid, bySystem.orphanet),
     ...Object.fromEntries(['monarch-clingen', 'monarch-clinvar', 'monarch-alliance', 'monarch-cureid'].map((k) => [k, measureMonarchEdges(measuredPath(k), bySystem.doid)])),
   };
-  const meshTerms = [];
-  await readObo(measuredPath('mesh-c'), (t) => t.id.startsWith('mesh:D') && meshTerms.push(t));
-  const mesh = measureMeshC(meshTerms);
-  if (mesh.missingHeads.length) console.warn(`[mesh-c] cabezas del árbol C sin verificar por nombre: ${mesh.missingHeads.join(', ')}`);
-  measured['mesh-c'] = mesh.items;
   const coverage = computeCoverage(bySystem, citations, measured);
   writeJson(join(BUILD_DIR, 'diseases-coverage.json'), { generatedAt: nowIso(), ...coverage }, true);
   writeFileSync(join(BUILD_DIR, 'diseases-coverage.md'), toMarkdown(coverage));

@@ -97,7 +97,9 @@ test('DOID: xrefs sin semántica declarada → mapeo sin equivalencia; SNOMED de
   const omim = marfan.xrefs.find((x) => x.cs === 'omim');
   assert.deepEqual([omim.code, omim.equivalence, omim.context], ['154700', null, 'doid:xref']);
   assert.ok(marfan.xrefs.some((x) => x.cs === 'mesh' && x.code === 'D008382'));
-  assert.deepEqual(marfan.properties.disease_external_xrefs.GARD, ['GARD:6975']);
+  // Desde que GARD es un sistema cargado (2026-10-27), el GARD que cita DOID es un alineamiento (sin ceros en DOID, con 7 dígitos en el catálogo).
+  assert.deepEqual(marfan.xrefs.filter((x) => x.cs === 'gard').map((x) => [x.code, x.equivalence, x.context]), [['GARD:0006975', null, 'doid:xref']]);
+  assert.equal(marfan.properties.disease_external_xrefs?.GARD, undefined);
   assert.ok(!JSON.stringify(marfan).includes('SNOMEDCT'));
 });
 

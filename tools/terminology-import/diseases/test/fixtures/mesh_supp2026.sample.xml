@@ -1,0 +1,355 @@
+<?xml version="1.0"?>
+<!DOCTYPE SupplementalRecordSet SYSTEM "https://www.nlm.nih.gov/databases/dtd/nlmsupplementalrecordset_20260101.dtd">
+<SupplementalRecordSet LanguageCode = "eng">
+<SupplementalRecord SCRClass = "3">
+  <SupplementalRecordUI>C531599</SupplementalRecordUI>
+  <SupplementalRecordName>
+   <String>Achondroplastic dwarfism</String>
+  </SupplementalRecordName>
+  <LastUpdated>
+   <Year>2013</Year>
+   <Month>10</Month>
+   <Day>24</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>2010</Year>
+   <Month>06</Month>
+   <Day>25</Day>
+  </DateIntroduced>
+  <Frequency>15</Frequency>
+  <HeadingMappedToList>
+   <HeadingMappedTo>
+    <DescriptorReferredTo>
+     <DescriptorUI>*D000130</DescriptorUI>
+     <DescriptorName>
+      <String>Achondroplasia</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </HeadingMappedTo>
+  </HeadingMappedToList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0525090</ConceptUI>
+    <ConceptName>
+     <String>Achondroplastic dwarfism</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T726987</TermUI>
+      <String>Achondroplastic dwarfism</String>
+      <DateCreated>
+       <Year>2008</Year>
+       <Month>09</Month>
+       <Day>25</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>GHR (2014)</ThesaurusID>
+       <ThesaurusID>ORD (2010)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </SupplementalRecord>
+<SupplementalRecord SCRClass = "3">
+  <SupplementalRecordUI>C531607</SupplementalRecordUI>
+  <SupplementalRecordName>
+   <String>Alexanders leukodystrophy</String>
+  </SupplementalRecordName>
+  <LastUpdated>
+   <Year>2010</Year>
+   <Month>06</Month>
+   <Day>25</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>2010</Year>
+   <Month>06</Month>
+   <Day>25</Day>
+  </DateIntroduced>
+  <Note>Megalencephaly in infancy accompanied by progressive spasticity and dementia
+  </Note>
+  <Frequency>1</Frequency>
+  <HeadingMappedToList>
+   <HeadingMappedTo>
+    <DescriptorReferredTo>
+     <DescriptorUI>*D038261</DescriptorUI>
+     <DescriptorName>
+      <String>Alexander Disease</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </HeadingMappedTo>
+  </HeadingMappedToList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0525098</ConceptUI>
+    <ConceptName>
+     <String>Alexanders leukodystrophy</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>0</RegistryNumber>
+    </RegistryNumberList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T727005</TermUI>
+      <String>Alexanders leukodystrophy</String>
+      <DateCreated>
+       <Year>2008</Year>
+       <Month>09</Month>
+       <Day>25</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>ORD (2010)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </SupplementalRecord>
+<SupplementalRecord SCRClass = "1">
+  <SupplementalRecordUI>C000002</SupplementalRecordUI>
+  <SupplementalRecordName>
+   <String>bevonium</String>
+  </SupplementalRecordName>
+  <LastUpdated>
+   <Year>2018</Year>
+   <Month>09</Month>
+   <Day>24</Day>
+  </LastUpdated>
+  <DateIntroduced>
+   <Year>1971</Year>
+   <Month>01</Month>
+   <Day>01</Day>
+  </DateIntroduced>
+  <Note>structure given in first source
+  </Note>
+  <Frequency>1</Frequency>
+  <PreviousIndexingList>
+   <PreviousIndexing>PIPERIDINES (71-81)</PreviousIndexing>
+  </PreviousIndexingList>
+  <HeadingMappedToList>
+   <HeadingMappedTo>
+    <DescriptorReferredTo>
+     <DescriptorUI>*D001561</DescriptorUI>
+     <DescriptorName>
+      <String>Benzilates</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </HeadingMappedTo>
+  </HeadingMappedToList>
+        <SourceList>
+   <Source>S Afr Med J 50(1):4;1976</Source>
+  </SourceList>
+  <ConceptList>
+   <Concept PreferredConceptYN="Y">
+    <ConceptUI>M0040005</ConceptUI>
+    <ConceptName>
+     <String>bevonium</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>34B0471E08</RegistryNumber>
+    </RegistryNumberList>
+    <RelatedRegistryNumberList>
+     <RelatedRegistryNumber>33371-53-8 (bevonium)</RelatedRegistryNumber>
+     <RelatedRegistryNumber>35517-05-6</RelatedRegistryNumber>
+     <RelatedRegistryNumber>5205-82-3 (bevoinum methylsulfate)</RelatedRegistryNumber>
+     <RelatedRegistryNumber>UWC15E373Z</RelatedRegistryNumber>
+    </RelatedRegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0040005</Concept1UI>
+     <Concept2UI>M0040001</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0040005</Concept1UI>
+     <Concept2UI>M0040002</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0040005</Concept1UI>
+     <Concept2UI>M0307342</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0040005</Concept1UI>
+     <Concept2UI>M0402330</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
+      <TermUI>T070005</TermUI>
+      <String>bevonium</String>
+      <DateCreated>
+       <Year>1955</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>FDA SRS (2013)</ThesaurusID>
+       <ThesaurusID>NLM (1971)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000946882</TermUI>
+      <String>2-(hydroxymethyl)-N,N-dimethylpiperidinium benzilate</String>
+      <DateCreated>
+       <Year>2018</Year>
+       <Month>09</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2017)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0040001</ConceptUI>
+    <ConceptName>
+     <String>Acabel</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0040005</Concept1UI>
+     <Concept2UI>M0040001</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="TRD"  RecordPreferredTermYN="N">
+      <TermUI>T070001</TermUI>
+      <String>Acabel</String>
+      <DateCreated>
+       <Year>1955</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1971)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0040002</ConceptUI>
+    <ConceptName>
+     <String>CG 201</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0040005</Concept1UI>
+     <Concept2UI>M0040002</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="LAB"  RecordPreferredTermYN="N">
+      <TermUI>T070002</TermUI>
+      <String>CG 201</String>
+      <DateCreated>
+       <Year>1955</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1971)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0307342</ConceptUI>
+    <ConceptName>
+     <String>bevonium sulfate (1:1)</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>35517-05-6</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0040005</Concept1UI>
+     <Concept2UI>M0307342</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T337342</TermUI>
+      <String>bevonium sulfate (1:1)</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>08</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1971)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M0402330</ConceptUI>
+    <ConceptName>
+     <String>bevonium methyl sulfate</String>
+    </ConceptName>
+    <RegistryNumberList>
+    <RegistryNumber>UWC15E373Z</RegistryNumber>
+    </RegistryNumberList>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0040005</Concept1UI>
+     <Concept2UI>M0402330</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T070003</TermUI>
+      <String>bevonium methyl sulfate</String>
+      <DateCreated>
+       <Year>1955</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>FDA SRS (2015)</ThesaurusID>
+       <ThesaurusID>NLM (1971)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000880976</TermUI>
+      <String>bevonium metilsulfate</String>
+      <DateCreated>
+       <Year>2015</Year>
+       <Month>06</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>INN (19XX)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T070004</TermUI>
+      <String>piribenzil methyl sulfate</String>
+      <DateCreated>
+       <Year>1955</Year>
+       <Month>01</Month>
+       <Day>01</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1971)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T337343</TermUI>
+      <String>bevonium methylsulfate</String>
+      <DateCreated>
+       <Year>1999</Year>
+       <Month>08</Month>
+       <Day>18</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (1971)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+    </TermList>
+   </Concept>
+  </ConceptList>
+ </SupplementalRecord>
+</SupplementalRecordSet>

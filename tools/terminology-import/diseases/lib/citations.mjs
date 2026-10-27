@@ -97,8 +97,9 @@ export function resolveDoidCode(code, doidCodes, altIds) {
 
 /**
  * 10To11MapToOneCategory → claves CIE-10 con su destino CIE-11 MMS. Los destinos
- * poscoordinados («stem&extensión», «a/b») no se reducen a uno: se cuentan y
- * quedan sin mapeo, porque quitarles la extensión cambiaría lo que dice la OMS.
+ * poscoordinados («stem&extensión», «a/b») no se reducen a uno: no generan mapeo
+ * (quitarles la extensión cambiaría lo que dice la OMS) y se guardan textuales en
+ * `postcoordinated` para dejarlos como propiedad de la clave.
  */
 export function icd10KeysFromWhoMap(path) {
   const lines = readFileSync(path, 'utf8').replace(/^﻿/, '').split(/\r?\n/);
@@ -113,10 +114,31 @@ export function icd10KeysFromWhoMap(path) {
     const code10 = f[c10]?.trim();
     if (!code10) continue;
     const code11 = f[c11]?.trim() ?? '';
-    const entry = byCode.get(code10) ?? { code: code10, targets: [] };
-    if (/[&/]/.test(code11)) postcoordinated += 1;
-    else if (code11 && code11 !== 'No Mapping') entry.targets.push(code11);
+    const entry = byCode.get(code10) ?? { code: code10, targets: [], postcoordinated: [] };
+    if (/[&/]/.test(code11)) {
+      postcoordinated += 1;
+      entry.postcoordinated.push(code11);
+    } else if (code11 && code11 !== 'No Mapping') entry.targets.push(code11);
     byCode.set(code10, entry);
   }
   return { version, postcoordinated, keys: [...byCode.values()] };
+}
+
+/**
+ * 10To11MapToMultipleCategories → Map<código CIE-10, destinos CIE-11 (textuales)> sólo para los códigos que la
+ * OMS publica con más de una fila (un código CIE-10 repartido en varias categorías CIE-11).
+ */
+export function icd10MultipleTargets(path) {
+  const lines = readFileSync(path, 'utf8').replace(/^﻿/, '').split(/\r?\n/);
+  const header = lines[0].split('\t');
+  const [c10, c11] = [header.indexOf('icd10Code'), header.indexOf('icd11Code')];
+  const by = new Map();
+  for (const line of lines.slice(1)) {
+    const f = line.split('\t');
+    const a = f[c10]?.trim();
+    const b = f[c11]?.trim();
+    if (!a || !b || b === 'No Mapping') continue;
+    (by.get(a) ?? by.set(a, []).get(a)).push(b);
+  }
+  return new Map([...by].filter(([, v]) => v.length > 1));
 }
