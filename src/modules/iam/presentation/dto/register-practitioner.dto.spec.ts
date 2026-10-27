@@ -676,3 +676,37 @@ describe('RegisterPractitionerDto · respaldos de la matrícula y del SEDES (P29
     ).toEqual(['licenseFileId', 'sedesLicenseFileId']);
   });
 });
+
+describe('RegisterPractitionerDto · fecha del SEDES y registro del colegio', () => {
+  it('acepta la fecha del SEDES y el registro del colegio completo', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseIssueDate: '2016-07-11',
+        collegeLicenseNumber: 'CMB-4410',
+        collegeName: 'Colegio Médico de Bolivia',
+        collegeLicenseIssueDate: '2015-09-20',
+        collegeLicenseFileId: '7d2f9e6a-0b3c-4e4d-9f5a-3c4d5e6f7a81',
+      }),
+    ).toEqual([]);
+  });
+
+  it('rechaza fechas que no son ISO, un número vacío y un fileId que no es uuid', async () => {
+    expect(
+      await propertiesWithError({
+        ...MINIMAL_REGISTRATION,
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseIssueDate: 'ayer',
+        collegeLicenseNumber: '',
+        collegeLicenseIssueDate: '31/02',
+        collegeLicenseFileId: 'colegio.pdf',
+      }),
+    ).toEqual([
+      'collegeLicenseFileId',
+      'collegeLicenseIssueDate',
+      'collegeLicenseNumber',
+      'sedesLicenseIssueDate',
+    ]);
+  });
+});
