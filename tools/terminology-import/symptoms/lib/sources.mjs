@@ -24,9 +24,9 @@ export const DATA_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..', '
 const HPO_RELEASE = 'https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download';
 const MONARCH = 'https://storage.googleapis.com/data-public-monarchinitiative';
 
-// Lo que DECLARA el archivo (hp.json: dcterms:license). El texto de esa página no
-// se pudo abrir desde el entorno de la corrida: ver SOURCES.md.
-export const HPO_LICENSE = 'HPO license — https://hpo.jax.org/app/license (declarada en hp.json, dcterms:license)';
+// Lo que DECLARA el archivo (hp.json: dcterms:license). Su texto se verificó el 2026-10-27 (SOURCES.md ¹); antes no
+// (antes no se pudo abrir desde el entorno de la corrida).
+export const HPO_LICENSE = 'HPO license — https://hpo.jax.org/app/license (declarada en hp.json, dcterms:license); texto verificado el 2026-10-27: de uso libre si se reconoce y cita al HPO Consortium, se indica fecha/versión al mostrarlo públicamente y no se altera el contenido ni las relaciones lógicas (SOURCES.md ¹)';
 
 /** Lo que DECLARA el propio archivo (`<Licence>` del XML de Orphadata). */
 export const ORPHADATA_LICENSE = 'CC BY 4.0 (declarada en el XML: Licence/ShortIdentifier CC-BY-4.0, https://creativecommons.org/licenses/by/4.0/legalcode); citar «Orphadata: Free access data from Orphanet. © INSERM 1999. Available on http://www.orphadata.com»';

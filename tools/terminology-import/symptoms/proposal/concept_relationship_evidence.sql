@@ -1,4 +1,10 @@
 -- =============================================================================
+-- OBSOLETA (2026-10-27): el repo del modelo entregó la tabla el 2026-10-25 (v4.2.50,
+-- SQL/patches/2026-10-25_v4250_terminology_relationship_evidence.sql, commit e8bd453)
+-- con otras columnas. `load-disease-phenotypes.mjs` ya escribe contra ESA tabla; este
+-- archivo queda sólo como registro de la propuesta original. No aplicar.
+-- =============================================================================
+-- =============================================================================
 -- PROPUESTA para mantra-core-technologies/mantra-core-health-model (módulo 03).
 -- NO es una migración: la API no escribe DDL (ADR-0021). Este archivo existe
 -- para que el repo del modelo lo evalúe y para probar `load-disease-phenotypes.mjs`

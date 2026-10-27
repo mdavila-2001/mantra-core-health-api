@@ -1,38 +1,44 @@
 # Síntomas, signos y fenotipos, relacionados con enfermedades
 
-Investigación y corpus de la sesión `seed-symptoms` (2026-10-24). Importadores en
-`tools/terminology-import/symptoms/`, fuentes y licencias en
-`tools/terminology-import/symptoms/SOURCES.md`.
+Investigación y corpus de la sesión `seed-symptoms` (2026-10-24), ampliados el
+**2026-10-27** por el carril C2 del cierre de huecos de terminología (plan:
+`docs/trabajo/2026-10-27-terminologia-cierre-huecos/PLAN.md`, evidencia en
+`…/evidencia/C2/`). Importadores en `tools/terminology-import/symptoms/`, fuentes y
+licencias en `tools/terminology-import/symptoms/SOURCES.md`.
 
 ## Resumen
 
 | | Cantidad |
 |---|---:|
-| Términos (síntomas, signos, hallazgos y fenotipos), 3 sistemas de códigos | **24 777** |
+| Términos (síntomas, signos, hallazgos y fenotipos), 4 sistemas de códigos | **25 743** (24 777 el 2026-10-24 + 966 de MeSH C23) |
 | — HPO (todas las subontologías) | 19 894 |
 | — con nombre **oficial** en castellano (HPO Translation Project) | 19 345 |
 | — Symptom Ontology (SYMP) | 895 |
 | — NCI Thesaurus: signos/síntomas + hallazgos clínicos por sistema | 3 988 |
-| Aristas jerárquicas is-a (sistema/órgano → tipo → término) | 29 428 |
-| Filas de relación enfermedad → síntoma leídas (4 fuentes publicadas) | 422 493 |
+| — MeSH 2026, árbol C23 (signos y síntomas, condiciones y procesos patológicos) **(nuevo 2026-10-27)** | 966 |
+| Aristas jerárquicas is-a (sistema/órgano → tipo → término) | 30 465 (29 428 + 1 037 de MeSH C23) |
+| Filas de relación enfermedad → síntoma leídas (5 fuentes publicadas; +116 661 de Orphadata el 2026-10-27) | 539 154 |
 | — que son síntoma/fenotipo (aspecto P) de enfermedad humana, positivas y negadas | 404 086 |
 | Enfermedades humanas de Mondo con al menos un síntoma enlazado | **12 631 de 23 263 (54,3 %)** |
 | Términos HPO de anomalía fenotípica con al menos una enfermedad | 11 867 de 19 178 |
 
-Estado de la carga:
+Estado de la carga (actualizado el 2026-10-27; todo contra un **Postgres 16 desechable**,
+no contra la base del stack):
 
-- **Términos: listos y medidos.** `load-symptoms.mjs` corrió contra un Postgres 16
-  desechable con el DDL real del módulo 03: 24 777 conceptos, 70 747
-  designaciones, 367 171 propiedades, 29 428 relaciones is-a; segunda corrida
-  = 0 filas nuevas.
-- **Relaciones: bloqueadas por el modelo.** `concept_relationships` no puede
-  guardar fuente, frecuencia ni evidencia por arista (§ Modelo). El cargador
-  existe y se probó contra la tabla propuesta aplicada **sólo en la base
-  desechable**; contra el modelo actual aborta sin escribir (código de salida 2).
-- **Enlace con `seed-diseases`: formatos confirmados.** La sesión hermana
-  (mdavila-2001/mantra-core-health-api#688) confirmó sus `internal_code` y el
-  formato de cada código; el cargador los usa por defecto y, con ese formato,
-  resuelve el 100 % de las filas de HPOA directo por código (§ Dependencia).
+- **Términos: cargados y medidos.** `load-symptoms.mjs` contra el DDL del módulo 03:
+  25 743 conceptos (HPO 19 894 · SYMP 895 · NCIt 3 988 · MeSH C23 966), 1 037 is-a
+  nuevos de MeSH; segunda corrida = 0 filas nuevas
+  (`evidencia/C2/carga-terminos-{1,2}.txt`).
+- **Relaciones: desbloqueadas.** El modelo ya tiene `concept_relationship_evidence`
+  (patch v4250 del repo del modelo, commit e8bd453). `load-disease-phenotypes.mjs` se
+  reescribió contra las columnas REALES de esa tabla (la propuesta anterior tenía otras)
+  y se probó con el patch aplicado sobre el DDL de este repo: **402 633 aristas y
+  520 430 filas de evidencia**; segunda corrida = 0/0
+  (`evidencia/C2/carga-relaciones-{1,2}.txt`). Contra una base sin el patch aborta con
+  salida 2 sin escribir (`carga-relaciones-sin-parche.txt`).
+- **Enlace con `seed-diseases`: formatos confirmados** (#688) y probado con el catálogo
+  real de su snapshot (`diseases/load-catalog.mjs --from-snapshot`): 402 633 aristas;
+  sólo quedan sin enfermedad 96 filas (`DOID:5898`, sin clase ni `alt_id` en la release).
 
 ## Paso 0: discovery
 
@@ -47,40 +53,49 @@ Estado de la carga:
 - No hay en este repo un catálogo de motivos de consulta del triage: el AI
   Service vive en otro repositorio (no está en el alcance de la sesión).
 - No hay `CLAUDE.md` ni `.claude/rules/` en el repo.
-- **`concept_relationships` sólo tiene origen, destino, tipo y ordinal.** No
-  puede guardar la fuente, la frecuencia ni la evidencia de cada relación. Según
-  la orden, se paró la carga de relaciones y se redactó la propuesta.
+- **`concept_relationships` sólo tiene origen, destino, tipo y ordinal** (así era el
+  2026-10-24; desde la v4.2.50 la evidencia vive en `concept_relationship_evidence`, ver
+  § Modelo). Entonces se paró la carga de relaciones y se redactó la propuesta.
 
-## Modelo: qué tiene que cambiar el repo del modelo
+## Modelo: lo que el repo del modelo ya resolvió y lo que sigue pendiente
 
-Propuesta completa en
-`tools/terminology-import/symptoms/proposal/concept_relationship_evidence.sql`
-(no es una migración; la API no escribe DDL, ADR-0021).
+La propuesta del 2026-10-24 (`proposal/concept_relationship_evidence.sql`, hoy
+histórica) pedía una tabla de evidencia por arista. El repo del modelo la entregó el
+2026-10-25 (v4.2.50, `SQL/patches/2026-10-25_v4250_terminology_relationship_evidence.sql`,
+commit e8bd453) con **otras columnas**. El cargador escribe así:
 
-1. **Tabla nueva `terminology.concept_relationship_evidence`**, 1:N con
-   `concept_relationships`: `relationship_id`, `source_id`
-   (→ `terminology_sources`), `source_record_key` (id estable de la línea o
-   axioma), `source_version`, `source_uri`, `retrieved_at`, `negated`,
-   `frequency_text` (tal como viene), `frequency_concept_id` (término HPO de
-   frecuencia), `frequency_numerator`/`frequency_denominator`,
-   `frequency_percent`, `evidence_code` (PCS/TAS/IEA/ITM…),
-   `onset_concept_id`, `sex`, `source_references` (jsonb), `qualifiers` (jsonb:
-   código y nombre tal como se publicaron, aspecto, modificadores, biocuración).
-   Único por `(relationship_id, source_id, source_record_key)`.
-   *Por qué 1:N y no columnas:* una misma arista la afirman varias líneas
-   (Marfan → aracnodactilia: OMIM con 124/197 y PCS; Orphanet con «Muy
-   frecuente» y TAS). Con columnas se perdería una de las dos.
-2. **Concepto nuevo `REL_SYMPTOM_EXCLUDED`**
-   (`terminology:relationship:symptom-excluded`) en `concepts.ts`: es dato que
-   siembra la API, no DDL. HPOA trae 733 anotaciones `NOT` (la enfermedad
-   **no** presenta el rasgo); nunca pueden cargarse como `REL_SYMPTOM`. Sin
-   el concepto, el cargador las omite y lo cuenta.
+| Columna del modelo | Qué se carga |
+|---|---|
+| `concept_relationship_id` | arista (enfermedad, fenotipo, tipo); clave natural única |
+| `terminology_source_id` | `HPO_CONSORTIUM` (HPOA y enfermedades comunes), `INSERM_ORPHANET` (Orphadata), `MONARCH_MONDO`, `DO_DOID` |
+| `code_system_version_id` | versión del code system del **fenotipo** (HPO o SYMP) contra la que se afirma |
+| `evidence_tier_concept_id` | `CURATED_REFERENCE` o `STATISTICAL_LITERATURE` (ver decisión 1) |
+| `source_reference` | clave estable de la línea: `hpoa:<md5 de la línea>` · `orphadata:HPODisorderAssociation/<id de Orphanet>` · … |
+| `citation_text` | campos publicados de la línea, `clave=valor`, con los nombres de columna de la fuente (incluye evidencia PCS/TAS/IEA/ITM, inicio, sexo, modificadores, biocuración, referencias, marca de criterio diagnóstico) |
+| `citation_locator` | dónde está la línea (`phenotype.hpoa#OMIM:154700/HP:0001166`, `en_product4.xml#HPODisorderAssociation@id=…`) |
+| `frequency_concept_id` | miembro de `vs_relationship_frequency` cuando la fuente da un término HP:0040280–0040285 (o la clase equivalente de Orphanet) |
+| `frequency_numerator/denominator` | el `n/m` de HPOA |
+| `statistic_value` | el `p%` de HPOA (la fuente lo publica como porcentaje) |
+| `valid_from` | fecha de la release de la fuente; para las enfermedades comunes (2015, sin fecha de release) la de descarga |
 
-Validación de la propuesta en la base desechable (con Mondo como sustituto): 345 258 aristas
-enfermedad → síntoma (344 258 `REL_SYMPTOM` + 723 `REL_SYMPTOM_EXCLUDED`) y
-372 928 filas de evidencia en 52 s; segunda corrida 0/0 en 31 s. Con el catálogo real de `seed-diseases`: 402 633 aristas y 403 959 evidencias (§ Dependencia). Muestra (Marfan, `MONDO:0007947`): «Aracnodactilia» con `124/197` PCS
-desde `OMIM:154700` y con «Muy frecuente» TAS desde `ORPHA:558`, en la misma
-arista.
+Qué **no** se calcula: las columnas derivadas de la arista (`strength_score`,
+`evidence_count`, `best_evidence_tier_concept_id`, `frequency_concept_id`). El modelo
+dice que las recalcula el cargador masivo de TAREA-41 F1.3 y no define la fórmula del
+puntaje ni el orden entre niveles; no se inventan acá.
+
+**Propuestas al repo del modelo** (no se tocó nada allí, ADR-0021):
+
+1. **Columnas que hoy no existen** y que la fuente sí publica: `evidence_code` (PCS/TAS/IEA/ITM),
+   `onset_concept_id` (término HPO de inicio), `negated` (hoy se resuelve con el tipo de
+   relación), `source_uri`. Mientras tanto viajan dentro de `citation_text`.
+2. **`sex_concept_id`**: no hay value set de sexo sembrado en `03_terminology.seeds.json`;
+   HPOA trae `MALE`/`FEMALE` (638 filas) y queda sólo en la cita.
+3. **Concepto `REL_SYMPTOM_EXCLUDED`** (`terminology:relationship:symptom-excluded`) en
+   `src/common/constants/concepts.ts`: **sigue sin existir** (comprobado el 2026-10-27).
+   Sin él, el cargador omite y cuenta las negaciones (HPOA `NOT` 733 + Orphanet «Excluded
+   (0%)» 733): nunca las carga como positivas. Con él (base desechable) cargó 726 aristas
+   excluidas. Es dato que siembra la API, no DDL; queda fuera de los directorios de este carril.
+4. **`valid_to`**: nunca se escribe; una fuente nueva es otra versión de code system.
 
 ## Protocolo de saturación
 
@@ -102,6 +117,22 @@ cuentan relaciones de aspecto P no negadas. Cálculo reproducible en
 | 6 | NCIt, hallazgos clínicos por sitio o sistema (C36278, tipo semántico *Finding*) | 2 868 | 0 | criterio de la fuente; quedan fuera resultados de laboratorio, enfermedades y neoplasias |
 | 7 | Monarch `phenopacket_ingest_edges.tsv`, `cureid_edges.tsv` | **0** | **0** | casos individuales y tratamientos; los 7 HP «faltantes» son `alt_id` |
 | 8 | Hetionet v1.0, OAE, `hp-es.synonyms.tsv`, `hp-international.obo`, HPO `src/mappings` | **0** | **0** | co-ocurrencia estadística, eventos adversos, archivo vacío, sinónimos sin idioma, licencias de terceros |
+
+### Pasadas del 2026-10-27 (cierre de huecos)
+
+| Pasada | Fuentes | Términos nuevos | Relaciones nuevas | Notas |
+|---:|---|---:|---:|---|
+| 9 | Orphadata producto 4 EN+ES (2026-06-23): 4 357 enfermedades, 116 664 asociaciones | 0 | **0** | Cero por causa real: sus 116 612 pares distintos son **exactamente** los de HPOA (HPOA es la integración de este producto). Aporta 116 471 filas de evidencia directa de Orphanet (fecha de validación, PMID, marca de criterio diagnóstico en 1 132 y de signo patognomónico en 19) |
+| 10 | MeSH 2026 `desc2026.xml`, árbol C23: 31 110 descriptores leídos, 966 en C23 | 966 (481 sin equivalente publicado en otro sistema; 485 ya representados por xref o por el mismo CUI en MedGen, pero se cargan igual: es otro code system con su jerarquía) | 0 | C23.888 Signs and Symptoms 416 · C23.550 Pathologic Processes 425 · C23.300 Anatomical 118 · C23.149 Morphological 6 · cabeza 1 |
+| 11 | Wikidata P3841 (consulta del 2026-10-27): 4 876 ítems–HPO | 0 | 0 | Sólo cruce; 4 843 términos HPO del corpus con ítem |
+| 12 | NCBI MedGen `MGCONSO` (sólo CUI y códigos de HPO/MeSH/NCIt) | 0 | 0 | 1 790 pares con el mismo CUI (HPO↔MeSH 575, HPO↔NCIt 734, MeSH↔NCIt 324, HPO↔SYMP 58, NCIt↔SYMP 52, MeSH↔SYMP 47) |
+| 13 | Re-descarga de las 9 fuentes originales | **0** | **0** | Cero por causa real: el SHA-256 de las 9 es idéntico al del 2026-10-24 (HPO 2026-09-01, HPOA 2026-09-02, SYMP 2026-07-30, DO 2026-09-30, Mondo 2026-10-06, NCIt 26.02d) |
+
+Las pasadas 11, 12 y 13 aportan 0 por causas reales (no por errores de red), y la 9 también:
+con las fuentes que hoy se pueden leer sin cuenta el corpus vuelve a estar saturado.
+Fuentes buscadas además de las listadas y descartadas (ver `SOURCES.md`): MedGen
+(`MGDEF`/`MGSTY`/`MGREL`: 0 términos nuevos, mezclan fuentes con licencia), traducciones
+HPO no oficiales, ítems de Wikidata sin P3841 (son del glosario).
 
 **Dos pasadas seguidas (7 y 8) aportan 0**: el corpus está saturado **dentro de
 lo que se puede bajar desde este entorno**. Los motivos de cada descarte están
@@ -260,12 +291,20 @@ OMS). Esta sesión **no** los duplica ni crea un `icd10-who` propio.
   `glossary-all-terms` + `glossary-category-signs-symptoms` y propiedades
   `glossary-slug` (`hpo-hp-0001250`), `glossary-external-ids`,
   `glossary-provenance`. Es el **mismo concepto** del sistema `hpo`, no una copia.
-- **Riesgo de duplicado visible:** las fichas `wikidata-sintoma-*` del glosario
-  (destinos de Wikidata P780) no declaran su id HPO, así que hoy no se puede saber
-  por código cuáles son el mismo síntoma que un término HPO. El cruce existe en
-  Wikidata (P3841 *Human Phenotype Ontology ID*), pero `query.wikidata.org` está
-  bloqueado en este entorno. Por eso `--glossary` **no es el comportamiento por
-  defecto**: es decisión del propietario activarlo antes o después de traer P3841.
+- **Riesgo de duplicado, ahora medible.** Las fichas `wikidata-sintoma-*` del glosario
+  no declaran su id HPO, pero Wikidata sí publica el cruce (P3841 *Human Phenotype
+  Ontology ID*): el 2026-10-27 `query.wikidata.org` responde 200 y se bajaron 4 876
+  declaraciones (4 799 ítems, 4 868 ids de HPO distintos; 4 843 términos HPO del corpus
+  tienen ítem; 42 ids son `alt_id` de HPO y se remapean al vigente; **1 id está mal escrito
+  en Wikidata** —`HP:000962`, ítem Q1640998— y se deja sin resolver, no se corrige).
+  `load-wikidata-crosswalk.mjs` guarda, por cada término HPO, la propiedad
+  `wikidata_items` y, si la ficha `wikidata-sintoma` de ese QID existe en la base, un
+  `concept_map` sin equivalencia declarada. **El corpus del glosario no está en git**,
+  así que el mapeo se probó contra un **doble** de 3 fichas (contrato: code system
+  `wikidata-sintoma`, `code` = QID; regla 65): las propiedades (4 843) se cargaron de
+  verdad; la cantidad real de mapas depende de cuántos QID haya cargado el glosario.
+  `--glossary` de `load-symptoms.mjs` sigue sin ser el comportamiento por defecto: es
+  decisión del propietario activarlo ahora que el cruce existe.
 
 ## Corrida en Postgres desechable
 
@@ -281,24 +320,63 @@ como sustituto de `seed-diseases`.
 | `load-disease-phenotypes.mjs --apply` sin la tabla propuesta | 0 (aborta, salida 2) | 5 s | — |
 | idem con la tabla propuesta aplicada en la base desechable | 345 258 aristas · 372 928 evidencias (andamio Mondo) | 52 s | 0 filas, 31 s |
 | idem con el catálogo real de #688 (57f23f9c) | 402 633 aristas · 403 959 evidencias | 59 s | 0 filas, 33 s |
+| **2026-10-27** `load-symptoms.mjs --apply` (4 sistemas, con MeSH C23) | 25 743 conceptos · 73 400 designaciones · 304 407 propiedades · 30 465 is-a | 12 s | 0 filas |
+| **2026-10-27** `load-disease-phenotypes.mjs --apply` contra el modelo real (DDL + patch v4250) y el catálogo de `seed-diseases` | 402 633 aristas (401 907 `REL_SYMPTOM` + 726 excluidas) · **520 430 evidencias** (HPOA/comunes 400 883 · Orphadata 116 471 · DO 2 262 · Mondo 814) | 69 s | 0/0, 40 s |
+| **2026-10-27** `load-wikidata-crosswalk.mjs --apply` | 4 843 propiedades `wikidata_items` · 3 mapas (doble del glosario) | 1 s | 0 |
+| **2026-10-27** `load-medgen-crosswalk.mjs --apply` | 1 790 `concept_maps` por CUI | <1 s | 0 |
 
-Tamaño de la base tras todo (incluido el andamio de Mondo): 639 MB. `catalog_import_batches` suma una fila por
+Tamaño de la base tras todo el 2026-10-27 (con el catálogo de `seed-diseases`): 932 MB (en 2026-10-24, con el andamio de Mondo: 639 MB). `catalog_import_batches` suma una fila por
 corrida y sistema (es el registro de cada corrida, no dato).
 
 ## Huecos
 
-| Fuente | Qué aportaría | Por qué no está |
-|---|---|---|
-| Orphadata `en_product4.xml` / `es_product4.xml` | fenotipos de enfermedades raras directo de Orphanet (y nombres ES de Orphanet) | 403 del proxy de red. Su contenido llega vía HPOA (filas `ORPHA:`, 116 661) |
-| CIE-11 capítulo 21 en castellano | nombres ES oficiales de síntomas, signos y hallazgos (OMS/OPS) | La MMS 2026-01 en inglés **ya la carga `seed-diseases`** (47 bloques + 1 241 categorías del cap. 21). La versión ES: `icd.who.int` / `icdcdn.who.int` bloqueados; la API de la OMS exige cuenta |
-| CIE-10 capítulo R | signos y síntomas | **Ya está** en el glosario (CIE-10-ES) y en `icd10cm`; no se duplica |
-| MeSH C23 y DeCS (BIREME) | descriptores de signos y síntomas, en castellano (DeCS) | `nlm.nih.gov` bloqueado; DeCS exige solicitar licencia y token a BIREME/OPS |
-| Wikidata P3841 | cruce HPO ↔ fichas `wikidata-sintoma` del glosario | `query.wikidata.org` bloqueado |
-| SNOMED CT (incluido el Global Patient Set) | hallazgos clínicos | Bolivia no es miembro; el GPS se distribuye por snomed.org/MLDS (cuenta). No se crean cuentas |
-| UMLS / MedDRA / OMIM API | sinónimos y cruces | requieren licencia o cuenta |
-| CIAP-2 / ICPC-2 (WONCA) | motivos de consulta de atención primaria | © WONCA; uso comercial con licencia. No se usaron copias de terceros |
-| PubMed / Europe PMC | detectar huecos en la literatura | `eutils.ncbi.nlm.nih.gov` y `www.ebi.ac.uk` bloqueados |
-| Página de licencia de HPO; reconfirmar términos de uso del NCIt | texto vigente de las condiciones | `hpo.jax.org` y `evs.nci.nih.gov` bloqueados. NCIt figura como CC BY 4.0 en `docs/terminology-expansion/SOURCE-REGISTER.md` (revisión anterior): reconfirmar antes de publicar |
+Re-sondeados el **2026-10-27** (`evidencia/C2/sondeo-2026-10-27.txt`). «Antes» = 2026-10-24
+(bloqueado por el proxy); «hoy» = código HTTP del 2026-10-27.
+
+| Hueco | Hoy | Qué se cargó | Antes → después |
+|---|---|---|---|
+| Orphadata `en_product4.xml` / `es_product4.xml` | 200 (48 MB c/u) | 116 661 asociaciones como evidencia directa de Orphanet (CC BY 4.0), con fecha de validación, PMID, marca de criterio diagnóstico/patognomónico y rótulos ES de Orphanet. 3 asociaciones con HPO retirado sin reemplazo quedan fuera y se cuentan. **No suma pares nuevos:** son los mismos que HPOA | evidencias 403 959 → 520 430; aristas 402 633 → 402 633 |
+| Nombres ES de Orphanet | 200 | Los nombres de enfermedad (4 357) y las clases de frecuencia ES quedan en la cita de la evidencia tal como los publica Orphanet. **No** se crean designaciones sobre `orphanet` (concepto de `seed-diseases`, otro carril; ellos cargan `es_product1`) | — |
+| MeSH C23 (signos y síntomas) | 200 (`desc2026.zip` 16,8 MB) | 966 descriptores con sinónimos por alcance y definición de la fuente (inglés), jerarquía por número de árbol, `mesh_tree_numbers`. Code system propio `mesh-c23` | conceptos 24 777 → 25 743 |
+| Wikidata P3841 | 200 | 4 876 declaraciones ítem–HPO → propiedad `wikidata_items` en 4 843 términos HPO y mapas a fichas `wikidata-sintoma` si existen | cruces HPO↔Wikidata 0 → 4 843 |
+| CIE-11 capítulo 21 en castellano | `icd.who.int/browse/2026-01/mms/es` 200 (app web); `id.who.int/icd/release/11/…/mms` **401** sin token; `icdcdn.who.int` 400 | **Nada.** Hueco de **acceso** (la API y las descargas de la OMS exigen cuenta/token; no se crean) y de **licencia** (CC BY-ND 3.0 IGO, verificada en `icd11-license.pdf`: prohíbe derivados). La MMS en inglés ya la carga `seed-diseases` | 0 → 0 |
+| Licencia vigente de HPO | `hpo.jax.org/app/license` 404 (SPA); texto leído del bundle público del sitio | Verificada y registrada en `SOURCES.md` ¹ (3 condiciones + leyenda) y en `evidencia/C2/licencia-hpo-2026-10-27.txt`. Hay una cláusula de «uso no comercial» del *sitio* que el propietario debe confirmar con un abogado | «sin verificar» → verificada |
+| Licencia vigente del NCIt | 200 | CC BY 4.0 reconfirmada; `SOURCES.md` ³ corregido | idem |
+| CIE-10 capítulo R | — | Ya está en el glosario (CIE-10-ES) e `icd10cm` | — |
+| DeCS (BIREME) | `decs.bvsalud.org` responde (206 con rango), pero el uso exige solicitar licencia y token a BIREME/OPS | **Nada.** Hueco de **licencia/acceso** | 0 → 0 |
+| SNOMED CT (incluido el GPS) | MedGen `MGCONSO` trae nombres de SNOMED CT: no se leen | **Nada.** Hueco de licencia: Bolivia no es miembro; el GPS va por MLDS (cuenta) | 0 → 0 |
+| UMLS / MedDRA / OMIM API | requieren licencia o cuenta | **Nada** (sólo CUI como clave, ver `SOURCES.md` ⁷) | 0 → 0 |
+| CIAP-2 / ICPC-2 (WONCA) | © WONCA | **Nada.** Hueco de licencia | 0 → 0 |
+| PubMed / Europe PMC | `eutils.ncbi.nlm.nih.gov` y `ebi.ac.uk/europepmc` responden 200 | **Nada, por decisión:** son buscadores de literatura, no un vocabulario; sacar términos de resúmenes sería inferir (es justo lo que HPO ya hizo con evidencia `ITM`). Quedan disponibles para curaduría humana | — |
+| `load-disease-phenotypes.mjs` | — | **Desbloqueado**: ver § Modelo y § Corrida | bloqueado (salida 2) → 520 430 evidencias, idempotente |
+| HPO: 549 términos sin nombre oficial ES | — | Curaduría: los traductores del HPO Translation Project no los publicaron como `OFFICIAL` | — |
+
+Persisten **sin cerrar** por motivo exacto: CIE-11 ES (acceso + licencia ND), DeCS (licencia),
+SNOMED CT/UMLS/MedDRA/CIAP-2 (licencia), mapas reales HPO→glosario (falta el corpus del
+glosario en esta base), y las columnas/valor-set que el modelo no tiene (§ Modelo).
+
+## Decisiones que necesita el propietario
+
+1. **Nivel de evidencia** (`vs_evidence_tier`): el modelo declara 4 niveles y no a qué
+   fuente corresponde cada uno. Se asignó `CURATED_REFERENCE` a HPOA TAS/PCS, Mondo, DO
+   y Orphadata, y `STATISTICAL_LITERATURE` a lo extraído automáticamente (HPOA IEA,
+   enfermedades comunes ITM/IEA: 160 018 filas). Cambiar la regla es una línea
+   (`evidenceTierCode`, `lib/relations-plan.mjs`). Confirmar con el dueño del modelo (autor del commit e8bd453).
+2. **Licencia de HPO**: la leyenda de atribución y la versión tienen que mostrarse en el
+   producto; confirmar la lectura de la cláusula de «noncommercial use» (§ Huecos).
+3. **MedGen CUI** (`load-medgen-crosswalk.mjs`): cargar o no los 1 790 cruces por CUI.
+   Hay precedente (CUI como clave en `seed-diseases` y en los `xrefs` de NCIt/SYMP), pero
+   el CUI es un identificador de UMLS.
+4. **MeSH C23 como code system propio** `mesh-c23` en vez de dentro de `mesh` (que carga
+   `seed-diseases` como claves y árbol C): evita pisarse y duplica el descriptor en dos
+   sistemas; si se prefiere uno solo, se cambia el `internal_code` y se coordina con C1.
+5. **`--glossary`** de `load-symptoms.mjs` (18 646 fenotipos HPO al glosario): activarlo
+   ahora que el cruce con Wikidata existe.
+6. **Fuentes de relaciones**: `load-disease-phenotypes.mjs` pasó a reusar los `terminology_sources`
+   `MONARCH_MONDO`, `DO_DOID` e `INSERM_ORPHANET` de `seed-diseases` (antes creaba `MONDO` y
+   `DISEASE_ONTOLOGY`): una sola fuente por organización.
+7. **Aviso a quien mantenga** `mantra-core-health-model/seedsProd/sources/mesh-2026-source-manifest.json`: NLM
+   re-publicó `desc2026.zip` con el mismo nombre (SHA-256 distinto, ver `SOURCES.md` ⁵).
 
 ## Cómo correr
 
@@ -310,11 +388,16 @@ El corpus normalizado está versionado en `tools/terminology-import/symptoms/dat
 node tools/terminology-import/symptoms/unpack-data.mjs                  # data/*.gz → glossary-data-build/symptoms (verifica SHA-256)
 node tools/terminology-import/symptoms/fetch-symptom-sources.mjs        # o desde cero: ~1 min, 510 MB, reanudable
 node tools/terminology-import/symptoms/build-symptoms-corpus.mjs        # ~25 s, sin red ni base
+node tools/terminology-import/symptoms/build-gap-sources.mjs            # Orphadata, MeSH C23, Wikidata P3841, MedGen: ~15 s, sin red ni base
 node tools/terminology-import/symptoms/pack-data.mjs                    # regenera data/ para commitear
+node tools/terminology-import/symptoms/pack-data.mjs --only relations-orphadata,terms-mesh-c23,crosswalk-wikidata-hpo,crosswalk-medgen-cui,gap-coverage.json,saturation-gaps.json   # sólo lo nuevo
 node tools/terminology-import/symptoms/load-symptoms.mjs                # dry-run: plan y conteos
 node tools/terminology-import/symptoms/load-symptoms.mjs --apply        # términos (.env DB_*); --glossary opcional
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs      # dry-run del plan de relaciones
 node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --check   # modelo + resolución, sin escribir
-node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --apply   # exige la tabla en el modelo
-node --test "tools/terminology-import/symptoms/test/*.test.mjs"         # 16 pruebas con recortes reales
+node tools/terminology-import/symptoms/load-disease-phenotypes.mjs --apply   # exige concept_relationship_evidence (v4.2.50) y los value sets de evidencia/frecuencia
+node tools/terminology-import/symptoms/load-wikidata-crosswalk.mjs --apply   # HPO ↔ Wikidata P3841
+node tools/terminology-import/symptoms/load-medgen-crosswalk.mjs --apply     # cruces por CUI (decisión 3)
+node --test "tools/terminology-import/symptoms/test/*.test.mjs"         # 27 pruebas con recortes reales
+sh tools/terminology-import/symptoms/test/disposable-db/fresh-db.sh      # Postgres desechable: DDL + patch v4250 del modelo + scaffold (ver el script)
 ```

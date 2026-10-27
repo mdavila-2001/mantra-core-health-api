@@ -3,11 +3,11 @@
 Los archivos **crudos no** están en git (~510 MB): `fetch-symptom-sources.mjs` los baja a
 `<GLOSSARY_BUILD_DIR>/symptoms-sources/` (por defecto `../glossary-data-build/`,
 hermana del repo) y escribe ahí `manifest.json` con URL, SHA-256, bytes, fecha y
-versión declarada. La tabla es la corrida del **2026-10-24**.
+versión declarada. La tabla es la corrida del **2026-10-24**; las filas de Orphadata, MeSH, Wikidata y MedGen se agregaron el **2026-10-27** (cierre de huecos, ver `docs/seed-research/symptoms.md` § Huecos). El 2026-10-27 se volvieron a bajar las 9 fuentes originales: los SHA-256 son idénticos a los de esta tabla (ninguna publicó nada nuevo).
 
 El corpus **normalizado** sí está en git, comprimido: `data/*.ndjson.gz` (20,9 MB,
 cada archivo < 10 MB; si alguno pasara de 45 MB se parte por líneas) con
-`data/MANIFEST.json` (filas y SHA-256 de cada parte y del original).
+`data/MANIFEST.json` (filas y SHA-256 de cada parte y del original). Los archivos nuevos del 2026-10-27 (`relations-orphadata`, `terms-mesh-c23`, `crosswalk-wikidata-hpo`, `crosswalk-medgen-cui`, `gap-coverage`, `saturation-gaps`) se agregaron con `pack-data.mjs --only …` sin reescribir los anteriores.
 `unpack-data.mjs` lo restaura verificando los SHA-256; `pack-data.mjs` lo
 regenera tras un build. Es contenido derivado de las fuentes de la tabla, con su
 misma licencia y atribución (HPO, Orphanet vía HPOA, Mondo, DO, SYMP, NCIt).
@@ -23,38 +23,86 @@ misma licencia y atribución (HPO, Orphanet vía HPOA, Mondo, DO, SYMP, NCIt).
 | `ncit` | [ncit.obo](https://github.com/ncit-obo-org/ncit-obo-edition/releases/download/v2026-03-19/ncit.obo) | 26.02d (2026-03-19) | 248 162 694 | `8fdc2d29c9ebd91a` | CC BY 4.0 según términos de uso de NCI EVS (el `.obo` no la declara) ³ |
 | `hpo-common-disease` | [common_disease_annot.tar.gz](https://storage.googleapis.com/data-public-monarchinitiative/hpo/common_disease_annot.tar.gz) | 2015 (Groza et al., AJHG 97:111) | 6 724 219 | `4c871573d57199cd` | HPO license ¹ (README del bucket) |
 | `monarch-hpoa-edges` | [hpoa_disease_to_phenotype_edges.tsv](https://storage.googleapis.com/data-public-monarchinitiative/monarch-kg/latest/transform_output/hpoa_disease_to_phenotype_edges.tsv) | KG 2026-10-07 | 73 917 456 | `ea89c38c162ab7d3` | sólo para medir saturación; no se carga |
+| `orphadata-en-product4` | [en_product4.xml](https://www.orphadata.com/data/xml/en_product4.xml) | 2026-06-23 (`JDBOR date`) | 47 893 357 | ver manifest | CC BY 4.0 (la declara el XML) ⁴ |
+| `orphadata-es-product4` | [es_product4.xml](https://www.orphadata.com/data/xml/es_product4.xml) | 2026-06-23 | 47 971 442 | ver manifest | CC BY 4.0 (la declara el XML) ⁴ |
+| `mesh-desc` | [desc2026.zip](https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.zip) | MeSH 2026 | 16 812 755 | `bb73dfdfe78cbfcd` ⁵ | libre con atribución a NLM e indicación de versión ⁶ |
+| `wikidata-p3841` | consulta SPARQL de `WIKIDATA_P3841_QUERY` (`lib/sources.mjs`) | consulta en vivo del 2026-10-27 | 2 094 507 | ver manifest | CC0 1.0 |
+| `medgen-mgconso` | [MGCONSO.RRF.gz](https://ftp.ncbi.nlm.nih.gov/pub/medgen/MGCONSO.RRF.gz) | sin versión declarada | 15 819 991 | ver manifest | dato público de NCBI; sólo se leen CUI y códigos de HPO, MeSH y NCIt ⁷ |
 
-¹ **HPO license** — el archivo declara `dcterms:license https://hpo.jax.org/app/license`
-y `rdfs:comment "Please see license of HPO at http://www.human-phenotype-ontology.org"`.
-La página no se pudo abrir desde el entorno de la corrida (host fuera de la lista
-permitida), así que su texto vigente **queda por verificar antes de publicar**.
-Lo que se sabe de releases anteriores, **sin verificar en esta corrida**: uso
-libre (académico y comercial) con atribución, mostrar la versión usada y la
-leyenda *«This service/product uses the Human Phenotype Ontology (version …).
-Find out more at http://www.human-phenotype-ontology.org»*, y no redistribuir
-contenido modificado como si fuera HPO. Cada concepto guarda la licencia
+¹ **HPO license** — el archivo declara `dcterms:license https://hpo.jax.org/app/license`.
+**Verificada el 2026-10-27** (texto completo en
+`docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C2/licencia-hpo-2026-10-27.txt`;
+la ruta del SPA responde HTTP 404 con el shell de la app y el texto sale del bundle
+público `chunk-BTDEGCNK.js` del sitio, componente `app-license`). Dice, textual:
+*«The HPO vocabularies, annotation files, tools and documentation are freely
+available. […] anyone can download the HPO and use the ontologies or other HPO
+files under three conditions: (1) That the Human Phenotype Ontology Consortium is
+acknowledged and cited properly. (2) That any HPO Consortium file(s) displayed
+publicly include the date(s) and/or version number(s) of the relevant HPO file(s).
+(3) That neither the content of the HPO file(s) nor the logical relationships
+embedded within the HPO file(s) be altered in any way.»* Y pide agregar a la
+presencia en línea: *«This service/product uses the Human Phenotype Ontology
+(version information). Find out more at http://www.human-phenotype-ontology.org»*
+(y el logo). **Dos puntos para el propietario:** (a) la condición 3 obliga a no
+alterar contenido ni relaciones: este importador conserva nombres, definiciones y
+jerarquía verbatim, pero la leyenda de atribución y la versión tienen que aparecer
+en el producto; (b) el *Warranty, Disclaimer, and Copyright Notice* del mismo sitio
+autoriza «personal, noncommercial use» del *contenido del sitio* y dice que el
+sitio es «for research and educational purposes»: se lee como referido a las
+páginas, no a los archivos descargables que rige la licencia de arriba, pero un
+abogado debería confirmarlo antes de publicar. Cada concepto guarda la licencia
 declarada en `source_license`.
 
 ² **Orphanet** — las filas `ORPHA:` de `phenotype.hpoa` son la integración que el
-HPO hace del producto 4 de Orphadata (fenotipos por enfermedad rara, con su
-frecuencia como término HPO). Según Orphadata —**sin verificar en esta corrida**,
-`orphadata.com` devolvió 403— sus datos se publican con CC BY 4.0 y piden citar
-*«Orphadata: Free access data from Orphanet. © INSERM 1999. Available on
-http://www.orphadata.com»*. El archivo directo `en_product4.xml` no se pudo bajar
-(403 del proxy de red) y queda como hueco documentado en
-`docs/seed-research/symptoms.md`.
+HPO hace del producto 4 de Orphadata. Desde el 2026-10-27 el producto 4 se baja
+directo (ver ⁴) y se comprobó que las dos fuentes coinciden: los 116 612 pares
+enfermedad–fenotipo distintos de Orphadata son exactamente los de HPOA (0 en uno y
+no en el otro), con las clases de frecuencia en correspondencia 1:1 con los términos
+HP:0040280–0040285 salvo 15 pares cuya frecuencia cambió entre las dos publicaciones.
 
 ³ **NCIt** — release fijada del repo oficial `ncit-obo-org` (la misma que usa
 `seed-diseases` para `ncit-disease`, así el corte contra C2991 coincide; el repo
 anterior `NCI-Thesaurus/thesaurus-obo-edition` quedó en 24.04e). `ncit.obo` no
-trae `license` en su cabecera. La licencia sale de los
-[términos de uso de NCI EVS](https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm),
-revisados en un corte anterior y registrados en
-`docs/terminology-expansion/SOURCE-REGISTER.md` (fila «NCI Thesaurus»): **CC BY 4.0**,
-atribuir a NCI con la versión, no implicar aval y no llamar «NCI Thesaurus» a un
-derivado. Por eso el code system se llama «Subconjunto de signos, síntomas y
-hallazgos clínicos de la NCIt OBO Edition». `evs.nci.nih.gov` está bloqueado
-desde este entorno: **reconfirmar** antes de publicar.
+trae `license` en su cabecera. **Reconfirmada el 2026-10-27** en los
+[términos de uso de NCI EVS](https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm)
+(HTTP 200), textual: *«The NCI Thesaurus™ is released under the Creative Commons
+Attribution 4.0 International license (CC BY 4.0). […] The name "NCI Thesaurus"
+is trademarked. Only the NCI Thesaurus™ published by the NCI can be released under
+this name.»* Por eso el code system se llama «Subconjunto de signos, síntomas y
+hallazgos clínicos de la NCIt OBO Edition» y se atribuye a NCI con la versión.
+
+⁴ **Orphadata** — `en_product4.xml` y `es_product4.xml` responden HTTP 200 el
+2026-10-27 (el 2026-10-24 daban 403 por el proxy). El XML declara en `<Licence>`:
+*«Creative Commons Attribution 4.0 International» (CC-BY-4.0)*; hay que citar
+*«Orphadata: Free access data from Orphanet. © INSERM 1999. Available on
+http://www.orphadata.com»*. El archivo en castellano trae igual los términos HPO en
+inglés; Orphanet sólo traduce el nombre de la enfermedad, su tipo y grupo, las clases
+de frecuencia y la marca de criterio diagnóstico. Esos textos se guardan tal cual en
+la cita de la evidencia (`Name_es`, `HPOFrequency_es`); no se tradujo nada.
+
+⁵ **MeSH** — el SHA-256 de `desc2026.zip` bajado hoy (`bb73dfdf…`, 16 812 755 bytes)
+**no coincide** con el del manifiesto de `mantra-core-health-model/seedsProd/sources/mesh-2026-source-manifest.json`
+(`c541855f…`, 16 812 779 bytes): NLM re-publicó el archivo con el mismo nombre. El
+XML interior es de 2026-08-12, 31 110 descriptores. Hay que avisar al dueño de ese
+manifiesto.
+
+⁶ **MeSH, términos de uso** (`terms_and_conditions_mesh.html`, revisados el
+2026-10-27; la página dice «Last Reviewed: October 4, 2018»): *«NLM freely provides
+MeSH data. Use of MeSH Translation (MTMS) files is not covered […]. Users of the
+data agree to: acknowledge NLM as the source of the data in a clear and conspicuous
+manner, not indicate or imply that NLM has endorsed its products/services/applications.
+Users who republish or redistribute the data […] agree to: maintain the most current
+version of all distributed data, or make known in a clear and conspicuous manner that
+[…] [they] do not reflect the most current/accurate data available from NLM and/or
+identify the version of MeSH being used.»* Cada concepto guarda la versión (`2026`)
+y la licencia. DeCS (MeSH en castellano, BIREME) no se usa.
+
+⁷ **MedGen** — `MGCONSO.RRF.gz` mezcla nombres de vocabularios con licencia (SNOMED CT,
+MedDRA, CPT, MEDCIN, Multum…, ver `MedGen_Sources.txt`). Sólo se leen las filas de
+SAB `HPO`, `MSH` y `NCI`, y de ellas **únicamente el CUI y el código**; ningún nombre.
+El CUI como clave ya tiene precedente aceptado en el repo (los CUI que declara NCIt y
+SYMP se cargan en `xrefs`; `seed-diseases` carga `umls` «sólo el CUI»). Si el
+propietario decide que no, se omite `load-medgen-crosswalk.mjs` y no se pierde nada más.
 
 ## Fuentes evaluadas y no cargadas
 
@@ -67,3 +115,8 @@ desde este entorno: **reconfirmar** antes de publicar.
 | `hp-es.synonyms.tsv` | GitHub | Sólo encabezado (0 sinónimos en castellano publicados). |
 | `hp-international.obo` | release HPO | Sinónimos sin etiqueta de idioma: no se puede afirmar cuáles son castellano. |
 | HPO `src/mappings/` (LDDB, MedDRA) | GitHub | © de terceros (LDDB, MedDRA/ICH): requieren licencia. |
+| CIE-11 capítulo 21 en castellano (OMS/OPS) | `icd.who.int/browse/2026-01/mms/es` responde 200 (es una app web); `id.who.int/icd/release/11/2026-01/mms` responde **401** sin token; `icdcdn.who.int` 400 | Las descargas y la API exigen cuenta/token de la OMS (no se crean cuentas). Además la licencia de la CIE-11 (CC BY-ND 3.0 IGO) **prohíbe derivados**. Hueco de acceso y de licencia. La MMS en inglés ya la carga `seed-diseases`. |
+| MedGen `MGCONSO` — filas de SNOMED CT, MedDRA, CPT, MEDCIN, Multum | NCBI FTP, 200 | © de terceros: no se leen (ver ⁷). |
+| MedGen `MedGen_HPO_Mapping.txt.gz`, `MGSTY`, `MGDEF`, `MGREL` | NCBI FTP, 200 | Se evaluaron: el cruce HPO↔CUI ya sale de `MGCONSO` (SAB `HPO`); `MGDEF` mezcla definiciones de fuentes con licencia. 0 términos nuevos. |
+| Wikidata: ítems de la clase «síntoma» sin P3841 ni P780 | consulta SPARQL, 200 | Pertenecen al glosario (`import-wikidata-relations.mjs`, otro carril); no aportan códigos HPO/MeSH. |
+| `hp-es.babelon.tsv`, traducciones con estado distinto de `OFFICIAL` | GitHub, 200 | Candidatas/sin revisar: no son nombre oficial (549 términos HPO siguen sin nombre ES). |
