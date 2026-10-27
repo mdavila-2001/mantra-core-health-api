@@ -4,9 +4,16 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   Audited,
   CurrentUser,
@@ -22,6 +29,7 @@ import {
   CreatedResourceDto,
   ResourceStatusDto,
   MyCoverageDto,
+  PatientCoverageOptionListDto,
 } from '../dto';
 
 /**
@@ -51,6 +59,26 @@ export class CoverageController {
   @ApiOperation({ summary: 'Mi cobertura' })
   listMine(@CurrentUser() actor: AuthenticatedUser): Promise<MyCoverageDto[]> {
     return this.service.listMine(actor);
+  }
+
+  /**
+   * Los seguros de una persona, para quien cobra (carril 16, REQ-16-026). Usa
+   * el `@Roles` de clase (`BILLING`, `FINANCE`; `SUPERADMIN` por el comodín),
+   * el mismo de cotizar. Cada lectura queda en la bitácora de accesos con la
+   * persona leída.
+   */
+  @Get('patient-coverages/by-patient/:patientProfileId')
+  @AccessLogged({
+    resourceType: 'PATIENT_COVERAGES',
+    patient: 'param:patientProfileId',
+  })
+  @ApiOperation({ summary: 'Seguros de una persona, para quien cobra' })
+  @ApiOkResponse({ type: PatientCoverageOptionListDto })
+  listForPatient(
+    @Param('patientProfileId', ParseUUIDPipe) patientProfileId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PatientCoverageOptionListDto> {
+    return this.service.listForPatient(patientProfileId, actor);
   }
 
   /** UC-26-02. */
