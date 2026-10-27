@@ -216,27 +216,26 @@ describe('ReverseGeocodingService', () => {
     expect(http).toHaveBeenCalledTimes(config.maxQueued + 1);
   });
 
-  it('inválido: un punto fuera de Bolivia no pasa la validación del cuerpo', () => {
-    const madrid = plainToInstance(ReverseGeocodingRequestDto, {
-      latitude: 40.41,
-      longitude: -3.7,
-    });
-    const scz = plainToInstance(ReverseGeocodingRequestDto, {
-      latitude: SCZ.lat,
-      longitude: SCZ.lng,
-    });
-    const texto = plainToInstance(ReverseGeocodingRequestDto, {
-      latitude: '-17',
-      longitude: '-63',
-    });
-
-    expect(
-      validateSync(madrid)
+  it('correcto/límite/inválido: el cuerpo acepta cualquier punto del planeta y nada más', () => {
+    const valida = (cuerpo: object) =>
+      validateSync(plainToInstance(ReverseGeocodingRequestDto, cuerpo))
         .map((e) => e.property)
-        .sort(),
-    ).toEqual(['latitude', 'longitude']);
-    expect(validateSync(scz)).toHaveLength(0);
-    expect(validateSync(texto).length).toBeGreaterThan(0);
+        .sort();
+
+    // Correcto: Bolivia y el exterior (antes Madrid daba 400).
+    expect(valida({ latitude: SCZ.lat, longitude: SCZ.lng })).toEqual([]);
+    expect(valida({ latitude: 40.41, longitude: -3.7 })).toEqual([]);
+    // Límite: los bordes exactos del planeta.
+    expect(valida({ latitude: -90, longitude: 180 })).toEqual([]);
+    expect(valida({ latitude: 90, longitude: -180 })).toEqual([]);
+    // Inválido: fuera del planeta o texto.
+    expect(valida({ latitude: 90.1, longitude: -180.1 })).toEqual([
+      'latitude',
+      'longitude',
+    ]);
+    expect(
+      valida({ latitude: '-17', longitude: '-63' }).length,
+    ).toBeGreaterThan(0);
   });
 
   describe('respaldo (Photon) cuando Nominatim falla', () => {
