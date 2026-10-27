@@ -72,6 +72,7 @@ describe('ReverseGeocodingService', () => {
       houseNumber: '3861',
       neighbourhood: 'Equipetrol',
       city: 'Santa Cruz de la Sierra',
+      adminAreas: { level3: 'Santa Cruz de la Sierra', district: 'Equipetrol' },
       attribution: OSM_ATTRIBUTION,
     });
     const [url, params, headers] = http.mock.calls[0] as unknown as [
@@ -108,7 +109,59 @@ describe('ReverseGeocodingService', () => {
       found: true,
       line: 'Calle 24 de Septiembre, Bartos',
       city: 'Santa Cruz de la Sierra',
+      countryCode: 'BO',
+      adminAreas: {
+        level1: 'Santa Cruz',
+        level2: 'Provincia Andrés Ibáñez',
+        level3: 'Santa Cruz de la Sierra',
+        district: 'Centro',
+      },
     });
+  });
+
+  it('correcto: otro país usa los mismos niveles (Argentina: provincia, departamento, ciudad, barrio)', () => {
+    // Forma de la respuesta de Nominatim para Córdoba (AR); valores sintéticos.
+    expect(
+      toResult({
+        address: {
+          road: 'Avenida Colón',
+          house_number: '500',
+          suburb: 'Centro',
+          city: 'Córdoba',
+          state_district: 'Departamento Capital',
+          state: 'Córdoba',
+          country_code: 'ar',
+        },
+      }),
+    ).toMatchObject({
+      found: true,
+      countryCode: 'AR',
+      adminAreas: {
+        level1: 'Córdoba',
+        level2: 'Departamento Capital',
+        level3: 'Córdoba',
+        district: 'Centro',
+      },
+    });
+  });
+
+  it('límite: un país que sólo informa región y pueblo deja vacíos los niveles que no conoce', () => {
+    expect(
+      toResult({
+        address: {
+          road: 'Jirón Lima',
+          region: 'Cusco',
+          town: 'Urubamba',
+          country_code: 'pe',
+        },
+      }),
+    ).toMatchObject({
+      countryCode: 'PE',
+      adminAreas: { level1: 'Cusco', level3: 'Urubamba' },
+    });
+    expect(
+      toResult({ address: { road: 'Calle 1', state: '  ' } }).adminAreas,
+    ).toBeUndefined();
   });
 
   it('límite: sin número de casa, la línea es la calle y el barrio', async () => {
@@ -125,6 +178,7 @@ describe('ReverseGeocodingService', () => {
     expect(await service.reverse(-11.03, -68.76)).toEqual({
       found: false,
       city: 'Cobija',
+      adminAreas: { level3: 'Cobija' },
       attribution: OSM_ATTRIBUTION,
     });
   });
@@ -261,6 +315,7 @@ describe('ReverseGeocodingService', () => {
       const r = await service.reverse(SCZ.lat, SCZ.lng);
 
       expect(r.line).toBe('Calle 24 de Septiembre 12, Centro');
+      expect(r.adminAreas?.district).toBe('Centro');
       expect(http).toHaveBeenCalledTimes(2);
     });
 

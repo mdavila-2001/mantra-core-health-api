@@ -18,8 +18,29 @@ export interface ReverseGeocodingResult {
   readonly houseNumber?: string;
   readonly neighbourhood?: string;
   readonly city?: string;
+  /**
+   * El país del punto, en ISO 3166-1 alfa-2 y mayúsculas («BO», «AR»). Es lo
+   * que decide si el punto cae en un país donde se opera; el recuadro de
+   * Bolivia era un atajo que no sirve para un segundo país.
+   */
+  readonly countryCode?: string;
+  /**
+   * Las divisiones administrativas del punto, de la mayor a la menor, con el
+   * nombre que da OpenStreetMap. Los niveles son los de cualquier país y no
+   * los de Bolivia: 1 = departamento / estado / región, 2 = provincia /
+   * condado, 3 = municipio / ciudad, y el distrito o zona dentro de él.
+   */
+  readonly adminAreas?: AdminAreas;
   /** La atribución que exige la licencia ODbL de OpenStreetMap. */
   readonly attribution: string;
+}
+
+/** Ver {@link ReverseGeocodingResult.adminAreas}. Cada nivel, si el proveedor lo conoce. */
+export interface AdminAreas {
+  readonly level1?: string;
+  readonly level2?: string;
+  readonly level3?: string;
+  readonly district?: string;
 }
 
 /** Configuración, desde el entorno; todo tiene un valor por defecto seguro. */
@@ -261,10 +282,20 @@ export function toResult(respuesta: NominatimReverse): ReverseGeocodingResult {
   const neighbourhood =
     a.neighbourhood ?? a.suburb ?? a.quarter ?? a.city_district;
   const city = a.city ?? a.town ?? a.village ?? a.municipality;
+  const ubicacion = {
+    ...(a.country_code ? { countryCode: a.country_code.toUpperCase() } : {}),
+    ...adminAreasOf(a),
+  };
 
   const calle = [road, houseNumber].filter(Boolean).join(' ');
   const line = [calle, neighbourhood].filter(Boolean).join(', ');
-  if (line === '') return { found: false, city, attribution: OSM_ATTRIBUTION };
+  if (line === '')
+    return {
+      found: false,
+      ...(city ? { city } : {}),
+      ...ubicacion,
+      attribution: OSM_ATTRIBUTION,
+    };
 
   return {
     found: true,
@@ -273,8 +304,39 @@ export function toResult(respuesta: NominatimReverse): ReverseGeocodingResult {
     ...(houseNumber ? { houseNumber } : {}),
     ...(neighbourhood ? { neighbourhood } : {}),
     ...(city ? { city } : {}),
+    ...ubicacion,
     attribution: OSM_ATTRIBUTION,
   };
+}
+
+/**
+ * Los niveles administrativos, a partir de las claves de OpenStreetMap, que
+ * son las mismas en todos los países aunque cada uno las llene distinto:
+ * Bolivia usa `state` (departamento), `county` (provincia) y `city` o
+ * `municipality`; otros países usan `region`, `state_district`, `town`… Se
+ * toma la primera que exista en cada nivel; un nivel desconocido no se inventa.
+ */
+function adminAreasOf(a: Readonly<Record<string, string | undefined>>): {
+  adminAreas?: AdminAreas;
+} {
+  const niveles: AdminAreas = {
+    ...pick('level1', a.state ?? a.region ?? a.province),
+    ...pick('level2', a.county ?? a.state_district),
+    ...pick(
+      'level3',
+      a.municipality ?? a.city ?? a.town ?? a.village ?? a.hamlet,
+    ),
+    ...pick('district', a.city_district ?? a.suburb ?? a.borough ?? a.quarter),
+  };
+  return Object.keys(niveles).length > 0 ? { adminAreas: niveles } : {};
+}
+
+function pick<K extends keyof AdminAreas>(
+  clave: K,
+  valor: string | undefined,
+): Partial<Record<K, string>> {
+  const limpio = valor?.trim();
+  return limpio ? ({ [clave]: limpio } as Partial<Record<K, string>>) : {};
 }
 
 /**
@@ -293,6 +355,10 @@ export function photonToResult(
       house_number: p.housenumber,
       neighbourhood: p.district ?? p.locality,
       city: p.city ?? p.county,
+      country_code: p.countrycode,
+      state: p.state,
+      county: p.county,
+      city_district: p.district,
     },
   });
 }
