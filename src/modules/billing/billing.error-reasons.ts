@@ -90,6 +90,12 @@ export enum BillingErrorReason {
   /** El servicio del catálogo referenciado no existe (actualización). */
   SERVICE_CATALOG_ITEM_NOT_FOUND = 'SERVICE_CATALOG_ITEM_NOT_FOUND',
 
+  /** El alta de un servicio no indicó el concepto del repositorio: no hay alta de texto libre. */
+  SERVICE_CATALOG_CONCEPT_REQUIRED = 'SERVICE_CATALOG_CONCEPT_REQUIRED',
+
+  /** El concepto pedido no pertenece al repositorio de servicios importables. */
+  SERVICE_CATALOG_CONCEPT_NOT_IN_REPOSITORY = 'SERVICE_CATALOG_CONCEPT_NOT_IN_REPOSITORY',
+
   /** El servicio del catálogo no existe o no es visible para el tenant/práctica del actor. */
   SERVICE_CATALOG_ITEM_NOT_VISIBLE = 'SERVICE_CATALOG_ITEM_NOT_VISIBLE',
 

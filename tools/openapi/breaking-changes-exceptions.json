@@ -158,5 +158,10 @@
     "id": "changed_type:PUT /practitioners/me/sites/{siteId}/contact-phone:request.contactPhone: object -> string",
     "reason": "Corrección del contrato, no del comportamiento: contactPhone es string | null y el DTO ya lo valida con @IsString(); la reflexión de TypeScript lo emitía como object porque faltaba type: String en @ApiProperty.",
     "migrationNote": "Ninguna para clientes que ya funcionaban: un valor que no fuera texto o null ya era rechazado con 400. Los clientes generados desde el contrato deben regenerarse para tipar el campo como string."
+  },
+  {
+    "id": "new_required_request_field:POST /billing/service-catalog:serviceConceptId",
+    "reason": "Pedido de producto 2026-10-27: no se permite dar de alta servicios de texto libre (rompe la catalogación). Todo servicio sale del repositorio de servicios.",
+    "migrationNote": "Buscar el servicio en GET /billing/service-catalog/repository y mandar su conceptId como serviceConceptId (o usar POST /billing/service-catalog/import en lote). code y name pasan a ser ignorados: los pone el repositorio."
   }
 ]

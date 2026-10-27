@@ -22405,8 +22405,9 @@ paths:
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
     post:
       description: >-
-        La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en su consultorio
-        propio.
+        Exige serviceConceptId de un servicio del repositorio: no hay alta de texto libre. Código y nombre salen del
+        repositorio. La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en
+        su consultorio propio.
       operationId: BillingServiceCatalogController_create
       parameters: []
       requestBody:
@@ -22436,7 +22437,7 @@ paths:
           $ref: '#/components/responses/InternalError'
       security:
         - bearer: []
-      summary: Dar de alta un servicio en el catálogo maestro
+      summary: Dar de alta en el catálogo un servicio del repositorio
       tags:
         - billing-service-catalog
   /billing/service-catalog/{id}:
@@ -22557,6 +22558,127 @@ paths:
       description: >-
         Listar el nomenclador de procedimientos (arancel de referencia). Requiere JWT y los roles o alcances declarados
         por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/service-catalog/repository:
+    get:
+      operationId: BillingServiceCatalogController_searchRepository
+      parameters:
+        - name: q
+          required: false
+          in: query
+          description: Texto a buscar
+          schema:
+            type: string
+        - name: specialtyConceptId
+          required: false
+          in: query
+          description: Especialidad (uuid del concepto)
+          schema:
+            type: string
+        - name: codeSystem
+          required: false
+          in: query
+          description: 'Fuente: código del sistema de códigos'
+          schema:
+            type: string
+        - name: practiceId
+          required: false
+          in: query
+          description: Práctica, para marcar lo ya importado
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Buscar en el repositorio de servicios (para importar)
+      tags:
+        - billing-service-catalog
+      description: >-
+        Buscar en el repositorio de servicios (para importar). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/service-catalog/repository/facets:
+    get:
+      operationId: BillingServiceCatalogController_repositoryFacets
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Fuentes y especialidades del repositorio de servicios
+      tags:
+        - billing-service-catalog
+      description: >-
+        Fuentes y especialidades del repositorio de servicios. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/service-catalog/import:
+    post:
+      operationId: BillingServiceCatalogController_importServices
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportServicesDto'
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Importar servicios del repositorio a mi catálogo
+      tags:
+        - billing-service-catalog
+      description: >-
+        Importar servicios del repositorio a mi catálogo. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /billing/simulated/status:
     get:
       operationId: BillingSimulatedController_status
@@ -75523,10 +75645,12 @@ components:
           format: uuid
         code:
           type: string
-          description: Código interno del servicio
+          description: 'Obsoleto e ignorado: el código lo pone el repositorio'
+          deprecated: true
         name:
           type: string
-          description: Nombre del servicio
+          description: 'Obsoleto e ignorado: el nombre lo pone el repositorio'
+          deprecated: true
         descriptionText:
           type: string
           description: Descripción larga del servicio, para la tarjeta
@@ -75536,7 +75660,7 @@ components:
           format: uuid
         serviceConceptId:
           type: string
-          description: Concepto de clasificación del servicio
+          description: Concepto del repositorio de servicios (obligatorio). Buscarlo en GET /billing/service-catalog/repository
           format: uuid
         defaultPrice:
           type: string
@@ -75559,8 +75683,7 @@ components:
           description: Si queda disponible para cotizar; por defecto true
       required:
         - practiceId
-        - code
-        - name
+        - serviceConceptId
         - defaultPrice
       additionalProperties: false
     UpdateServiceCatalogItemDto:
@@ -75580,6 +75703,36 @@ components:
         isActive:
           type: boolean
           description: Si el servicio sigue disponible para cotizar
+      additionalProperties: false
+    ImportServiceItemDto:
+      type: object
+      properties:
+        conceptId:
+          type: string
+          format: uuid
+        defaultPrice:
+          type: string
+          example: '250.00'
+        currencyConceptId:
+          type: string
+          format: uuid
+      required:
+        - conceptId
+        - defaultPrice
+      additionalProperties: false
+    ImportServicesDto:
+      type: object
+      properties:
+        practiceId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportServiceItemDto'
+      required:
+        - practiceId
+        - items
       additionalProperties: false
     SimulatedRegisterPaymentDto:
       type: object

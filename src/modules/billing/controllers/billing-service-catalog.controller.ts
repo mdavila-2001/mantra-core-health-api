@@ -26,9 +26,14 @@ import {
 import {
   BillingServiceCatalogService,
   ProcedureNomenclatureService,
+  ServiceRepositoryService,
 } from '../services';
 import {
   CreateServiceCatalogItemDto,
+  ImportServicesDto,
+  ImportServicesResponseDto,
+  ServiceRepositoryFacetsResponseDto,
+  ServiceRepositorySearchResponseDto,
   ProcedureNomenclatureResponseDto,
   ProcedureSpecialtiesResponseDto,
   SearchServiceCatalogResponseDto,
@@ -58,6 +63,7 @@ export class BillingServiceCatalogController {
   constructor(
     private readonly serviceCatalogService: BillingServiceCatalogService,
     private readonly nomenclature: ProcedureNomenclatureService,
+    private readonly repository: ServiceRepositoryService,
   ) {}
 
   /**
@@ -135,9 +141,9 @@ export class BillingServiceCatalogController {
   @Roles('SECURITY_ADMIN', 'PRACTITIONER', 'CLINICIAN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Dar de alta un servicio en el catálogo maestro',
+    summary: 'Dar de alta en el catálogo un servicio del repositorio',
     description:
-      'La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en su consultorio propio.',
+      'Exige serviceConceptId de un servicio del repositorio: no hay alta de texto libre. Código y nombre salen del repositorio. La administración lo da de alta en cualquier práctica de su organización; un profesional, sólo en su consultorio propio.',
   })
   create(
     @Body() dto: CreateServiceCatalogItemDto,
@@ -241,5 +247,103 @@ export class BillingServiceCatalogController {
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<ProcedureNomenclatureResponseDto> {
     return this.nomenclature.search({ specialty, query, cursor, limit });
+  }
+
+  /**
+   * Busca en el repositorio de servicios importables (todas las fuentes).
+   *
+   * Sin `@Roles`, como el nomenclador: es referencia pública y la necesita
+   * cualquiera que arme su catálogo. Lo que exige permiso es importar.
+   *
+   * @param query - Texto libre; cada palabra debe aparecer (sin acentos).
+   * @param specialtyConceptId - Especialidad (`VS_MEDICAL_SPECIALTY`).
+   * @param codeSystem - Fuente (`cups`, `fonasa-mle-2026`, …).
+   * @param practiceId - Si viene, marca lo que esa práctica ya importó.
+   * @param cursor - Cursor opaco de la página anterior.
+   * @param limit - Entradas por página (tope 100).
+   * @returns La página de servicios.
+   */
+  @Get('repository')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Buscar en el repositorio de servicios (para importar)',
+  })
+  @ApiQuery({ name: 'q', required: false, description: 'Texto a buscar' })
+  @ApiQuery({
+    name: 'specialtyConceptId',
+    required: false,
+    description: 'Especialidad (uuid del concepto)',
+  })
+  @ApiQuery({
+    name: 'codeSystem',
+    required: false,
+    description: 'Fuente: código del sistema de códigos',
+  })
+  @ApiQuery({
+    name: 'practiceId',
+    required: false,
+    description: 'Práctica, para marcar lo ya importado',
+  })
+  @ApiQuery({ name: 'cursor', required: false })
+  @ApiQuery({ name: 'limit', required: false })
+  searchRepository(
+    @Query('q') query?: string,
+    @Query('specialtyConceptId', new ParseUUIDPipe({ optional: true }))
+    specialtyConceptId?: string,
+    @Query('codeSystem') codeSystem?: string,
+    @Query('practiceId', new ParseUUIDPipe({ optional: true }))
+    practiceId?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit', new ParseOptionalLimitPipe(100)) limit?: number,
+  ): Promise<ServiceRepositorySearchResponseDto> {
+    return this.repository.search({
+      query,
+      specialtyConceptId,
+      codeSystem,
+      practiceId,
+      cursor,
+      limit,
+    });
+  }
+
+  /**
+   * Fuentes y especialidades del repositorio con su recuento, para los filtros.
+   *
+   * @returns Total y facetas.
+   */
+  @Get('repository/facets')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Fuentes y especialidades del repositorio de servicios',
+  })
+  repositoryFacets(): Promise<ServiceRepositoryFacetsResponseDto> {
+    return this.repository.facets();
+  }
+
+  /**
+   * Importa servicios del repositorio al catálogo de una práctica.
+   *
+   * Mismos roles y alcance que el alta. Idempotente por concepto.
+   *
+   * @param dto - Práctica y servicios con su precio.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Un resultado por servicio.
+   */
+  @Audited({
+    action: 'BILLING_SERVICES_IMPORTED',
+    entity: 'service_catalog',
+    entityId: 'body.practiceId',
+  })
+  @Post('import')
+  @Roles('SECURITY_ADMIN', 'PRACTITIONER', 'CLINICIAN')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Importar servicios del repositorio a mi catálogo',
+  })
+  importServices(
+    @Body() dto: ImportServicesDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ImportServicesResponseDto> {
+    return this.serviceCatalogService.importServices(dto, actor);
   }
 }

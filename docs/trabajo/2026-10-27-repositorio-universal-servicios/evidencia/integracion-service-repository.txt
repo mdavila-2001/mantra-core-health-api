@@ -1,0 +1,2 @@
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total

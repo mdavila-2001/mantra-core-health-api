@@ -11,6 +11,7 @@ import { BillingServiceCatalogService } from './billing-service-catalog.service'
 import {
   CONCEPTS,
   ConflictException,
+  PreconditionFailedException,
   ResourceNotFoundException,
   encodeKeysetCursor,
   runWithTenant,
@@ -34,6 +35,7 @@ function build() {
   const tx = {
     flush: mockFn().mockResolvedValue(undefined),
     find: mockFn().mockResolvedValue([]),
+    findOne: mockFn().mockResolvedValue(null),
   };
   const em = {
     fork: mockFn().mockReturnValue({}),
@@ -59,6 +61,15 @@ function build() {
   };
   const assignmentsRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  // El repositorio de servicios: por omisión sólo conoce `concept-1`.
+  const serviceRepository = {
+    resolveImportable: mockFn(async (ids: string[]) => {
+      const known = new Map(Object.entries(REPOSITORY));
+      return new Map(
+        ids.filter((id) => known.has(id)).map((id) => [id, known.get(id)]),
+      );
+    }),
+  };
   const service = new BillingServiceCatalogService(
     em as any,
     serviceCatalogRepo as any,
@@ -66,11 +77,13 @@ function build() {
     templatesRepo as any,
     assignmentsRepo as any,
     logger as any,
+    serviceRepository as any,
   );
   return {
     service,
     tx,
     em,
+    serviceRepository,
     serviceCatalogRepo,
     practiceTenantLookup,
     templatesRepo,
@@ -78,6 +91,22 @@ function build() {
     logger,
   };
 }
+
+/** Conceptos que el doble del repositorio reconoce como importables. */
+const REPOSITORY: Record<string, any> = {
+  'concept-1': {
+    id: 'concept-1',
+    code: 'CONS-01',
+    display: 'Consulta general',
+    code_system: null,
+  },
+  'concept-eco': {
+    id: 'concept-eco',
+    code: '881234',
+    display: 'Ecocardiograma transtorácico',
+    code_system: 'cups',
+  },
+};
 
 /** Una fila editable del catálogo, con los campos que el servicio toca. */
 function catalogRow(overrides: Record<string, unknown> = {}) {
@@ -168,6 +197,7 @@ describe('BillingServiceCatalogService', () => {
           code: 'CONS-01',
           name: 'Consulta general',
           defaultPrice: '100.00',
+          serviceConceptId: 'concept-1',
         },
         actor,
       );
@@ -191,6 +221,7 @@ describe('BillingServiceCatalogService', () => {
         code: 'NEBU-01',
         name: 'Nebulización',
         defaultPrice: '80.00',
+        serviceConceptId: 'concept-1',
       };
 
       it('un profesional da de alta un servicio en su consultorio propio', async () => {
@@ -267,6 +298,7 @@ describe('BillingServiceCatalogService', () => {
               code: 'CONS-01',
               name: 'Consulta general',
               defaultPrice: '100.00',
+              serviceConceptId: 'concept-1',
             },
             doctor,
           ),
@@ -320,6 +352,7 @@ describe('BillingServiceCatalogService', () => {
               code: 'CONS-01',
               name: 'Consulta general',
               defaultPrice: '100.00',
+              serviceConceptId: 'concept-1',
             },
             actor,
           ),
@@ -343,6 +376,7 @@ describe('BillingServiceCatalogService', () => {
             code: 'CONS-01',
             name: 'Consulta general',
             defaultPrice: '100.00',
+            serviceConceptId: 'concept-1',
           },
           actor,
         );
@@ -364,11 +398,187 @@ describe('BillingServiceCatalogService', () => {
             code: 'CONS-01',
             name: 'Consulta general',
             defaultPrice: '100.00',
+            serviceConceptId: 'concept-1',
           },
           actor,
         ),
       ).rejects.toBeInstanceOf(ConflictException);
       expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * El catálogo ya no admite texto libre: todo servicio sale del repositorio.
+   * Es el pedido explícito («no se debe permitir crearlo porque se hace un caos
+   * la catalogación»), así que se prueba la puerta cerrada y no sólo la abierta.
+   */
+  describe('alta sólo desde el repositorio', () => {
+    it('sin serviceConceptId responde 422 con su motivo y no crea nada', async () => {
+      const d = build();
+
+      const err = await d.service
+        .create(
+          {
+            practiceId: 'pr1',
+            name: 'Mi servicio inventado',
+            defaultPrice: '10.00',
+          },
+          actor,
+        )
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect((err as PreconditionFailedException).reason).toBe(
+        'SERVICE_CATALOG_CONCEPT_REQUIRED',
+      );
+      expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('con un concepto que no es del repositorio responde 422 y no crea nada', async () => {
+      const d = build();
+
+      const err = await d.service
+        .create(
+          {
+            practiceId: 'pr1',
+            serviceConceptId: 'concept-ajeno',
+            defaultPrice: '10.00',
+          },
+          actor,
+        )
+        .catch((e: unknown) => e);
+
+      expect((err as PreconditionFailedException).reason).toBe(
+        'SERVICE_CATALOG_CONCEPT_NOT_IN_REPOSITORY',
+      );
+      expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el nombre y el código los pone el repositorio, no el cuerpo', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+      d.serviceCatalogRepo.create.mockReturnValue(item);
+
+      await d.service.create(
+        {
+          practiceId: 'pr1',
+          code: 'LO-QUE-SEA',
+          name: 'eco cardio',
+          serviceConceptId: 'concept-eco',
+          defaultPrice: '300.00',
+        },
+        actor,
+      );
+
+      expect(d.serviceCatalogRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          code: 'cups:881234',
+          name: 'Ecocardiograma transtorácico',
+          serviceConceptId: 'concept-eco',
+          currencyConceptId: CONCEPTS.CURRENCY_BOB,
+        }),
+      );
+    });
+  });
+
+  describe('importServices', () => {
+    const created = (id: string) => ({ ...item, id });
+
+    it('importa lo nuevo y devuelve lo que ya estaba sin duplicarlo', async () => {
+      const d = build();
+      // `concept-1` ya está enlazado en la práctica; `concept-eco` no.
+      d.tx.findOne.mockImplementation(async (_e: unknown, where: any) =>
+        where.serviceConceptId === 'concept-1' ? { id: 'ya-estaba' } : null,
+      );
+      d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+      d.serviceCatalogRepo.create.mockReturnValue(created('nuevo'));
+
+      const res = await d.service.importServices(
+        {
+          practiceId: 'pr1',
+          items: [
+            { conceptId: 'concept-1', defaultPrice: '100.00' },
+            { conceptId: 'concept-eco', defaultPrice: '300.00' },
+          ],
+        },
+        actor,
+      );
+
+      expect(res.items).toEqual([
+        {
+          conceptId: 'concept-1',
+          outcome: 'ALREADY_IMPORTED',
+          serviceCatalogId: 'ya-estaba',
+        },
+        {
+          conceptId: 'concept-eco',
+          outcome: 'CREATED',
+          serviceCatalogId: 'nuevo',
+        },
+      ]);
+      expect(d.serviceCatalogRepo.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('el mismo concepto dos veces en el lote nace una sola vez', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findByCode.mockResolvedValue(null);
+      d.serviceCatalogRepo.create.mockReturnValue(created('nuevo'));
+
+      const res = await d.service.importServices(
+        {
+          practiceId: 'pr1',
+          items: [
+            { conceptId: 'concept-eco', defaultPrice: '300.00' },
+            { conceptId: 'concept-eco', defaultPrice: '350.00' },
+          ],
+        },
+        actor,
+      );
+
+      expect(res.items.map((i) => i.outcome)).toEqual([
+        'CREATED',
+        'ALREADY_IMPORTED',
+      ]);
+      expect(d.serviceCatalogRepo.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('si uno no es del repositorio no entra ninguno, y dice cuál', async () => {
+      const d = build();
+
+      const err = await d.service
+        .importServices(
+          {
+            practiceId: 'pr1',
+            items: [
+              { conceptId: 'concept-eco', defaultPrice: '300.00' },
+              { conceptId: 'inventado', defaultPrice: '1.00' },
+            ],
+          },
+          actor,
+        )
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect((err as PreconditionFailedException).details).toEqual({
+        conceptIds: ['inventado'],
+      });
+      expect(d.em.transactional).not.toHaveBeenCalled();
+    });
+
+    it('en una organización ajena responde 404 antes de mirar el repositorio', async () => {
+      const d = build();
+
+      await expect(
+        d.service.importServices(
+          {
+            practiceId: 'pr1',
+            items: [{ conceptId: 'concept-eco', defaultPrice: '1.00' }],
+          },
+          doctor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.serviceRepository.resolveImportable).not.toHaveBeenCalled();
     });
   });
 

@@ -16,13 +16,19 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const serviceCatalogService = { search: mockFn(), create: mockFn() };
+  const serviceCatalogService = {
+    search: mockFn(),
+    create: mockFn(),
+    importServices: mockFn(),
+  };
   const nomenclature = { listSpecialties: mockFn(), search: mockFn() };
+  const repository = { search: mockFn(), facets: mockFn() };
   const controller = new BillingServiceCatalogController(
     serviceCatalogService as any,
     nomenclature as any,
+    repository as any,
   );
-  return { controller, serviceCatalogService, nomenclature };
+  return { controller, serviceCatalogService, nomenclature, repository };
 }
 
 describe('BillingServiceCatalogController', () => {
@@ -102,5 +108,37 @@ describe('BillingServiceCatalogController', () => {
     await d.controller.listProcedureSpecialties();
 
     expect(d.nomenclature.listSpecialties).toHaveBeenCalledTimes(1);
+  });
+
+  it('delegates the repository search with every filter', async () => {
+    const d = build();
+    d.repository.search.mockResolvedValue({ items: [], nextCursor: null });
+
+    await d.controller.searchRepository('eco', 'sp-1', 'cups', 'pr1', 'c', 10);
+
+    expect(d.repository.search).toHaveBeenCalledWith({
+      query: 'eco',
+      specialtyConceptId: 'sp-1',
+      codeSystem: 'cups',
+      practiceId: 'pr1',
+      cursor: 'c',
+      limit: 10,
+    });
+  });
+
+  it('delegates the import to the catalog service with the actor', async () => {
+    const d = build();
+    const dto = {
+      practiceId: 'pr1',
+      items: [{ conceptId: 'c1', defaultPrice: '1.00' }],
+    };
+    d.serviceCatalogService.importServices.mockResolvedValue({ items: [] });
+
+    await d.controller.importServices(dto, actor);
+
+    expect(d.serviceCatalogService.importServices).toHaveBeenCalledWith(
+      dto,
+      actor,
+    );
   });
 });

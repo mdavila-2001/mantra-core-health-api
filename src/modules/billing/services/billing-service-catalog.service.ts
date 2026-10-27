@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   CONCEPT_DEFS,
   ConflictException,
+  PreconditionFailedException,
   ResourceNotFoundException,
   decodeKeysetCursor,
   encodeKeysetCursor,
@@ -22,14 +23,22 @@ import {
   TemplatesRepository,
 } from '../../surveys/repositories';
 import { SURVEYS } from '../../surveys/surveys.concepts';
+import { ServiceCatalog as ServiceCatalogEntity } from '../entities';
 import type { ServiceCatalog } from '../entities';
 import { ServiceCatalogRepository } from '../repositories';
 import {
   CreateServiceCatalogItemDto,
+  ImportServicesDto,
+  ImportServicesResponseDto,
   SearchServiceCatalogResponseDto,
   ServiceCatalogItemDto,
   UpdateServiceCatalogItemDto,
 } from '../dto';
+import {
+  ServiceRepositoryService,
+  importedServiceCode,
+  type ImportableConcept,
+} from './service-repository.service';
 
 /** Plazo por defecto para responder la encuesta de satisfacción que se auto-crea (FT-31). */
 const DEFAULT_SURVEY_RESPONSE_WINDOW_DAYS = 30;
@@ -71,6 +80,7 @@ export class BillingServiceCatalogService {
     private readonly templatesRepo: TemplatesRepository,
     private readonly assignmentsRepo: AssignmentsRepository,
     private readonly logger: PinoLogger,
+    private readonly serviceRepository: ServiceRepositoryService,
   ) {
     this.logger.setContext(BillingServiceCatalogService.name);
   }
@@ -129,12 +139,19 @@ export class BillingServiceCatalogService {
   }
 
   /**
-   * Crea un servicio nuevo en el catálogo maestro.
+   * Da de alta en el catálogo un servicio **del repositorio**.
+   *
+   * Ya no hay alta de texto libre: el servicio tiene que ser un concepto del
+   * repositorio (`ServiceRepositoryService`), y el código y el nombre salen de
+   * él. Si cada práctica inventara el suyo, el catálogo dejaría de servir para
+   * comparar, cotizar o reportar. `code` y `name` del cuerpo se aceptan por
+   * compatibilidad y se ignoran.
    *
    * @param dto - Datos validados de la operación.
    * @param actor - Usuario autenticado que ejecuta la operación.
    * @returns Servicio recién creado.
-   * @throws ConflictException si ya existe un servicio con ese código en la práctica.
+   * @throws PreconditionFailedException si falta el concepto o no es del repositorio.
+   * @throws ConflictException si la práctica ya tiene ese servicio.
    */
   async create(
     dto: CreateServiceCatalogItemDto,
@@ -144,53 +161,200 @@ export class BillingServiceCatalogService {
       {
         operation: 'billing.service-catalog.create',
         practiceId: dto.practiceId,
-        code: dto.code,
+        serviceConceptId: dto.serviceConceptId,
         actorId: actor.id,
       },
       'Creating service catalog item',
     );
-    await this.assertRegistrationCanRegister(actor, dto.practiceId);
-    return this.em.transactional(async (tx) => {
-      const clash = await this.serviceCatalogRepo.findByCode(
-        tx,
-        dto.practiceId,
-        dto.code,
+    if (!dto.serviceConceptId) {
+      throw new PreconditionFailedException(
+        'El servicio se elige del repositorio: indicá serviceConceptId',
+        {},
+        BillingErrorReason.SERVICE_CATALOG_CONCEPT_REQUIRED,
       );
-      if (clash) {
+    }
+    await this.assertRegistrationCanRegister(actor, dto.practiceId);
+    const concept = await this.requireImportable(dto.serviceConceptId);
+
+    return this.em.transactional(async (tx) => {
+      const existing = await this.findImported(tx, dto.practiceId, concept);
+      if (existing) {
         throw new ConflictException(
-          'Ya existe un servicio con ese código en el catálogo',
-          { code: dto.code },
+          'Ese servicio ya está en el catálogo',
+          { serviceCatalogId: existing.id },
           BillingErrorReason.SERVICE_CATALOG_CODE_ALREADY_EXISTS,
         );
       }
-
-      const item = this.serviceCatalogRepo.create(tx, {
+      const item = await this.insertFromConcept(tx, actor, concept, {
         practiceId: dto.practiceId,
-        code: dto.code,
-        name: dto.name,
-        descriptionText: dto.descriptionText,
-        imageFileId: dto.imageFileId,
-        serviceConceptId: dto.serviceConceptId,
         defaultPrice: dto.defaultPrice,
         currencyConceptId: dto.currencyConceptId,
+        descriptionText: dto.descriptionText,
+        imageFileId: dto.imageFileId,
         taxCodeId: dto.taxCodeId,
         incomeAccountId: dto.incomeAccountId,
-        isActive: dto.isActive ?? true,
-        actorUserId: actor.id,
+        isActive: dto.isActive,
       });
-      await tx.flush();
-
-      await this.attachDefaultSatisfactionSurvey(tx, item, actor);
-
-      this.logger.info(
-        {
-          operation: 'billing.service-catalog.create',
-          serviceCatalogId: item.id,
-        },
-        'Service catalog item created',
-      );
       return toItemDto(item);
     });
+  }
+
+  /**
+   * Importa en lote servicios del repositorio al catálogo de una práctica.
+   *
+   * Idempotente por concepto: lo que la práctica ya tenía vuelve como
+   * `ALREADY_IMPORTED` con su id, sin duplicarse ni cambiarle el precio. Todo
+   * el lote entra en una transacción: si un concepto no es del repositorio no
+   * entra ninguno, y la respuesta dice cuáles fallaron.
+   *
+   * @param dto - Práctica y servicios con su precio.
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Un resultado por servicio, en el orden pedido.
+   */
+  async importServices(
+    dto: ImportServicesDto,
+    actor: AuthenticatedUser,
+  ): Promise<ImportServicesResponseDto> {
+    this.logger.info(
+      {
+        operation: 'billing.service-catalog.import',
+        practiceId: dto.practiceId,
+        items: dto.items.length,
+        actorId: actor.id,
+      },
+      'Importing services from the repository',
+    );
+    await this.assertRegistrationCanRegister(actor, dto.practiceId);
+
+    const ids = [...new Set(dto.items.map((i) => i.conceptId))];
+    const importable = await this.serviceRepository.resolveImportable(ids);
+    const missing = ids.filter((id) => !importable.has(id));
+    if (missing.length > 0) {
+      throw new PreconditionFailedException(
+        'Hay servicios que no son del repositorio',
+        { conceptIds: missing },
+        BillingErrorReason.SERVICE_CATALOG_CONCEPT_NOT_IN_REPOSITORY,
+      );
+    }
+
+    return this.em.transactional(async (tx) => {
+      const results: ImportServicesResponseDto['items'] = [];
+      const done = new Map<string, string>();
+      for (const request of dto.items) {
+        const concept = importable.get(request.conceptId) as ImportableConcept;
+        const already =
+          done.get(concept.id) ??
+          (await this.findImported(tx, dto.practiceId, concept))?.id;
+        if (already) {
+          results.push({
+            conceptId: concept.id,
+            outcome: 'ALREADY_IMPORTED',
+            serviceCatalogId: already,
+          });
+          continue;
+        }
+        const item = await this.insertFromConcept(tx, actor, concept, {
+          practiceId: dto.practiceId,
+          defaultPrice: request.defaultPrice,
+          currencyConceptId: request.currencyConceptId,
+        });
+        done.set(concept.id, item.id);
+        results.push({
+          conceptId: concept.id,
+          outcome: 'CREATED',
+          serviceCatalogId: item.id,
+        });
+      }
+      this.logger.info(
+        {
+          operation: 'billing.service-catalog.import',
+          practiceId: dto.practiceId,
+          created: results.filter((r) => r.outcome === 'CREATED').length,
+        },
+        'Services imported',
+      );
+      return { items: results };
+    });
+  }
+
+  /** El concepto, si es del repositorio; si no, 422. */
+  private async requireImportable(
+    conceptId: string,
+  ): Promise<ImportableConcept> {
+    const found = await this.serviceRepository.resolveImportable([conceptId]);
+    const concept = found.get(conceptId);
+    if (!concept) {
+      throw new PreconditionFailedException(
+        'Ese servicio no es del repositorio',
+        { conceptIds: [conceptId] },
+        BillingErrorReason.SERVICE_CATALOG_CONCEPT_NOT_IN_REPOSITORY,
+      );
+    }
+    return concept;
+  }
+
+  /**
+   * El servicio de la práctica que ya corresponde a ese concepto: por el enlace
+   * al concepto o, para filas viejas sin enlace, por el código que tendría.
+   */
+  private async findImported(
+    tx: EntityManager,
+    practiceId: string,
+    concept: ImportableConcept,
+  ): Promise<ServiceCatalog | null> {
+    const linked = await tx.findOne(ServiceCatalogEntity, {
+      practiceId,
+      serviceConceptId: concept.id,
+    });
+    if (linked) return linked;
+    return this.serviceCatalogRepo.findByCode(
+      tx,
+      practiceId,
+      importedServiceCode(concept),
+    );
+  }
+
+  /** Inserta la fila desde el concepto y le cuelga su encuesta (FT-31). */
+  private async insertFromConcept(
+    tx: EntityManager,
+    actor: AuthenticatedUser,
+    concept: ImportableConcept,
+    data: {
+      practiceId: string;
+      defaultPrice: string;
+      currencyConceptId?: string;
+      descriptionText?: string;
+      imageFileId?: string;
+      taxCodeId?: string;
+      incomeAccountId?: string;
+      isActive?: boolean;
+    },
+  ): Promise<ServiceCatalog> {
+    const item = this.serviceCatalogRepo.create(tx, {
+      practiceId: data.practiceId,
+      code: importedServiceCode(concept),
+      name: concept.display,
+      descriptionText: data.descriptionText,
+      imageFileId: data.imageFileId,
+      serviceConceptId: concept.id,
+      defaultPrice: data.defaultPrice,
+      currencyConceptId: data.currencyConceptId ?? CONCEPTS.CURRENCY_BOB,
+      taxCodeId: data.taxCodeId,
+      incomeAccountId: data.incomeAccountId,
+      isActive: data.isActive ?? true,
+      actorUserId: actor.id,
+    });
+    await tx.flush();
+    await this.attachDefaultSatisfactionSurvey(tx, item, actor);
+    this.logger.info(
+      {
+        operation: 'billing.service-catalog.create',
+        serviceCatalogId: item.id,
+        serviceConceptId: concept.id,
+      },
+      'Service catalog item created',
+    );
+    return item;
   }
 
   /**
