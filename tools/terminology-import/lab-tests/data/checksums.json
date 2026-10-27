@@ -59,5 +59,19 @@
       "lab-tests-gtr-ncbi.part05.ndjson.gz",
       "lab-tests-gtr-ncbi.part06.ndjson.gz"
     ]
+  },
+  "lab-tests-dicom-dcm": {
+    "sha256": "84e9c29a92336f179afad6c1ed2bc6ee661ee45212dfef67a94cd5fed8d99d1d",
+    "lines": 51,
+    "files": [
+      "lab-tests-dicom-dcm.ndjson.gz"
+    ]
+  },
+  "lab-tests-radlex-playbook": {
+    "sha256": "7b6d8902079e474b1b9551c9d2879e99085e210f32ffe1750f52f5f4df6e2d41",
+    "lines": 4772,
+    "files": [
+      "lab-tests-radlex-playbook.ndjson.gz"
+    ]
   }
 }

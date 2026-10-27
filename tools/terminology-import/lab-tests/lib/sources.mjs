@@ -123,6 +123,37 @@ export const SOURCES = {
       { name: '_README.html', url: 'https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/_README.html' },
     ],
   },
+  'dicom-dcm': {
+    sourceCode: 'DICOM_PS316',
+    name: 'DICOM PS3.16 — Context Group CID 29 «Acquisition Modality» (códigos DCM)',
+    owner: 'National Electrical Manufacturers Association (NEMA) — DICOM Standards Committee',
+    officialUrl: 'https://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_29.html',
+    license:
+      '© NEMA. «The DICOM Standard is free to download and use» (https://www.dicomstandard.org/). El aviso de marca y derechos está en https://www.dicomstandard.org/about-home/trademark: DICOM® es marca registrada de NEMA para sus publicaciones de estándares; el copyright del estándar es de NEMA. El sitio NO publica un texto de licencia de redistribución: uso declarado libre, redistribución a confirmar por el propietario (capa aislada: se puede retirar sola).',
+    obtain: 'http',
+    dir: 'dicom-nema',
+    files: [
+      { name: 'ValueSet-dicom-cid-29-AcquisitionModality.json', url: 'https://dicom.nema.org/medical/dicom/resources/valuesets/fhir/json/ValueSet-dicom-cid-29-AcquisitionModality.json' },
+      { name: 'chapter_D.html', url: 'https://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_D.html' },
+      { name: 'sect_CID_29.html', url: 'https://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_29.html' },
+    ],
+  },
+  'radlex-playbook': {
+    sourceCode: 'RSNA_RADLEX_PLAYBOOK',
+    name: 'RSNA RadLex Playbook — lexicón de órdenes, procedimientos y protocolos de radiología',
+    owner: 'Radiological Society of North America (RSNA)',
+    officialUrl: 'https://playbook.radlex.org/',
+    license:
+      'Copyright 2014 RSNA. RadLex License Version 2.1 (2025-01-06), http://www.rsna.org/radlexdownloads/ : licencia de copyright mundial, no exclusiva, sin cargo y libre de regalías para reproducir, adaptar, mostrar y redistribuir el Playbook con condiciones: (a) dar aviso y una copia del Acuerdo a quien reciba la obra (copia en data/licenses/); (b) toda adaptación debe declarar que modificó la obra, que no es la obra original y que no está respaldada por RSNA; (c) no se cambian el RPID, el código de letras, el nombre corto, el nombre largo, la descripción ni los pares atributo-valor; (d) se conservan los avisos de copyright; (e) no se usan las marcas RSNA/RadLex/RadLex Playbook salvo para atribuir. Esta capa es una adaptación (NDJSON normalizado, estado y subconjuntos como propiedades) y NO está respaldada ni aprobada por RSNA. Obra provista «AS IS» sin garantías.',
+    obtain: 'http',
+    dir: 'rsna-radlex-playbook',
+    files: [
+      { name: 'complete-playbook-dev.csv', url: 'https://api3.rsna.org/radlex/v1/createCsv?csvType=new' },
+      { name: 'subset-table-playbook-dev.csv', url: 'https://api3.rsna.org/radlex/v1/createCsv?csvType=subset' },
+      { name: 'map-to-table-playbook-dev.xlsx', url: 'https://api3.rsna.org/radlex/v1/createXlsx' },
+      { name: 'RadLex_License_Agreement_and_Terms_of_Use_V2.1.pdf', url: 'http://www.rsna.org/uploadedFiles/RSNA/Content/Informatics/RadLex_License_Agreement_and_Terms_of_Use_V2_Final.pdf' },
+    ],
+  },
 };
 
 /** Fuentes evaluadas que no se pudieron obtener o no se usan: van a la cobertura como hueco. */

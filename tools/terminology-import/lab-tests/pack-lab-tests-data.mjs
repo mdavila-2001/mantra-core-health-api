@@ -74,6 +74,14 @@ function main() {
   if (existsSync(coverage)) copyFileSync(coverage, join(DATA_DIR, 'lab-tests-coverage.json'));
   const manifest = join(BUILD_DIR, 'lab-tests-sources', 'manifest.json');
   if (!only && existsSync(manifest)) copyFileSync(manifest, join(DATA_DIR, 'sources-manifest.json'));
+  // La licencia de RadLex exige entregar una copia del Acuerdo a quien reciba la obra o una adaptación.
+  const radlexDir = join(BUILD_DIR, 'lab-tests-sources', 'rsna-radlex-playbook');
+  if (existsSync(radlexDir)) {
+    for (const f of readdirSync(radlexDir).filter((n) => n.endsWith('.pdf'))) {
+      ensureDir(join(DATA_DIR, 'licenses'));
+      copyFileSync(join(radlexDir, f), join(DATA_DIR, 'licenses', f));
+    }
+  }
   const openManifest = join(BUILD_DIR, 'lab-tests-sources', 'open-sources-manifest.json');
   if (existsSync(openManifest)) copyFileSync(openManifest, join(DATA_DIR, 'open-sources-manifest.json'));
   writeJson(join(DATA_DIR, 'checksums.json'), checksums, true);

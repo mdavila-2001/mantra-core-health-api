@@ -35,6 +35,8 @@ import {
   parseUniversalLabOrders,
 } from './lib/loinc.mjs';
 import { gunzipSync } from 'node:zlib';
+import { RADLEX_CODE_SYSTEM, parseMapTo, parsePlaybookCsv, parseSubsets, radlexRecords } from './lib/radlex.mjs';
+import { DICOM_CODE_SYSTEM, DCM_SYSTEM_URI, dicomRecords, parseCid29, parseDcmDefinitions, parseStandardEdition } from './lib/dicom.mjs';
 import { GTR_CODE_SYSTEM, gtrRecords, parseConditionGene, parseMethodCategories, parseTestVersion } from './lib/gtr.mjs';
 import { DOMAINS, assertRecord } from './lib/records.mjs';
 import { GAPS, SOURCES } from './lib/sources.mjs';
@@ -307,6 +309,67 @@ async function buildGtr() {
   return { layer: 'gtr-ncbi', records, stats };
 }
 
+// --- Capa DICOM CID 29 ----------------------------------------------------------
+async function buildDicom() {
+  const vsf = openFile('dicom-dcm', 'ValueSet-dicom-cid-29-AcquisitionModality.json');
+  const chd = openFile('dicom-dcm', 'chapter_D.html');
+  if (!vsf || !chd) return { layer: 'dicom-dcm', missing: 'archivos de dicom.nema.org no descargados: corré fetch-open-sources.mjs dicom-dcm' };
+  const src = SOURCES['dicom-dcm'];
+  const cid29 = parseCid29(readFileSync(vsf.path, 'utf8'));
+  const chapterD = readFileSync(chd.path, 'utf8');
+  const definitions = parseDcmDefinitions(chapterD, cid29.members.map((m) => m.code));
+  const version = `PS3.16 ${parseStandardEdition(chapterD)}; CID 29 ${cid29.version}`;
+  const { records, stats } = dicomRecords(
+    { cid29, definitions },
+    {
+      sourceName: `${src.name} — ${version}`,
+      sourceVersion: `${version} (ValueSet date ${cid29.date}; UID ${cid29.uid})`,
+      sourceUrl: src.officialUrl,
+      sourceFile: `${vsf.file} + ${chd.file}`,
+      sourceSha256: `${vsf.sha256} ${chd.sha256}`,
+      retrievedAt: vsf.retrievedAt,
+      license: src.license,
+    },
+  );
+  await writeLayer('dicom-dcm', records, {
+    source: { name: src.name, url: src.officialUrl },
+    codeSystems: [{ internalCode: DICOM_CODE_SYSTEM, name: src.name, canonicalUrl: DCM_SYSTEM_URI, version, sourceKey: 'dicom-dcm', records: records.length }],
+    files: { 'ValueSet-dicom-cid-29-AcquisitionModality.json': { file: vsf.file, sha256: vsf.sha256, url: vsf.url }, 'chapter_D.html': { file: chd.file, sha256: chd.sha256, url: chd.url } },
+    stats,
+  });
+  return { layer: 'dicom-dcm', records, stats };
+}
+
+// --- Capa RSNA RadLex Playbook ---------------------------------------------------
+async function buildRadlex() {
+  const cp = openFile('radlex-playbook', 'complete-playbook-dev.csv');
+  const sb = openFile('radlex-playbook', 'subset-table-playbook-dev.csv');
+  const mp = openFile('radlex-playbook', 'map-to-table-playbook-dev.xlsx');
+  if (!cp || !sb || !mp) return { layer: 'radlex-playbook', missing: 'archivos de playbook.radlex.org / api3.rsna.org no descargados: corré fetch-open-sources.mjs radlex-playbook' };
+  const src = SOURCES['radlex-playbook'];
+  const mapTo = parseMapTo(readFileSync(mp.path));
+  const version = `RadLex Playbook (descarga ${cp.retrievedAt.slice(0, 10)})`;
+  const { records, stats } = radlexRecords(
+    { playbook: parsePlaybookCsv(readFileSync(cp.path, 'utf8')), subsets: parseSubsets(readFileSync(sb.path, 'utf8')), mapTo },
+    {
+      sourceName: `${src.name} — ${version}`,
+      sourceVersion: `${version}; archivos complete-playbook-dev.csv, subset-table-playbook-dev.csv, map-to-table-playbook-dev.xlsx (el sitio no publica número de versión en los archivos)`,
+      sourceUrl: cp.url,
+      sourceFile: `${cp.file} + ${sb.file} + ${mp.file}`,
+      sourceSha256: `${cp.sha256} ${sb.sha256} ${mp.sha256}`,
+      retrievedAt: cp.retrievedAt,
+      license: src.license,
+    },
+  );
+  await writeLayer('radlex-playbook', records, {
+    source: { name: src.name, url: src.officialUrl },
+    codeSystems: [{ internalCode: RADLEX_CODE_SYSTEM, name: src.name, canonicalUrl: 'http://playbook.radlex.org/', version, sourceKey: 'radlex-playbook', records: records.length }],
+    files: { 'complete-playbook-dev.csv': { file: cp.file, sha256: cp.sha256, url: cp.url }, 'subset-table-playbook-dev.csv': { file: sb.file, sha256: sb.sha256, url: sb.url }, 'map-to-table-playbook-dev.xlsx': { file: mp.file, sha256: mp.sha256, url: mp.url } },
+    stats: { ...stats, mapSheets: mapTo.sheetNames, mapUnknownTargets: mapTo.unknownTargets, cptSheetRead: false },
+  });
+  return { layer: 'radlex-playbook', records, stats };
+}
+
 function coverage(results) {
   const byDomain = Object.fromEntries(Object.keys(DOMAINS).map((d) => [d, 0]));
   const byCategory = {};
@@ -350,7 +413,7 @@ function coverage(results) {
 }
 
 async function main() {
-  const results = [await buildLoinc(), await buildTho(), await buildUcum(), await buildGtr()];
+  const results = [await buildLoinc(), await buildTho(), await buildUcum(), await buildGtr(), await buildDicom(), await buildRadlex()];
   for (const key of Object.keys(TARIFF_LAYERS)) results.push(await buildTariff(key));
   for (const r of results) if (r.missing) console.log(`[build] ${r.layer}: SIN DATOS — ${r.missing}`);
   const cov = coverage(results);

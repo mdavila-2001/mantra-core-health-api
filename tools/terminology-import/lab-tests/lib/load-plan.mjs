@@ -69,6 +69,8 @@ export function valueSetDefinition(code, context = {}) {
     'lab-catalog-tuss-ans': ['Catálogo de análisis — TUSS tabla 22 (Brasil)', 'Procedimientos diagnósticos de la TUSS (ANS) incluidos por prefijo (ver tariffs.mjs).'],
     'lab-catalog-icd10pcs-cms': ['Catálogo de análisis — ICD-10-PCS (secciones diagnósticas)', 'Códigos ICD-10-PCS de imagen (B), medicina nuclear diagnóstica (C1–C6), medición y monitoreo (4) y evaluaciones (F0–F5).'],
     'lab-catalog-gtr-ncbi': ['Catálogo de análisis — NCBI GTR (pruebas genéticas)', 'Pruebas genéticas vigentes y públicas del Genetic Testing Registry de NCBI (una por laboratorio y prueba registrada).'],
+    'lab-catalog-dicom-dcm': ['Catálogo de análisis — DICOM CID 29 (modalidades de adquisición)', 'Códigos DCM del Context Group CID 29 «Acquisition Modality» de DICOM PS3.16.'],
+    'lab-catalog-radlex-playbook': ['Catálogo de análisis — RSNA RadLex Playbook (imagenología)', 'Órdenes y procedimientos de radiología del RadLex Playbook (RPID), con su estado publicado. Adaptación no respaldada por RSNA.'],
     'lab-catalog-pami-nomenclador': ['Catálogo de análisis — Nomenclador PAMI (Argentina)', 'Prácticas diagnósticas del nomenclador de PAMI incluidas por prefijo (ver tariffs.mjs).'],
   };
   if (fixed[code]) return { name: fixed[code][0], description: fixed[code][1] };
@@ -79,10 +81,10 @@ export function valueSetDefinition(code, context = {}) {
     const src = SOURCES[cat[1]];
     return { name: `Catálogo de análisis — ${src?.name.split(' — ')[0] ?? cat[1]} · ${context.category.display}`, description: `Categoría «${context.category.display}» (${context.category.scheme} ${context.category.code}) de ${src?.name ?? cat[1]}.` };
   }
-  const facet = code.match(/^lab-catalog-([a-z0-9-]+?)-(major|method)-.+$/);
+  const facet = code.match(/^lab-catalog-([a-z0-9-]+?)-(major|method|subset)-.+$/);
   if (facet && context.label) {
     const src = SOURCES[facet[1]];
-    const what = facet[2] === 'major' ? 'categoría mayor de método' : 'categoría de método';
+    const what = { major: 'categoría mayor de método', method: 'categoría de método', subset: 'subconjunto' }[facet[2]];
     return { name: `Catálogo de análisis — ${src?.name.split(' — ')[0] ?? facet[1]} · ${context.label}`, description: `${what[0].toUpperCase()}${what.slice(1)} «${context.label}» de ${src?.name ?? facet[1]}, tal como la publica la fuente.` };
   }
   if (code.startsWith('lab-catalog-loinc-class-')) {

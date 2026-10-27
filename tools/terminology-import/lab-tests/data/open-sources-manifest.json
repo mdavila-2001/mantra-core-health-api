@@ -38,5 +38,76 @@
         "etag": null
       }
     }
+  },
+  "dicom-dcm": {
+    "files": {
+      "ValueSet-dicom-cid-29-AcquisitionModality.json": {
+        "url": "https://dicom.nema.org/medical/dicom/resources/valuesets/fhir/json/ValueSet-dicom-cid-29-AcquisitionModality.json",
+        "bytes": 7867,
+        "sha256": "4164abb669f9a467c21105a252804e9b349b09391b4b4ffd159cc1e491c3b28d",
+        "retrievedAt": "2026-10-27T23:23:05.503Z",
+        "httpStatus": 200,
+        "lastModified": "Sun, 20 Sep 2026 02:28:16 GMT",
+        "etag": "\"c45e58b1a748dd1:0\""
+      },
+      "chapter_D.html": {
+        "url": "https://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_D.html",
+        "bytes": 5997586,
+        "sha256": "49172ae0566edc83467022db142f1b6576fc348fef059b8f38f86f9663f9c846",
+        "retrievedAt": "2026-10-27T23:23:06.232Z",
+        "httpStatus": 200,
+        "lastModified": "Sun, 20 Sep 2026 12:39:06 GMT",
+        "etag": "\"7153956fd48dd1:0\""
+      },
+      "sect_CID_29.html": {
+        "url": "https://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_29.html",
+        "bytes": 50545,
+        "sha256": "4559280555ca6c63a8ca5525017a3b0f4df7ab572b940cdde5a138fcc49a29da",
+        "retrievedAt": "2026-10-27T23:23:06.913Z",
+        "httpStatus": 200,
+        "lastModified": "Sun, 20 Sep 2026 12:39:53 GMT",
+        "etag": "\"ece2c322fd48dd1:0\""
+      }
+    }
+  },
+  "radlex-playbook": {
+    "files": {
+      "complete-playbook-dev.csv": {
+        "url": "https://api3.rsna.org/radlex/v1/createCsv?csvType=new",
+        "bytes": 2348169,
+        "sha256": "9d83635e3de360353cb3b2e984e99c6f330ff3dd6bc9067a442e9bbd067a9179",
+        "retrievedAt": "2026-10-27T23:26:58.472Z",
+        "httpStatus": 200,
+        "lastModified": null,
+        "etag": null
+      },
+      "subset-table-playbook-dev.csv": {
+        "url": "https://api3.rsna.org/radlex/v1/createCsv?csvType=subset",
+        "bytes": 35190,
+        "sha256": "88a0ac207af559264b3533b0c649c42fd029805356819fb074452af2391c21f6",
+        "retrievedAt": "2026-10-27T23:26:58.935Z",
+        "httpStatus": 200,
+        "lastModified": null,
+        "etag": null
+      },
+      "map-to-table-playbook-dev.xlsx": {
+        "url": "https://api3.rsna.org/radlex/v1/createXlsx",
+        "bytes": 60867,
+        "sha256": "51baea47de23e5bbfbbe0ba239fa61496e3c129808ac50bdee923da718d011a4",
+        "retrievedAt": "2026-10-27T23:26:59.463Z",
+        "httpStatus": 200,
+        "lastModified": "Tue, 27 Oct 2026 23:26:59 GMT",
+        "etag": null
+      },
+      "RadLex_License_Agreement_and_Terms_of_Use_V2.1.pdf": {
+        "url": "http://www.rsna.org/uploadedFiles/RSNA/Content/Informatics/RadLex_License_Agreement_and_Terms_of_Use_V2_Final.pdf",
+        "bytes": 138636,
+        "sha256": "fd30e1c463d8466d519b9b31e1a9fc340c40c84fa28f7920a5808dbd125e286c",
+        "retrievedAt": "2026-10-27T23:27:00.076Z",
+        "httpStatus": 200,
+        "lastModified": "Fri, 13 Jun 2025 13:49:59 GMT",
+        "etag": "\"d8889ed6adcdb1:0\""
+      }
+    }
   }
 }

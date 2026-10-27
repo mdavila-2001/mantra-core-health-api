@@ -1,0 +1,74 @@
+{
+  "layer": "radlex-playbook",
+  "builtAt": "2026-10-27T23:28:27.385Z",
+  "records": 4772,
+  "source": {
+    "name": "RSNA RadLex Playbook — lexicón de órdenes, procedimientos y protocolos de radiología",
+    "url": "https://playbook.radlex.org/"
+  },
+  "codeSystems": [
+    {
+      "internalCode": "radlex-playbook",
+      "name": "RSNA RadLex Playbook — lexicón de órdenes, procedimientos y protocolos de radiología",
+      "canonicalUrl": "http://playbook.radlex.org/",
+      "version": "RadLex Playbook (descarga 2026-10-27)",
+      "sourceKey": "radlex-playbook",
+      "records": 4772
+    }
+  ],
+  "files": {
+    "complete-playbook-dev.csv": {
+      "file": "lab-tests-sources/rsna-radlex-playbook/complete-playbook-dev.csv",
+      "sha256": "9d83635e3de360353cb3b2e984e99c6f330ff3dd6bc9067a442e9bbd067a9179",
+      "url": "https://api3.rsna.org/radlex/v1/createCsv?csvType=new"
+    },
+    "subset-table-playbook-dev.csv": {
+      "file": "lab-tests-sources/rsna-radlex-playbook/subset-table-playbook-dev.csv",
+      "sha256": "88a0ac207af559264b3533b0c649c42fd029805356819fb074452af2391c21f6",
+      "url": "https://api3.rsna.org/radlex/v1/createCsv?csvType=subset"
+    },
+    "map-to-table-playbook-dev.xlsx": {
+      "file": "lab-tests-sources/rsna-radlex-playbook/map-to-table-playbook-dev.xlsx",
+      "sha256": "51baea47de23e5bbfbbe0ba239fa61496e3c129808ac50bdee923da718d011a4",
+      "url": "https://api3.rsna.org/radlex/v1/createXlsx"
+    }
+  },
+  "stats": {
+    "rows": 4772,
+    "byStatus": {
+      "ACTIVE": 4373,
+      "DEPRECATED": 316,
+      "DISCOURAGED": 53,
+      "TRIAL": 30
+    },
+    "byModality": {
+      "MR": 732,
+      "CT": 1437,
+      "XR": 686,
+      "(sin modalidad)": 247,
+      "ULTRASOUND": 399,
+      "NM": 547,
+      "INTERVENTIONAL RADIOLOGY": 10,
+      "RADIO-FLUOROSCOPY": 246,
+      "XR&RF": 7,
+      "MAMMOGRAPHY": 143,
+      "RADIOLOGY PROCEDURE": 237,
+      "XA": 63,
+      "US&RF": 3,
+      "NM&CT": 2,
+      "PT&CT": 6,
+      "PT": 7
+    },
+    "selectable": 4403,
+    "displayFromAutomatedLongName": 3369,
+    "withLoincMap": 1010,
+    "withRadlexMap": 311,
+    "mapsForUnknownRpid": 0,
+    "mapSheets": [
+      "map-to-table-playbook-dev.xlsx",
+      "CPT_mappings"
+    ],
+    "mapUnknownTargets": {},
+    "cptSheetRead": false
+  }
+}

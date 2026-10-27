@@ -1,10 +1,12 @@
 {
-  "builtAt": "2026-10-27T23:14:05.937Z",
+  "builtAt": "2026-10-27T23:28:28.482Z",
   "totals": {
     "loinc": 0,
     "hl7-tho": 479,
     "ucum": 888,
     "gtr-ncbi": 63914,
+    "dicom-dcm": 51,
+    "radlex-playbook": 4772,
     "fonasa-mle": 648,
     "sigtap-sus": 1108,
     "tuss-ans": 2211,
@@ -13,7 +15,7 @@
   },
   "byDomain": {
     "laboratory": 5084,
-    "imaging": 4460,
+    "imaging": 9283,
     "pathology": 112,
     "genetics": 64103,
     "functional": 1291
@@ -24,10 +26,20 @@
       "domain": "genetics",
       "count": 63914
     },
+    "(sin categoría):radlex-playbook": {
+      "display": null,
+      "domain": "imaging",
+      "count": 247
+    },
     "(sin categoría):ucum": {
       "display": null,
       "domain": null,
       "count": 129
+    },
+    "dicom-cid:29": {
+      "display": "CID 29 Acquisition Modality",
+      "domain": "imaging",
+      "count": 51
     },
     "fonasa-mle:03": {
       "display": "Prefijo 03",
@@ -218,6 +230,81 @@
       "display": "Prefijo 88",
       "domain": "laboratory",
       "count": 1015
+    },
+    "radlex-playbook-modality:ct": {
+      "display": "CT",
+      "domain": "imaging",
+      "count": 1437
+    },
+    "radlex-playbook-modality:interventional-radiology": {
+      "display": "INTERVENTIONAL RADIOLOGY",
+      "domain": "imaging",
+      "count": 10
+    },
+    "radlex-playbook-modality:mammography": {
+      "display": "MAMMOGRAPHY",
+      "domain": "imaging",
+      "count": 143
+    },
+    "radlex-playbook-modality:mr": {
+      "display": "MR",
+      "domain": "imaging",
+      "count": 732
+    },
+    "radlex-playbook-modality:nm": {
+      "display": "NM",
+      "domain": "imaging",
+      "count": 547
+    },
+    "radlex-playbook-modality:nm-ct": {
+      "display": "NM&CT",
+      "domain": "imaging",
+      "count": 2
+    },
+    "radlex-playbook-modality:pt": {
+      "display": "PT",
+      "domain": "imaging",
+      "count": 7
+    },
+    "radlex-playbook-modality:pt-ct": {
+      "display": "PT&CT",
+      "domain": "imaging",
+      "count": 6
+    },
+    "radlex-playbook-modality:radio-fluoroscopy": {
+      "display": "RADIO-FLUOROSCOPY",
+      "domain": "imaging",
+      "count": 246
+    },
+    "radlex-playbook-modality:radiology-procedure": {
+      "display": "RADIOLOGY PROCEDURE",
+      "domain": "imaging",
+      "count": 237
+    },
+    "radlex-playbook-modality:ultrasound": {
+      "display": "ULTRASOUND",
+      "domain": "imaging",
+      "count": 399
+    },
+    "radlex-playbook-modality:us-rf": {
+      "display": "US&RF",
+      "domain": "imaging",
+      "count": 3
+    },
+    "radlex-playbook-modality:xa": {
+      "display": "XA",
+      "domain": "imaging",
+      "count": 63
+    },
+    "radlex-playbook-modality:xr": {
+      "display": "XR",
+      "domain": "imaging",
+      "count": 686
+    },
+    "radlex-playbook-modality:xr-rf": {
+      "display": "XR&RF",
+      "domain": "imaging",
+      "count": 7
     },
     "sigtap-forma-organizacao:020101": {
       "display": "Coleta de material › Coleta de material por meio de punção/biópsia",
@@ -589,6 +676,8 @@
     "hl7-tho": 595,
     "ucum": 772,
     "gtr-ncbi": 63914,
+    "dicom-dcm": 51,
+    "radlex-playbook": 4772,
     "fonasa-mle": 648,
     "sigtap-sus": 1108,
     "tuss-ans": 2211,
