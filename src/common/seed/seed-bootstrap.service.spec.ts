@@ -373,6 +373,9 @@ describe('SeedBootstrapService', () => {
         terms: 0,
         relationships: 0,
         orphanRelationships: 1,
+        // Artículos cuyo slug todavía no tiene concepto: se omiten, no se escriben.
+        articles: 0,
+        orphanArticles: 446,
       });
 
       const summary = await service.run();

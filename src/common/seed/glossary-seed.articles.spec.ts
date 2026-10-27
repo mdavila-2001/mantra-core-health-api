@@ -126,7 +126,7 @@ describe('GlossarySeedService — artículos de cualquier término del glosario'
       valueJson: ARTICLES[IMPORTED],
     });
     expect(result.articles).toBe(2);
-    expect(result.articlesWithoutConcept).toBe(1);
+    expect(result.orphanArticles).toBe(1);
   });
 
   it('el slug sin concepto en la base no rompe la corrida: se cuenta y se advierte una vez', async () => {
@@ -178,14 +178,14 @@ describe('GlossarySeedService — artículos de cualquier término del glosario'
     expect(second.removed).toEqual([]);
     expect(result.articles).toBe(0);
     expect(result.updated).toBe(0);
-    expect(result.articlesWithoutConcept).toBe(1);
+    expect(result.orphanArticles).toBe(1);
   });
 
   it('el término que se importa después recibe su artículo en la corrida siguiente', async () => {
     const before = buildGlossarySeed(GlossarySeedService);
     const first = await before.service.run();
     expect(first.articles).toBe(1);
-    expect(first.articlesWithoutConcept).toBe(2);
+    expect(first.orphanArticles).toBe(2);
 
     // Un importador carga el término entre dos arranques.
     const store = before.store;
@@ -196,7 +196,7 @@ describe('GlossarySeedService — artículos de cualquier término del glosario'
     const second = await after.service.run();
 
     expect(second.articles).toBe(1);
-    expect(second.articlesWithoutConcept).toBe(1);
+    expect(second.orphanArticles).toBe(1);
     expect(articleRows(after.rowsOf('ConceptProperties'))).toEqual([
       expect.objectContaining({
         id: glossaryPropertyId(IMPORTED, 'glossary-article'),

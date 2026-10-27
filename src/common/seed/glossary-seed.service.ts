@@ -192,7 +192,7 @@ export class GlossarySeedService {
     /** Artículos enciclopédicos (`glossary-article`) creados. */
     articles: number;
     /** Artículos cuyo slug no tiene todavía un concepto en la base; se omiten con advertencia. */
-    articlesWithoutConcept: number;
+    orphanArticles: number;
   }> {
     this.assertUniqueSlugs();
 
@@ -210,7 +210,7 @@ export class GlossarySeedService {
       updated: 0,
       removed: 0,
       articles: 0,
-      articlesWithoutConcept: 0,
+      orphanArticles: 0,
     };
 
     // --- Nivel 0: procedencia propia del catálogo curado (FND-25-03) ---
@@ -336,7 +336,7 @@ export class GlossarySeedService {
     const articles = await this.seedArticles(em, now);
     counters.articles += articles.created;
     counters.updated += articles.updated;
-    counters.articlesWithoutConcept += articles.withoutConcept;
+    counters.orphanArticles += articles.withoutConcept;
 
     if (
       counters.valueSets +
