@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1584 de 1584 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **73 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1591 de 1591 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **73 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -71,13 +71,13 @@ Esta referencia documenta **1584 de 1584 operaciones HTTP** registradas en `open
 | [education](education.md) | 14 | `education` | 1 |
 | [erp](erp.md) | 17 | `erp` | 1 |
 | [forms](forms.md) | 25 | `forms-assignments`, `forms-definition-sets`, `forms-fields`, `forms-instances`, `forms-me`, `forms-values` | 6 |
-| [geo](geo.md) | 10 | `geo-geofences`, `geo-tracked-subjects`, `geo-tracking-sessions`, `geo-trips` | 4 |
+| [geo](geo.md) | 11 | `geo`, `geo-geofences`, `geo-tracked-subjects`, `geo-tracking-sessions`, `geo-trips` | 5 |
 | [graph_intelligence](graph-intelligence.md) | 15 | `graph_intelligence` | 2 |
 | [health_context](health-context.md) | 13 | `health-context` | 1 |
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
 | [iam](iam.md) | 39 | `iam-auth`, `iam-onboarding-drafts`, `iam-users` | 4 |
 | [identity_assurance](identity-assurance.md) | 28 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
-| [insurance](insurance.md) | 55 | `insurance`, `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`, `insurer-patients`, `insurer-received-claims`, `my-insurance-claims` | 18 |
+| [insurance](insurance.md) | 56 | `insurance`, `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`, `insurer-patients`, `insurer-received-claims`, `my-insurance-claims` | 18 |
 | [insurance-campaigns](insurance-campaigns.md) | 16 | `insurance-campaigns` | 0 |
 | [integration_contracts](integration-contracts.md) | 12 | `integration-contracts`, `integration-exchanges` | 2 |
 | [integrations](integrations.md) | 15 | `integrations-connections`, `integrations-messages`, `integrations-providers`, `integrations-webhooks` | 4 |
@@ -97,7 +97,7 @@ Esta referencia documenta **1584 de 1584 operaciones HTTP** registradas en `open
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
 | [practice](practice.md) | 36 | `practice` | 9 |
 | [procedures_perioperative](procedures-perioperative.md) | 32 | `dental-procedures`, `procedure-cases` | 2 |
-| [profiles](profiles.md) | 58 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 5 |
+| [profiles](profiles.md) | 63 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 6 |
 | [promotions](promotions.md) | 19 | `loyalty`, `promotions` | 2 |
 | [public](public.md) | 4 | `public-catalog` | 1 |
 | [qa_execution](qa-execution.md) | 9 | `qa-execution`, `qa-execution-internal` | 2 |
@@ -124,4 +124,4 @@ Esta referencia documenta **1584 de 1584 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1584 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1591 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

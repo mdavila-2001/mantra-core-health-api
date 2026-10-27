@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1584 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1584 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1591 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1591 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -63417,7 +63417,7 @@
       ]
     },
     {
-      "name": "patient-coverages (2)",
+      "name": "patient-coverages (3)",
       "item": [
         {
           "name": "GET /patient-coverages/me · Mi cobertura",
@@ -63518,6 +63518,61 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.patientCoverageId);",
                   "  if (id) pm.environment.set('patientCoverageId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /patient-coverages/by-patient/{patientProfileId} · Seguros de una persona, para quien cobra",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient-coverages/by-patient/:patientProfileId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient-coverages",
+                "by-patient",
+                ":patientProfileId"
+              ],
+              "variable": [
+                {
+                  "key": "patientProfileId",
+                  "value": "{{patientProfileId}}",
+                  "description": "Identificador de ruta · variable `{{patientProfileId}}`"
+                }
+              ]
+            },
+            "description": "Seguros de una persona, para quien cobra. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /patient-coverages/by-patient/{patientProfileId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `CoverageController_listForPatient`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.patientCoverages || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('patientCoverageId', first.id);",
                   "}"
                 ]
               }
@@ -75938,7 +75993,7 @@
       ]
     },
     {
-      "name": "profiles (54)",
+      "name": "profiles (59)",
       "item": [
         {
           "name": "profiles-patients",
@@ -76064,6 +76119,55 @@
                       "  const list = Array.isArray(body) ? body : (body.patients || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('patientId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /profiles/patients/me/addresses · Listar las propias direcciones (la preferida primero)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "addresses"
+                  ]
+                },
+                "description": "Listar las propias direcciones (la preferida primero). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /profiles/patients/me/addresses`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PatientAddressBookController_list`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.addresses || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('addressId', first.id);",
                       "}"
                     ]
                   }
@@ -76390,6 +76494,67 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.patientId);",
                       "  if (id) pm.environment.set('patientId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /profiles/patients/me/addresses · Guardar una dirección nueva",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "addresses"
+                  ]
+                },
+                "description": "Guardar una dirección nueva. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /profiles/patients/me/addresses`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `PatientAddressBookController_create`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"label\": \"Casa de mi mamá\",\n  \"municipalityConceptId\": \"<municipalityConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"lines\": \"lines-ejemplo\",\n  \"latitude\": -90,\n  \"longitude\": -180,\n  \"isPreferred\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{addressId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.addressId);",
+                      "  if (id) pm.environment.set('addressId', id);",
                       "}"
                     ]
                   }
@@ -77265,6 +77430,118 @@
               ]
             },
             {
+              "name": "PATCH /profiles/patients/me/addresses/{id} · Corregir una dirección (cierra la vigente y abre otra)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/addresses/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "addresses",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{addressId}}",
+                      "description": "Identificador de ruta · variable `{{addressId}}`"
+                    }
+                  ]
+                },
+                "description": "Corregir una dirección (cierra la vigente y abre otra). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /profiles/patients/me/addresses/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PatientAddressBookController_update`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"label\": \"label-ejemplo\",\n  \"lines\": \"lines-ejemplo\",\n  \"latitude\": -90,\n  \"longitude\": -180\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /profiles/patients/me/addresses/{id}/preferred · Marcar la dirección que se ofrece primero",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/addresses/:id/preferred",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "addresses",
+                    ":id",
+                    "preferred"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{addressId}}",
+                      "description": "Identificador de ruta · variable `{{addressId}}`"
+                    }
+                  ]
+                },
+                "description": "Marcar la dirección que se ofrece primero. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /profiles/patients/me/addresses/{id}/preferred`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PatientAddressBookController_prefer`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "PUT /profiles/patients/me/photo · Fijar la propia foto de perfil",
               "request": {
                 "method": "PUT",
@@ -77302,6 +77579,55 @@
                     }
                   }
                 }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "DELETE /profiles/patients/me/addresses/{id} · Quitar una dirección guardada o la del trabajo",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/patients/me/addresses/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "patients",
+                    "me",
+                    "addresses",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{addressId}}",
+                      "description": "Identificador de ruta · variable `{{addressId}}`"
+                    }
+                  ]
+                },
+                "description": "Quitar una dirección guardada o la del trabajo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /profiles/patients/me/addresses/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PatientAddressBookController_remove`"
               },
               "response": [],
               "event": [
@@ -79409,7 +79735,7 @@
       ]
     },
     {
-      "name": "public (26)",
+      "name": "public (27)",
       "item": [
         {
           "name": "clinical-prescriptions-public",
@@ -80464,6 +80790,68 @@
                       "  const list = Array.isArray(body) ? body : (body.reviews || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('reviewId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "geo",
+          "item": [
+            {
+              "name": "POST /public/geo/reverse · Nombre de la calle de un punto en Bolivia",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/public/geo/reverse",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "geo",
+                    "reverse"
+                  ]
+                },
+                "description": "Sin sesión. 503 si el proveedor no responde: el alta sigue con la calle a mano. Nunca inventa una dirección.\n\n`POST /public/geo/reverse`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `ReverseGeocodingController_reverse`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"latitude\": -23.5,\n  \"longitude\": -70\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{reverseId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.reverseId);",
+                      "  if (id) pm.environment.set('reverseId', id);",
                       "}"
                     ]
                   }
@@ -86478,7 +86866,7 @@
                 "description": "Publicar una plantilla de agenda con sus franjas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /scheduling/resources/{id}/templates`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingController_createTemplate`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\"\n    }\n  ],\n  \"slotMinutes\": 30,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\",\n  \"flexibleHours\": false\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false\n    }\n  ],\n  \"slotMinutes\": 30,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\",\n  \"flexibleHours\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -87328,7 +87716,7 @@
                 "description": "Todo opcional; lo que no se manda se conserva. `rules`, si viene, reemplaza el conjunto entero y no toca los cupos ya materializados.\n\n`PATCH /scheduling/templates/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingController_updateTemplate`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\"\n    }\n  ],\n  \"slotMinutes\": 1,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false\n    }\n  ],\n  \"slotMinutes\": 1,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -92330,6 +92718,15 @@
                   ]
                 },
                 "description": "Captura eventos de telemetría de alta y avance en formularios de registro. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /telemetry/onboarding-events`\n\nRespuesta esperada: **200**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `TelemetryOnboardingAnalyticsController_recordEvents`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"events\": [\n    {\n      \"eventType\": \"start\",\n      \"formType\": \"formType-ejemplo\",\n      \"draftId\": \"draftId-ejemplo\",\n      \"stepIndex\": 1,\n      \"stepKey\": \"stepKey-ejemplo\",\n      \"fieldKey\": \"fieldKey-ejemplo\",\n      \"interactionType\": \"focus\",\n      \"errorCategory\": \"errorCategory-ejemplo\",\n      \"durationMs\": 1,\n      \"timestamp\": \"timestamp-ejemplo\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "auth": {
                   "type": "noauth"
                 }
