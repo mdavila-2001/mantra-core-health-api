@@ -47,5 +47,17 @@
     "files": [
       "lab-tests-ucum.ndjson.gz"
     ]
+  },
+  "lab-tests-gtr-ncbi": {
+    "sha256": "2dd8458d67490159c3229403e7f412cf822154638505700b0a513a2738b6c733",
+    "lines": 63914,
+    "files": [
+      "lab-tests-gtr-ncbi.part01.ndjson.gz",
+      "lab-tests-gtr-ncbi.part02.ndjson.gz",
+      "lab-tests-gtr-ncbi.part03.ndjson.gz",
+      "lab-tests-gtr-ncbi.part04.ndjson.gz",
+      "lab-tests-gtr-ncbi.part05.ndjson.gz",
+      "lab-tests-gtr-ncbi.part06.ndjson.gz"
+    ]
   }
 }

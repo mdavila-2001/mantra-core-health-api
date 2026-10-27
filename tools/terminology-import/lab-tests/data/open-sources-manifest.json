@@ -1,0 +1,42 @@
+{
+  "gtr-ncbi": {
+    "files": {
+      "test_version.gz": {
+        "url": "https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/test_version.gz",
+        "bytes": 13075988,
+        "sha256": "b9d49d8284fe122245cd3bc39d31a7576702d1ad7a4bb04239906e0b55aec850",
+        "retrievedAt": "2026-10-27T23:12:13.351Z",
+        "httpStatus": 200,
+        "lastModified": "Thu, 22 Oct 2026 14:18:53 GMT",
+        "etag": null
+      },
+      "test_condition_gene.txt": {
+        "url": "https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/test_condition_gene.txt",
+        "bytes": 47325875,
+        "sha256": "8ffb76349340ba0e3ad4c8f878206051cf07750b465865558bbc3aac868ab71d",
+        "retrievedAt": "2026-10-27T23:12:14.253Z",
+        "httpStatus": 200,
+        "lastModified": "Thu, 22 Oct 2026 14:18:20 GMT",
+        "etag": null
+      },
+      "tests_by_method_category.txt": {
+        "url": "https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/tests_by_method_category.txt",
+        "bytes": 1613,
+        "sha256": "dbc40f16e290f8ffd39da2c714b7b2de52ae73f7b82302d8453a3de633f1a714",
+        "retrievedAt": "2026-10-27T23:12:14.421Z",
+        "httpStatus": 200,
+        "lastModified": "Thu, 22 Oct 2026 14:18:21 GMT",
+        "etag": null
+      },
+      "_README.html": {
+        "url": "https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/_README.html",
+        "bytes": 7424,
+        "sha256": "47020b4f604169c4f13fd2c6f54eea9a2b0a79968389e4f5e67f489c7596f69e",
+        "retrievedAt": "2026-10-27T23:12:15.261Z",
+        "httpStatus": 200,
+        "lastModified": "Wed, 19 Mar 2025 21:00:14 GMT",
+        "etag": null
+      }
+    }
+  }
+}

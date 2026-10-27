@@ -1,0 +1,86 @@
+{
+  "layer": "gtr-ncbi",
+  "builtAt": "2026-10-27T23:14:04.278Z",
+  "records": 63914,
+  "source": {
+    "name": "NCBI Genetic Testing Registry (GTR) — pruebas genéticas registradas por laboratorios",
+    "url": "https://www.ncbi.nlm.nih.gov/gtr/"
+  },
+  "codeSystems": [
+    {
+      "internalCode": "gtr-ncbi",
+      "name": "NCBI Genetic Testing Registry (GTR) — pruebas genéticas registradas por laboratorios",
+      "canonicalUrl": "https://www.ncbi.nlm.nih.gov/gtr/",
+      "version": "GTR 2026-10-22",
+      "sourceKey": "gtr-ncbi",
+      "records": 63914
+    }
+  ],
+  "files": {
+    "test_version.gz": {
+      "file": "lab-tests-sources/ncbi-gtr/test_version.gz",
+      "sha256": "b9d49d8284fe122245cd3bc39d31a7576702d1ad7a4bb04239906e0b55aec850",
+      "url": "https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/test_version.gz"
+    },
+    "test_condition_gene.txt": {
+      "file": "lab-tests-sources/ncbi-gtr/test_condition_gene.txt",
+      "sha256": "8ffb76349340ba0e3ad4c8f878206051cf07750b465865558bbc3aac868ab71d",
+      "url": "https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/test_condition_gene.txt"
+    },
+    "tests_by_method_category.txt": {
+      "file": "lab-tests-sources/ncbi-gtr/tests_by_method_category.txt",
+      "sha256": "dbc40f16e290f8ffd39da2c714b7b2de52ae73f7b82302d8453a3de633f1a714",
+      "url": "https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/tests_by_method_category.txt"
+    }
+  },
+  "stats": {
+    "rowsRead": 224353,
+    "notCurrentPublic": 160439,
+    "current": 63914,
+    "withLinks": 63909,
+    "withoutLinks": 5,
+    "researchOnly": 172,
+    "methodCategoryNotInHierarchy": {
+      "Multicolor FISH (M-FISH)/Spectral Karyotypingâ„¢ (SKYâ„¢)": 1
+    },
+    "byCountry": {
+      "United States": 31397,
+      "Canada": 1971,
+      "Belgium": 156,
+      "Brazil": 118,
+      "Japan": 7,
+      "Australia": 28,
+      "Cyprus": 48,
+      "Netherlands": 1280,
+      "Argentina": 27,
+      "India": 4011,
+      "Germany": 3055,
+      "United Kingdom": 26,
+      "Denmark": 70,
+      "Norway": 3,
+      "Sweden": 40,
+      "Poland": 91,
+      "Turkey": 11273,
+      "Chile": 65,
+      "Spain": 5260,
+      "South Korea": 164,
+      "Singapore": 7,
+      "Switzerland": 1,
+      "Mexico": 10,
+      "Italy": 10,
+      "Austria": 1017,
+      "Portugal": 3400,
+      "Iran": 61,
+      "Greece": 13,
+      "New Zealand": 1,
+      "Taiwan": 8,
+      "Finland": 228,
+      "China": 3,
+      "Slovenia": 1,
+      "United Arab Emirates": 57,
+      "Bangladesh": 3,
+      "Hong Kong": 2,
+      "Kazakhstan": 2
+    }
+  }
+}

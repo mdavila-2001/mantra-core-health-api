@@ -32,12 +32,15 @@ const MAX_PART_BYTES = 45 * 1024 * 1024;
 
 function main() {
   const ndjsonDir = join(BUILD_DIR, 'ndjson');
-  const layers = readdirSync(ndjsonDir).filter((f) => /^lab-tests-.+\.ndjson$/.test(f));
-  if (!layers.length) throw new Error(`No hay lab-tests-*.ndjson en ${ndjsonDir}: corré build-lab-tests.mjs.`);
+  const only = process.argv.includes('--layers') ? process.argv[process.argv.indexOf('--layers') + 1].split(',') : null;
+  const layers = readdirSync(ndjsonDir).filter((f) => /^lab-tests-.+\.ndjson$/.test(f) && (!only || only.includes(f.replace(/^lab-tests-|\.ndjson$/g, ''))));
+  if (!layers.length) throw new Error(`No hay lab-tests-*.ndjson${only ? ` de ${only.join(', ')}` : ''} en ${ndjsonDir}: corré build-lab-tests.mjs.`);
   ensureDir(DATA_DIR);
-  for (const f of readdirSync(DATA_DIR)) if (/^lab-tests-|^checksums\.json$|^sources-manifest\.json$/.test(f)) rmSync(join(DATA_DIR, f));
+  // Con --layers sólo se reescriben esas capas: las demás (y su manifiesto npm) quedan como están en git.
+  const mine = (f) => !only || layers.some((l) => f.startsWith(`${l.replace(/\.ndjson$/, '')}.`));
+  for (const f of readdirSync(DATA_DIR)) if (/^lab-tests-.+\.(ndjson\.gz|meta\.json)$|^lab-tests-.+\.part\d+\.ndjson\.gz$/.test(f) ? mine(f) : !only && /^lab-tests-|^checksums\.json$|^sources-manifest\.json$/.test(f)) rmSync(join(DATA_DIR, f));
 
-  const checksums = {};
+  const checksums = only && existsSync(join(DATA_DIR, 'checksums.json')) ? JSON.parse(readFileSync(join(DATA_DIR, 'checksums.json'), 'utf8')) : {};
   for (const file of layers) {
     const raw = readFileSync(join(ndjsonDir, file));
     const lines = raw.toString('utf8').split('\n').filter((l) => l !== '');
@@ -70,7 +73,9 @@ function main() {
   const coverage = join(ndjsonDir, 'lab-tests-coverage.json');
   if (existsSync(coverage)) copyFileSync(coverage, join(DATA_DIR, 'lab-tests-coverage.json'));
   const manifest = join(BUILD_DIR, 'lab-tests-sources', 'manifest.json');
-  if (existsSync(manifest)) copyFileSync(manifest, join(DATA_DIR, 'sources-manifest.json'));
+  if (!only && existsSync(manifest)) copyFileSync(manifest, join(DATA_DIR, 'sources-manifest.json'));
+  const openManifest = join(BUILD_DIR, 'lab-tests-sources', 'open-sources-manifest.json');
+  if (existsSync(openManifest)) copyFileSync(openManifest, join(DATA_DIR, 'open-sources-manifest.json'));
   writeJson(join(DATA_DIR, 'checksums.json'), checksums, true);
   console.log(`[pack] listo en ${DATA_DIR}`);
 }

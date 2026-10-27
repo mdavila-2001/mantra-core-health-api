@@ -107,6 +107,22 @@ export const SOURCES = {
     dir: 'nomenclador-salud-js',
     redistributor: 'https://www.npmjs.com/package/nomenclador-salud-js',
   },
+  'gtr-ncbi': {
+    sourceCode: 'NCBI_GTR',
+    name: 'NCBI Genetic Testing Registry (GTR) — pruebas genéticas registradas por laboratorios',
+    owner: 'National Center for Biotechnology Information (NCBI), National Library of Medicine (NLM/NIH), EE. UU.',
+    officialUrl: 'https://www.ncbi.nlm.nih.gov/gtr/',
+    license:
+      'Dominio público: «Information that is created by or for the US government on this site is within the public domain» (https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/_README.html). NCBI pide atribuir a GTR (http://www.ncbi.nlm.nih.gov/gtr/; cita: http://nar.oxfordjournals.org/content/41/D1/D925.full). Aviso de NIH: no verifica de forma independiente lo que envían los laboratorios ni respalda pruebas ni laboratorios.',
+    obtain: 'http',
+    dir: 'ncbi-gtr',
+    files: [
+      { name: 'test_version.gz', url: 'https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/test_version.gz' },
+      { name: 'test_condition_gene.txt', url: 'https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/test_condition_gene.txt' },
+      { name: 'tests_by_method_category.txt', url: 'https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/tests_by_method_category.txt' },
+      { name: '_README.html', url: 'https://ftp.ncbi.nlm.nih.gov/pub/GTR/data/_README.html' },
+    ],
+  },
 };
 
 /** Fuentes evaluadas que no se pudieron obtener o no se usan: van a la cobertura como hueco. */

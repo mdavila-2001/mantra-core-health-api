@@ -1,0 +1,124 @@
+#accession_version	test_type	object	GTR_identifier	MIM_number	object_name	gene_or_SNOMED_CT_ID	gene_symbol
+GTR000004006.1	Clinical	condition	C0016667	300624	Fragile X syndrome	613003	N/A
+GTR000004006.1	Clinical	gene	C1414649	309550	FMR1:fragile X messenger ribonucleoprotein 1	2332	FMR1
+GTR000005914.3	Research	condition	C1859786	206300	Anemia, nonspherocytic hemolytic, associated with abnormality of red cell membrane		N/A
+GTR000005914.3	Research	condition	C1838120	600461	Lethal hemolytic anemia-genital anomalies syndrome		N/A
+GTR000005914.3	Research	condition	C0272066	611881	HNSHA due to aldolase A deficiency	111578003	N/A
+GTR000011470.10	Research	condition	C1275808		Congenital central hypoventilation	399040002	N/A
+GTR000011470.10	Research	condition	C5191058		Hirschsprung disease-ganglioneuroblastoma syndrome		N/A
+GTR000011470.10	Research	condition	C0019569		Aganglionic megacolon	204739008	N/A
+GTR000011470.10	Research	condition	C3888239	142623	Hirschsprung disease, susceptibility to, 1		N/A
+GTR000011470.10	Research	condition	C0013080	190685	Down syndrome		N/A
+GTR000011470.10	Research	condition	C1856113	235730	Mowat-Wilson syndrome		N/A
+GTR000011470.10	Research	condition	C1856112	235740	Hirschsprung disease-hearing loss-polydactyly syndrome		N/A
+GTR000011470.10	Research	condition	C1856111	235750	Hirschsprung disease with ulnar polydactyly, polysyndactyly of big toes, and ventricular septal defect		N/A
+GTR000011470.10	Research	condition	C1856110	235760	Hirschsprung disease-nail hypoplasia-dysmorphism syndrome		N/A
+GTR000011470.10	Research	condition	C1848519	277580	Waardenburg syndrome type 4A		N/A
+GTR000011470.10	Research	condition	C1844017	306980	Hirschsprung disease-type D brachydactyly syndrome		N/A
+GTR000011470.10	Research	condition	C1838564	600155	Hirschsprung disease, susceptibility to, 2		N/A
+GTR000011470.10	Research	condition	C1970723	600156	Hirschsprung disease, susceptibility to, 5		N/A
+GTR000011470.10	Research	condition	C1858696	604211	Hirschsprung disease with heart defects, laryngeal anomalies, and preaxial polydactyly		N/A
+GTR000011470.10	Research	condition	C1969837	606874	Hirschsprung disease, susceptibility to, 6		N/A
+GTR000011470.10	Research	condition	C1969836	606875	Hirschsprung disease, susceptibility to, 7		N/A
+GTR000011470.10	Research	condition	C1969482	608462	Hirschsprung disease, susceptibility to, 8		N/A
+GTR000011470.10	Research	condition	C1836727	609136	PCWH syndrome		N/A
+GTR000011470.10	Research	condition	C1836123	609460	Goldberg-Shprintzen syndrome		N/A
+GTR000011470.10	Research	condition	C1968840	611644	Hirschsprung disease, susceptibility to, 9		N/A
+GTR000011470.10	Research	condition	C2750457	613265	Waardenburg syndrome type 4B		N/A
+GTR000011470.10	Research	condition	C2750452	613266	Waardenburg syndrome type 4C		N/A
+GTR000011470.10	Research	condition	C3150974	613711	Hirschsprung disease, susceptibility to, 3		N/A
+GTR000011470.10	Research	condition	C3150975	613712	Hirschsprung disease, susceptibility to, 4		N/A
+GTR000011470.10	Research	condition	C3151237	613870	Hirschsprung disease, cardiac defects, and autonomic dysfunction		N/A
+GTR000011470.10	Research	gene	C1414261	131242	EDN3:endothelin 3	1908	EDN3
+GTR000011470.10	Research	gene	C1414263	131244	EDNRB:endothelin receptor type B	1910	EDNRB
+GTR000011470.10	Research	gene	C0694890	164761	RET:ret proto-oncogene	5979	RET
+GTR000011470.10	Research	gene	C1414244	600423	ECE1:endothelin converting enzyme 1	1889	ECE1
+GTR000011470.10	Research	gene	C1333669	600837	GDNF:glial cell derived neurotrophic factor	2668	GDNF
+GTR000011470.10	Research	gene	C1420317	602229	SOX10:SRY-box transcription factor 10	6663	SOX10
+GTR000011470.10	Research	gene	C1418697	603851	PHOX2B:paired like homeobox 2B	8929	PHOX2B
+GTR000011470.10	Research	gene	C1423021	605802	ZEB2:zinc finger E-box binding homeobox 2	9839	ZEB2
+GTR000011470.10	Research	gene	C1428077	609367	KIFBP:kinesin family binding protein	26128	KIFBP
+GTR000020305.9	Clinical	condition	C0557874		Global developmental delay		N/A
+GTR000020305.9	Clinical	condition	C0000772		Multiple congenital anomalies	444406006	N/A
+GTR000020305.9	Clinical	condition	C0004352	209850	Autism	408856003	N/A
+GTR000020305.9	Clinical	condition	C0004352	209850	Autism	43614003	N/A
+GTR000028894.1	Clinical	condition	C0410529	146000	Hypochondroplasia	205468002	N/A
+GTR000028894.1	Clinical	gene	C1333543	134934	FGFR3:fibroblast growth factor receptor 3	2261	FGFR3
+GTR000325752.3	Research	condition	C1833213	600886	Hereditary hyperferritinemia with congenital cataracts		N/A
+GTR000325752.3	Research	gene	C1414852	134790	FTL:ferritin light chain	2512	FTL
+GTR000500480.7	Clinical	condition	C0014761		Hemolytic disease of fetus OR newborn due to isoimmunization	387705004	N/A
+GTR000506312.7	Clinical	condition	C0270960		Congenital myopathy		N/A
+GTR000506312.7	Clinical	condition	C0024591		Malignant hyperthermia of anesthesia		N/A
+GTR000506312.7	Clinical	condition	C1968782		Myopathy, congenital, with excess of muscle spindles		N/A
+GTR000506312.7	Clinical	condition	C2674259		Neuromuscular disease, congenital, with uniform type 1 fiber		N/A
+GTR000506312.7	Clinical	condition	C5830701	117000	Central core myopathy	43152001	N/A
+GTR000506312.7	Clinical	condition	C4551952	160150	Autosomal dominant centronuclear myopathy		N/A
+GTR000506312.7	Clinical	condition	C3711389	161800	Actin accumulation myopathy	702349003	N/A
+GTR000506312.7	Clinical	condition	C0238357	170500	Hyperkalemic periodic paralysis	278513006	N/A
+GTR000506312.7	Clinical	condition	C0238357	170500	Hyperkalemic periodic paralysis	304737009	N/A
+GTR000506312.7	Clinical	condition	CN031787	255200	Myopathy, centronuclear, 2		N/A
+GTR000506312.7	Clinical	condition	C1850674	255320	Congenital multicore myopathy with external ophthalmoplegia		N/A
+GTR000506312.7	Clinical	condition	C1850569	256030	Nemaline myopathy 2		N/A
+GTR000506312.7	Clinical	condition	C2749128	300580	Myopathy, congenital, with fiber-type disproportion, X-linked		N/A
+GTR000506312.7	Clinical	condition	C0410203	310400	Severe X-linked myotubular myopathy	46804001	N/A
+GTR000506312.7	Clinical	condition	C1838244	600334	Tibial muscular dystrophy		N/A
+GTR000506312.7	Clinical	condition	C1865233	602541	Megaconial type congenital muscular dystrophy		N/A
+GTR000506312.7	Clinical	condition	C1863599	603689	Myopathy, myofibrillar, 9, with early respiratory failure		N/A
+GTR000506312.7	Clinical	condition	C1858763	604145	Dilated cardiomyopathy 1G		N/A
+GTR000506312.7	Clinical	condition	C1854380	605355	Nemaline myopathy 5		N/A
+GTR000506312.7	Clinical	condition	C1842160	608358	Myosin storage myopathy	699267007	N/A
+GTR000506312.7	Clinical	condition	C1837342	608807	Autosomal recessive limb-girdle muscular dystrophy type 2J		N/A
+GTR000506312.7	Clinical	condition	C1836472	609273	Nemaline myopathy 6		N/A
+GTR000506312.7	Clinical	condition	C5829889	609284	Congenital myopathy 4B, autosomal recessive		N/A
+GTR000506312.7	Clinical	condition	C1836447	609285	Congenital myopathy 23		N/A
+GTR000506312.7	Clinical	condition	C1853154	610687	Nemaline myopathy 7		N/A
+GTR000506312.7	Clinical	condition	C2673677	611705	Early-onset myopathy with fatal cardiomyopathy		N/A
+GTR000506312.7	Clinical	condition	C2675527	612540	Compton-North congenital myopathy		N/A
+GTR000506312.7	Clinical	condition	C1861065	613765	Hypertrophic cardiomyopathy 9		N/A
+GTR000506312.7	Clinical	condition	C4707232	614807	Congenital myopathy with internal nuclei and atypical cores		N/A
+GTR000506312.7	Clinical	condition	C3809209	615348	Nemaline myopathy 8		N/A
+GTR000506312.7	Clinical	condition	C3810384	615731	Nemaline myopathy 9		N/A
+GTR000506312.7	Clinical	condition	C4015360	616165	Nemaline myopathy 10		N/A
+GTR000506312.7	Clinical	gene	C1412166	102573	ACTN2:actinin alpha 2	88	ACTN2
+GTR000506312.7	Clinical	gene	C1412136	102610	ACTA1:actin alpha 1, skeletal muscle	58	ACTA1
+GTR000506312.7	Clinical	gene	C1413572	120320	COL12A1:collagen type XII alpha 1 chain	1303	COL12A1
+GTR000506312.7	Clinical	gene	C1417533	159991	MYF6:myogenic factor 6	4618	MYF6
+GTR000506312.7	Clinical	gene	C1417537	160740	MYH2:myosin heavy chain 2	4620	MYH2
+GTR000506312.7	Clinical	gene	C1417542	160760	MYH7:myosin heavy chain 7	4625	MYH7
+GTR000506312.7	Clinical	gene	C1417546	160780	MYL1:myosin light chain 1	4632	MYL1
+GTR000506312.7	Clinical	gene	C1417547	160781	MYL2:myosin light chain 2	4633	MYL2
+GTR000506312.7	Clinical	gene	C1417656	161650	NEB:nebulin	4703	NEB
+GTR000506312.7	Clinical	gene	C1335194	167410	PAX7:paired box 7	5081	PAX7
+GTR000506312.7	Clinical	gene	C1419778	180901	RYR1:ryanodine receptor 1	6261	RYR1
+GTR000506312.7	Clinical	gene	C1421222	188840	TTN:titin	7273	TTN
+GTR000506312.7	Clinical	gene	C0079471	190020	HRAS:HRas proto-oncogene, GTPase	3265	HRAS
+GTR000506312.7	Clinical	gene	C1420873	190990	TPM2:tropomyosin 2	7169	TPM2
+GTR000506312.7	Clinical	gene	C1420874	191030	TPM3:tropomyosin 3	7170	TPM3
+GTR000506312.7	Clinical	gene	C1420827	191041	TNNT1:troponin T1, slow skeletal type	7138	TNNT1
+GTR000506312.7	Clinical	gene	C1414612	300163	FHL1:four and a half LIM domains 1	2273	FHL1
+GTR000506312.7	Clinical	gene	C1336578	300394	TAFAZZIN:tafazzin, phospholipid-lysophospholipid transacylase	6901	TAFAZZIN
+GTR000506312.7	Clinical	gene	C1417434	300415	MTM1:myotubularin 1	4534	MTM1
+GTR000506312.7	Clinical	gene	C2681112	300913	VMA21:vacuolar ATPase assembly factor VMA21	203547	VMA21
+GTR000506312.7	Clinical	gene	C1413559	600016	CNTN1:contactin 1	1272	CNTN1
+GTR000506312.7	Clinical	gene	C1414872	600819	FXR1:FMR1 autosomal homolog 1	8087	FXR1
+GTR000506312.7	Clinical	gene	C1332412	601248	BIN1:bridging integrator 1	274	BIN1
+GTR000506312.7	Clinical	gene	C1413356	601443	CFL2:cofilin 2	1073	CFL2
+GTR000506312.7	Clinical	gene	C1414120	602378	DNM2:dynamin 2	1785	DNM2
+GTR000506312.7	Clinical	gene	C1412731	603883	BAG3:BAG cochaperone 3	9531	BAG3
+GTR000506312.7	Clinical	gene	C1419862	603967	SCN4A:sodium voltage-gated channel alpha subunit 4	6329	SCN4A
+GTR000506312.7	Clinical	gene	C1420533	604126	SVIL:supervillin	6840	SVIL
+GTR000506312.7	Clinical	gene	C1423899	606210	SELENON:selenoprotein N	57190	SELENON
+GTR000506312.7	Clinical	gene	C1425346	607295	MYO18B:myosin XVIIIB	84700	MYO18B
+GTR000506312.7	Clinical	gene	C1424626	607701	KLHL41:kelch like family member 41	10324	KLHL41
+GTR000506312.7	Clinical	gene	C1428017	608517	MYPN:myopalladin	84665	MYPN
+GTR000506312.7	Clinical	gene	C1419093	610467	HACD1:3-hydroxyacyl-CoA dehydratase 1	9200	HACD1
+GTR000506312.7	Clinical	gene	C1538453	612395	CHKB:choline kinase beta	1120	CHKB
+GTR000506312.7	Clinical	gene	C1825964	612453	MEGF10:multiple EGF like domains 10	84466	MEGF10
+GTR000506312.7	Clinical	gene	C2829594	613727	KBTBD13:kelch repeat and BTB domain containing 13	390594	KBTBD13
+GTR000506312.7	Clinical	gene	C1425657	614505	FKBP14:FKBP prolyl isomerase 14	55033	FKBP14
+GTR000506312.7	Clinical	gene	C1824603	614666	CCDC78:coiled-coil domain containing 78	124093	CCDC78
+GTR000506312.7	Clinical	gene	C1428967	615340	KLHL40:kelch like family member 40	131377	KLHL40
+GTR000506312.7	Clinical	gene	C2828870	615345	MYMK:myomaker, myoblast fusion factor	389827	MYMK
+GTR000506312.7	Clinical	gene	C1539880	615521	STAC3:SH3 and cysteine rich domain 3	246329	STAC3
+GTR000506312.7	Clinical	gene	C1823098	615950	SPEG:striated muscle enriched protein kinase	10290	SPEG
+GTR000506312.7	Clinical	gene	C1416888	616112	LMOD3:leiomodin 3	56203	LMOD3

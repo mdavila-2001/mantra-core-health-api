@@ -34,6 +34,8 @@ import {
   parseTop2000,
   parseUniversalLabOrders,
 } from './lib/loinc.mjs';
+import { gunzipSync } from 'node:zlib';
+import { GTR_CODE_SYSTEM, gtrRecords, parseConditionGene, parseMethodCategories, parseTestVersion } from './lib/gtr.mjs';
 import { DOMAINS, assertRecord } from './lib/records.mjs';
 import { GAPS, SOURCES } from './lib/sources.mjs';
 import { TARIFF_EXCLUSIONS, TARIFF_RULES, fonasaItems, pamiItems, pcsItems, sigtapItems, tariffRecords, tussItems } from './lib/tariffs.mjs';
@@ -256,6 +258,55 @@ async function buildTariff(key) {
   return { layer: key, records, stats };
 }
 
+
+// --- Fuentes abiertas bajadas por HTTP (fetch-open-sources.mjs) ----------------
+const openManifest = existsSync(join(SRC, 'open-sources-manifest.json')) ? JSON.parse(readFileSync(join(SRC, 'open-sources-manifest.json'), 'utf8')) : {};
+
+/** Ruta + procedencia de un archivo de una fuente HTTP; null si no se bajó (queda como hueco). */
+function openFile(key, name) {
+  const m = openManifest[key]?.files?.[name];
+  if (!m || m.error) return null;
+  const path = join(SRC, SOURCES[key].dir, name);
+  if (!existsSync(path)) return null;
+  const sha256 = sha256File(path);
+  if (sha256 !== m.sha256) throw new Error(`${key}/${name}: el SHA-256 del archivo (${sha256}) no coincide con el manifiesto (${m.sha256})`);
+  return { path, file: relative(BUILD_DIR, path), sha256, url: m.url, retrievedAt: m.retrievedAt, lastModified: m.lastModified, bytes: m.bytes };
+}
+const lastModifiedDate = (f) => (f.lastModified ? new Date(f.lastModified).toISOString().slice(0, 10) : f.retrievedAt.slice(0, 10));
+
+// --- Capa NCBI GTR --------------------------------------------------------------
+async function buildGtr() {
+  const tv = openFile('gtr-ncbi', 'test_version.gz');
+  const cg = openFile('gtr-ncbi', 'test_condition_gene.txt');
+  const mc = openFile('gtr-ncbi', 'tests_by_method_category.txt');
+  if (!tv || !cg || !mc) return { layer: 'gtr-ncbi', missing: 'archivos de ftp.ncbi.nlm.nih.gov/pub/GTR/data no descargados: corré fetch-open-sources.mjs gtr-ncbi' };
+  const src = SOURCES['gtr-ncbi'];
+  const version = `GTR ${lastModifiedDate(tv)}`;
+  const { records, stats } = gtrRecords(
+    {
+      testVersion: parseTestVersion(gunzipSync(readFileSync(tv.path)).toString('utf8')),
+      conditionGene: parseConditionGene(readFileSync(cg.path, 'utf8')),
+      methodCategories: parseMethodCategories(readFileSync(mc.path, 'utf8')),
+    },
+    {
+      sourceName: `${src.name} — ${version}`,
+      sourceVersion: `${version} (test_version.gz ${lastModifiedDate(tv)}; test_condition_gene.txt ${lastModifiedDate(cg)})`,
+      sourceUrl: tv.url,
+      sourceFile: `${tv.file} + ${cg.file}`,
+      sourceSha256: `${tv.sha256} ${cg.sha256}`,
+      retrievedAt: tv.retrievedAt,
+      license: src.license,
+    },
+  );
+  await writeLayer('gtr-ncbi', records, {
+    source: { name: src.name, url: src.officialUrl },
+    codeSystems: [{ internalCode: GTR_CODE_SYSTEM, name: src.name, canonicalUrl: 'https://www.ncbi.nlm.nih.gov/gtr/', version, sourceKey: 'gtr-ncbi', records: records.length }],
+    files: { 'test_version.gz': { file: tv.file, sha256: tv.sha256, url: tv.url }, 'test_condition_gene.txt': { file: cg.file, sha256: cg.sha256, url: cg.url }, 'tests_by_method_category.txt': { file: mc.file, sha256: mc.sha256, url: mc.url } },
+    stats,
+  });
+  return { layer: 'gtr-ncbi', records, stats };
+}
+
 function coverage(results) {
   const byDomain = Object.fromEntries(Object.keys(DOMAINS).map((d) => [d, 0]));
   const byCategory = {};
@@ -299,7 +350,7 @@ function coverage(results) {
 }
 
 async function main() {
-  const results = [await buildLoinc(), await buildTho(), await buildUcum()];
+  const results = [await buildLoinc(), await buildTho(), await buildUcum(), await buildGtr()];
   for (const key of Object.keys(TARIFF_LAYERS)) results.push(await buildTariff(key));
   for (const r of results) if (r.missing) console.log(`[build] ${r.layer}: SIN DATOS — ${r.missing}`);
   const cov = coverage(results);

@@ -1,0 +1,29 @@
+Major method category	Method category	Total Labs with clinical tests	US Labs with clinical tests	Total Labs with research tests	US Labs with research tests
+Biochemical Genetics	Analyte	20	16	3	2
+Biochemical Genetics	Enzyme assay	14	11	1	1
+Biochemical Genetics	Immunohistochemistry	9	7	1	0
+Biochemical Genetics	Protein analysis	4	4	1	1
+Biochemical Genetics	Protein expression	1	0	1	1
+Cytogenetics	Chromosome breakage studies	10	4	0	0
+Cytogenetics	FISH-interphase	20	14	0	0
+Cytogenetics	FISH-metaphase	27	19	0	0
+Cytogenetics	Fluorescence in situ hybridization (FISH)	12	9	0	0
+Cytogenetics	Karyotyping	34	21	1	1
+Cytogenetics	Multicolor FISH (M-FISH)/Spectral Karyotyping™ (SKY™)	2	0	0	0
+Cytogenetics	Sister chromatid exchange	2	1	0	0
+Molecular Genetics	DNA analysis	0	0	0	0
+Molecular Genetics	Deletion/duplication analysis	157	83	5	3
+Molecular Genetics	Detection of homozygosity	22	15	0	0
+Molecular Genetics	Linkage analysis	13	4	3	2
+Molecular Genetics	Methylation analysis	65	36	0	0
+Molecular Genetics	Microsatellite instability testing (MSI)	27	17	1	0
+Molecular Genetics	Mutation scanning of select exons	43	20	0	0
+Molecular Genetics	Mutation scanning of the entire coding region	55	26	9	4
+Molecular Genetics	RNA analysis	38	32	2	2
+Molecular Genetics	Sequence analysis of select exons	116	63	6	4
+Molecular Genetics	Sequence analysis of the entire coding region	177	91	24	14
+Molecular Genetics	Targeted variant analysis	175	104	3	2
+Molecular Genetics	Uniparental disomy study (UPD)	19	10	0	0
+Serology	Antibody assay	0	0	0	0
+Serology	Antigen assay	0	0	0	0
+Serology	Combination antibody and antigen assay	0	0	0	0
