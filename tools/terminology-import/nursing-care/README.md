@@ -24,6 +24,13 @@ node tools/terminology-import/nursing-care/load-nursing-care.mjs
 node tools/terminology-import/nursing-care/load-nursing-care.mjs --apply
 # sin build local (p. ej. en otra máquina): usa los datos versionados de data/
 node tools/terminology-import/nursing-care/load-nursing-care.mjs --apply --from-repo-data
+# Omaha System (2026-10-27): red → NDJSON → contraste → versionado (necesita `pdftotext`)
+node tools/terminology-import/nursing-care/fetch-omaha.mjs
+node tools/terminology-import/nursing-care/build-omaha.mjs
+node tools/terminology-import/nursing-care/verify-omaha-crosscheck.mjs
+node tools/terminology-import/nursing-care/fetch-loinc-links.mjs          # enlaces LOINC por código (NLM Clinical Tables)
+node tools/terminology-import/nursing-care/verify-cmdic-license.mjs       # cláusula del Ministerio + .zip oficial vs corpus
+node tools/terminology-import/nursing-care/pack-omaha.mjs                 # después de pack-data.mjs
 # validación con las ramas hermanas (y con la base si se pasa --db)
 node tools/terminology-import/nursing-care/link-check.mjs [--db]
 # pruebas con archivos reales
@@ -36,6 +43,7 @@ node --test "tools/terminology-import/nursing-care/test/*.test.mjs"
 |---|---|---|
 | `openehr-ckm` | arquetipo → nodo (CLUSTER/ELEMENT/paso de ACTION) → respuesta (con valor ordinal si lo tiene) | `PART_OF` hijo → padre; `IS_A` especialización → arquetipo padre |
 | `es-msssi-cmdic-13606` | informe (COMPOSITION) → sección → entrada → cluster → elemento; ranuras con los arquetipos que admiten | `PART_OF` |
+| `omaha-system` | dominio → problema → signo/síntoma (18 de 42 problemas), categorías y objetivos de intervención, modificadores y la escala PRSO; 320 conceptos, inglés verbatim, dominio público con cita del libro de 2005 | `PART_OF` hijo → padre |
 | `nursing-terminology-registry` | una fila por terminología de enfermería reconocida por la ANA (OID y URI de HL7 THO, licencia) | — |
 
 - `display`: el castellano que publica la fuente (original del Ministerio, o traducción

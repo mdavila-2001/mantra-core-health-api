@@ -17,7 +17,7 @@
 // =============================================================================
 
 import { execFileSync } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { BUILD_DIR, CORPUS_PATH, META_PATH, REPO_DATA_DIR, ensureDir, fetchCached, readTarGzMember, sha256, writeGzParts } from './lib/common.mjs';
@@ -39,14 +39,14 @@ const REPORT = process.argv.includes('--report');
 
 async function loadFonasa() {
   const t = SOURCES.fonasa.transport;
-  const { bytes, sha256: tgzSha } = await fetchCached(t.url, { sha256: t.sha256, name: 'fonasa-mle-open-1.0.0.tgz' });
+  const { bytes, path, sha256: tgzSha } = await fetchCached(t.url, { sha256: t.sha256, name: 'fonasa-mle-open-1.0.0.tgz' });
   const member = readTarGzMember(bytes, t.member);
   const rows = parseFonasa(member.toString('utf8'));
   const check = verifyFonasaAgainstPdf(rows, readFonasaPdfExtracts());
   if (check.problems.length > 0) {
     throw new Error(`FONASA: la copia npm no coincide con el PDF oficial en ${check.problems.length} filas: ${check.problems.slice(0, 5).join('; ')}`);
   }
-  return { rows, transport: { ...t, sha256: tgzSha, memberSha256: sha256(member) }, check };
+  return { rows, transport: { ...t, sha256: tgzSha, memberSha256: sha256(member) }, check, cachePaths: [path] };
 }
 
 async function loadCups() {
@@ -58,6 +58,7 @@ async function loadCups() {
   const copyB = parseCupsCopyB(fb.bytes.toString('utf8'));
   const cross = crossValidateCups(copyA, copyB);
   return {
+    cachePaths: [fa.path, fb.path],
     agreed: cross.agreed,
     onlyA: cross.onlyA,
     transport: { kind: 'github-raw-pair', copies: [a, b].map((c) => ({ repo: c.repo, commit: c.commit, path: c.path, url: raw(c), sha256: c.sha256 })) },
@@ -79,7 +80,7 @@ async function loadCups2025() {
     const parent = { procedure: r.code.slice(0, 7), group: r.code.slice(0, 5), subcategory: r.code.slice(0, 3) }[r.level];
     return parent && !codes.has(parent);
   }).map((r) => r.code);
-  return { rows, transport: { ...t, sha256: f.sha256 }, stats: { byLevel, chapters: chapters.length, sections: sections.length, orphansWithoutParentInSource: orphans } };
+  return { rows, cachePaths: [f.path], transport: { ...t, sha256: f.sha256 }, stats: { byLevel, chapters: chapters.length, sections: sections.length, orphansWithoutParentInSource: orphans } };
 }
 
 function markdownCoverage(cov) {
@@ -98,11 +99,13 @@ async function main() {
   const missing = [...referencedSpecialties(rules)].filter((c) => !modelCodes.has(c));
   if (missing.length > 0) throw new Error(`rules.json apunta a especialidades que el modelo no tiene: ${missing.join(', ')}`);
 
-  const retrievedAt = new Date().toISOString();
   const fonasa = await loadFonasa();
   const cups = await loadCups();
   const cups2025 = await loadCups2025();
   const bo = readBoDataset();
+  // `retrievedAt` = cuándo se bajaron los bytes (mtime del archivo en la caché, el más reciente de las fuentes), NO la hora del armado:
+  // con la misma caché, dos armados dan exactamente los mismos bytes.
+  const retrievedAt = new Date(Math.max(...[...fonasa.cachePaths, ...cups.cachePaths, ...cups2025.cachePaths].map((f) => statSync(f).mtimeMs))).toISOString();
 
   const corpus = buildCorpus(
     { fonasaRows: fonasa.rows, cupsAgreed: cups.agreed, cupsOnlyA: cups.onlyA, cups2025Rows: cups2025.rows, bo, retrievedAt, transports: { fonasa: fonasa.transport, cups: cups.transport, cups2025: cups2025.transport } },

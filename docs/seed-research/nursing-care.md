@@ -38,6 +38,27 @@ devuelve 403 al CONNECT o no resuelve (sondeado el 2026-10-24): `www.omahasystem
 La búsqueda web (del lado del servidor) se usó **sólo para descubrir fuentes y verificar licencias**;
 ningún dato que pase por un resumen de modelo se cargó. No se eludió ningún bloqueo ni CAPTCHA.
 
+## Cierre de huecos — 2026-10-27
+
+La red de esta sesión (2026-10-27) ya alcanza a `www.omahasystem.org`, al NLM (Clinical Tables), a `www.sanidad.gob.es`, a `ckm.openehr.org`, a `www.minsalud.gob.bo`, a `www.imss.gob.mx` y a `www.minsal.cl`; `loinc.org` sigue dando 403. Evidencia en `docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C8/`. Cargas medidas en un **Postgres 16 desechable** (no en la base del stack): 1.ª corrida con las filas nuevas, 2.ª con **0** y consultas de integridad (0 duplicados, 0 huérfanos, 0 nulos) pegadas en la evidencia.
+
+| Hueco | Estado el 2026-10-24 | Estado hoy | Qué se cargó | Antes → después |
+|---|---|---|---|---|
+| **Omaha System** (dominio público) | host inaccesible | `omahasystem.org` 200; `omahasystemmn.org` 200 | parser contra el sitio oficial, la imagen de la PRSO y el suplemento del MOSUG: 4 dominios, 42 problemas, 4 categorías, 76 objetivos, modificadores, PRSO y 168 signos/síntomas de 18 problemas con su definición | 0 → **320** conceptos (`omaha-system`), 231 relaciones |
+| Omaha: signos/síntomas de 24 problemas, códigos numéricos, definiciones de objetivos | — | sólo en el libro de 2005 (Apéndices A y E) | nada (sin fuente abierta; no se inventa) | hueco de licencia/curaduría |
+| **LOINC** (paneles y escalas) | enlaces sin resolver | NLM Clinical Tables 200 (`loinc.org` 403) | los 126 enlaces: **47 términos LOINC enlazados, los 47 resueltos** (48 `concept_maps` en la base desechable); 54 códigos `LA…` son respuestas de LOINC, no términos | 0 → 48 mapas |
+| LOINC `[OMAHA]` | — | 403 términos publicados | guardados como referencia (`data/loinc-omaha-terms`); sin cruce por nombre | — |
+| **CMDIC** (licencia) | «no declarada» | Aviso legal del Ministerio leído hoy | reutilizable (comercial y no comercial) con 3 condiciones; el `.zip` oficial = el corpus (617/617) | licencia confirmada |
+| **Glasgow (adultos)** | sin verificar | titular: «no license is required» (clínica e investigación) | contenido de la escala | 0 → 22 conceptos (8 015 → 8 037) |
+| NEWS2 | sin verificar | titular: libre, pero «must not be modified/amended» | nada | decisión del propietario |
+| Braden, Barthel, Waterlow, MUST | sin verificar | licencia/permiso exigidos | nada | hueco de licencia |
+| Norton, EMINA, Cubbin-Jackson, Morse | sin fuente | sin fuente abierta con licencia | nada | hueco |
+| Protocolos Bolivia / España / MINSAL / IMSS | hosts bloqueados | Bolivia, España, MINSAL, IMSS responden 200 | nada: Bolivia no publica manual de enfermería; IMSS y GuíaSalud son NC; MINSAL sin licencia legible; `cenetec-difusion.com` es spam | hueco de licencia/curaduría (ver SOURCES.md) |
+
+Conteos por code system (antes → después): `openehr-ckm` 8 015 → 8 037 · `es-msssi-cmdic-13606` 617 → 617 · `nursing-terminology-registry` 12 → 12 · `omaha-system` 0 → 320 · **total 8 644 → 8 986**. Subconjunto de enfermería: 101 arquetipos y 1 099 conceptos → 101 y 1 121 (los 22 de Glasgow).
+
+**No cubierto**: el contenido de las 196 escalas retenidas; los signos/síntomas de 24 problemas de Omaha; la traducción al castellano de Omaha (no hay oficial); la carga en la base real del stack (sólo Postgres desechable); la verificación de la transcripción visual de la PRSO contra el original impreso (sólo se contrastó con LOINC).
+
 ## Pasadas (protocolo de saturación)
 
 Aportes nuevos contados **por code system + código** tras deduplicar.
@@ -125,15 +146,15 @@ con esta rama. `link-check.mjs` repite el control (git y, con `--db`, por códig
 
 | Hueco | Requisito | Quién lo da |
 |---|---|---|
-| Omaha System (dominio público) | habilitar `www.omahasystem.org` en la red del entorno; luego escribir el parser contra el archivo real | propietario (red) |
+| Omaha System — lo que sólo está en el libro (códigos, signos/síntomas de 24 problemas, definiciones de objetivos) | el libro de 2005 (Health Connections Press) o un permiso para volcar sus Apéndices A y E; **confirmar además** que cargar los términos en un producto comercial entra en el uso libre de la FAQ | propietario (licencia / editorial) |
 | CCC v2.5 | leer y aceptar el acuerdo de SabaCare | propietario (licencia) |
 | ICNP / CIPE en castellano | licencia del CIE (tasas comerciales) | propietario (licencia) |
 | NANDA-I, NIC, NOC | licencia comercial | propietario (licencia) |
-| LOINC (paneles de enfermería y escalas) | habilitar `loinc.org`/NLM o cargar `import-loinc.mjs`: los 126 enlaces se resuelven solos | propietario (red) |
+| LOINC (paneles de enfermería y escalas) | los 47 términos enlazados están en el subconjunto público del NLM; cargar `import-loinc.mjs` en la base real para que los 48 mapas se creen | propietario (carga en el stack) |
 | Norton, Norton modificada, EMINA, Cubbin-Jackson, Morse | una fuente con licencia verificada | propietario |
 | Contenido de escalas (Braden, Barthel, Glasgow, Downton, NEWS2…) | permiso o licencia del titular; el importador lo habilita con un *override* con evidencia primaria (`LICENSE_OVERRIDES`) | propietario (licencia) |
-| CMDIC del Ministerio | confirmación escrita de la licencia de los arquetipos | propietario (Ministerio de Sanidad) |
-| Protocolos de enfermería de Bolivia (Ministerio de Salud y Deportes), España, MINSAL, IMSS | habilitar hosts y confirmar licencia; son PDF: parser a validar contra el archivo real | propietario (red) |
+| CMDIC del Ministerio | **cerrado 2026-10-27** (Aviso legal); queda cumplir las 3 condiciones (no desnaturalizar, citar, fecha de actualización) | — |
+| Protocolos de enfermería de Bolivia, España, MINSAL, IMSS | hosts ya alcanzables: no hay documento libre (ver «Cierre de huecos 2026-10-27» y SOURCES.md) | propietario (licencia) |
 | Ostomías | no hay arquetipo en CKM | — |
 | *Share-alike* de CC-BY-SA (CKM) | decidir el alcance de la obligación sobre obras derivadas | legal |
 
