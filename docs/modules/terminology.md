@@ -9,7 +9,7 @@
 # Módulo `terminology`
 
 **Fuente:** [`src/modules/terminology/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/terminology/README.md)
-· 7 controllers · 9 services · 9 repositories · 15 entidades · 19 DTO
+· 7 controllers · 9 services · 9 repositories · 16 entidades · 19 DTO
 
 ---
 
@@ -170,6 +170,21 @@ conceptos):
 Los endpoints administrativos exigen rol global `SECURITY_ADMIN` (`@Roles`) sobre
 el `JwtAuthGuard` global. `$translate` y `$lookup` sólo exigen autenticación: el
 caso de uso los asigna al consumidor FHIR, no al terminólogo.
+
+### Contenido `professional` (farmacología clínica)
+
+Las secciones del code system `clinical-pharmacology` (posología incluida) llevan
+`audience: 'professional'` dentro de su `value_json`. `$lookup` y
+`GET /terminology/concepts/:conceptId` las omiten salvo que el sujeto tenga un rol
+clínico (los asistenciales de `CLINICAL_ROLE_SEED` o el `SUPERADMIN` de plataforma); sin sujeto no
+se entrega ninguna. Un `SECURITY_ADMIN` o un `PATIENT` no las ven. La regla vive en
+`pharmacology-audience.ts`. La expansión de un conjunto de valores no las alcanza:
+ese code system no es miembro de ninguno.
+
+`$lookup` agrega a cada propiedad que es una sección `sourceAge` (estado S7):
+`{ known, sourceDate?, retrievedAt }`. `known: false` es una ficha de CIMA que no
+publica su fecha (`document.versionUnpublished`): se carga igual y el dato que vale
+es la fecha de consulta.
 
 ## Persistencia
 

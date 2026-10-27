@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `insurance`
 
-Referencia exhaustiva de 55 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 56 operación(es) del módulo `insurance`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `insurance`, `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`, `insurer-patients`, `insurer-received-claims`, `my-insurance-claims`
 - **Controladores:** `AppealsController`, `BrokerCommissionController`, `ClaimsController`, `ClaimsReadController`, `CoverageController`, `InsuranceAnalyticsController`, `InsuranceBackboneController`, `InsuranceCatalogController`, `InsurancePortabilityController`, `InsurancePortabilityPublicController`, `InsuranceReadController`, `InsurerPatientsController`, `InsurerReceivedClaimsController`, `MyClaimsController`, `PractitionerInsuranceNetworksController`, `PractitionerSettlementBatchesController`, `PriorAuthController`, `ReconciliationController`
@@ -52,20 +52,21 @@ Referencia exhaustiva de 55 operación(es) del módulo `insurance`, derivada del
 39. [GET /insurance/received-claims](#39-get-insurance-received-claims) — Solicitudes de seguro recibidas por la aseguradora activa
 40. [POST /insurance/received-claims/{id}/decision](#40-post-insurance-received-claims-id-decision) — Dictaminar una solicitud recibida (definitivo)
 41. [POST /patient-coverages](#41-post-patient-coverages) — Registrar cobertura de paciente y dependientes
-42. [GET /patient-coverages/me](#42-get-patient-coverages-me) — Mi cobertura
-43. [GET /practitioner-settlement-batches](#43-get-practitioner-settlement-batches) — Listar los lotes de liquidación del alcance del actor
-44. [POST /practitioner-settlement-batches](#44-post-practitioner-settlement-batches) — Generar (o repetir) el lote de liquidación del período
-45. [GET /practitioner-settlement-batches/{id}](#45-get-practitioner-settlement-batches-id) — Consultar un lote de liquidación
-46. [GET /practitioners/{profileId}/insurance-networks](#46-get-practitioners-profileid-insurance-networks) — Aseguradoras con las que trabaja el profesional
-47. [POST /prior-authorization-requests](#47-post-prior-authorization-requests) — Solicitar autorización previa con items
-48. [GET /prior-authorization-requests/{id}](#48-get-prior-authorization-requests-id) — Detalle de una solicitud de aprobación (aseguradora)
-49. [POST /prior-authorization-requests/{id}/determinations](#49-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
-50. [GET /prior-authorization-requests/inbox](#50-get-prior-authorization-requests-inbox) — Bandeja de solicitudes de aprobación (aseguradora)
-51. [POST /provider-networks](#51-post-provider-networks) — Alta de red de prestadores (soporte)
-52. [POST /provider-networks/{id}/memberships](#52-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
-53. [GET /public/portability/verify/{manifestHash}](#53-get-public-portability-verify-manifesthash) — Verificar la autenticidad de un certificado de portabilidad por su sello
-54. [POST /reconciliation-batches](#54-post-reconciliation-batches) — Abrir lote de conciliación
-55. [POST /reconciliation-batches/{id}/items](#55-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
+42. [GET /patient-coverages/by-patient/{patientProfileId}](#42-get-patient-coverages-by-patient-patientprofileid) — Seguros de una persona, para quien cobra
+43. [GET /patient-coverages/me](#43-get-patient-coverages-me) — Mi cobertura
+44. [GET /practitioner-settlement-batches](#44-get-practitioner-settlement-batches) — Listar los lotes de liquidación del alcance del actor
+45. [POST /practitioner-settlement-batches](#45-post-practitioner-settlement-batches) — Generar (o repetir) el lote de liquidación del período
+46. [GET /practitioner-settlement-batches/{id}](#46-get-practitioner-settlement-batches-id) — Consultar un lote de liquidación
+47. [GET /practitioners/{profileId}/insurance-networks](#47-get-practitioners-profileid-insurance-networks) — Aseguradoras con las que trabaja el profesional
+48. [POST /prior-authorization-requests](#48-post-prior-authorization-requests) — Solicitar autorización previa con items
+49. [GET /prior-authorization-requests/{id}](#49-get-prior-authorization-requests-id) — Detalle de una solicitud de aprobación (aseguradora)
+50. [POST /prior-authorization-requests/{id}/determinations](#50-post-prior-authorization-requests-id-determinations) — Emitir determinación de autorización previa
+51. [GET /prior-authorization-requests/inbox](#51-get-prior-authorization-requests-inbox) — Bandeja de solicitudes de aprobación (aseguradora)
+52. [POST /provider-networks](#52-post-provider-networks) — Alta de red de prestadores (soporte)
+53. [POST /provider-networks/{id}/memberships](#53-post-provider-networks-id-memberships) — Alta de membresía de prestador en la red
+54. [GET /public/portability/verify/{manifestHash}](#54-get-public-portability-verify-manifesthash) — Verificar la autenticidad de un certificado de portabilidad por su sello
+55. [POST /reconciliation-batches](#55-post-reconciliation-batches) — Abrir lote de conciliación
+56. [POST /reconciliation-batches/{id}/items](#56-post-reconciliation-batches-id-items) — Agregar ítem de conciliación al lote
 
 ---
 
@@ -4158,7 +4159,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Cobertura no encontrada | Excepción explícita en src/modules/insurance/application/services/claim-quote.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Las secuencias de líneas deben ser únicas | Excepción explícita en src/modules/insurance/application/services/claim-quote.service.ts |
 | 422 | `PRECONDITION_FAILED` | La cobertura no corresponde a la aseguradora indicada | Excepción explícita en src/modules/insurance/application/services/claim-quote.service.ts |
@@ -5195,6 +5195,30 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "outcome": "APPROVED",
         "decidedAt": "2026-07-31T12:00:00.000Z",
         "reason": "Texto descriptivo de ejemplo"
+      },
+      "breakdown": {
+        "currencyCode": "BOB",
+        "patientTotal": "valor-ejemplo",
+        "insurerTotal": "valor-ejemplo",
+        "lines": [
+          {
+            "key": "00000000-0000-4000-8000-000000000001",
+            "service": "valor-ejemplo",
+            "billedAmount": "valor-ejemplo",
+            "coveragePercent": "valor-ejemplo",
+            "copayAmount": "valor-ejemplo",
+            "patientAmount": "valor-ejemplo",
+            "insurerAmount": "valor-ejemplo",
+            "chargeKind": "INSURED_SHARE",
+            "authorizationStatus": "NOT_REQUIRED"
+          }
+        ]
+      },
+      "patientObjection": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "reason": "AMOUNT_DIFFERS",
+        "submittedAt": "2026-07-31T12:00:00.000Z",
+        "status": "OPEN"
       }
     }
   ],
@@ -5207,7 +5231,7 @@ Campos de la respuesta:
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `view` | Sí | `string` | valores: `PATIENT`, `PRACTITIONER`, `LABORATORY`, `IMAGING`, `NONE` | Sin descripción específica en el contrato OpenAPI. | `PATIENT` |
-| `items` | Sí | `array<MyClaimDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","patientName":"Nombre de ejemplo","practitioner":{"displayName":"Nombre de ejemplo","specialty":"valor-ejemplo"},"providerName":"Nombre de ejemplo","service":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"additionalServiceCount":1,"billedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"approvedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"submittedAt":"2026-07-31T12:00:00.000Z","serviceDate":"2026-07-31","insurerName":"Nombre de ejemplo","planName":"Nombre de ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"decision":{"outcome":"APPROVED","decidedAt":"2026-07-31T12:00:00.000Z","reason":"Texto descriptivo de ejemplo"}}]` |
+| `items` | Sí | `array<MyClaimDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","patientName":"Nombre de ejemplo","practitioner":{"displayName":"Nombre de ejemplo","specialty":"valor-ejemplo"},"providerName":"Nombre de ejemplo","service":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"additionalServiceCount":1,"billedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"approvedTotal":{"amount":"1250.00","currency":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"}},"submittedAt":"2026-07-31T12:00:00.000Z","serviceDate":"2026-07-31","insurerName":"Nombre de ejemplo","planName":"Nombre de ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"decision":{"outcome":"APPROVED","decidedAt":"2026-07-31T12:00:00.000Z","reason":"Texto descriptivo de ejemplo"},"breakdown":{"currencyCode":"BOB","patientTotal":"valor-ejemplo","insurerTotal":"valor-ejemplo","lines":[{"key":"00000000-0000-4000-8000-000000000001","service":"valor-ejemplo","billedAmount":"valor-ejemplo","coveragePercent":"valor-ejemplo","copayAmount":"valor-ejemplo","patientAmount":"valor-ejemplo","insurerAmount":"valor-ejemplo","chargeKind":"INSURED_SHARE","authorizationStatus":"NOT_REQUIRED"}]},"patientObjection":{"id":"00000000-0000-4000-8000-000000000001","reason":"AMOUNT_DIFFERS","submittedAt":"2026-07-31T12:00:00.000Z","status":"OPEN"}}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].claimIdentifier` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `items[].patientName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -5240,6 +5264,25 @@ Campos de la respuesta:
 | `items[].decision.outcome` | Sí | `string` | valores: `APPROVED`, `PARTIAL`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `APPROVED` |
 | `items[].decision.decidedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `items[].decision.reason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].breakdown` | Sí | `MyClaimBreakdownDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"currencyCode":"BOB","patientTotal":"valor-ejemplo","insurerTotal":"valor-ejemplo","lines":[{"key":"00000000-0000-4000-8000-000000000001","service":"valor-ejemplo","billedAmount":"valor-ejemplo","coveragePercent":"valor-ejemplo","copayAmount":"valor-ejemplo","patientAmount":"valor-ejemplo","insurerAmount":"valor-ejemplo","chargeKind":"INSURED_SHARE","authorizationStatus":"NOT_REQUIRED"}]}` |
+| `items[].breakdown.currencyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `items[].breakdown.patientTotal` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].breakdown.insurerTotal` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].breakdown.lines` | Sí | `array<MyClaimBreakdownLineDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"key":"00000000-0000-4000-8000-000000000001","service":"valor-ejemplo","billedAmount":"valor-ejemplo","coveragePercent":"valor-ejemplo","copayAmount":"valor-ejemplo","patientAmount":"valor-ejemplo","insurerAmount":"valor-ejemplo","chargeKind":"INSURED_SHARE","authorizationStatus":"NOT_REQUIRED"}]` |
+| `items[].breakdown.lines[].key` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].breakdown.lines[].service` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].breakdown.lines[].billedAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].breakdown.lines[].coveragePercent` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].breakdown.lines[].copayAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].breakdown.lines[].patientAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].breakdown.lines[].insurerAmount` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].breakdown.lines[].chargeKind` | Sí | `string` | valores: `INSURED_SHARE`, `PRIVATE_FULL` | Sin descripción específica en el contrato OpenAPI. | `INSURED_SHARE` |
+| `items[].breakdown.lines[].authorizationStatus` | Sí | `string` | valores: `NOT_REQUIRED`, `APPROVED`, `MISSING`, `PENDING`, `DENIED`, `EXPIRED`, `MISMATCH`, `AMOUNT_EXCEEDED`; admite null | Sin descripción específica en el contrato OpenAPI. | `NOT_REQUIRED` |
+| `items[].patientObjection` | Sí | `MyClaimObjectionDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","reason":"AMOUNT_DIFFERS","submittedAt":"2026-07-31T12:00:00.000Z","status":"OPEN"}` |
+| `items[].patientObjection.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientObjection.reason` | Sí | `string` | valores: `AMOUNT_DIFFERS`, `SERVICE_NOT_RECEIVED`, `NOT_INFORMED` | Sin descripción específica en el contrato OpenAPI. | `AMOUNT_DIFFERS` |
+| `items[].patientObjection.submittedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].patientObjection.status` | Sí | `string` | valores: `OPEN`, `RESOLVED` | Sin descripción específica en el contrato OpenAPI. | `OPEN` |
 | `truncated` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -5253,6 +5296,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 403 | `FORBIDDEN` | No hay acceso a las solicitudes del tenant indicado | Excepción explícita en src/modules/insurance/application/services/my-claims.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cobertura del paciente no corresponde al plan del cobro | Excepción explícita en src/modules/insurance/application/services/claim-coverage-policy.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -6734,7 +6778,130 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. GET /patient-coverages/me
+## 42. GET /patient-coverages/by-patient/{patientProfileId}
+
+- **Módulo:** `insurance`
+- **Etiqueta OpenAPI:** `insurance-coverage`
+- **Nombre:** Seguros de una persona, para quien cobra
+- **Operation ID:** `CoverageController_listForPatient`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CoverageController.listForPatient](../../src/modules/insurance/presentation/controllers/coverage.controller.ts)
+
+### Descripción de negocio
+
+Seguros de una persona, para quien cobra. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Los seguros de una persona, para quien cobra (carril 16, REQ-16-026). Usa el `@Roles` de clase (`BILLING`, `FINANCE`; `SUPERADMIN` por el comodín), el mismo de cotizar. Cada lectura queda en la bitácora de accesos con la persona leída.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /patient-coverages/by-patient/{patientProfileId}` en `CoverageController_listForPatient`. El controlador delega en `CoverageService.listForPatient`. No recibe body. El tipo de retorno estático es `Promise<PatientCoverageOptionListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /patient-coverages/by-patient/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `BILLING`, `FINANCE`.
+- Deben ser UUID válidos: `patientProfileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /patient-coverages/by-patient/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientCoverageOptionListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PatientCoverageOptionListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientCoverageOptionListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientCoverageOptionListDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PatientCoverageOptionListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientCoverageOptionListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientCoverageOptionListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientCoverageOptionListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientCoverageOptionListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "insuranceCarrierId": "00000000-0000-4000-8000-000000000001",
+      "carrierName": "Nombre de ejemplo",
+      "planName": "Nombre de ejemplo",
+      "validityStatus": "CURRENT",
+      "currencyCode": "BOB"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PatientCoverageOptionDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","validityStatus":"CURRENT","currencyCode":"BOB"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].insuranceCarrierId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].carrierName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].planName` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].validityStatus` | Sí | `string` | valores: `CURRENT`, `UPCOMING`, `EXPIRED`, `INACTIVE`, `UNKNOWN` | Sin descripción específica en el contrato OpenAPI. | `CURRENT` |
+| `items[].currencyCode` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: BILLING, FINANCE. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/patient-coverages/by-patient/{patientProfileId}"
+}
+```
+
+---
+
+## 43. GET /patient-coverages/me
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-coverage`
@@ -6848,7 +7015,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /practitioner-settlement-batches
+## 44. GET /practitioner-settlement-batches
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-practitioner-settlement`
@@ -7042,7 +7209,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. POST /practitioner-settlement-batches
+## 45. POST /practitioner-settlement-batches
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-practitioner-settlement`
@@ -7253,7 +7420,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /practitioner-settlement-batches/{id}
+## 46. GET /practitioner-settlement-batches/{id}
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-practitioner-settlement`
@@ -7441,7 +7608,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /practitioners/{profileId}/insurance-networks
+## 47. GET /practitioners/{profileId}/insurance-networks
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance`
@@ -7565,7 +7732,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. POST /prior-authorization-requests
+## 48. POST /prior-authorization-requests
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -7733,7 +7900,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. GET /prior-authorization-requests/{id}
+## 49. GET /prior-authorization-requests/{id}
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -7900,7 +8067,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. POST /prior-authorization-requests/{id}/determinations
+## 50. POST /prior-authorization-requests/{id}/determinations
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -8057,7 +8224,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. GET /prior-authorization-requests/inbox
+## 51. GET /prior-authorization-requests/inbox
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-prior-auth`
@@ -8195,7 +8362,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. POST /provider-networks
+## 52. POST /provider-networks
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -8327,7 +8494,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. POST /provider-networks/{id}/memberships
+## 53. POST /provider-networks/{id}/memberships
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-backbone`
@@ -8462,7 +8629,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. GET /public/portability/verify/{manifestHash}
+## 54. GET /public/portability/verify/{manifestHash}
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-portability-public`
@@ -8574,7 +8741,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. POST /reconciliation-batches
+## 55. POST /reconciliation-batches
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`
@@ -8707,7 +8874,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. POST /reconciliation-batches/{id}/items
+## 56. POST /reconciliation-batches/{id}/items
 
 - **Módulo:** `insurance`
 - **Etiqueta OpenAPI:** `insurance-reconciliation`
