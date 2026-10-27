@@ -19,7 +19,7 @@ const attr = (tag, name) => {
  * la fuente las declara, `colspan`/`rowspan` (no se expanden: expandir sería
  * repetir texto que la fuente escribió una vez). Tablas anidadas: se leen las
  * celdas de la exterior con su contenido completo.
- * @returns {{ rows: { text: string|null, colspan?: number, rowspan?: number }[][] }[]}
+ * @returns {{ caption?: string, rows: { text: string|null, colspan?: number, rowspan?: number }[][] }[]}
  */
 export function extractTables(html) {
   if (html == null) return [];
@@ -37,7 +37,12 @@ export function extractTables(html) {
       if (depth === 0) tables.push(src.slice(start, m.index + m[0].length));
     }
   }
-  return tables.map((t) => ({ rows: tableRows(t) })).filter((t) => t.rows.length > 0);
+  return tables
+    .map((t) => {
+      const caption = htmlToText(/<caption\b[^>]*>([\s\S]*?)<\/caption>/i.exec(t)?.[1] ?? null); // título que la etiqueta escribió («Table 1: …»)
+      return { ...(caption ? { caption } : {}), rows: tableRows(t) };
+    })
+    .filter((t) => t.rows.length > 0);
 }
 
 function tableRows(tableHtml) {

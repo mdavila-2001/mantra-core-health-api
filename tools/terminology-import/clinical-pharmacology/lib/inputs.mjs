@@ -1,13 +1,14 @@
 // Lectura de lo YA descargado (sin red): productos de CIMA, maestra ATC, LINAME
 // y vademécum, y el universo de ATC 5 que se busca en las demás fuentes.
 
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { atcMasterRows, cimaProduct, groupByAtc5, isAtc5 } from './cima.mjs';
 import { listJson, readJsonIfExists, retrievedAtOf } from './cli.mjs';
 import { loadLiname, loadVademecumAtc } from './liname.mjs';
-import { CIMA_SHARED_CACHE, cpCache } from './paths.mjs';
-import { RXNAV_LICENSE, atcBridge } from './rxnorm.mjs';
+import { CIMA_SHARED_CACHE, cpCache, rxnavByAtcPath, rxnavConceptPath } from './paths.mjs';
+import { RXNAV_LICENSE, atcBridge, parseProperties, parseRelatedIn, parseRelatedPin, parseRxcuiByAtc } from './rxnorm.mjs';
 
 /** Productos de CIMA desde la caché compartida (listado + detalle). Vacío si nunca se bajó. */
 export function readCimaProducts() {
@@ -46,17 +47,36 @@ export function readAllInputs() {
   return { rows, products, master, liname, vademecum, universe: atcUniverse({ products, master, liname, vademecum }) };
 }
 
-/** Puente RxNav de un ATC desde la caché (sin red). `null` si ese ATC nunca se consultó. */
+/** Puente RxNav de un ATC desde la caché v2 (sin red). `null` si ese ATC nunca se consultó. */
 export function readBridge(atc) {
-  const dir = cpCache('rxnav', atc);
-  const byAtc = readJsonIfExists(join(dir, 'by-atc.json'));
-  if (byAtc === undefined) return null;
-  const r = { byAtc, properties: {}, relatedIn: {}, unii: {} };
-  for (const name of listJson(dir)) {
-    const m = /^(properties|related-in|unii)-(\d+)\.json$/.exec(name);
-    if (!m) continue;
-    const slot = { properties: 'properties', 'related-in': 'relatedIn', unii: 'unii' }[m[1]];
-    r[slot][m[2]] = readJsonIfExists(join(dir, name));
+  const byAtcFile = rxnavByAtcPath(atc);
+  if (!existsSync(byAtcFile)) return null;
+  const files = [byAtcFile];
+  const get = (rxcui, kind) => {
+    const path = rxnavConceptPath(rxcui, kind);
+    if (!existsSync(path)) return undefined;
+    files.push(path);
+    return readJsonIfExists(path);
+  };
+  const r = { byAtc: readJsonIfExists(byAtcFile), properties: {}, relatedIn: {}, relatedPin: {}, unii: {} };
+  const props = (id) => (r.properties[id] ??= get(id, 'properties'));
+  const ingredients = new Set();
+  for (const id of parseRxcuiByAtc(r.byAtc)) {
+    const p = parseProperties(props(id));
+    if (p?.tty === 'IN' || p?.tty === 'PIN') ingredients.add(id);
+    else if (p?.tty === 'MIN') {
+      r.relatedIn[id] = get(id, 'related-in');
+      for (const i of parseRelatedIn(r.relatedIn[id])) ingredients.add(i);
+    }
   }
-  return { ...atcBridge(atc, r), source: 'nlm-rxnav', retrievedAt: retrievedAtOf(join(dir, 'by-atc.json')), license: RXNAV_LICENSE };
+  for (const id of ingredients) {
+    const p = parseProperties(props(id));
+    r.unii[id] = get(id, 'unii');
+    if (p?.tty === 'IN') {
+      r.relatedPin[id] = get(id, 'related-pin');
+      for (const pin of parseRelatedPin(r.relatedPin[id])) r.unii[pin.rxcui] = get(pin.rxcui, 'unii');
+    }
+  }
+  const retrievedAt = files.map(retrievedAtOf).sort().at(-1);
+  return { ...atcBridge(atc, r), source: 'nlm-rxnav', retrievedAt, license: RXNAV_LICENSE };
 }

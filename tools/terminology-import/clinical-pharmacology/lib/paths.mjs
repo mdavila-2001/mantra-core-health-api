@@ -35,5 +35,9 @@ export const notesPath = (nreg) => cpCache('cima', 'notas', `${nreg}.json`);
 export const atcMasterPath = (page) => cpCache('cima', 'maestra-atc', `page-${page}.json`);
 
 // RxNav y openFDA
-export const rxnavPath = (atc, kind, id = '') => cpCache('rxnav', atc, `${kind}${id ? `-${id}` : ''}.json`);
+export const rxnavPath = (atc, kind, id = '') => cpCache('rxnav', atc, `${kind}${id ? `-${id}` : ''}.json`); // disposición v1 (por ATC); la migra migrate-rxnav-cache.mjs
+// Disposición v2 (2026-10-27): lo que depende del RxCUI se baja UNA vez aunque lo compartan muchos ATC
+// (p. ej. paracetamol en cada combinación).
+export const rxnavByAtcPath = (atc) => cpCache('rxnav', 'by-atc', `${atc}.json`);
+export const rxnavConceptPath = (rxcui, kind) => cpCache('rxnav', 'rxcui', String(rxcui), `${kind}.json`);
 export const openFdaDir = () => cpCache('openfda');

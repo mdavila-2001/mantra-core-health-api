@@ -3,39 +3,60 @@
 // Farmacología clínica · etapa 1b (red): puente ATC 5 → RxCUI → UNII (RxNav).
 //
 // Para cada ATC 5 del universo (CIMA ∪ maestra ATC ∪ LINAME ∪ vademecum):
-//   rxcui.json?idtype=ATC&id=<ATC5>, properties de cada RxCUI, related?tty=IN
-//   de los MIN, y property?propName=UNII_CODE de cada ingrediente.
-// Todo por código. Caché en clinical-pharmacology/cache/rxnav/<ATC5>/.
-// RxNav pide no superar 20 pedidos/s: acá concurrencia 4 y 150 ms por carril.
+//   rxcui.json?idtype=ATC&id=<ATC5>             RxCUI(s) del ATC
+//   rxcui/<id>/properties.json                  TTY (IN, MIN, PIN…)
+//   rxcui/<id>/related.json?tty=IN              ingredientes de un MIN
+//   rxcui/<id>/related.json?tty=PIN             sales/formas precisas de un IN
+//   rxcui/<id>/property.json?propName=UNII_CODE UNII de cada IN/PIN
+// Todo por código. Lo que depende de un RxCUI se baja UNA vez aunque lo compartan
+// muchos ATC (paracetamol aparece en decenas de combinaciones): caché en
+// clinical-pharmacology/cache/rxnav/rxcui/<id>/ y by-atc/<ATC>.json.
+// Tope: ≤ 2 pedidos/s (`--rps`), concurrencia 4 (RxNav publica ≤ 20/s).
 //
-// Uso: node tools/terminology-import/clinical-pharmacology/fetch-rxnorm.mjs [--limit-atc N]
+// Uso: node tools/terminology-import/clinical-pharmacology/fetch-rxnorm.mjs [--limit-atc N] [--rps 2]
 // =============================================================================
 
-import { HttpClient, mapPool, progressLogger, writeJson } from '../lib/glossary-es/common.mjs';
+import { mapPool, progressLogger, writeJson } from '../lib/glossary-es/common.mjs';
 import { parseArgs } from './lib/cli.mjs';
 import { readAllInputs } from './lib/inputs.mjs';
-import { cpCache, rxnavPath } from './lib/paths.mjs';
-import { atcBridge, parseProperties, parseRelatedIn, parseRxcuiByAtc, propertiesUrl, relatedInUrl, rxcuiByAtcUrl, uniiUrl } from './lib/rxnorm.mjs';
+import { PoliteHttpClient } from './lib/polite-http.mjs';
+import { cpCache, rxnavByAtcPath, rxnavConceptPath } from './lib/paths.mjs';
+import { atcBridge, parseProperties, parseRelatedIn, parseRelatedPin, parseRxcuiByAtc, propertiesUrl, relatedInUrl, relatedPinUrl, rxcuiByAtcUrl, uniiUrl } from './lib/rxnorm.mjs';
 
 const { opt } = parseArgs();
 const LIMIT_ATC = Number(opt('--limit-atc', 0));
-const http = new HttpClient({ concurrency: 4, minDelayMs: 150 });
+const http = new PoliteHttpClient({ concurrency: 4, rps: Number(opt('--rps', 2)) });
+
+const URLS = { properties: propertiesUrl, 'related-in': relatedInUrl, 'related-pin': relatedPinUrl, unii: uniiUrl };
+const inflight = new Map();
+/** Respuesta de RxNav para (kind, rxcui), con caché en disco y sin pedir dos veces lo mismo en vuelo. */
+function concept(kind, rxcui) {
+  const key = `${kind}:${rxcui}`;
+  if (!inflight.has(key)) inflight.set(key, http.getJsonCached(URLS[kind](rxcui), rxnavConceptPath(rxcui, kind), { allow404: true }));
+  return inflight.get(key);
+}
 
 /** Descarga (o lee de caché) las respuestas de un ATC y devuelve el puente. `build-monographs` lo relee sin red (`readBridge`). */
 async function bridgeFor(atc) {
-  const r = { byAtc: await http.getJsonCached(rxcuiByAtcUrl(atc), rxnavPath(atc, 'by-atc'), { allow404: true }), properties: {}, relatedIn: {}, unii: {} };
-  for (const id of parseRxcuiByAtc(r.byAtc)) {
-    r.properties[id] = await http.getJsonCached(propertiesUrl(id), rxnavPath(atc, 'properties', id), { allow404: true });
-    const p = parseProperties(r.properties[id]);
-    if (p?.tty === 'MIN') r.relatedIn[id] = await http.getJsonCached(relatedInUrl(id), rxnavPath(atc, 'related-in', id), { allow404: true });
-  }
+  const r = { byAtc: await http.getJsonCached(rxcuiByAtcUrl(atc), rxnavByAtcPath(atc), { allow404: true }), properties: {}, relatedIn: {}, relatedPin: {}, unii: {} };
+  const props = async (id) => (r.properties[id] ??= await concept('properties', id));
   const ingredients = new Set();
-  for (const id of Object.keys(r.properties)) {
-    const p = parseProperties(r.properties[id]);
+  for (const id of parseRxcuiByAtc(r.byAtc)) {
+    const p = parseProperties(await props(id));
     if (p?.tty === 'IN' || p?.tty === 'PIN') ingredients.add(id);
+    else if (p?.tty === 'MIN') {
+      r.relatedIn[id] = await concept('related-in', id);
+      for (const i of parseRelatedIn(r.relatedIn[id])) ingredients.add(i);
+    }
   }
-  for (const resp of Object.values(r.relatedIn)) for (const i of parseRelatedIn(resp)) ingredients.add(i);
-  for (const id of ingredients) r.unii[id] = await http.getJsonCached(uniiUrl(id), rxnavPath(atc, 'unii', id), { allow404: true });
+  for (const id of ingredients) {
+    const p = parseProperties(await props(id));
+    r.unii[id] = await concept('unii', id);
+    if (p?.tty === 'IN') {
+      r.relatedPin[id] = await concept('related-pin', id);
+      for (const pin of parseRelatedPin(r.relatedPin[id])) r.unii[pin.rxcui] = await concept('unii', pin.rxcui);
+    }
+  }
   return atcBridge(atc, r);
 }
 

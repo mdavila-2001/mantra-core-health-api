@@ -22,9 +22,10 @@ import 'dotenv/config';
 import pg from 'pg';
 import { existsSync } from 'node:fs';
 
-import { readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
+import { writeJson } from '../lib/glossary-es/common.mjs';
 import { CONCEPT, md5uuid } from '../lib/glossary-es/load-plan.mjs';
 import { parseArgs } from './lib/cli.mjs';
+import { streamNdjson } from './lib/ndjson-stream.mjs';
 import { CODE_SYSTEM, EQUIV_EQUIVALENT, PROPERTY_PREFIX, REL_IS_A, planFor, vademecumMapTuple } from './lib/load-plan.mjs';
 import { DRY_RUN_PLAN, MONOGRAPHS_NDJSON } from './lib/paths.mjs';
 
@@ -32,6 +33,8 @@ const { has } = parseArgs();
 const DRY_RUN = has('--dry-run');
 const PRUNE = !has('--no-prune');
 const BATCH = 500;
+const MAX_STATEMENT_BYTES = 24 * 1024 * 1024; // las secciones largas (jsonb) llegan a cientos de KB: se corta también por tamaño
+const MONOGRAPHS_PER_BATCH = 25;
 
 const DB_CONFIG = {
   host: process.env.DB_HOST ?? 'localhost',
@@ -41,10 +44,27 @@ const DB_CONFIG = {
   database: process.env.DB_NAME ?? 'mantra_redesa_health',
 };
 
+const approxBytes = (t) => t.reduce((n, v) => n + (typeof v === 'string' ? v.length : 16), 0);
+
+function* chunksBySize(tuples) {
+  let chunk = [];
+  let bytes = 0;
+  for (const t of tuples) {
+    const b = approxBytes(t);
+    if (chunk.length > 0 && (chunk.length >= BATCH || bytes + b > MAX_STATEMENT_BYTES)) {
+      yield chunk;
+      chunk = [];
+      bytes = 0;
+    }
+    chunk.push(t);
+    bytes += b;
+  }
+  if (chunk.length > 0) yield chunk;
+}
+
 async function insertMany(client, table, columns, tuples, casts) {
   let inserted = 0;
-  for (let i = 0; i < tuples.length; i += BATCH) {
-    const chunk = tuples.slice(i, i + BATCH);
+  for (const chunk of chunksBySize(tuples)) {
     const params = [];
     const values = chunk.map((t) => {
       const ph = t.map((v, j) => {
@@ -105,11 +125,14 @@ async function vademecumMaps(client, atc5, version) {
   return rows.map((r) => vademecumMapTuple(r.code, r.id, version));
 }
 
-async function prune(client, csvId, planIds) {
+async function collectPlanIds(client, planIds) {
   await client.query('CREATE TEMP TABLE IF NOT EXISTS cp_plan_ids (id uuid PRIMARY KEY) ON COMMIT DROP');
   for (let i = 0; i < planIds.length; i += 5000) {
     await client.query('INSERT INTO cp_plan_ids SELECT unnest($1::uuid[]) ON CONFLICT DO NOTHING', [planIds.slice(i, i + 5000)]);
   }
+}
+
+async function prune(client, csvId) {
   const res = await client.query(
     `DELETE FROM terminology.concept_properties p
       USING terminology.catalog_concepts cc
@@ -121,44 +144,75 @@ async function prune(client, csvId, planIds) {
   return res.rowCount;
 }
 
+/** Lotes de monografías leídos en flujo (el NDJSON completo no cabe en una cadena de V8). */
+async function* batches() {
+  let batch = [];
+  for await (const m of streamNdjson(MONOGRAPHS_NDJSON())) {
+    batch.push(m);
+    if (batch.length >= MONOGRAPHS_PER_BATCH) {
+      yield batch;
+      batch = [];
+    }
+  }
+  if (batch.length > 0) yield batch;
+}
+
 async function main() {
   const t0 = Date.now();
   if (!existsSync(MONOGRAPHS_NDJSON())) throw new Error(`Falta ${MONOGRAPHS_NDJSON()}: corré build-monographs.mjs.`);
-  const monographs = readNdjson(MONOGRAPHS_NDJSON());
-  const plan = planFor(monographs);
-  const summary = {
-    codeSystem: CODE_SYSTEM,
-    version: plan.version.version,
-    monographs: plan.monographs,
-    concepts: plan.concepts.length,
-    designations: plan.designations.length,
-    properties: plan.properties.length,
-    relationships: plan.relationships.length,
-    uniqueIds: new Set([...plan.concepts, ...plan.designations, ...plan.properties, ...plan.relationships].map((t) => t[0])).size,
-  };
   console.log(`=== Farmacología clínica → terminology.* ${DRY_RUN ? '(DRY-RUN, sin base)' : ''} ===`);
-  console.log(JSON.stringify(summary, null, 2));
-  if (DRY_RUN) {
-    writeJson(DRY_RUN_PLAN(), { generatedAt: new Date().toISOString(), summary }, true);
-    console.log('No se tocó ninguna base.');
-    return;
-  }
 
-  const client = new pg.Client(DB_CONFIG);
-  await client.connect();
-  const result = {};
+  const seenNodes = new Set();
+  const seenIds = new Set();
+  let version = null;
+  let first = null;
+  const summary = { codeSystem: CODE_SYSTEM, version: null, monographs: 0, concepts: 0, designations: 0, properties: 0, relationships: 0, uniqueIds: 0 };
+  const atc5 = [];
+  let client = null;
+  let ids = null;
+  const result = { concepts: 0, designations: 0, relationships: 0, properties: 0 };
+
+  if (!DRY_RUN) {
+    client = new pg.Client(DB_CONFIG);
+    await client.connect();
+  }
   try {
-    await assertPrerequisites(client);
-    await client.query('BEGIN');
-    const ids = await upsertHeader(client, plan);
-    for (const c of plan.concepts) c[1] = ids.csvId;
-    // Concepto ya existente con otra versión: sus propiedades cuelgan del id, que es estable.
-    result.concepts = await insertMany(client, 'catalog_concepts', ['id', 'code_system_version_id', 'code', 'display', 'definition', 'abstract', 'selectable', 'state_concept_id'], plan.concepts, ['uuid', 'uuid', null, null, null, 'boolean', 'boolean', 'uuid']);
-    result.designations = await insertMany(client, 'concept_designations', ['id', 'concept_id', 'language_concept_id', 'designation_type_concept_id', 'value', 'preferred'], plan.designations, ['uuid', 'uuid', 'uuid', 'uuid', null, 'boolean']);
-    result.relationships = await insertMany(client, 'concept_relationships', ['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'], plan.relationships, ['uuid', 'uuid', 'uuid', 'uuid', 'int']);
-    result.prunedProperties = PRUNE ? await prune(client, ids.csvId, plan.properties.map((p) => p[0])) : null;
-    result.properties = await insertMany(client, 'concept_properties', ['id', 'concept_id', 'property_code', 'data_type', 'value_json'], plan.properties, ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb']);
-    const maps = await vademecumMaps(client, plan.atc5, plan.version.version);
+    if (client) {
+      await assertPrerequisites(client);
+      await client.query('BEGIN');
+    }
+    for await (const batch of batches()) {
+      const plan = planFor(batch, undefined, seenNodes);
+      first ??= plan;
+      version = plan.version;
+      summary.monographs += plan.monographs;
+      summary.concepts += plan.concepts.length;
+      summary.designations += plan.designations.length;
+      summary.properties += plan.properties.length;
+      summary.relationships += plan.relationships.length;
+      for (const t of [...plan.concepts, ...plan.designations, ...plan.properties, ...plan.relationships]) seenIds.add(t[0]);
+      atc5.push(...plan.atc5);
+      if (!client) continue;
+      ids ??= await upsertHeader(client, plan);
+      for (const c of plan.concepts) c[1] = ids.csvId;
+      // Concepto ya existente con otra versión: sus propiedades cuelgan del id, que es estable.
+      result.concepts += await insertMany(client, 'catalog_concepts', ['id', 'code_system_version_id', 'code', 'display', 'definition', 'abstract', 'selectable', 'state_concept_id'], plan.concepts, ['uuid', 'uuid', null, null, null, 'boolean', 'boolean', 'uuid']);
+      result.designations += await insertMany(client, 'concept_designations', ['id', 'concept_id', 'language_concept_id', 'designation_type_concept_id', 'value', 'preferred'], plan.designations, ['uuid', 'uuid', 'uuid', 'uuid', null, 'boolean']);
+      result.relationships += await insertMany(client, 'concept_relationships', ['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'], plan.relationships, ['uuid', 'uuid', 'uuid', 'uuid', 'int']);
+      await collectPlanIds(client, plan.properties.map((p) => p[0]));
+      result.properties += await insertMany(client, 'concept_properties', ['id', 'concept_id', 'property_code', 'data_type', 'value_json'], plan.properties, ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb']);
+      if (summary.monographs % 500 < MONOGRAPHS_PER_BATCH) console.log(`[load] ${summary.monographs} monografías…`);
+    }
+    summary.version = version?.version ?? null;
+    summary.uniqueIds = seenIds.size;
+    console.log(JSON.stringify(summary, null, 2));
+    if (DRY_RUN) {
+      writeJson(DRY_RUN_PLAN(), { generatedAt: new Date().toISOString(), summary }, true);
+      console.log('No se tocó ninguna base.');
+      return;
+    }
+    result.prunedProperties = PRUNE ? await prune(client, ids.csvId) : null;
+    const maps = await vademecumMaps(client, atc5, version.version);
     result.vademecumMaps = await insertMany(client, 'concept_maps', ['id', 'source_concept_id', 'target_concept_id', 'equivalence_concept_id', 'context', 'version', 'state_concept_id'], maps, ['uuid', 'uuid', 'uuid', 'uuid', null, null, 'uuid']);
     result.vademecumMapsPlanned = maps.length;
     const startedAt = new Date(t0);
@@ -170,17 +224,17 @@ async function main() {
         ids.sourceId,
         ids.csvId,
         startedAt,
-        monographs.length,
+        summary.monographs,
         result.concepts + result.designations + result.relationships + result.properties + result.vademecumMaps,
-        md5uuid(plan.properties.map((p) => p[0]).join('|')),
+        md5uuid([...seenIds].sort().join('|')),
       ],
     );
     await client.query('COMMIT');
   } catch (err) {
-    await client.query('ROLLBACK').catch(() => {});
+    if (client) await client.query('ROLLBACK').catch(() => {});
     throw err;
   } finally {
-    await client.end();
+    if (client) await client.end();
   }
   console.log('\n=== RESUMEN (filas NUEVAS/BORRADAS; 0 y 0 en la segunda corrida = idempotente) ===');
   console.log(JSON.stringify({ result, segundos: Math.round((Date.now() - t0) / 1000) }, null, 2));

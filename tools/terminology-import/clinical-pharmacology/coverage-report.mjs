@@ -16,8 +16,9 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { BUILD_DIR, readNdjson, writeJson } from '../lib/glossary-es/common.mjs';
+import { BUILD_DIR, writeJson } from '../lib/glossary-es/common.mjs';
 import { readJsonIfExists } from './lib/cli.mjs';
+import { streamNdjson } from './lib/ndjson-stream.mjs';
 import { readAllInputs } from './lib/inputs.mjs';
 import { COVERAGE_JSON, MONOGRAPHS_META, MONOGRAPHS_NDJSON, cpOut } from './lib/paths.mjs';
 import { REQUIRED_SECTIONS, SECTION_KEYS } from './lib/sections.mjs';
@@ -119,8 +120,14 @@ function markdown(c) {
   return lines.join('\n') + '\n';
 }
 
-function main() {
-  const monographs = existsSync(MONOGRAPHS_NDJSON()) ? readNdjson(MONOGRAPHS_NDJSON()) : [];
+async function main() {
+  // En flujo: el NDJSON pasa de los 512 MiB de una cadena de V8. Del texto sólo se necesitan fuente, clave e idioma.
+  const monographs = [];
+  if (existsSync(MONOGRAPHS_NDJSON())) {
+    for await (const m of streamNdjson(MONOGRAPHS_NDJSON())) {
+      monographs.push({ code: m.code, display: m.display, atcPath: m.atcPath, coverage: m.coverage, sections: m.sections.map((x) => ({ source: x.source, key: x.key, language: x.language })) });
+    }
+  }
   const meta = readJsonIfExists(MONOGRAPHS_META());
   const { universe, liname } = readAllInputs();
   const c = coverage({ monographs, meta, universe, liname, products: productAtc5() });
@@ -129,4 +136,7 @@ function main() {
   console.log(markdown(c));
 }
 
-main();
+main().catch((err) => {
+  console.error('ERROR FATAL en coverage-report:', err);
+  process.exitCode = 1;
+});

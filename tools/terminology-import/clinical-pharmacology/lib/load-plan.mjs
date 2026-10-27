@@ -103,16 +103,19 @@ export function monographProperties(m) {
  * Plan completo. Conceptos de niveles 1–4: los de la ruta ATC de cada
  * monografía (abstractos, no seleccionables). `display` es el nombre oficial; si
  * ninguna fuente nombra el nivel, el propio código (no se inventa un nombre).
+ * `seenNodes` permite planear por lotes sin repetir los niveles ya emitidos.
  */
-export function planFor(monographs, version = CODE_SYSTEM_VERSION) {
+export function planFor(monographs, version = CODE_SYSTEM_VERSION, seenNodes = new Set()) {
   const base = codeSystemPlan(version);
   const nodes = new Map();
   for (const m of monographs) {
     for (const n of m.atcPath) {
+      if (seenNodes.has(n.code)) continue; // ya planeado en un lote anterior (la carga va por lotes)
       const prev = nodes.get(n.code);
       if (!prev || (!prev.name && n.name)) nodes.set(n.code, { ...n, display: n.level === 5 ? (m.display ?? n.name) : n.name });
     }
   }
+  for (const code of nodes.keys()) seenNodes.add(code);
   const concepts = [];
   const designations = [];
   const properties = [];

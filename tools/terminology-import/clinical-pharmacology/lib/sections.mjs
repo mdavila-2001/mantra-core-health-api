@@ -10,7 +10,12 @@
 // todas las fichas técnicas autorizadas en España.
 // openFDA: nombres de campo documentados en
 // https://open.fda.gov/apis/drug/label/searchable-fields/ (formato PLR y
-// formato antiguo; los dos se mapean, cada uno a su propia fila).
+// formato antiguo; los dos se mapean, cada uno a su propia fila). Contrastados el
+// 2026-10-27 con los 262 903 registros reales: se agregaron los campos que existen en
+// las etiquetas y la lista original omitía (uso pediátrico/geriátrico, embarazo en
+// etiquetas OTC, trabajo de parto, precauciones generales, abuso y dependencia).
+// Siguen sin cargarse, por decisión de alcance (ver SOURCES.md): how_supplied,
+// clinical_studies, information_for_patients, spl_medguide, microbiology, references.
 // =============================================================================
 
 /** Claves de sección (identificadores en inglés) y su rótulo en castellano. */
@@ -27,6 +32,9 @@ export const SECTION_KEYS = Object.freeze({
   driving: 'Efectos sobre la capacidad para conducir',
   adverse_reactions: 'Reacciones adversas',
   overdose: 'Sobredosis',
+  pediatric_use: 'Uso pediátrico',
+  geriatric_use: 'Uso geriátrico',
+  abuse_dependence: 'Abuso y dependencia',
   mechanism_of_action: 'Mecanismo de acción',
   pharmacodynamics: 'Propiedades farmacodinámicas',
   clinical_pharmacology: 'Farmacología clínica',
@@ -68,12 +76,20 @@ export const OPENFDA_FIELDS = Object.freeze({
   warnings_and_cautions: 'warnings',
   warnings: 'warnings',
   precautions: 'warnings',
+  general_precautions: 'warnings',
   drug_interactions: 'interactions',
+  drug_and_or_laboratory_test_interactions: 'interactions',
   use_in_specific_populations: 'pregnancy_lactation',
   pregnancy: 'pregnancy_lactation',
+  pregnancy_or_breast_feeding: 'pregnancy_lactation',
   teratogenic_effects: 'pregnancy_lactation',
+  nonteratogenic_effects: 'pregnancy_lactation',
+  labor_and_delivery: 'pregnancy_lactation',
   lactation: 'pregnancy_lactation',
   nursing_mothers: 'pregnancy_lactation',
+  pediatric_use: 'pediatric_use',
+  geriatric_use: 'geriatric_use',
+  drug_abuse_and_dependence: 'abuse_dependence',
   adverse_reactions: 'adverse_reactions',
   overdosage: 'overdose',
   mechanism_of_action: 'mechanism_of_action',

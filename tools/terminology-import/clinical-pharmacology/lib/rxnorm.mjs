@@ -6,9 +6,18 @@
 //   rxcui/<id>/related.json?tty=IN             → ingredientes de un MIN
 //   rxcui/<id>/property.json?propName=UNII_CODE → UNII
 //
-// ESTADO: no validado contra respuestas reales (rxnav.nlm.nih.gov bloqueado en
-// la sesión que lo escribió). Los parsers son defensivos: ante una forma
+//   rxcui/<id>/related.json?tty=PIN            → sales/formas precisas de un IN
+//
+// ESTADO (2026-10-27): validado contra respuestas REALES de rxnav.nlm.nih.gov
+// (fixtures en test/fixtures/rxnav/). Los parsers son defensivos: ante una forma
 // desconocida devuelven vacío, nunca un código adivinado.
+//
+// Hallazgo de la validación: `openfda.unii` de una etiqueta lista el UNII de la
+// SAL (p. ej. clorhidrato de oxicodona C1ENJ2TE6C), mientras que el RxCUI del
+// ingrediente (IN) trae el UNII de la base (oxicodona CD35PMG570). Por eso el
+// puente guarda también los PIN (precise ingredient) del propio RxNorm de cada IN
+// y sus UNII: la equivalencia sal↔base es la que RxNorm publica, no una
+// coincidencia de nombres.
 // =============================================================================
 
 export const RXNAV_REST = 'https://rxnav.nlm.nih.gov/REST';
@@ -20,6 +29,7 @@ export const RXNAV_LICENSE =
 export const rxcuiByAtcUrl = (atc) => `${RXNAV_REST}/rxcui.json?idtype=ATC&id=${encodeURIComponent(atc)}`;
 export const propertiesUrl = (rxcui) => `${RXNAV_REST}/rxcui/${encodeURIComponent(rxcui)}/properties.json`;
 export const relatedInUrl = (rxcui) => `${RXNAV_REST}/rxcui/${encodeURIComponent(rxcui)}/related.json?tty=IN`;
+export const relatedPinUrl = (rxcui) => `${RXNAV_REST}/rxcui/${encodeURIComponent(rxcui)}/related.json?tty=PIN`;
 export const uniiUrl = (rxcui) => `${RXNAV_REST}/rxcui/${encodeURIComponent(rxcui)}/property.json?propName=UNII_CODE`;
 
 const isRxcui = (v) => typeof v === 'string' && /^\d+$/.test(v);
@@ -35,13 +45,20 @@ export function parseProperties(resp) {
   return p && isRxcui(p.rxcui) ? { rxcui: p.rxcui, name: p.name ?? null, tty: p.tty ?? null } : null;
 }
 
-export function parseRelatedIn(resp) {
+/** `related.json?tty=X` → conceptos de ese TTY `[{ rxcui, name, tty }]`, por RxCUI ascendente. */
+export function parseRelatedTty(resp, tty) {
   const groups = resp?.relatedGroup?.conceptGroup;
   if (!Array.isArray(groups)) return [];
-  return [...new Set(groups.filter((g) => g?.tty === 'IN').flatMap((g) => (g.conceptProperties ?? []).map((c) => c.rxcui)).filter(isRxcui))].sort(
-    (a, b) => Number(a) - Number(b),
-  );
+  const byId = new Map();
+  for (const g of groups) {
+    if (g?.tty !== tty) continue;
+    for (const c of g.conceptProperties ?? []) if (isRxcui(c?.rxcui) && !byId.has(c.rxcui)) byId.set(c.rxcui, { rxcui: c.rxcui, name: c.name ?? null, tty: c.tty ?? tty });
+  }
+  return [...byId.values()].sort((a, b) => Number(a.rxcui) - Number(b.rxcui));
 }
+
+export const parseRelatedIn = (resp) => parseRelatedTty(resp, 'IN').map((c) => c.rxcui);
+export const parseRelatedPin = (resp) => parseRelatedTty(resp, 'PIN');
 
 export function parseUnii(resp) {
   const props = resp?.propConceptGroup?.propConcept;
@@ -49,21 +66,33 @@ export function parseUnii(resp) {
   return [...new Set(props.filter((p) => p?.propName === 'UNII_CODE').map((p) => p.propValue).filter((v) => typeof v === 'string' && UNII.test(v)))].sort();
 }
 
+/** Todos los UNII con los que una etiqueta puede nombrar a un ingrediente: el propio y los de sus PIN (sales). */
+export const ingredientUnii = (ing) => [...new Set([...ing.unii, ...ing.pins.flatMap((p) => p.unii)])].sort();
+
 /**
- * Puente de un ATC 5: `{ atc, rxcuis: [{ rxcui, tty, name }], ingredients: [rxcui], unii: [..] }`.
- * Sólo se considera resuelto si TODOS los ingredientes tienen UNII; si no, `unii` queda vacío
- * (un conjunto parcial emparejaría etiquetas de otra combinación).
- * @param {object} r respuestas crudas: { byAtc, properties: {rxcui→resp}, relatedIn: {rxcui→resp}, unii: {rxcui→resp} }
+ * Puente de un ATC 5:
+ * `{ atc, rxcuis: [{ rxcui, tty, name }], ingredients: [{ rxcui, tty, name, unii, pins: [{ rxcui, name, unii }] }], unii, complete }`.
+ * Ingrediente = el IN/PIN al que RxNorm mapea el ATC o, si el ATC es una combinación (MIN), cada IN de ésta.
+ * Los PIN se listan sólo para los IN (RxNorm: «precise ingredient» = sal/forma del ingrediente).
+ * `complete` = todo ingrediente tiene al menos un UNII (propio o de un PIN); si no, el ATC no se empareja
+ * con etiquetas (un conjunto parcial emparejaría etiquetas de otra combinación).
+ * @param {object} r respuestas crudas por RxCUI: { byAtc, properties: {rxcui→resp}, relatedIn, relatedPin, unii }
  */
 export function atcBridge(atc, r) {
   const rxcuis = parseRxcuiByAtc(r.byAtc).map((id) => parseProperties(r.properties?.[id]) ?? { rxcui: id, name: null, tty: null });
-  const ingredients = new Set();
+  const ids = new Set();
   for (const c of rxcuis) {
-    if (c.tty === 'IN' || c.tty === 'PIN') ingredients.add(c.rxcui);
-    else if (c.tty === 'MIN') for (const i of parseRelatedIn(r.relatedIn?.[c.rxcui])) ingredients.add(i);
+    if (c.tty === 'IN' || c.tty === 'PIN') ids.add(c.rxcui);
+    else if (c.tty === 'MIN') for (const i of parseRelatedIn(r.relatedIn?.[c.rxcui])) ids.add(i);
   }
-  const ing = [...ingredients].sort((a, b) => Number(a) - Number(b));
-  const perIngredient = ing.map((i) => parseUnii(r.unii?.[i]));
-  const complete = ing.length > 0 && perIngredient.every((u) => u.length > 0);
-  return { atc, rxcuis, ingredients: ing, unii: complete ? [...new Set(perIngredient.flat())].sort() : [], complete };
+  const ingredients = [...ids]
+    .sort((a, b) => Number(a) - Number(b))
+    .map((id) => {
+      const p = parseProperties(r.properties?.[id]);
+      const tty = p?.tty ?? null;
+      const pins = tty === 'IN' ? parseRelatedPin(r.relatedPin?.[id]).map((x) => ({ rxcui: x.rxcui, name: x.name, unii: parseUnii(r.unii?.[x.rxcui]) })) : [];
+      return { rxcui: id, tty, name: p?.name ?? null, unii: parseUnii(r.unii?.[id]), pins };
+    });
+  const complete = ingredients.length > 0 && ingredients.every((i) => ingredientUnii(i).length > 0);
+  return { atc, rxcuis, ingredients, unii: [...new Set(ingredients.flatMap((i) => i.unii))].sort(), complete };
 }

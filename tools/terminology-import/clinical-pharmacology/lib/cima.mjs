@@ -30,8 +30,15 @@ export const sectionPublicUrl = (nregistro, section) =>
   `https://cima.aemps.es/cima/dochtml/ft/${encodeURIComponent(nregistro)}/${encodeURIComponent(section)}/FichaTecnica.html`;
 /** Notas de seguridad de la AEMPS asociadas a un medicamento. */
 export const safetyNotesUrl = (nregistro) => `${CIMA_REST}/notas/${encodeURIComponent(nregistro)}`;
-/** Maestra de códigos ATC de CIMA (nombres en castellano de la AEMPS), paginada. */
-export const atcMasterUrl = (page) => `${CIMA_REST}/maestras?maestra=7&pagina=${page}`;
+/**
+ * Maestra de códigos ATC de CIMA (nombres en castellano de la AEMPS), paginada.
+ * Medido contra la API real (2026-10-27): `maestras?maestra=7` SIN filtro responde
+ * 204 (vacío), igual que `codigo=`/`nombre=` vacíos. Con CUALQUIER `codigo=` no
+ * vacío la API ignora el valor y devuelve la maestra entera (7 358 filas, 37
+ * páginas de 200); con `nombre=<texto>` filtra por subcadena. Se usa `codigo=A`
+ * y `verify-atc-master.mjs` lo contrasta con la unión de búsquedas por `nombre`.
+ */
+export const atcMasterUrl = (page) => `${CIMA_REST}/maestras?maestra=7&codigo=A&pagina=${page}`;
 
 const ATC5 = /^[A-Z]\d{2}[A-Z]{2}\d{2}$/;
 export const isAtc5 = (code) => typeof code === 'string' && ATC5.test(code);

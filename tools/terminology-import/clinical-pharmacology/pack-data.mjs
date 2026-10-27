@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
 import { ensureDir } from '../lib/glossary-es/common.mjs';
+import { streamLines } from './lib/ndjson-stream.mjs';
 import { cpCache, cpOut, openFdaDir } from './lib/paths.mjs';
 
 const DATA_DIR = ensureDir(join(dirname(fileURLToPath(import.meta.url)), 'data'));
@@ -56,7 +57,28 @@ export function splitNdjson(text, maxBytes = MAX_PART_BYTES) {
   return parts;
 }
 
-function main() {
+/** NDJSON de cualquier tamaño → partes gzip, leyendo en flujo (no cabe en una cadena de V8). */
+export async function packNdjsonFile(path, maxBytes = MAX_PART_BYTES) {
+  const hash = createHash('sha256');
+  const parts = [];
+  let chunk = [];
+  let raw = 0;
+  const flush = () => {
+    if (chunk.length > 0) parts.push(...splitNdjson(chunk.join('\n'), maxBytes));
+    chunk = [];
+    raw = 0;
+  };
+  for await (const line of streamLines(path)) {
+    hash.update(`${line}\n`);
+    chunk.push(line);
+    raw += line.length + 1;
+    if (raw >= maxBytes * 3) flush();
+  }
+  flush();
+  return { parts, sha256: hash.digest('hex') };
+}
+
+async function main() {
   for (const name of readdirSync(DATA_DIR)) if (name.endsWith('.gz') || name === 'MANIFEST.json') unlinkSync(join(DATA_DIR, name));
   const manifest = { generatedAt: new Date().toISOString(), note: 'Datos normalizados (no crudos). Ver SOURCES.md y docs/seed-research/clinical-pharmacology.md.', files: [] };
   const add = (name, gz, rows, from) => {
@@ -66,10 +88,9 @@ function main() {
 
   const ndjson = cpOut('monographs.ndjson');
   if (existsSync(ndjson)) {
-    const text = readFileSync(ndjson, 'utf8');
-    const parts = splitNdjson(text);
+    const { parts, sha256: sum } = await packNdjsonFile(ndjson);
     parts.forEach((p, i) => add(`monographs.part-${String(i + 1).padStart(3, '0')}.ndjson.gz`, p.gz, p.rows, 'out/monographs.ndjson'));
-    manifest.monographsSha256 = sha256(Buffer.from(text, 'utf8'));
+    manifest.monographsSha256 = sum;
     manifest.monographs = parts.reduce((n, p) => n + p.rows, 0);
   }
   const small = [
@@ -92,4 +113,9 @@ function main() {
   console.log(JSON.stringify(manifest, null, 2));
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) main();
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error('ERROR FATAL en pack-data:', err);
+    process.exitCode = 1;
+  });
+}

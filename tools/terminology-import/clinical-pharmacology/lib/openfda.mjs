@@ -6,12 +6,13 @@
 // su idioma de origen (`language: 'en'`).
 //
 // Enlace con el ATC, sólo por código: ATC 5 → RxCUI del ingrediente (RxNorm,
-// `idtype=ATC`) → UNII (propiedad `UNII_CODE` de RxNorm) → etiquetas cuyo
-// `openfda.unii` es EXACTAMENTE ese conjunto de UNII. Nunca por nombre.
+// `idtype=ATC`) → UNII (propiedad `UNII_CODE` de RxNorm) del ingrediente y de sus
+// sales (PIN) → etiquetas cuyo `openfda.unii` cubre EXACTAMENTE esos ingredientes:
+// cada UNII de la etiqueta pertenece a un ingrediente del ATC y cada ingrediente
+// del ATC tiene algún UNII en la etiqueta. Nunca por nombre.
 //
-// ESTADO: escrito contra la lista de campos documentada por openFDA; NO
-// validado contra una partición real (la red de la sesión que lo escribió
-// bloqueaba download.open.fda.gov). Ver SOURCES.md.
+// ESTADO (2026-10-27): validado contra las 14 particiones reales (262 903
+// etiquetas, export 2026-10-27; fixtures reales recortados en test/fixtures/).
 // =============================================================================
 
 import { extractTables, literalFromParagraphs } from './literal.mjs';
@@ -58,21 +59,31 @@ export function labelIdentity(label) {
   };
 }
 
-const sameSet = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+/**
+ * ¿La etiqueta corresponde al ATC? Cada UNII de la etiqueta debe pertenecer a algún
+ * ingrediente del puente (propio o de un PIN) y cada ingrediente debe estar
+ * representado por al menos un UNII de la etiqueta. Una combinación nunca empareja con
+ * un ATC de un solo ingrediente ni al revés.
+ * @param {string[]} labelUnii  `labelIdentity(l).unii`
+ * @param {string[][]} allowed  por ingrediente, `ingredientUnii(ing)` del puente
+ */
+export function labelCoversIngredients(labelUnii, allowed) {
+  if (labelUnii.length === 0 || allowed.length === 0) return false;
+  return labelUnii.every((u) => allowed.some((a) => a.includes(u))) && allowed.every((a) => labelUnii.some((u) => a.includes(u)));
+}
 
 /**
- * Etiqueta de referencia por (conjunto de UNII, vías): entre las etiquetas de
- * medicamento de prescripción humano cuyo `openfda.unii` es exactamente el
- * conjunto pedido, la de `effective_time` más reciente; a igualdad, el
- * `set_id` menor. Si no hay de prescripción, se acepta OTC (queda dicho en el
- * criterio). Determinista y auditable; no juzga cuál etiqueta es «mejor».
- * @param {ReturnType<typeof labelIdentity>[]} identities
- * @param {string[]} uniiSet  ordenado
+ * Etiqueta de referencia por vías: entre las etiquetas de medicamento de prescripción
+ * humano que ya cubren los ingredientes del ATC (`labelCoversIngredients`), la de
+ * `effective_time` más reciente; a igualdad, el `set_id` menor. Si no hay de
+ * prescripción, se acepta OTC (queda dicho en el criterio). Determinista y auditable;
+ * no juzga cuál etiqueta es «mejor».
+ * @param {ReturnType<typeof labelIdentity>[]} matching  identidades que ya cubren los ingredientes
+ * @param {string[]} ingredientRxcuis  RxCUI de los ingredientes del puente (para la cita)
  */
-export function referenceLabels(identities, uniiSet) {
-  const matching = identities.filter((l) => l.id && sameSet(l.unii, uniiSet));
-  const rx = matching.filter((l) => l.productType === 'HUMAN PRESCRIPTION DRUG');
-  const pool = rx.length > 0 ? rx : matching.filter((l) => l.productType === 'HUMAN OTC DRUG');
+export function referenceLabels(matching, ingredientRxcuis) {
+  const rx = matching.filter((l) => l.id && l.productType === 'HUMAN PRESCRIPTION DRUG');
+  const pool = rx.length > 0 ? rx : matching.filter((l) => l.id && l.productType === 'HUMAN OTC DRUG');
   const kind = rx.length > 0 ? 'de prescripción (HUMAN PRESCRIPTION DRUG)' : 'de venta libre (HUMAN OTC DRUG), porque no hay de prescripción';
   const groups = new Map();
   for (const l of pool) {
@@ -86,15 +97,15 @@ export function referenceLabels(identities, uniiSet) {
       return {
         identity: ref,
         criterion:
-          `Etiqueta de referencia por (UNII exactos, vías): entre las etiquetas ${kind} con ese conjunto exacto de UNII, ` +
-          'la de effective_time más reciente; a igualdad, el set_id menor.',
-        group: { unii: uniiSet, routes, candidates: members.length },
+          `Etiqueta de referencia por vías: entre las etiquetas ${kind} cuyos UNII cubren exactamente los ingredientes del ATC según RxNorm ` +
+          '(UNII del ingrediente o de sus sales), la de effective_time más reciente; a igualdad, el set_id menor.',
+        group: { ingredients: ingredientRxcuis, unii: ref.unii, routes, candidates: members.length },
       };
     })
     .sort((a, b) => a.group.routes.localeCompare(b.group.routes));
 }
 
-/** Etiqueta completa → filas de sección literales (inglés) con su procedencia. */
+/** Etiqueta completa → filas de sección literales (inglés) con su procedencia. `ref` puede ser null (ver `selection`). */
 export function openFdaSections(label, ref, retrievedAt) {
   const id = labelIdentity(label);
   const out = [];
@@ -129,7 +140,7 @@ export function openFdaSections(label, ref, retrievedAt) {
       citation:
         `U.S. FDA. openFDA drug label, set_id ${id.setId}, versión ${id.version ?? '?'} (effective_time ${id.effectiveDate ?? '?'}), ` +
         `campo «${field}». ${dailyMedSetUrl(id.setId)} (consultado el ${retrievedAt.slice(0, 10)}).`,
-      selection: { criterion: ref.criterion, group: ref.group },
+      selection: ref ? { criterion: ref.criterion, group: ref.group } : null, // sin `ref`, el armado la completa por ATC (una misma etiqueta sirve a varios ATC)
     });
   }
   return out;

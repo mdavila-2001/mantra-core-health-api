@@ -21,7 +21,8 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { HttpClient, mapPool, progressLogger, writeJson } from '../lib/glossary-es/common.mjs';
+import { mapPool, progressLogger, writeJson } from '../lib/glossary-es/common.mjs';
+import { PoliteHttpClient } from './lib/polite-http.mjs';
 import { CIMA_REST, atcMasterUrl, cimaProduct, fullDocUrl, groupByAtc5, missingSections, referenceDocuments, safetyNotesUrl, sectionApiUrl } from './lib/cima.mjs';
 import { parseArgs, readJsonIfExists } from './lib/cli.mjs';
 import { CIMA_SHARED_CACHE, atcMasterPath, cpCache, ftPath, ftSectionPath, notesPath } from './lib/paths.mjs';
@@ -31,7 +32,7 @@ const GRANULARITY = opt('--granularity', 'route');
 const LIMIT_ATC = Number(opt('--limit-atc', 0));
 const PLAN = has('--plan');
 const CONCURRENCY = Math.min(4, Number(opt('--concurrency', 4)));
-const http = new HttpClient({ concurrency: CONCURRENCY, minDelayMs: 120 });
+const http = new PoliteHttpClient({ concurrency: CONCURRENCY, rps: Number(opt('--rps', 2)) });
 
 async function fetchPaged(urlOf, pathOf, label) {
   const first = await http.getJsonCached(urlOf(1), pathOf(1));
@@ -52,6 +53,10 @@ async function main() {
   const rows = [...new Map(list.rows.map((r) => [r.nregistro, r])).values()];
   console.log(`[cima] listado: ${rows.length} medicamentos únicos (API informa ${list.reported})`);
 
+  // La maestra ATC va ANTES de los ~25 500 detalles: el universo de ATC 5 (que necesita RxNav) sale de ella.
+  const master = PLAN ? null : await fetchPaged(atcMasterUrl, atcMasterPath, 'cima:maestra-atc');
+  if (master) console.log(`[cima] maestra ATC: ${master.rows.length} filas`);
+
   const details = new Map();
   const missingDetails = rows.filter((r) => !existsSync(join(CIMA_SHARED_CACHE, 'detail', `${r.nregistro}.json`))).length;
   if (PLAN) {
@@ -65,9 +70,6 @@ async function main() {
       progressLogger('cima:detalle', 1000),
     );
   }
-
-  const master = PLAN ? null : await fetchPaged(atcMasterUrl, atcMasterPath, 'cima:maestra-atc');
-  if (master) console.log(`[cima] maestra ATC: ${master.rows.length} filas`);
 
   const products = rows.map((r) => cimaProduct(r, details.get(r.nregistro)));
   const { byAtc, withoutAtc5 } = groupByAtc5(products);
