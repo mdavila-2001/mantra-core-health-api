@@ -13,35 +13,25 @@ import { NotAudited, Public } from '../../../common';
 import { ReverseGeocodingService } from './reverse-geocoding.service';
 
 /**
- * El recuadro de Bolivia, con un margen de ~0,5° para los municipios de borde.
- * Fuera de él no se consulta: el servicio existe para el alta boliviana, no
- * como geocodificador abierto para cualquiera.
+ * El punto, en el cuerpo y no en la URL: es el domicilio de alguien.
+ *
+ * Cualquier punto del planeta. Antes sólo se aceptaba el recuadro de Bolivia y
+ * un pin fuera de él —la persona que se registra desde el exterior, o el GPS
+ * de quien prueba desde otro país— recibía un 400 que el alta leía como «no
+ * pudimos traer la calle». El abuso lo frenan el tope por minuto de la ruta y
+ * la cola con tope del servicio, no el recuadro.
  */
-export const BOLIVIA_BOUNDS = {
-  minLat: -23.5,
-  maxLat: -9.2,
-  minLng: -70.0,
-  maxLng: -57.0,
-};
-
-/** El punto, en el cuerpo y no en la URL: es el domicilio de alguien. */
 export class ReverseGeocodingRequestDto {
-  @ApiProperty({
-    minimum: BOLIVIA_BOUNDS.minLat,
-    maximum: BOLIVIA_BOUNDS.maxLat,
-  })
+  @ApiProperty({ minimum: -90, maximum: 90 })
   @IsNumber()
-  @Min(BOLIVIA_BOUNDS.minLat)
-  @Max(BOLIVIA_BOUNDS.maxLat)
+  @Min(-90)
+  @Max(90)
   latitude!: number;
 
-  @ApiProperty({
-    minimum: BOLIVIA_BOUNDS.minLng,
-    maximum: BOLIVIA_BOUNDS.maxLng,
-  })
+  @ApiProperty({ minimum: -180, maximum: 180 })
   @IsNumber()
-  @Min(BOLIVIA_BOUNDS.minLng)
-  @Max(BOLIVIA_BOUNDS.maxLng)
+  @Min(-180)
+  @Max(180)
   longitude!: number;
 }
 
@@ -87,7 +77,7 @@ export class ReverseGeocodingController {
   @Post('reverse')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Nombre de la calle de un punto en Bolivia',
+    summary: 'Nombre de la calle de un punto del mapa',
     description:
       'Sin sesión. 503 si el proveedor no responde: el alta sigue con la calle a mano. Nunca inventa una dirección.',
   })

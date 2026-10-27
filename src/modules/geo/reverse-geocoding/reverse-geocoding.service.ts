@@ -62,7 +62,7 @@ export function loadReverseGeocodingConfig(
     userAgent:
       env.GEOCODING_USER_AGENT ||
       'AloVida/1.0 (registro de pacientes; contacto: soporte)',
-    timeoutMs: entero(env.GEOCODING_TIMEOUT_MS, 4000),
+    timeoutMs: entero(env.GEOCODING_TIMEOUT_MS, 6000),
     minIntervalMs: entero(env.GEOCODING_MIN_INTERVAL_MS, 1100),
     cacheSize: entero(env.GEOCODING_CACHE_SIZE, 2000),
     maxQueued: entero(env.GEOCODING_MAX_QUEUED, 10),
