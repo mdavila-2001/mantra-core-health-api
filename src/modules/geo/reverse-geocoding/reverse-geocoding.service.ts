@@ -26,6 +26,11 @@ export interface ReverseGeocodingResult {
 export interface ReverseGeocodingConfig {
   /** Endpoint `reverse` compatible con Nominatim. */
   readonly url: string;
+  /**
+   * Endpoint `reverse` compatible con Photon (komoot), al que se pregunta si
+   * Nominatim falla o no responde a tiempo. Vacío lo apaga.
+   */
+  readonly fallbackUrl: string;
   /** Nominatim exige un User-Agent que identifique a la aplicación. */
   readonly userAgent: string;
   readonly timeoutMs: number;
@@ -52,6 +57,8 @@ export function loadReverseGeocodingConfig(
     url:
       env.GEOCODING_REVERSE_URL ||
       'https://nominatim.openstreetmap.org/reverse',
+    fallbackUrl:
+      env.GEOCODING_FALLBACK_URL ?? 'https://photon.komoot.io/reverse',
     userAgent:
       env.GEOCODING_USER_AGENT ||
       'AloVida/1.0 (registro de pacientes; contacto: soporte)',
@@ -68,13 +75,20 @@ interface NominatimReverse {
   readonly address?: Readonly<Record<string, string | undefined>>;
 }
 
+/** Lo que se lee de la respuesta GeoJSON de Photon. */
+interface PhotonReverse {
+  readonly features?: readonly {
+    readonly properties?: Readonly<Record<string, string | undefined>>;
+  }[];
+}
+
 /** Quien hace el pedido HTTP; se inyecta en las pruebas. */
 export type ReverseGeocodingHttp = (
   url: string,
   params: Record<string, string>,
   headers: Record<string, string>,
   timeoutMs: number,
-) => Promise<NominatimReverse>;
+) => Promise<unknown>;
 
 const httpConAxios: ReverseGeocodingHttp = async (
   url,
@@ -83,7 +97,7 @@ const httpConAxios: ReverseGeocodingHttp = async (
   timeoutMs,
 ) =>
   (
-    await axios.get<NominatimReverse>(url, {
+    await axios.get<unknown>(url, {
       params,
       headers,
       timeout: timeoutMs,
@@ -179,9 +193,8 @@ export class ReverseGeocodingService {
     latitude: number,
     longitude: number,
   ): Promise<ReverseGeocodingResult> {
-    let respuesta: NominatimReverse;
     try {
-      respuesta = await this.http(
+      const respuesta = (await this.http(
         this.config.url,
         {
           format: 'jsonv2',
@@ -193,18 +206,39 @@ export class ReverseGeocodingService {
         },
         { 'User-Agent': this.config.userAgent },
         this.config.timeoutMs,
-      );
+      )) as NominatimReverse;
+      return toResult(respuesta);
     } catch (error) {
       this.logger.warn(
         { operation: 'geo.reverseGeocoding', error: (error as Error)?.message },
         'Reverse geocoding provider unavailable',
       );
-      throw serviceUnavailableWithReason(
-        'No pudimos traer el nombre de la calle. Puede escribirla a mano.',
-        SystemErrorReason.GEOCODING_PROVIDER_UNAVAILABLE,
-      );
     }
-    return toResult(respuesta);
+    // Nominatim público limita y a veces bloquea IPs de servidores: antes de
+    // rendirse se pregunta a un segundo proveedor con los mismos datos (OSM).
+    if (this.config.fallbackUrl) {
+      try {
+        const respuesta = (await this.http(
+          this.config.fallbackUrl,
+          { lat: String(latitude), lon: String(longitude), limit: '1' },
+          { 'User-Agent': this.config.userAgent },
+          this.config.timeoutMs,
+        )) as PhotonReverse;
+        return photonToResult(respuesta);
+      } catch (error) {
+        this.logger.warn(
+          {
+            operation: 'geo.reverseGeocoding.fallback',
+            error: (error as Error)?.message,
+          },
+          'Reverse geocoding fallback provider unavailable',
+        );
+      }
+    }
+    throw serviceUnavailableWithReason(
+      'No pudimos traer el nombre de la calle. Puede escribirla a mano.',
+      SystemErrorReason.GEOCODING_PROVIDER_UNAVAILABLE,
+    );
   }
 
   private recordar(clave: string, resultado: ReverseGeocodingResult): void {
@@ -241,4 +275,24 @@ export function toResult(respuesta: NominatimReverse): ReverseGeocodingResult {
     ...(city ? { city } : {}),
     attribution: OSM_ATTRIBUTION,
   };
+}
+
+/**
+ * Traduce la respuesta de Photon a la misma línea. Si el punto más cercano no
+ * tiene calle pero es una vía o una plaza, su nombre hace de calle.
+ */
+export function photonToResult(
+  respuesta: PhotonReverse,
+): ReverseGeocodingResult {
+  const p = respuesta.features?.[0]?.properties;
+  if (!p) return { found: false, attribution: OSM_ATTRIBUTION };
+  const nombreEsVia = p.osm_key === 'highway' || p.osm_value === 'square';
+  return toResult({
+    address: {
+      road: p.street ?? (nombreEsVia ? p.name : undefined),
+      house_number: p.housenumber,
+      neighbourhood: p.district ?? p.locality,
+      city: p.city ?? p.county,
+    },
+  });
 }
