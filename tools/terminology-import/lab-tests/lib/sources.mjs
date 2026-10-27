@@ -101,7 +101,7 @@ export const SOURCES = {
     owner: 'Instituto Nacional de Servicios Sociales para Jubilados y Pensionados (PAMI), Argentina',
     officialUrl: 'https://www.datos.gob.ar/dataset/pami-nomenclador-practicas-medicas--valor-por-capitas-modulos',
     license:
-      'Datos abiertos de PAMI en datos.gob.ar (conjunto creado y modificado por última vez el 2022-08-03), redistribuidos por nomenclador-salud-js (ISC). La licencia del conjunto en el portal no se pudo leer (403 desde la sesión): a confirmar.',
+      'Datos abiertos de PAMI (conjunto «nomenclador», creado y modificado por última vez el 2022-08-03), redistribuidos por nomenclador-salud-js (ISC). Licencia del conjunto: CC-BY-4.0 según el metadato del portal propio de PAMI (datos.pami.org.ar, leído el 2026-10-27; datos.gob.ar responde 502). Cotejado contra el CSV oficial: mismos 4 739 códigos; el paquete trae los nombres en Title Case y el original en MAYÚSCULAS.',
     obtain: 'npm',
     npm: { name: 'nomenclador-salud-js', version: '1.0.2' },
     dir: 'nomenclador-salud-js',
@@ -152,6 +152,33 @@ export const SOURCES = {
       { name: 'subset-table-playbook-dev.csv', url: 'https://api3.rsna.org/radlex/v1/createCsv?csvType=subset' },
       { name: 'map-to-table-playbook-dev.xlsx', url: 'https://api3.rsna.org/radlex/v1/createXlsx' },
       { name: 'RadLex_License_Agreement_and_Terms_of_Use_V2.1.pdf', url: 'http://www.rsna.org/uploadedFiles/RSNA/Content/Informatics/RadLex_License_Agreement_and_Terms_of_Use_V2_Final.pdf' },
+    ],
+  },
+  // Originales que sólo se bajan para COTEJAR las redistribuciones de npm (no generan una capa propia).
+  'pami-datos': {
+    sourceCode: 'PAMI_DATOS',
+    name: 'PAMI — Portal de datos abiertos (original del nomenclador de prácticas médicas)',
+    owner: 'Instituto Nacional de Servicios Sociales para Jubilados y Pensionados (INSSJP / PAMI), Argentina',
+    officialUrl: 'https://datos.pami.org.ar/dataset/nomenclador',
+    license: 'CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/), según `license_id` del conjunto «nomenclador» en datos.pami.org.ar (CKAN `package_search`, 2026-10-27); autor INSSJP; creado 2022-08-03.',
+    obtain: 'http',
+    dir: 'pami-datos',
+    files: [
+      { name: 'nomenclador-comun.csv', url: 'https://datos.pami.org.ar/dataset/9937b24d-abad-45fb-8158-c1c5684d2635/resource/5d32d7a8-3d6a-4ed4-9701-6d4fd024c657/download/nomenclador-comun.csv' },
+      { name: 'package_show.json', url: 'https://datos.pami.org.ar/api/3/action/package_show?id=nomenclador' },
+    ],
+  },
+  'tuss-ans-original': {
+    sourceCode: 'ANS_TUSS_PDA049',
+    name: 'ANS — Plan de Dados Abertos PDA-049, TUSS (original)',
+    owner: 'Agência Nacional de Saúde Suplementar (ANS), Brasil',
+    officialUrl: 'https://dadosabertos.ans.gov.br/FTP/PDA/terminologia_unificada_saude_suplementar_TUSS-049/',
+    license: 'Dados abertos del PDA de la ANS. El Plano de Dados Abertos define «dados abertos» como los publicados bajo licencia abierta (uso, reuso y redistribución con, como máximo, crédito y compartir igual); el conjunto TUSS no declara un texto de licencia propio. El PDF del PDA es CC BY-NC-ND 4.0 (la obra documental, no los datos).',
+    obtain: 'http',
+    dir: 'ans-tuss-original',
+    files: [
+      { name: 'pda-049-tuss.zip', url: 'https://dadosabertos.ans.gov.br/FTP/PDA/terminologia_unificada_saude_suplementar_TUSS-049/pda-049-tuss.zip' },
+      { name: 'dicionario-pda-049-tuss.ods', url: 'https://dadosabertos.ans.gov.br/FTP/PDA/terminologia_unificada_saude_suplementar_TUSS-049/dicionario-pda-049-tuss.ods' },
     ],
   },
 };

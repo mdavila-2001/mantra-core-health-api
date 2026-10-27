@@ -1,0 +1,78 @@
+{
+  "tuss": {
+    "zipSha256": "8d3bc59ee7814042c8ba7cb6d2a4cd13e0ab4bb53933eb726ee856b14c5bd8d7",
+    "npmDeclaredChecksum": "8d3bc59ee7814042c8ba7cb6d2a4cd13e0ab4bb53933eb726ee856b14c5bd8d7",
+    "zipIdenticalToNpmSource": true,
+    "originalRows": 5966,
+    "npmRows": 5966,
+    "onlyInOriginal": 0,
+    "onlyInNpm": 0,
+    "nameDifferences": 0,
+    "startDateDifferences": 0,
+    "endDateDifferences": 0,
+    "examples": []
+  },
+  "pami": {
+    "csvSha256": "07370b31822789ce774f1f6632855a0e865ec23d65373a1c5e84aeefe96980b4",
+    "title": "NOMENCLADOR ESTRUCTURA UNIDADES FEBRERO 2019",
+    "originalRows": 4739,
+    "npmRows": 4739,
+    "onlyInOriginal": 0,
+    "onlyInNpm": 0,
+    "namesEqualExceptCase": 4729,
+    "namesDifferingBeyondCase": 10,
+    "differingExamples": [
+      {
+        "code": "664606",
+        "original": "SUBUNIDAD BETA DE GONADOTROFINA CORIONICA (CUALITATIVA) - HCG O ?-HCG - SUB ?",
+        "npm": "Subunidad Beta De Gonadotrofina Corionica (Cualitativa) - Hcg O Β-Hcg - Sub Β"
+      },
+      {
+        "code": "664607",
+        "original": "SUBUNIDAD BETA DE GONADOTROFINA CORIONICA (CUANTITATIVA) -  HCG O ?-HCG - SUB ?",
+        "npm": "Subunidad Beta De Gonadotrofina Corionica (Cuantitativa) - Hcg O Β-Hcg - Sub Β"
+      },
+      {
+        "code": "772492",
+        "original": "ANTITRIPSINA, ALFA 1 (?1 AT) - LIQ. PLEURAL O MAT. FECAL O SERICA - C/U - (POR I.D.-CUANTITATIVA)",
+        "npm": "Antitripsina, Alfa 1 (Α1 At) - Liq. Pleural O Mat. Fecal O Serica - C/U - (Por I.D.-Cuantitativa)"
+      },
+      {
+        "code": "773051",
+        "original": "BETA LACTAMASA  (ß-LACTAMASA)",
+        "npm": "Beta Lactamasa (Ss-Lactamasa)"
+      },
+      {
+        "code": "774606",
+        "original": "SUBUNIDAD BETA DE GONADOTROFINA CORIONICA (CUALITATIVA) - HCG O ?-HCG - SUB ?",
+        "npm": "Subunidad Beta De Gonadotrofina Corionica (Cualitativa) - Hcg O Β-Hcg - Sub Β"
+      },
+      {
+        "code": "774607",
+        "original": "SUBUNIDAD BETA DE GONADOTROFINA CORIONICA (CUANTITATIVA) -  HCG O ?-HCG - SUB ?",
+        "npm": "Subunidad Beta De Gonadotrofina Corionica (Cuantitativa) - Hcg O Β-Hcg - Sub Β"
+      },
+      {
+        "code": "882492",
+        "original": "ANTITRIPSINA, ALFA 1 (?1 AT) - LIQ. PLEURAL O MAT. FECAL O SERICA - C/U - (POR I.D.-CUANTITATIVA)",
+        "npm": "Antitripsina, Alfa 1 (Α1 At) - Liq. Pleural O Mat. Fecal O Serica - C/U - (Por I.D.-Cuantitativa)"
+      },
+      {
+        "code": "883051",
+        "original": "BETA LACTAMASA  (ß-LACTAMASA)",
+        "npm": "Beta Lactamasa (Ss-Lactamasa)"
+      },
+      {
+        "code": "778467",
+        "original": "POLIOMAVIRUS JC,  PCR  LCR",
+        "npm": "Poliomavirus Jc, Pcr – Lcr"
+      },
+      {
+        "code": "888467",
+        "original": "POLIOMAVIRUS JC,  PCR  LCR",
+        "npm": "Poliomavirus Jc, Pcr – Lcr"
+      }
+    ],
+    "note": "Las diferencias más allá de la caja son letras griegas que el export CSV de PAMI perdió («?»); el .xlsx oficial del mismo conjunto las conserva."
+  }
+}

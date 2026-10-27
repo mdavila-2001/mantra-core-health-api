@@ -109,5 +109,49 @@
         "etag": "\"d8889ed6adcdb1:0\""
       }
     }
+  },
+  "pami-datos": {
+    "files": {
+      "nomenclador-comun.csv": {
+        "url": "https://datos.pami.org.ar/dataset/9937b24d-abad-45fb-8158-c1c5684d2635/resource/5d32d7a8-3d6a-4ed4-9701-6d4fd024c657/download/nomenclador-comun.csv",
+        "bytes": 306799,
+        "sha256": "07370b31822789ce774f1f6632855a0e865ec23d65373a1c5e84aeefe96980b4",
+        "retrievedAt": "2026-10-27T23:34:45.169Z",
+        "httpStatus": 200,
+        "lastModified": "Wed, 03 Aug 2022 17:59:03 GMT",
+        "etag": "\"1659549543.88-306799\""
+      },
+      "package_show.json": {
+        "url": "https://datos.pami.org.ar/api/3/action/package_show?id=nomenclador",
+        "bytes": 5214,
+        "sha256": "b7997641e7710e50ee97ac1efd785909451b0f3fc55471c77275592b7bc57386",
+        "retrievedAt": "2026-10-27T23:34:46.695Z",
+        "httpStatus": 200,
+        "lastModified": null,
+        "etag": null
+      }
+    }
+  },
+  "tuss-ans-original": {
+    "files": {
+      "pda-049-tuss.zip": {
+        "url": "https://dadosabertos.ans.gov.br/FTP/PDA/terminologia_unificada_saude_suplementar_TUSS-049/pda-049-tuss.zip",
+        "bytes": 1470290,
+        "sha256": "8d3bc59ee7814042c8ba7cb6d2a4cd13e0ab4bb53933eb726ee856b14c5bd8d7",
+        "retrievedAt": "2026-10-27T23:34:48.414Z",
+        "httpStatus": 200,
+        "lastModified": "Fri, 26 Jun 2026 15:09:08 GMT",
+        "etag": "\"166f52-655297d82b71d\""
+      },
+      "dicionario-pda-049-tuss.ods": {
+        "url": "https://dadosabertos.ans.gov.br/FTP/PDA/terminologia_unificada_saude_suplementar_TUSS-049/dicionario-pda-049-tuss.ods",
+        "bytes": 10466,
+        "sha256": "62a470ac9f747c89a03ab05aa09e19d9f673cafd284952a5f7bc98d73ef8a65a",
+        "retrievedAt": "2026-10-27T23:34:49.838Z",
+        "httpStatus": 200,
+        "lastModified": "Tue, 14 Jul 2026 20:28:41 GMT",
+        "etag": "\"28e2-656980d758cef\""
+      }
+    }
   }
 }

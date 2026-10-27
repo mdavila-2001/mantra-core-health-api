@@ -233,9 +233,27 @@ export function tussItems(procedures) {
     }));
 }
 
-/** Nomenclador PAMI: `[{ name, code:number }]`; el código se rellena a 6 dígitos (el JSON perdió el cero inicial). */
-export function pamiItems(rows) {
-  return rows.map((r) => ({ code: String(r.code).padStart(6, '0'), name: r.name.replace(/\s+/g, ' ').trim(), lang: 'es', properties: { pami_code_as_published: r.code } }));
+/**
+ * Nomenclador PAMI: `[{ name, code:number }]`; el código se rellena a 6 dígitos (el JSON perdió el cero inicial).
+ * `original` (opcional) = salida de parsePamiOriginal: cotejo exacto de códigos con el CSV oficial de PAMI
+ * (si difieren, aborta) y agrega módulo, valor en unidades y el nombre oficial tal como está en el CSV. El
+ * `display` sigue siendo el del paquete (Title Case; el CSV pierde letras griegas en 10 filas). Defecto conocido
+ * del paquete: 773051 «ß-LACTAMASA» quedó como «Ss-Lactamasa».
+ */
+export function pamiItems(rows, original = null) {
+  const items = rows.map((r) => ({ code: String(r.code).padStart(6, '0'), name: r.name.replace(/\s+/g, ' ').trim(), lang: 'es', properties: { pami_code_as_published: r.code } }));
+  if (!original) return items;
+  const have = new Set(items.map((i) => i.code));
+  const missing = [...original.rows.keys()].filter((c) => !have.has(c));
+  const extra = items.filter((i) => !original.rows.has(i.code)).map((i) => i.code);
+  if (missing.length || extra.length) throw new Error(`PAMI: el paquete npm y el CSV oficial difieren (solo en el CSV: ${missing.length}; solo en npm: ${extra.length})`);
+  for (const it of items) {
+    const o = original.rows.get(it.code);
+    it.properties.pami_module = o.module;
+    it.properties.pami_official_name_csv = o.officialName; // verbatim del CSV oficial (MAYÚSCULAS; «?» donde el export perdió una letra griega)
+    it.properties.reference_price = { currency: 'ARS', schedule: `PAMI nomenclador — ${original.title ?? 'estructura unidades'}`, amount_cents: o.valueCents };
+  }
+  return items;
 }
 
 /**

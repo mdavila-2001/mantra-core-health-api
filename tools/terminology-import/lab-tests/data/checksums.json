@@ -21,7 +21,7 @@
     ]
   },
   "lab-tests-pami-nomenclador": {
-    "sha256": "edc981bc7b0100c610e9c5fbf1f5c32d15cf7b469f45decde448a6e1d408f996",
+    "sha256": "b7c6d753ec567798f98187804d7ca8d7304e80d00f620504450fe8f398f8340f",
     "lines": 3034,
     "files": [
       "lab-tests-pami-nomenclador.ndjson.gz"

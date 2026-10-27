@@ -35,6 +35,7 @@ import {
   parseUniversalLabOrders,
 } from './lib/loinc.mjs';
 import { gunzipSync } from 'node:zlib';
+import { parsePamiOriginal } from './lib/pami-original.mjs';
 import { RADLEX_CODE_SYSTEM, parseMapTo, parsePlaybookCsv, parseSubsets, radlexRecords } from './lib/radlex.mjs';
 import { DICOM_CODE_SYSTEM, DCM_SYSTEM_URI, dicomRecords, parseCid29, parseDcmDefinitions, parseStandardEdition } from './lib/dicom.mjs';
 import { GTR_CODE_SYSTEM, gtrRecords, parseConditionGene, parseMethodCategories, parseTestVersion } from './lib/gtr.mjs';
@@ -216,7 +217,11 @@ const TARIFF_LAYERS = {
     file: ['dist', 'assets', 'estudios.json'],
     version: () => '2022-08-03',
     sourceUrl: () => SOURCES['pami-nomenclador'].officialUrl,
-    items: (dir, read) => pamiItems(read(join(dir, 'dist', 'assets', 'estudios.json'))),
+    items: (dir, read) => {
+      // Cotejo y enriquecimiento con el CSV oficial de PAMI (datos.pami.org.ar), si se bajó (fetch-open-sources.mjs pami-datos).
+      const csv = openFile('pami-datos', 'nomenclador-comun.csv');
+      return pamiItems(read(join(dir, 'dist', 'assets', 'estudios.json')), csv ? parsePamiOriginal(readFileSync(csv.path)) : null);
+    },
   },
 };
 
