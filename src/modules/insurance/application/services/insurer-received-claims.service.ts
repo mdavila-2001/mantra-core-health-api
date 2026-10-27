@@ -626,6 +626,8 @@ export class InsurerReceivedClaimsService {
             reason: item.decision.reason,
           }
         : null,
+      breakdown: null,
+      patientObjection: null,
     }));
   }
 
