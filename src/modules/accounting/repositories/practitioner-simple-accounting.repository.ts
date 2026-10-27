@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import {
   PractitionerSimpleAccounts,
@@ -85,6 +86,56 @@ export class PractitionerSimpleAccountingRepository {
       },
       { partial: true },
     );
+  }
+
+  /**
+   * Siembra las cuentas generales de la práctica en UNA sentencia
+   * `INSERT … ON CONFLICT (practice_id, code) DO NOTHING`.
+   *
+   * Es lo que vuelve segura la siembra concurrente: dos pedidos que llegan a la
+   * vez a una práctica sin cuentas ven ambos «cero sembradas», y con `em.create`
+   * + `flush` el segundo chocaba con el UNIQUE `(practice_id, code)` y fallaba.
+   * Aquí el segundo espera a que el primero confirme y no inserta nada: quedan
+   * exactamente las filas de la lista, una vez. Una fila que ya existe con ese
+   * código (renombrada o propia) no se toca: `DO NOTHING`, nunca `DO UPDATE`.
+   *
+   * Las filas viajan siempre en el mismo orden, así que dos siembras a la vez
+   * toman los bloqueos de índice en el mismo orden y no se interbloquean. Va por
+   * el `EntityManager` recibido para correr dentro de su transacción, si la hay.
+   * La tabla no tiene espejo `audit.*_history`, así que saltarse el ORM no deja
+   * una revisión sin sellar.
+   *
+   * @returns Cuántas filas insertó esta llamada (0 si otra se le adelantó).
+   */
+  async seedAccounts(
+    em: EntityManager,
+    practiceId: string,
+    accounts: ReadonlyArray<
+      readonly [code: string, name: string, accountClass: string]
+    >,
+    actorUserId?: string,
+  ): Promise<number> {
+    if (accounts.length === 0) return 0;
+    const row = '(?, ?, ?, ?, ?, true, now(), now(), ?, ?)';
+    const params = accounts.flatMap(([code, name, accountClass]) => [
+      randomUUID(),
+      practiceId,
+      code,
+      name,
+      accountClass,
+      actorUserId ?? null,
+      actorUserId ?? null,
+    ]);
+    const inserted = await em.execute<Array<{ id: string }>>(
+      `insert into accounting.practitioner_simple_accounts
+         (id, practice_id, code, name, account_class, seeded,
+          created_at, updated_at, created_by_user_id, updated_by_user_id)
+       values ${accounts.map(() => row).join(', ')}
+       on conflict (practice_id, code) do nothing
+       returning id`,
+      params,
+    );
+    return inserted.length;
   }
 
   /** Cuántos registros y transacciones cuelgan de una cuenta. */

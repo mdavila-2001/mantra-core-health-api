@@ -77,6 +77,34 @@ function memoryRepo() {
         accounts.filter((a) => a.practiceId === practiceId && a.seeded).length,
     ),
     createAccount: mockFn(make(accounts)),
+    // Mismo contrato que el real: `ON CONFLICT (practice_id, code) DO NOTHING`.
+    seedAccounts: mockFn(
+      async (
+        _em: any,
+        practiceId: string,
+        generals: ReadonlyArray<readonly [string, string, string]>,
+        actorUserId?: string,
+      ) => {
+        let inserted = 0;
+        for (const [code, name, accountClass] of generals) {
+          if (
+            accounts.some((a) => a.practiceId === practiceId && a.code === code)
+          )
+            continue;
+          accounts.push({
+            id: uuid(),
+            practiceId,
+            code,
+            name,
+            accountClass,
+            seeded: true,
+            createdByUserId: actorUserId,
+          });
+          inserted += 1;
+        }
+        return inserted;
+      },
+    ),
     countAccountUsage: mockFn(
       async (_em: any, accountId: string) =>
         records.filter((r) => r.accountId === accountId).length +
@@ -422,6 +450,19 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
       );
       await ctx.service.listAccounts(PRACTICE, actor);
       expect(ctx.repo.accounts).toHaveLength(26);
+      expect(ctx.repo.seedAccounts).toHaveBeenCalledTimes(1);
+    });
+
+    it('la siembra va por el repositorio idempotente, con las 26 generales y el actor', async () => {
+      const ctx = build();
+      await ctx.service.listAccounts(PRACTICE, actor);
+      expect(ctx.repo.seedAccounts).toHaveBeenCalledWith(
+        expect.anything(),
+        PRACTICE,
+        GENERAL_ACCOUNTS,
+        actor.id,
+      );
+      expect(ctx.repo.createAccount).not.toHaveBeenCalled();
     });
 
     it('cada práctica tiene sus propias generales', async () => {

@@ -17,6 +17,9 @@ import { TerminologyModule } from '../terminology/terminology.module';
 // transacción; `practice` no importa `iam`, así que la dependencia no cierra
 // ciclo.
 import { PracticeModule } from '../practice/practice.module';
+// El alta pública de farmacia (P50) provisiona la farmacia, su central y sus
+// sucursales con `PharmacyProvisioningService`; `pharmacy` no importa `iam`.
+import { PharmacyModule } from '../pharmacy/pharmacy.module';
 import {
   IamUsersController,
   IamAuthController,
@@ -103,6 +106,7 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     InsuranceModule,
     TerminologyModule,
     PracticeModule,
+    PharmacyModule,
   ],
   controllers: [
     IamUsersController,

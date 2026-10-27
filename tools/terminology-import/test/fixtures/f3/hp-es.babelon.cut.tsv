@@ -1,0 +1,15 @@
+# fixture-source: hp-es.babelon.tsv https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/src/translations/hp-es.babelon.tsv (sha256 00972e33775a0340…, el mismo medido en volumes.md)
+# fixture-lines: 6,44,292,983,1002,1402,1516,2232,3797,5475,7760,8775
+source_language	translation_language	subject_id	source_value	predicate_id	translation_value	translation_status
+en	es	HP:0000006	Autosomal dominant inheritance	rdfs:label	Herencia autosómica dominante	OFFICIAL
+en	es	HP:0000047	Hypospadias	rdfs:label	Hipospadias	OFFICIAL
+en	es	HP:0000365	Hearing impairment	rdfs:label	Discapacidad auditiva/hipoacusia	OFFICIAL
+en	es	HP:0001263	Global developmental delay	rdfs:label	Retardo global del desarrollo	OFFICIAL
+en	es	HP:0001288	Gait disturbance	rdfs:label	Alteración en la marcha	OFFICIAL
+en	es	HP:0001878	Hemolytic anemia	rdfs:label	Anemia hemolítica	OFFICIAL
+en	es	HP:0002014	Diarrhea	rdfs:label	Diarrea	OFFICIAL
+en	es	HP:0003003	Colon cancer	rdfs:label	Cáncer de colon	OFFICIAL
+en	es	HP:0005403	Decrease in T cell count	rdfs:label	Linfocitopenia T severa	OFFICIAL
+en	es	HP:0008305	Exercise-induced myoglobinuria	rdfs:label	Mioglobinuria inducida por el ejercicio	OFFICIAL
+en	es	HP:0011097	Epileptic spasms	rdfs:label	Espasmos epilépticos	OFFICIAL
+en	es	HP:0012120	Methylmalonic aciduria	rdfs:label	Aciduria metilmalónica	OFFICIAL

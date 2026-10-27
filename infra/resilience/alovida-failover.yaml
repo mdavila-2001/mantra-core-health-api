@@ -14,6 +14,16 @@
 # prioridad es el largo de la regla), así que esto manda sobre esos dominios.
 # Quitarlo = borrar este archivo; Traefik vuelve solo a las rutas de Coolify.
 http:
+  # Conectar a un contenedor que acaba de desaparecer no da «connection
+  # refused»: queda colgado hasta el dialTimeout, que por defecto es 30 s, y el
+  # reintento no llega a actuar. Medido el 25/10/2026 23:26:45 durante el
+  # cambio de contenedor del front de test. Los contenedores están en el mismo
+  # host: si no conecta en 1 s, ya no existe.
+  serversTransports:
+    alovida-fast-dial:
+      forwardingTimeouts:
+        dialTimeout: 1s
+
   middlewares:
     # Cubre los ~1–2 s entre que el principal cae y el healthcheck lo marca.
     alovida-ha-retry:
@@ -82,11 +92,13 @@ http:
     alovida-ha-mockup-live:
       loadBalancer:
         passHostHeader: true
+        serversTransport: alovida-fast-dial
         healthCheck: { path: /auth, hostname: demo.alovidasalud.arauzsoftware.com, interval: 2s, timeout: 2s }
         servers: [{ url: "http://alovida-live-mockup:4000" }]
     alovida-ha-mockup-standby:
       loadBalancer:
         passHostHeader: true
+        serversTransport: alovida-fast-dial
         healthCheck: { path: /auth, hostname: demo.alovidasalud.arauzsoftware.com, interval: 5s, timeout: 3s }
         servers: [{ url: "http://alovida-standby-mockup:4000" }]
 
@@ -98,11 +110,13 @@ http:
     alovida-ha-test-live:
       loadBalancer:
         passHostHeader: true
+        serversTransport: alovida-fast-dial
         healthCheck: { path: /auth, hostname: app.alovidasalud.arauzsoftware.com, interval: 2s, timeout: 2s }
         servers: [{ url: "http://alovida-live-test:80" }]
     alovida-ha-test-standby:
       loadBalancer:
         passHostHeader: true
+        serversTransport: alovida-fast-dial
         healthCheck: { path: /auth, hostname: app.alovidasalud.arauzsoftware.com, interval: 5s, timeout: 3s }
         servers: [{ url: "http://alovida-standby-test:80" }]
 
@@ -114,10 +128,12 @@ http:
     alovida-ha-dev-live:
       loadBalancer:
         passHostHeader: true
+        serversTransport: alovida-fast-dial
         healthCheck: { path: /auth, hostname: app.alovidasalud.com, interval: 2s, timeout: 2s }
         servers: [{ url: "http://alovida-live-dev:80" }]
     alovida-ha-dev-standby:
       loadBalancer:
         passHostHeader: true
+        serversTransport: alovida-fast-dial
         healthCheck: { path: /auth, hostname: app.alovidasalud.com, interval: 5s, timeout: 3s }
         servers: [{ url: "http://alovida-standby-dev:80" }]

@@ -84,4 +84,10 @@ export enum ClinicalErrorReason {
   SUGGESTED_SITE_DOES_NOT_OFFER_PROCEDURE = 'SUGGESTED_SITE_DOES_NOT_OFFER_PROCEDURE',
   /** El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida. */
   PRACTITIONER_NOT_AFFILIATED_AT_SITE = 'PRACTITIONER_NOT_AFFILIATED_AT_SITE',
+  /** P40: una nota citada en `basedOnNoteIds` no existe o es de otro paciente (indistinguibles a propósito). */
+  BASED_ON_NOTE_NOT_FOUND = 'BASED_ON_NOTE_NOT_FOUND',
+  /** P40: una nota citada en `basedOnNoteIds` es de otro encuentro que la orden. */
+  BASED_ON_NOTE_ENCOUNTER_MISMATCH = 'BASED_ON_NOTE_ENCOUNTER_MISMATCH',
+  /** P40: `category` y `categoryConceptId` viajan juntos y no dicen lo mismo. */
+  SERVICE_REQUEST_CATEGORY_MISMATCH = 'SERVICE_REQUEST_CATEGORY_MISMATCH',
 }

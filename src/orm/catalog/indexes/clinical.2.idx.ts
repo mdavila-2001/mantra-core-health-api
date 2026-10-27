@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `clinical` (parte 2/2).
- * 76 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 80 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const clinicalIndexes2: readonly IndexTuple[] = [
@@ -55,6 +55,10 @@ export const clinicalIndexes2: readonly IndexTuple[] = [
   ['received_services', 'ix_received_services_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['received_services', 'ix_received_services_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['received_services', 'ix_received_services_patient_performed_at', ['custodian_tenant_id', 'patient_profile_id', 'performed_at desc'], false, 'btree'],
+  ['service_request_notes', 'ux_service_request_notes_request_note', ['service_request_id', 'clinical_note_header_id'], true, 'btree'],
+  ['service_request_notes', 'ix_service_request_notes_service_request_id', ['service_request_id'], false, 'btree'],
+  ['service_request_notes', 'ix_service_request_notes_clinical_note_header_id', ['clinical_note_header_id'], false, 'btree'],
+  ['service_request_notes', 'ix_service_request_notes_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_custodian_tenant_id', ['custodian_tenant_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_patient_profile_id', ['patient_profile_id'], false, 'btree'],
   ['service_requests', 'ix_service_requests_encounter_id', ['encounter_id'], false, 'btree'],

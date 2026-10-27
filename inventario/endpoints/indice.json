@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1574,
+    "total": 1591,
     "porOrigen": {
-      "CONTRATO": 1565,
+      "CONTRATO": 1582,
       "CONTRATO_AUSENTE": 9
     },
     "porRiesgo": {
-      "BAJO": 498,
-      "MEDIO": 887,
-      "ALTO": 189
+      "BAJO": 507,
+      "MEDIO": 890,
+      "ALTO": 194
     },
-    "conTablas": 1513,
+    "conTablas": 1530,
     "sinTablasSinDeterminar": 0,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 916,
-    "conRequerimientos": 1574
+    "conPruebas": 928,
+    "conRequerimientos": 1591
   },
   "endpoints": [
     {
@@ -3725,6 +3725,24 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PatientSpendingController_listMine",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/patient-spending/me",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Mis gastos de salud",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PATIENT"
+      ],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ChartCarePlansController_createCarePlan",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -3918,7 +3936,7 @@
       ],
       "tablas": 4,
       "eventos": 0,
-      "pruebas": 5,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -3994,7 +4012,7 @@
       ],
       "tablas": 19,
       "eventos": 0,
-      "pruebas": 4,
+      "pruebas": 5,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -4903,9 +4921,9 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 27,
+      "tablas": 29,
       "eventos": 1,
-      "pruebas": 5,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -5510,7 +5528,7 @@
       "roles": [],
       "tablas": 3,
       "eventos": 0,
-      "pruebas": 3,
+      "pruebas": 4,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -5542,7 +5560,7 @@
       "roles": [],
       "tablas": 2,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10312,9 +10330,9 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10534,7 +10552,7 @@
       "roles": [
         "SUPERADMIN"
       ],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -10589,9 +10607,9 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 7,
+      "tablas": 15,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10624,6 +10642,22 @@
       "tablas": 5,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TenantsController_completeAffiliationDocuments",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/tenants/{tenantId}/affiliation-documents",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Completar los documentos legales de la organización",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10703,7 +10737,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -10866,6 +10900,22 @@
       "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TenantsController_getPharmacyReadiness",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/tenants/{tenantId}/pharmacy-readiness",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Requisitos pendientes para que la farmacia opere",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13164,7 +13214,7 @@
       "roles": [],
       "tablas": 23,
       "eventos": 0,
-      "pruebas": 53,
+      "pruebas": 59,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13210,9 +13260,9 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 36,
+      "tablas": 37,
       "eventos": 0,
-      "pruebas": 17,
+      "pruebas": 20,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13228,7 +13278,7 @@
       "roles": [],
       "tablas": 21,
       "eventos": 0,
-      "pruebas": 31,
+      "pruebas": 34,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13244,7 +13294,7 @@
       "roles": [],
       "tablas": 45,
       "eventos": 0,
-      "pruebas": 31,
+      "pruebas": 37,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13326,7 +13376,7 @@
       "roles": [],
       "tablas": 6,
       "eventos": 0,
-      "pruebas": 4,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13881,7 +13931,7 @@
       "roles": [],
       "tablas": 16,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -19476,7 +19526,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -19496,6 +19546,63 @@
         "PHARMACY_STAFF"
       ],
       "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyController_createCategory",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/pharmacies/{pharmacyId}/categories",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": "Crear una categoría de la farmacia",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyController_deleteCategory",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/pharmacies/{pharmacyId}/categories/{categoryId}",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": "Eliminar una categoría de la farmacia",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyController_renameCategory",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/pharmacies/{pharmacyId}/categories/{categoryId}",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": "Renombrar una categoría de la farmacia",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -19539,6 +19646,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PharmacyController_updateInventory",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/pharmacies/{pharmacyId}/inventory",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": "Guardar el inventario declarado de varios productos (todo o nada)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PharmacyController_verifyLicense",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -19555,6 +19681,44 @@
       "tablas": 2,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyController_cancelOnCallShift",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": "Cancelar un turno de guardia (deja de publicarse)",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyController_getOpeningHours",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/pharmacies/{pharmacyId}/opening-hours",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": "Horario declarado de las sedes: 24 h y turnos vigentes y próximos",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -19622,13 +19786,13 @@
       "modulo": "pharmacy",
       "bloque": "Farmacia",
       "nombre": "Publicar producto en catálogo con identificadores",
-      "riesgo": "MEDIO",
+      "riesgo": "ALTO",
       "publica": false,
       "roles": [
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 7,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -19659,14 +19823,14 @@
       "ruta": "/pharmacies/{pharmacyId}/products/{productId}",
       "modulo": "pharmacy",
       "bloque": "Farmacia",
-      "nombre": "Editar los datos descriptivos de un producto del catálogo",
-      "riesgo": "MEDIO",
+      "nombre": "Editar un producto del catálogo de la farmacia",
+      "riesgo": "ALTO",
       "publica": false,
       "roles": [
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 3,
+      "tablas": 17,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -19707,6 +19871,44 @@
       "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyController_createOnCallShift",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": "Registrar un turno de guardia de la sede",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyController_setOpen24h",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/pharmacies/{pharmacyId}/sites/{siteId}/open-24h",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": "Declarar si la sede abre las 24 horas",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -19800,7 +20002,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -19816,7 +20018,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -19832,9 +20034,9 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 7,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -19883,6 +20085,22 @@
       "tablas": 11,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyPublicController_openNow",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/public/pharmacies/open-now",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": "Farmacias abiertas ahora: 24 h o de turno vigente",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -21032,19 +21250,8 @@
       "nombre": "Listar las prácticas activas del tenant",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN",
-        "SURGERY_SCHEDULER",
-        "PERIOP_ADMIN",
-        "SURGEON",
-        "ANESTHESIOLOGIST",
-        "PERIOP_NURSE",
-        "SCHEDULING_ADMIN",
-        "PRACTITIONER",
-        "CLINICIAN",
-        "ACCOUNTING_APPROVER"
-      ],
-      "tablas": 2,
+      "roles": [],
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -21064,7 +21271,7 @@
       ],
       "tablas": 2,
       "eventos": 0,
-      "pruebas": 5,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -21271,16 +21478,8 @@
       "nombre": "Listar las sedes de una práctica",
       "riesgo": "BAJO",
       "publica": false,
-      "roles": [
-        "SECURITY_ADMIN",
-        "SURGERY_SCHEDULER",
-        "PERIOP_ADMIN",
-        "SURGEON",
-        "ANESTHESIOLOGIST",
-        "PERIOP_NURSE",
-        "SCHEDULING_ADMIN"
-      ],
-      "tablas": 2,
+      "roles": [],
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -22143,7 +22342,7 @@
         "SURGEON",
         "PERIOP_ADMIN"
       ],
-      "tablas": 28,
+      "tablas": 30,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22780,6 +22979,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "ProfilesPractitionersController_updatePractitionerProfile",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/profiles/practitioners/{profileId}",
+      "modulo": "profiles",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Corregir el perfil profesional de otro (titular o plataforma)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 26,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "ProfilesPractitionersController_addAffiliationFor",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -22874,7 +23089,7 @@
       "roles": [],
       "tablas": 15,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22890,7 +23105,7 @@
       "roles": [],
       "tablas": 26,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -23162,7 +23377,7 @@
       "roles": [],
       "tablas": 15,
       "eventos": 0,
-      "pruebas": 3,
+      "pruebas": 5,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -23616,6 +23831,38 @@
       "tablas": 13,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PublicCatalogController_pharmacyBranchAvailability",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/public/profiles/f/{slug}/branch-availability",
+      "modulo": "public",
+      "bloque": null,
+      "nombre": "Disponibilidad de una receta en las sucursales de una farmacia",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PublicCatalogController_pharmacyBranches",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/public/profiles/f/{slug}/branches",
+      "modulo": "public",
+      "bloque": null,
+      "nombre": "Sucursales de una farmacia, desde su ficha pública",
+      "riesgo": "BAJO",
+      "publica": true,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -24944,7 +25191,7 @@
       ],
       "tablas": 24,
       "eventos": 0,
-      "pruebas": 4,
+      "pruebas": 5,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25023,9 +25270,9 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 53,
+      "tablas": 54,
       "eventos": 0,
-      "pruebas": 3,
+      "pruebas": 4,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25044,9 +25291,9 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 45,
+      "tablas": 46,
       "eventos": 0,
-      "pruebas": 5,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25083,7 +25330,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25163,7 +25410,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 9,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25183,7 +25430,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 33,
+      "tablas": 34,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25243,7 +25490,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 40,
+      "tablas": 41,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -25433,7 +25680,7 @@
       ],
       "tablas": 18,
       "eventos": 0,
-      "pruebas": 5,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25453,7 +25700,7 @@
       ],
       "tablas": 44,
       "eventos": 0,
-      "pruebas": 5,
+      "pruebas": 6,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25489,7 +25736,7 @@
         "SYSTEM",
         "SYSTEM_WORKER"
       ],
-      "tablas": 8,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -25569,7 +25816,7 @@
       ],
       "tablas": 4,
       "eventos": 0,
-      "pruebas": 19,
+      "pruebas": 22,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25586,7 +25833,7 @@
         "SCHEDULING_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 30,
+      "tablas": 31,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -25645,9 +25892,51 @@
         "SCHEDULING_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 30,
+      "tablas": 31,
       "eventos": 0,
       "pruebas": 3,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SchedulingFlexibleController_availability",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/scheduling/resources/{id}/flexible-availability",
+      "modulo": "scheduling",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Horas que se pueden pedir en un horario flexible",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PATIENT",
+        "PRACTITIONER",
+        "CLINICIAN",
+        "SCHEDULING_ADMIN",
+        "SCHEDULING_AGENT"
+      ],
+      "tablas": 9,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SchedulingFlexibleController_placeHold",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/scheduling/resources/{id}/flexible-holds",
+      "modulo": "scheduling",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Retener una hora de un horario flexible",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PATIENT",
+        "SCHEDULING_ADMIN",
+        "SCHEDULING_AGENT"
+      ],
+      "tablas": 17,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25706,7 +25995,7 @@
       ],
       "tablas": 3,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25725,7 +26014,7 @@
       ],
       "tablas": 5,
       "eventos": 0,
-      "pruebas": 12,
+      "pruebas": 14,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25870,7 +26159,7 @@
       ],
       "tablas": 1,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25890,7 +26179,7 @@
       ],
       "tablas": 9,
       "eventos": 0,
-      "pruebas": 10,
+      "pruebas": 11,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25909,7 +26198,7 @@
       ],
       "tablas": 34,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25947,7 +26236,7 @@
       ],
       "tablas": 7,
       "eventos": 0,
-      "pruebas": 12,
+      "pruebas": 14,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -26542,7 +26831,7 @@
       "roles": [],
       "tablas": 5,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -27772,7 +28061,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"

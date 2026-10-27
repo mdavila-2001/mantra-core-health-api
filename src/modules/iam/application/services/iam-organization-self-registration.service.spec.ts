@@ -4,7 +4,6 @@ const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { IamOrganizationSelfRegistrationService } from './iam-organization-self-registration.service';
 import { TracingService } from '../../../../observability';
 import { MessagingEmailNoticeAdapter } from '../../infrastructure/adapters/messaging-email-notice.adapter';
-import { PharmacyRegistrationAdapter } from '../../infrastructure/adapters/pharmacy-registration.adapter';
 import { directoryRegistration } from './iam-registration.testing';
 import {
   CONCEPTS,
@@ -49,6 +48,7 @@ describe('IamOrganizationSelfRegistrationService', () => {
     };
     const usersRepo = { create: fn(() => ({ id: 'user-1' })) };
     const credentialsRepo = {
+      lockSubjectForRegistration: fn().mockResolvedValue(undefined),
       findLivePasswordBySubject: fn().mockResolvedValue(null),
       createPassword: fn(),
     };
@@ -86,6 +86,12 @@ describe('IamOrganizationSelfRegistrationService', () => {
     const representatives = {
       register: fn(async () => ({ representativesRegistered: 4 })),
     };
+    // P50: doble del puerto de farmacia (el adaptador real delega en
+    // `PharmacyProvisioningService`, que tiene su propio spec).
+    const pharmacies = {
+      provision: fn().mockResolvedValue({ pharmacyId: 'pharmacy-1' }),
+    };
+    const branches = { create: fn(() => undefined) };
 
     const service = new IamOrganizationSelfRegistrationService(
       em as never,
@@ -98,12 +104,12 @@ describe('IamOrganizationSelfRegistrationService', () => {
       directoryRegistration({
         tenants: tenantsRepo,
         memberships: membershipsRepo,
-        branches: { create: () => undefined },
+        branches,
         typeProfile,
         affiliationDocuments,
       }),
       new MessagingEmailNoticeAdapter(notificationsService as never),
-      new PharmacyRegistrationAdapter(),
+      pharmacies as never,
       representatives as never,
       logger as never,
       new TracingService(),
@@ -122,8 +128,149 @@ describe('IamOrganizationSelfRegistrationService', () => {
       typeProfile,
       affiliationDocuments,
       representatives,
+      pharmacies,
+      branches,
     };
   }
+
+  describe('PHARMACY (P50)', () => {
+    const pharmacyDto: RegisterOrganizationDto = {
+      ...dto,
+      organization: {
+        ...dto.organization,
+        code: 'FARM-1023456029',
+        legalName: 'Farmacia Central S.R.L.',
+        tenantType: 'PHARMACY',
+        legalEntityType: 'SRL',
+        taxIdentifier: '1023456029',
+        pharmacy: {
+          address: 'Av. Cristo Redentor 1234',
+          latitude: -17.78,
+          longitude: -63.18,
+          branches: [
+            {
+              name: 'Sucursal Equipetrol',
+              latitude: -17.76,
+              longitude: -63.19,
+            },
+          ],
+        },
+      },
+    };
+
+    it('provisiona la farmacia con su casa central y sus sucursales y devuelve pharmacyId', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization(pharmacyDto);
+
+      expect(result.pharmacyId).toBe('pharmacy-1');
+      expect(d.pharmacies.provision).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          tenantId: 'tenant-1',
+          code: 'FARM-1023456029',
+          legalName: 'Farmacia Central S.R.L.',
+          ownerUserId: 'user-1',
+        }),
+        {
+          headquarters: {
+            name: 'Casa central',
+            addressLines: 'Av. Cristo Redentor 1234',
+            latitude: -17.78,
+            longitude: -63.18,
+          },
+          branches: [
+            {
+              name: 'Sucursal Equipetrol',
+              latitude: -17.76,
+              longitude: -63.19,
+            },
+          ],
+        },
+        'user-1',
+      );
+      // La central (con punto) y la sucursal siguen en `directory.branches`,
+      // que es lo que lista el portal de la organización.
+      expect(d.branches.create).toHaveBeenCalledTimes(2);
+    });
+
+    it('sin bloque pharmacy, la central nace igual (sin dirección ni punto)', async () => {
+      const d = build();
+      const { pharmacy: _omit, ...organization } = pharmacyDto.organization;
+
+      await d.service.registerOrganization({ ...pharmacyDto, organization });
+
+      expect(d.pharmacies.provision).toHaveBeenCalledWith(
+        d.tx,
+        expect.anything(),
+        {
+          headquarters: {
+            name: 'Casa central',
+            addressLines: undefined,
+            latitude: undefined,
+            longitude: undefined,
+          },
+          branches: [],
+        },
+        'user-1',
+      );
+      expect(d.branches.create).not.toHaveBeenCalled();
+    });
+
+    it('una SRL de farmacia con representante sin poder se registra: el poder se exige para operar', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization({
+        ...pharmacyDto,
+        organization: {
+          ...pharmacyDto.organization,
+          legalRepresentative: {
+            fullName: 'Mariana Siles Justiniano',
+            idNumber: '4872190 SC',
+            email: 'legal@farmacia.bo',
+          },
+        },
+      });
+
+      expect(result.pharmacyId).toBe('pharmacy-1');
+      expect(d.representatives.register).toHaveBeenCalled();
+    });
+
+    it('copia el NIT declarado como número del documento tributario', async () => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...pharmacyDto,
+        organization: {
+          ...pharmacyDto.organization,
+          legalDocuments: {
+            constitutionFileId: '00000000-0000-4000-8000-000000000001',
+            taxIdentifierFileId: '00000000-0000-4000-8000-000000000002',
+            commerceRegistryFileId: '00000000-0000-4000-8000-000000000003',
+            operatingLicenseFileId: '00000000-0000-4000-8000-000000000004',
+            healthAuthorityCertificateFileId:
+              '00000000-0000-4000-8000-000000000005',
+          },
+        },
+      });
+
+      expect(
+        d.affiliationDocuments.attachRegistrationDocuments,
+      ).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ taxIdentifier: '1023456029' }),
+      );
+    });
+
+    it('no provisiona farmacia para otro tipo de organización', async () => {
+      const d = build();
+
+      const result = await d.service.registerOrganization(dto);
+
+      expect(d.pharmacies.provision).not.toHaveBeenCalled();
+      expect(result.pharmacyId).toBeUndefined();
+    });
+  });
 
   it('creates the organization and its owner account in one call', async () => {
     const d = build();
@@ -190,6 +337,38 @@ describe('IamOrganizationSelfRegistrationService', () => {
       }),
     );
   });
+
+  // Organización médica: las cinco institucionales de salud. CLINIC es el
+  // código de «Clínica», que no existía y se rechazaba con 400 en el DTO.
+  it.each([
+    ['HOSPITAL', CONCEPTS.TENANT_TYPE_HOSPITAL],
+    ['CLINIC', CONCEPTS.TENANT_TYPE_CLINIC],
+    ['MEDICAL_OFFICE', CONCEPTS.TENANT_TYPE_MEDICAL_OFFICE],
+    ['NURSING', CONCEPTS.TENANT_TYPE_NURSING],
+    ['HEALTH_OTHER', CONCEPTS.TENANT_TYPE_HEALTH_OTHER],
+  ] as const)(
+    'registra la organización médica %s con su concepto de tipo, pendiente y sin verificar',
+    async (tenantType, conceptId) => {
+      const d = build();
+
+      await d.service.registerOrganization({
+        ...dto,
+        organization: { ...dto.organization, tenantType },
+      });
+
+      expect(d.typeProfile.assertProfileMatchesType).toHaveBeenCalledWith(
+        expect.objectContaining({ tenantType }),
+      );
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          tenantTypeConceptId: conceptId,
+          statusConceptId: DIR.TENANT_PENDING,
+          verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
+        }),
+      );
+    },
+  );
 
   describe('DIAGNOSTIC_CENTER (subtarea 1.5)', () => {
     it('devuelve diagnosticUnitId cuando el tipo es DIAGNOSTIC_CENTER', async () => {
@@ -351,6 +530,21 @@ describe('IamOrganizationSelfRegistrationService', () => {
       ConflictException,
     );
     expect(d.tenantsRepo.create).not.toHaveBeenCalled();
+  });
+
+  // Sin el cerrojo, dos altas simultáneas con el mismo correo pasarían las dos
+  // la comprobación.
+  it('locks the owner email inside the transaction before checking for a live credential', async () => {
+    const d = build();
+
+    await d.service.registerOrganization(dto);
+
+    const lock = d.credentialsRepo.lockSubjectForRegistration;
+    const check = d.credentialsRepo.findLivePasswordBySubject;
+    expect(lock).toHaveBeenCalledWith(d.tx, dto.owner.email);
+    expect(lock.mock.invocationCallOrder[0]).toBeLessThan(
+      check.mock.invocationCallOrder[0],
+    );
   });
 
   it('keeps the organization when the verification email cannot be queued', async () => {

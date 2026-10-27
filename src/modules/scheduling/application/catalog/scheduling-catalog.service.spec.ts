@@ -599,8 +599,14 @@ describe('SchedulingCatalogService', () => {
         const res = await d.service.listTemplates(RESOURCE, actor);
 
         expect(res.count).toBe(2);
+        // v4.2.61: la telemedicina viaja siempre; sin declararla, `false`.
         expect(res.items[0].rules).toEqual([
-          { dayOfWeek: 1, startTime: '09:00:00', endTime: '13:00:00' },
+          {
+            dayOfWeek: 1,
+            startTime: '09:00:00',
+            endTime: '13:00:00',
+            telemedicineEnabled: false,
+          },
         ]);
         expect(res.items[1].rules).toHaveLength(1);
       });
@@ -671,11 +677,51 @@ describe('SchedulingCatalogService', () => {
         // sí viaja siempre: es un booleano derivado, no una columna anulable.
         expect(res.items[0]).toEqual({
           retired: false,
+          // P36: booleano derivado, viaja siempre como `retired`.
+          flexibleHours: false,
           id: 'tpl-1',
           name: 'Horario',
           statusConceptId: 'c',
-          rules: [{ dayOfWeek: 1, startTime: '09:00:00', endTime: '13:00:00' }],
+          rules: [
+            {
+              dayOfWeek: 1,
+              startTime: '09:00:00',
+              endTime: '13:00:00',
+              // v4.2.61: NOT NULL DEFAULT false, viaja siempre.
+              telemedicineEnabled: false,
+            },
+          ],
         });
+      });
+
+      it('devuelve la telemedicina de cada franja (v4.2.61)', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.findTemplatesByResource.mockResolvedValue([
+          { id: 'tpl-1', name: 'Horario', statusConceptId: 'c' },
+        ]);
+        d.catalogRepo.findRulesByTemplates.mockResolvedValue([
+          {
+            scheduleTemplateId: 'tpl-1',
+            dayOfWeek: 2,
+            startTime: '15:00:00',
+            endTime: '19:00:00',
+            telemedicineEnabled: true,
+          },
+          {
+            scheduleTemplateId: 'tpl-1',
+            dayOfWeek: 4,
+            startTime: '08:00:00',
+            endTime: '12:00:00',
+            telemedicineEnabled: false,
+          },
+        ]);
+
+        const res = await d.service.listTemplates(RESOURCE, actor);
+
+        expect(
+          res.items[0].rules.map((rule) => rule.telemedicineEnabled),
+        ).toEqual([true, false]);
       });
 
       it('un recurso inexistente sí es 404', async () => {
@@ -836,6 +882,33 @@ describe('SchedulingCatalogService', () => {
         expect(d.catalogRepo.createRule).toHaveBeenCalledTimes(1);
       });
 
+      it('la telemedicina por franja: apagada por defecto, encendida si se pide (v4.2.61)', async () => {
+        const d = buildCatalog();
+        d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+        d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+
+        await d.service.createTemplate(
+          RESOURCE,
+          {
+            name: 'Mixto',
+            rules: [
+              { dayOfWeek: 1, startTime: '08:00:00', endTime: '12:00:00' },
+              {
+                dayOfWeek: 2,
+                startTime: '15:00:00',
+                endTime: '19:00:00',
+                telemedicineEnabled: true,
+              },
+            ],
+          } as never,
+          actor,
+        );
+
+        const bands = d.catalogRepo.createRule.mock.calls.map((c: any) => c[1]);
+        expect(bands[0].telemedicineEnabled).toBe(false);
+        expect(bands[1].telemedicineEnabled).toBe(true);
+      });
+
       it('rejects a rule that ends before it starts', async () => {
         const d = buildCatalog();
 
@@ -920,6 +993,135 @@ describe('SchedulingCatalogService', () => {
             actor as any,
           ),
         ).rejects.toBeInstanceOf(PreconditionFailedException);
+      });
+
+      /**
+       * P36 · horario flexible, sin turnos fijos (propietario, 18/09/2026).
+       */
+      describe('horario flexible (P36)', () => {
+        const flexibleDto = {
+          name: 'Mañanas flexibles',
+          flexibleHours: true,
+          slotMinutes: 20,
+          rules: [{ dayOfWeek: 1, startTime: '08:00:00', endTime: '12:00:00' }],
+        };
+
+        it('guarda el modo en la plantilla y franjas sin duración ni capacidad', async () => {
+          const d = buildCatalog();
+          d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+          d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+
+          const res = await d.service.createTemplate(
+            RESOURCE,
+            flexibleDto,
+            actor,
+          );
+
+          expect(res.flexibleHours).toBe(true);
+          expect(d.catalogRepo.createTemplate).toHaveBeenCalledWith(
+            d.tx,
+            expect.objectContaining({ flexibleHours: true, slotMinutes: 20 }),
+          );
+          const rule = d.catalogRepo.createRule.mock.calls[0][1];
+          expect(rule.slotMinutes).toBeUndefined();
+          expect(rule.capacityPerSlot).toBeUndefined();
+          expect(rule.gapMinutes).toBeUndefined();
+        });
+
+        it('sin la marca, la plantilla sigue siendo de turnos fijos', async () => {
+          const d = buildCatalog();
+          d.catalogRepo.findResourceById.mockResolvedValue({ id: RESOURCE });
+          d.catalogRepo.createTemplate.mockReturnValue({ id: 'tpl-1' });
+
+          const res = await d.service.createTemplate(RESOURCE, dto, actor);
+
+          expect(res.flexibleHours).toBe(false);
+          expect(d.catalogRepo.createTemplate).toHaveBeenCalledWith(
+            d.tx,
+            expect.objectContaining({ flexibleHours: false }),
+          );
+          const rule = d.catalogRepo.createRule.mock.calls[0][1];
+          expect(rule.slotMinutes).toBe(30);
+          expect(rule.capacityPerSlot).toBe(1);
+        });
+
+        it.each([
+          ['slotMinutes', { slotMinutes: 30 }],
+          ['gapMinutes', { gapMinutes: 5 }],
+          ['capacityPerSlot', { capacityPerSlot: 3 }],
+        ])(
+          'rechaza una franja flexible que declara %s, sin escribir nada',
+          async (_campo, extra) => {
+            const d = buildCatalog();
+            await expect(
+              d.service.createTemplate(
+                RESOURCE,
+                {
+                  ...flexibleDto,
+                  rules: [
+                    {
+                      dayOfWeek: 1,
+                      startTime: '08:00:00',
+                      endTime: '12:00:00',
+                      ...extra,
+                    },
+                  ],
+                },
+                actor,
+              ),
+            ).rejects.toBeInstanceOf(PreconditionFailedException);
+            expect(d.catalogRepo.createTemplate).not.toHaveBeenCalled();
+          },
+        );
+
+        it('rechaza una franja más corta que el tiempo por paciente: no entraría nadie', async () => {
+          const d = buildCatalog();
+          await expect(
+            d.service.createTemplate(
+              RESOURCE,
+              {
+                ...flexibleDto,
+                rules: [
+                  { dayOfWeek: 1, startTime: '08:00:00', endTime: '08:15:00' },
+                ],
+              },
+              actor,
+            ),
+          ).rejects.toThrow(/dura menos que el tiempo por paciente/);
+        });
+
+        it('generar cupos de una plantilla flexible no materializa ninguno', async () => {
+          const d = buildCatalog();
+          d.catalogRepo.findTemplateById.mockResolvedValue({
+            id: 'tpl-1',
+            resourceId: RESOURCE,
+            slotMinutes: 20,
+            flexibleHours: true,
+          });
+          d.catalogRepo.findResourceById.mockResolvedValue({
+            id: RESOURCE,
+            resourceRefType: 'health_practitioner_profiles',
+            resourceRefId: 'hp-1',
+          });
+          d.catalogRepo.findRulesByTemplate.mockResolvedValue([
+            { dayOfWeek: 1, startTime: '08:00:00', endTime: '12:00:00' },
+          ]);
+          d.catalogRepo.findSlotsByTemplateInRange.mockResolvedValue([]);
+
+          const res = await d.service.generateSlots(
+            'tpl-1',
+            { from: '2026-06-01T00:00:00Z', to: '2026-06-09T00:00:00Z' },
+            actor as never,
+          );
+
+          expect(res).toEqual({
+            templateId: 'tpl-1',
+            created: 0,
+            skipped: 0,
+            omittedByCommitments: 0,
+          });
+          expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+        });
       });
 
       it('accepts a slot that fills the franja exactly', async () => {
@@ -1568,6 +1770,33 @@ describe('SchedulingCatalogService', () => {
         expect(res.ruleCount).toBe(2);
       });
 
+      it('al reemplazar las franjas conserva la telemedicina que se manda (v4.2.61)', async () => {
+        const d = buildCatalog();
+        withOwnTemplate(d);
+
+        await d.service.updateTemplate(
+          'tpl-1',
+          {
+            rules: [
+              {
+                dayOfWeek: 2,
+                startTime: '09:00',
+                endTime: '12:00',
+                telemedicineEnabled: true,
+              },
+              { dayOfWeek: 4, startTime: '14:00', endTime: '17:00' },
+            ],
+          } as never,
+          owner as never,
+        );
+
+        const bands = d.catalogRepo.createRule.mock.calls.map((c: any) => c[1]);
+        expect(bands.map((b: any) => b.telemedicineEnabled)).toEqual([
+          true,
+          false,
+        ]);
+      });
+
       it('rechaza una franja cuyo turno, completo, pisaría la siguiente', async () => {
         const d = buildCatalog();
         withOwnTemplate(d);
@@ -1756,6 +1985,7 @@ describe('SchedulingCatalogService', () => {
           'tpl-1',
           CONCEPTS.TEMPLATE_RETIRED,
           'u-1',
+          CONCEPTS.SLOT_BLOCKED,
         );
         expect(res.statusConceptId).toBe(CONCEPTS.TEMPLATE_RETIRED);
         // Los tres cupos con cita se conservan: ninguna cita se toca.

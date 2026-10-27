@@ -577,28 +577,37 @@ export class ClinicalFormsSeedService {
 
     const sectionId = deterministicId(`${ORIGIN}:section:${form.code}`);
 
-    em.create(
-      DynamicFieldSections,
-      {
-        id: sectionId,
-        // Mismo formato que `ChartTemplatesService.createTemplate`, para que las
-        // secciones del catálogo y las que arma un admin sean indistinguibles.
-        code: `CHART_TPL-${form.code}`,
-        name: form.name,
-        stateConceptId: CONCEPTS.STATE_ACTIVE,
-        createdAt: now,
-        updatedAt: now,
-      },
-      { partial: true },
-    );
-    // La sección se flushea ANTES de crear la plantilla, no las dos juntas:
-    // `specialty_chart_templates.section_id` es una columna `uuid` plana con FK,
-    // no una relación del ORM, así que MikroORM no infiere que la sección va
-    // primero — ordena los inserts por tabla, y la plantilla entraba antes. La
-    // base rechazaba el lote con `fk_specialty_chart_templates_section_id`, el
-    // seed quedaba «omitido» en el arranque y el catálogo, vacío. Es el mismo
-    // motivo por el que `TerminologySeedService` flushea por niveles.
-    await em.flush();
+    // La sección y la plantilla se escriben en dos flush (ver abajo), así que
+    // una corrida cortada entre ambos —proceso muerto por timeout, caída de la
+    // base— deja la sección sin plantilla. La corrida siguiente no encuentra la
+    // plantilla y llega acá: si volviera a crear la sección con el mismo id
+    // determinista, la base la rechazaría con `pk_dynamic_field_sections` y el
+    // arranque entero quedaría trabado. Se reusa la que ya está y se completa
+    // lo que falta; campos y asignaciones ya se reanudan solos (`seedField`).
+    if (!(await em.findOne(DynamicFieldSections, { id: sectionId }))) {
+      em.create(
+        DynamicFieldSections,
+        {
+          id: sectionId,
+          // Mismo formato que `ChartTemplatesService.createTemplate`, para que las
+          // secciones del catálogo y las que arma un admin sean indistinguibles.
+          code: `CHART_TPL-${form.code}`,
+          name: form.name,
+          stateConceptId: CONCEPTS.STATE_ACTIVE,
+          createdAt: now,
+          updatedAt: now,
+        },
+        { partial: true },
+      );
+      // La sección se flushea ANTES de crear la plantilla, no las dos juntas:
+      // `specialty_chart_templates.section_id` es una columna `uuid` plana con FK,
+      // no una relación del ORM, así que MikroORM no infiere que la sección va
+      // primero — ordena los inserts por tabla, y la plantilla entraba antes. La
+      // base rechazaba el lote con `fk_specialty_chart_templates_section_id`, el
+      // seed quedaba «omitido» en el arranque y el catálogo, vacío. Es el mismo
+      // motivo por el que `TerminologySeedService` flushea por niveles.
+      await em.flush();
+    }
 
     em.create(
       SpecialtyChartTemplates,

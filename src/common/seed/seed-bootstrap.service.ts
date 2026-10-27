@@ -29,6 +29,7 @@ import { StickerPackSeedService } from './sticker-pack-seed.service';
 import { VademecumSeedService } from './vademecum-seed.service';
 import { TerminologySeedService } from './terminology-seed.service';
 import { ClinicalFormsSeedService } from './clinical-forms-seed.service';
+import { BoMedicalSpecialtiesSeedService } from './bo-medical-specialties-seed.service';
 import { PracticeDefaultServicesSeedService } from './practice-default-services-seed.service';
 import { PeopleSeedService } from './people-seed.service';
 import { DirectoryNetworksSeedService } from './directory-networks-seed.service';
@@ -165,6 +166,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
    * @param platformPermissions - Permisos de sistema en `authz.permissions`.
    * @param bootstrapAdmin - Primer `SECURITY_ADMIN`, si el entorno lo pide.
    * @param clinicalForms - Catálogo de formularios clínicos estándar.
+   * @param boMedicalSpecialties - Especialidades y subespecialidades que se
+   *   suman a `VS_MEDICAL_SPECIALTY` (médicas, quirúrgicas y odontológicas).
    * @param practiceDefaultServices - «Cita médica» en las prácticas que nacieron
    *   sin catálogo.
    * @param people - Cuentas del padrón (H2, carril M2 · MacBook), sintéticas y
@@ -202,6 +205,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly bootstrapAdmin: BootstrapAdminSeedService,
     private readonly providerAccounts: ProviderAccountsSeedService,
     private readonly clinicalForms: ClinicalFormsSeedService,
+    private readonly boMedicalSpecialties: BoMedicalSpecialtiesSeedService,
     private readonly practiceDefaultServices: PracticeDefaultServicesSeedService,
     private readonly people: PeopleSeedService,
     private readonly directoryNetworks: DirectoryNetworksSeedService,
@@ -495,6 +499,17 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
         name: 'formularios clínicos estándar',
         kind: 'content',
         run: () => this.clinicalForms.run(),
+      },
+      // Después de los formularios y no antes: en una base sin el paquete del
+      // modelo es ese paso quien publica `VS_MEDICAL_SPECIALTY`, y éste sólo
+      // suma miembros a un conjunto que ya existe. Antes del directorio de
+      // redes, que mapea las especialidades de los médicos por nombre contra
+      // el conjunto. Contenido: sin él el alta sigue funcionando con las del
+      // modelo.
+      {
+        name: 'especialidades médicas ampliadas',
+        kind: 'content',
+        run: () => this.boMedicalSpecialties.run(),
       },
       // Va el último a propósito: el alta del administrador referencia conceptos
       // de estado y el tenant por defecto, que los sembra el catálogo.

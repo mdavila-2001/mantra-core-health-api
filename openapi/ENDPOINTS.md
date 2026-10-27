@@ -2,7 +2,7 @@
 
 # Documentación de endpoints
 
-Se documentan **1565 de 1565 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
+Se documentan **1584 de 1584 endpoints** en **73 módulos**. La referencia completa, convenciones y modelo de error están en [openapi/endpoints/README.md](endpoints/README.md).
 
 | Módulo | Endpoints | Documento |
 |---|---:|---|
@@ -14,7 +14,7 @@ Se documentan **1565 de 1565 endpoints** en **73 módulos**. La referencia compl
 | `auth_providers` | 12 | [Abrir referencia](endpoints/auth-providers.md) |
 | `authz` | 32 | [Abrir referencia](endpoints/authz.md) |
 | `automation` | 17 | [Abrir referencia](endpoints/automation.md) |
-| `billing` | 35 | [Abrir referencia](endpoints/billing.md) |
+| `billing` | 36 | [Abrir referencia](endpoints/billing.md) |
 | `chart` | 23 | [Abrir referencia](endpoints/chart.md) |
 | `clinical` | 42 | [Abrir referencia](endpoints/clinical.md) |
 | `clinical_ext` | 27 | [Abrir referencia](endpoints/clinical-ext.md) |
@@ -28,7 +28,7 @@ Se documentan **1565 de 1565 endpoints** en **73 módulos**. La referencia compl
 | `delegated_access` | 12 | [Abrir referencia](endpoints/delegated-access.md) |
 | `diagnostic_units` | 21 | [Abrir referencia](endpoints/diagnostic-units.md) |
 | `diagnostics` | 31 | [Abrir referencia](endpoints/diagnostics.md) |
-| `directory` | 23 | [Abrir referencia](endpoints/directory.md) |
+| `directory` | 26 | [Abrir referencia](endpoints/directory.md) |
 | `document_store` | 5 | [Abrir referencia](endpoints/document-store.md) |
 | `education` | 14 | [Abrir referencia](endpoints/education.md) |
 | `erp` | 17 | [Abrir referencia](endpoints/erp.md) |
@@ -37,7 +37,7 @@ Se documentan **1565 de 1565 endpoints** en **73 módulos**. La referencia compl
 | `graph_intelligence` | 15 | [Abrir referencia](endpoints/graph-intelligence.md) |
 | `health_context` | 13 | [Abrir referencia](endpoints/health-context.md) |
 | `health_data` | 16 | [Abrir referencia](endpoints/health-data.md) |
-| `iam` | 38 | [Abrir referencia](endpoints/iam.md) |
+| `iam` | 39 | [Abrir referencia](endpoints/iam.md) |
 | `identity_assurance` | 28 | [Abrir referencia](endpoints/identity-assurance.md) |
 | `insurance` | 55 | [Abrir referencia](endpoints/insurance.md) |
 | `insurance-campaigns` | 16 | [Abrir referencia](endpoints/insurance-campaigns.md) |
@@ -53,22 +53,22 @@ Se documentan **1565 de 1565 endpoints** en **73 módulos**. La referencia compl
 | `organization_extensions` | 9 | [Abrir referencia](endpoints/organization-extensions.md) |
 | `payments` | 14 | [Abrir referencia](endpoints/payments.md) |
 | `pharma_lab` | 76 | [Abrir referencia](endpoints/pharma-lab.md) |
-| `pharmacy` | 24 | [Abrir referencia](endpoints/pharmacy.md) |
+| `pharmacy` | 33 | [Abrir referencia](endpoints/pharmacy.md) |
 | `pharmacy_inventory` | 29 | [Abrir referencia](endpoints/pharmacy-inventory.md) |
 | `platform_ops` | 15 | [Abrir referencia](endpoints/platform-ops.md) |
 | `polyglot_storage` | 15 | [Abrir referencia](endpoints/polyglot-storage.md) |
 | `practice` | 36 | [Abrir referencia](endpoints/practice.md) |
 | `procedures_perioperative` | 32 | [Abrir referencia](endpoints/procedures-perioperative.md) |
-| `profiles` | 57 | [Abrir referencia](endpoints/profiles.md) |
+| `profiles` | 58 | [Abrir referencia](endpoints/profiles.md) |
 | `promotions` | 19 | [Abrir referencia](endpoints/promotions.md) |
-| `public` | 2 | [Abrir referencia](endpoints/public.md) |
+| `public` | 4 | [Abrir referencia](endpoints/public.md) |
 | `qa_execution` | 9 | [Abrir referencia](endpoints/qa-execution.md) |
 | `qa_lab` | 21 | [Abrir referencia](endpoints/qa-lab.md) |
 | `quotations` | 3 | [Abrir referencia](endpoints/quotations.md) |
 | `read_models` | 15 | [Abrir referencia](endpoints/read-models.md) |
 | `redis_runtime` | 5 | [Abrir referencia](endpoints/redis-runtime.md) |
 | `reporting` | 12 | [Abrir referencia](endpoints/reporting.md) |
-| `scheduling` | 59 | [Abrir referencia](endpoints/scheduling.md) |
+| `scheduling` | 61 | [Abrir referencia](endpoints/scheduling.md) |
 | `search_platform` | 3 | [Abrir referencia](endpoints/search-platform.md) |
 | `surveys` | 17 | [Abrir referencia](endpoints/surveys.md) |
 | `system_context` | 13 | [Abrir referencia](endpoints/system-context.md) |

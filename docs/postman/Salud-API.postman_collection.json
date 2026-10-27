@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1565 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1565 requests en 145 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1584 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1584 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -310,7 +310,7 @@
                 "register-organization"
               ]
             },
-            "description": "Alta pública desde cero: crea en una transacción el usuario owner con su credencial y rol, el tenant, la membresía que los une y el token de verificación de email. La organización queda pendiente de verificación por la plataforma, pero el owner puede iniciar sesión de inmediato.\n\n`tenantType` es obligatorio y cada tipo exige lo suyo: PAYER el bloque `payer` (que crea la aseguradora) y BROKER el bloque `broker` (que crea el corredor); los territoriales —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER y HEALTH_BUSINESS— país y jurisdicción.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `IamAuthController_registerOrganization`",
+            "description": "Alta pública desde cero: crea en una transacción el usuario owner con su credencial y rol, el tenant, la membresía que los une y el token de verificación de email. La organización queda pendiente de verificación por la plataforma, pero el owner puede iniciar sesión de inmediato.\n\n`tenantType` es obligatorio y cada tipo exige lo suyo: PAYER el bloque `payer` (que crea la aseguradora) y BROKER el bloque `broker` (que crea el corredor); los territoriales —PROVIDER, UNIVERSITY, PHARMACY, HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER y HEALTH_BUSINESS— país y jurisdicción.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `IamAuthController_registerOrganization`",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"organization\": {\n    \"code\": \"ORG-{{$timestamp}}\",\n    \"legalName\": \"Organización de prueba {{$timestamp}}\",\n    \"tenantType\": \"PROVIDER\",\n    \"countryConceptId\": \"{{countryConceptId}}\",\n    \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n  },\n  \"owner\": {\n    \"email\": \"owner-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de prueba\"\n  }\n}",
@@ -622,6 +622,63 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"organization\": {\n    \"code\": \"HOS-{{$timestamp}}\",\n    \"legalName\": \"Hospital de prueba {{$timestamp}}\",\n    \"tenantType\": \"HOSPITAL\",\n    \"countryConceptId\": \"{{countryConceptId}}\",\n    \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n  },\n  \"owner\": {\n    \"email\": \"hos-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de hospital\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{registerOrganizationId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.registerOrganizationId);",
+                  "  if (id) pm.environment.set('registerOrganizationId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Organización CLINIC · clínica",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/iam/auth/register-organization",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "iam",
+                "auth",
+                "register-organization"
+              ]
+            },
+            "description": "Alta de clínica. Mismo endpoint y mismo cuerpo que el PROVIDER: los tipos territoriales solo exigen país y jurisdicción, que es lo que determina bajo qué regulador operan. No materializan fila propia —operan por sus sedes— a diferencia de PAYER y BROKER.\n\nCuerpo ejecutable, el mismo del folder «01 · Alta de usuarios (por tipo)», donde está el flujo completo y sus variantes.\n\nRegistrar una organización con su cuenta owner. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /iam/auth/register-organization`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `IamAuthController_registerOrganization`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"organization\": {\n    \"code\": \"CLI-{{$timestamp}}\",\n    \"legalName\": \"Clínica de prueba {{$timestamp}}\",\n    \"tenantType\": \"CLINIC\",\n    \"countryConceptId\": \"{{countryConceptId}}\",\n    \"jurisdictionConceptId\": \"{{jurisdictionConceptId}}\"\n  },\n  \"owner\": {\n    \"email\": \"cli-{{$timestamp}}@example.test\",\n    \"password\": \"{{password}}\",\n    \"displayName\": \"Owner de clínica\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -21859,7 +21916,7 @@
                 "description": "Crear una nota clínica versionada (borrador SOAP). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /charts/notes`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ChartNotesController_createNote`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"chiefComplaintText\": \"chiefComplaintText-ejemplo\",\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
+                  "raw": "{\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"chiefComplaintText\": \"chiefComplaintText-ejemplo\",\n  \"entries\": [\n    {\n      \"label\": \"Presión arterial\",\n      \"value\": \"120/80\"\n    }\n  ],\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -22134,7 +22191,7 @@
                 "description": "Enmendar una nota firmada (addendum versionado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /charts/notes/{noteId}/amendments`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ChartNotesController_amendNote`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"amendmentReasonText\": \"2026-01-01T00:00:00.000Z\",\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
+                  "raw": "{\n  \"amendmentReasonText\": \"2026-01-01T00:00:00.000Z\",\n  \"entries\": [\n    {\n      \"label\": \"Presión arterial\",\n      \"value\": \"120/80\"\n    }\n  ],\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -22352,7 +22409,7 @@
                 "description": "Editar borrador creando una nueva versión inmutable. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PUT /charts/notes/{noteId}/versions`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ChartNotesController_addVersion`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"chiefComplaintText\": \"chiefComplaintText-ejemplo\",\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
+                  "raw": "{\n  \"chiefComplaintText\": \"chiefComplaintText-ejemplo\",\n  \"entries\": [\n    {\n      \"label\": \"Presión arterial\",\n      \"value\": \"120/80\"\n    }\n  ],\n  \"subjectiveText\": \"subjectiveText-ejemplo\",\n  \"objectiveText\": \"objectiveText-ejemplo\",\n  \"assessmentText\": \"assessmentText-ejemplo\",\n  \"planText\": \"planText-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -23543,7 +23600,7 @@
                 "description": "Crear una orden de servicio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /clinical/service-requests`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ClinicalOrdersController_createServiceRequest`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"custodianTenantId\": \"<custodianTenantId: uuid existente>\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"codeConceptId\": \"<codeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"reusePreviousReport\": true,\n  \"duplicateOverrideReason\": \"duplicateOverrideReason-ejemplo\"\n}",
+                  "raw": "{\n  \"custodianTenantId\": \"<custodianTenantId: uuid existente>\",\n  \"patientProfileId\": \"{{patientProfileId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"codeConceptId\": \"<codeConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n  \"category\": \"LAB\",\n  \"basedOnNoteIds\": [\n    \"<basedOnNoteIds: uuid existente>\"\n  ],\n  \"reusePreviousReport\": true,\n  \"duplicateOverrideReason\": \"duplicateOverrideReason-ejemplo\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -45519,7 +45576,7 @@
       ]
     },
     {
-      "name": "iam (38)",
+      "name": "iam (39)",
       "item": [
         {
           "name": "iam-auth",
@@ -46716,7 +46773,7 @@
           "name": "iam-users",
           "item": [
             {
-              "name": "GET /iam/users · Listado paginado de usuarios",
+              "name": "GET /iam/users · Listado paginado de usuarios (obsoleto)",
               "request": {
                 "method": "GET",
                 "header": [
@@ -46763,7 +46820,7 @@
                     }
                   ]
                 },
-                "description": "Listado paginado de usuarios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /iam/users`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `IamUsersController_searchUsers`"
+                "description": "Obsoleto: usar `POST /iam/users/search`. Un nombre o un correo en la query string queda en los logs de acceso de cualquier proxy.\n\n`GET /iam/users`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `IamUsersController_searchUsers`"
               },
               "response": [],
               "event": [
@@ -46954,6 +47011,66 @@
                     "exec": [
                       "pm.test('status 201', function () {",
                       "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{userId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.userId);",
+                      "  if (id) pm.environment.set('userId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /iam/users/search · Listado paginado de usuarios, con los filtros en el cuerpo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/users/search",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "users",
+                    "search"
+                  ]
+                },
+                "description": "Igual que `GET /iam/users`, pero el texto de búsqueda viaja en el cuerpo y no en la URL. Una clave no declarada responde 400.\n\n`POST /iam/users/search`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `IamUsersController_searchUsersByBody`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"q\": \"q-ejemplo\",\n  \"cursor\": \"cursor-ejemplo\",\n  \"limit\": 50\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
                       "});",
                       "",
                       "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{userId}}.",
@@ -63410,6 +63527,78 @@
       ]
     },
     {
+      "name": "patient-spending (1)",
+      "item": [
+        {
+          "name": "GET /patient-spending/me · Mis gastos de salud",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/patient-spending/me?from=2025-01-01&to=2026-10-26",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "patient-spending",
+                "me"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2025-01-01",
+                  "description": "Desde (inclusive)",
+                  "disabled": false
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-26",
+                  "description": "Hasta (inclusive)",
+                  "disabled": false
+                },
+                {
+                  "key": "limit",
+                  "value": "1000",
+                  "description": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Un movimiento por factura emitida al titular entre `from` y `to` (inclusive, nunca después de hoy), del más reciente al más antiguo. Importes en texto decimal exacto, con `paidAmount = grossAmount − coveredAmount − discountAmount`. El titular sale del token.\n\n`GET /patient-spending/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 422, 429, 500, 504\n\noperationId: `PatientSpendingController_listMine`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('meId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "patients (2)",
       "item": [
         {
@@ -67468,7 +67657,7 @@
       ]
     },
     {
-      "name": "pharmacies (13)",
+      "name": "pharmacies (21)",
       "item": [
         {
           "name": "POST /pharmacies · Alta de farmacia con licencia inicial",
@@ -67522,6 +67711,73 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.pharmacyId);",
                   "  if (id) pm.environment.set('pharmacyId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /pharmacies/{pharmacyId}/categories · Crear una categoría de la farmacia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pharmacies/:pharmacyId/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pharmacies",
+                ":pharmacyId",
+                "categories"
+              ],
+              "variable": [
+                {
+                  "key": "pharmacyId",
+                  "value": "{{pharmacyId}}",
+                  "description": "Identificador de ruta · variable `{{pharmacyId}}`"
+                }
+              ]
+            },
+            "description": "El nombre es único en la farmacia sin distinguir mayúsculas ni tildes (409).\n\n`POST /pharmacies/{pharmacyId}/categories`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PharmacyController_createCategory`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"name-ejemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{categoryId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.categoryId);",
+                  "  if (id) pm.environment.set('categoryId', id);",
                   "}"
                 ]
               }
@@ -67737,6 +67993,67 @@
                   "  const body = pm.response.json();",
                   "  const id = body && (body.id || body.licenseId);",
                   "  if (id) pm.environment.set('licenseId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel · Cancelar un turno de guardia (deja de publicarse)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pharmacies/:pharmacyId/on-call-shifts/:shiftId/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pharmacies",
+                ":pharmacyId",
+                "on-call-shifts",
+                ":shiftId",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "pharmacyId",
+                  "value": "{{pharmacyId}}",
+                  "description": "Identificador de ruta · variable `{{pharmacyId}}`"
+                },
+                {
+                  "key": "shiftId",
+                  "value": "{{shiftId}}",
+                  "description": "Identificador de ruta · variable `{{shiftId}}`"
+                }
+              ]
+            },
+            "description": "Cancelar un turno de guardia (deja de publicarse). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PharmacyController_cancelOnCallShift`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{onCallShiftId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.onCallShiftId);",
+                  "  if (id) pm.environment.set('onCallShiftId', id);",
                   "}"
                 ]
               }
@@ -67982,7 +68299,7 @@
             "description": "Publicar producto en catálogo con identificadores. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /pharmacies/{pharmacyId}/products`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PharmacyController_publishProduct`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"productCode\": \"productCode-ejemplo\",\n  \"catalogProductId\": \"{{catalogProductId}}\",\n  \"catalogPresentationCode\": \"catalogPresentationCode-ejemplo\",\n  \"brandName\": \"brandName-ejemplo\",\n  \"genericName\": \"genericName-ejemplo\",\n  \"strengthText\": \"strengthText-ejemplo\",\n  \"packageSizeText\": \"packageSizeText-ejemplo\",\n  \"requiresPrescription\": true,\n  \"coldChainRequired\": true,\n  \"identifiers\": [\n    {\n      \"identifierType\": \"GTIN\",\n      \"identifierValue\": \"identifierValue-ejemplo\",\n      \"assigningAuthorityTenantId\": \"<assigningAuthorityTenantId: uuid existente>\",\n      \"validFrom\": \"2026-01-01\",\n      \"validTo\": \"2026-01-01\"\n    }\n  ]\n}",
+              "raw": "{\n  \"productCode\": \"productCode-ejemplo\",\n  \"catalogProductId\": \"{{catalogProductId}}\",\n  \"catalogPresentationCode\": \"catalogPresentationCode-ejemplo\",\n  \"brandName\": \"brandName-ejemplo\",\n  \"genericName\": \"genericName-ejemplo\",\n  \"strengthText\": \"strengthText-ejemplo\",\n  \"packageSizeText\": \"packageSizeText-ejemplo\",\n  \"requiresPrescription\": true,\n  \"coldChainRequired\": true,\n  \"identifiers\": [\n    {\n      \"identifierType\": \"GTIN\",\n      \"identifierValue\": \"identifierValue-ejemplo\",\n      \"assigningAuthorityTenantId\": \"<assigningAuthorityTenantId: uuid existente>\",\n      \"validFrom\": \"2026-01-01\",\n      \"validTo\": \"2026-01-01\"\n    }\n  ],\n  \"unitPrice\": 12.5,\n  \"category\": \"category-ejemplo\",\n  \"description\": \"description-ejemplo\",\n  \"inStock\": true,\n  \"status\": \"PUBLISHED\",\n  \"stock\": 0,\n  \"minStock\": 0,\n  \"imageFileIds\": [\n    \"<imageFileIds: uuid existente>\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -68134,6 +68451,80 @@
           ]
         },
         {
+          "name": "POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts · Registrar un turno de guardia de la sede",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pharmacies/:pharmacyId/sites/:siteId/on-call-shifts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pharmacies",
+                ":pharmacyId",
+                "sites",
+                ":siteId",
+                "on-call-shifts"
+              ],
+              "variable": [
+                {
+                  "key": "pharmacyId",
+                  "value": "{{pharmacyId}}",
+                  "description": "Identificador de ruta · variable `{{pharmacyId}}`"
+                },
+                {
+                  "key": "siteId",
+                  "value": "{{siteId}}",
+                  "description": "Identificador de ruta · variable `{{siteId}}`"
+                }
+              ]
+            },
+            "description": "Horas ISO-8601 con desplazamiento obligatorio. Como mucho 72 h, no ya terminado, a no más de 62 días: si no, 422 `ON_CALL_SHIFT_WINDOW_INVALID`. Solapado con otro turno activo de la sede: 409 `ON_CALL_SHIFT_OVERLAP`.\n\n`POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PharmacyController_createOnCallShift`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startsAt\": \"2026-10-26T20:00:00-04:00\",\n  \"endsAt\": \"2026-10-27T08:00:00-04:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{onCallShiftId}}.",
+                  "if (pm.response.code < 300) {",
+                  "  const body = pm.response.json();",
+                  "  const id = body && (body.id || body.onCallShiftId);",
+                  "  if (id) pm.environment.set('onCallShiftId', id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "GET /pharmacies/{pharmacyId}/categories · Categorías de la farmacia (sólo su personal)",
           "request": {
             "method": "GET",
@@ -68189,7 +68580,188 @@
           ]
         },
         {
-          "name": "PATCH /pharmacies/{pharmacyId}/products/{productId} · Editar los datos descriptivos de un producto del catálogo",
+          "name": "GET /pharmacies/{pharmacyId}/opening-hours · Horario declarado de las sedes: 24 h y turnos vigentes y próximos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pharmacies/:pharmacyId/opening-hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pharmacies",
+                ":pharmacyId",
+                "opening-hours"
+              ],
+              "variable": [
+                {
+                  "key": "pharmacyId",
+                  "value": "{{pharmacyId}}",
+                  "description": "Identificador de ruta · variable `{{pharmacyId}}`"
+                }
+              ]
+            },
+            "description": "Sólo el personal de la farmacia (o la plataforma). Los turnos ya terminados o cancelados no se listan. Las horas vienen en UTC y en la hora local de la sede (`timeZone`, `America/La_Paz` por defecto).\n\n`GET /pharmacies/{pharmacyId}/opening-hours`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `PharmacyController_getOpeningHours`"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  const list = Array.isArray(body) ? body : (body.openingHours || body.items || body.data || body.results);",
+                  "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                  "  if (first && first.id) pm.environment.set('openingHourId', first.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /pharmacies/{pharmacyId}/categories/{categoryId} · Renombrar una categoría de la farmacia",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pharmacies/:pharmacyId/categories/:categoryId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pharmacies",
+                ":pharmacyId",
+                "categories",
+                ":categoryId"
+              ],
+              "variable": [
+                {
+                  "key": "pharmacyId",
+                  "value": "{{pharmacyId}}",
+                  "description": "Identificador de ruta · variable `{{pharmacyId}}`"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}",
+                  "description": "Identificador de ruta · variable `{{categoryId}}`"
+                }
+              ]
+            },
+            "description": "Renombrar una categoría de la farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /pharmacies/{pharmacyId}/categories/{categoryId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PharmacyController_renameCategory`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"name-ejemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /pharmacies/{pharmacyId}/inventory · Guardar el inventario declarado de varios productos (todo o nada)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pharmacies/:pharmacyId/inventory",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pharmacies",
+                ":pharmacyId",
+                "inventory"
+              ],
+              "variable": [
+                {
+                  "key": "pharmacyId",
+                  "value": "{{pharmacyId}}",
+                  "description": "Identificador de ruta · variable `{{pharmacyId}}`"
+                }
+              ]
+            },
+            "description": "Cada línea lleva `stock`/`minStock` **o** `inStock`: las dos juntas, ninguna, un producto repetido, ajeno o retirado es 422 y no se guarda ninguna. Es la declaración del catálogo, no el ledger de existencias.\n\n`PATCH /pharmacies/{pharmacyId}/inventory`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PharmacyController_updateInventory`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lines\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"stock\": 0,\n      \"minStock\": 0,\n      \"inStock\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /pharmacies/{pharmacyId}/products/{productId} · Editar un producto del catálogo de la farmacia",
           "request": {
             "method": "PATCH",
             "header": [
@@ -68228,16 +68800,136 @@
                 }
               ]
             },
-            "description": "Marca, genérico, concentración, empaque y receta: cada uno opcional y `null` lo borra. Precio, categoría, descripción, existencias, estado e imágenes no tienen columna (P47 §3-5) y se rechazan con 400. Un producto retirado responde 422.\n\n`PATCH /pharmacies/{pharmacyId}/products/{productId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PharmacyController_updateProduct`",
+            "description": "Marca, genérico, concentración, empaque y receta (no en un producto del catálogo universal: 400), y lo que administra la farmacia: precio (Bs, lista `CATALOGO`), categoría por nombre, descripción, existencias o «hay / no hay», estado e imágenes. Cada clave es opcional y `null` borra lo que lo admite. Un retirado sólo acepta `status` PUBLISHED/DRAFT (si no, 422). Devuelve el producto como la lectura de gestión.\n\n`PATCH /pharmacies/{pharmacyId}/products/{productId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PharmacyController_updateProduct`",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"brandName\": \"brandName-ejemplo\",\n  \"genericName\": \"genericName-ejemplo\",\n  \"strengthText\": \"strengthText-ejemplo\",\n  \"packageSizeText\": \"packageSizeText-ejemplo\",\n  \"requiresPrescription\": true\n}",
+              "raw": "{\n  \"brandName\": \"brandName-ejemplo\",\n  \"genericName\": \"genericName-ejemplo\",\n  \"strengthText\": \"strengthText-ejemplo\",\n  \"packageSizeText\": \"packageSizeText-ejemplo\",\n  \"requiresPrescription\": true,\n  \"unitPrice\": 12.5,\n  \"category\": \"category-ejemplo\",\n  \"description\": \"description-ejemplo\",\n  \"inStock\": true,\n  \"status\": \"PUBLISHED\",\n  \"stock\": 0,\n  \"minStock\": 0,\n  \"imageFileIds\": [\n    \"<imageFileIds: uuid existente>\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
             }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h · Declarar si la sede abre las 24 horas",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pharmacies/:pharmacyId/sites/:siteId/open-24h",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pharmacies",
+                ":pharmacyId",
+                "sites",
+                ":siteId",
+                "open-24h"
+              ],
+              "variable": [
+                {
+                  "key": "pharmacyId",
+                  "value": "{{pharmacyId}}",
+                  "description": "Identificador de ruta · variable `{{pharmacyId}}`"
+                },
+                {
+                  "key": "siteId",
+                  "value": "{{siteId}}",
+                  "description": "Identificador de ruta · variable `{{siteId}}`"
+                }
+              ]
+            },
+            "description": "`open24h: null` vuelve a «no declarado». Una sede de otra farmacia responde 404 igual que una inexistente.\n\n`PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PharmacyController_setOpen24h`",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"open24h\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /pharmacies/{pharmacyId}/categories/{categoryId} · Eliminar una categoría de la farmacia",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Tenant-Id",
+                "value": "{{tenantId}}",
+                "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pharmacies/:pharmacyId/categories/:categoryId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pharmacies",
+                ":pharmacyId",
+                "categories",
+                ":categoryId"
+              ],
+              "variable": [
+                {
+                  "key": "pharmacyId",
+                  "value": "{{pharmacyId}}",
+                  "description": "Identificador de ruta · variable `{{pharmacyId}}`"
+                },
+                {
+                  "key": "categoryId",
+                  "value": "{{categoryId}}",
+                  "description": "Identificador de ruta · variable `{{categoryId}}`"
+                }
+              ]
+            },
+            "description": "Eliminar una categoría de la farmacia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`DELETE /pharmacies/{pharmacyId}/categories/{categoryId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `PharmacyController_deleteCategory`"
           },
           "response": [],
           "event": [
@@ -68476,6 +69168,12 @@
                       "disabled": true
                     },
                     {
+                      "key": "managed",
+                      "value": "true",
+                      "description": "P47: con `true` (y `pharmacyId`) lista TODO el catálogo de esa farmacia —borradores y retirados— con estado, existencias, umbral e imágenes. Sólo su personal; cualquier otro, 404.",
+                      "disabled": true
+                    },
+                    {
                       "key": "limit",
                       "value": "1",
                       "description": "Tope del listado (por defecto 50)",
@@ -68552,6 +69250,12 @@
                       "key": "limit",
                       "value": "1",
                       "description": "Tope del listado (por defecto 50)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "openNow",
+                      "value": "true",
+                      "description": "P34: `true` deja sólo las sedes abiertas ahora (24 h declaradas o de turno vigente)",
                       "disabled": true
                     }
                   ]
@@ -70830,7 +71534,7 @@
                 "practices"
               ]
             },
-            "description": "Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE.\n\n`GET /practices`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PracticesController_listPractices`"
+            "description": "Sin `@Roles`: el servicio autoriza por rol clínico o por ser OWNER/ADMIN de la organización (A-6). Un PRACTITIONER sólo recibe las prácticas donde tiene una vinculación ACTIVE; quien administra la organización recibe todas las suyas.\n\n`GET /practices`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PracticesController_listPractices`"
           },
           "response": [],
           "event": [
@@ -75234,7 +75938,7 @@
       ]
     },
     {
-      "name": "profiles (53)",
+      "name": "profiles (54)",
       "item": [
         {
           "name": "profiles-patients",
@@ -77652,7 +78356,7 @@
                 "description": "Editar la presentación del propio perfil profesional. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`PATCH /profiles/practitioners/me`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 409, 413, 422, 429, 500, 504\n\noperationId: `ProfilesPractitionersController_updateOwnPractitionerProfile`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"languages\": [\n    {\n      \"languageConceptId\": \"<languageConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"proficiencyConceptId\": \"<proficiencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"clinicalInterpretationAllowed\": true\n    }\n  ]\n}",
+                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"languages\": [\n    {\n      \"languageConceptId\": \"<languageConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"proficiencyConceptId\": \"<proficiencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"clinicalInterpretationAllowed\": true\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -78011,6 +78715,66 @@
                   ]
                 },
                 "description": "Baja la primaria anterior y sube ésta, en la misma transacción. Idempotente: marcar la que ya lo es devuelve la especialidad sin escribir. `412` si la especialidad ya no se ejerce (`validTo`).\n\n`PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 422, 429, 500, 504\n\noperationId: `ProfilesPractitionersController_setOwnPrimarySpecialty`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PATCH /profiles/practitioners/{profileId} · Corregir el perfil profesional de otro (titular o plataforma)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profiles/practitioners/:profileId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profiles",
+                    "practitioners",
+                    ":profileId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "profileId",
+                      "value": "{{profileId}}",
+                      "description": "Identificador de ruta · variable `{{profileId}}`"
+                    }
+                  ]
+                },
+                "description": "`403` si quien pide no es el titular ni plataforma. `409` `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY` si se corrige el número del documento de una identidad verificada o con un caso de verificación en curso.\n\n`PATCH /profiles/practitioners/{profileId}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `ProfilesPractitionersController_updatePractitionerProfile`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"professionalTitle\": \"professionalTitle-ejemplo\",\n  \"professionalBio\": \"professionalBio-ejemplo\",\n  \"acceptsNewPatients\": true,\n  \"telehealthAvailable\": true,\n  \"name\": \"name-ejemplo\",\n  \"middleName\": \"middleName-ejemplo\",\n  \"lastName\": \"lastName-ejemplo\",\n  \"motherLastName\": \"motherLastName-ejemplo\",\n  \"birthDate\": {},\n  \"sexAtBirth\": \"MALE\",\n  \"nationalId\": \"nationalId-ejemplo\",\n  \"phone\": \"phone-ejemplo\",\n  \"workEmail\": \"usuario@example.test\",\n  \"personalEmail\": \"usuario@example.test\",\n  \"mobilePhone\": \"mobilePhone-ejemplo\",\n  \"workMobilePhone\": \"workMobilePhone-ejemplo\",\n  \"workLandline\": \"workLandline-ejemplo\",\n  \"taxId\": \"taxId-ejemplo\",\n  \"taxHolderName\": \"taxHolderName-ejemplo\",\n  \"homeAddressLines\": \"homeAddressLines-ejemplo\",\n  \"homeLatitude\": {},\n  \"homeLongitude\": {},\n  \"workAddressLines\": \"workAddressLines-ejemplo\",\n  \"workLatitude\": {},\n  \"workLongitude\": {},\n  \"occupationFreeText\": \"occupationFreeText-ejemplo\",\n  \"workEmployerFreeText\": \"workEmployerFreeText-ejemplo\",\n  \"languages\": [\n    {\n      \"languageConceptId\": \"<languageConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"proficiencyConceptId\": \"<proficiencyConceptId: uuid del catálogo, ver GET /terminology/concepts>\",\n      \"clinicalInterpretationAllowed\": true\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
               },
               "response": [],
               "event": [
@@ -78645,7 +79409,7 @@
       ]
     },
     {
-      "name": "public (23)",
+      "name": "public (26)",
       "item": [
         {
           "name": "clinical-prescriptions-public",
@@ -79850,6 +80614,92 @@
               ]
             },
             {
+              "name": "GET /public/pharmacies/open-now · Farmacias abiertas ahora: 24 h o de turno vigente",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/public/pharmacies/open-now",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "pharmacies",
+                    "open-now"
+                  ],
+                  "query": [
+                    {
+                      "key": "mode",
+                      "value": "any",
+                      "description": "`any` (por defecto): 24 h o de turno · `24h`: sólo 24 h · `on-call`: sólo de turno",
+                      "disabled": true
+                    },
+                    {
+                      "key": "city",
+                      "value": "city-ejemplo",
+                      "description": "Ciudad de la sede (sin distinguir mayúsculas)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "lat",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "Latitud WGS84 para ordenar por distancia (va con lng)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "lng",
+                      "value": "lng-ejemplo",
+                      "description": "Longitud WGS84 para ordenar por distancia (va con lat)",
+                      "disabled": true
+                    },
+                    {
+                      "key": "cursor",
+                      "value": "cursor-ejemplo",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "limit-ejemplo",
+                      "description": "Tamaño de página (por defecto 20, máx. 50)",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Farmacias abiertas ahora: 24 h o de turno vigente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /public/pharmacies/open-now`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 429, 500, 504\n\noperationId: `PharmacyPublicController_openNow`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.pharmacies || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('pharmacyId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "GET /public/medications/{conceptId}/availability · Farmacias que publican un medicamento, con precio y distancia",
               "request": {
                 "method": "GET",
@@ -79926,6 +80776,132 @@
         {
           "name": "public-catalog",
           "item": [
+            {
+              "name": "POST /public/profiles/f/{slug}/branch-availability · Disponibilidad de una receta en las sucursales de una farmacia",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/public/profiles/f/:slug/branch-availability",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "profiles",
+                    "f",
+                    ":slug",
+                    "branch-availability"
+                  ],
+                  "variable": [
+                    {
+                      "key": "slug",
+                      "value": "{{slug}}",
+                      "description": "Identificador de ruta · variable `{{slug}}`"
+                    }
+                  ]
+                },
+                "description": "Sin sesión. Cuerpo { items: string[] (1-20, texto libre), lat?, lng? }. Sólo cuenta lo que está en stock; un agotado es faltante. Orden del servidor: primero las completas, después la más cercana en línea recta. No guarda nada. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`POST /public/profiles/f/{slug}/branch-availability`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PublicCatalogController_pharmacyBranchAvailability`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    \"Paracetamol 500 mg\",\n    \"Losartán\"\n  ],\n  \"lat\": -17.78,\n  \"lng\": -63.18\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{profileId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.profileId);",
+                      "  if (id) pm.environment.set('profileId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /public/profiles/f/{slug}/branches · Sucursales de una farmacia, desde su ficha pública",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/public/profiles/f/:slug/branches",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "profiles",
+                    "f",
+                    ":slug",
+                    "branches"
+                  ],
+                  "variable": [
+                    {
+                      "key": "slug",
+                      "value": "{{slug}}",
+                      "description": "Identificador de ruta · variable `{{slug}}`"
+                    }
+                  ]
+                },
+                "description": "Sin sesión. Sedes activas de las farmacias activas y verificadas del tenant dueño de la ficha, por ciudad y nombre, con su punto si lo tiene. Un slug inexistente, oculto o de otro tipo responde 404.\n\n`GET /public/profiles/f/{slug}/branches`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `PublicCatalogController_pharmacyBranches`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.branches || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('branchId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
             {
               "name": "GET /public/profiles/f/{slug}/products · Productos que ofrece una farmacia, desde su ficha pública",
               "request": {
@@ -84338,7 +85314,7 @@
       ]
     },
     {
-      "name": "scheduling (58)",
+      "name": "scheduling (60)",
       "item": [
         {
           "name": "scheduling",
@@ -85329,6 +86305,74 @@
               ]
             },
             {
+              "name": "POST /scheduling/resources/{id}/flexible-holds · Retener una hora de un horario flexible",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/resources/:id/flexible-holds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "resources",
+                    ":id",
+                    "flexible-holds"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{resourceId}}",
+                      "description": "Identificador de ruta · variable `{{resourceId}}`"
+                    }
+                  ]
+                },
+                "description": "Crea el cupo de la hora pedida, con el tiempo por paciente de la plantilla, y lo retiene bajo el candado del profesional. 409 si la hora ya no está libre; 422 si no cae en una franja flexible o ya pasó. Se confirma con POST /scheduling/holds/{token}/confirm o /request.\n\n`POST /scheduling/resources/{id}/flexible-holds`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingFlexibleController_placeHold`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"startAt\": \"2026-01-01T00:00:00.000Z\",\n  \"patientProfileId\": \"{{patientProfileId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{flexibleHoldId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.flexibleHoldId);",
+                      "  if (id) pm.environment.set('flexibleHoldId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "POST /scheduling/resources/{id}/shift-slots · Correr los cupos de una agenda N minutos",
               "request": {
                 "method": "POST",
@@ -85434,7 +86478,7 @@
                 "description": "Publicar una plantilla de agenda con sus franjas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /scheduling/resources/{id}/templates`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingController_createTemplate`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\"\n    }\n  ],\n  \"slotMinutes\": 30,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\"\n    }\n  ],\n  \"slotMinutes\": 30,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\",\n  \"flexibleHours\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -85787,6 +86831,76 @@
                       "  const list = Array.isArray(body) ? body : (body.exceptions || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('exceptionId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /scheduling/resources/{id}/flexible-availability · Horas que se pueden pedir en un horario flexible",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/scheduling/resources/:id/flexible-availability?from=2026-01-01T00:00:00.000Z&to=2026-01-01T00:00:00.000Z",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "scheduling",
+                    "resources",
+                    ":id",
+                    "flexible-availability"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{resourceId}}",
+                      "description": "Identificador de ruta · variable `{{resourceId}}`"
+                    }
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "",
+                      "disabled": false
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-01-01T00:00:00.000Z",
+                      "description": "",
+                      "disabled": false
+                    }
+                  ]
+                },
+                "description": "Se calculan en lectura a partir de las franjas de las plantillas flexibles de la agenda y del tiempo ocupado del profesional en todas sus sedes. No reserva nada. Una agenda sin horario flexible responde la lista vacía.\n\n`GET /scheduling/resources/{id}/flexible-availability`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `SchedulingFlexibleController_availability`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.resources || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('resourceId', first.id);",
                       "}"
                     ]
                   }
@@ -91247,7 +92361,7 @@
       ]
     },
     {
-      "name": "tenants (24)",
+      "name": "tenants (27)",
       "item": [
         {
           "name": "directory-tenants",
@@ -91293,6 +92407,73 @@
                       "  const list = Array.isArray(body) ? body : (body.tenants || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('tenantId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /tenants/{tenantId}/affiliation-documents · Completar los documentos legales de la organización",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/tenants/:tenantId/affiliation-documents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tenants",
+                    ":tenantId",
+                    "affiliation-documents"
+                  ],
+                  "variable": [
+                    {
+                      "key": "tenantId",
+                      "value": "{{tenantId}}",
+                      "description": "Identificador de ruta · variable `{{tenantId}}`"
+                    }
+                  ]
+                },
+                "description": "Vincula PDF ya subidos con POST /iam/auth/upload-registration-document. 422 sin documentos, fuera de PENDING, con archivo repetido o sin representante para el poder; 409 si ese papel ya está presentado; 403 si no administra la organización.\n\n`POST /tenants/{tenantId}/affiliation-documents`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `TenantsController_completeAffiliationDocuments`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"taxIdentifier\": \"1023456029\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{affiliationDocumentId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.affiliationDocumentId);",
+                      "  if (id) pm.environment.set('affiliationDocumentId', id);",
                       "}"
                     ]
                   }
@@ -91888,6 +93069,61 @@
               ]
             },
             {
+              "name": "GET /tenants/{tenantId}/laboratory-readiness · Requisitos pendientes para que el laboratorio opere",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/tenants/:tenantId/laboratory-readiness",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tenants",
+                    ":tenantId",
+                    "laboratory-readiness"
+                  ],
+                  "variable": [
+                    {
+                      "key": "tenantId",
+                      "value": "{{tenantId}}",
+                      "description": "Identificador de ruta · variable `{{tenantId}}`"
+                    }
+                  ]
+                },
+                "description": "403 si no pertenece a la organización; 422 si no es un laboratorio.\n\n`GET /tenants/{tenantId}/laboratory-readiness`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `TenantsController_getLaboratoryReadiness`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.laboratoryReadiness || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('laboratoryReadinessId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "GET /tenants/{tenantId}/logo · Logo de la propia organización",
               "request": {
                 "method": "GET",
@@ -92129,6 +93365,61 @@
                       "  const list = Array.isArray(body) ? body : (body.branchAssignments || body.items || body.data || body.results);",
                       "  const first = Array.isArray(list) && list.length ? list[0] : null;",
                       "  if (first && first.id) pm.environment.set('branchAssignmentId', first.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "GET /tenants/{tenantId}/pharmacy-readiness · Requisitos pendientes para que la farmacia opere",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/tenants/:tenantId/pharmacy-readiness",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "tenants",
+                    ":tenantId",
+                    "pharmacy-readiness"
+                  ],
+                  "variable": [
+                    {
+                      "key": "tenantId",
+                      "value": "{{tenantId}}",
+                      "description": "Identificador de ruta · variable `{{tenantId}}`"
+                    }
+                  ]
+                },
+                "description": "Requisitos pendientes para que la farmacia opere. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`GET /tenants/{tenantId}/pharmacy-readiness`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 429, 500, 504\n\noperationId: `TenantsController_getPharmacyReadiness`"
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "// Toma el primero de la lista para poder ejercer el resto sin crear nada.",
+                      "if (pm.response.code === 200) {",
+                      "  const body = pm.response.json();",
+                      "  const list = Array.isArray(body) ? body : (body.pharmacyReadiness || body.items || body.data || body.results);",
+                      "  const first = Array.isArray(list) && list.length ? list[0] : null;",
+                      "  if (first && first.id) pm.environment.set('pharmacyReadinessId', first.id);",
                       "}"
                     ]
                   }

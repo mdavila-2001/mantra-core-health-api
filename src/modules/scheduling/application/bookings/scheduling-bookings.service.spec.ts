@@ -20,6 +20,7 @@ import {
 } from '../../../../common';
 import { SCHED } from '../../domain/scheduling.concepts';
 import { CLIN } from '../../../clinical/clinical.concepts';
+import { SchedulingErrorReason } from '../../scheduling.error-reasons';
 
 const actor = { id: 'user-1', roles: ['SCHEDULING_AGENT'] };
 /** Tenant activo de las pruebas de lectura: el de los recursos que se listan. */
@@ -92,6 +93,10 @@ function build() {
     findResourceById: mockFn(),
     findOpenSlotsOfProfessionalInWindow: mockFn().mockResolvedValue([]),
     createSlot: mockFn().mockReturnValue({ id: 'slot-directo' }),
+    // v4.2.61: por omisión el recurso no tiene horario publicado, así que
+    // ninguna franja habilita la telemedicina.
+    findTemplatesByResource: mockFn().mockResolvedValue([]),
+    findRulesByTemplates: mockFn().mockResolvedValue([]),
   };
   // C-10: la historia de transición se versiona vía el HistoryRepository de audit.
   // `latestBySource` es la lectura del motivo (corrección #14): por defecto no
@@ -734,6 +739,60 @@ describe('SchedulingBookingsService', () => {
       );
     });
 
+    it('P36 · el cupo de un horario flexible tampoco se reofrece: muere con la retención', async () => {
+      const d = build();
+      const hold = {
+        bookableSlotId: SLOT_ID,
+        statusConceptId: CONCEPTS.HOLD_ACTIVE,
+      };
+      const slot = openSlot({
+        capacity: 1,
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_HELD,
+        endAt: new Date(Date.now() + 2 * IN_ONE_HOUR),
+        scheduleTemplateId: 'tpl-flexible',
+      });
+      d.bookingsRepo.findExpiredHolds.mockResolvedValue([hold]);
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-flexible',
+        flexibleHours: true,
+      });
+
+      await d.service.expireHolds(10);
+
+      // Reabrirlo publicaría un turno fijo en una agenda que el médico
+      // publicó sin turnos.
+      expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+      expect(d.catalogRepo.findTemplateById).toHaveBeenCalledWith(
+        d.tx,
+        'tpl-flexible',
+      );
+    });
+
+    it('el cupo de una plantilla de turnos fijos sí se reofrece', async () => {
+      const d = build();
+      const hold = {
+        bookableSlotId: SLOT_ID,
+        statusConceptId: CONCEPTS.HOLD_ACTIVE,
+      };
+      const slot = openSlot({
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_HELD,
+        scheduleTemplateId: 'tpl-fijo',
+      });
+      d.bookingsRepo.findExpiredHolds.mockResolvedValue([hold]);
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-fijo',
+        flexibleHours: false,
+      });
+
+      await d.service.expireHolds(10);
+
+      expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+    });
+
     it('is a no-op when there is nothing expired', async () => {
       const d = build();
       d.bookingsRepo.findExpiredHolds.mockResolvedValue([]);
@@ -775,6 +834,34 @@ describe('SchedulingBookingsService', () => {
       expect(origin.remainingCapacity).toBe(1);
       expect(target.remainingCapacity).toBe(0);
       expect(d.bookingsRepo.recordReschedule).toHaveBeenCalled();
+    });
+
+    it('P36 · un turno de horario flexible no se reprograma: se cancela y se pide otra hora', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      });
+      d.bookingsRepo.findSlotById.mockResolvedValue(
+        openSlot({ scheduleTemplateId: 'tpl-flexible' }),
+      );
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-flexible',
+        flexibleHours: true,
+      });
+
+      await expect(
+        d.service.reschedule(
+          'booking-1',
+          {
+            toSlotId: '44444444-4444-4444-4444-444444444444',
+            reasonText: REASON,
+          },
+          actor as any,
+        ),
+      ).rejects.toThrow(/horario flexible/);
+      expect(d.bookingsRepo.recordReschedule).not.toHaveBeenCalled();
     });
 
     it('rejects moving to a slot with no seats', async () => {
@@ -1685,8 +1772,33 @@ describe('SchedulingBookingsService', () => {
        * reserva, que es otro eje), y que omitirlo no inventa nada.
        */
       describe('el canal de la atención', () => {
+        /**
+         * v4.2.61: publica un horario cuyo jueves de 08:00 a 12:00 (La Paz)
+         * tiene la telemedicina como se pida. `dto.startAt` es el jueves
+         * 10/09 a las 10:00 de La Paz.
+         */
+        function withThursdayBand(
+          d: ReturnType<typeof build>,
+          telemedicineEnabled: boolean,
+          statusConceptId: string = CONCEPTS.TEMPLATE_PUBLISHED,
+        ) {
+          d.catalogRepo.findTemplatesByResource.mockResolvedValue([
+            { id: 'tpl-1', statusConceptId },
+          ]);
+          d.catalogRepo.findRulesByTemplates.mockResolvedValue([
+            {
+              scheduleTemplateId: 'tpl-1',
+              dayOfWeek: 4,
+              startTime: '08:00:00',
+              endTime: '12:00:00',
+              telemedicineEnabled,
+            },
+          ]);
+          return d;
+        }
+
         it('escribe la teleconsulta en la cita clínica, no en la reserva', async () => {
-          const d = readyToAssign(build());
+          const d = withThursdayBand(readyToAssign(build()), true);
 
           await d.service.createDirectAppointment(
             { ...dto, channel: 'TELECONSULTA' } as never,
@@ -1704,6 +1816,65 @@ describe('SchedulingBookingsService', () => {
           expect(reservation.bookingChannelConceptId).toBe(
             CONCEPTS.CHANNEL_DESK,
           );
+        });
+
+        describe('telemedicina por franja (v4.2.61)', () => {
+          it('rechaza la teleconsulta en una franja sin telemedicina (por defecto)', async () => {
+            const d = withThursdayBand(readyToAssign(build()), false);
+
+            await expect(
+              d.service.createDirectAppointment(
+                { ...dto, channel: 'TELECONSULTA' } as never,
+                practitioner,
+              ),
+            ).rejects.toMatchObject({
+              reason: SchedulingErrorReason.TELEMEDICINE_NOT_ENABLED,
+            });
+            // Nada se escribe: ni cupo, ni cita clínica, ni reserva.
+            expect(d.catalogRepo.createSlot).not.toHaveBeenCalled();
+            expect(d.appointmentsRepo.create).not.toHaveBeenCalled();
+          });
+
+          it('rechaza la teleconsulta fuera de toda franja publicada', async () => {
+            const d = readyToAssign(build());
+
+            await expect(
+              d.service.createDirectAppointment(
+                { ...dto, channel: 'TELECONSULTA' } as never,
+                practitioner,
+              ),
+            ).rejects.toMatchObject({
+              reason: SchedulingErrorReason.TELEMEDICINE_NOT_ENABLED,
+            });
+          });
+
+          it('una plantilla retirada no habilita la telemedicina', async () => {
+            const d = withThursdayBand(
+              readyToAssign(build()),
+              true,
+              CONCEPTS.TEMPLATE_RETIRED,
+            );
+
+            await expect(
+              d.service.createDirectAppointment(
+                { ...dto, channel: 'TELECONSULTA' } as never,
+                practitioner,
+              ),
+            ).rejects.toMatchObject({
+              reason: SchedulingErrorReason.TELEMEDICINE_NOT_ENABLED,
+            });
+          });
+
+          it('presencial no mira la telemedicina de la franja', async () => {
+            const d = withThursdayBand(readyToAssign(build()), false);
+
+            await d.service.createDirectAppointment(
+              { ...dto, channel: 'PRESENCIAL' } as never,
+              practitioner,
+            );
+
+            expect(d.appointmentsRepo.create).toHaveBeenCalled();
+          });
         });
 
         it('sin canal no escribe ninguno: ausente ≠ presencial explícito', async () => {

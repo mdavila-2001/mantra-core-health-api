@@ -2,26 +2,13 @@ import { BadRequestException } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { CONCEPTS } from '../../../common';
-import { boDepartmentConceptId } from '../../../common/seed/bo-geography.catalog';
+import {
+  boDepartmentConceptId,
+  departmentSiglaOfMunicipalityCode,
+} from '../../../common/seed/bo-geography.catalog';
 import type { CatalogConceptsRepository } from '../../terminology/repositories';
 import type { Addresses } from '../entities';
 import type { AddressesRepository } from '../repositories';
-
-/**
- * La sigla del departamento, a partir del `code` del municipio.
- *
- * Los 340 municipios de `VS_BO_MUNICIPALITY` —los que de verdad sembró el
- * generador del modelo, ver el aviso arriba de `writeAddress`— codifican
- * `<SIGLA>-<NOMBRE>` (`SC-SANTA_CRUZ_DE_LA_SIERRA`, `LP-EL_ALTO`...);
- * verificado contra los 340 códigos de Neon, sin una sola excepción. No hay
- * una relación explícita municipio→departamento en
- * `terminology.concept_relationships` —se buscó y no existe—, así que esto
- * es lo único que hay para derivarlo sin inventar un vínculo que el modelo
- * no declara.
- */
-function departmentSiglaFromMunicipalityCode(code: string): string | undefined {
-  return code.match(/^([A-Z]{2})-/)?.[1];
-}
 
 /** Lo que hace falta para escribir una dirección de una persona. */
 export interface ResidenceAddressData {
@@ -91,6 +78,10 @@ export interface ResidenceAddressData {
  * uuid pasaba las dos capas a la vez. El departamento no tiene este problema
  * —`geo:bo:department:SC` sí está sembrado— así que su derivación no cambió.
  *
+ * Una base sembrada por la propia API (`BoGeographySeedService`, que corre en el
+ * arranque) sí trae el esquema `geo:bo:municipality:<INE>`; el departamento se
+ * deriva de las dos formas de código con `departmentSiglaOfMunicipalityCode`.
+ *
  * No hace nada si no se eligió municipio: el domicilio es opcional y una
  * dirección con país y nada más no es un dato, es una fila.
  *
@@ -143,6 +134,28 @@ export function createWorkAddress(
  * El cuerpo compartido por los dos usos: lo único que los distingue es el
  * concepto de uso.
  */
+/** Una dirección de la libreta: la de {@link ResidenceAddressData} con nombre y preferencia. */
+export interface SavedAddressData extends ResidenceAddressData {
+  readonly label?: string;
+  readonly isPreferred?: boolean;
+}
+
+/**
+ * Guarda una dirección de la libreta del paciente (uso `ADDR_USE_SAVED`).
+ *
+ * Mismo camino que el domicilio —municipio validado contra el catálogo,
+ * departamento derivado, `city` legible—, más el nombre y la preferencia.
+ * Devuelve la fila creada, o `null` si no había nada que guardar.
+ */
+export async function createSavedAddress(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  concepts: CatalogConceptsRepository,
+  data: SavedAddressData,
+): Promise<Addresses | null> {
+  return writeAddressRow(repo, tx, concepts, data, CONCEPTS.ADDR_USE_SAVED);
+}
+
 async function writeAddress(
   repo: AddressesRepository,
   tx: EntityManager,
@@ -150,12 +163,24 @@ async function writeAddress(
   data: ResidenceAddressData,
   useConceptId: string,
 ): Promise<boolean> {
+  return (
+    (await writeAddressRow(repo, tx, concepts, data, useConceptId)) !== null
+  );
+}
+
+async function writeAddressRow(
+  repo: AddressesRepository,
+  tx: EntityManager,
+  concepts: CatalogConceptsRepository,
+  data: SavedAddressData,
+  useConceptId: string,
+): Promise<Addresses | null> {
   const coordinates = coordinatesOf(data);
 
   // Sin municipio, sin calle y sin coordenadas no hay dirección: una fila con
   // país y nada más no es un dato, es una fila.
   if (!data.municipalityConceptId && !data.lines && !coordinates) {
-    return false;
+    return null;
   }
 
   const municipality = data.municipalityConceptId
@@ -167,10 +192,10 @@ async function writeAddress(
     );
   }
   const departmentSigla = municipality
-    ? departmentSiglaFromMunicipalityCode(municipality.code)
+    ? departmentSiglaOfMunicipalityCode(municipality.code)
     : undefined;
 
-  repo.create(tx, {
+  return repo.create(tx, {
     ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
     ownerId: data.personId,
     countryConceptId: CONCEPTS.COUNTRY_BO,
@@ -188,9 +213,10 @@ async function writeAddress(
     longitude: coordinates?.longitude,
     useConceptId,
     typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,
+    label: data.label,
+    isPreferred: data.isPreferred,
     actorUserId: data.actorUserId,
   });
-  return true;
 }
 
 /**

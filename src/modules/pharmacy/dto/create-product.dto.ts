@@ -1,8 +1,21 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { IsCatalogMoney } from './catalog-fields.dto';
 import {
+  CATEGORY_NAME_MAX,
+  DEFAULT_MIN_STOCK,
+  DESCRIPTION_MAX,
+  MAX_PRODUCT_IMAGES,
+  STOCK_MAX,
+} from '../services/pharmacy-catalog-rules';
+import {
+  ArrayMaxSize,
+  ArrayUnique,
   IsArray,
   IsBoolean,
+  IsInt,
+  Max,
+  Min,
   IsDateString,
   IsIn,
   IsOptional,
@@ -199,4 +212,104 @@ export class CreateProductDto {
   @ValidateNested({ each: true })
   @Type(() => ProductIdentifierDto)
   identifiers?: ProductIdentifierDto[];
+
+  /*
+   * P47 §3-5 · lo que administra la propia farmacia. Con `catalogProductId`
+   * también se aceptan: no son datos del registro sanitario.
+   */
+
+  /** Precio de venta en bolivianos (número o texto decimal, ≤ 2 decimales). */
+  @ApiPropertyOptional({
+    description:
+      'Precio de venta en bolivianos (número o texto decimal, hasta 2 decimales). Se versiona en la lista pública `CATALOGO` de la farmacia.',
+    oneOf: [{ type: 'number' }, { type: 'string' }],
+    example: 12.5,
+  })
+  @IsOptional()
+  @IsCatalogMoney()
+  unitPrice?: number | string;
+
+  /** Categoría de la vitrina, por nombre: una de las de la farmacia. */
+  @ApiPropertyOptional({
+    description:
+      'Categoría de la vitrina, por nombre (sin distinguir mayúsculas ni tildes). Tiene que ser una de `GET /pharmacies/{pharmacyId}/categories`: otra es 422.',
+    maxLength: CATEGORY_NAME_MAX,
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(CATEGORY_NAME_MAX)
+  category?: string;
+
+  /** Descripción para el paciente. */
+  @ApiPropertyOptional({
+    description: 'Descripción para el paciente',
+    maxLength: DESCRIPTION_MAX,
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(DESCRIPTION_MAX)
+  description?: string;
+
+  /**
+   * `false` = la farmacia lo carga pero hoy no lo tiene. No se manda junto con
+   * `stock` (422).
+   */
+  @ApiPropertyOptional({
+    description:
+      '`false` = «no lo tengo» (sin conteo). Junto con `stock` es 422: dirían dos cosas a la vez.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  inStock?: boolean;
+
+  /** Publicado (por defecto) o borrador. */
+  @ApiPropertyOptional({
+    description:
+      'Estado: `PUBLISHED` (por defecto) o `DRAFT` (sólo lo ve la farmacia). `WITHDRAWN` no vale en el alta.',
+    enum: ['PUBLISHED', 'DRAFT'],
+  })
+  @IsOptional()
+  @IsIn(['PUBLISHED', 'DRAFT'])
+  status?: 'PUBLISHED' | 'DRAFT';
+
+  /** Existencias declaradas; sin ellas, «sin conteo». */
+  @ApiPropertyOptional({
+    description:
+      'Existencias declaradas (sin ellas el producto queda «sin conteo»)',
+    minimum: 0,
+    maximum: STOCK_MAX,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(STOCK_MAX)
+  stock?: number;
+
+  /** Umbral de alerta de existencias. */
+  @ApiPropertyOptional({
+    description: `Umbral de alerta (sin él, ${DEFAULT_MIN_STOCK})`,
+    minimum: 0,
+    maximum: STOCK_MAX,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(STOCK_MAX)
+  minStock?: number;
+
+  /** Imágenes propias, archivos de `common.files` subidos por el actor. */
+  @ApiPropertyOptional({
+    description: `Hasta ${MAX_PRODUCT_IMAGES} imágenes (ids de \`POST /common/files/upload\`, categoría IMAGE, subidas por quien publica)`,
+    type: [String],
+    format: 'uuid',
+    maxItems: MAX_PRODUCT_IMAGES,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_PRODUCT_IMAGES)
+  @ArrayUnique()
+  @IsUUID('all', { each: true })
+  imageFileIds?: string[];
 }

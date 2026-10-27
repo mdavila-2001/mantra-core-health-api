@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 38 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 39 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `iam-auth`, `iam-onboarding-drafts`, `iam-users`
 - **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamOnboardingDraftsController`, `IamUsersController`
@@ -32,7 +32,7 @@ Referencia exhaustiva de 38 operación(es) del módulo `iam`, derivada del contr
 19. [DELETE /iam/onboarding-drafts/{formType}/{draftId}](#19-delete-iam-onboarding-drafts-formtype-draftid) — Elimina el borrador al completar el alta exitosamente o por descarte del usuario
 20. [GET /iam/onboarding-drafts/{formType}/{draftId}](#20-get-iam-onboarding-drafts-formtype-draftid) — Recupera un borrador de alta guardado por identificador y tipo de formulario
 21. [PUT /iam/onboarding-drafts/{formType}/{draftId}](#21-put-iam-onboarding-drafts-formtype-draftid) — Guarda o actualiza el avance del formulario de alta en borrador
-22. [GET /iam/users](#22-get-iam-users) — Listado paginado de usuarios
+22. [GET /iam/users](#22-get-iam-users) — Listado paginado de usuarios (obsoleto)
 23. [POST /iam/users](#23-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
 24. [GET /iam/users/{id}](#24-get-iam-users-id) — Ficha de un usuario
 25. [POST /iam/users/{id}/anonymize](#25-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
@@ -49,6 +49,7 @@ Referencia exhaustiva de 38 operación(es) del módulo `iam`, derivada del contr
 36. [GET /iam/users/{id}/sessions](#36-get-iam-users-id-sessions) — Sesiones del usuario
 37. [POST /iam/users/assisted-practitioner-registration](#37-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
 38. [POST /iam/users/assisted-registration](#38-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+39. [POST /iam/users/search](#39-post-iam-users-search) — Listado paginado de usuarios, con los filtros en el cuerpo
 
 ---
 
@@ -803,12 +804,13 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}]},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","pharmacy":{"latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}}` |
+| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","taxIdentifier":"1023456029","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18"}]},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","pharmacy":{"address":"Av. Cristo Redentor 1234, Santa Cruz de la Sierra","latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}}` |
 | `organization.code` | Sí | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Código único global de la organización | `CLINICA_SAN_RAFAEL` |
 | `organization.legalName` | Sí | `string` | longitud mínima 1; longitud máxima 300 | Razón social / nombre legal | `Nombre de ejemplo` |
 | `organization.tradeName` | No | `string` | longitud máxima 300 | Nombre comercial | `Nombre de ejemplo` |
-| `organization.tenantType` | Sí | `string` | valores: `PROVIDER`, `PAYER`, `BROKER`, `UNIVERSITY`, `PHARMACY`, `HOSPITAL`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`, `HEALTH_BUSINESS`, `DIAGNOSTIC_CENTER` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cuatro institucionales (HOSPITAL, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan. | `HOSPITAL` |
+| `organization.tenantType` | Sí | `string` | valores: `PROVIDER`, `PAYER`, `BROKER`, `UNIVERSITY`, `PHARMACY`, `HOSPITAL`, `CLINIC`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`, `HEALTH_BUSINESS`, `DIAGNOSTIC_CENTER` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cinco institucionales (HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan. | `HOSPITAL` |
 | `organization.legalEntityType` | No | `string` | valores: `UNIPERSONAL`, `SRL`, `LTDA`, `SA`, `SOCIEDAD_COLECTIVA`, `COMANDITA_SIMPLE`, `COMANDITA_ACCIONES`, `SUCURSAL_EXTRANJERA`, `BR_LTDA`, `BR_SA`, `BR_MEI`, `BR_EI`, `BR_SLU`, `BR_FILIAL_EST`, `US_LLC`, `US_CORP`, `US_SOLE_PROP`, `US_LLP`, `US_BRANCH`, `AR_SAS`, `MX_S_RL` | Tipo societario del diccionario internacional (BO/BR/US/AR/MX). Sin él, la organización nace con la forma legada `COMPANY`. | `SRL` |
+| `organization.taxIdentifier` | No | `string` | longitud mínima 1; longitud máxima 50 | Identificación tributaria (NIT en Bolivia); se registra como número del documento tributario | `1023456029` |
 | `organization.legalDocuments` | No | `RegisterOrganizationLegalDocumentsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"}` |
 | `organization.legalDocuments.constitutionFileId` | No | `string` | formato `uuid` | Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL, que no la tiene; el servicio responde 422 nombrando el documento faltante | `00000000-0000-4000-8000-000000000001` |
 | `organization.legalDocuments.taxIdentifierFileId` | No | `string` | formato `uuid` | Identificación tributaria (NIT en Bolivia) | `00000000-0000-4000-8000-000000000001` |
@@ -891,7 +893,7 @@ Content-Type: application/json
 | `organization.broker.agreements[].current` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `organization.broker.agreements[].contractFileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.broker.publicProfileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `organization.diagnosticUnit` | No | `DiagnosticUnitProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}]}` |
+| `organization.diagnosticUnit` | No | `DiagnosticUnitProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18"}]}` |
 | `organization.diagnosticUnit.code` | No | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Sin descripción específica en el contrato OpenAPI. | `CENTRO_IMAGEN_CENTRAL` |
 | `organization.diagnosticUnit.name` | No | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Centro de Diagnóstico por Imágenes` |
 | `organization.diagnosticUnit.diagnosticUnitTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
@@ -908,7 +910,7 @@ Content-Type: application/json
 | `organization.diagnosticUnit.primarySite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.diagnosticUnit.primarySite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `organization.diagnosticUnit.primarySite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
-| `organization.diagnosticUnit.branches` | No | `array<DiagnosticUnitBranchDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}]` |
+| `organization.diagnosticUnit.branches` | No | `array<DiagnosticUnitBranchDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18"}]` |
 | `organization.diagnosticUnit.branches[].name` | No | `string` | longitud mínima 2; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Sucursal Equipetrol` |
 | `organization.diagnosticUnit.branches[].address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
 | `organization.diagnosticUnit.branches[].address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
@@ -917,16 +919,19 @@ Content-Type: application/json
 | `organization.diagnosticUnit.branches[].address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.diagnosticUnit.branches[].address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `organization.diagnosticUnit.branches[].address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `organization.diagnosticUnit.branches[].description` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `Frente al mercado` |
+| `organization.diagnosticUnit.branches[].locationUrl` | No | `string` | longitud máxima 2000; patrón runtime `/^https?:\/\//i` | Sin descripción específica en el contrato OpenAPI. | `https://maps.google.com/?q=-17.78,-63.18` |
 | `organization.countryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA | `America/La_Paz` |
-| `organization.pharmacy` | No | `RegisterPharmacyBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}` |
-| `organization.pharmacy.latitude` | No | `number` | Sin restricción adicional declarada | Latitud de la casa central | `1` |
-| `organization.pharmacy.longitude` | No | `number` | Sin restricción adicional declarada | Longitud de la casa central | `1` |
-| `organization.pharmacy.branches` | No | `array<RegisterPharmacyBranchDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]` |
+| `organization.pharmacy` | No | `RegisterPharmacyBlockDto` | Sin restricción adicional declarada | Sólo para PHARMACY: dirección y punto de la casa central y sucursales | `{"address":"Av. Cristo Redentor 1234, Santa Cruz de la Sierra","latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}` |
+| `organization.pharmacy.address` | No | `string` | longitud máxima 500 | Dirección escrita de la casa central (dirección legal) | `Av. Cristo Redentor 1234, Santa Cruz de la Sierra` |
+| `organization.pharmacy.latitude` | No | `number` | Sin restricción adicional declarada | Latitud de la casa central; va junto con longitude o no va | `1` |
+| `organization.pharmacy.longitude` | No | `number` | Sin restricción adicional declarada | Longitud de la casa central; va junto con latitude o no va | `1` |
+| `organization.pharmacy.branches` | No | `array<RegisterPharmacyBranchDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]` |
 | `organization.pharmacy.branches[].name` | No | `string` | longitud mínima 1; longitud máxima 300 | Nombre de la sucursal | `Nombre de ejemplo` |
-| `organization.pharmacy.branches[].latitude` | No | `number` | Sin restricción adicional declarada | Latitud | `-17.769` |
-| `organization.pharmacy.branches[].longitude` | No | `number` | Sin restricción adicional declarada | Longitud | `-63.196` |
+| `organization.pharmacy.branches[].latitude` | No | `number` | Sin restricción adicional declarada | Latitud; va junto con longitude o no va | `-17.769` |
+| `organization.pharmacy.branches[].longitude` | No | `number` | Sin restricción adicional declarada | Longitud; va junto con latitude o no va | `-63.196` |
 | `organization.pharmacy.branches[].description` | No | `string` | longitud máxima 1000 | Descripción | `Texto descriptivo de ejemplo` |
 | `organization.pharmacy.branches[].locationUrl` | No | `string` | longitud máxima 2000; patrón runtime `/^https?:\/\//i` | Enlace de ubicación (http/https) | `valor-ejemplo` |
 | `owner` | Sí | `RegisterOrganizationOwnerDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"email":"usuario@example.com","password":"ClaveSegura2026!","name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","displayName":"Nombre de ejemplo","timeZone":"America/La_Paz"}` |
@@ -955,6 +960,7 @@ Content-Type: application/json
     "tradeName": "Nombre de ejemplo",
     "tenantType": "HOSPITAL",
     "legalEntityType": "SRL",
+    "taxIdentifier": "1023456029",
     "legalDocuments": {
       "constitutionFileId": "00000000-0000-4000-8000-000000000001",
       "taxIdentifierFileId": "00000000-0000-4000-8000-000000000001",
@@ -1088,7 +1094,9 @@ Content-Type: application/json
             "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
             "latitude": 1,
             "longitude": 1
-          }
+          },
+          "description": "Frente al mercado",
+          "locationUrl": "https://maps.google.com/?q=-17.78,-63.18"
         }
       ]
     },
@@ -1096,6 +1104,7 @@ Content-Type: application/json
     "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
     "timeZone": "America/La_Paz",
     "pharmacy": {
+      "address": "Av. Cristo Redentor 1234, Santa Cruz de la Sierra",
       "latitude": 1,
       "longitude": 1,
       "branches": [
@@ -1146,6 +1155,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "00000000-0000-4000-8000-000000000001",
   "emailVerificationSent": true,
   "diagnosticUnitId": "00000000-0000-4000-8000-000000000001",
+  "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "legalDocumentsRegistered": 1,
   "representativesRegistered": 1
 }
@@ -1162,6 +1172,7 @@ Campos de la respuesta:
 | `status` | Sí | `string` | formato `uuid` | Concepto de estado del tenant (pendiente de verificación) | `00000000-0000-4000-8000-000000000001` |
 | `emailVerificationSent` | Sí | `boolean` | Sin restricción adicional declarada | Si se pudo encolar el correo de verificación | `true` |
 | `diagnosticUnitId` | No | `string` | formato `uuid` | Id de la unidad diagnóstica creada (sólo DIAGNOSTIC_CENTER) | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyId` | No | `string` | formato `uuid` | Id de la farmacia creada (sólo PHARMACY) | `00000000-0000-4000-8000-000000000001` |
 | `legalDocumentsRegistered` | No | `number` | Sin restricción adicional declarada | Cuántos documentos legales quedaron registrados pendientes de | `1` |
 | `representativesRegistered` | No | `number` | Sin restricción adicional declarada | Vínculos de representación registrados (representante legal + gerencias) | `1` |
 
@@ -1469,6 +1480,8 @@ Content-Type: application/json
 | `sedesLicenseNumber` | No | `string` | longitud mínima 1; longitud máxima 100 | Número de registro del SEDES departamental | `T.I. 538/14` |
 | `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad reguladora que emitió la licencia | `valor-ejemplo` |
 | `licenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción de la matrícula (ISO) | `2026-07-31` |
+| `licenseFileId` | No | `string` | formato `uuid` | fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
+| `sedesLicenseFileId` | No | `string` | formato `uuid` | fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
 | `professionalTitle` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `specialtyConceptIds` | No | `array<string>` | formato `uuid`; máximo 4 elemento(s) | Especialidades declaradas (una principal y hasta tres adicionales). | `["00000000-0000-4000-8000-000000000001"]` |
 | `nationalId` | Sí | `string` | longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Documento de identidad obligatorio; se guarda como identificador oficial | `00000000-0000-4000-8000-000000000001` |
@@ -1545,6 +1558,8 @@ Content-Type: application/json
   "sedesLicenseNumber": "T.I. 538/14",
   "regulatoryAuthority": "valor-ejemplo",
   "licenseIssueDate": "2026-07-31",
+  "licenseFileId": "00000000-0000-4000-8000-000000000001",
+  "sedesLicenseFileId": "00000000-0000-4000-8000-000000000001",
   "professionalTitle": "valor-ejemplo",
   "specialtyConceptIds": [
     "00000000-0000-4000-8000-000000000001"
@@ -1670,6 +1685,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo del registro del SEDES necesita su número de registro | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La matrícula y el registro del SEDES no pueden compartir el mismo archivo | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | La firma y el sello requieren una imagen privada de hasta 2 MB | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
@@ -3020,16 +3037,16 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
-- **Nombre:** Listado paginado de usuarios
+- **Nombre:** Listado paginado de usuarios (obsoleto)
 - **Operation ID:** `IamUsersController_searchUsers`
 - **Autenticación:** JWT Bearer obligatoria
 - **Implementación:** [IamUsersController.searchUsers](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
 
 ### Descripción de negocio
 
-Listado paginado de usuarios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+Obsoleto: usar `POST /iam/users/search`. Un nombre o un correo en la query string queda en los logs de acceso de cualquier proxy.
 
-Contexto declarado en el controlador: UC-01-01 (cara de lectura): listado paginado de usuarios. Se declara antes que las rutas con parámetro para que ninguna de ellas capture un segmento fijo.
+Contexto declarado en el controlador: UC-01-01 (cara de lectura): listado paginado de usuarios. Se declara antes que las rutas con parámetro para que ninguna de ellas capture un segmento fijo. Obsoleto: el cliente usa `POST /iam/users/search`, que lleva el texto en el cuerpo. Se conserva sólo por compatibilidad, con los mismos roles, filtros y respuesta.
 
 ### Descripción del sistema
 
@@ -3097,13 +3114,13 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "mfaStatusConceptId": "00000000-0000-4000-8000-000000000001",
       "emailVerified": true,
       "phoneVerified": true,
-      "lastLoginAt": "2026-07-31T12:00:00.000Z",
+      "lastLoginAt": {},
       "createdAt": "2026-07-31T12:00:00.000Z"
     }
   ],
   "count": 1,
   "limit": 1,
-  "nextCursor": "valor-ejemplo"
+  "nextCursor": {}
 }
 ```
 
@@ -3111,18 +3128,18 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<UserListItemDto>` | Sin restricción adicional declarada | Usuarios de esta página, ordenados por nombre visible. | `[{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","mfaStatusConceptId":"00000000-0000-4000-8000-000000000001","emailVerified":true,"phoneVerified":true,"lastLoginAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
-| `items[].id` | Sí | `string` | formato `uuid` | Identificador del usuario. | `00000000-0000-4000-8000-000000000001` |
-| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre visible. | `Nombre de ejemplo` |
-| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Estado de la cuenta. | `00000000-0000-4000-8000-000000000001` |
-| `items[].mfaStatusConceptId` | No | `string` | formato `uuid` | Estado del segundo factor. | `00000000-0000-4000-8000-000000000001` |
-| `items[].emailVerified` | Sí | `boolean` | Sin restricción adicional declarada | Si el correo consta verificado. | `true` |
-| `items[].phoneVerified` | Sí | `boolean` | Sin restricción adicional declarada | Si el teléfono consta verificado. | `true` |
-| `items[].lastLoginAt` | No | `string` | formato `date-time`; admite null | Último ingreso registrado. | `2026-07-31T12:00:00.000Z` |
-| `items[].createdAt` | Sí | `string` | formato `date-time` | Alta de la cuenta. | `2026-07-31T12:00:00.000Z` |
-| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta en esta página. | `1` |
-| `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado a la consulta. | `1` |
-| `nextCursor` | No | `string` | admite null | Cursor opaco de continuación, o `null` si ésta es la última página. | `valor-ejemplo` |
+| `items` | Sí | `array<UserListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","mfaStatusConceptId":"00000000-0000-4000-8000-000000000001","emailVerified":true,"phoneVerified":true,"lastLoginAt":{},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].mfaStatusConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].emailVerified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].phoneVerified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].lastLoginAt` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `nextCursor` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -5000,6 +5017,8 @@ Content-Type: application/json
 | `sedesLicenseNumber` | No | `string` | longitud máxima 100 | Número de registro del SEDES departamental | `T.I. 538/14` |
 | `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad reguladora que emitió la licencia | `valor-ejemplo` |
 | `licenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción de la matrícula (ISO) | `2026-07-31` |
+| `licenseFileId` | No | `string` | formato `uuid` | fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
+| `sedesLicenseFileId` | No | `string` | formato `uuid` | fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
 | `professionalTitle` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `specialtyConceptIds` | No | `array<string>` | máximo 4 elemento(s) | Especialidades declaradas (una principal y hasta tres adicionales). | `["00000000-0000-4000-8000-000000000001"]` |
 | `nationalId` | Sí | `string` | longitud máxima 40 | Documento de identidad obligatorio; se guarda como identificador oficial | `00000000-0000-4000-8000-000000000001` |
@@ -5078,6 +5097,8 @@ Content-Type: application/json
   "sedesLicenseNumber": "T.I. 538/14",
   "regulatoryAuthority": "valor-ejemplo",
   "licenseIssueDate": "2026-07-31",
+  "licenseFileId": "00000000-0000-4000-8000-000000000001",
+  "sedesLicenseFileId": "00000000-0000-4000-8000-000000000001",
   "professionalTitle": "valor-ejemplo",
   "specialtyConceptIds": [
     "00000000-0000-4000-8000-000000000001"
@@ -5194,6 +5215,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo del registro del SEDES necesita su número de registro | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La matrícula y el registro del SEDES no pueden compartir el mismo archivo | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | La firma y el sello requieren una imagen privada de hasta 2 MB | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
@@ -5360,6 +5383,156 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/iam/users/assisted-registration"
+}
+```
+
+---
+
+## 39. POST /iam/users/search
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-users`
+- **Nombre:** Listado paginado de usuarios, con los filtros en el cuerpo
+- **Operation ID:** `IamUsersController_searchUsersByBody`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamUsersController.searchUsersByBody](../../src/modules/iam/presentation/controllers/iam-users.controller.ts)
+
+### Descripción de negocio
+
+Igual que `GET /iam/users`, pero el texto de búsqueda viaja en el cuerpo y no en la URL. Una clave no declarada responde 400.
+
+Contexto declarado en el controlador: UC-01-01 (cara de lectura): listado paginado de usuarios, con los filtros en el cuerpo. Existe porque el texto de búsqueda es un nombre o un correo, y los parámetros de la URL quedan en los logs de acceso de cualquier proxy, en el historial del navegador y en el `Referer`. Es el camino que usa el cliente (por ejemplo, para elegir al owner en el alta administrativa de una organización); el `GET /iam/users` sigue vivo, obsoleto. Responde `200` y no `201`: no crea nada. Va declarada antes que cualquier ruta `:id`: Nest las resuelve por orden de declaración. Los filtros, los límites y el tope por defecto son los del `GET`; una clave de más responde `400`.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/users/search` en `IamUsersController_searchUsersByBody`. El controlador delega en `IamUsersReadService.searchUsers`. Valida el body como `SearchUsersBodyDto` y consume `application/json`. El tipo de retorno estático es `Promise<SearchUsersResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SearchUsersBodyDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/users/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `q` | No | `string` | Sin restricción adicional declarada | Texto a buscar en el nombre visible o en el correo de acceso | `valor-ejemplo` |
+| `status` | No | `string` | formato `uuid` | Concepto de estado al que acotar | `00000000-0000-4000-8000-000000000001` |
+| `cursor` | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
+| `limit` | No | `integer` | mínimo 1; máximo 500 | Tope de resultados (por defecto 50) | `50` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/users/search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "q": "valor-ejemplo",
+  "status": "00000000-0000-4000-8000-000000000001",
+  "cursor": "valor-ejemplo",
+  "limit": 50
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SearchUsersResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchUsersResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "statusConceptId": "00000000-0000-4000-8000-000000000001",
+      "mfaStatusConceptId": "00000000-0000-4000-8000-000000000001",
+      "emailVerified": true,
+      "phoneVerified": true,
+      "lastLoginAt": {},
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "limit": 1,
+  "nextCursor": {}
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<UserListItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","statusConceptId":"00000000-0000-4000-8000-000000000001","mfaStatusConceptId":"00000000-0000-4000-8000-000000000001","emailVerified":true,"phoneVerified":true,"lastLoginAt":{},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].mfaStatusConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].emailVerified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].phoneVerified` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].lastLoginAt` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `nextCursor` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/users/search"
 }
 ```
 

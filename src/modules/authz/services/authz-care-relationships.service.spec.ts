@@ -15,6 +15,7 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { AuthzErrorReason } from '../authz.error-reasons';
+import { AUTHZ } from '../authz.concepts';
 import {
   ACTIVE_TENANT,
   buildClinicalScope,
@@ -816,6 +817,177 @@ describe('AuthzCareRelationshipsService', () => {
         'u9',
         ACTIVE_TENANT,
       );
+    });
+  });
+  // REQ-16-035: el check-in de un encuentro deja la relación que exige el cobro.
+  describe('recordEncounterCareRelationships (REQ-16-035)', () => {
+    const encounterInput = (over: object = {}) => ({
+      patientProfileId: 'pat-1',
+      tenantId: ACTIVE_TENANT,
+      practitionerProfileIds: ['prac-1'],
+      ...over,
+    });
+
+    it('con huella propia del paciente crea una relación ACTIVE acotada a PAYMENT', async () => {
+      const d = build();
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.create.mockReturnValue({ id: 'cr-1' });
+      const notices = await d.service.recordEncounterCareRelationships(
+        d.tx as any,
+        encounterInput(),
+        actor,
+      );
+      expect(notices).toEqual([]);
+      const created = d.careRepo.create.mock.calls[0][1];
+      expect(created).toMatchObject({
+        tenantId: ACTIVE_TENANT,
+        patientProfileId: 'pat-1',
+        practitionerProfileId: 'prac-1',
+        purposeConceptId: AUTHZ.PURPOSE_PAYMENT,
+        actorUserId: 'sec-1',
+      });
+      // Sin estado explícito el repositorio la crea ACTIVE.
+      expect(created.statusConceptId).toBeUndefined();
+      expect(d.auditTrail.record).toHaveBeenCalledWith(
+        d.tx,
+        actor,
+        expect.objectContaining({
+          action: 'CARE_RELATIONSHIP_ESTABLISHED_BY_ENCOUNTER',
+          entityId: 'cr-1',
+        }),
+      );
+    });
+
+    it('sin huella propia crea una solicitud PENDING sin acotar y la devuelve para avisar', async () => {
+      const d = build();
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.create.mockReturnValue({ id: 'cr-2' });
+      const notices = await d.service.recordEncounterCareRelationships(
+        d.tx as any,
+        encounterInput({ patientProfileId: 'pat-staff-planted' }),
+        actor,
+      );
+      expect(notices).toEqual([
+        {
+          relId: 'cr-2',
+          patientProfileId: 'pat-staff-planted',
+          tenantId: ACTIVE_TENANT,
+        },
+      ]);
+      const created = d.careRepo.create.mock.calls[0][1];
+      expect(created.statusConceptId).toBe(CONCEPTS.STATE_PENDING);
+      expect(created.purposeConceptId).toBeUndefined();
+      expect(d.auditTrail.record).toHaveBeenCalledWith(
+        d.tx,
+        actor,
+        expect.objectContaining({
+          action: 'CARE_RELATIONSHIP_REQUESTED_BY_ENCOUNTER',
+        }),
+      );
+      // El aviso va tras el commit, no dentro de este método.
+      expect(d.notifications.emitInApp).not.toHaveBeenCalled();
+    });
+
+    it('no toca nada si el tenant del encuentro no es el activo del actor', async () => {
+      const d = build();
+      const notices = await d.service.recordEncounterCareRelationships(
+        d.tx as any,
+        encounterInput({ tenantId: 'otro-tenant' }),
+        actor,
+      );
+      expect(notices).toEqual([]);
+      expect(d.careRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('no toca nada si no hay tenant activo en el contexto', async () => {
+      const d = build();
+      const notices = await d.rawService.recordEncounterCareRelationships(
+        d.tx as any,
+        encounterInput(),
+        actor,
+      );
+      expect(notices).toEqual([]);
+      expect(d.careRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('no crea nada si el encuentro no nombra ningún profesional', async () => {
+      const d = build();
+      const notices = await d.service.recordEncounterCareRelationships(
+        d.tx as any,
+        encounterInput({ practitionerProfileIds: [] }),
+        actor,
+      );
+      expect(notices).toEqual([]);
+      expect(d.careRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('es idempotente: respeta una relación ACTIVE o una solicitud PENDING existente', async () => {
+      const d = build();
+      d.careRepo.findActiveInTenant.mockImplementation(
+        (_tx: unknown, _pat: string, prac: string) =>
+          Promise.resolve(prac === 'prac-active' ? { id: 'x' } : null),
+      );
+      d.careRepo.findPendingInTenant.mockImplementation(
+        (_tx: unknown, _pat: string, prac: string) =>
+          Promise.resolve(prac === 'prac-pending' ? { id: 'y' } : null),
+      );
+      d.careRepo.create.mockReturnValue({ id: 'cr-3' });
+      await d.service.recordEncounterCareRelationships(
+        d.tx as any,
+        encounterInput({
+          practitionerProfileIds: ['prac-active', 'prac-pending', 'prac-new'],
+        }),
+        actor,
+      );
+      expect(d.careRepo.create).toHaveBeenCalledTimes(1);
+      expect(d.careRepo.create.mock.calls[0][1].practitionerProfileId).toBe(
+        'prac-new',
+      );
+    });
+
+    it('crea una relación por profesional distinto aunque se repita', async () => {
+      const d = build();
+      d.careRepo.findActiveInTenant.mockResolvedValue(null);
+      d.careRepo.create.mockReturnValue({ id: 'cr-4' });
+      await d.service.recordEncounterCareRelationships(
+        d.tx as any,
+        encounterInput({ practitionerProfileIds: ['a', 'b', 'a'] }),
+        actor,
+      );
+      expect(
+        d.careRepo.create.mock.calls.map(
+          (c: any) => c[1].practitionerProfileId,
+        ),
+      ).toEqual(['a', 'b']);
+    });
+  });
+
+  describe('notifyEncounterCareRelationshipRequests (REQ-16-035)', () => {
+    it('avisa al paciente titular de cada solicitud', async () => {
+      const d = build();
+      d.accountLinksRepo.findActiveByPerson.mockResolvedValue({
+        userId: 'user-pat',
+      });
+      await d.service.notifyEncounterCareRelationshipRequests(
+        [{ relId: 'cr-2', patientProfileId: 'pat-1', tenantId: ACTIVE_TENANT }],
+        actor,
+      );
+      expect(d.notifications.emitInApp).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipientUserId: 'user-pat',
+          destination: { type: 'CARE_RELATIONSHIP_REQUEST', id: 'cr-2' },
+          tenantId: ACTIVE_TENANT,
+        }),
+      );
+    });
+
+    it('no falla si el paciente no tiene cuenta activa', async () => {
+      const d = build();
+      await d.service.notifyEncounterCareRelationshipRequests(
+        [{ relId: 'cr-2', patientProfileId: 'pat-1', tenantId: ACTIVE_TENANT }],
+        actor,
+      );
+      expect(d.notifications.emitInApp).not.toHaveBeenCalled();
     });
   });
 });

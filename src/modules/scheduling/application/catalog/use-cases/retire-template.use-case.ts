@@ -130,6 +130,9 @@ export class RetireTemplateUseCase {
         templateId,
         CONCEPTS.TEMPLATE_RETIRED,
         actor.id,
+        // Los cupos que sostienen una cita se conservan cerrados: siguen con
+        // su paciente, pero el horario retirado no los vuelve a ofrecer (P23).
+        CONCEPTS.SLOT_BLOCKED,
       );
 
       const live = bookings.live > 0 ? bookings.sample : [];
