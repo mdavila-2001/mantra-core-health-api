@@ -16612,6 +16612,44 @@ paths:
       description: >-
         Mi cobertura. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error
         usan el envelope ErrorResponse.
+  /patient-coverages/by-patient/{patientProfileId}:
+    get:
+      operationId: CoverageController_listForPatient
+      parameters:
+        - name: patientProfileId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientCoverageOptionListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Seguros de una persona, para quien cobra
+      tags:
+        - insurance-coverage
+      description: >-
+        Seguros de una persona, para quien cobra. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /patient-coverages:
     post:
       operationId: CoverageController_enroll
@@ -75085,6 +75123,95 @@ components:
         - outcome
         - decidedAt
         - reason
+    MyClaimBreakdownLineDto:
+      type: object
+      properties:
+        key:
+          type: string
+          format: uuid
+        service:
+          type: string
+        billedAmount:
+          type: string
+        coveragePercent:
+          type: string
+        copayAmount:
+          type: string
+        patientAmount:
+          type: string
+        insurerAmount:
+          type: string
+        chargeKind:
+          type: string
+          enum:
+            - INSURED_SHARE
+            - PRIVATE_FULL
+        authorizationStatus:
+          type: string
+          enum:
+            - NOT_REQUIRED
+            - APPROVED
+            - MISSING
+            - PENDING
+            - DENIED
+            - EXPIRED
+            - MISMATCH
+            - AMOUNT_EXCEEDED
+          nullable: true
+      required:
+        - key
+        - service
+        - billedAmount
+        - coveragePercent
+        - copayAmount
+        - patientAmount
+        - insurerAmount
+        - chargeKind
+        - authorizationStatus
+    MyClaimBreakdownDto:
+      type: object
+      properties:
+        currencyCode:
+          type: string
+          nullable: true
+        patientTotal:
+          type: string
+        insurerTotal:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyClaimBreakdownLineDto'
+      required:
+        - currencyCode
+        - patientTotal
+        - insurerTotal
+        - lines
+    MyClaimObjectionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+          enum:
+            - AMOUNT_DIFFERS
+            - SERVICE_NOT_RECEIVED
+            - NOT_INFORMED
+        submittedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - OPEN
+            - RESOLVED
+      required:
+        - id
+        - reason
+        - submittedAt
+        - status
     MyClaimDto:
       type: object
       properties:
@@ -75140,6 +75267,16 @@ components:
           type: object
           allOf:
             - $ref: '#/components/schemas/MyClaimDecisionDto'
+        breakdown:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/MyClaimBreakdownDto'
+        patientObjection:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/MyClaimObjectionDto'
       required:
         - id
         - claimIdentifier
@@ -75156,6 +75293,8 @@ components:
         - planName
         - status
         - decision
+        - breakdown
+        - patientObjection
     MyClaimListDto:
       type: object
       properties:
@@ -75482,6 +75621,47 @@ components:
         - groupCode
         - legalName
       additionalProperties: false
+    PatientCoverageOptionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        insuranceCarrierId:
+          type: string
+          format: uuid
+        carrierName:
+          type: string
+        planName:
+          type: string
+          nullable: true
+        validityStatus:
+          type: string
+          enum:
+            - CURRENT
+            - UPCOMING
+            - EXPIRED
+            - INACTIVE
+            - UNKNOWN
+        currencyCode:
+          type: string
+          nullable: true
+      required:
+        - id
+        - insuranceCarrierId
+        - carrierName
+        - planName
+        - validityStatus
+        - currencyCode
+    PatientCoverageOptionListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatientCoverageOptionDto'
+      required:
+        - items
     CoverageDependentDto:
       type: object
       properties:
