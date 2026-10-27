@@ -14,6 +14,22 @@ import {
   InsuranceCarriers,
 } from '../../entities';
 
+/** Una cobertura de la persona, tal como la lee quien cobra. */
+export interface PatientCoverageOptionRow {
+  readonly coverage_id: string;
+  readonly carrier_id: string;
+  readonly carrier_name: string;
+  readonly plan_name: string | null;
+  readonly status_concept_id: string | null;
+  readonly plan_status_concept_id: string | null;
+  readonly effective_from: string | null;
+  readonly effective_to: string | null;
+  readonly plan_effective_from: string | null;
+  readonly plan_effective_to: string | null;
+  readonly currency_code: string | null;
+  readonly currency_concept_id: string | null;
+}
+
 /** La aseguradora de un paciente, tal como la necesita quien lista consultas. */
 export interface PatientCarrier {
   readonly patientProfileId: string;
@@ -102,6 +118,39 @@ export class CoverageRepository {
       PatientCoverages,
       { patientProfileId },
       { orderBy: { coverageOrder: 'ASC', createdAt: 'ASC' } },
+    );
+  }
+
+  /**
+   * Los seguros de una persona con aseguradora, plan, períodos y moneda, para
+   * quien cobra (carril 16, REQ-16-026). Una sola consulta, sin beneficios ni
+   * números de póliza o de afiliado: lo que la cotización necesita para elegir.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param patientProfileId - Perfil de paciente.
+   * @returns Una fila por cobertura, por orden y luego alta.
+   */
+  findOptionsByPatient(
+    em: EntityManager,
+    patientProfileId: string,
+  ): Promise<PatientCoverageOptionRow[]> {
+    return em.getConnection().execute<PatientCoverageOptionRow[]>(
+      `select c.id as coverage_id, ca.id as carrier_id, ca.legal_name as carrier_name,
+              pl.name as plan_name, c.status_concept_id,
+              pl.status_concept_id as plan_status_concept_id,
+              to_char(c.effective_from, 'YYYY-MM-DD') as effective_from,
+              to_char(c.effective_to, 'YYYY-MM-DD') as effective_to,
+              to_char(pl.effective_from, 'YYYY-MM-DD') as plan_effective_from,
+              to_char(pl.effective_to, 'YYYY-MM-DD') as plan_effective_to,
+              currency.code as currency_code, pl.currency_concept_id
+         from insurance.patient_coverages c
+         join insurance.insurance_plans pl on pl.id = c.insurance_plan_id
+         join insurance.insurance_products pr on pr.id = pl.insurance_product_id
+         join insurance.insurance_carriers ca on ca.id = pr.insurance_carrier_id
+         left join terminology.catalog_concepts currency on currency.id = pl.currency_concept_id
+        where c.patient_profile_id = ?
+        order by c.coverage_order nulls last, c.created_at, c.id`,
+      [patientProfileId],
     );
   }
 

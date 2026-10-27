@@ -1,5 +1,6 @@
 import { MyClaimsController } from './presentation/controllers/my-claims.controller';
 import { MyClaimsService } from './application/services/my-claims.service';
+import { PatientChargeBreakdownService } from './application/services/patient-charge-breakdown.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { CommunityModule } from '../community/community.module';
@@ -243,6 +244,7 @@ import {
     },
     PractitionerInsuranceNetworksService,
     MyClaimsService,
+    PatientChargeBreakdownService,
     // Repositorios
     CatalogRepository,
     InsuranceReadRepository,

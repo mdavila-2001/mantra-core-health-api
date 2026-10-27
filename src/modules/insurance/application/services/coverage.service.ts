@@ -12,7 +12,13 @@ import {
   CatalogRepository,
   InsurancePatientAccountRepository,
 } from '../../infrastructure/repositories';
+import {
+  coverageReferenceDate,
+  coverageValidity,
+} from '../../domain/coverage-validity';
+import { resolveInsuranceCurrencyCode } from '../../domain/insurance-currency';
 import { INS } from '../../domain/insurance.concepts';
+import { assertLegacyClaimRoles } from './linked-claim-access.service';
 import {
   CreateCoverageDto,
   CreateEligibilityRequestDto,
@@ -20,6 +26,7 @@ import {
   CreatedResourceDto,
   ResourceStatusDto,
   MyCoverageDto,
+  PatientCoverageOptionListDto,
 } from '../../presentation/dto';
 
 const RELATIONSHIP_CONCEPT: Record<string, string> = {
@@ -82,6 +89,62 @@ export class CoverageService {
       status: c.statusConceptId,
       createdAt: c.createdAt,
     }));
+  }
+
+  /**
+   * Los seguros de una persona, para quien cobra (carril 16, REQ-16-026): es lo
+   * que la pantalla de cotización necesita para elegir la cobertura. La puerta
+   * es la de cotizar y cobrar (`assertLegacyClaimRoles`): quien puede cobrar
+   * puede ver con qué seguro, y nadie más. No devuelve póliza ni afiliado.
+   *
+   * @param patientProfileId - Persona cuyos seguros se leen.
+   * @param actor - Quien consulta.
+   * @returns Sus coberturas con vigencia y moneda; vacía si no declaró ninguna.
+   * @throws ForbiddenException si el rol no puede cobrar a la aseguradora.
+   */
+  async listForPatient(
+    patientProfileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<PatientCoverageOptionListDto> {
+    assertLegacyClaimRoles(actor);
+    const em = this.em.fork();
+    const rows = await this.repo.findOptionsByPatient(em, patientProfileId);
+    const referenceDate = coverageReferenceDate();
+    this.logger.info(
+      {
+        operation: 'insurance.coverage.list-for-patient',
+        actorId: actor.id,
+        patientProfileId,
+        count: rows.length,
+      },
+      'Reading patient coverages for billing',
+    );
+    return {
+      items: rows.map((row) => ({
+        id: row.coverage_id,
+        insuranceCarrierId: row.carrier_id,
+        carrierName: row.carrier_name,
+        planName: row.plan_name,
+        validityStatus: coverageValidity(referenceDate, [
+          {
+            statusConceptId: row.status_concept_id,
+            activeConceptId: INS.COVERAGE_ACTIVE,
+            effectiveFrom: row.effective_from,
+            effectiveTo: row.effective_to,
+          },
+          {
+            statusConceptId: row.plan_status_concept_id,
+            activeConceptId: INS.PLAN_ACTIVE,
+            effectiveFrom: row.plan_effective_from,
+            effectiveTo: row.plan_effective_to,
+          },
+        ]),
+        currencyCode: resolveInsuranceCurrencyCode(
+          row.currency_concept_id,
+          row.currency_code,
+        ),
+      })),
+    };
   }
 
   /** UC-26-02: registrar cobertura del paciente y sus dependientes. */
