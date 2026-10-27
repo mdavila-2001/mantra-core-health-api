@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
+  requireTenantId,
   ResourceNotFoundException,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -18,6 +19,7 @@ import {
 } from '../../domain/coverage-validity';
 import { resolveInsuranceCurrencyCode } from '../../domain/insurance-currency';
 import { INS } from '../../domain/insurance.concepts';
+import { ClaimCareRelationshipGate } from './claim-care-relationship-gate';
 import { assertLegacyClaimRoles } from './linked-claim-access.service';
 import {
   CreateCoverageDto,
@@ -54,6 +56,7 @@ export class CoverageService {
     private readonly repo: CoverageRepository,
     private readonly catalog: CatalogRepository,
     private readonly patientAccounts: InsurancePatientAccountRepository,
+    private readonly careGate: ClaimCareRelationshipGate,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CoverageService.name);
@@ -95,12 +98,19 @@ export class CoverageService {
    * Los seguros de una persona, para quien cobra (carril 16, REQ-16-026): es lo
    * que la pantalla de cotización necesita para elegir la cobertura. La puerta
    * es la de cotizar y cobrar (`assertLegacyClaimRoles`): quien puede cobrar
-   * puede ver con qué seguro, y nadie más. No devuelve póliza ni afiliado.
+   * puede ver con qué seguro, y nadie más. Además corre la misma puerta de
+   * pertenencia que cotizar y cobrar: sin relación asistencial vigente con la
+   * organización activa, responde el 404 uniforme de una cobertura inexistente,
+   * para que esta lectura no sirva para descubrir seguros de pacientes ajenos.
+   * No devuelve póliza ni afiliado.
    *
    * @param patientProfileId - Persona cuyos seguros se leen.
    * @param actor - Quien consulta.
    * @returns Sus coberturas con vigencia y moneda; vacía si no declaró ninguna.
    * @throws ForbiddenException si el rol no puede cobrar a la aseguradora.
+   * @throws ResourceNotFoundException 404 uniforme si la persona no tiene
+   *   relación asistencial vigente con la organización activa.
+   * @throws PreconditionFailedException 412 `TENANT_REQUIRED` sin organización activa.
    */
   async listForPatient(
     patientProfileId: string,
@@ -108,6 +118,12 @@ export class CoverageService {
   ): Promise<PatientCoverageOptionListDto> {
     assertLegacyClaimRoles(actor);
     const em = this.em.fork();
+    await this.careGate.assertCareRelationship(
+      em,
+      { patientProfileId },
+      requireTenantId(),
+      new Date(),
+    );
     const rows = await this.repo.findOptionsByPatient(em, patientProfileId);
     const referenceDate = coverageReferenceDate();
     this.logger.info(
