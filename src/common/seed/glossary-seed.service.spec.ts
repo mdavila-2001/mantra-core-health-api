@@ -204,7 +204,7 @@ describe('GlossarySeedService', () => {
     );
     // En una base vacía sólo existen los conceptos curados: el resto de los
     // artículos espera a que un importador cargue su término.
-    expect(result.articlesWithoutConcept).toBe(
+    expect(result.orphanArticles).toBe(
       GLOSSARY_ARTICLE_SLUGS.length - CURATED_ARTICLE_SLUGS.length,
     );
     for (const slug of CURATED_ARTICLE_SLUGS) {
@@ -241,7 +241,7 @@ describe('GlossarySeedService', () => {
       updated: 0,
       removed: 0,
       articles: 0,
-      articlesWithoutConcept:
+      orphanArticles:
         GLOSSARY_ARTICLE_SLUGS.length - CURATED_ARTICLE_SLUGS.length,
     });
   });
