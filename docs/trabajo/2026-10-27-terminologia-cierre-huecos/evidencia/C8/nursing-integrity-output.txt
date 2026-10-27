@@ -1,0 +1,71 @@
+== conceptos por code system
+        internal_code         | count 
+------------------------------+-------
+ es-msssi-cmdic-13606         |   617
+ nursing-terminology-registry |    12
+ omaha-system                 |   320
+ openehr-ckm                  |  8037
+(4 rows)
+
+== duplicados por (versión, código)
+ duplicados 
+------------
+          0
+(1 row)
+
+== relaciones huérfanas (origen o destino inexistente)
+ huerfanas 
+-----------
+         0
+(1 row)
+
+== designaciones y propiedades huérfanas
+ designaciones_huerfanas | propiedades_huerfanas 
+-------------------------+-----------------------
+                       0 |                     0
+(1 row)
+
+== nulos indebidos (display vacío)
+ display_nulo_o_vacio 
+----------------------
+                    0
+(1 row)
+
+== Omaha: conceptos sin procedencia (omaha-provenance) o sin licencia
+ sin_procedencia 
+-----------------
+               0
+(1 row)
+
+== Omaha: problemas sin dominio padre / signos sin problema
+ problemas_sin_dominio | signos_sin_problema 
+-----------------------+---------------------
+                     0 |                   0
+(1 row)
+
+== Omaha: conceptos por clase
+         clase         | count 
+-----------------------+-------
+ sign-symptom          |   168
+ intervention-target   |    76
+ problem               |    42
+ prso-rating           |    15
+ problem-modifier      |     6
+ domain                |     4
+ intervention-category |     4
+ prso-concept          |     3
+ problem-modifier-set  |     2
+(9 rows)
+
+== Glasgow adulto: conceptos y puntajes cargados
+ conceptos_glasgow 
+-------------------
+                23
+(1 row)
+
+== enlaces a LOINC (concept_maps con destino en loinc)
+ mapas_loinc 
+-------------
+          48
+(1 row)
+

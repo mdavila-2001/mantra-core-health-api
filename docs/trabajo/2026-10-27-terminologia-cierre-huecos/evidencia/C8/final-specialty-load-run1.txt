@@ -1,0 +1,23 @@
+Corpus: /tmp/claude-0/-home-user/d54e8fca-588a-538f-8209-b411160eadd8/scratchpad/build-C8/specialty-services/specialty-services.ndjson
+=== Servicios por especialidad → terminology.*  ===
+{
+  "skippedBoConceptsMissing": 0,
+  "concepts": 1338,
+  "designations": 1338,
+  "properties": 7709,
+  "relationships": 5113,
+  "valueSets": 53,
+  "valueSetMembers": 5113,
+  "unresolvedSpecialties": {},
+  "inserted": {
+    "concepts": 1338,
+    "designations": 1338,
+    "properties": 7709,
+    "relationships": 5113,
+    "valueSets": 53,
+    "valueSetVersions": 53,
+    "valueSetMembers": 5113,
+    "batches": 4
+  },
+  "segundos": 1
+}
