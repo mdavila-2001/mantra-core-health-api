@@ -1,0 +1,235 @@
+Copyright 2010 Minnesota Omaha System Users Group
+May be used without permission. Please acknowledge authors when used.
+Income (pg 169):
+Money from wages, pensions, subsidies, interest, dividends, or other sources available for
+living and health care expenses
+
+Signs/ Symptoms:
+    Low/ no income                                   Able to buy only necessities
+    Uninsured medical expenses                       Difficulty buying necessities
+    Difficulty with money management                 Other
+
+
+
+KBS rating considerations:
+Mental Health (pg 199):
+Development and use of mental/emotional abilities to adjust to life situations, interact
+with others, and engage in activities.
+
+Signs/ Symptoms:
+    Sadness/ hopelessness/                        Somatic complaints/ fatigue
+      decreased self-esteem                        Delusions
+    Apprehension/ undefined fear                  Hallucinations/ illusions
+    Loss of interest/ involvement in              Expresses suicidal/ homicidal
+      activities/ self-care                         thoughts
+    Narrowed to scattered attention/              Attempts suicide/ homicide
+      focus                                        Self-mutilation
+    Flat affect                                   Mood swings
+    Irritable/ agitated/ aggressive               Flash-backs
+    Purposeless/ compulsive activity              Other
+    Difficulty managing stress
+    Difficulty managing anger
+
+
+
+KBS rating considerations:
+Communication with Community Resources ( pg 181):
+Interaction between the individual/ family/ community and social service
+organizations, schools, and businesses in regard to services, information, and goods/
+supplies.
+
+Signs/ Symptoms:
+  Unfamiliar with options/ procedures           Cultural barrier
+    for obtaining services                       Educational barrier
+  Difficulty understanding roles/               Transportation barrier
+    regulations of service providers             Limited access to care/ services/
+  Unable to communicate concerns to              goods
+    provider                                     Unable to use/ has inadequate
+  Dissatisfaction with services                  communication devices/ equipment
+  Inadequate/ unavailable resources             Other
+  Language barrier
+ 
+
+KBS rating considerations:
+Healthcare Supervision (pg 346):
+Management of the health care treatment plan by health care providers
+
+
+Signs/ Symptoms:
+  Fails to obtain                            Inability to coordinate multiple
+    routine/preventative health care           appointments/treatment plans
+  Fails to seek care for symptoms            Inconsistent source of health care
+    requiring evaluation/treatment            Inadequate source of health care
+  Fails to return as requested to            Inadequate treatment plan
+    health care provider                      Other
+
+
+KBS rating considerations:
+Interpersonal Relationships (pg. 190):
+Association or bonds between the individual/family/community and others.
+
+Signs/ Symptoms:
+  Difficulty establishing/maintaining             Inappropriate
+    relationships                                   suspicion/manipulation/control
+  Minimal shared activities                       Physically/emotionally abusive to
+  Incongruent                                      partner
+    values/goals/expectations/schedules            Difficulty problem solving without
+  Inadequate interpersonal                         conflict
+    communication skills                           Other
+  Prolonged, unrelieved tension
+
+
+
+KBS rating considerations:
+Problem Classification Scheme
+Following is a list of all the problems in the Problem Classification Scheme and the page numbers they
+
+
+          Environmental Domain
+          Income……………………………..…………...                             169-171
+          Sanitation………………………...…………….                           171-175
+          Residence………………………….…………...                            175-178
+          Neighborhood/ Workplace Safety                         178-180
+
+          Psychosocial Domain
+          Communication with Community                           181-185
+          Resources…….
+          Social Contact…………………………………                            185-187
+          Role Change…………………………………...                            187-190
+          Interpersonal Relationship……………………..                   190-193
+          Spirituality……………………………………..                           193-196
+          Grief…………………………………………...                               196-199
+          Mental Health…………………………………                             199-204
+          Sexuality………………………………………                               205-208
+          Caretaking/ Parenting………………………...                      208-214
+          Neglect………………………………………..                               214-219
+          Abuse………………………………………….                                 219-223
+          Growth and Development……………………                         223-229
+
+
+
+
+                                                  40
+Physiological Domain
+Hearing………………………………………                   230-233
+Vision………………………………………...                 233-237
+Speech and Language………………………             237-241
+Oral Health………………………………….                241-244
+Cognition…………………………………….                 245-250
+Pain………………………………………….                    250-254
+Consciousness………………………………...             254-258
+Skin…………………………………………..                   258-262
+Neuro-Musculo-Skeletal Function…………….    263-270
+Respiration…………………………………...              270-277
+Circulation……………………………………                277-284
+Digestion-Hydration…………………………            284-290
+Bowel Function……………………………….              290-295
+Urinary Function……………………………...           295-300
+Reproductive Function………………………..         300-304
+Pregnancy……………………………………                  304-310
+Postpartum…………………………………...               310-315
+Communicable/ Infectious Condition…………   315-322
+
+Health-Related Behaviors Domain
+Nutrition……………………………………...               323-328
+Sleep and Rest Patterns……………………...       328-331
+Physical Activity……………………………...          331-334
+Personal Care……………………………….               334-337
+Substance Use………………………………..              337-342
+Family Planning………………………………              343-346
+Health Care Supervision……………………..        346-350
+Medication Regimen…………………………             350-356
+
+
+
+
+                        41
+                               43
+                     Omaha System Problem Modifiers Guide
+
+
+Assessment            Actual                                                Potential
+
+Definition            Client problem status characterized by the            Client status characterized by the
+                      existence of one or more signs and symptoms           absence of signs and symptoms
+                                                                            and the presence of patterns,
+                                                                            practices, behaviors, or risk
+                                                                            factors that may preclude optimal
+                                                                            health
+When to select        When signs/ symptoms are present                      When risk factors are present
+
+
+
+
+When to put it        When the PHN will be addressing the issue in          When the PHN will be addressing
+on the client’s       some way                                              the issue in some way
+careplan
+
+
+When not to put       When it's something the PHN won't be                  When it's something the PHN won't
+it on the client’s    addressing. You should then select one of the         be addressing. You should then
+careplan              options: low priority, self-care, other provider      select one of the options: low
+                                                                            priority, self-care, other provider
+
+Admission             Admission status rating must be 1,2,3, or 4. These    Admission status rating must be 5.
+Status Rating         ratings mean signs/ symptoms are present              This rating means no signs/
+                                                                            symptoms are present
+
+
+Other                 Signs: Objective evidence about a client’s
+                      problem.
+                      Symptoms: Subjective evidence about a client’s
+                      problem
+
+Example:              Client is currently using drugs, alcohol or smoking   Has a history of substance use, is
+Substance Use                                                               not currently using but is
+                                                                            experiencing stressful events that
+                                                                            put her at risk
+
+
+        *Remember for all ratings, if you are trying to decide between 2 ratings, select the lower
+        rating as a rule of thumb.
+
+                                                        44
+Assessment           Health Promotion                                     Adequate
+
+Definition           Client status characterized by interest in           Not an Omaha System definition.
+                     increasing knowledge, behavior,                      It means the problem was
+                     and health expectations, as well as developing       assessed, no signs/ symptoms or
+                     strengths and resources to enhance well-being in     risk factors are present and it will
+                     the absence of risk factors, signs, or symptoms      not go on the client careplan
+When to select       When the client wishes to learn about something      When you have assessed a
+                     we don't normally address and there are no           problem and determine that the
+                     signs/ symptoms or risk factors present               problem is neither Actual or
+                                                                          Potential and you will not be
+                                                                          addressing it
+When to put it on    It should be used rarely or never. Do you have       Never
+the client’s         time to address issues not normally on your plate?
+careplan
+
+
+When not to put it   When it's something the PHN won't be
+on the client’s      addressing. You should then select one of the
+careplan             options: low priority, self-care, other provider
+
+
+Admission Status     Admission status rating must be 5. This rating
+Rating               means no signs/ symptoms are present.
+
+
+
+
+Other                If Health Promotion is selected, the problem must
+                     go on the client careplan. It implies you are
+                     doing something about it
+
+
+Example:             Client wants to know how to prevent osteoporosis     No history of substance use or has
+Substance Use                                                             history but appears stable and not
+                                                                          at risk for relapse.
+
+
+
+
+                                                     45
+

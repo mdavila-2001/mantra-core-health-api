@@ -1,0 +1,27 @@
+{
+  "fetchedAt": "2026-10-27T23:19:54.542Z",
+  "boundCodesTotal": 101,
+  "bindingsTotal": 126,
+  "answerCodesNotLookedUp": {
+    "count": 54,
+    "bindings": 78,
+    "note": "LA…/LL… son respuestas y listas de respuestas de LOINC (parte de las respuestas de un ítem), no términos de loinc_items"
+  },
+  "boundTermCodes": 47,
+  "termBindings": 48,
+  "resolvedInPublicSubset": 47,
+  "notResolved": [],
+  "omahaTerms": {
+    "total": 403,
+    "byMethod": {
+      "∅": 1,
+      "Observed.OMAHA": 402
+    },
+    "answerLists": {
+      "LA6495-1=No knowledge | LA6496-9=Minimal knowledge | LA6497-7=Basic knowledge | LA6498-5=Adequate knowledge | LA6499-3=Superior knowledge": 134,
+      "LA6500-8=Not appropriate behavior | LA6501-6=Rarely appropriate behavior | LA6502-4=Inconsistently appropriate behavior | LA6503-2=Usually appropriate behavior | LA6504-0=Consistently appropriate behavior": 134,
+      "LA6490-2=Extreme signs/symptoms | LA6491-0=Severe signs/symptoms | LA6492-8=Moderate signs/symptoms | LA6493-6=Minimal signs/symptoms | LA6494-4=No signs/symptoms": 134
+    }
+  },
+  "requests": 48
+}

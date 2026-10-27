@@ -84,6 +84,104 @@
           "gzSha256": "43d82fb9e7e199aace24d08029bf66661492900f664232e462d6cb7efcf876bf"
         }
       ]
+    },
+    "omaha-system": {
+      "source": "omaha-system.ndjson",
+      "rows": 320,
+      "parts": [
+        {
+          "file": "omaha-system.part-001.ndjson.gz",
+          "rows": 320,
+          "bytes": 754384,
+          "sha256": "c8081a80375b6027222dcfc9f47437c571dac8ff55d6cbb64c2c0083e407d60c",
+          "gzBytes": 21722,
+          "gzSha256": "51e604d1cf7a41176c85685a4f658170347254d1c91853b4d8f820b956ebc631"
+        }
+      ]
+    },
+    "omaha-meta": {
+      "source": "omaha.meta.json",
+      "rows": null,
+      "parts": [
+        {
+          "file": "omaha-meta.json.gz",
+          "rows": null,
+          "bytes": 4235,
+          "sha256": "3ffa00fb6d374b89146991e9871db09eb9e9ce5fd8037112f7f7603cf91526da",
+          "gzBytes": 1201,
+          "gzSha256": "36557295fcaa16736f36618ecd74433180486ac7addff1e6241dd06bc4abe848"
+        }
+      ]
+    },
+    "omaha-coverage": {
+      "source": "coverage-omaha.json",
+      "rows": null,
+      "parts": [
+        {
+          "file": "omaha-coverage.json.gz",
+          "rows": null,
+          "bytes": 4459,
+          "sha256": "a1ecb49401436dcb1ffd4117aac10e95163913dfd1ab1027e43b859c34c8d236",
+          "gzBytes": 1817,
+          "gzSha256": "b12fd48816fb6bf2d3e942335b7868db0f159371c19168f78f02a93a6822d824"
+        }
+      ]
+    },
+    "omaha-crosscheck": {
+      "source": "omaha-crosscheck.json",
+      "rows": null,
+      "parts": [
+        {
+          "file": "omaha-crosscheck.json.gz",
+          "rows": null,
+          "bytes": 1778,
+          "sha256": "bd93d194dd73b95b06d34209a0284912253a7dec211edbfd01078e6d47d4dd64",
+          "gzBytes": 435,
+          "gzSha256": "14f858b337fb4a25cd9ced4ef5217088026770dd59f7f35ece6f55cb9524753f"
+        }
+      ]
+    },
+    "loinc-links": {
+      "source": "loinc-links.ndjson",
+      "rows": 47,
+      "parts": [
+        {
+          "file": "loinc-links.part-001.ndjson.gz",
+          "rows": 47,
+          "bytes": 24696,
+          "sha256": "f2e3775e9f332a67faed8fe31996d738cb4bc9002f3467e0477c635e47991e95",
+          "gzBytes": 2475,
+          "gzSha256": "ddfa1d640e7bfeed7c954742d31be8de83824274c43afa4599714fb273cad84b"
+        }
+      ]
+    },
+    "loinc-links-report": {
+      "source": "loinc-links-report.json",
+      "rows": null,
+      "parts": [
+        {
+          "file": "loinc-links-report.json.gz",
+          "rows": null,
+          "bytes": 1109,
+          "sha256": "a61e15d8a58d08263195f074d4b539f32e4fa42ff2d98355852faeac5604ba05",
+          "gzBytes": 562,
+          "gzSha256": "bcbb84ddc88f6b6574a8ca1ae7ec6d8fee8bb55ae43393a74ee174f1d0588763"
+        }
+      ]
+    },
+    "loinc-omaha-terms": {
+      "source": "loinc-omaha-terms.json",
+      "rows": null,
+      "parts": [
+        {
+          "file": "loinc-omaha-terms.json.gz",
+          "rows": null,
+          "bytes": 476089,
+          "sha256": "e209afd4a204a95be9032d5c19b77d115bb5a2548711cf77a6dc0df27be5d184",
+          "gzBytes": 10724,
+          "gzSha256": "8d7cb31f2fbee7949097ea6247ddf62d13e03664944bcadd57039cbd43976ed1"
+        }
+      ]
     }
   }
 }

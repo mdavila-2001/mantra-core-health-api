@@ -34,6 +34,7 @@ import {
   LANG_EN, NURSING_VALUE_SET, REL_IS_A, REL_PART_OF, codeSystemPlan, conceptId, definitionOf, designationsFor, displayOf, id, loincRequestsFor, membershipsFor, propertiesFor, relationshipsFor,
 } from './lib/plan.mjs';
 import { MSSSI_CODE_SYSTEM } from './lib/msssi.mjs';
+import { OMAHA_CODE_SYSTEM, OMAHA_VERSION } from './lib/omaha.mjs';
 import { REGISTRY_CODE_SYSTEM } from './lib/registry.mjs';
 import { parseNdjsonText, readManifest, readRepoDataset } from './lib/repo-data.mjs';
 
@@ -125,6 +126,11 @@ function readInputs() {
     [MSSSI_CODE_SYSTEM]: `${meta.adlArchetypes.commitDate.slice(0, 10)}+${meta.adlArchetypes.commit.slice(0, 8)}`,
     [REGISTRY_CODE_SYSTEM]: meta.tho.packageVersion,
   };
+  // Omaha System (2026-10-27): opcional, de su propio armado local o de los datos versionados.
+  const omahaLocal = join(NURSING_OUT, `${OMAHA_CODE_SYSTEM}.ndjson`);
+  if (!FROM_REPO_DATA && existsSync(omahaLocal)) rowsByCs[OMAHA_CODE_SYSTEM] = readNdjson(omahaLocal);
+  else if (readManifest()?.datasets?.[OMAHA_CODE_SYSTEM]) rowsByCs[OMAHA_CODE_SYSTEM] = parseNdjsonText(readRepoDataset(OMAHA_CODE_SYSTEM));
+  if (rowsByCs[OMAHA_CODE_SYSTEM]) versions[OMAHA_CODE_SYSTEM] = OMAHA_VERSION;
   console.log(`[entrada] ${fromRepo ? 'datos versionados en tools/terminology-import/nursing-care/data/' : NURSING_OUT}`);
   return { meta, rowsByCs, versions };
 }

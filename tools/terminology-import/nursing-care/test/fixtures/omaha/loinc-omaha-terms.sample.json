@@ -1,0 +1,152 @@
+{
+ "fetchedAt": "2026-10-27T23:19:54.542Z",
+ "url": "https://clinicaltables.nlm.nih.gov/api/loinc_items/v3/search?terms=omaha&maxList=500&df=LOINC_NUM,LONG_COMMON_NAME,SHORTNAME,COMPONENT,PROPERTY,TIME_ASPCT,SYSTEM,SCALE_TYP,METHOD_TYP,CLASS&ef=answers,AnswerList",
+ "total": 403,
+ "terms": [
+  {
+   "LOINC_NUM": "48547-4",
+   "LONG_COMMON_NAME": "Omaha System 2005 panel",
+   "SHORTNAME": null,
+   "COMPONENT": "Omaha System 2005 panel",
+   "PROPERTY": "-",
+   "TIME_ASPCT": null,
+   "SYSTEM": null,
+   "SCALE_TYP": null,
+   "METHOD_TYP": null,
+   "CLASS": null,
+   "answers": null
+  },
+  {
+   "LOINC_NUM": "28309-3",
+   "LONG_COMMON_NAME": "Neighborhood/workplace safety..knowledge [OMAHA]",
+   "SHORTNAME": null,
+   "COMPONENT": "Neighborhood &or workplace safety.knowledge",
+   "PROPERTY": "Find",
+   "TIME_ASPCT": null,
+   "SYSTEM": null,
+   "SCALE_TYP": null,
+   "METHOD_TYP": "Observed.OMAHA",
+   "CLASS": null,
+   "answers": [
+    {
+     "AnswerStringID": "LA6495-1",
+     "DisplayText": "No knowledge",
+     "SequenceNo": 1,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6496-9",
+     "DisplayText": "Minimal knowledge",
+     "SequenceNo": 2,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6497-7",
+     "DisplayText": "Basic knowledge",
+     "SequenceNo": 3,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6498-5",
+     "DisplayText": "Adequate knowledge",
+     "SequenceNo": 4,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6499-3",
+     "DisplayText": "Superior knowledge",
+     "SequenceNo": 5,
+     "Score": null
+    }
+   ]
+  },
+  {
+   "LOINC_NUM": "28356-4",
+   "LONG_COMMON_NAME": "Technical procedure.behavior [OMAHA]",
+   "SHORTNAME": null,
+   "COMPONENT": "Technical procedure.behavior",
+   "PROPERTY": "Find",
+   "TIME_ASPCT": null,
+   "SYSTEM": null,
+   "SCALE_TYP": null,
+   "METHOD_TYP": "Observed.OMAHA",
+   "CLASS": null,
+   "answers": [
+    {
+     "AnswerStringID": "LA6500-8",
+     "DisplayText": "Not appropriate behavior",
+     "SequenceNo": 1,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6501-6",
+     "DisplayText": "Rarely appropriate behavior",
+     "SequenceNo": 2,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6502-4",
+     "DisplayText": "Inconsistently appropriate behavior",
+     "SequenceNo": 3,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6503-2",
+     "DisplayText": "Usually appropriate behavior",
+     "SequenceNo": 4,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6504-0",
+     "DisplayText": "Consistently appropriate behavior",
+     "SequenceNo": 5,
+     "Score": null
+    }
+   ]
+  },
+  {
+   "LOINC_NUM": "28245-9",
+   "LONG_COMMON_NAME": "Abuse Status [OMAHA]",
+   "SHORTNAME": null,
+   "COMPONENT": "Abuse.status",
+   "PROPERTY": "Find",
+   "TIME_ASPCT": null,
+   "SYSTEM": null,
+   "SCALE_TYP": null,
+   "METHOD_TYP": "Observed.OMAHA",
+   "CLASS": null,
+   "answers": [
+    {
+     "AnswerStringID": "LA6490-2",
+     "DisplayText": "Extreme signs/symptoms",
+     "SequenceNo": 1,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6491-0",
+     "DisplayText": "Severe signs/symptoms",
+     "SequenceNo": 2,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6492-8",
+     "DisplayText": "Moderate signs/symptoms",
+     "SequenceNo": 3,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6493-6",
+     "DisplayText": "Minimal signs/symptoms",
+     "SequenceNo": 4,
+     "Score": null
+    },
+    {
+     "AnswerStringID": "LA6494-4",
+     "DisplayText": "No signs/symptoms",
+     "SequenceNo": 5,
+     "Score": null
+    }
+   ]
+  }
+ ]
+}

@@ -13,6 +13,7 @@ import { CONCEPT, md5uuid, valueSetMemberId, valueSetVersionId } from '../../lib
 import { deterministicId } from '../../lib/glossary-es/common.mjs';
 import { CODE_SYSTEM } from './ckm.mjs';
 import { MSSSI_CODE_SYSTEM } from './msssi.mjs';
+import { OMAHA_CITATION, OMAHA_CODE_SYSTEM } from './omaha.mjs';
 import { REGISTRY_CODE_SYSTEM } from './registry.mjs';
 
 export const NS = 'mantra:nursing-care';
@@ -46,6 +47,14 @@ export const SOURCES = {
     officialUrl: 'https://www.sanidad.gob.es/profesionales/hcdsns/areaRecursosSem/Rec_mod_clinico_arquetipos.htm',
     license: 'No declarada en los archivos ni en el repositorio de copia (github.com/openEHR/adl-archetypes). Contenido derivado del RD 1093/2010 (CMDIC); art. 13 TRLPI. Pendiente de confirmación con el Ministerio.',
     csName: 'CMDIC (RD 1093/2010) — arquetipos UNE-EN ISO 13606 del Ministerio de Sanidad',
+  },
+  [OMAHA_CODE_SYSTEM]: {
+    code: 'OMAHA_SYSTEM',
+    name: 'Omaha System (Omaha System Partnership / Martin, 2005)',
+    owner: 'Omaha System (Health Connections Press; términos y estructura en el dominio público desde 1975)',
+    officialUrl: 'https://www.omahasystem.org/',
+    license: `Dominio público para términos, definiciones y códigos (FAQ oficial, pregunta 1); deben usarse con la estructura del libro de 2005 y citarlo o citar el sitio: ${OMAHA_CITATION} Definiciones y signos/síntomas de 18 problemas: Minnesota Omaha System Users Group (2010), «may be used without permission», citando a los autores.`,
+    csName: 'Omaha System — esquema de clasificación de problemas, esquema de intervenciones y escala de calificación de resultados (PRSO)',
   },
   [REGISTRY_CODE_SYSTEM]: {
     code: 'HL7_THO',
@@ -113,6 +122,20 @@ export function propertiesFor(row) {
     // lo justo para ubicar la fila en la fuente (el resto cuelga del arquetipo por PART_OF).
     ...js('nursing-provenance', row.kind === 'node' || row.kind === 'value' ? { source: p.source, sourceId: `${row.archetypeId}::${row.atCode}`, version: p.version, commit: p.commit, path: p.path, uri: p.uri } : p),
   ];
+  if (row.codeSystem === OMAHA_CODE_SYSTEM) {
+    // la procedencia completa va en `omaha-provenance`; `nursing-provenance` (pensada para CKM) sobra
+    out.splice(0, out.length, ...out.filter((x) => x.code !== 'nursing-provenance'));
+    out.push(
+      ...str('source_license', p.license?.status),
+      ...str('omaha_kind', row.kind),
+      ...js('omaha-provenance', p),
+      ...(row.sourceOrder != null ? [prop(row, 'source_order', 'json', row.sourceOrder)] : []),
+      ...(row.ordinalValue != null ? [prop(row, 'ordinal_value', 'json', row.ordinalValue)] : []),
+      ...js('definition_source', row.definitionSource ?? null),
+      ...(row.descriptionOriginal ? [prop(row, 'definition_original', 'json', { [row.originalLanguage]: row.descriptionOriginal })] : []),
+    );
+    return out;
+  }
   if (row.codeSystem === REGISTRY_CODE_SYSTEM) {
     out.push(...str('source_license', p.packageLicense), ...js('hl7_naming_system', row.hl7), ...js('terminology_license', row.license), ...js('ana_recognition', row.anaRecognition));
     if (row.descriptionOriginal) out.push(prop(row, 'definition_original', 'json', { [row.originalLanguage]: row.descriptionOriginal }));

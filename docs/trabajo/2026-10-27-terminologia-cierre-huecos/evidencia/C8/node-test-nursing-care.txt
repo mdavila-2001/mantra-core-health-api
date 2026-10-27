@@ -1,0 +1,154 @@
+TAP version 13
+# Subtest: ODIN: claves con corchetes, escapes, listas y códigos de término
+ok 1 - ODIN: claves con corchetes, escapes, listas y códigos de término
+  ---
+  duration_ms: 1.407858
+  type: 'test'
+  ...
+# Subtest: cADL: el nodo es dueño de la última llave abierta (occurrences matches {0..1} matches {)
+ok 2 - cADL: el nodo es dueño de la última llave abierta (occurrences matches {0..1} matches {)
+  ---
+  duration_ms: 0.546548
+  type: 'test'
+  ...
+# Subtest: ADL real: ECOG v2 (id, idioma, traducción es, ordinales 0–5)
+ok 3 - ADL real: ECOG v2 (id, idioma, traducción es, ordinales 0–5)
+  ---
+  duration_ms: 0.17356
+  type: 'test'
+  ...
+# Subtest: Licencia del contenido: Braden con copyright de terceros, ECOG declarado de dominio público, balance de fluidos modelo propio
+ok 4 - Licencia del contenido: Braden con copyright de terceros, ECOG declarado de dominio público, balance de fluidos modelo propio
+  ---
+  duration_ms: 3.213708
+  type: 'test'
+  ...
+# Subtest: Filas: Braden sólo con la raíz y sin nombre ES (el es-ar es un marcador «*…(en)»)
+ok 5 - Filas: Braden sólo con la raíz y sin nombre ES (el es-ar es un marcador «*…(en)»)
+  ---
+  duration_ms: 1.129504
+  type: 'test'
+  ...
+# Subtest: Filas: ECOG con jerarquía y valores ordinales, verbatim en castellano
+ok 6 - Filas: ECOG con jerarquía y valores ordinales, verbatim en castellano
+  ---
+  duration_ms: 1.122786
+  type: 'test'
+  ...
+# Subtest: Plan: balance de fluidos entra al glosario de cuidados; ids deterministas y PART_OF
+ok 7 - Plan: balance de fluidos entra al glosario de cuidados; ids deterministas y PART_OF
+  ---
+  duration_ms: 3.050835
+  type: 'test'
+  ...
+# Subtest: Enlaces: LOINC se pide por código; SNOMED no se guarda
+ok 8 - Enlaces: LOINC se pide por código; SNOMED no se guarda
+  ---
+  duration_ms: 1.285341
+  type: 'test'
+  ...
+# Subtest: pickSpanish prioriza «es» sobre variantes regionales
+ok 9 - pickSpanish prioriza «es» sobre variantes regionales
+  ---
+  duration_ms: 5.717936
+  type: 'test'
+  ...
+# Subtest: Registro: 12 terminologías ANA con OID y URI verbatim de HL7 THO 7.0.1
+ok 10 - Registro: 12 terminologías ANA con OID y URI verbatim de HL7 THO 7.0.1
+  ---
+  duration_ms: 1.062016
+  type: 'test'
+  ...
+# Subtest: CMDIC: las ranuras del informe de enfermería nombran los arquetipos que lo componen (regla M2, fuera del glosario)
+ok 11 - CMDIC: las ranuras del informe de enfermería nombran los arquetipos que lo componen (regla M2, fuera del glosario)
+  ---
+  duration_ms: 1.021696
+  type: 'test'
+  ...
+# Subtest: Datos versionados: partición por filas y lectura verificada contra MANIFEST.json
+ok 12 - Datos versionados: partición por filas y lectura verificada contra MANIFEST.json
+  ---
+  duration_ms: 315.682968
+  type: 'test'
+  ...
+# Subtest: sitio oficial: 4 dominios con definición y 42 problemas, en el orden publicado
+ok 13 - sitio oficial: 4 dominios con definición y 42 problemas, en el orden publicado
+  ---
+  duration_ms: 6.72768
+  type: 'test'
+  ...
+# Subtest: sitio oficial: modificadores de problema (dos conjuntos) leídos de la frase del nivel 3
+ok 14 - sitio oficial: modificadores de problema (dos conjuntos) leídos de la frase del nivel 3
+  ---
+  duration_ms: 0.325514
+  type: 'test'
+  ...
+# Subtest: sitio oficial: intervenciones — 4 categorías con definición y 75 objetivos + «other»
+ok 15 - sitio oficial: intervenciones — 4 categorías con definición y 75 objetivos + «other»
+  ---
+  duration_ms: 0.334305
+  type: 'test'
+  ...
+# Subtest: FAQ oficial: pregunta 1 de la licencia, verbatim
+ok 16 - FAQ oficial: pregunta 1 de la licencia, verbatim
+  ---
+  duration_ms: 1.799727
+  type: 'test'
+  ...
+# Subtest: MOSUG: lista de 42 problemas con página del libro; el nombre puede venir cortado por el PDF
+ok 17 - MOSUG: lista de 42 problemas con página del libro; el nombre puede venir cortado por el PDF
+  ---
+  duration_ms: 0.175459
+  type: 'test'
+  ...
+# Subtest: MOSUG: signos/síntomas en dos columnas, orden por columnas, continuaciones unidas
+ok 18 - MOSUG: signos/síntomas en dos columnas, orden por columnas, continuaciones unidas
+  ---
+  duration_ms: 0.14098
+  type: 'test'
+  ...
+# Subtest: MOSUG: parseTwoColumnBullets con una sola columna
+ok 19 - MOSUG: parseTwoColumnBullets con una sola columna
+  ---
+  duration_ms: 0.130562
+  type: 'test'
+  ...
+# Subtest: MOSUG: definiciones de los modificadores Actual, Potencial y Promoción de la salud
+ok 20 - MOSUG: definiciones de los modificadores Actual, Potencial y Promoción de la salud
+  ---
+  duration_ms: 0.281395
+  type: 'test'
+  ...
+# Subtest: PRSO: la transcripción de la imagen coincide con las listas de respuesta que publica LOINC
+ok 21 - PRSO: la transcripción de la imagen coincide con las listas de respuesta que publica LOINC
+  ---
+  duration_ms: 0.440529
+  type: 'test'
+  ...
+# Subtest: filas: conteos por clase, códigos únicos, padres presentes y procedencia en cada fila
+ok 22 - filas: conteos por clase, códigos únicos, padres presentes y procedencia en cada fila
+  ---
+  duration_ms: 0.468271
+  type: 'test'
+  ...
+# Subtest: filas: la definición sólo existe donde la fuente la publica, y cita al MOSUG
+ok 23 - filas: la definición sólo existe donde la fuente la publica, y cita al MOSUG
+  ---
+  duration_ms: 0.143256
+  type: 'test'
+  ...
+# Subtest: plan de carga: designación EN, definición, PART_OF y propiedades de procedencia
+ok 24 - plan de carga: designación EN, definición, PART_OF y propiedades de procedencia
+  ---
+  duration_ms: 23.27449
+  type: 'test'
+  ...
+1..24
+# tests 24
+# suites 0
+# pass 24
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 423.0307
