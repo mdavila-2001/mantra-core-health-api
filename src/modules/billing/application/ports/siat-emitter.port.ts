@@ -1,82 +1,74 @@
-/* ============================================================================
-    Puerto SIAT — contrato entre la capa de aplicación y los adaptadores de
-    emisión (simulado y real). Los tipos de entrada/salida derivan directamente
-    del motor simulado para que ambos adaptadores compartan la misma superficie.
-    ========================================================================== */
-
-import type {
-  BuildInvoiceInput,
-  BuiltInvoice,
-  IssuerInput,
-  SimulatedCredentials,
-  SimulatedIssuerView,
-  SiatResponse,
-} from '../../siat-simulated/siat-simulated.engine';
-
-// ---- tipos de puerto -------------------------------------------------------
-
-export interface SiatIssuer extends SimulatedIssuerView {}
-
-export interface SiatCredentials extends SimulatedCredentials {}
-
-export interface SiatInvoiceInput extends BuildInvoiceInput {}
-
-export interface SiatInvoiceResult extends BuiltInvoice {}
-
-export interface SiatCommunicationStatus {
-  online: boolean;
-  timestamp: string;
-  simulated: boolean;
+/** NIT, sucursal, punto de venta y sector documental de un emisor SIAT. */
+export interface SiatIssuerProfile {
+  readonly nit: string;
+  readonly legalName: string;
+  readonly municipality: string;
+  readonly address: string;
+  readonly phone: string | null;
+  readonly branchCode: number;
+  readonly pointOfSaleCode: number;
+  readonly documentSector: number;
 }
 
-export interface SiatAnnulInput {
-  emisor: SiatIssuer;
-  credenciales: SiatCredentials;
-  cuf: string;
-  codigoMotivo: number;
-  fechaEmision: string;
+/** CUIS, CUFD y código de control vigentes en un instante dado. */
+export interface SiatSessionCredentials {
+  readonly cuis: string;
+  readonly cufd: string;
+  readonly codigoControl: string;
 }
 
-// ---- puerto ----------------------------------------------------------------
+export interface SiatEmitMessage {
+  readonly codigo: number;
+  readonly descripcion: string;
+  readonly advertencia: boolean;
+}
 
+export interface SiatEmitResult {
+  readonly transaccion: boolean;
+  readonly codigoEstado: number;
+  readonly codigoDescripcion: string;
+  readonly codigoRecepcion: string | null;
+  readonly mensajesList: readonly SiatEmitMessage[];
+  /** 'simulated' en pruebas, 'real' al conectar el SIN productivo. */
+  readonly siatMode: 'simulated' | 'real';
+}
+
+/**
+ * Puerto SIAT: abstrae la comunicación con el SIN boliviano (real o simulada).
+ *
+ * La implementación simulada (`SiatSimulatedAdapter`) envuelve el motor
+ * sintético de `siat-simulated.engine`. La real (`SiatRealAdapter`) usa
+ * `integration_contracts` (M31) para OAuth2/mTLS y llama a los endpoints
+ * productivos del SIN.
+ */
 export interface ISiatEmitterPort {
-  /**
-   * Obtiene (o renueva) las credenciales del emisor para la práctica dada.
-   * En el adaptador real llama a `obtenerCUIS`; en el simulado las deriva
-   * de forma determinista del `practiceId`.
-   */
-  obtenerIssuer(input: IssuerInput, ahora: Date): Promise<SiatIssuer>;
+  readonly siatMode: 'simulated' | 'real';
 
-  /**
-   * Obtiene las credenciales diarias (CUFD + CUIS) vigentes para el emisor.
-   * En el adaptador real llama a `obtenerCUFD`; en el simulado las deriva
-   * del día de Bolivia.
-   */
-  obtenerCredenciales(
-    emisor: SiatIssuer,
-    ahora: Date,
-  ): Promise<SiatCredentials>;
+  /** Perfil del emisor: NIT real o sintético según el modo. */
+  resolveIssuer(practiceId: string, legalName: string): Promise<SiatIssuerProfile>;
 
-  /**
-   * Envía la factura al SIAT y devuelve la respuesta oficial.
-   * En el adaptador real serializa, comprime, firma (modalidad 1) y llama
-   * a `recepcionFactura`; en el simulado la construye y la valida localmente.
-   */
-  recibirFactura(input: SiatInvoiceInput): Promise<SiatInvoiceResult>;
+  /** CUIS y CUFD vigentes al instante indicado. */
+  resolveCredentials(
+    issuerNit: string,
+    branchCode: number,
+    pointOfSaleCode: number,
+    at: Date,
+  ): Promise<SiatSessionCredentials>;
 
-  /**
-   * Solicita la anulación de una factura emitida.
-   * En el adaptador real llama a `anulacionFactura`; en el simulado construye
-   * la respuesta determinista correspondiente al motivo.
-   */
-  anularFactura(input: SiatAnnulInput): Promise<SiatResponse>;
+  /** Envía el XML comprimido en base64 al SIN y devuelve la respuesta de recepción. */
+  submitInvoice(
+    xmlCompressedBase64: string,
+    cufd: string,
+    issuerNit: string,
+  ): Promise<SiatEmitResult>;
 
-  /**
-   * Verifica que el canal con el SIN esté activo.
-   * En el adaptador real llama a `verificarComunicacion`; en el simulado
-   * siempre devuelve `online: true`.
-   */
-  verificarComunicacion(emisor: SiatIssuer): Promise<SiatCommunicationStatus>;
+  /** Anula una factura ya recibida por el SIN (o el simulador). */
+  annulInvoice(
+    cuf: string,
+    codigoMotivo: number,
+    cufd: string,
+    issuerNit: string,
+  ): Promise<SiatEmitResult>;
 }
 
-export const SIAT_EMITTER_PORT = Symbol('SIAT_EMITTER_PORT');
+export const SIAT_EMITTER_PORT = Symbol('BILLING_SIAT_EMITTER_PORT');
