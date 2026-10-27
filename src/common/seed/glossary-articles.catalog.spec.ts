@@ -3,6 +3,7 @@ import {
   GLOSSARY_ARTICLE_SLUGS,
   glossaryArticleFor,
 } from './glossary-articles.catalog';
+import articleAliases from './data/glossary/glossary-article-aliases.json';
 import { GLOSSARY_TERMS } from './glossary-terms.catalog';
 
 /** Las claves de sección que el front sabe titular (`GlossarySectionKind`). */
@@ -105,6 +106,22 @@ describe('Artículos enciclopédicos de autoría propia del glosario', () => {
     for (const slug of GLOSSARY_ARTICLE_SLUGS) {
       expect(slug).toMatch(SLUG);
       expect(glossaryArticleFor(slug)!.conceptRef.slug).toBe(slug);
+    }
+  });
+
+  it('un término con alias muestra el artículo de su fuente bajo su propio slug', () => {
+    // El término visible casi nunca tiene el slug del artículo («Ecografía»
+    // es `medlineplus-lab-ecografia`): sin el alias quedaba sin artículo.
+    const aliases = Object.entries(
+      articleAliases as Record<string, string>,
+    );
+    for (const [term, source] of aliases) {
+      expect(GLOSSARY_ARTICLE_SLUGS).toContain(term);
+      const article = glossaryArticleFor(term)!;
+      const original = glossaryArticleFor(source)!;
+      expect(article.conceptRef.slug).toBe(term);
+      expect(article.sections).toEqual(original.sections);
+      expect(article.images).toEqual(original.images);
     }
   });
 
