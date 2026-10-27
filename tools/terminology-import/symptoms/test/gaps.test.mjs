@@ -21,6 +21,8 @@ import { firstZipEntry, zipEntryStream } from '../lib/zip.mjs';
 import { groupByHpo, mapTuple, propertyTuple } from '../load-wikidata-crosswalk.mjs';
 import { EVIDENCE_COLUMNS, evidenceTuple } from '../load-disease-phenotypes.mjs';
 import { termOverlaps } from '../lib/crosswalk.mjs';
+import { medgenLinks, xrefDeclaredPairs } from '../lib/medgen.mjs';
+import { mapTupleFor } from '../load-medgen-crosswalk.mjs';
 
 const FX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
 const fx = (f) => readFileSync(join(FX, f), 'utf8');
@@ -218,4 +220,29 @@ test('nivel de evidencia: curado vs automático; un código desconocido es un er
   assert.deepEqual(Object.keys(HPO_FREQUENCY_TO_VS), Object.values(ORPHA_FREQUENCY_TO_HPO));
   assert.equal(EVIDENCE_VALUE_SETS.tier.codes.length, 4);
   assert.throws(() => citationText({ source: 'otra' }), /desconocida/);
+});
+
+test('MedGen: mismo CUI ⇒ cruce entre los sistemas del corpus; sólo identificadores, sólo fuentes aceptadas', () => {
+  const codes = { hpo: new Set(['HP:0002027']), 'mesh-c23': new Set(['D015746']), ncit: new Set(['C26682']) };
+  const sympByCui = new Map([['C0000737', 'SYMP:0000457'], ['C9999999', 'SYMP:9']]);
+  const { rows, stats } = medgenLinks(fx('medgen-mgconso-excerpt.rrf'), codes, sympByCui, new Set(), { version: 'v', retrievedAt: PROV.retrievedAt, license: 'l' });
+  assert.equal(stats.cuisWithAnyCorpusCode, 1, 'C9999999 de SYMP no está en MedGen: no genera cruce');
+  assert.equal(rows.length, 6, 'HPO, MeSH, NCIt y SYMP bajo un CUI = 6 pares');
+  assert.deepEqual(rows.map((r) => `${r.a.codeSystem}↔${r.b.codeSystem}`), ['hpo↔mesh-c23', 'hpo↔ncit', 'hpo↔symp', 'mesh-c23↔ncit', 'mesh-c23↔symp', 'ncit↔symp']);
+  assert.ok(rows.every((r) => r.cui === 'C0000737' && /^[0-9a-f]{32}$/.test(r.key)));
+  assert.equal(rows.find((r) => r.b.codeSystem === 'symp').via, 'medgen+symp-xref');
+  assert.equal(JSON.stringify(rows).includes('Abdominal'), false, 'no se toma ningún texto de MGCONSO');
+  // Un código de HPO que no está en el corpus no entra.
+  const none = medgenLinks(fx('medgen-mgconso-excerpt.rrf'), { hpo: new Set(), 'mesh-c23': new Set(['D015746']), ncit: new Set() }, new Map(), new Set(), { version: 'v', retrievedAt: 'r', license: 'l' });
+  assert.equal(none.rows.length, 0);
+  // Pares que la fuente ya cruza por xref se marcan y el cargador no los repite.
+  const declared = xrefDeclaredPairs({ hpo: [{ codeSystem: 'hpo', code: 'HP:0002027', xrefs: [{ system: 'NCIT', code: 'C26682' }] }] });
+  const marked = medgenLinks(fx('medgen-mgconso-excerpt.rrf'), codes, sympByCui, declared, { version: 'v', retrievedAt: 'r', license: 'l' });
+  assert.deepEqual(marked.rows.filter((r) => r.alsoDeclaredByXref).map((r) => `${r.a.code}|${r.b.code}`), ['HP:0002027|C26682']);
+  const ids = { 'hpo|HP:0002027': 'h1', 'mesh-c23|D015746': 'm1' };
+  const t = mapTupleFor(rows[0], (cs, c) => ids[`${cs}|${c}`], 'ver');
+  assert.equal(t[1], 'h1');
+  assert.equal(t[3], null, 'sin equivalencia declarada');
+  assert.match(t[4], /^UMLS CUI C0000737 compartido \(NCBI MedGen\): HP:0002027 ↔ D015746$/);
+  assert.equal(mapTupleFor(rows[1], (cs, c) => ids[`${cs}|${c}`], 'ver'), null, 'si falta un concepto en la base no se escribe');
 });

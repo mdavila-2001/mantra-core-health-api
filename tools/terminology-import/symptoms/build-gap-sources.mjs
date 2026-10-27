@@ -18,11 +18,13 @@
 // =============================================================================
 
 import { existsSync, readFileSync } from 'node:fs';
+import { gunzipSync } from 'node:zlib';
 import { join } from 'node:path';
 import { ensureDir, nowIso, readNdjson, writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
 import { diseaseIdentity, termOverlaps } from './lib/crosswalk.mjs';
 import { hpoIdResolver } from './lib/hpo.mjs';
 import { meshC23Rows, readC23Descriptors } from './lib/mesh.mjs';
+import { medgenLinks, xrefDeclaredPairs } from './lib/medgen.mjs';
 import { crossCheckWithHpoa, orphadataRows } from './lib/orphadata.mjs';
 import { isPhenotypeRelation } from './lib/relations-plan.mjs';
 import { OUT_DIR, SOURCES_DIR, WIKIDATA_P3841_QUERY, sourceByKey, sourcePath } from './lib/sources.mjs';
@@ -100,7 +102,24 @@ async function main() {
   const mesh = meshC23Rows(descriptors, { version: pMesh.version, retrievedAt: pMesh.retrievedAt, license: pMesh.license, descriptorXmlSha256: pMesh.sha256 });
   await writeNdjson(nd('terms-mesh-c23'), mesh.rows);
   const previousTerms = [...termsHpo, ...termsSymp, ...termsNcit];
-  const meshOverlaps = termOverlaps(mesh.rows, previousTerms);
+  const meshOverlapsByXref = termOverlaps(mesh.rows, previousTerms);
+
+  // --- Cruces por CUI (NCBI MedGen): HPO/MeSH/NCIt/SYMP que caen en el mismo concepto ---
+  const pMg = provenanceFor('medgen-mgconso');
+  const sympByCui = new Map(termsSymp.flatMap((r) => r.xrefs.filter((x) => x.system === 'UMLS_CUI').map((x) => [x.code, r.code])));
+  const mg = medgenLinks(
+    gunzipSync(readFileSync(sourcePath(sourceByKey('medgen-mgconso').file))).toString('utf8'),
+    { hpo: new Set(termsHpo.map((r) => r.code)), 'mesh-c23': new Set(mesh.rows.map((r) => r.code)), ncit: new Set(termsNcit.map((r) => r.code)) },
+    sympByCui,
+    xrefDeclaredPairs({ hpo: termsHpo, symp: termsSymp, ncit: termsNcit, 'mesh-c23': mesh.rows }),
+    { version: pMg.version, retrievedAt: pMg.retrievedAt, license: pMg.license },
+  );
+  await writeNdjson(nd('crosswalk-medgen-cui'), mg.rows);
+  // MeSH ya representado por otro sistema del corpus: por xref que declara la fuente, o por el mismo CUI en MedGen.
+  const meshOverlaps = new Map(meshOverlapsByXref);
+  for (const r of mg.rows) {
+    for (const side of [r.a, r.b]) if (side.codeSystem === 'mesh-c23' && !meshOverlaps.has(side.code)) meshOverlaps.set(side.code, `mismo CUI ${r.cui} en MedGen`);
+  }
 
   // --- Pasada 11: Wikidata P3841 -------------------------------------------------
   const pWd = provenanceFor('wikidata-p3841');
@@ -132,9 +151,9 @@ async function main() {
       sources: [`MeSH ${pMesh.version} desc${pMesh.version}.xml, árbol C23`],
       read: scanned,
       newTerms: mesh.rows.length - meshOverlaps.size,
-      overlapsByPublishedUmlsCui: meshOverlaps.size,
+      overlapsByPublishedXrefOrMedgenCui: meshOverlaps.size,
       newRelations: 0,
-      note: 'Descriptores C23 (signos y síntomas, condiciones patológicas, procesos patológicos, hallazgos morfológicos). El cruce con HPO/SYMP/NCIt sólo se mide por CUI de UMLS que declaran las dos fuentes; no se descartan filas (es otro code system).',
+      note: 'Descriptores C23 (signos y síntomas, condiciones patológicas, procesos patológicos, hallazgos morfológicos). El solapamiento con HPO/SYMP/NCIt se mide sólo por xref que declara una fuente o por el mismo CUI en NCBI MedGen; no se descartan filas (es otro code system, con su propia jerarquía) y los cruces quedan como concept_maps.',
     },
     {
       pass: 11,
@@ -148,6 +167,15 @@ async function main() {
     },
     {
       pass: 12,
+      sources: ['NCBI MedGen MGCONSO (cruces por CUI entre HPO, MeSH C23, NCIt y SYMP)'],
+      read: mg.stats.lines,
+      newTerms: 0,
+      newCrosswalkPairs: mg.rows.length,
+      newRelations: 0,
+      note: 'Sólo identificadores; no aporta términos.',
+    },
+    {
+      pass: 13,
       sources: ['Re-descarga de las 9 fuentes originales (HPO hp.json/hp-es/HPOA, SYMP, DO, Mondo, NCIt, enfermedades comunes, Monarch)'],
       newTerms: 0,
       newRelations: 0,
@@ -162,7 +190,8 @@ async function main() {
     {
       generatedAt: nowIso(),
       orphadata: { header: orpha.header, headerEs: orpha.headerEs, stats: orpha.stats, crossCheckWithHpoa: crossCheck, newRelationsBeyondExistingSources: orphaNewRelations },
-      mesh: { zipEntry: entry, descriptorsScanned: scanned, stats: mesh.stats, overlapsByPublishedUmlsCui: meshOverlaps.size, overlapSample: [...meshOverlaps].slice(0, 5) },
+      mesh: { zipEntry: entry, descriptorsScanned: scanned, stats: mesh.stats, overlapsByPublishedXrefOrMedgenCui: meshOverlaps.size, overlapSample: [...meshOverlaps].slice(0, 5) },
+      medgen: { stats: mg.stats, pairsBySystems: Object.fromEntries([...mg.rows.reduce((m, r) => m.set(`${r.a.codeSystem}↔${r.b.codeSystem}`, (m.get(`${r.a.codeSystem}↔${r.b.codeSystem}`) ?? 0) + 1), new Map())]) },
       wikidata: { stats: wd.stats, rows: wd.rows.length, distinctItems: new Set(wd.rows.map((r) => r.qid)).size, distinctHpo: new Set(wd.rows.map((r) => r.hpoAsPublished)).size, hpoTermsInCorpusWithItem: hpoWithItem.size, hpoTermsInCorpus: hpoCodes.size, query: WIKIDATA_P3841_QUERY },
     },
     true,

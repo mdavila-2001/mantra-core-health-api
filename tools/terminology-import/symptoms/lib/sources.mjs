@@ -150,6 +150,14 @@ export const SOURCE_FILES = [
     fixedVersion: 'consulta en vivo',
   },
   {
+    key: 'medgen-mgconso',
+    file: 'medgen/MGCONSO.RRF.gz',
+    url: 'https://ftp.ncbi.nlm.nih.gov/pub/medgen/MGCONSO.RRF.gz',
+    owner: 'NCBI MedGen (National Library of Medicine) — sólo se toman los CUI y los códigos de HPO, MeSH y NCIt; ningún texto',
+    license: 'Dato público de NCBI (https://www.ncbi.nlm.nih.gov/home/about/policies/); MGCONSO incluye nombres de vocabularios con licencia (SNOMED CT, MedDRA, CPT…) que NO se leen ni se cargan: se usan únicamente identificadores de fuentes ya aceptadas',
+    fixedVersion: 'MedGen FTP, sin versión declarada (ver retrievedAt)',
+  },
+  {
     key: 'monarch-hpoa-edges',
     file: 'monarch/hpoa_disease_to_phenotype_edges.tsv',
     url: `${MONARCH}/monarch-kg/latest/transform_output/hpoa_disease_to_phenotype_edges.tsv`,
