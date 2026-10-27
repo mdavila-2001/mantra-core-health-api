@@ -2,7 +2,7 @@
 // Plan de carga (puro, sin base): del corpus a las tuplas de `terminology.*`.
 //
 // Qué se escribe, todo en tablas existentes (sin DDL, ADR-0021):
-//  - terminology_sources / code_systems / code_system_versions: FONASA y CUPS.
+//  - terminology_sources / code_systems / code_system_versions: FONASA, CUPS y CUPS 2025.
 //  - catalog_concepts + concept_designations (es, preferida): los servicios de
 //    FONASA y CUPS. Los del arancel boliviano NO: ya los siembra la API
 //    (`VS_BO_MEDICAL_PROCEDURE`) y se reusan por su id.
@@ -41,7 +41,7 @@ export function checksum(parts) {
 
 /** Fuentes / code systems / versiones de los conceptos nuevos (FONASA, CUPS). */
 export function codeSystemPlans() {
-  return [SOURCES.fonasa, SOURCES.cups].map((def) => ({
+  return [SOURCES.fonasa, SOURCES.cups, SOURCES.cups2025].map((def) => ({
     key: def.key,
     source: { id: id('source', def.sourceCode), code: def.sourceCode, name: def.sourceName, owner: def.owner, officialUrl: def.officialUrl, license: def.license },
     codeSystem: { id: id('cs', def.codeSystem), internalCode: def.codeSystem, name: def.codeSystemName, canonicalUrl: `https://mantracore.health/fhir/CodeSystem/${def.codeSystem}` },
@@ -102,7 +102,7 @@ export function buildPlan(records, specialtyIds, modelDisplay) {
       code,
       `Servicios de ${display}`,
       `https://mantracore.health/fhir/ValueSet/specialty-services-${specialty.toLowerCase().replace(/_/g, '-')}`,
-      `Servicios que la fuente atribuye a ${display}, con la evidencia en la propiedad «${PROPERTY.evidence}» de cada concepto. Fuentes: FONASA MLE 2026, CUPS (Colombia) y aranceles bolivianos ya cargados. Ver docs/seed-research/specialty-services.md.`,
+      `Servicios que la fuente atribuye a ${display}, con la evidencia en la propiedad «${PROPERTY.evidence}» de cada concepto. Fuentes: FONASA MLE 2026, CUPS (Colombia; copias y Resolución 2706 de 2025) y aranceles bolivianos ya cargados. Ver docs/seed-research/specialty-services.md.`,
       CONCEPT.TERM_ACTIVE,
     ]);
     valueSetVersions.push([verId, vsId, VALUE_SET_VERSION, true, CONCEPT.TERM_ACTIVE]);

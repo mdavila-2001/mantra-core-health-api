@@ -66,7 +66,7 @@ function applyPerformer(compiled, sourceKey, row, evidence, gaps, unmatched) {
   }
 }
 
-export function buildCorpus({ fonasaRows, cupsAgreed, cupsOnlyA = [], bo, retrievedAt, transports }, compiled) {
+export function buildCorpus({ fonasaRows, cupsAgreed, cupsOnlyA = [], cups2025Rows = [], bo, retrievedAt, transports }, compiled) {
   const records = [];
   const gaps = new Tally();
   const unmatched = new Tally();
@@ -113,6 +113,24 @@ export function buildCorpus({ fonasaRows, cupsAgreed, cupsOnlyA = [], bo, retrie
       display: row.display,
       source: sourceBlock(SOURCES.cups, { retrievedAt, transport: transports.cups }),
       reviewStatus: row.reviewStatus,
+      evidence,
+    });
+  }
+
+  // --- CUPS 2025 (Resolución 2706 de 2025, fuente oficial) ---------------------------
+  // Sólo las hojas (procedimientos): son lo que se usa para codificar. Los notas «Incluye/Excluye» no entran a la regla.
+  for (const row of cups2025Rows.filter((r) => r.level === 'procedure')) {
+    const evidence = [];
+    applyPerformer(compiled, 'cups2025', row, evidence, gaps, unmatched);
+    if (evidence.length === 0) continue;
+    records.push({
+      id: serviceConceptId(SOURCES.cups2025.codeSystem, row.code),
+      reuse: false,
+      codeSystem: SOURCES.cups2025.codeSystem,
+      code: row.code,
+      display: row.display,
+      source: sourceBlock(SOURCES.cups2025, { chapter: row.chapter, retrievedAt, transport: transports.cups2025 }),
+      reviewStatus: 'official',
       evidence,
     });
   }

@@ -16,11 +16,13 @@
 //   node tools/terminology-import/specialty-services/build-specialty-services.mjs --report   # imprime la tabla de cobertura en markdown
 // =============================================================================
 
+import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { BUILD_DIR, CORPUS_PATH, META_PATH, REPO_DATA_DIR, ensureDir, fetchCached, readTarGzMember, sha256, writeGzParts } from './lib/common.mjs';
 import { buildCorpus, coverage } from './lib/corpus.mjs';
+import { checkCups2025, parseCups2025 } from './lib/cups2025.mjs';
 import { compileRules, loadModelSpecialties, loadRules, referencedSpecialties } from './lib/rules.mjs';
 import {
   SOURCES,
@@ -63,10 +65,27 @@ async function loadCups() {
   };
 }
 
+/** CUPS 2025: PDF oficial del Ministerio (SHA-256 fijo) → `pdftotext -raw` → filas del Anexo Técnico 2. */
+async function loadCups2025() {
+  const t = SOURCES.cups2025.transport;
+  const f = await fetchCached(t.url, { sha256: t.sha256, name: 'resolucion-2706-de-2025.pdf' });
+  const raw = execFileSync('pdftotext', ['-raw', f.path, '-'], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+  const { rows, chapters, sections } = parseCups2025(raw);
+  const problems = checkCups2025(rows);
+  if (problems.length > 0) throw new Error(`CUPS 2025: ${problems.length} problemas de estructura: ${problems.slice(0, 5).join('; ')}`);
+  const byLevel = rows.reduce((m, r) => ((m[r.level] = (m[r.level] ?? 0) + 1), m), {});
+  const codes = new Set(rows.map((r) => r.code));
+  const orphans = rows.filter((r) => {
+    const parent = { procedure: r.code.slice(0, 7), group: r.code.slice(0, 5), subcategory: r.code.slice(0, 3) }[r.level];
+    return parent && !codes.has(parent);
+  }).map((r) => r.code);
+  return { rows, transport: { ...t, sha256: f.sha256 }, stats: { byLevel, chapters: chapters.length, sections: sections.length, orphansWithoutParentInSource: orphans } };
+}
+
 function markdownCoverage(cov) {
-  const lines = ['| Especialidad | Código | Servicios | FONASA | CUPS | Arancel BO | Nombres distintos |', '|---|---|---:|---:|---:|---:|---:|'];
+  const lines = ['| Especialidad | Código | Servicios | FONASA | CUPS | CUPS 2025 | Arancel BO | Nombres distintos |', '|---|---|---:|---:|---:|---:|---:|---:|'];
   for (const r of cov) {
-    lines.push(`| ${r.display} | \`${r.code}\` | ${r.total} | ${r.bySource['fonasa-mle-2026'] ?? 0} | ${r.bySource['cups-co'] ?? 0} | ${r.bySource.VS_BO_MEDICAL_PROCEDURE ?? 0} | ${r.distinctNames} |`);
+    lines.push(`| ${r.display} | \`${r.code}\` | ${r.total} | ${r.bySource['fonasa-mle-2026'] ?? 0} | ${r.bySource['cups-co'] ?? 0} | ${r.bySource['cups-co-2706-2025'] ?? 0} | ${r.bySource.VS_BO_MEDICAL_PROCEDURE ?? 0} | ${r.distinctNames} |`);
   }
   return lines.join('\n');
 }
@@ -82,10 +101,11 @@ async function main() {
   const retrievedAt = new Date().toISOString();
   const fonasa = await loadFonasa();
   const cups = await loadCups();
+  const cups2025 = await loadCups2025();
   const bo = readBoDataset();
 
   const corpus = buildCorpus(
-    { fonasaRows: fonasa.rows, cupsAgreed: cups.agreed, cupsOnlyA: cups.onlyA, bo, retrievedAt, transports: { fonasa: fonasa.transport, cups: cups.transport } },
+    { fonasaRows: fonasa.rows, cupsAgreed: cups.agreed, cupsOnlyA: cups.onlyA, cups2025Rows: cups2025.rows, bo, retrievedAt, transports: { fonasa: fonasa.transport, cups: cups.transport, cups2025: cups2025.transport } },
     compileRules(rules),
   );
   const cov = coverage(corpus.records, model.specialties);
@@ -97,6 +117,7 @@ async function main() {
     modelSnapshot: model.source,
     fonasa: { rows: fonasa.rows.length, verifiedAgainstPdf: fonasa.check, transport: fonasa.transport },
     cups: { ...cups.cross, transport: cups.transport },
+    cups2025: { ...cups2025.stats, transport: cups2025.transport },
     bo: { honorariosMedicos: bo.honorariosMedicos.length, arancelOdontologico: bo.arancelOdontologico.length },
     records: corpus.records.length,
     relations: corpus.records.reduce((n, r) => n + new Set(r.evidence.map((e) => e.specialty)).size, 0),

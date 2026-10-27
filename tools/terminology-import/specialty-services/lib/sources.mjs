@@ -11,6 +11,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { API_ROOT, clean, norm } from './common.mjs';
+import { CUPS2025 } from './cups2025.mjs';
 
 export const SOURCES = {
   fonasa: {
@@ -65,6 +66,26 @@ export const SOURCES = {
           note: 'Generada del PDF «Tabla 1. Procedimientos en salud» (7 882 códigos, con grupo quirúrgico y puntos SMLDV descartados).',
         },
       ],
+    },
+  },
+  cups2025: {
+    key: 'cups2025',
+    sourceCode: 'MINSALUD_CO_CUPS_2706_2025',
+    sourceName: 'CUPS 2025 — Resolución 2706 de 2025, Anexo Técnico 2 «Lista tabular» (Colombia)',
+    owner: 'Ministerio de Salud y Protección Social de Colombia',
+    officialUrl: CUPS2025.officialUrl,
+    license: 'Acto administrativo del Ministerio de Salud y Protección Social (Resolución 2706 de 2025) con sus anexos técnicos: texto normativo, de reproducción libre (Ley 23 de 1982, art. 41; verificar). Descargado del sitio oficial del Ministerio; el normograma que lo reproduce da los mismos bytes.',
+    codeSystem: 'cups-co-2706-2025',
+    codeSystemName: 'CUPS 2025 — Clasificación Única de Procedimientos en Salud, Resolución 2706 de 2025 (Colombia)',
+    version: CUPS2025.version,
+    validFrom: CUPS2025.validFrom,
+    transport: {
+      kind: 'official-pdf',
+      url: CUPS2025.officialUrl,
+      alsoServedBy: 'https://normograma.com/documentospdf/PDF/R_MSPS_2706_2025.pdf (mismos bytes)',
+      sha256: 'a9c198bb58b85ba14711acebbc91f5f041d3f67f235e0eb9aae2463f449bbece',
+      pages: 395,
+      extraction: 'pdftotext -raw (poppler); Anexo Técnico 2',
     },
   },
   boArancel: {

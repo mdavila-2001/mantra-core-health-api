@@ -1,0 +1,1776 @@
+{
+  "generatedAt": "2026-10-27T23:37:47.361Z",
+  "modelSnapshot": {
+    "repository": "mantra-core-technologies/mantra-core-health-model",
+    "commit": "eceb98f26cd76a84c866f4f95e918fa88111e12b",
+    "path": "seedsGenerales/modules/03_terminology.seeds.json",
+    "valueSet": "VS_MEDICAL_SPECIALTY"
+  },
+  "modelSpecialties": 63,
+  "corpusBuiltAt": "2026-10-27T23:37:16.900Z",
+  "rulesVersion": "2026.10.24",
+  "note": "Cada fila es un nombre tal cual lo escribe UNA fuente. No se fusionan nombres de fuentes distintas ni se proponen códigos: el código de cada especialidad nueva lo fija el propietario del modelo.",
+  "bySource": {
+    "boArancel": {
+      "names": 6,
+      "services": 713
+    },
+    "fonasa": {
+      "names": 20,
+      "services": 209
+    },
+    "cups": {
+      "names": 55,
+      "services": 184
+    },
+    "cups2025": {
+      "names": 55,
+      "services": 185
+    }
+  },
+  "rows": [
+    {
+      "source": "boArancel",
+      "sourceLabel": "Arancel SCZ",
+      "name": "Neurocirugía",
+      "basis": "source-section",
+      "servicesWithoutSpecialty": 266,
+      "reason": "Falta Neurocirugía en el modelo.",
+      "examples": [
+        "BO_ARM_NEUROCIRUGIA_CRANEOTOMIA Craneotomia",
+        "BO_ARM_NEUROCIRUGIA_HEMATOMAS_EXTRADURALES_SUPRATEN Hematomas extradurales supratentoriales",
+        "BO_ARM_NEUROCIRUGIA_HEMATOMAS_SUBDURALES Hematomas subdurales"
+      ]
+    },
+    {
+      "source": "boArancel",
+      "sourceLabel": "Arancel SCZ",
+      "name": "Cirugía Plástica, Estética y Reconstructiva",
+      "basis": "source-section",
+      "servicesWithoutSpecialty": 205,
+      "reason": "Falta Cirugía Plástica en el modelo.",
+      "examples": [
+        "BO_ARM_CIRUGIA_PLASTICA_ESTETICA_Y_RECONSTRUCTIVA_P Biopsia de piel y/o mucosa hasta tejido celular subcutaneo",
+        "BO_ARM_CIRUGIA_PLASTICA_ESTETICA_Y_RECONSTRUCTIVA_P_1EF2A2 —_Exceresis de nevus menor de 1 om, verrugas, moluscos contagiosos,",
+        "BO_ARM_CIRUGIA_PLASTICA_ESTETICA_Y_RECONSTRUCTIVA_P_BAA9FB Escisión local de lesiones de piel o anexo cutáneo superfcialos hasta telido celular subcutaneo: cicatriz, inflamatoria, congénita, quiste sebaceo, lipoma, quiste esidermoide, hasta 1 cm"
+      ]
+    },
+    {
+      "source": "boArancel",
+      "sourceLabel": "Arancel SCZ",
+      "name": "Cirugía Cardíaca, Torácica y Vascular",
+      "basis": "source-section",
+      "servicesWithoutSpecialty": 192,
+      "reason": "Falta Cirugía Cardiovascular y de Tórax en el modelo.",
+      "examples": [
+        "BO_ARM_CIRUGIA_CARDIACA_TORACICA_Y_VASCULAR_OPERACI Septostomía interauricular (blalock-hantom),",
+        "BO_ARM_CIRUGIA_CARDIACA_TORACICA_Y_VASCULAR_OPERACI_8494CF Colocación de marcapasos transitorio Colocación de marcapaso defintivo con electrodo endocavitario:",
+        "BO_ARM_CIRUGIA_CARDIACA_TORACICA_Y_VASCULAR_OPERACI_136D7D WI"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "Grupo 15 · Cirugía plástica y reparadora",
+      "basis": "source-section",
+      "servicesWithoutSpecialty": 66,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "1502001 HERIDAS DE LA CARA COMPLICADAS: 1 O VARIAS DE MÁS DE 5 CMS. Y/O UBICADAS EN BORDES DE PÁRPADOS, LABIOS O ALA NASAL Y/O QUE COMPROMETEN MÚSCULOS, CONDUCTOS, VASOS O NERVIOS",
+        "1502002 HERIDAS DE LA CARA SIMPLES: 1 O VARIAS DE HASTA 5 CMS. QUE SÓLO COMPROMETEN PIEL",
+        "1502003 IMPLANTE DE SILICONA FACIAL (CUALQUIER ZONA O ZONAS)"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "Grupo 14 · Cirugía de cabeza y cuello",
+      "basis": "source-section",
+      "servicesWithoutSpecialty": 60,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "1401001 PUNCIÓN ASPIRATIVA CON AGUJA FINA DE NÓDULO TIROIDEO",
+        "1402001 TIROIDECTOMÍA BILATERAL TOTAL",
+        "1402002 TIROIDECTOMÍA BILATERAL SUBTOTAL"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "Grupo 05 · Medicina nuclear y radioterapia",
+      "basis": "source-section",
+      "servicesWithoutSpecialty": 43,
+      "reason": "Falta Medicina Nuclear / Radioterapia en el modelo.",
+      "examples": [
+        "0501100 CAPTACIÓN I-131 A LAS 2 Y/O 24 HORAS",
+        "0501101 CINTIGRAFÍA TIROIDEA, CUALQUIER RADIOISÓTOPO",
+        "0501102 CINTIGRAFÍA GLÁNDULAS PARATIROIDES (NO INCLUYE MIBI)"
+      ]
+    },
+    {
+      "source": "boArancel",
+      "sourceLabel": "Arancel SCZ",
+      "name": "Mastología",
+      "basis": "source-section",
+      "servicesWithoutSpecialty": 36,
+      "reason": "Falta Mastología en el modelo.",
+      "examples": [
+        "BO_ARM_MASTOLOGIA_FUNCION_ASPIRATIVA_CON_AGUJA_FINA Funcion aspirativa con aguja fina ( 1 a3 quistes )",
+        "BO_ARM_MASTOLOGIA_FUNCION_ASPIRATIVA_CON_AGUJA_FINA_0A2D93 Funcion aspirativa con aguja fina ( multiples quistes ): 45.01.03: Funcion aspirativa de nódulo sólido 30",
+        "BO_ARM_MASTOLOGIA_CORE_BIOPSIA_UNILATERAL Core biopsia unilateral :"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "EQUIPO INTERDISCIPLINARIO",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 13,
+      "reason": "No es una especialidad.",
+      "examples": [
+        "890115 ATENCIÓN (VISITA) DOMICILIARIA, POR EQUIPO INTERDISCIPLINARIO",
+        "890215 CONSULTA DE PRIMERA VEZ POR EQUIPO INTERDISCIPLINARIO",
+        "890315 CONSULTA INTEGRAL DE CONTROL O DE SEGUIMIENTO POR EQUIPO INTERDISCIPLINARIO"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "EQUIPO INTERDISCIPLINARIO",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 13,
+      "reason": "No es una especialidad.",
+      "examples": [
+        "89.0.1.15 ATENCIÓN (VISITA) DOMICILIARIA, POR EQUIPO INTERDISCIPLINARIO",
+        "89.0.1.25 ATENCIÓN (VISITA) AL SITIO DE TRABAJO, POR EQUIPO INTERDISCIPLINARIO",
+        "89.0.2.15 CONSULTA DE PRIMERA VEZ POR EQUIPO INTERDISCIPLINARIO"
+      ]
+    },
+    {
+      "source": "boArancel",
+      "sourceLabel": "Arancel SCZ",
+      "name": "Salud Pública",
+      "basis": "source-section",
+      "servicesWithoutSpecialty": 10,
+      "reason": "Falta Salud Pública en el modelo; además arancela consultorías, no atención.",
+      "examples": [
+        "BO_ARM_SALUD_PUBLICA_PRODUCTO_RESULTADO_CONSULTORIA Asesorias en centro de salud, hospitales de los diferentes niveles de atencion.",
+        "BO_ARM_SALUD_PUBLICA_PRODUCTO_RESULTADO_CONSULTORIA_D1C0BB Planificación",
+        "BO_ARM_SALUD_PUBLICA_PRODUCTO_RESULTADO_CONSULTORIA_1701E8 Diagnósticos situacionales"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "TERAPIA OCUPACIONAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 8,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "890113 ATENCIÓN (VISITA) DOMICILIARIA, POR TERAPIA OCUPACIONAL",
+        "890213 CONSULTA DE PRIMERA VEZ POR TERAPIA OCUPACIONAL",
+        "890313 CONSULTA DE CONTROL O DE SEGUIMIENTO POR TERAPIA OCUPACIONAL"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "TERAPIA OCUPACIONAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 8,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "89.0.1.13 ATENCIÓN (VISITA) DOMICILIARIA, POR TERAPIA OCUPACIONAL",
+        "89.0.2.13 CONSULTA DE PRIMERA VEZ POR TERAPIA OCUPACIONAL",
+        "89.0.3.13 CONSULTA DE CONTROL O DE SEGUIMIENTO POR TERAPIA OCUPACIONAL"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "TRABAJO SOCIAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 8,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "890109 ATENCIÓN (VISITA) DOMICILIARIA, POR TRABAJO SOCIAL",
+        "890209 CONSULTA DE PRIMERA VEZ POR TRABAJO SOCIAL",
+        "890309 CONSULTA DE CONTROL O DE SEGUIMIENTO POR TRABAJO SOCIAL"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "TRABAJO SOCIAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 8,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "89.0.1.09 ATENCIÓN (VISITA) DOMICILIARIA, POR TRABAJO SOCIAL",
+        "89.0.2.09 CONSULTA DE PRIMERA VEZ POR TRABAJO SOCIAL",
+        "89.0.3.09 CONSULTA DE CONTROL O DE SEGUIMIENTO POR TRABAJO SOCIAL"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "TERAPIA OCUPACIONAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 6,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "0602001 ATENCIÓN INTEGRAL DE TERAPIA OCUPACIONAL",
+        "0602002 INTERVENCIÓN DE TERAPIA OCUPACIONAL EN AYUDAS TÉCNICAS Y TECNOLOGÍA ASISTIDA",
+        "0602003 INTERVENCIÓN TERAPIA OCUPACIONAL EN ACTIVIDADES DE LA VIDA DIARIA, BÁSICAS, INSTRUMENTALES Y AVANZADAS"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MEDICINA ESPECIALIZADA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 5,
+      "reason": "No nombra la especialidad.",
+      "examples": [
+        "89.0.1.02 ATENCIÓN (VISITA) DOMICILIARIA, POR MEDICINA ESPECIALIZADA",
+        "89.0.5.02 PARTICIPACIÓN EN JUNTA MÉDICA O EQUIPO INTERDISCIPLINARIO POR MEDICINA ESPECIALIZADA Y CASO (PACIENTE)",
+        "89.0.6.02 CUIDADO (MANEJO) INTRAHOSPITALARIO POR MEDICINA ESPECIALIZADA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "TERAPIA RESPIRATORIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 5,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "890112 ATENCIÓN (VISITA) DOMICILIARIA, POR TERAPIA RESPIRATORIA",
+        "890212 CONSULTA DE PRIMERA VEZ POR TERAPIA RESPIRATORIA",
+        "890312 CONSULTA DE CONTROL O DE SEGUIMIENTO POR TERAPIA RESPIRATORIA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "TERAPIA RESPIRATORIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 5,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "89.0.1.12 ATENCIÓN (VISITA) DOMICILIARIA, POR TERAPIA RESPIRATORIA",
+        "89.0.2.12 CONSULTA DE PRIMERA VEZ POR TERAPIA RESPIRATORIA",
+        "89.0.3.12 CONSULTA DE CONTROL O DE SEGUIMIENTO POR TERAPIA RESPIRATORIA"
+      ]
+    },
+    {
+      "source": "boArancel",
+      "sourceLabel": "Arancel SCZ",
+      "name": "Auditoría Médica",
+      "basis": "source-section",
+      "servicesWithoutSpecialty": 4,
+      "reason": "VS_MEDICAL_SPECIALTY no tiene Auditoría Médica.",
+      "examples": [
+        "BO_ARM_AUDITORIA_MEDICA_I_GENERAL General",
+        "BO_ARM_AUDITORIA_MEDICA_I_ESTABLECIMIENTO_DE_SALUD_ Establecimiento de Salud Privado",
+        "BO_ARM_AUDITORIA_MEDICA_I_SEGURIDAD_SOCIAL_SOAT Seguridad Social, SOAT"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "FONOAUDIOLOGO",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 4,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "1303010 EVALUACIÓN INTEGRAL DE FONOAUDIOLOGO",
+        "1303011 REHABILITACIÓN INTEGRAL DE FONOAUDIOLOGO",
+        "1308010 TELEREHABILITACIÓN: EVALUACIÓN INTEGRAL DE FONOAUDIOLOGO"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MEDICINA ESPECIALIZADA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 4,
+      "reason": "No nombra la especialidad.",
+      "examples": [
+        "890102 ATENCIÓN (VISITA) DOMICILIARIA, POR MEDICINA ESPECIALIZADA",
+        "990102 EDUCACIÓN GRUPAL EN SALUD, POR MEDICINA ESPECIALIZADA",
+        "990202 EDUCACIÓN INDIVIDUAL EN SALUD, POR MEDICINA ESPECIALIZADA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "OTRAS ESPECIALIDADES MEDICAS",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 4,
+      "reason": "No nombra la especialidad.",
+      "examples": [
+        "890202 CONSULTA DE PRIMERA VEZ POR OTRAS ESPECIALIDADES MÉDICAS",
+        "890302 CONSULTA DE CONTROL O DE SEGUIMIENTO POR OTRAS ESPECIALIDADES MÉDICAS",
+        "890402 INTERCONSULTA POR OTRAS ESPECIALIDADES MÉDICAS"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "OTRAS ESPECIALIDADES MEDICAS",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 4,
+      "reason": "No nombra la especialidad.",
+      "examples": [
+        "89.0.2.02 CONSULTA DE PRIMERA VEZ POR OTRAS ESPECIALIDADES MÉDICAS",
+        "89.0.3.02 CONSULTA DE CONTROL O DE SEGUIMIENTO POR OTRAS ESPECIALIDADES MÉDICAS",
+        "89.0.4.02 INTERCONSULTA POR OTRAS ESPECIALIDADES MÉDICAS"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "ALERGOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890225 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ALERGOLOGÍA",
+        "890325 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ALERGOLOGÍA",
+        "890425 INTERCONSULTA POR ESPECIALISTA EN ALERGOLOGÍA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "ALERGOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.25 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ALERGOLOGÍA",
+        "89.0.3.25 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ALERGOLOGÍA",
+        "89.0.4.25 INTERCONSULTA POR ESPECIALISTA EN ALERGOLOGÍA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "ANESTESIOLOGIA CARDIOVASCULAR",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Subespecialidad sin código en el modelo.",
+      "examples": [
+        "890227 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ANESTESIOLOGÍA CARDIOVASCULAR",
+        "890327 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ANESTESIOLOGÍA CARDIOVASCULAR",
+        "890427 INTERCONSULTA POR ESPECIALISTA EN ANESTESIOLOGÍA CARDIOVASCULAR"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "ANESTESIOLOGIA CARDIOVASCULAR",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Subespecialidad sin código en el modelo.",
+      "examples": [
+        "89.0.2.27 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ANESTESIOLOGÍA CARDIOVASCULAR",
+        "89.0.3.27 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ANESTESIOLOGÍA CARDIOVASCULAR",
+        "89.0.4.27 INTERCONSULTA POR ESPECIALISTA EN ANESTESIOLOGÍA CARDIOVASCULAR"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "CIRUGIA CARDIOVASCULAR",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890230 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA CARDIOVASCULAR",
+        "890330 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA CARDIOVASCULAR",
+        "890430 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA CARDIOVASCULAR"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "CIRUGIA CARDIOVASCULAR",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.30 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA CARDIOVASCULAR",
+        "89.0.3.30 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA CARDIOVASCULAR",
+        "89.0.4.30 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA CARDIOVASCULAR"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "CIRUGIA DE CABEZA Y CUELLO",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890231 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA DE CABEZA Y CUELLO",
+        "890331 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA DE CABEZA Y CUELLO",
+        "890431 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA DE CABEZA Y CUELLO"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "CIRUGIA DE CABEZA Y CUELLO",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.31 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA DE CABEZA Y CUELLO",
+        "89.0.3.31 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA DE CABEZA Y CUELLO",
+        "89.0.4.31 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA DE CABEZA Y CUELLO"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "CIRUGIA DE MAMA Y TUMORES DE TEJIDOS BLANDOS",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890232 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA DE MAMA Y TUMORES DE TEJIDOS BLANDOS",
+        "890332 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA DE MAMA Y TUMORES DE TEJIDOS BLANDOS",
+        "890432 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA DE MAMA Y TUMORES DE TEJIDOS BLANDOS"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "CIRUGIA DE MAMA Y TUMORES DE TEJIDOS BLANDOS",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.32 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA DE MAMA Y TUMORES DE TEJIDOS BLANDOS",
+        "89.0.3.32 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA DE MAMA Y TUMORES DE TEJIDOS BLANDOS",
+        "89.0.4.32 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA DE MAMA Y TUMORES DE TEJIDOS BLANDOS"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "CIRUGIA DE TORAX",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890233 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA DE TÓRAX",
+        "890333 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA DE TÓRAX",
+        "890433 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA DE TÓRAX"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "CIRUGIA DE TORAX",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.33 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA DE TÓRAX",
+        "89.0.3.33 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA DE TÓRAX",
+        "89.0.4.33 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA DE TÓRAX"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "CIRUGIA GASTROINTESTINAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890234 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA GASTROINTESTINAL",
+        "890334 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA GASTROINTESTINAL",
+        "890434 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA GASTROINTESTINAL"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "CIRUGIA GASTROINTESTINAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.34 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA GASTROINTESTINAL",
+        "89.0.3.34 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA GASTROINTESTINAL",
+        "89.0.4.34 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA GASTROINTESTINAL"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "CIRUGIA MAXILOFACIAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "El modelo tiene CIRUGIA_BUCOMAXILOFACIAL y CIRUGIA_ORAL_MAXILOFACIAL; ninguna lleva este nombre exacto y elegir una sería inventar.",
+      "examples": [
+        "890236 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA MAXILOFACIAL",
+        "890336 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA MAXILOFACIAL",
+        "890436 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA MAXILOFACIAL"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "CIRUGIA MAXILOFACIAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "El modelo tiene CIRUGIA_BUCOMAXILOFACIAL y CIRUGIA_ORAL_MAXILOFACIAL; ninguna lleva este nombre exacto y elegir una sería inventar.",
+      "examples": [
+        "89.0.2.36 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA MAXILOFACIAL",
+        "89.0.3.36 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA MAXILOFACIAL",
+        "89.0.4.36 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA MAXILOFACIAL"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "CIRUGIA ORAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Idem: no coincide con ninguna de las dos del modelo.",
+      "examples": [
+        "890217 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA ORAL",
+        "890317 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA ORAL",
+        "890417 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA ORAL"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "CIRUGIA ORAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Idem: no coincide con ninguna de las dos del modelo.",
+      "examples": [
+        "89.0.2.17 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA ORAL",
+        "89.0.3.17 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA ORAL",
+        "89.0.4.17 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA ORAL"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "CIRUGIA PLASTICA, ESTETICA Y RECONSTRUCTIVA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890239 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA PLÁSTICA, ESTÉTICA Y RECONSTRUCTIVA",
+        "890339 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA PLÁSTICA, ESTÉTICA Y RECONSTRUCTIVA",
+        "890439 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA PLÁSTICA, ESTÉTICA Y RECONSTRUCTIVA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "CIRUGIA PLASTICA, ESTETICA Y RECONSTRUCTIVA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.39 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA PLÁSTICA, ESTÉTICA Y RECONSTRUCTIVA",
+        "89.0.3.39 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA PLÁSTICA, ESTÉTICA Y RECONSTRUCTIVA",
+        "89.0.4.39 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA PLÁSTICA, ESTÉTICA Y RECONSTRUCTIVA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "CIRUGIA VASCULAR",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890240 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA VASCULAR",
+        "890340 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA VASCULAR",
+        "890440 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA VASCULAR"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "CIRUGIA VASCULAR",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.40 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGÍA VASCULAR",
+        "89.0.3.40 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGÍA VASCULAR",
+        "89.0.4.40 INTERCONSULTA POR ESPECIALISTA EN CIRUGÍA VASCULAR"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "DOLOR Y CUIDADOS PALIATIVOS",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Más amplia que MEDICINA_DEL_DOLOR (incluye paliativos): no se asimila.",
+      "examples": [
+        "890243 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN DOLOR Y CUIDADOS PALIATIVOS",
+        "890343 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN DOLOR Y CUIDADOS PALIATIVOS",
+        "890443 INTERCONSULTA POR ESPECIALISTA EN DOLOR Y CUIDADOS PALIATIVOS"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "DOLOR Y CUIDADOS PALIATIVOS",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Más amplia que MEDICINA_DEL_DOLOR (incluye paliativos): no se asimila.",
+      "examples": [
+        "89.0.2.43 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN DOLOR Y CUIDADOS PALIATIVOS",
+        "89.0.3.43 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN DOLOR Y CUIDADOS PALIATIVOS",
+        "89.0.4.43 INTERCONSULTA POR ESPECIALISTA EN DOLOR Y CUIDADOS PALIATIVOS"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "ENDOCRINOLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890245 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ENDOCRINOLOGÍA PEDIÁTRICA",
+        "890345 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ENDOCRINOLOGÍA PEDIÁTRICA",
+        "890445 INTERCONSULTA POR ESPECIALISTA EN ENDOCRINOLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "ENDOCRINOLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.45 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ENDOCRINOLOGÍA PEDIÁTRICA",
+        "89.0.3.45 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ENDOCRINOLOGÍA PEDIÁTRICA",
+        "89.0.4.45 INTERCONSULTA POR ESPECIALISTA EN ENDOCRINOLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "ESTOMATOLOGIA Y CIRUGIA ORAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Idem.",
+      "examples": [
+        "890219 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ESTOMATOLOGÍA Y CIRUGÍA ORAL",
+        "890319 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ESTOMATOLOGÍA Y CIRUGÍA ORAL",
+        "890419 INTERCONSULTA POR ESPECIALISTA EN ESTOMATOLOGÍA Y CIRUGÍA ORAL"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "ESTOMATOLOGIA Y CIRUGIA ORAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Idem.",
+      "examples": [
+        "89.0.2.19 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ESTOMATOLOGÍA Y CIRUGÍA ORAL",
+        "89.0.3.19 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ESTOMATOLOGÍA Y CIRUGÍA ORAL",
+        "89.0.4.19 INTERCONSULTA POR ESPECIALISTA EN ESTOMATOLOGÍA Y CIRUGÍA ORAL"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "FONIATRIA Y FONOAUDIOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "890110 ATENCIÓN (VISITA) DOMICILIARIA, POR FONIATRÍA Y FONOAUDIOLOGÍA",
+        "990110 EDUCACIÓN GRUPAL EN SALUD, POR FONIATRIA Y FONOAUDIOLOGÍA",
+        "990210 EDUCACIÓN INDIVIDUAL EN SALUD, POR FONIATRÍA Y FONOAUDIOLOGÍA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "FONIATRIA Y FONOAUDIOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "89.0.1.10 ATENCIÓN (VISITA) DOMICILIARIA, POR FONIATRÍA Y FONOAUDIOLOGÍA",
+        "99.0.1.10 EDUCACIÓN GRUPAL EN SALUD, POR FONIATRIA Y FONOAUDIOLOGÍA",
+        "99.0.2.10 EDUCACIÓN INDIVIDUAL EN SALUD, POR FONIATRÍA Y FONOAUDIOLOGÍA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "FONOAUDIOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "890210 CONSULTA DE PRIMERA VEZ POR FONOAUDIOLOGÍA",
+        "890310 CONSULTA DE CONTROL O DE SEGUIMIENTO POR FONOAUDIOLOGÍA",
+        "890410 INTERCONSULTA POR FONOAUDIOLOGÍA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "FONOAUDIOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "89.0.2.10 CONSULTA DE PRIMERA VEZ POR FONOAUDIOLOGÍA",
+        "89.0.3.10 CONSULTA DE CONTROL O DE SEGUIMIENTO POR FONOAUDIOLOGÍA",
+        "89.0.4.10 INTERCONSULTA POR FONOAUDIOLOGÍA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "GASTROENTEROLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890247 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN GASTROENTEROLOGÍA PEDIÁTRICA",
+        "890347 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN GASTROENTEROLOGÍA PEDIÁTRICA",
+        "890447 INTERCONSULTA POR ESPECIALISTA EN GASTROENTEROLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "GASTROENTEROLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.47 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN GASTROENTEROLOGÍA PEDIÁTRICA",
+        "89.0.3.47 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN GASTROENTEROLOGÍA PEDIÁTRICA",
+        "89.0.4.47 INTERCONSULTA POR ESPECIALISTA EN GASTROENTEROLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "GENETICA MEDICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890248 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN GENÉTICA MÉDICA",
+        "890348 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN GENÉTICA MÉDICA",
+        "890448 INTERCONSULTA POR ESPECIALISTA EN GENÉTICA MÉDICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "GENETICA MEDICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.48 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN GENÉTICA MÉDICA",
+        "89.0.3.48 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN GENÉTICA MÉDICA",
+        "89.0.4.48 INTERCONSULTA POR ESPECIALISTA EN GENÉTICA MÉDICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "HEMATOLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890252 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN HEMATOLOGÍA PEDIÁTRICA",
+        "890352 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN HEMATOLOGÍA PEDIÁTRICA",
+        "890452 INTERCONSULTA POR ESPECIALISTA EN HEMATOLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "HEMATOLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.52 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN HEMATOLOGÍA PEDIÁTRICA",
+        "89.0.3.52 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN HEMATOLOGÍA PEDIÁTRICA",
+        "89.0.4.52 INTERCONSULTA POR ESPECIALISTA EN HEMATOLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "HEPATOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890253 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN HEPATOLOGÍA",
+        "890353 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN HEPATOLOGÍA",
+        "890453 INTERCONSULTA POR ESPECIALISTA EN HEPATOLOGÍA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "HEPATOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.53 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN HEPATOLOGÍA",
+        "89.0.3.53 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN HEPATOLOGÍA",
+        "89.0.4.53 INTERCONSULTA POR ESPECIALISTA EN HEPATOLOGÍA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MASTOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890255 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MASTOLOGÍA",
+        "890355 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MASTOLOGÍA",
+        "890455 INTERCONSULTA POR ESPECIALISTA EN MASTOLOGÍA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MASTOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.55 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MASTOLOGÍA",
+        "89.0.3.55 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MASTOLOGÍA",
+        "89.0.4.55 INTERCONSULTA POR ESPECIALISTA EN MASTOLOGÍA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MEDICINA AEROESPACIAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890256 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA AEROESPACIAL",
+        "890356 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA AEROESPACIAL",
+        "890456 INTERCONSULTA POR ESPECIALISTA EN MEDICINA AEROESPACIAL"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MEDICINA AEROESPACIAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.56 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA AEROESPACIAL",
+        "89.0.3.56 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA AEROESPACIAL",
+        "89.0.4.56 INTERCONSULTA POR ESPECIALISTA EN MEDICINA AEROESPACIAL"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MEDICINA ALTERNATIVA (AYURVEDA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "890257 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (AYURVEDA)",
+        "890357 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (AYURVEDA)",
+        "890457 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (AYURVEDA)"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MEDICINA ALTERNATIVA (AYURVEDA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "89.0.2.57 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (AYURVEDA)",
+        "89.0.3.57 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (AYURVEDA)",
+        "89.0.4.57 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (AYURVEDA)"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MEDICINA ALTERNATIVA (HOMEOPATICA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "890258 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (HOMEOPÁTICA)",
+        "890358 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (HOMEOPÁTICA)",
+        "890458 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (HOMEOPÁTICA)"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MEDICINA ALTERNATIVA (HOMEOPATICA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "89.0.2.58 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (HOMEOPÁTICA)",
+        "89.0.3.58 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (HOMEOPÁTICA)",
+        "89.0.4.58 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (HOMEOPÁTICA)"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MEDICINA ALTERNATIVA (MEDICINA TRADICIONAL CHINA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "890259 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (MEDICINA TRADICIONAL CHINA)",
+        "890359 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (MEDICINA TRADICIONAL CHINA)",
+        "890459 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (MEDICINA TRADICIONAL CHINA)"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MEDICINA ALTERNATIVA (MEDICINA TRADICIONAL CHINA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "89.0.2.59 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (MEDICINA TRADICIONAL CHINA)",
+        "89.0.3.59 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (MEDICINA TRADICIONAL CHINA)",
+        "89.0.4.59 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (MEDICINA TRADICIONAL CHINA)"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MEDICINA ALTERNATIVA (NATUROPATIA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "890260 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NATUROPATÍA)",
+        "890360 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NATUROPATÍA)",
+        "890460 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NATUROPATÍA)"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MEDICINA ALTERNATIVA (NATUROPATIA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "89.0.2.60 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NATUROPATÍA)",
+        "89.0.3.60 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NATUROPATÍA)",
+        "89.0.4.60 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NATUROPATÍA)"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MEDICINA ALTERNATIVA (NEURALTERAPEUTICA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "890296 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NEURALTERAPÉUTICA)",
+        "890396 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NEURALTERAPÉUTICA)",
+        "890496 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NEURALTERAPÉUTICA)"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MEDICINA ALTERNATIVA (NEURALTERAPEUTICA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "89.0.2.96 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NEURALTERAPÉUTICA)",
+        "89.0.3.96 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NEURALTERAPÉUTICA)",
+        "89.0.4.96 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (NEURALTERAPÉUTICA)"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MEDICINA ALTERNATIVA (OSTEOPATICA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "890295 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (OSTEOPÁTICA)",
+        "890395 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (OSTEOPÁTICA)",
+        "890495 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (OSTEOPÁTICA)"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MEDICINA ALTERNATIVA (OSTEOPATICA)",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": null,
+      "examples": [
+        "89.0.2.95 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ALTERNATIVA (OSTEOPÁTICA)",
+        "89.0.3.95 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ALTERNATIVA (OSTEOPÁTICA)",
+        "89.0.4.95 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ALTERNATIVA (OSTEOPÁTICA)"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MEDICINA ESTETICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890298 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ESTÉTICA",
+        "890398 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ESTÉTICA",
+        "890497 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ESTÉTICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MEDICINA ESTETICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.98 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA ESTÉTICA",
+        "89.0.3.98 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA ESTÉTICA",
+        "89.0.4.97 INTERCONSULTA POR ESPECIALISTA EN MEDICINA ESTÉTICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MEDICINA FORENSE",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890265 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA FORENSE",
+        "890365 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA FORENSE",
+        "890465 INTERCONSULTA POR ESPECIALISTA EN MEDICINA FORENSE"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MEDICINA FORENSE",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.65 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA FORENSE",
+        "89.0.3.65 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA FORENSE",
+        "89.0.4.65 INTERCONSULTA POR ESPECIALISTA EN MEDICINA FORENSE"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "MEDICINA NUCLEAR",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890267 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA NUCLEAR",
+        "890367 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA NUCLEAR",
+        "890467 INTERCONSULTA POR ESPECIALISTA EN MEDICINA NUCLEAR"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "MEDICINA NUCLEAR",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.67 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN MEDICINA NUCLEAR",
+        "89.0.3.67 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN MEDICINA NUCLEAR",
+        "89.0.4.67 INTERCONSULTA POR ESPECIALISTA EN MEDICINA NUCLEAR"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "NEFROLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890269 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN NEFROLOGÍA PEDIÁTRICA",
+        "890369 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN NEFROLOGÍA PEDIÁTRICA",
+        "890469 INTERCONSULTA POR ESPECIALISTA EN NEFROLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "NEFROLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.69 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN NEFROLOGÍA PEDIÁTRICA",
+        "89.0.3.69 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN NEFROLOGÍA PEDIÁTRICA",
+        "89.0.4.69 INTERCONSULTA POR ESPECIALISTA EN NEFROLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "NEUMOLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890272 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN NEUMOLOGÍA PEDIÁTRICA",
+        "890372 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN NEUMOLOGÍA PEDIÁTRICA",
+        "890472 INTERCONSULTA POR ESPECIALISTA EN NEUMOLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "NEUMOLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.72 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN NEUMOLOGÍA PEDIÁTRICA",
+        "89.0.3.72 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN NEUMOLOGÍA PEDIÁTRICA",
+        "89.0.4.72 INTERCONSULTA POR ESPECIALISTA EN NEUMOLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "NEUROCIRUGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890273 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN NEUROCIRUGÍA",
+        "890373 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN NEUROCIRUGÍA",
+        "890473 INTERCONSULTA POR ESPECIALISTA EN NEUROCIRUGÍA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "NEUROCIRUGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.73 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN NEUROCIRUGÍA",
+        "89.0.3.73 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN NEUROCIRUGÍA",
+        "89.0.4.73 INTERCONSULTA POR ESPECIALISTA EN NEUROCIRUGÍA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "ONCOHEMATOLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890277 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ONCOHEMATOLOGÍA PEDIÁTRICA",
+        "890377 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ONCOHEMATOLOGÍA PEDIÁTRICA",
+        "890477 INTERCONSULTA POR ESPECIALISTA EN ONCOHEMATOLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "ONCOHEMATOLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.77 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ONCOHEMATOLOGÍA PEDIÁTRICA",
+        "89.0.3.77 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ONCOHEMATOLOGÍA PEDIÁTRICA",
+        "89.0.4.77 INTERCONSULTA POR ESPECIALISTA EN ONCOHEMATOLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "OTRAS ESPECIALIDADES EN ODONTOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "No nombra la especialidad.",
+      "examples": [
+        "890204 CONSULTA DE PRIMERA VEZ POR OTRAS ESPECIALIDADES EN ODONTOLOGIA",
+        "890304 CONSULTA DE CONTROL O DE SEGUIMIENTO POR OTRAS ESPECIALIDADES EN ODONTOLOGIA",
+        "890404 INTERCONSULTA POR OTRAS ESPECIALIDADES EN ODONTOLOGIA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "OTRAS ESPECIALIDADES EN ODONTOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "No nombra la especialidad.",
+      "examples": [
+        "89.0.2.04 CONSULTA DE PRIMERA VEZ POR OTRAS ESPECIALIDADES EN ODONTOLOGIA",
+        "89.0.3.04 CONSULTA DE CONTROL O DE SEGUIMIENTO POR OTRAS ESPECIALIDADES EN ODONTOLOGIA",
+        "89.0.4.04 INTERCONSULTA POR OTRAS ESPECIALIDADES EN ODONTOLOGIA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "PSIQUIATRIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890285 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN PSIQUIATRÍA PEDIÁTRICA",
+        "890385 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN PSIQUIATRÍA PEDIÁTRICA",
+        "890485 INTERCONSULTA POR ESPECIALISTA EN PSIQUIATRÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "PSIQUIATRIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.85 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN PSIQUIATRÍA PEDIÁTRICA",
+        "89.0.3.85 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN PSIQUIATRÍA PEDIÁTRICA",
+        "89.0.4.85 INTERCONSULTA POR ESPECIALISTA EN PSIQUIATRÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "RADIOLOGIA ORAL Y MAXILOFACIAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890223 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN RADIOLOGÍA ORAL Y MAXILOFACIAL",
+        "890323 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN RADIOLOGÍA ORAL Y MAXILOFACIAL",
+        "890423 INTERCONSULTA POR ESPECIALISTA EN RADIOLOGÍA ORAL Y MAXILOFACIAL"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "RADIOLOGIA ORAL Y MAXILOFACIAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.23 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN RADIOLOGÍA ORAL Y MAXILOFACIAL",
+        "89.0.3.23 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN RADIOLOGÍA ORAL Y MAXILOFACIAL",
+        "89.0.4.23 INTERCONSULTA POR ESPECIALISTA EN RADIOLOGÍA ORAL Y MAXILOFACIAL"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "RADIOTERAPIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890287 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN RADIOTERAPIA",
+        "890387 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN RADIOTERAPIA",
+        "890487 INTERCONSULTA POR ESPECIALISTA EN RADIOTERAPIA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "RADIOTERAPIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.87 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN RADIOTERAPIA",
+        "89.0.3.87 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN RADIOTERAPIA",
+        "89.0.4.87 INTERCONSULTA POR ESPECIALISTA EN RADIOTERAPIA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "REUMATOLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890289 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN REUMATOLOGÍA PEDIÁTRICA",
+        "890389 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN REUMATOLOGÍA PEDIÁTRICA",
+        "890489 INTERCONSULTA POR ESPECIALISTA EN REUMATOLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "REUMATOLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.89 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN REUMATOLOGÍA PEDIÁTRICA",
+        "89.0.3.89 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN REUMATOLOGÍA PEDIÁTRICA",
+        "89.0.4.89 INTERCONSULTA POR ESPECIALISTA EN REUMATOLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "SALUD FAMILIAR Y COMUNITARIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "No es SALUD_FAMILIAR_COMUNITARIA_INTERCULTURAL (la SAFCI boliviana incluye el componente intercultural): no se asimila.",
+      "examples": [
+        "890216 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN SALUD FAMILIAR Y COMUNITARIA",
+        "890316 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN SALUD FAMILIAR Y COMUNITARIA",
+        "890416 INTERCONSULTA POR ESPECIALISTA EN SALUD FAMILIAR Y COMUNITARIA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "SALUD FAMILIAR Y COMUNITARIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "No es SALUD_FAMILIAR_COMUNITARIA_INTERCULTURAL (la SAFCI boliviana incluye el componente intercultural): no se asimila.",
+      "examples": [
+        "89.0.2.16 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN SALUD FAMILIAR Y COMUNITARIA",
+        "89.0.3.16 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN SALUD FAMILIAR Y COMUNITARIA",
+        "89.0.4.16 INTERCONSULTA POR ESPECIALISTA EN SALUD FAMILIAR Y COMUNITARIA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "SEXOLOGIA CLINICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890290 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN SEXOLOGÍA CLÍNICA",
+        "890390 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN SEXOLOGÍA CLÍNICA",
+        "890490 INTERCONSULTA POR ESPECIALISTA EN SEXOLOGÍA CLÍNICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "SEXOLOGIA CLINICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.90 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN SEXOLOGÍA CLÍNICA",
+        "89.0.3.90 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN SEXOLOGÍA CLÍNICA",
+        "89.0.4.90 INTERCONSULTA POR ESPECIALISTA EN SEXOLOGÍA CLÍNICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "TOXICOLOGIA CLINICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890291 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN TOXICOLOGÍA CLÍNICA",
+        "890391 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN TOXICOLOGÍA CLÍNICA",
+        "890491 INTERCONSULTA POR ESPECIALISTA EN TOXICOLOGÍA CLÍNICA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "TOXICOLOGIA CLINICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.91 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN TOXICOLOGÍA CLÍNICA",
+        "89.0.3.91 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN TOXICOLOGÍA CLÍNICA",
+        "89.0.4.91 INTERCONSULTA POR ESPECIALISTA EN TOXICOLOGÍA CLÍNICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "TRASPLANTES",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "890292 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN TRASPLANTES",
+        "890392 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN TRASPLANTES",
+        "890492 INTERCONSULTA POR ESPECIALISTA EN TRASPLANTES"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "TRASPLANTES",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 3,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "89.0.2.92 CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN TRASPLANTES",
+        "89.0.3.92 CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN TRASPLANTES",
+        "89.0.4.92 INTERCONSULTA POR ESPECIALISTA EN TRASPLANTES"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "AGENTE EDUCATIVO",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "No es una especialidad.",
+      "examples": [
+        "990111 EDUCACIÓN GRUPAL EN SALUD, POR AGENTE EDUCATIVO",
+        "990211 EDUCACIÓN INDIVIDUAL EN SALUD, POR AGENTE EDUCATIVO"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "AGENTE EDUCATIVO",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "No es una especialidad.",
+      "examples": [
+        "99.0.1.11 EDUCACIÓN GRUPAL EN SALUD, POR AGENTE EDUCATIVO",
+        "99.0.2.11 EDUCACIÓN INDIVIDUAL EN SALUD, POR AGENTE EDUCATIVO"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "CIRUGIA CARDIOVASCULAR",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101314 CONSULTA MÉDICA DE ESPECIALIDAD EN CIRUGÍA CARDIOVASCULAR",
+        "0108314 TELECONSULTA MÉDICA DE ESPECIALIDAD EN CIRUGÍA CARDIOVASCULAR"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "CIRUGIA DE CABEZA, CUELLO Y MAXILOFACIAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101313 CONSULTA MÉDICA DE ESPECIALIDAD EN CIRUGÍA DE CABEZA, CUELLO Y MAXILOFACIAL",
+        "0108313 TELECONSULTA MÉDICA DE ESPECIALIDAD EN CIRUGÍA DE CABEZA, CUELLO Y MAXILOFACIAL"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "CIRUGIA DE TORAX",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101315 CONSULTA MÉDICA DE ESPECIALIDAD EN CIRUGÍA DE TÓRAX",
+        "0108315 TELECONSULTA MÉDICA DE ESPECIALIDAD EN CIRUGÍA DE TÓRAX"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "CIRUGIA PLASTICA Y REPARADORA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101316 CONSULTA MÉDICA DE ESPECIALIDAD EN CIRUGÍA PLÁSTICA Y REPARADORA",
+        "0108316 TELECONSULTA MÉDICA DE ESPECIALIDAD EN CIRUGÍA PLÁSTICA Y REPARADORA"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "CIRUGIA VASCULAR PERIFERICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101318 CONSULTA MÉDICA DE ESPECIALIDAD EN CIRUGÍA VASCULAR PERIFÉRICA",
+        "0108318 TELECONSULTA MÉDICA DE ESPECIALIDAD EN CIRUGÍA VASCULAR PERIFÉRICA"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "DIABETOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101320 CONSULTA MÉDICA DE ESPECIALIDAD EN DIABETOLOGÍA",
+        "0108320 TELECONSULTA MÉDICA DE ESPECIALIDAD EN DIABETOLOGÍA"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "ENDOCRINOLOGIA PEDIATRICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101208 CONSULTA MÉDICA DE ESPECIALIDAD EN ENDOCRINOLOGÍA PEDIÁTRICA",
+        "0108208 TELECONSULTA MÉDICA DE ESPECIALIDAD EN ENDOCRINOLOGÍA PEDIÁTRICA"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "ENFERMEDADES RESPIRATORIAS PEDIATRICAS",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta Neumología Pediátrica en el modelo.",
+      "examples": [
+        "0101322 CONSULTA MÉDICA DE ESPECIALIDAD EN ENFERMEDADES RESPIRATORIAS PEDIÁTRICAS",
+        "0108322 TELECONSULTA MÉDICA DE ESPECIALIDAD EN ENFERMEDADES RESPIRATORIAS PEDIÁTRICAS"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "GENETICA CLINICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101325 CONSULTA MÉDICA DE ESPECIALIDAD EN GENÉTICA CLÍNICA",
+        "0108325 TELECONSULTA MÉDICA DE ESPECIALIDAD EN GENÉTICA CLÍNICA"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "GINECOLOGIA PEDIATRICA Y DE LA ADOLESCENCIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101332 CONSULTA MÉDICA DE ESPECIALIDAD EN GINECOLOGÍA PEDIÁTRICA Y DE LA ADOLESCENCIA",
+        "0108332 TELECONSULTA MÉDICA DE ESPECIALIDAD EN GINECOLOGÍA PEDIÁTRICA Y DE LA ADOLESCENCIA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "HIGIENE ORAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Profesión (higienista oral) que el modelo no tiene.",
+      "examples": [
+        "990112 EDUCACIÓN GRUPAL EN SALUD, POR HIGIENE ORAL",
+        "990212 EDUCACIÓN INDIVIDUAL EN SALUD, POR HIGIENE ORAL"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "HIGIENE ORAL",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Profesión (higienista oral) que el modelo no tiene.",
+      "examples": [
+        "99.0.1.12 EDUCACIÓN GRUPAL EN SALUD, POR HIGIENE ORAL",
+        "99.0.2.12 EDUCACIÓN INDIVIDUAL EN SALUD, POR HIGIENE ORAL"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "INMUNOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101304 CONSULTA MÉDICA DE ESPECIALIDAD EN INMUNOLOGÍA",
+        "0108304 TELECONSULTA MÉDICA DE ESPECIALIDAD EN INMUNOLOGÍA"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "MEDICINA NUCLEAR",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101334 CONSULTA MÉDICA DE ESPECIALIDAD EN MEDICINA NUCLEAR",
+        "0108334 TELECONSULTA MÉDICA DE ESPECIALIDAD EN MEDICINA NUCLEAR"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "NEUROCIRUGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101203 CONSULTA MÉDICA DE ESPECIALIDAD EN NEUROCIRUGÍA",
+        "0108203 TELECONSULTA MÉDICA DE ESPECIALIDAD EN NEUROCIRUGÍA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "OPTOMETRIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "890207 CONSULTA DE PRIMERA VEZ POR OPTOMETRÍA",
+        "890307 CONSULTA DE CONTROL O DE SEGUIMIENTO POR OPTOMETRÍA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "OPTOMETRIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Profesión que el modelo no tiene.",
+      "examples": [
+        "89.0.2.07 CONSULTA DE PRIMERA VEZ POR OPTOMETRÍA",
+        "89.0.3.07 CONSULTA DE CONTROL O DE SEGUIMIENTO POR OPTOMETRÍA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "OTRAS ESPECIALIDADES DE PSICOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "No nombra la especialidad.",
+      "examples": [
+        "890297 CONSULTA DE PRIMERA VEZ POR OTRAS ESPECIALIDADES DE PSICOLOGÍA",
+        "890397 CONSULTA DE CONTROL O DE SEGUIMIENTO POR OTRAS ESPECIALIDADES DE PSICOLOGÍA"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "OTRAS ESPECIALIDADES DE PSICOLOGIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "No nombra la especialidad.",
+      "examples": [
+        "89.0.2.97 CONSULTA DE PRIMERA VEZ POR OTRAS ESPECIALIDADES DE PSICOLOGÍA",
+        "89.0.3.97 CONSULTA DE CONTROL O DE SEGUIMIENTO POR OTRAS ESPECIALIDADES DE PSICOLOGÍA"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "PSIQUIATRIA PEDIATRICA Y DE LA ADOLESCENCIA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101213 CONSULTA MÉDICA DE ESPECIALIDAD EN PSIQUIATRÍA PEDIÁTRICA Y DE LA ADOLESCENCIA (1RA CONSULTA)",
+        "0108213 TELECONSULTA MÉDICA DE ESPECIALIDAD EN PSIQUIATRÍA PEDIÁTRICA Y DE LA ADOLESCENCIA (1RA CONSULTA)"
+      ]
+    },
+    {
+      "source": "fonasa",
+      "sourceLabel": "FONASA MLE 2026",
+      "name": "RADIOTERAPIA ONCOLOGICA",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": "Falta en el modelo.",
+      "examples": [
+        "0101331 CONSULTA MÉDICA DE ESPECIALIDAD EN RADIOTERAPIA ONCOLÓGICA",
+        "0108331 TELECONSULTA MÉDICA DE ESPECIALIDAD EN RADIOTERAPIA ONCOLÓGICA"
+      ]
+    },
+    {
+      "source": "cups",
+      "sourceLabel": "CUPS (copias)",
+      "name": "TERAPIAS ALTERNATIVAS",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": null,
+      "examples": [
+        "890214 CONSULTA DE PRIMERA VEZ POR TERAPIAS ALTERNATIVAS",
+        "890314 CONSULTA DE CONTROL O DE SEGUIMIENTO POR TERAPIAS ALTERNATIVAS"
+      ]
+    },
+    {
+      "source": "cups2025",
+      "sourceLabel": "CUPS 2025 (Res. 2706/2025)",
+      "name": "TERAPIAS ALTERNATIVAS",
+      "basis": "descriptor",
+      "servicesWithoutSpecialty": 2,
+      "reason": null,
+      "examples": [
+        "89.0.2.14 CONSULTA DE PRIMERA VEZ POR TERAPIAS ALTERNATIVAS",
+        "89.0.3.14 CONSULTA DE CONTROL O DE SEGUIMIENTO POR TERAPIAS ALTERNATIVAS"
+      ]
+    }
+  ]
+}

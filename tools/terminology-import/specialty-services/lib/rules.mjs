@@ -46,6 +46,9 @@ export function compileRules(rules) {
   return { rules, phraseIndex, patterns, trailingCut, headingIndex, dentalIndex, fonasaGroups, dentalAll: rules.boDentalSections._all };
 }
 
+/** CUPS 2025 usa los mismos patrones de prestador que la CUPS anterior (mismo estilo de descriptor). */
+const PATTERN_ALIAS = { cups2025: 'cups' };
+
 /**
  * Frases de prestador que el descriptor declara, ya resueltas contra la tabla.
  *
@@ -56,7 +59,7 @@ export function compileRules(rules) {
 export function performerPhrases(compiled, source, display) {
   const text = norm(display);
   const out = [];
-  for (const re of compiled.patterns[source] ?? []) {
+  for (const re of compiled.patterns[source] ?? compiled.patterns[PATTERN_ALIAS[source]] ?? []) {
     const m = text.match(re);
     if (!m) continue;
     let phrase = m[1].replace(/[\s.,;:-]+$/, '').trim();
