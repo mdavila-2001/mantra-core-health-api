@@ -71,6 +71,40 @@ export const GITHUB_SOURCES = {
 };
 
 /**
+ * Fuentes oficiales por HTTP directo (sin cuenta, sin token). Alcanzables desde el sondeo del
+ * 2026-10-27 (antes respondían 403). Cada archivo se baja con curl, con reintentos y User-Agent
+ * identificable, y su SHA-256 y Last-Modified quedan en `cache/<fuente>/meta.json`.
+ */
+export const HTTP_SOURCES = {
+  'icd10pcs-cms-2027': {
+    name: 'ICD-10-PCS FY2027 — tablas, códigos y orden (CMS)',
+    publisher: 'Centers for Medicare & Medicaid Services (CMS), EE. UU.',
+    license: 'Obra del gobierno federal de EE. UU. (CMS): dominio público.',
+    licenseUrl: 'https://www.cms.gov/medicare/coding-billing/icd-10-codes',
+    homepage: 'https://www.cms.gov/medicare/coding-billing/icd-10-codes',
+    kind: 'http',
+    files: {
+      'tables.zip': 'https://www.cms.gov/files/zip/2027-icd-10-pcs-code-tables-index.zip',
+      'codes.zip': 'https://www.cms.gov/files/zip/2027-icd-10-pcs-codes-file.zip',
+      'order.zip': 'https://www.cms.gov/files/zip/2027-icd-10-pcs-order-file-long-abbreviated-titles.zip',
+    },
+  },
+  'cie10es-procedimientos': {
+    name: 'CIE-10-ES Procedimientos, edición 2026 (Ministerio de Sanidad de España)',
+    publisher: 'Ministerio de Sanidad, España',
+    license:
+      'Aviso legal del Ministerio de Sanidad (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-PCS (© CMS), obra del gobierno de EE. UU.',
+    licenseUrl: 'https://www.sanidad.gob.es/avisoLegal/home.htm',
+    homepage: 'https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/home.htm',
+    kind: 'http',
+    files: {
+      'Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx':
+        'https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx',
+    },
+  },
+};
+
+/**
  * Fuentes candidatas que este entorno NO alcanza (la política de red responde
  * 403 al CONNECT). Se registran con el host exacto para que se pueda permitir
  * y re-correr `fetch.mjs`. Ninguna se reemplaza con un espejo de terceros.

@@ -17,7 +17,7 @@
 // =============================================================================
 
 import { execFileSync } from 'node:child_process';
-import { statSync } from 'node:fs';
+import { readFileSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   cacheDir,
@@ -26,7 +26,7 @@ import {
   sha256File,
   writeJson,
 } from './lib/common.mjs';
-import { BLOCKED_SOURCES, GITHUB_SOURCES } from './lib/sources.mjs';
+import { BLOCKED_SOURCES, GITHUB_SOURCES, HTTP_SOURCES } from './lib/sources.mjs';
 
 const args = process.argv.slice(2);
 const probeOnly = args.includes('--probe');
@@ -35,7 +35,7 @@ const wanted = args.filter((a) => !a.startsWith('--'));
 function curl(argv) {
   return execFileSync(
     'curl',
-    ['-sS', '--retry', '3', '--max-time', '1800', ...argv],
+    ['-sS', '--retry', '4', '--retry-all-errors', '--retry-delay', '4', '--max-time', '1800', '-A', 'mantra-core-health-terminology-import/1.0 (+contacto: pabliarca@gmail.com)', ...argv],
     { encoding: 'utf8', maxBuffer: 1 << 20, stdio: ['ignore', 'pipe', 'pipe'] },
   );
 }
@@ -106,6 +106,18 @@ function fetchSource(key, spec) {
         bytes: statSync(dest).size,
       };
     }
+  } else if (spec.kind === 'http') {
+    pin = {};
+    for (const [name, url] of Object.entries(spec.files)) {
+      const dest = join(dir, name);
+      const hdr = `${dest}.headers`;
+      curl(['--fail', '-L', '-D', hdr, '-o', dest, url]);
+      const last = readFileSync(hdr, 'utf8').split(/\r?\n\r?\n/).filter((b) => /^HTTP\//.test(b.trim())).at(-1) ?? '';
+      const lastModified = last.match(/^last-modified:\s*(.+)$/im)?.[1]?.trim() ?? null;
+      rmSync(hdr, { force: true });
+      files[name] = { url, fileUrl: url, sha256: sha256File(dest), bytes: statSync(dest).size, lastModified };
+      pin.lastModified = [pin.lastModified, lastModified].filter(Boolean).sort().at(-1) ?? null;
+    }
   } else {
     throw new Error(`Tipo de fuente desconocido: ${spec.kind}`);
   }
@@ -159,9 +171,10 @@ function probe() {
 }
 
 if (!probeOnly) {
-  const keys = wanted.length ? wanted : Object.keys(GITHUB_SOURCES);
+  const ALL = { ...GITHUB_SOURCES, ...HTTP_SOURCES };
+  const keys = wanted.length ? wanted : Object.keys(ALL);
   for (const key of keys) {
-    const spec = GITHUB_SOURCES[key];
+    const spec = ALL[key];
     if (!spec)
       throw new Error(
         `Fuente no registrada o no descargable desde este entorno: ${key}`,

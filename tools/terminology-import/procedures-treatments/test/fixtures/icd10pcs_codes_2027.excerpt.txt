@@ -1,0 +1,406 @@
+0016070 Bypass Cerebral Ventricle to Nasopharynx with Autologous Tissue Substitute, Open Approach
+0016071 Bypass Cerebral Ventricle to Mastoid Sinus with Autologous Tissue Substitute, Open Approach
+0016072 Bypass Cerebral Ventricle to Atrium with Autologous Tissue Substitute, Open Approach
+0016073 Bypass Cerebral Ventricle to Blood Vessel with Autologous Tissue Substitute, Open Approach
+0016074 Bypass Cerebral Ventricle to Pleural Cavity with Autologous Tissue Substitute, Open Approach
+0016075 Bypass Cerebral Ventricle to Intestine with Autologous Tissue Substitute, Open Approach
+0016076 Bypass Cerebral Ventricle to Peritoneal Cavity with Autologous Tissue Substitute, Open Approach
+0016077 Bypass Cerebral Ventricle to Urinary Tract with Autologous Tissue Substitute, Open Approach
+0016078 Bypass Cerebral Ventricle to Bone Marrow with Autologous Tissue Substitute, Open Approach
+001607A Bypass Cerebral Ventricle to Subgaleal Space with Autologous Tissue Substitute, Open Approach
+001607B Bypass Cerebral Ventricle to Cerebral Cisterns with Autologous Tissue Substitute, Open Approach
+00160J0 Bypass Cerebral Ventricle to Nasopharynx with Synthetic Substitute, Open Approach
+00160J1 Bypass Cerebral Ventricle to Mastoid Sinus with Synthetic Substitute, Open Approach
+00160J2 Bypass Cerebral Ventricle to Atrium with Synthetic Substitute, Open Approach
+00160J3 Bypass Cerebral Ventricle to Blood Vessel with Synthetic Substitute, Open Approach
+00160J4 Bypass Cerebral Ventricle to Pleural Cavity with Synthetic Substitute, Open Approach
+00160J5 Bypass Cerebral Ventricle to Intestine with Synthetic Substitute, Open Approach
+00160J6 Bypass Cerebral Ventricle to Peritoneal Cavity with Synthetic Substitute, Open Approach
+00160J7 Bypass Cerebral Ventricle to Urinary Tract with Synthetic Substitute, Open Approach
+00160J8 Bypass Cerebral Ventricle to Bone Marrow with Synthetic Substitute, Open Approach
+00160JA Bypass Cerebral Ventricle to Subgaleal Space with Synthetic Substitute, Open Approach
+00160JB Bypass Cerebral Ventricle to Cerebral Cisterns with Synthetic Substitute, Open Approach
+00160K0 Bypass Cerebral Ventricle to Nasopharynx with Nonautologous Tissue Substitute, Open Approach
+00160K1 Bypass Cerebral Ventricle to Mastoid Sinus with Nonautologous Tissue Substitute, Open Approach
+00160K2 Bypass Cerebral Ventricle to Atrium with Nonautologous Tissue Substitute, Open Approach
+00160K3 Bypass Cerebral Ventricle to Blood Vessel with Nonautologous Tissue Substitute, Open Approach
+00160K4 Bypass Cerebral Ventricle to Pleural Cavity with Nonautologous Tissue Substitute, Open Approach
+00160K5 Bypass Cerebral Ventricle to Intestine with Nonautologous Tissue Substitute, Open Approach
+00160K6 Bypass Cerebral Ventricle to Peritoneal Cavity with Nonautologous Tissue Substitute, Open Approach
+00160K7 Bypass Cerebral Ventricle to Urinary Tract with Nonautologous Tissue Substitute, Open Approach
+00160K8 Bypass Cerebral Ventricle to Bone Marrow with Nonautologous Tissue Substitute, Open Approach
+00160KA Bypass Cerebral Ventricle to Subgaleal Space with Nonautologous Tissue Substitute, Open Approach
+00160KB Bypass Cerebral Ventricle to Cerebral Cisterns with Nonautologous Tissue Substitute, Open Approach
+00160ZB Bypass Cerebral Ventricle to Cerebral Cisterns, Open Approach
+0016370 Bypass Cerebral Ventricle to Nasopharynx with Autologous Tissue Substitute, Percutaneous Approach
+0016371 Bypass Cerebral Ventricle to Mastoid Sinus with Autologous Tissue Substitute, Percutaneous Approach
+0016372 Bypass Cerebral Ventricle to Atrium with Autologous Tissue Substitute, Percutaneous Approach
+0016373 Bypass Cerebral Ventricle to Blood Vessel with Autologous Tissue Substitute, Percutaneous Approach
+0016374 Bypass Cerebral Ventricle to Pleural Cavity with Autologous Tissue Substitute, Percutaneous Approach
+0016375 Bypass Cerebral Ventricle to Intestine with Autologous Tissue Substitute, Percutaneous Approach
+0016376 Bypass Cerebral Ventricle to Peritoneal Cavity with Autologous Tissue Substitute, Percutaneous Approach
+0016377 Bypass Cerebral Ventricle to Urinary Tract with Autologous Tissue Substitute, Percutaneous Approach
+0016378 Bypass Cerebral Ventricle to Bone Marrow with Autologous Tissue Substitute, Percutaneous Approach
+001637A Bypass Cerebral Ventricle to Subgaleal Space with Autologous Tissue Substitute, Percutaneous Approach
+001637B Bypass Cerebral Ventricle to Cerebral Cisterns with Autologous Tissue Substitute, Percutaneous Approach
+00163J0 Bypass Cerebral Ventricle to Nasopharynx with Synthetic Substitute, Percutaneous Approach
+00163J1 Bypass Cerebral Ventricle to Mastoid Sinus with Synthetic Substitute, Percutaneous Approach
+00163J2 Bypass Cerebral Ventricle to Atrium with Synthetic Substitute, Percutaneous Approach
+00163J3 Bypass Cerebral Ventricle to Blood Vessel with Synthetic Substitute, Percutaneous Approach
+00163J4 Bypass Cerebral Ventricle to Pleural Cavity with Synthetic Substitute, Percutaneous Approach
+00163J5 Bypass Cerebral Ventricle to Intestine with Synthetic Substitute, Percutaneous Approach
+00163J6 Bypass Cerebral Ventricle to Peritoneal Cavity with Synthetic Substitute, Percutaneous Approach
+00163J7 Bypass Cerebral Ventricle to Urinary Tract with Synthetic Substitute, Percutaneous Approach
+00163J8 Bypass Cerebral Ventricle to Bone Marrow with Synthetic Substitute, Percutaneous Approach
+00163JA Bypass Cerebral Ventricle to Subgaleal Space with Synthetic Substitute, Percutaneous Approach
+00163JB Bypass Cerebral Ventricle to Cerebral Cisterns with Synthetic Substitute, Percutaneous Approach
+00163K0 Bypass Cerebral Ventricle to Nasopharynx with Nonautologous Tissue Substitute, Percutaneous Approach
+00163K1 Bypass Cerebral Ventricle to Mastoid Sinus with Nonautologous Tissue Substitute, Percutaneous Approach
+00163K2 Bypass Cerebral Ventricle to Atrium with Nonautologous Tissue Substitute, Percutaneous Approach
+00163K3 Bypass Cerebral Ventricle to Blood Vessel with Nonautologous Tissue Substitute, Percutaneous Approach
+00163K4 Bypass Cerebral Ventricle to Pleural Cavity with Nonautologous Tissue Substitute, Percutaneous Approach
+00163K5 Bypass Cerebral Ventricle to Intestine with Nonautologous Tissue Substitute, Percutaneous Approach
+00163K6 Bypass Cerebral Ventricle to Peritoneal Cavity with Nonautologous Tissue Substitute, Percutaneous Approach
+00163K7 Bypass Cerebral Ventricle to Urinary Tract with Nonautologous Tissue Substitute, Percutaneous Approach
+00163K8 Bypass Cerebral Ventricle to Bone Marrow with Nonautologous Tissue Substitute, Percutaneous Approach
+00163KA Bypass Cerebral Ventricle to Subgaleal Space with Nonautologous Tissue Substitute, Percutaneous Approach
+00163KB Bypass Cerebral Ventricle to Cerebral Cisterns with Nonautologous Tissue Substitute, Percutaneous Approach
+00163ZB Bypass Cerebral Ventricle to Cerebral Cisterns, Percutaneous Approach
+0016470 Bypass Cerebral Ventricle to Nasopharynx with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+0016471 Bypass Cerebral Ventricle to Mastoid Sinus with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+0016472 Bypass Cerebral Ventricle to Atrium with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+0016473 Bypass Cerebral Ventricle to Blood Vessel with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+0016474 Bypass Cerebral Ventricle to Pleural Cavity with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+0016475 Bypass Cerebral Ventricle to Intestine with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+0016476 Bypass Cerebral Ventricle to Peritoneal Cavity with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+0016477 Bypass Cerebral Ventricle to Urinary Tract with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+0016478 Bypass Cerebral Ventricle to Bone Marrow with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+001647A Bypass Cerebral Ventricle to Subgaleal Space with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+001647B Bypass Cerebral Ventricle to Cerebral Cisterns with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164J0 Bypass Cerebral Ventricle to Nasopharynx with Synthetic Substitute, Percutaneous Endoscopic Approach
+00164J1 Bypass Cerebral Ventricle to Mastoid Sinus with Synthetic Substitute, Percutaneous Endoscopic Approach
+00164J2 Bypass Cerebral Ventricle to Atrium with Synthetic Substitute, Percutaneous Endoscopic Approach
+00164J3 Bypass Cerebral Ventricle to Blood Vessel with Synthetic Substitute, Percutaneous Endoscopic Approach
+00164J4 Bypass Cerebral Ventricle to Pleural Cavity with Synthetic Substitute, Percutaneous Endoscopic Approach
+00164J5 Bypass Cerebral Ventricle to Intestine with Synthetic Substitute, Percutaneous Endoscopic Approach
+00164J6 Bypass Cerebral Ventricle to Peritoneal Cavity with Synthetic Substitute, Percutaneous Endoscopic Approach
+00164J7 Bypass Cerebral Ventricle to Urinary Tract with Synthetic Substitute, Percutaneous Endoscopic Approach
+00164J8 Bypass Cerebral Ventricle to Bone Marrow with Synthetic Substitute, Percutaneous Endoscopic Approach
+00164JA Bypass Cerebral Ventricle to Subgaleal Space with Synthetic Substitute, Percutaneous Endoscopic Approach
+00164JB Bypass Cerebral Ventricle to Cerebral Cisterns with Synthetic Substitute, Percutaneous Endoscopic Approach
+00164K0 Bypass Cerebral Ventricle to Nasopharynx with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164K1 Bypass Cerebral Ventricle to Mastoid Sinus with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164K2 Bypass Cerebral Ventricle to Atrium with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164K3 Bypass Cerebral Ventricle to Blood Vessel with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164K4 Bypass Cerebral Ventricle to Pleural Cavity with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164K5 Bypass Cerebral Ventricle to Intestine with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164K6 Bypass Cerebral Ventricle to Peritoneal Cavity with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164K7 Bypass Cerebral Ventricle to Urinary Tract with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164K8 Bypass Cerebral Ventricle to Bone Marrow with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164KA Bypass Cerebral Ventricle to Subgaleal Space with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164KB Bypass Cerebral Ventricle to Cerebral Cisterns with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+00164ZB Bypass Cerebral Ventricle to Cerebral Cisterns, Percutaneous Endoscopic Approach
+001U072 Bypass Spinal Canal to Atrium with Autologous Tissue Substitute, Open Approach
+001U074 Bypass Spinal Canal to Pleural Cavity with Autologous Tissue Substitute, Open Approach
+001U076 Bypass Spinal Canal to Peritoneal Cavity with Autologous Tissue Substitute, Open Approach
+001U077 Bypass Spinal Canal to Urinary Tract with Autologous Tissue Substitute, Open Approach
+001U079 Bypass Spinal Canal to Fallopian Tube with Autologous Tissue Substitute, Open Approach
+001U0J2 Bypass Spinal Canal to Atrium with Synthetic Substitute, Open Approach
+001U0J4 Bypass Spinal Canal to Pleural Cavity with Synthetic Substitute, Open Approach
+001U0J6 Bypass Spinal Canal to Peritoneal Cavity with Synthetic Substitute, Open Approach
+001U0J7 Bypass Spinal Canal to Urinary Tract with Synthetic Substitute, Open Approach
+001U0J9 Bypass Spinal Canal to Fallopian Tube with Synthetic Substitute, Open Approach
+001U0K2 Bypass Spinal Canal to Atrium with Nonautologous Tissue Substitute, Open Approach
+001U0K4 Bypass Spinal Canal to Pleural Cavity with Nonautologous Tissue Substitute, Open Approach
+001U0K6 Bypass Spinal Canal to Peritoneal Cavity with Nonautologous Tissue Substitute, Open Approach
+001U0K7 Bypass Spinal Canal to Urinary Tract with Nonautologous Tissue Substitute, Open Approach
+001U0K9 Bypass Spinal Canal to Fallopian Tube with Nonautologous Tissue Substitute, Open Approach
+001U372 Bypass Spinal Canal to Atrium with Autologous Tissue Substitute, Percutaneous Approach
+001U374 Bypass Spinal Canal to Pleural Cavity with Autologous Tissue Substitute, Percutaneous Approach
+001U376 Bypass Spinal Canal to Peritoneal Cavity with Autologous Tissue Substitute, Percutaneous Approach
+001U377 Bypass Spinal Canal to Urinary Tract with Autologous Tissue Substitute, Percutaneous Approach
+001U379 Bypass Spinal Canal to Fallopian Tube with Autologous Tissue Substitute, Percutaneous Approach
+001U3J2 Bypass Spinal Canal to Atrium with Synthetic Substitute, Percutaneous Approach
+001U3J4 Bypass Spinal Canal to Pleural Cavity with Synthetic Substitute, Percutaneous Approach
+001U3J6 Bypass Spinal Canal to Peritoneal Cavity with Synthetic Substitute, Percutaneous Approach
+001U3J7 Bypass Spinal Canal to Urinary Tract with Synthetic Substitute, Percutaneous Approach
+001U3J9 Bypass Spinal Canal to Fallopian Tube with Synthetic Substitute, Percutaneous Approach
+001U3K2 Bypass Spinal Canal to Atrium with Nonautologous Tissue Substitute, Percutaneous Approach
+001U3K4 Bypass Spinal Canal to Pleural Cavity with Nonautologous Tissue Substitute, Percutaneous Approach
+001U3K6 Bypass Spinal Canal to Peritoneal Cavity with Nonautologous Tissue Substitute, Percutaneous Approach
+001U3K7 Bypass Spinal Canal to Urinary Tract with Nonautologous Tissue Substitute, Percutaneous Approach
+001U3K9 Bypass Spinal Canal to Fallopian Tube with Nonautologous Tissue Substitute, Percutaneous Approach
+001U472 Bypass Spinal Canal to Atrium with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+001U474 Bypass Spinal Canal to Pleural Cavity with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+001U476 Bypass Spinal Canal to Peritoneal Cavity with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+001U477 Bypass Spinal Canal to Urinary Tract with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+001U479 Bypass Spinal Canal to Fallopian Tube with Autologous Tissue Substitute, Percutaneous Endoscopic Approach
+001U4J2 Bypass Spinal Canal to Atrium with Synthetic Substitute, Percutaneous Endoscopic Approach
+001U4J4 Bypass Spinal Canal to Pleural Cavity with Synthetic Substitute, Percutaneous Endoscopic Approach
+001U4J6 Bypass Spinal Canal to Peritoneal Cavity with Synthetic Substitute, Percutaneous Endoscopic Approach
+001U4J7 Bypass Spinal Canal to Urinary Tract with Synthetic Substitute, Percutaneous Endoscopic Approach
+001U4J9 Bypass Spinal Canal to Fallopian Tube with Synthetic Substitute, Percutaneous Endoscopic Approach
+001U4K2 Bypass Spinal Canal to Atrium with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+001U4K4 Bypass Spinal Canal to Pleural Cavity with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+001U4K6 Bypass Spinal Canal to Peritoneal Cavity with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+001U4K7 Bypass Spinal Canal to Urinary Tract with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+001U4K9 Bypass Spinal Canal to Fallopian Tube with Nonautologous Tissue Substitute, Percutaneous Endoscopic Approach
+4A0002Z Measurement of Central Nervous Conductivity, Open Approach
+4A0004Z Measurement of Central Nervous Electrical Activity, Open Approach
+4A000BZ Measurement of Central Nervous Pressure, Open Approach
+4A0034Z Measurement of Central Nervous Electrical Activity, Percutaneous Approach
+4A003BD Measurement of Intracranial Pressure, Percutaneous Approach
+4A003KD Measurement of Intracranial Temperature, Percutaneous Approach
+4A003RD Measurement of Intracranial Saturation, Percutaneous Approach
+4A0074Z Measurement of Central Nervous Electrical Activity, Via Natural or Artificial Opening
+4A007BD Measurement of Intracranial Pressure, Via Natural or Artificial Opening
+4A007KD Measurement of Intracranial Temperature, Via Natural or Artificial Opening
+4A007RD Measurement of Intracranial Saturation, Via Natural or Artificial Opening
+4A0084Z Measurement of Central Nervous Electrical Activity, Via Natural or Artificial Opening Endoscopic
+4A008BD Measurement of Intracranial Pressure, Via Natural or Artificial Opening Endoscopic
+4A008KD Measurement of Intracranial Temperature, Via Natural or Artificial Opening Endoscopic
+4A008RD Measurement of Intracranial Saturation, Via Natural or Artificial Opening Endoscopic
+4A00X2Z Measurement of Central Nervous Conductivity, External Approach
+4A00X4Z Measurement of Central Nervous Electrical Activity, External Approach
+4A01029 Measurement of Peripheral Nervous Conductivity, Sensory, Open Approach
+4A0102B Measurement of Peripheral Nervous Conductivity, Motor, Open Approach
+4A0104Z Measurement of Peripheral Nervous Electrical Activity, Open Approach
+4A01329 Measurement of Peripheral Nervous Conductivity, Sensory, Percutaneous Approach
+4A0132B Measurement of Peripheral Nervous Conductivity, Motor, Percutaneous Approach
+4A0134Z Measurement of Peripheral Nervous Electrical Activity, Percutaneous Approach
+4A01729 Measurement of Peripheral Nervous Conductivity, Sensory, Via Natural or Artificial Opening
+4A0172B Measurement of Peripheral Nervous Conductivity, Motor, Via Natural or Artificial Opening
+4A0174Z Measurement of Peripheral Nervous Electrical Activity, Via Natural or Artificial Opening
+4A01829 Measurement of Peripheral Nervous Conductivity, Sensory, Via Natural or Artificial Opening Endoscopic
+4A0182B Measurement of Peripheral Nervous Conductivity, Motor, Via Natural or Artificial Opening Endoscopic
+4A0184Z Measurement of Peripheral Nervous Electrical Activity, Via Natural or Artificial Opening Endoscopic
+4A01X29 Measurement of Peripheral Nervous Conductivity, Sensory, External Approach
+4A01X2B Measurement of Peripheral Nervous Conductivity, Motor, External Approach
+4A01X4Z Measurement of Peripheral Nervous Electrical Activity, External Approach
+4A0204Z Measurement of Cardiac Electrical Activity, Open Approach
+4A0209Z Measurement of Cardiac Output, Open Approach
+4A020CZ Measurement of Cardiac Rate, Open Approach
+4A020FZ Measurement of Cardiac Rhythm, Open Approach
+4A020HZ Measurement of Cardiac Sound, Open Approach
+4A020N6 Measurement of Cardiac Sampling and Pressure, Right Heart, Open Approach
+4A020N7 Measurement of Cardiac Sampling and Pressure, Left Heart, Open Approach
+4A020N8 Measurement of Cardiac Sampling and Pressure, Bilateral, Open Approach
+4A020PZ Measurement of Cardiac Action Currents, Open Approach
+4A0234Z Measurement of Cardiac Electrical Activity, Percutaneous Approach
+4A0239Z Measurement of Cardiac Output, Percutaneous Approach
+4A023CZ Measurement of Cardiac Rate, Percutaneous Approach
+4A023FZ Measurement of Cardiac Rhythm, Percutaneous Approach
+4A023HZ Measurement of Cardiac Sound, Percutaneous Approach
+4A023N6 Measurement of Cardiac Sampling and Pressure, Right Heart, Percutaneous Approach
+4A023N7 Measurement of Cardiac Sampling and Pressure, Left Heart, Percutaneous Approach
+4A023N8 Measurement of Cardiac Sampling and Pressure, Bilateral, Percutaneous Approach
+4A023PZ Measurement of Cardiac Action Currents, Percutaneous Approach
+4A0274Z Measurement of Cardiac Electrical Activity, Via Natural or Artificial Opening
+4A0279Z Measurement of Cardiac Output, Via Natural or Artificial Opening
+4A027CZ Measurement of Cardiac Rate, Via Natural or Artificial Opening
+4A027FZ Measurement of Cardiac Rhythm, Via Natural or Artificial Opening
+4A027HZ Measurement of Cardiac Sound, Via Natural or Artificial Opening
+4A027N6 Measurement of Cardiac Sampling and Pressure, Right Heart, Via Natural or Artificial Opening
+4A027N7 Measurement of Cardiac Sampling and Pressure, Left Heart, Via Natural or Artificial Opening
+4A027N8 Measurement of Cardiac Sampling and Pressure, Bilateral, Via Natural or Artificial Opening
+4A027PZ Measurement of Cardiac Action Currents, Via Natural or Artificial Opening
+4A0284Z Measurement of Cardiac Electrical Activity, Via Natural or Artificial Opening Endoscopic
+4A0289Z Measurement of Cardiac Output, Via Natural or Artificial Opening Endoscopic
+4A028CZ Measurement of Cardiac Rate, Via Natural or Artificial Opening Endoscopic
+4A028FZ Measurement of Cardiac Rhythm, Via Natural or Artificial Opening Endoscopic
+4A028HZ Measurement of Cardiac Sound, Via Natural or Artificial Opening Endoscopic
+4A028N6 Measurement of Cardiac Sampling and Pressure, Right Heart, Via Natural or Artificial Opening Endoscopic
+4A028N7 Measurement of Cardiac Sampling and Pressure, Left Heart, Via Natural or Artificial Opening Endoscopic
+4A028N8 Measurement of Cardiac Sampling and Pressure, Bilateral, Via Natural or Artificial Opening Endoscopic
+4A028PZ Measurement of Cardiac Action Currents, Via Natural or Artificial Opening Endoscopic
+4A02X4A Measurement of Cardiac Electrical Activity, Guidance, External Approach
+4A02X4Z Measurement of Cardiac Electrical Activity, External Approach
+4A02X9Z Measurement of Cardiac Output, External Approach
+4A02XCZ Measurement of Cardiac Rate, External Approach
+4A02XFZ Measurement of Cardiac Rhythm, External Approach
+4A02XHZ Measurement of Cardiac Sound, External Approach
+4A02XM4 Measurement of Cardiac Total Activity, External Approach
+4A02XPZ Measurement of Cardiac Action Currents, External Approach
+4A03051 Measurement of Arterial Flow, Peripheral, Open Approach
+4A03053 Measurement of Arterial Flow, Pulmonary, Open Approach
+4A0305C Measurement of Arterial Flow, Coronary, Open Approach
+4A030B1 Measurement of Arterial Pressure, Peripheral, Open Approach
+4A030B3 Measurement of Arterial Pressure, Pulmonary, Open Approach
+4A030BC Measurement of Arterial Pressure, Coronary, Open Approach
+4A030BF Measurement of Arterial Pressure, Other Thoracic, Open Approach
+4A030H1 Measurement of Arterial Sound, Peripheral, Open Approach
+4A030J1 Measurement of Arterial Pulse, Peripheral, Open Approach
+4A030J3 Measurement of Arterial Pulse, Pulmonary, Open Approach
+4A030JC Measurement of Arterial Pulse, Coronary, Open Approach
+4A030R1 Measurement of Arterial Saturation, Peripheral, Open Approach
+4A03351 Measurement of Arterial Flow, Peripheral, Percutaneous Approach
+4A03353 Measurement of Arterial Flow, Pulmonary, Percutaneous Approach
+4A0335C Measurement of Arterial Flow, Coronary, Percutaneous Approach
+4A033B1 Measurement of Arterial Pressure, Peripheral, Percutaneous Approach
+4A033B3 Measurement of Arterial Pressure, Pulmonary, Percutaneous Approach
+4A033BC Measurement of Arterial Pressure, Coronary, Percutaneous Approach
+4A033BF Measurement of Arterial Pressure, Other Thoracic, Percutaneous Approach
+4A033H1 Measurement of Arterial Sound, Peripheral, Percutaneous Approach
+4A033J1 Measurement of Arterial Pulse, Peripheral, Percutaneous Approach
+4A033J3 Measurement of Arterial Pulse, Pulmonary, Percutaneous Approach
+4A033JC Measurement of Arterial Pulse, Coronary, Percutaneous Approach
+4A033R1 Measurement of Arterial Saturation, Peripheral, Percutaneous Approach
+4A03X51 Measurement of Arterial Flow, Peripheral, External Approach
+4A03X5D Measurement of Arterial Flow, Intracranial, External Approach
+4A03XB1 Measurement of Arterial Pressure, Peripheral, External Approach
+4A03XH1 Measurement of Arterial Sound, Peripheral, External Approach
+4A03XJ1 Measurement of Arterial Pulse, Peripheral, External Approach
+4A03XR1 Measurement of Arterial Saturation, Peripheral, External Approach
+4A04050 Measurement of Venous Flow, Central, Open Approach
+4A04051 Measurement of Venous Flow, Peripheral, Open Approach
+4A04052 Measurement of Venous Flow, Portal, Open Approach
+4A04053 Measurement of Venous Flow, Pulmonary, Open Approach
+4A040B0 Measurement of Venous Pressure, Central, Open Approach
+4A040B1 Measurement of Venous Pressure, Peripheral, Open Approach
+4A040B2 Measurement of Venous Pressure, Portal, Open Approach
+4A040B3 Measurement of Venous Pressure, Pulmonary, Open Approach
+4A040J0 Measurement of Venous Pulse, Central, Open Approach
+4A040J1 Measurement of Venous Pulse, Peripheral, Open Approach
+4A040J2 Measurement of Venous Pulse, Portal, Open Approach
+4A040J3 Measurement of Venous Pulse, Pulmonary, Open Approach
+4A040R1 Measurement of Venous Saturation, Peripheral, Open Approach
+4A04350 Measurement of Venous Flow, Central, Percutaneous Approach
+4A04351 Measurement of Venous Flow, Peripheral, Percutaneous Approach
+4A04352 Measurement of Venous Flow, Portal, Percutaneous Approach
+4A04353 Measurement of Venous Flow, Pulmonary, Percutaneous Approach
+4A043B0 Measurement of Venous Pressure, Central, Percutaneous Approach
+4A043B1 Measurement of Venous Pressure, Peripheral, Percutaneous Approach
+4A043B2 Measurement of Venous Pressure, Portal, Percutaneous Approach
+4A043B3 Measurement of Venous Pressure, Pulmonary, Percutaneous Approach
+4A043J0 Measurement of Venous Pulse, Central, Percutaneous Approach
+4A043J1 Measurement of Venous Pulse, Peripheral, Percutaneous Approach
+4A043J2 Measurement of Venous Pulse, Portal, Percutaneous Approach
+4A043J3 Measurement of Venous Pulse, Pulmonary, Percutaneous Approach
+4A043R1 Measurement of Venous Saturation, Peripheral, Percutaneous Approach
+4A044B2 Measurement of Venous Pressure, Portal, Percutaneous Endoscopic Approach
+4A04X51 Measurement of Venous Flow, Peripheral, External Approach
+4A04XB1 Measurement of Venous Pressure, Peripheral, External Approach
+4A04XJ1 Measurement of Venous Pulse, Peripheral, External Approach
+4A04XR1 Measurement of Venous Saturation, Peripheral, External Approach
+4A05XLZ Measurement of Circulatory Volume, External Approach
+4A0605Z Measurement of Lymphatic Flow, Open Approach
+4A060BZ Measurement of Lymphatic Pressure, Open Approach
+4A0635Z Measurement of Lymphatic Flow, Percutaneous Approach
+4A063BZ Measurement of Lymphatic Pressure, Percutaneous Approach
+4A0675Z Measurement of Lymphatic Flow, Via Natural or Artificial Opening
+4A067BZ Measurement of Lymphatic Pressure, Via Natural or Artificial Opening
+4A0685Z Measurement of Lymphatic Flow, Via Natural or Artificial Opening Endoscopic
+4A068BZ Measurement of Lymphatic Pressure, Via Natural or Artificial Opening Endoscopic
+4A07X0Z Measurement of Visual Acuity, External Approach
+4A07X7Z Measurement of Visual Mobility, External Approach
+4A07XBZ Measurement of Visual Pressure, External Approach
+4A08X0Z Measurement of Olfactory Acuity, External Approach
+4A0971Z Measurement of Respiratory Capacity, Via Natural or Artificial Opening
+4A0975Z Measurement of Respiratory Flow, Via Natural or Artificial Opening
+4A097CZ Measurement of Respiratory Rate, Via Natural or Artificial Opening
+4A097DZ Measurement of Respiratory Resistance, Via Natural or Artificial Opening
+4A097LZ Measurement of Respiratory Volume, Via Natural or Artificial Opening
+4A097MZ Measurement of Respiratory Total Activity, Via Natural or Artificial Opening
+4A0981Z Measurement of Respiratory Capacity, Via Natural or Artificial Opening Endoscopic
+4A0985Z Measurement of Respiratory Flow, Via Natural or Artificial Opening Endoscopic
+4A098CZ Measurement of Respiratory Rate, Via Natural or Artificial Opening Endoscopic
+4A098DZ Measurement of Respiratory Resistance, Via Natural or Artificial Opening Endoscopic
+4A098LZ Measurement of Respiratory Volume, Via Natural or Artificial Opening Endoscopic
+4A098MZ Measurement of Respiratory Total Activity, Via Natural or Artificial Opening Endoscopic
+4A09X1Z Measurement of Respiratory Capacity, External Approach
+4A09X5Z Measurement of Respiratory Flow, External Approach
+4A09XCZ Measurement of Respiratory Rate, External Approach
+4A09XDZ Measurement of Respiratory Resistance, External Approach
+4A09XLZ Measurement of Respiratory Volume, External Approach
+4A09XMZ Measurement of Respiratory Total Activity, External Approach
+4A0B78Z Measurement of Gastrointestinal Motility, Via Natural or Artificial Opening
+4A0B7BZ Measurement of Gastrointestinal Pressure, Via Natural or Artificial Opening
+4A0B7GZ Measurement of Gastrointestinal Secretion, Via Natural or Artificial Opening
+4A0B88Z Measurement of Gastrointestinal Motility, Via Natural or Artificial Opening Endoscopic
+4A0B8BZ Measurement of Gastrointestinal Pressure, Via Natural or Artificial Opening Endoscopic
+4A0B8GZ Measurement of Gastrointestinal Secretion, Via Natural or Artificial Opening Endoscopic
+4A0C35Z Measurement of Biliary Flow, Percutaneous Approach
+4A0C3BZ Measurement of Biliary Pressure, Percutaneous Approach
+4A0C45Z Measurement of Biliary Flow, Percutaneous Endoscopic Approach
+4A0C4BZ Measurement of Biliary Pressure, Percutaneous Endoscopic Approach
+4A0C75Z Measurement of Biliary Flow, Via Natural or Artificial Opening
+4A0C7BZ Measurement of Biliary Pressure, Via Natural or Artificial Opening
+4A0C85Z Measurement of Biliary Flow, Via Natural or Artificial Opening Endoscopic
+4A0C8BZ Measurement of Biliary Pressure, Via Natural or Artificial Opening Endoscopic
+4A0D73Z Measurement of Urinary Contractility, Via Natural or Artificial Opening
+4A0D75Z Measurement of Urinary Flow, Via Natural or Artificial Opening
+4A0D7BZ Measurement of Urinary Pressure, Via Natural or Artificial Opening
+4A0D7DZ Measurement of Urinary Resistance, Via Natural or Artificial Opening
+4A0D7LZ Measurement of Urinary Volume, Via Natural or Artificial Opening
+4A0D83Z Measurement of Urinary Contractility, Via Natural or Artificial Opening Endoscopic
+4A0D85Z Measurement of Urinary Flow, Via Natural or Artificial Opening Endoscopic
+4A0D8BZ Measurement of Urinary Pressure, Via Natural or Artificial Opening Endoscopic
+4A0D8DZ Measurement of Urinary Resistance, Via Natural or Artificial Opening Endoscopic
+4A0D8LZ Measurement of Urinary Volume, Via Natural or Artificial Opening Endoscopic
+4A0F33Z Measurement of Musculoskeletal Contractility, Percutaneous Approach
+4A0F3BE Measurement of Musculoskeletal Pressure, Compartment, Percutaneous Approach
+4A0FX3Z Measurement of Musculoskeletal Contractility, External Approach
+4A0FXEJ Measurement of Musculoskeletal Body Composition using Air Displacement Plethysmography, External Approach
+4A0H74Z Measurement of Products of Conception, Cardiac Electrical Activity, Via Natural or Artificial Opening
+4A0H7CZ Measurement of Products of Conception, Cardiac Rate, Via Natural or Artificial Opening
+4A0H7FZ Measurement of Products of Conception, Cardiac Rhythm, Via Natural or Artificial Opening
+4A0H7HZ Measurement of Products of Conception, Cardiac Sound, Via Natural or Artificial Opening
+4A0H84Z Measurement of Products of Conception, Cardiac Electrical Activity, Via Natural or Artificial Opening Endoscopic
+4A0H8CZ Measurement of Products of Conception, Cardiac Rate, Via Natural or Artificial Opening Endoscopic
+4A0H8FZ Measurement of Products of Conception, Cardiac Rhythm, Via Natural or Artificial Opening Endoscopic
+4A0H8HZ Measurement of Products of Conception, Cardiac Sound, Via Natural or Artificial Opening Endoscopic
+4A0HX4Z Measurement of Products of Conception, Cardiac Electrical Activity, External Approach
+4A0HXCZ Measurement of Products of Conception, Cardiac Rate, External Approach
+4A0HXFZ Measurement of Products of Conception, Cardiac Rhythm, External Approach
+4A0HXHZ Measurement of Products of Conception, Cardiac Sound, External Approach
+4A0J72Z Measurement of Products of Conception, Nervous Conductivity, Via Natural or Artificial Opening
+4A0J74Z Measurement of Products of Conception, Nervous Electrical Activity, Via Natural or Artificial Opening
+4A0J7BZ Measurement of Products of Conception, Nervous Pressure, Via Natural or Artificial Opening
+4A0J82Z Measurement of Products of Conception, Nervous Conductivity, Via Natural or Artificial Opening Endoscopic
+4A0J84Z Measurement of Products of Conception, Nervous Electrical Activity, Via Natural or Artificial Opening Endoscopic
+4A0J8BZ Measurement of Products of Conception, Nervous Pressure, Via Natural or Artificial Opening Endoscopic
+4A0JX2Z Measurement of Products of Conception, Nervous Conductivity, External Approach
+4A0JX4Z Measurement of Products of Conception, Nervous Electrical Activity, External Approach
+4A0JXBZ Measurement of Products of Conception, Nervous Pressure, External Approach
+4A0Z76Z Measurement of Metabolism, Via Natural or Artificial Opening
+4A0Z7KZ Measurement of Temperature, Via Natural or Artificial Opening
+4A0ZX6Z Measurement of Metabolism, External Approach
+4A0ZXKZ Measurement of Temperature, External Approach
+4A0ZXQZ Measurement of Sleep, External Approach
+D0000ZZ Beam Radiation of Brain using Photons <1 MeV
+D0001ZZ Beam Radiation of Brain using Photons 1 - 10 MeV
+D0002ZZ Beam Radiation of Brain using Photons >10 MeV
+D0003Z0 Beam Radiation of Brain using Electrons, Intraoperative
+D0003ZZ Beam Radiation of Brain using Electrons
+D0004ZZ Beam Radiation of Brain using Heavy Particles (Protons,Ions)
+D0005ZZ Beam Radiation of Brain using Neutrons
+D0006ZZ Beam Radiation of Brain using Neutron Capture
+D0010ZZ Beam Radiation of Brain Stem using Photons <1 MeV
+D0011ZZ Beam Radiation of Brain Stem using Photons 1 - 10 MeV
+D0012ZZ Beam Radiation of Brain Stem using Photons >10 MeV
+D0013Z0 Beam Radiation of Brain Stem using Electrons, Intraoperative
+D0013ZZ Beam Radiation of Brain Stem using Electrons
+D0014ZZ Beam Radiation of Brain Stem using Heavy Particles (Protons,Ions)
+D0015ZZ Beam Radiation of Brain Stem using Neutrons
+D0016ZZ Beam Radiation of Brain Stem using Neutron Capture
+D0060ZZ Beam Radiation of Spinal Cord using Photons <1 MeV
+D0061ZZ Beam Radiation of Spinal Cord using Photons 1 - 10 MeV
+D0062ZZ Beam Radiation of Spinal Cord using Photons >10 MeV
+D0063Z0 Beam Radiation of Spinal Cord using Electrons, Intraoperative
+D0063ZZ Beam Radiation of Spinal Cord using Electrons
+D0064ZZ Beam Radiation of Spinal Cord using Heavy Particles (Protons,Ions)
+D0065ZZ Beam Radiation of Spinal Cord using Neutrons
+D0066ZZ Beam Radiation of Spinal Cord using Neutron Capture
+D0070ZZ Beam Radiation of Peripheral Nerve using Photons <1 MeV
+D0071ZZ Beam Radiation of Peripheral Nerve using Photons 1 - 10 MeV
+D0072ZZ Beam Radiation of Peripheral Nerve using Photons >10 MeV
+D0073Z0 Beam Radiation of Peripheral Nerve using Electrons, Intraoperative
+D0073ZZ Beam Radiation of Peripheral Nerve using Electrons
+D0074ZZ Beam Radiation of Peripheral Nerve using Heavy Particles (Protons,Ions)
+D0075ZZ Beam Radiation of Peripheral Nerve using Neutrons
+D0076ZZ Beam Radiation of Peripheral Nerve using Neutron Capture
+GZ10ZZZ Psychological Tests, Developmental
+GZ11ZZZ Psychological Tests, Personality and Behavioral
+GZ12ZZZ Psychological Tests, Intellectual and Psychoeducational
+GZ13ZZZ Psychological Tests, Neuropsychological
+GZ14ZZZ Psychological Tests, Neurobehavioral and Cognitive Status

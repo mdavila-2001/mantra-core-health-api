@@ -1,0 +1,1669 @@
+{
+ "sheet": "ES2026 Completa + Marcadores",
+ "rows": [
+  [
+   "Código",
+   "Descripción"
+  ],
+  [
+   "0016070",
+   "Derivación de ventrículo cerebral a nasofaringe, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "0016071",
+   "Derivación de ventrículo cerebral a seno mastoideo, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "0016072",
+   "Derivación de ventrículo cerebral a aurícula, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "0016073",
+   "Derivación de ventrículo cerebral a vaso sanguíneo, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "0016074",
+   "Derivación de ventrículo cerebral a cavidad pleural, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "0016075",
+   "Derivación de ventrículo cerebral a intestino, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "0016076",
+   "Derivación de ventrículo cerebral a cavidad peritoneal, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "0016077",
+   "Derivación de ventrículo cerebral a tracto urinario, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "0016078",
+   "Derivación de ventrículo cerebral a médula ósea, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "001607A",
+   "Derivación de ventrículo cerebral a espacio subgaleal, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "001607B",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "00160J0",
+   "Derivación de ventrículo cerebral a nasofaringe, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "00160J1",
+   "Derivación de ventrículo cerebral a seno mastoideo, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "00160J2",
+   "Derivación de ventrículo cerebral a aurícula, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "00160J3",
+   "Derivación de ventrículo cerebral a vaso sanguíneo, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "00160J4",
+   "Derivación de ventrículo cerebral a cavidad pleural, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "00160J5",
+   "Derivación de ventrículo cerebral a intestino, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "00160J6",
+   "Derivación de ventrículo cerebral a cavidad peritoneal, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "00160J7",
+   "Derivación de ventrículo cerebral a tracto urinario, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "00160J8",
+   "Derivación de ventrículo cerebral a médula ósea, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "00160JA",
+   "Derivación de ventrículo cerebral a espacio subgaleal, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "00160JB",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "00160K0",
+   "Derivación de ventrículo cerebral a nasofaringe, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "00160K1",
+   "Derivación de ventrículo cerebral a seno mastoideo, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "00160K2",
+   "Derivación de ventrículo cerebral a aurícula, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "00160K3",
+   "Derivación de ventrículo cerebral a vaso sanguíneo, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "00160K4",
+   "Derivación de ventrículo cerebral a cavidad pleural, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "00160K5",
+   "Derivación de ventrículo cerebral a intestino, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "00160K6",
+   "Derivación de ventrículo cerebral a cavidad peritoneal, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "00160K7",
+   "Derivación de ventrículo cerebral a tracto urinario, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "00160K8",
+   "Derivación de ventrículo cerebral a médula ósea, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "00160KA",
+   "Derivación de ventrículo cerebral a espacio subgaleal, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "00160KB",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "00160ZB",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, abordaje abierto"
+  ],
+  [
+   "0016370",
+   "Derivación de ventrículo cerebral a nasofaringe, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "0016371",
+   "Derivación de ventrículo cerebral a seno mastoideo, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "0016372",
+   "Derivación de ventrículo cerebral a aurícula, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "0016373",
+   "Derivación de ventrículo cerebral a vaso sanguíneo, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "0016374",
+   "Derivación de ventrículo cerebral a cavidad pleural, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "0016375",
+   "Derivación de ventrículo cerebral a intestino, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "0016376",
+   "Derivación de ventrículo cerebral a cavidad peritoneal, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "0016377",
+   "Derivación de ventrículo cerebral a tracto urinario, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "0016378",
+   "Derivación de ventrículo cerebral a médula ósea, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "001637A",
+   "Derivación de ventrículo cerebral a espacio subgaleal, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "001637B",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163J0",
+   "Derivación de ventrículo cerebral a nasofaringe, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "00163J1",
+   "Derivación de ventrículo cerebral a seno mastoideo, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "00163J2",
+   "Derivación de ventrículo cerebral a aurícula, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "00163J3",
+   "Derivación de ventrículo cerebral a vaso sanguíneo, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "00163J4",
+   "Derivación de ventrículo cerebral a cavidad pleural, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "00163J5",
+   "Derivación de ventrículo cerebral a intestino, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "00163J6",
+   "Derivación de ventrículo cerebral a cavidad peritoneal, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "00163J7",
+   "Derivación de ventrículo cerebral a tracto urinario, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "00163J8",
+   "Derivación de ventrículo cerebral a médula ósea, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "00163JA",
+   "Derivación de ventrículo cerebral a espacio subgaleal, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "00163JB",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "00163K0",
+   "Derivación de ventrículo cerebral a nasofaringe, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163K1",
+   "Derivación de ventrículo cerebral a seno mastoideo, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163K2",
+   "Derivación de ventrículo cerebral a aurícula, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163K3",
+   "Derivación de ventrículo cerebral a vaso sanguíneo, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163K4",
+   "Derivación de ventrículo cerebral a cavidad pleural, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163K5",
+   "Derivación de ventrículo cerebral a intestino, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163K6",
+   "Derivación de ventrículo cerebral a cavidad peritoneal, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163K7",
+   "Derivación de ventrículo cerebral a tracto urinario, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163K8",
+   "Derivación de ventrículo cerebral a médula ósea, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163KA",
+   "Derivación de ventrículo cerebral a espacio subgaleal, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163KB",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "00163ZB",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, abordaje percutáneo"
+  ],
+  [
+   "0016470",
+   "Derivación de ventrículo cerebral a nasofaringe, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "0016471",
+   "Derivación de ventrículo cerebral a seno mastoideo, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "0016472",
+   "Derivación de ventrículo cerebral a aurícula, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "0016473",
+   "Derivación de ventrículo cerebral a vaso sanguíneo, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "0016474",
+   "Derivación de ventrículo cerebral a cavidad pleural, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "0016475",
+   "Derivación de ventrículo cerebral a intestino, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "0016476",
+   "Derivación de ventrículo cerebral a cavidad peritoneal, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "0016477",
+   "Derivación de ventrículo cerebral a tracto urinario, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "0016478",
+   "Derivación de ventrículo cerebral a médula ósea, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001647A",
+   "Derivación de ventrículo cerebral a espacio subgaleal, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001647B",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164J0",
+   "Derivación de ventrículo cerebral a nasofaringe, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164J1",
+   "Derivación de ventrículo cerebral a seno mastoideo, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164J2",
+   "Derivación de ventrículo cerebral a aurícula, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164J3",
+   "Derivación de ventrículo cerebral a vaso sanguíneo, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164J4",
+   "Derivación de ventrículo cerebral a cavidad pleural, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164J5",
+   "Derivación de ventrículo cerebral a intestino, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164J6",
+   "Derivación de ventrículo cerebral a cavidad peritoneal, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164J7",
+   "Derivación de ventrículo cerebral a tracto urinario, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164J8",
+   "Derivación de ventrículo cerebral a médula ósea, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164JA",
+   "Derivación de ventrículo cerebral a espacio subgaleal, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164JB",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164K0",
+   "Derivación de ventrículo cerebral a nasofaringe, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164K1",
+   "Derivación de ventrículo cerebral a seno mastoideo, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164K2",
+   "Derivación de ventrículo cerebral a aurícula, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164K3",
+   "Derivación de ventrículo cerebral a vaso sanguíneo, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164K4",
+   "Derivación de ventrículo cerebral a cavidad pleural, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164K5",
+   "Derivación de ventrículo cerebral a intestino, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164K6",
+   "Derivación de ventrículo cerebral a cavidad peritoneal, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164K7",
+   "Derivación de ventrículo cerebral a tracto urinario, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164K8",
+   "Derivación de ventrículo cerebral a médula ósea, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164KA",
+   "Derivación de ventrículo cerebral a espacio subgaleal, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164KB",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "00164ZB",
+   "Derivación de ventrículo cerebral a cisternas cerebrales, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U072",
+   "Derivación de canal espinal a aurícula, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "001U074",
+   "Derivación de canal espinal a cavidad pleural, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "001U076",
+   "Derivación de canal espinal a cavidad peritoneal, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "001U077",
+   "Derivación de canal espinal a tracto urinario, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "001U079",
+   "Derivación de canal espinal a trompa de falopio, con sustituto de tejido autólogo, abordaje abierto"
+  ],
+  [
+   "001U0J2",
+   "Derivación de canal espinal a aurícula, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "001U0J4",
+   "Derivación de canal espinal a cavidad pleural, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "001U0J6",
+   "Derivación de canal espinal a cavidad peritoneal, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "001U0J7",
+   "Derivación de canal espinal a tracto urinario, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "001U0J9",
+   "Derivación de canal espinal a trompa de falopio, con sustituto sintético, abordaje abierto"
+  ],
+  [
+   "001U0K2",
+   "Derivación de canal espinal a aurícula, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "001U0K4",
+   "Derivación de canal espinal a cavidad pleural, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "001U0K6",
+   "Derivación de canal espinal a cavidad peritoneal, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "001U0K7",
+   "Derivación de canal espinal a tracto urinario, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "001U0K9",
+   "Derivación de canal espinal a trompa de falopio, con sustituto de tejido no autólogo, abordaje abierto"
+  ],
+  [
+   "001U372",
+   "Derivación de canal espinal a aurícula, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "001U374",
+   "Derivación de canal espinal a cavidad pleural, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "001U376",
+   "Derivación de canal espinal a cavidad peritoneal, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "001U377",
+   "Derivación de canal espinal a tracto urinario, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "001U379",
+   "Derivación de canal espinal a trompa de falopio, con sustituto de tejido autólogo, abordaje percutáneo"
+  ],
+  [
+   "001U3J2",
+   "Derivación de canal espinal a aurícula, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "001U3J4",
+   "Derivación de canal espinal a cavidad pleural, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "001U3J6",
+   "Derivación de canal espinal a cavidad peritoneal, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "001U3J7",
+   "Derivación de canal espinal a tracto urinario, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "001U3J9",
+   "Derivación de canal espinal a trompa de falopio, con sustituto sintético, abordaje percutáneo"
+  ],
+  [
+   "001U3K2",
+   "Derivación de canal espinal a aurícula, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "001U3K4",
+   "Derivación de canal espinal a cavidad pleural, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "001U3K6",
+   "Derivación de canal espinal a cavidad peritoneal, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "001U3K7",
+   "Derivación de canal espinal a tracto urinario, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "001U3K9",
+   "Derivación de canal espinal a trompa de falopio, con sustituto de tejido no autólogo, abordaje percutáneo"
+  ],
+  [
+   "001U472",
+   "Derivación de canal espinal a aurícula, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U474",
+   "Derivación de canal espinal a cavidad pleural, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U476",
+   "Derivación de canal espinal a cavidad peritoneal, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U477",
+   "Derivación de canal espinal a tracto urinario, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U479",
+   "Derivación de canal espinal a trompa de falopio, con sustituto de tejido autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U4J2",
+   "Derivación de canal espinal a aurícula, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U4J4",
+   "Derivación de canal espinal a cavidad pleural, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U4J6",
+   "Derivación de canal espinal a cavidad peritoneal, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U4J7",
+   "Derivación de canal espinal a tracto urinario, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U4J9",
+   "Derivación de canal espinal a trompa de falopio, con sustituto sintético, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U4K2",
+   "Derivación de canal espinal a aurícula, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U4K4",
+   "Derivación de canal espinal a cavidad pleural, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U4K6",
+   "Derivación de canal espinal a cavidad peritoneal, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U4K7",
+   "Derivación de canal espinal a tracto urinario, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "001U4K9",
+   "Derivación de canal espinal a trompa de falopio, con sustituto de tejido no autólogo, abordaje endoscópico percutáneo"
+  ],
+  [
+   "4A0002Z",
+   "Medición de conductividad, nervioso central, abordaje abierto"
+  ],
+  [
+   "4A0004Z",
+   "Medición de actividad eléctrica, nervioso central, abordaje abierto"
+  ],
+  [
+   "4A000BZ",
+   "Medición de presión, nervioso central, abordaje abierto"
+  ],
+  [
+   "4A0034Z",
+   "Medición de actividad eléctrica, nervioso central, abordaje percutáneo"
+  ],
+  [
+   "4A003BD",
+   "Medición de presión, intracraneal, nervioso central, abordaje percutáneo"
+  ],
+  [
+   "4A003KD",
+   "Medición de temperatura, intracraneal, nervioso central, abordaje percutáneo"
+  ],
+  [
+   "4A003RD",
+   "Medición de saturación, intracraneal, nervioso central, abordaje percutáneo"
+  ],
+  [
+   "4A0074Z",
+   "Medición de actividad eléctrica, nervioso central, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A007BD",
+   "Medición de presión, intracraneal, nervioso central, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A007KD",
+   "Medición de temperatura, intracraneal, nervioso central, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A007RD",
+   "Medición de saturación, intracraneal, nervioso central, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0084Z",
+   "Medición de actividad eléctrica, nervioso central, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A008BD",
+   "Medición de presión, intracraneal, nervioso central, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A008KD",
+   "Medición de temperatura, intracraneal, nervioso central, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A008RD",
+   "Medición de saturación, intracraneal, nervioso central, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A00X2Z",
+   "Medición de conductividad, nervioso central, abordaje externo"
+  ],
+  [
+   "4A00X4Z",
+   "Medición de actividad eléctrica, nervioso central, abordaje externo"
+  ],
+  [
+   "4A01029",
+   "Medición de conductividad, sensorial, nervioso periférico, abordaje abierto"
+  ],
+  [
+   "4A0102B",
+   "Medición de conductividad, motora, nervioso periférico, abordaje abierto"
+  ],
+  [
+   "4A0104Z",
+   "Medición de actividad eléctrica, nervioso periférico, abordaje abierto"
+  ],
+  [
+   "4A01329",
+   "Medición de conductividad, sensorial, nervioso periférico, abordaje percutáneo"
+  ],
+  [
+   "4A0132B",
+   "Medición de conductividad, motora, nervioso periférico, abordaje percutáneo"
+  ],
+  [
+   "4A0134Z",
+   "Medición de actividad eléctrica, nervioso periférico, abordaje percutáneo"
+  ],
+  [
+   "4A01729",
+   "Medición de conductividad, sensorial, nervioso periférico, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0172B",
+   "Medición de conductividad, motora, nervioso periférico, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0174Z",
+   "Medición de actividad eléctrica, nervioso periférico, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A01829",
+   "Medición de conductividad, sensorial, nervioso periférico, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0182B",
+   "Medición de conductividad, motora, nervioso periférico, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0184Z",
+   "Medición de actividad eléctrica, nervioso periférico, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A01X29",
+   "Medición de conductividad, sensorial, nervioso periférico, abordaje externo"
+  ],
+  [
+   "4A01X2B",
+   "Medición de conductividad, motora, nervioso periférico, abordaje externo"
+  ],
+  [
+   "4A01X4Z",
+   "Medición de actividad eléctrica, nervioso periférico, abordaje externo"
+  ],
+  [
+   "4A0204Z",
+   "Medición de actividad eléctrica, cardiaco, abordaje abierto"
+  ],
+  [
+   "4A0209Z",
+   "Medición de gasto, cardiaco, abordaje abierto"
+  ],
+  [
+   "4A020CZ",
+   "Medición de frecuencia, cardiaco, abordaje abierto"
+  ],
+  [
+   "4A020FZ",
+   "Medición de ritmo, cardiaco, abordaje abierto"
+  ],
+  [
+   "4A020HZ",
+   "Medición de sonido, cardiaco, abordaje abierto"
+  ],
+  [
+   "4A020N6",
+   "Medición de toma de muestras y presión, corazón derecho, cardiaco, abordaje abierto"
+  ],
+  [
+   "4A020N7",
+   "Medición de toma de muestras y presión, corazón izquierdo, cardiaco, abordaje abierto"
+  ],
+  [
+   "4A020N8",
+   "Medición de toma de muestras y presión, bilateral, cardiaco, abordaje abierto"
+  ],
+  [
+   "4A020PZ",
+   "Medición de potenciales de acción, cardiaco, abordaje abierto"
+  ],
+  [
+   "4A0234Z",
+   "Medición de actividad eléctrica, cardiaco, abordaje percutáneo"
+  ],
+  [
+   "4A0239Z",
+   "Medición de gasto, cardiaco, abordaje percutáneo"
+  ],
+  [
+   "4A023CZ",
+   "Medición de frecuencia, cardiaco, abordaje percutáneo"
+  ],
+  [
+   "4A023FZ",
+   "Medición de ritmo, cardiaco, abordaje percutáneo"
+  ],
+  [
+   "4A023HZ",
+   "Medición de sonido, cardiaco, abordaje percutáneo"
+  ],
+  [
+   "4A023N6",
+   "Medición de toma de muestras y presión, corazón derecho, cardiaco, abordaje percutáneo"
+  ],
+  [
+   "4A023N7",
+   "Medición de toma de muestras y presión, corazón izquierdo, cardiaco, abordaje percutáneo"
+  ],
+  [
+   "4A023N8",
+   "Medición de toma de muestras y presión, bilateral, cardiaco, abordaje percutáneo"
+  ],
+  [
+   "4A023PZ",
+   "Medición de potenciales de acción, cardiaco, abordaje percutáneo"
+  ],
+  [
+   "4A0274Z",
+   "Medición de actividad eléctrica, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0279Z",
+   "Medición de gasto, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A027CZ",
+   "Medición de frecuencia, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A027FZ",
+   "Medición de ritmo, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A027HZ",
+   "Medición de sonido, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A027N6",
+   "Medición de toma de muestras y presión, corazón derecho, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A027N7",
+   "Medición de toma de muestras y presión, corazón izquierdo, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A027N8",
+   "Medición de toma de muestras y presión, bilateral, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A027PZ",
+   "Medición de potenciales de acción, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0284Z",
+   "Medición de actividad eléctrica, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0289Z",
+   "Medición de gasto, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A028CZ",
+   "Medición de frecuencia, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A028FZ",
+   "Medición de ritmo, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A028HZ",
+   "Medición de sonido, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A028N6",
+   "Medición de toma de muestras y presión, corazón derecho, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A028N7",
+   "Medición de toma de muestras y presión, corazón izquierdo, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A028N8",
+   "Medición de toma de muestras y presión, bilateral, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A028PZ",
+   "Medición de potenciales de acción, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A02X4A",
+   "Medición de actividad eléctrica, guiada, cardiaco, abordaje externo"
+  ],
+  [
+   "4A02X4Z",
+   "Medición de actividad eléctrica, cardiaco, abordaje externo"
+  ],
+  [
+   "4A02X9Z",
+   "Medición de gasto, cardiaco, abordaje externo"
+  ],
+  [
+   "4A02XCZ",
+   "Medición de frecuencia, cardiaco, abordaje externo"
+  ],
+  [
+   "4A02XFZ",
+   "Medición de ritmo, cardiaco, abordaje externo"
+  ],
+  [
+   "4A02XHZ",
+   "Medición de sonido, cardiaco, abordaje externo"
+  ],
+  [
+   "4A02XM4",
+   "Medición de actividad total, estrés, cardiaco, abordaje externo"
+  ],
+  [
+   "4A02XPZ",
+   "Medición de potenciales de acción, cardiaco, abordaje externo"
+  ],
+  [
+   "4A03051",
+   "Medición de flujo, periférico, arterial, abordaje abierto"
+  ],
+  [
+   "4A03053",
+   "Medición de flujo, pulmonar, arterial, abordaje abierto"
+  ],
+  [
+   "4A0305C",
+   "Medición de flujo, coronario, arterial, abordaje abierto"
+  ],
+  [
+   "4A030B1",
+   "Medición de presión, periférico, arterial, abordaje abierto"
+  ],
+  [
+   "4A030B3",
+   "Medición de presión, pulmonar, arterial, abordaje abierto"
+  ],
+  [
+   "4A030BC",
+   "Medición de presión, coronario, arterial, abordaje abierto"
+  ],
+  [
+   "4A030BF",
+   "Medición de presión, otro torácico, arterial, abordaje abierto"
+  ],
+  [
+   "4A030H1",
+   "Medición de sonido, periférico, arterial, abordaje abierto"
+  ],
+  [
+   "4A030J1",
+   "Medición de pulso, periférico, arterial, abordaje abierto"
+  ],
+  [
+   "4A030J3",
+   "Medición de pulso, pulmonar, arterial, abordaje abierto"
+  ],
+  [
+   "4A030JC",
+   "Medición de pulso, coronario, arterial, abordaje abierto"
+  ],
+  [
+   "4A030R1",
+   "Medición de saturación, periférico, arterial, abordaje abierto"
+  ],
+  [
+   "4A03351",
+   "Medición de flujo, periférico, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A03353",
+   "Medición de flujo, pulmonar, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A0335C",
+   "Medición de flujo, coronario, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A033B1",
+   "Medición de presión, periférico, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A033B3",
+   "Medición de presión, pulmonar, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A033BC",
+   "Medición de presión, coronario, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A033BF",
+   "Medición de presión, otro torácico, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A033H1",
+   "Medición de sonido, periférico, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A033J1",
+   "Medición de pulso, periférico, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A033J3",
+   "Medición de pulso, pulmonar, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A033JC",
+   "Medición de pulso, coronario, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A033R1",
+   "Medición de saturación, periférico, arterial, abordaje percutáneo"
+  ],
+  [
+   "4A03X51",
+   "Medición de flujo, periférico, arterial, abordaje externo"
+  ],
+  [
+   "4A03X5D",
+   "Medición de flujo, intracraneal, arterial, abordaje externo"
+  ],
+  [
+   "4A03XB1",
+   "Medición de presión, periférico, arterial, abordaje externo"
+  ],
+  [
+   "4A03XH1",
+   "Medición de sonido, periférico, arterial, abordaje externo"
+  ],
+  [
+   "4A03XJ1",
+   "Medición de pulso, periférico, arterial, abordaje externo"
+  ],
+  [
+   "4A03XR1",
+   "Medición de saturación, periférico, arterial, abordaje externo"
+  ],
+  [
+   "4A04050",
+   "Medición de flujo, central, venoso, abordaje abierto"
+  ],
+  [
+   "4A04051",
+   "Medición de flujo, periférico, venoso, abordaje abierto"
+  ],
+  [
+   "4A04052",
+   "Medición de flujo, portal, venoso, abordaje abierto"
+  ],
+  [
+   "4A04053",
+   "Medición de flujo, pulmonar, venoso, abordaje abierto"
+  ],
+  [
+   "4A040B0",
+   "Medición de presión, central, venoso, abordaje abierto"
+  ],
+  [
+   "4A040B1",
+   "Medición de presión, periférico, venoso, abordaje abierto"
+  ],
+  [
+   "4A040B2",
+   "Medición de presión, portal, venoso, abordaje abierto"
+  ],
+  [
+   "4A040B3",
+   "Medición de presión, pulmonar, venoso, abordaje abierto"
+  ],
+  [
+   "4A040J0",
+   "Medición de pulso, central, venoso, abordaje abierto"
+  ],
+  [
+   "4A040J1",
+   "Medición de pulso, periférico, venoso, abordaje abierto"
+  ],
+  [
+   "4A040J2",
+   "Medición de pulso, portal, venoso, abordaje abierto"
+  ],
+  [
+   "4A040J3",
+   "Medición de pulso, pulmonar, venoso, abordaje abierto"
+  ],
+  [
+   "4A040R1",
+   "Medición de saturación, periférico, venoso, abordaje abierto"
+  ],
+  [
+   "4A04350",
+   "Medición de flujo, central, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A04351",
+   "Medición de flujo, periférico, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A04352",
+   "Medición de flujo, portal, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A04353",
+   "Medición de flujo, pulmonar, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A043B0",
+   "Medición de presión, central, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A043B1",
+   "Medición de presión, periférico, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A043B2",
+   "Medición de presión, portal, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A043B3",
+   "Medición de presión, pulmonar, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A043J0",
+   "Medición de pulso, central, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A043J1",
+   "Medición de pulso, periférico, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A043J2",
+   "Medición de pulso, portal, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A043J3",
+   "Medición de pulso, pulmonar, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A043R1",
+   "Medición de saturación, periférico, venoso, abordaje percutáneo"
+  ],
+  [
+   "4A044B2",
+   "Medición de presión, portal, venoso, abordaje endoscópico percutáneo"
+  ],
+  [
+   "4A04X51",
+   "Medición de flujo, periférico, venoso, abordaje externo"
+  ],
+  [
+   "4A04XB1",
+   "Medición de presión, periférico, venoso, abordaje externo"
+  ],
+  [
+   "4A04XJ1",
+   "Medición de pulso, periférico, venoso, abordaje externo"
+  ],
+  [
+   "4A04XR1",
+   "Medición de saturación, periférico, venoso, abordaje externo"
+  ],
+  [
+   "4A05XLZ",
+   "Medición de volumen, circulatorio, abordaje externo"
+  ],
+  [
+   "4A0605Z",
+   "Medición de flujo, linfático, abordaje abierto"
+  ],
+  [
+   "4A060BZ",
+   "Medición de presión, linfático, abordaje abierto"
+  ],
+  [
+   "4A0635Z",
+   "Medición de flujo, linfático, abordaje percutáneo"
+  ],
+  [
+   "4A063BZ",
+   "Medición de presión, linfático, abordaje percutáneo"
+  ],
+  [
+   "4A0675Z",
+   "Medición de flujo, linfático, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A067BZ",
+   "Medición de presión, linfático, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0685Z",
+   "Medición de flujo, linfático, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A068BZ",
+   "Medición de presión, linfático, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A07X0Z",
+   "Medición de agudeza, visual, abordaje externo"
+  ],
+  [
+   "4A07X7Z",
+   "Medición de movilidad, visual, abordaje externo"
+  ],
+  [
+   "4A07XBZ",
+   "Medición de presión, visual, abordaje externo"
+  ],
+  [
+   "4A08X0Z",
+   "Medición de agudeza, olfatorio, abordaje externo"
+  ],
+  [
+   "4A0971Z",
+   "Medición de capacidad, respiratorio, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0975Z",
+   "Medición de flujo, respiratorio, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A097CZ",
+   "Medición de frecuencia, respiratorio, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A097DZ",
+   "Medición de resistencia, respiratorio, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A097LZ",
+   "Medición de volumen, respiratorio, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A097MZ",
+   "Medición de actividad total, respiratorio, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0981Z",
+   "Medición de capacidad, respiratorio, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0985Z",
+   "Medición de flujo, respiratorio, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A098CZ",
+   "Medición de frecuencia, respiratorio, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A098DZ",
+   "Medición de resistencia, respiratorio, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A098LZ",
+   "Medición de volumen, respiratorio, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A098MZ",
+   "Medición de actividad total, respiratorio, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A09X1Z",
+   "Medición de capacidad, respiratorio, abordaje externo"
+  ],
+  [
+   "4A09X5Z",
+   "Medición de flujo, respiratorio, abordaje externo"
+  ],
+  [
+   "4A09XCZ",
+   "Medición de frecuencia, respiratorio, abordaje externo"
+  ],
+  [
+   "4A09XDZ",
+   "Medición de resistencia, respiratorio, abordaje externo"
+  ],
+  [
+   "4A09XLZ",
+   "Medición de volumen, respiratorio, abordaje externo"
+  ],
+  [
+   "4A09XMZ",
+   "Medición de actividad total, respiratorio, abordaje externo"
+  ],
+  [
+   "4A0B78Z",
+   "Medición de motilidad, gastrointestinal, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0B7BZ",
+   "Medición de presión, gastrointestinal, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0B7GZ",
+   "Medición de secreción, gastrointestinal, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0B88Z",
+   "Medición de motilidad, gastrointestinal, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0B8BZ",
+   "Medición de presión, gastrointestinal, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0B8GZ",
+   "Medición de secreción, gastrointestinal, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0C35Z",
+   "Medición de flujo, biliar, abordaje percutáneo"
+  ],
+  [
+   "4A0C3BZ",
+   "Medición de presión, biliar, abordaje percutáneo"
+  ],
+  [
+   "4A0C45Z",
+   "Medición de flujo, biliar, abordaje endoscópico percutáneo"
+  ],
+  [
+   "4A0C4BZ",
+   "Medición de presión, biliar, abordaje endoscópico percutáneo"
+  ],
+  [
+   "4A0C75Z",
+   "Medición de flujo, biliar, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0C7BZ",
+   "Medición de presión, biliar, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0C85Z",
+   "Medición de flujo, biliar, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0C8BZ",
+   "Medición de presión, biliar, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0D73Z",
+   "Medición de contractilidad, urinario, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0D75Z",
+   "Medición de flujo, urinario, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0D7BZ",
+   "Medición de presión, urinario, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0D7DZ",
+   "Medición de resistencia, urinario, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0D7LZ",
+   "Medición de volumen, urinario, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0D83Z",
+   "Medición de contractilidad, urinario, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0D85Z",
+   "Medición de flujo, urinario, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0D8BZ",
+   "Medición de presión, urinario, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0D8DZ",
+   "Medición de resistencia, urinario, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0D8LZ",
+   "Medición de volumen, urinario, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0F33Z",
+   "Medición de contractilidad, músculo esquelético, abordaje percutáneo"
+  ],
+  [
+   "4A0F3BE",
+   "Medición de presión, compartimental, músculo esquelético, abordaje percutáneo"
+  ],
+  [
+   "4A0FX3Z",
+   "Medición de contractilidad, músculo esquelético, abordaje externo"
+  ],
+  [
+   "4A0H74Z",
+   "Medición de actividad eléctrica, productos de la concepción, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0H7CZ",
+   "Medición de frecuencia, productos de la concepción, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0H7FZ",
+   "Medición de ritmo, productos de la concepción, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0H7HZ",
+   "Medición de sonido, productos de la concepción, cardiaco, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0H84Z",
+   "Medición de actividad eléctrica, productos de la concepción, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0H8CZ",
+   "Medición de frecuencia, productos de la concepción, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0H8FZ",
+   "Medición de ritmo, productos de la concepción, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0H8HZ",
+   "Medición de sonido, productos de la concepción, cardiaco, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0HX4Z",
+   "Medición de actividad eléctrica, productos de la concepción, cardiaco, abordaje externo"
+  ],
+  [
+   "4A0HXCZ",
+   "Medición de frecuencia, productos de la concepción, cardiaco, abordaje externo"
+  ],
+  [
+   "4A0HXFZ",
+   "Medición de ritmo, productos de la concepción, cardiaco, abordaje externo"
+  ],
+  [
+   "4A0HXHZ",
+   "Medición de sonido, productos de la concepción, cardiaco, abordaje externo"
+  ],
+  [
+   "4A0J72Z",
+   "Medición de conductividad, productos de la concepción, nervioso, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0J74Z",
+   "Medición de actividad eléctrica, productos de la concepción, nervioso, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0J7BZ",
+   "Medición de presión, productos de la concepción, nervioso, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0J82Z",
+   "Medición de conductividad, productos de la concepción, nervioso, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0J84Z",
+   "Medición de actividad eléctrica, productos de la concepción, nervioso, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0J8BZ",
+   "Medición de presión, productos de la concepción, nervioso, abordaje orificio natural o artificial, endoscópico"
+  ],
+  [
+   "4A0JX2Z",
+   "Medición de conductividad, productos de la concepción, nervioso, abordaje externo"
+  ],
+  [
+   "4A0JX4Z",
+   "Medición de actividad eléctrica, productos de la concepción, nervioso, abordaje externo"
+  ],
+  [
+   "4A0JXBZ",
+   "Medición de presión, productos de la concepción, nervioso, abordaje externo"
+  ],
+  [
+   "4A0Z76Z",
+   "Medición de metabolismo, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0Z7KZ",
+   "Medición de temperatura, abordaje orificio natural o artificial"
+  ],
+  [
+   "4A0ZX6Z",
+   "Medición de metabolismo, abordaje externo"
+  ],
+  [
+   "4A0ZXKZ",
+   "Medición de temperatura, abordaje externo"
+  ],
+  [
+   "4A0ZXQZ",
+   "Medición de sueño, abordaje externo"
+  ],
+  [
+   "D0000ZZ",
+   "Radioterapia externa de cerebro, con fotones <1 mev"
+  ],
+  [
+   "D0001ZZ",
+   "Radioterapia externa de cerebro, con fotones 1 a 10 mev"
+  ],
+  [
+   "D0002ZZ",
+   "Radioterapia externa de cerebro, con fotones >10 mev"
+  ],
+  [
+   "D0003Z0",
+   "Radioterapia externa de cerebro, con electrones, intraoperatoria"
+  ],
+  [
+   "D0003ZZ",
+   "Radioterapia externa de cerebro, con electrones"
+  ],
+  [
+   "D0004ZZ",
+   "Radioterapia externa de cerebro, con partículas pesadas (protones, iones)"
+  ],
+  [
+   "D0005ZZ",
+   "Radioterapia externa de cerebro, con neutrones"
+  ],
+  [
+   "D0006ZZ",
+   "Radioterapia externa de cerebro, con captura de neutrones"
+  ],
+  [
+   "D0010ZZ",
+   "Radioterapia externa de tronco cerebral, con fotones <1 mev"
+  ],
+  [
+   "D0011ZZ",
+   "Radioterapia externa de tronco cerebral, con fotones 1 a 10 mev"
+  ],
+  [
+   "D0012ZZ",
+   "Radioterapia externa de tronco cerebral, con fotones >10 mev"
+  ],
+  [
+   "D0013Z0",
+   "Radioterapia externa de tronco cerebral, con electrones, intraoperatoria"
+  ],
+  [
+   "D0013ZZ",
+   "Radioterapia externa de tronco cerebral, con electrones"
+  ],
+  [
+   "D0014ZZ",
+   "Radioterapia externa de tronco cerebral, con partículas pesadas (protones, iones)"
+  ],
+  [
+   "D0015ZZ",
+   "Radioterapia externa de tronco cerebral, con neutrones"
+  ],
+  [
+   "D0016ZZ",
+   "Radioterapia externa de tronco cerebral, con captura de neutrones"
+  ],
+  [
+   "D0060ZZ",
+   "Radioterapia externa de médula espinal, con fotones <1 mev"
+  ],
+  [
+   "D0061ZZ",
+   "Radioterapia externa de médula espinal, con fotones 1 a 10 mev"
+  ],
+  [
+   "D0062ZZ",
+   "Radioterapia externa de médula espinal, con fotones >10 mev"
+  ],
+  [
+   "D0063Z0",
+   "Radioterapia externa de médula espinal, con electrones, intraoperatoria"
+  ],
+  [
+   "D0063ZZ",
+   "Radioterapia externa de médula espinal, con electrones"
+  ],
+  [
+   "D0064ZZ",
+   "Radioterapia externa de médula espinal, con partículas pesadas (protones, iones)"
+  ],
+  [
+   "D0065ZZ",
+   "Radioterapia externa de médula espinal, con neutrones"
+  ],
+  [
+   "D0066ZZ",
+   "Radioterapia externa de médula espinal, con captura de neutrones"
+  ],
+  [
+   "D0070ZZ",
+   "Radioterapia externa de nervio periférico, con fotones <1 mev"
+  ],
+  [
+   "D0071ZZ",
+   "Radioterapia externa de nervio periférico, con fotones 1 a 10 mev"
+  ],
+  [
+   "D0072ZZ",
+   "Radioterapia externa de nervio periférico, con fotones >10 mev"
+  ],
+  [
+   "D0073Z0",
+   "Radioterapia externa de nervio periférico, con electrones, intraoperatoria"
+  ],
+  [
+   "D0073ZZ",
+   "Radioterapia externa de nervio periférico, con electrones"
+  ],
+  [
+   "D0074ZZ",
+   "Radioterapia externa de nervio periférico, con partículas pesadas (protones, iones)"
+  ],
+  [
+   "D0075ZZ",
+   "Radioterapia externa de nervio periférico, con neutrones"
+  ],
+  [
+   "D0076ZZ",
+   "Radioterapia externa de nervio periférico, con captura de neutrones"
+  ],
+  [
+   "GZ10ZZZ",
+   "Test psicológicos, del desarrollo, para salud mental"
+  ],
+  [
+   "GZ11ZZZ",
+   "Test psicológicos, personalidad y comportamiento, para salud mental"
+  ],
+  [
+   "GZ12ZZZ",
+   "Test psicológicos, intelectual y psicoeducativo, para salud mental"
+  ],
+  [
+   "GZ13ZZZ",
+   "Test psicológicos, neuropsicológico, para salud mental"
+  ],
+  [
+   "GZ14ZZZ",
+   "Test psicológicos, estado neuroconductual y cognitivo, para salud mental"
+  ]
+ ],
+ "intro": [
+  [
+   "CIE-10 -ES PROCEDIMIENTOS_ ED. 2026"
+  ],
+  [
+   "Traducción Española de ICD-10-PCS (CMS.gov)"
+  ],
+  [
+   "Título original de la obra: The ICD-10 Procedure Coding System (ICD-10-PCS)"
+  ],
+  [
+   "© Center for Medicare and Medicaid Services (CMS)."
+  ],
+  [
+   "https://www.cms.gov/medicare/coding-billing/icd-10-codes"
+  ],
+  [
+   "Fecha:",
+   "46175"
+  ],
+  [
+   "Versión ",
+   "1.0"
+  ],
+  [
+   "ES2026 Completa + Marcadores"
+  ],
+  [
+   "ES2026 Nuevos"
+  ],
+  [
+   "ES 2026 Modificados"
+  ],
+  [
+   "ES 2026 Borrados"
+  ],
+  [
+   "ES 2026 Abreviados"
+  ]
+ ]
+}

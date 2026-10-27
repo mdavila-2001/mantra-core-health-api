@@ -113,6 +113,38 @@ export const RELATION_TYPES = {
     assertion: 'terminology-role',
     label: 'Anatomía extirpada por completo (rol NCIt)',
   },
+  // --- ICD-10-PCS (procedimiento → sitio por el eje 4 del propio código) -------
+  'icd10pcs:axis4-body-part': {
+    kind: 'procedure-site',
+    sourcePredicate: 'ICD-10-PCS eje 4 «Body Part»',
+    assertion: 'by-definition',
+    label: 'Parte del cuerpo por definición del código (eje 4 «Body Part» de ICD-10-PCS)',
+  },
+  'icd10pcs:axis4-body-region': {
+    kind: 'procedure-site',
+    sourcePredicate: 'ICD-10-PCS eje 4 «Body Region»',
+    assertion: 'by-definition',
+    label: 'Región del cuerpo por definición del código (eje 4 «Body Region» de ICD-10-PCS)',
+  },
+  'icd10pcs:axis4-body-system-region': {
+    kind: 'procedure-site',
+    sourcePredicate: 'ICD-10-PCS eje 4 «Body System / Region»',
+    assertion: 'by-definition',
+    label: 'Sistema o región del cuerpo por definición del código (eje 4 «Body System / Region» de ICD-10-PCS)',
+  },
+  'icd10pcs:axis4-body-system': {
+    kind: 'procedure-site',
+    sourcePredicate: 'ICD-10-PCS eje 4 «Body System»',
+    assertion: 'by-definition',
+    label: 'Sistema fisiológico por definición del código (eje 4 «Body System» de ICD-10-PCS)',
+  },
+  'icd10pcs:axis4-treatment-site': {
+    kind: 'procedure-site',
+    sourcePredicate: 'ICD-10-PCS eje 4 «Treatment Site»',
+    assertion: 'by-definition',
+    label: 'Sitio de tratamiento por definición del código (eje 4 «Treatment Site» de ICD-10-PCS, radioterapia)',
+  },
+
   'ncit:R180': {
     kind: 'procedure-disease',
     sourcePredicate: 'R180 Procedure_Has_Target_Disease',

@@ -2,37 +2,90 @@
   "generatedFrom": "build.mjs",
   "files": [
     {
-      "path": "out/procedures.ndjson.gz",
-      "bytes": 102951,
-      "uncompressedBytes": 1172669,
-      "sha256Uncompressed": "0c37d3ac57a3ccf1ce8881afbc923057a9cdf8a0d8184609e75578d0dc398c22",
-      "rows": 1988
+      "path": "out/procedures.part001.ndjson.gz",
+      "bytes": 4332465,
+      "uncompressedBytes": 47349950,
+      "sha256Uncompressed": "f5837be0152cd475963f4c69c1bbba0c9b4d4babb094bc04b1cc6899bc15ee90",
+      "rows": 30927
     },
     {
-      "path": "out/assertions.ndjson.gz",
-      "bytes": 99657,
-      "uncompressedBytes": 955829,
-      "sha256Uncompressed": "5661281f730f49231ed0a16b1382af649d397154f0bafaa686f87f1c00ebf94e",
-      "rows": 746
+      "path": "out/procedures.part002.ndjson.gz",
+      "bytes": 4327311,
+      "uncompressedBytes": 47350164,
+      "sha256Uncompressed": "645c81c086e43667ce9de2e352c54fa2f29c1772ff15ea1fc2e3a072a03046e9",
+      "rows": 30899
+    },
+    {
+      "path": "out/procedures.part003.ndjson.gz",
+      "bytes": 2964539,
+      "uncompressedBytes": 32451451,
+      "sha256Uncompressed": "a5a1ca00daf5e45d5ecb777efe5183cc344870cdd7e125ae7b440679afebb424",
+      "rows": 21163
+    },
+    {
+      "path": "out/assertions.part001.ndjson.gz",
+      "bytes": 4778176,
+      "uncompressedBytes": 47477254,
+      "sha256Uncompressed": "685f8acff5ee7c84aed0a83a078eb697e658d496b288cd12c98ff376850d019b",
+      "rows": 41599
+    },
+    {
+      "path": "out/assertions.part002.ndjson.gz",
+      "bytes": 4406549,
+      "uncompressedBytes": 43733359,
+      "sha256Uncompressed": "68ee0f1036da5332ca89594f421f3ecb082c8e8885e6a540e57e2a4aedcac73a",
+      "rows": 38316
     },
     {
       "path": "out/maps.ndjson.gz",
       "bytes": 53102,
       "uncompressedBytes": 654626,
-      "sha256Uncompressed": "2b36926637b4883dff1d6e373f226351203ad265d2db6b5d71e165455ed2444b",
+      "sha256Uncompressed": "0e2eb33a44eb5fcab40ea6ca46d8fab11071ae3ee9718b99137068854f68ba49",
       "rows": 1145
     },
     {
       "path": "out/coverage.json.gz",
-      "bytes": 2581,
-      "uncompressedBytes": 10184,
-      "sha256Uncompressed": "7bc82e73d0f7078934d3fdae2f3ee4d20ac99a239d3e0cbdaf2d94269cd5fffc"
+      "bytes": 3122,
+      "uncompressedBytes": 11310,
+      "sha256Uncompressed": "f040f4383a9e129c69fa7395f1ef01caaf404295a58b7e6982377703047ca024"
     },
     {
       "path": "out/load-plan.dry-run.json.gz",
-      "bytes": 1016,
-      "uncompressedBytes": 2977,
-      "sha256Uncompressed": "1500b21df7f4e3d1876fd60e80e062aec7302f9ff5db0baf046163993b89a46b"
+      "bytes": 1451,
+      "uncompressedBytes": 5181,
+      "sha256Uncompressed": "2975596d71c15c886444bbe5d01f8e1e38a4bbe35694a2263418a260506423c0"
+    },
+    {
+      "path": "raw/cie10es-procedimientos/Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx.gz",
+      "bytes": 3995054,
+      "uncompressedBytes": 5039772,
+      "sha256Uncompressed": "8c091285d7e0817f326307d2bf2743dc47cd31ce7cded59b122f5607f3e36ba3",
+      "source": "cie10es-procedimientos",
+      "sha256Original": "8c091285d7e0817f326307d2bf2743dc47cd31ce7cded59b122f5607f3e36ba3"
+    },
+    {
+      "path": "raw/icd10pcs-cms-2027/tables.zip.gz",
+      "bytes": 7829630,
+      "uncompressedBytes": 8078885,
+      "sha256Uncompressed": "db77f8b948a612db66320724a515dd7bc350036805ff0ecfd58839bcbfb34c84",
+      "source": "icd10pcs-cms-2027",
+      "sha256Original": "db77f8b948a612db66320724a515dd7bc350036805ff0ecfd58839bcbfb34c84"
+    },
+    {
+      "path": "raw/icd10pcs-cms-2027/codes.zip.gz",
+      "bytes": 658457,
+      "uncompressedBytes": 664342,
+      "sha256Uncompressed": "8db2465fe7a65f53bf21d840fce825d7d107dbd603b7fcb66358c8321919809d",
+      "source": "icd10pcs-cms-2027",
+      "sha256Original": "8db2465fe7a65f53bf21d840fce825d7d107dbd603b7fcb66358c8321919809d"
+    },
+    {
+      "path": "raw/icd10pcs-cms-2027/order.zip.gz",
+      "bytes": 1314702,
+      "uncompressedBytes": 1322280,
+      "sha256Uncompressed": "c9064c5c66873ecc4cc9aab1b100be605f2db457fd458113076b5eb6ce246439",
+      "source": "icd10pcs-cms-2027",
+      "sha256Original": "c9064c5c66873ecc4cc9aab1b100be605f2db457fd458113076b5eb6ce246439"
     },
     {
       "path": "raw/maxo/maxo.obo.gz",

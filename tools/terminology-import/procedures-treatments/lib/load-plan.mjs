@@ -64,6 +64,35 @@ export const OWNED_CODE_SYSTEMS = {
     },
     createIfAbsent: true,
   },
+  // ICD-10-PCS: misma fuente y mismo code system que el catálogo de análisis (lab-tests, subconjunto
+  // diagnóstico de FY2026). Esta importación agrega una versión propia (FY2027) con TODOS los códigos;
+  // los conceptos de cada versión son filas distintas y los ids no chocan.
+  'icd10pcs-cms': {
+    internalCode: 'icd10pcs-cms',
+    name: 'ICD-10-PCS — International Classification of Diseases, 10th Revision, Procedure Coding System (EE. UU.)',
+    canonicalUrl: 'http://www.cms.gov/Medicare/Coding/ICD10',
+    source: {
+      code: 'CMS_ICD10PCS',
+      name: 'ICD-10-PCS — International Classification of Diseases, 10th Revision, Procedure Coding System (EE. UU.)',
+      owner: 'Centers for Medicare & Medicaid Services (CMS), EE. UU.',
+      officialUrl: 'https://www.cms.gov/medicare/coding-billing/icd-10-codes',
+      license: 'Obra del gobierno federal de EE. UU. (CMS), dominio público.',
+    },
+    createIfAbsent: true,
+  },
+  'icd10pcs-site': {
+    internalCode: 'icd10pcs-site',
+    name: 'ICD-10-PCS — sitios (valores del eje 4 por sección y sistema corporal)',
+    canonicalUrl: 'https://mantracore.health/fhir/CodeSystem/icd10pcs-site',
+    source: {
+      code: 'CMS_ICD10PCS',
+      name: 'ICD-10-PCS — International Classification of Diseases, 10th Revision, Procedure Coding System (EE. UU.)',
+      owner: 'Centers for Medicare & Medicaid Services (CMS), EE. UU.',
+      officialUrl: 'https://www.cms.gov/medicare/coding-billing/icd-10-codes',
+      license: 'Obra del gobierno federal de EE. UU. (CMS), dominio público.',
+    },
+    createIfAbsent: true,
+  },
   [RELATION_TYPE_SYSTEM]: {
     internalCode: RELATION_TYPE_SYSTEM,
     name: 'Tipos de relación de procedimientos (predicado literal de cada fuente)',
@@ -85,7 +114,54 @@ export const PROVENANCE_SOURCE_CODE = {
   'maxo-annotations': 'MONARCH_MAXO',
   'ncit-obo': 'NCI_EVS_NCIT',
   ohd: 'OBO_OHD',
+  'icd10pcs-cms-2027': 'CMS_ICD10PCS',
 };
+
+/** Sistemas cuyo extremo se resuelve en la versión que carga esta importación (no «la versión por defecto»). */
+export const PINNED_SYSTEMS = ['icd10pcs-cms', 'icd10pcs-site'];
+
+// --- Evidencia (modelo v4.2.50: terminology.concept_relationship_evidence) ---------------
+export const EVIDENCE_TABLE = 'concept_relationship_evidence';
+export const EVIDENCE_COLUMNS = ['id', 'concept_relationship_id', 'terminology_source_id', 'code_system_version_id', 'evidence_tier_concept_id', 'source_reference', 'citation_text', 'citation_locator', 'valid_from'];
+export const EVIDENCE_TIER_VERSION = '1.0.0-vs_evidence_tier';
+export const EVIDENCE_TIER_CODES = ['NATIONAL_STANDARD', 'CURATED_REFERENCE', 'COLLABORATIVE_KNOWLEDGE', 'STATISTICAL_LITERATURE'];
+
+/**
+ * Clase de afirmación → nivel de evidencia (vs_evidence_tier). DECISIÓN A CONFIRMAR con el dueño del modelo:
+ * el modelo declara los cuatro niveles pero no a qué fuente corresponde cada uno.
+ *   by-definition        eje del código de una clasificación nacional oficial (CMS)        → NATIONAL_STANDARD
+ *   curated-literature   anotación curada por personas con cita (MAxO/POET)                  → CURATED_REFERENCE
+ *   ontology-axiom       axioma de una ontología (MAxO, OHD)                                 → CURATED_REFERENCE
+ *   terminology-role     rol declarado por una terminología (NCIt)                           → CURATED_REFERENCE
+ *   investigational      registro de ensayos (ClinicalTrials.gov): datos del patrocinador     → STATISTICAL_LITERATURE
+ */
+export const TIER_OF_ASSERTION = {
+  'by-definition': 'NATIONAL_STANDARD',
+  'curated-literature': 'CURATED_REFERENCE',
+  'ontology-axiom': 'CURATED_REFERENCE',
+  'terminology-role': 'CURATED_REFERENCE',
+  investigational: 'STATISTICAL_LITERATURE',
+};
+
+/** Devuelve el motivo del bloqueo, o null si la tabla de evidencia existe con las columnas que se escriben. */
+export function evidenceBlockedReason(columns) {
+  const have = new Set(columns);
+  const missing = EVIDENCE_COLUMNS.filter((c) => !have.has(c));
+  return missing.length ? `terminology.${EVIDENCE_TABLE} no existe o le faltan columnas (${missing.join(', ')}): aplicar el patch 2026-10-25_v4250 del repo del modelo.` : null;
+}
+
+/** Fecha de vigencia: la primera fecha que declara la versión de la fuente; si no hay, la de la descarga (base `retrieved`). */
+export function validFromOf(p) {
+  const m = /(\d{4}-\d{2}-\d{2})/.exec(p.sourceVersion ?? '');
+  return m ? { date: m[1], basis: 'release' } : { date: String(p.retrievedAt).slice(0, 10), basis: 'retrieved' };
+}
+
+const kv = (obj) => Object.entries(obj ?? {}).filter(([, v]) => v != null && v !== '').map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : v}`).join(' | ');
+
+/** Campos publicados de la afirmación, «clave=valor», tal como están en el corpus. */
+export function citationTextOf(p) {
+  return [p.source, `predicado=${p.sourcePredicate}`, `clase=${p.assertionKind}`, kv(p.evidence), `versión=${p.sourceVersion}`, `fecha_base_vigencia=${validFromOf(p).basis}`].filter(Boolean).join(' | ');
+}
 
 /** Columnas mínimas de la tabla de procedencia propuesta (ver la propuesta para el modelo). */
 export const PROVENANCE_TABLE = 'concept_relationship_assertions';
@@ -117,7 +193,10 @@ const PROPERTY_DATA_TYPE = 'string';
 
 /** Propiedades de procedencia por concepto propio, con los nombres que ya usa el resto de terminology. */
 export function conceptProperties(p) {
+  // Propiedades propias del registro (ejes de PCS, descripción corta…): valores tal como la fuente los publica.
+  const own = Object.entries(p.properties ?? {}).map(([code, value]) => [code, value]);
   return [
+    ...own,
     ['source', p.provenance.source],
     ['source_url', p.provenance.uri],
     ['source_version', p.provenance.version],
@@ -127,7 +206,7 @@ export function conceptProperties(p) {
     ['procedure_category', p.category],
   ]
     .filter(([, v]) => v != null)
-    .map(([code, value]) => ({ code, dataType: PROPERTY_DATA_TYPE, value }));
+    .map(([code, value]) => ({ code, dataType: typeof value === 'string' ? 'string' : 'json', value }));
 }
 
 export function relationTypeConcepts() {
@@ -169,6 +248,7 @@ export function buildLoadPlan({ procedures, assertions }) {
         display: p.display,
         definition: null,
         properties: conceptProperties(p),
+        designations: p.designations ?? [],
       })),
     ...relationTypeConcepts(),
   ];

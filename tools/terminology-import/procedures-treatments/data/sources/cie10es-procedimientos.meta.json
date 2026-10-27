@@ -1,0 +1,19 @@
+{
+  "source": "cie10es-procedimientos",
+  "name": "CIE-10-ES Procedimientos, edición 2026 (Ministerio de Sanidad de España)",
+  "publisher": "Ministerio de Sanidad, España",
+  "license": "Aviso legal del Ministerio de Sanidad (https://www.sanidad.gob.es/avisoLegal/home.htm): reutilización autorizada, también comercial, citando la fuente y la fecha de última actualización y sin desnaturalizar el contenido. CIE-10-ES es la traducción oficial de ICD-10-PCS (© CMS), obra del gobierno de EE. UU.",
+  "licenseUrl": "https://www.sanidad.gob.es/avisoLegal/home.htm",
+  "homepage": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/home.htm",
+  "retrievedAt": "2026-10-27T23:41:47.789Z",
+  "lastModified": "Tue, 16 Dec 2025 09:01:37 GMT",
+  "files": {
+    "Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx": {
+      "url": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx",
+      "fileUrl": "https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx",
+      "sha256": "8c091285d7e0817f326307d2bf2743dc47cd31ce7cded59b122f5607f3e36ba3",
+      "bytes": 5039772,
+      "lastModified": "Tue, 16 Dec 2025 09:01:37 GMT"
+    }
+  }
+}

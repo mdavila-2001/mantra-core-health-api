@@ -41,6 +41,8 @@ import {
   readOboTerms,
 } from './lib/sources/obo-procedures.mjs';
 import { mondoMaps, readXrefs, uberonMaps } from './lib/sources/xrefs.mjs';
+import { parseCie10esProcedures, parseCodesFile, parseOrderFile, parsePcsTables, pcsCorpus } from './lib/sources/pcs.mjs';
+import { readXlsx, unzip } from '../lab-tests/lib/xlsx-min.mjs';
 
 /** Metadatos de procedencia de una fuente descargada por `fetch.mjs`. */
 function sourceMeta(key, file, version) {
@@ -56,7 +58,7 @@ function sourceMeta(key, file, version) {
     license: m.license,
     fileUrl: f.fileUrl,
     sha256: f.sha256,
-    pin: m.commit ?? m.tag,
+    pin: m.commit ?? m.tag ?? m.lastModified ?? null,
   };
 }
 
@@ -126,13 +128,38 @@ async function main() {
     meta: ohdMeta,
   });
 
+  // --- ICD-10-PCS FY2027 (CMS) + español oficial CIE-10-ES 2026 ------------------------
+  const zipEntry = (zipPath, re) => {
+    const hit = [...unzip(readFileSync(zipPath))].find(([n]) => re.test(n));
+    if (!hit) throw new Error(`${zipPath}: no trae ${re}`);
+    return hit[1].toString('utf8');
+  };
+  const { tables: pcsTables, version: pcsXmlVersion } = parsePcsTables(zipEntry(cacheDir('icd10pcs-cms-2027', 'tables.zip'), /icd10pcs_tables_\d{4}\.xml$/));
+  const pcsVersion = `ICD-10-PCS FY${pcsXmlVersion}`;
+  const pcsMeta = sourceMeta('icd10pcs-cms-2027', 'tables.zip', pcsVersion);
+  const cieSheets = readXlsx(readFileSync(cacheDir('cie10es-procedimientos', 'Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx')));
+  const cieComplete = cieSheets.find((sh) => sh.name === 'ES2026 Completa + Marcadores');
+  if (!cieComplete) throw new Error(`CIE-10-ES: falta la hoja «ES2026 Completa + Marcadores» (hojas: ${cieSheets.map((sh) => sh.name).join(' | ')})`);
+  const pcs = pcsCorpus(
+    {
+      tables: pcsTables,
+      version: pcsVersion,
+      codes: parseCodesFile(zipEntry(cacheDir('icd10pcs-cms-2027', 'codes.zip'), /icd10pcs_codes_\d{4}\.txt$/)),
+      order: parseOrderFile(zipEntry(cacheDir('icd10pcs-cms-2027', 'order.zip'), /icd10pcs_order_\d{4}\.txt$/)),
+      es: parseCie10esProcedures(cieComplete.rows),
+    },
+    { tables: pcsMeta, tablesUrl: 'https://www.cms.gov/files/zip/2027-icd-10-pcs-code-tables-index.zip' },
+  );
+  coverage.skipped['icd10pcs-cms-2027'] = pcs.stats;
+
   const assertions = [
     ...poet.assertions,
     ...maxoSites,
     ...ncitOut.assertions,
     ...ohd.assertions,
+    ...pcs.assertions,
   ];
-  const procedures = [...maxoProcs, ...ncitOut.procedures, ...ohd.procedures];
+  const procedures = [...maxoProcs, ...ncitOut.procedures, ...ohd.procedures, ...pcs.procedures];
 
   // --- Equivalencias publicadas (solo para los códigos que se usan) ----------------
   const wantedMondo = new Set(
@@ -193,6 +220,7 @@ async function main() {
     ['ohd', ohdMeta],
     ['mondo', mondoMeta],
     ['uberon', uberonMeta],
+    ['icd10pcs-cms-2027', pcsMeta],
   ]) {
     coverage.sources[key] = {
       version: meta.version,

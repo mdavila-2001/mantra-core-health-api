@@ -1,0 +1,957 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ICD10PCS.tabular>
+  <version>2027</version>
+  <title>2027 ICD-10-PCS Tables</title>
+  <pcsTable>
+    <axis pos="1" values="1">
+      <title>Section</title>
+      <label code="0">Medical and Surgical</label>
+    </axis>
+    <axis pos="2" values="1">
+      <title>Body System</title>
+      <label code="0">Central Nervous System and Cranial Nerves</label>
+    </axis>
+    <axis pos="3" values="1">
+      <title>Operation</title>
+      <label code="1">Bypass</label>
+      <definition>Altering the route of passage of the contents of a tubular body part</definition>
+    </axis>
+    <pcsRow codes="99">
+      <axis pos="4" values="1">
+        <title>Body Part</title>
+        <label code="6">Cerebral Ventricle</label>
+      </axis>
+      <axis pos="5" values="3">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+        <label code="4">Percutaneous Endoscopic</label>
+      </axis>
+      <axis pos="6" values="3">
+        <title>Device</title>
+        <label code="7">Autologous Tissue Substitute</label>
+        <label code="J">Synthetic Substitute</label>
+        <label code="K">Nonautologous Tissue Substitute</label>
+      </axis>
+      <axis pos="7" values="11">
+        <title>Qualifier</title>
+        <label code="0">Nasopharynx</label>
+        <label code="1">Mastoid Sinus</label>
+        <label code="2">Atrium</label>
+        <label code="3">Blood Vessel</label>
+        <label code="4">Pleural Cavity</label>
+        <label code="5">Intestine</label>
+        <label code="6">Peritoneal Cavity</label>
+        <label code="7">Urinary Tract</label>
+        <label code="8">Bone Marrow</label>
+        <label code="A">Subgaleal Space</label>
+        <label code="B">Cerebral Cisterns</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="3">
+      <axis pos="4" values="1">
+        <title>Body Part</title>
+        <label code="6">Cerebral Ventricle</label>
+      </axis>
+      <axis pos="5" values="3">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+        <label code="4">Percutaneous Endoscopic</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Device</title>
+        <label code="Z">No Device</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="B">Cerebral Cisterns</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="45">
+      <axis pos="4" values="1">
+        <title>Body Part</title>
+        <label code="U">Spinal Canal</label>
+      </axis>
+      <axis pos="5" values="3">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+        <label code="4">Percutaneous Endoscopic</label>
+      </axis>
+      <axis pos="6" values="3">
+        <title>Device</title>
+        <label code="7">Autologous Tissue Substitute</label>
+        <label code="J">Synthetic Substitute</label>
+        <label code="K">Nonautologous Tissue Substitute</label>
+      </axis>
+      <axis pos="7" values="5">
+        <title>Qualifier</title>
+        <label code="2">Atrium</label>
+        <label code="4">Pleural Cavity</label>
+        <label code="6">Peritoneal Cavity</label>
+        <label code="7">Urinary Tract</label>
+        <label code="9">Fallopian Tube</label>
+      </axis>
+    </pcsRow>
+  </pcsTable>
+<pcsTable>
+    <axis pos="1" values="1">
+      <title>Section</title>
+      <label code="D">Radiation Therapy</label>
+    </axis>
+    <axis pos="2" values="1">
+      <title>Body System</title>
+      <label code="0">Central and Peripheral Nervous System</label>
+    </axis>
+    <axis pos="3" values="1">
+      <title>Modality</title>
+      <label code="0">Beam Radiation</label>
+    </axis>
+    <pcsRow codes="24">
+      <axis pos="4" values="4">
+        <title>Treatment Site</title>
+        <label code="0">Brain</label>
+        <label code="1">Brain Stem</label>
+        <label code="6">Spinal Cord</label>
+        <label code="7">Peripheral Nerve</label>
+      </axis>
+      <axis pos="5" values="6">
+        <title>Modality Qualifier</title>
+        <label code="0">Photons &lt;1 MeV</label>
+        <label code="1">Photons 1 - 10 MeV</label>
+        <label code="2">Photons &gt;10 MeV</label>
+        <label code="4">Heavy Particles (Protons,Ions)</label>
+        <label code="5">Neutrons</label>
+        <label code="6">Neutron Capture</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Isotope</title>
+        <label code="Z">None</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">None</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="8">
+      <axis pos="4" values="4">
+        <title>Treatment Site</title>
+        <label code="0">Brain</label>
+        <label code="1">Brain Stem</label>
+        <label code="6">Spinal Cord</label>
+        <label code="7">Peripheral Nerve</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Modality Qualifier</title>
+        <label code="3">Electrons</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Isotope</title>
+        <label code="Z">None</label>
+      </axis>
+      <axis pos="7" values="2">
+        <title>Qualifier</title>
+        <label code="0">Intraoperative</label>
+        <label code="Z">None</label>
+      </axis>
+    </pcsRow>
+  </pcsTable>
+<pcsTable>
+    <axis pos="1" values="1">
+      <title>Section</title>
+      <label code="G">Mental Health</label>
+    </axis>
+    <axis pos="2" values="1">
+      <title>Body System</title>
+      <label code="Z">None</label>
+    </axis>
+    <axis pos="3" values="1">
+      <title>Type</title>
+      <label code="1">Psychological Tests</label>
+      <definition>The administration and interpretation of standardized psychological tests and measurement instruments for the assessment of psychological function</definition>
+    </axis>
+    <pcsRow codes="5">
+      <axis pos="4" values="5">
+        <title>Qualifier</title>
+        <label code="0">Developmental</label>
+        <label code="1">Personality and Behavioral</label>
+        <label code="2">Intellectual and Psychoeducational</label>
+        <label code="3">Neuropsychological</label>
+        <label code="4">Neurobehavioral and Cognitive Status</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Qualifier</title>
+        <label code="Z">None</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Qualifier</title>
+        <label code="Z">None</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">None</label>
+      </axis>
+    </pcsRow>
+  </pcsTable>
+<pcsTable>
+    <axis pos="1" values="1">
+      <title>Section</title>
+      <label code="4">Measurement and Monitoring</label>
+    </axis>
+    <axis pos="2" values="1">
+      <title>Body System</title>
+      <label code="A">Physiological Systems</label>
+    </axis>
+    <axis pos="3" values="1">
+      <title>Operation</title>
+      <label code="0">Measurement</label>
+      <definition>Determining the level of a physiological or physical function at a point in time</definition>
+    </axis>
+    <pcsRow codes="3">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="0">Central Nervous</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="0">Open</label>
+      </axis>
+      <axis pos="6" values="3">
+        <title>Function / Device</title>
+        <label code="2">Conductivity</label>
+        <label code="4">Electrical Activity</label>
+        <label code="B">Pressure</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="3">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="0">Central Nervous</label>
+      </axis>
+      <axis pos="5" values="3">
+        <title>Approach</title>
+        <label code="3">Percutaneous</label>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="4">Electrical Activity</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="9">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="0">Central Nervous</label>
+      </axis>
+      <axis pos="5" values="3">
+        <title>Approach</title>
+        <label code="3">Percutaneous</label>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+      </axis>
+      <axis pos="6" values="3">
+        <title>Function / Device</title>
+        <label code="B">Pressure</label>
+        <label code="K">Temperature</label>
+        <label code="R">Saturation</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="D">Intracranial</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="2">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="0">Central Nervous</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="2">
+        <title>Function / Device</title>
+        <label code="2">Conductivity</label>
+        <label code="4">Electrical Activity</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="10">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="1">Peripheral Nervous</label>
+      </axis>
+      <axis pos="5" values="5">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="2">Conductivity</label>
+      </axis>
+      <axis pos="7" values="2">
+        <title>Qualifier</title>
+        <label code="9">Sensory</label>
+        <label code="B">Motor</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="5">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="1">Peripheral Nervous</label>
+      </axis>
+      <axis pos="5" values="5">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="4">Electrical Activity</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="24">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="2">Cardiac</label>
+      </axis>
+      <axis pos="5" values="4">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+      </axis>
+      <axis pos="6" values="6">
+        <title>Function / Device</title>
+        <label code="4">Electrical Activity</label>
+        <label code="9">Output</label>
+        <label code="C">Rate</label>
+        <label code="F">Rhythm</label>
+        <label code="H">Sound</label>
+        <label code="P">Action Currents</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="12">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="2">Cardiac</label>
+      </axis>
+      <axis pos="5" values="4">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="N">Sampling and Pressure</label>
+      </axis>
+      <axis pos="7" values="3">
+        <title>Qualifier</title>
+        <label code="6">Right Heart</label>
+        <label code="7">Left Heart</label>
+        <label code="8">Bilateral</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="2">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="2">Cardiac</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="4">Electrical Activity</label>
+      </axis>
+      <axis pos="7" values="2">
+        <title>Qualifier</title>
+        <label code="A">Guidance</label>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="5">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="2">Cardiac</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="5">
+        <title>Function / Device</title>
+        <label code="9">Output</label>
+        <label code="C">Rate</label>
+        <label code="F">Rhythm</label>
+        <label code="H">Sound</label>
+        <label code="P">Action Currents</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="1">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="2">Cardiac</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="M">Total Activity</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="4">Stress</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="12">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="3">Arterial</label>
+      </axis>
+      <axis pos="5" values="2">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+      </axis>
+      <axis pos="6" values="2">
+        <title>Function / Device</title>
+        <label code="5">Flow</label>
+        <label code="J">Pulse</label>
+      </axis>
+      <axis pos="7" values="3">
+        <title>Qualifier</title>
+        <label code="1">Peripheral</label>
+        <label code="3">Pulmonary</label>
+        <label code="C">Coronary</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="8">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="3">Arterial</label>
+      </axis>
+      <axis pos="5" values="2">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="B">Pressure</label>
+      </axis>
+      <axis pos="7" values="4">
+        <title>Qualifier</title>
+        <label code="1">Peripheral</label>
+        <label code="3">Pulmonary</label>
+        <label code="C">Coronary</label>
+        <label code="F">Other Thoracic</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="4">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="3">Arterial</label>
+      </axis>
+      <axis pos="5" values="2">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+      </axis>
+      <axis pos="6" values="2">
+        <title>Function / Device</title>
+        <label code="H">Sound</label>
+        <label code="R">Saturation</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="1">Peripheral</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="2">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="3">Arterial</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="5">Flow</label>
+      </axis>
+      <axis pos="7" values="2">
+        <title>Qualifier</title>
+        <label code="1">Peripheral</label>
+        <label code="D">Intracranial</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="4">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="3">Arterial</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="4">
+        <title>Function / Device</title>
+        <label code="B">Pressure</label>
+        <label code="H">Sound</label>
+        <label code="J">Pulse</label>
+        <label code="R">Saturation</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="1">Peripheral</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="24">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="4">Venous</label>
+      </axis>
+      <axis pos="5" values="2">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+      </axis>
+      <axis pos="6" values="3">
+        <title>Function / Device</title>
+        <label code="5">Flow</label>
+        <label code="B">Pressure</label>
+        <label code="J">Pulse</label>
+      </axis>
+      <axis pos="7" values="4">
+        <title>Qualifier</title>
+        <label code="0">Central</label>
+        <label code="1">Peripheral</label>
+        <label code="2">Portal</label>
+        <label code="3">Pulmonary</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="2">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="4">Venous</label>
+      </axis>
+      <axis pos="5" values="2">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="R">Saturation</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="1">Peripheral</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="1">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="4">Venous</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="4">Percutaneous Endoscopic</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="B">Pressure</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="2">Portal</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="4">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="4">Venous</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="4">
+        <title>Function / Device</title>
+        <label code="5">Flow</label>
+        <label code="B">Pressure</label>
+        <label code="J">Pulse</label>
+        <label code="R">Saturation</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="1">Peripheral</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="1">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="5">Circulatory</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="L">Volume</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="8">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="6">Lymphatic</label>
+      </axis>
+      <axis pos="5" values="4">
+        <title>Approach</title>
+        <label code="0">Open</label>
+        <label code="3">Percutaneous</label>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+      </axis>
+      <axis pos="6" values="2">
+        <title>Function / Device</title>
+        <label code="5">Flow</label>
+        <label code="B">Pressure</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="3">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="7">Visual</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="3">
+        <title>Function / Device</title>
+        <label code="0">Acuity</label>
+        <label code="7">Mobility</label>
+        <label code="B">Pressure</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="1">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="8">Olfactory</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="0">Acuity</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="18">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="9">Respiratory</label>
+      </axis>
+      <axis pos="5" values="3">
+        <title>Approach</title>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="6">
+        <title>Function / Device</title>
+        <label code="1">Capacity</label>
+        <label code="5">Flow</label>
+        <label code="C">Rate</label>
+        <label code="D">Resistance</label>
+        <label code="L">Volume</label>
+        <label code="M">Total Activity</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="6">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="B">Gastrointestinal</label>
+      </axis>
+      <axis pos="5" values="2">
+        <title>Approach</title>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+      </axis>
+      <axis pos="6" values="3">
+        <title>Function / Device</title>
+        <label code="8">Motility</label>
+        <label code="B">Pressure</label>
+        <label code="G">Secretion</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="8">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="C">Biliary</label>
+      </axis>
+      <axis pos="5" values="4">
+        <title>Approach</title>
+        <label code="3">Percutaneous</label>
+        <label code="4">Percutaneous Endoscopic</label>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+      </axis>
+      <axis pos="6" values="2">
+        <title>Function / Device</title>
+        <label code="5">Flow</label>
+        <label code="B">Pressure</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="10">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="D">Urinary</label>
+      </axis>
+      <axis pos="5" values="2">
+        <title>Approach</title>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+      </axis>
+      <axis pos="6" values="5">
+        <title>Function / Device</title>
+        <label code="3">Contractility</label>
+        <label code="5">Flow</label>
+        <label code="B">Pressure</label>
+        <label code="D">Resistance</label>
+        <label code="L">Volume</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="1">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="F">Musculoskeletal</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="3">Percutaneous</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="3">Contractility</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="1">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="F">Musculoskeletal</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="3">Percutaneous</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="B">Pressure</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="E">Compartment</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="1">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="F">Musculoskeletal</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="3">Contractility</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="1">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="F">Musculoskeletal</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="1">
+        <title>Function / Device</title>
+        <label code="E">Body Composition</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="J">Air Displacement Plethysmography</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="12">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="H">Products of Conception, Cardiac</label>
+      </axis>
+      <axis pos="5" values="3">
+        <title>Approach</title>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="4">
+        <title>Function / Device</title>
+        <label code="4">Electrical Activity</label>
+        <label code="C">Rate</label>
+        <label code="F">Rhythm</label>
+        <label code="H">Sound</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="9">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="J">Products of Conception, Nervous</label>
+      </axis>
+      <axis pos="5" values="3">
+        <title>Approach</title>
+        <label code="7">Via Natural or Artificial Opening</label>
+        <label code="8">Via Natural or Artificial Opening Endoscopic</label>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="3">
+        <title>Function / Device</title>
+        <label code="2">Conductivity</label>
+        <label code="4">Electrical Activity</label>
+        <label code="B">Pressure</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="2">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="Z">None</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="7">Via Natural or Artificial Opening</label>
+      </axis>
+      <axis pos="6" values="2">
+        <title>Function / Device</title>
+        <label code="6">Metabolism</label>
+        <label code="K">Temperature</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+    <pcsRow codes="3">
+      <axis pos="4" values="1">
+        <title>Body System</title>
+        <label code="Z">None</label>
+      </axis>
+      <axis pos="5" values="1">
+        <title>Approach</title>
+        <label code="X">External</label>
+      </axis>
+      <axis pos="6" values="3">
+        <title>Function / Device</title>
+        <label code="6">Metabolism</label>
+        <label code="K">Temperature</label>
+        <label code="Q">Sleep</label>
+      </axis>
+      <axis pos="7" values="1">
+        <title>Qualifier</title>
+        <label code="Z">No Qualifier</label>
+      </axis>
+    </pcsRow>
+  </pcsTable>
+</ICD10PCS.tabular>

@@ -30,20 +30,31 @@ import {
   writeJson,
 } from './lib/common.mjs';
 import {
+  EVIDENCE_TABLE,
+  EVIDENCE_TIER_CODES,
+  EVIDENCE_TIER_VERSION,
   OWNED_CODE_SYSTEMS,
+  PINNED_SYSTEMS,
   PROVENANCE_SOURCE_CODE,
   PROVENANCE_TABLE,
+  TIER_OF_ASSERTION,
   alternateRelationshipId,
   buildLoadPlan,
+  citationTextOf,
   conceptRowId,
+  evidenceBlockedReason,
   propertyRowId,
   relationshipsBlockedReason,
+  validFromOf,
 } from './lib/load-plan.mjs';
+import { deterministicId } from '../lib/glossary-es/common.mjs';
 
 const args = process.argv.slice(2);
 if (args.includes('--dry-run') && args.includes('--apply'))
   throw new Error('Use --dry-run o --apply, no ambos.');
 const DRY_RUN = !args.includes('--apply');
+const LANGUAGE_CONCEPT = { es: deterministicId('terminology:language:es') };
+const DESIGNATION_TYPE = { preferred: deterministicId('terminology:designation-type:preferred'), synonym: deterministicId('terminology:designation-type:synonym') };
 const BATCH = 1000;
 
 const DB_CONFIG = {
@@ -148,7 +159,7 @@ async function ensureCodeSystem(client, internalCode, version, stateId) {
 }
 
 /** Resuelve (internal_code, code) → concept id en cualquier versión; prefiere la versión por defecto. */
-async function resolveConcepts(client, refs) {
+async function resolveConcepts(client, refs, pinned = new Map()) {
   const bySystem = new Map();
   for (const r of refs)
     (
@@ -156,6 +167,17 @@ async function resolveConcepts(client, refs) {
     ).add(r.code);
   const out = new Map();
   for (const [system, codes] of bySystem) {
+    if (pinned.has(system)) {
+      // Sistemas con varias versiones cargadas por distintas importaciones (PCS): se usa la de esta importación.
+      for (let i = 0; i < [...codes].length; i += 20000) {
+        const { rows: pr } = await client.query(
+          'SELECT cc.code, cc.id FROM terminology.catalog_concepts cc WHERE cc.code_system_version_id = $1 AND cc.code = ANY($2::text[])',
+          [pinned.get(system), [...codes].slice(i, i + 20000)],
+        );
+        for (const r of pr) out.set(`${system}|${r.code}`, r.id);
+      }
+      continue;
+    }
     const { rows } = await client.query(
       `SELECT DISTINCT ON (cc.code) cc.code, cc.id FROM terminology.catalog_concepts cc
          JOIN terminology.code_system_versions csv ON csv.id = cc.code_system_version_id
@@ -189,6 +211,7 @@ async function main() {
       {},
     ),
     properties: plan.concepts.reduce((n, c) => n + c.properties.length, 0),
+    designations: plan.concepts.reduce((n, c) => n + (c.designations?.length ?? 0), 0),
     relationships: plan.relationships.length,
     provenanceRows: plan.provenance.length,
     versions,
@@ -221,7 +244,9 @@ async function main() {
     properties: 0,
     relationships: 0,
     provenance: 0,
+    designations: 0,
     unresolvedEndpoints: 0,
+    unresolvedByObjectSystem: {},
     resolvedViaPublishedSiteMap: 0,
     relationshipsBlocked: null,
   };
@@ -282,27 +307,63 @@ async function main() {
         props,
         ['uuid', 'uuid', null, 'terminology.technical_data_type', 'jsonb'],
       );
+      // Designaciones oficiales (p. ej. CIE-10-ES para ICD-10-PCS): se escriben tal cual las trae la fuente.
+      const desig = list.flatMap((c) =>
+        (c.designations ?? []).map((d, i) => [
+          md5uuid(`mantra:procedures-treatments:designation:${idByCode.get(c.code)}:${d.lang}:${d.type}:${i}`),
+          idByCode.get(c.code),
+          LANGUAGE_CONCEPT[d.lang] ?? (() => { throw new Error(`idioma sin concepto interno: ${d.lang}`); })(),
+          DESIGNATION_TYPE[d.type],
+          d.value,
+          d.type === 'preferred',
+        ]),
+      );
+      if (desig.length)
+        result.designations += await insertMany(
+          client,
+          'concept_designations',
+          ['id', 'concept_id', 'language_concept_id', 'designation_type_concept_id', 'value', 'preferred'],
+          desig,
+          ['uuid', 'uuid', 'uuid', 'uuid', null, null],
+        );
     }
 
-    const { rows: cols } = await client.query(
-      "SELECT column_name FROM information_schema.columns WHERE table_schema = 'terminology' AND table_name = $1",
-      [PROVENANCE_TABLE],
-    );
-    result.relationshipsBlocked = relationshipsBlockedReason(
-      cols.map((c) => c.column_name),
-    );
-    if (result.relationshipsBlocked) {
-      console.warn(
-        `[load] RELACIONES NO CARGADAS: ${result.relationshipsBlocked}`,
+    const colsOf = async (table) =>
+      (
+        await client.query(
+          "SELECT column_name FROM information_schema.columns WHERE table_schema = 'terminology' AND table_name = $1",
+          [table],
+        )
+      ).rows.map((c) => c.column_name);
+    // Modo de procedencia: la tabla de evidencia del modelo v4.2.50 (preferida) o la tabla propuesta
+    // `concept_relationship_assertions`; si no hay ninguna, no se escribe ninguna relación.
+    const evidenceBlock = evidenceBlockedReason(await colsOf(EVIDENCE_TABLE));
+    const legacyBlock = relationshipsBlockedReason(await colsOf(PROVENANCE_TABLE));
+    let tiers = null;
+    if (!evidenceBlock) {
+      const { rows: tr } = await client.query(
+        `SELECT cc.code, cc.id FROM terminology.catalog_concepts cc JOIN terminology.code_system_versions v ON v.id = cc.code_system_version_id WHERE v.version = $1 AND cc.code = ANY($2)`,
+        [EVIDENCE_TIER_VERSION, EVIDENCE_TIER_CODES],
       );
+      tiers = new Map(tr.map((r) => [r.code, r.id]));
+      const lacking = EVIDENCE_TIER_CODES.filter((c) => !tiers.has(c));
+      if (lacking.length) {
+        result.relationshipsBlocked = `BLOQUEADO POR LOS SEEDS: faltan miembros de vs_evidence_tier (${lacking.join(', ')}) en la versión ${EVIDENCE_TIER_VERSION}; los siembra gen_seeds.py (load_seeds.py --skip-prod --refresh).`;
+      }
+    } else if (legacyBlock) {
+      result.relationshipsBlocked = `${evidenceBlock} / ${legacyBlock}`;
+    }
+    if (result.relationshipsBlocked) {
+      console.warn(`[load] RELACIONES NO CARGADAS: ${result.relationshipsBlocked}`);
     } else {
+      const pinned = new Map(PINNED_SYSTEMS.filter((cs) => versionBySystem[cs]).map((cs) => [cs, versionBySystem[cs].versionId]));
       const refs = plan.relationships.flatMap((r) => [
         r.subject,
         r.object,
         ...r.objectAlternates,
         { system: 'procedure-relationship-types', code: r.typeCode },
       ]);
-      const ids = await resolveConcepts(client, refs);
+      const ids = await resolveConcepts(client, refs, pinned);
       const rels = [];
       const resolvedAs = new Map(); // relationshipId del corpus → { id en la base, mapeo usado }
       for (const r of plan.relationships) {
@@ -324,83 +385,71 @@ async function main() {
         }
         if (!s || !o || !t) {
           result.unresolvedEndpoints++;
+          result.unresolvedByObjectSystem[r.object.system] = (result.unresolvedByObjectSystem[r.object.system] ?? 0) + 1;
           continue;
         }
         if (!resolvedAs.has(r.id)) rels.push([id, s, o, t, null]);
-        resolvedAs.set(r.id, { id, via });
+        resolvedAs.set(r.id, { id, via, subjectSystem: r.subject.system });
       }
       result.relationships = await insertMany(
         client,
         'concept_relationships',
-        [
-          'id',
-          'source_concept_id',
-          'target_concept_id',
-          'relationship_type_concept_id',
-          'ordinal',
-        ],
+        ['id', 'source_concept_id', 'target_concept_id', 'relationship_type_concept_id', 'ordinal'],
         rels,
         ['uuid', 'uuid', 'uuid', 'uuid', null],
       );
-      const { rows: srcRows } = await client.query(
-        'SELECT code, id FROM terminology.terminology_sources',
-      );
+      const { rows: srcRows } = await client.query('SELECT code, id FROM terminology.terminology_sources');
       const srcByCode = new Map(srcRows.map((r) => [r.code, r.id]));
-      const prov = plan.provenance
-        .filter((p) => resolvedAs.has(p.relationshipId))
-        .map((p) => {
-          const { id, via } = resolvedAs.get(p.relationshipId);
-          const evidence = via
-            ? { ...(p.evidence ?? {}), objectMappedVia: via }
-            : p.evidence;
-          return [
-            p.id,
-            id,
-            srcByCode.get(PROVENANCE_SOURCE_CODE[p.source]),
-            p.sourceRecordId,
-            p.sourceVersion,
-            p.sourceUri,
-            p.sourcePredicate,
-            p.assertionKind,
-            JSON.stringify(evidence),
-            p.retrievedAt,
-          ];
-        });
-      result.provenance = await insertMany(
-        client,
-        PROVENANCE_TABLE,
-        [
-          'id',
-          'concept_relationship_id',
-          'source_id',
-          'source_record_id',
-          'source_version',
-          'source_uri',
-          'source_predicate',
-          'assertion_kind',
-          'evidence_json',
-          'retrieved_at',
-        ],
-        prov,
-        [
-          'uuid',
-          'uuid',
-          'uuid',
-          null,
-          null,
-          null,
-          null,
-          null,
-          'jsonb',
-          'timestamptz',
-        ],
-      );
+      if (!evidenceBlock) {
+        const ev = plan.provenance
+          .filter((p) => resolvedAs.has(p.relationshipId))
+          .map((p) => {
+            const { id, via, subjectSystem } = resolvedAs.get(p.relationshipId);
+            const tier = tiers.get(TIER_OF_ASSERTION[p.assertionKind]);
+            if (!tier) throw new Error(`Clase de afirmación sin nivel de evidencia: ${p.assertionKind}`);
+            const text = citationTextOf(p) + (via ? ` | sitio_vía_mapeo_publicado=${via.source}:${via.sourceRecordId}` : '');
+            return [
+              p.id,
+              id,
+              srcByCode.get(PROVENANCE_SOURCE_CODE[p.source]),
+              versionBySystem[subjectSystem].versionId,
+              tier,
+              p.sourceRecordId.slice(0, 250),
+              text,
+              p.sourceUri,
+              validFromOf(p).date,
+            ];
+          });
+        result.provenance = await insertMany(
+          client,
+          EVIDENCE_TABLE,
+          ['id', 'concept_relationship_id', 'terminology_source_id', 'code_system_version_id', 'evidence_tier_concept_id', 'source_reference', 'citation_text', 'citation_locator', 'valid_from'],
+          ev,
+          ['uuid', 'uuid', 'uuid', 'uuid', 'uuid', null, null, null, 'date'],
+        );
+      } else {
+        const prov = plan.provenance
+          .filter((p) => resolvedAs.has(p.relationshipId))
+          .map((p) => {
+            const { id, via } = resolvedAs.get(p.relationshipId);
+            const evidence = via ? { ...(p.evidence ?? {}), objectMappedVia: via } : p.evidence;
+            return [p.id, id, srcByCode.get(PROVENANCE_SOURCE_CODE[p.source]), p.sourceRecordId, p.sourceVersion, p.sourceUri, p.sourcePredicate, p.assertionKind, JSON.stringify(evidence), p.retrievedAt];
+          });
+        result.provenance = await insertMany(
+          client,
+          PROVENANCE_TABLE,
+          ['id', 'concept_relationship_id', 'source_id', 'source_record_id', 'source_version', 'source_uri', 'source_predicate', 'assertion_kind', 'evidence_json', 'retrieved_at'],
+          prov,
+          ['uuid', 'uuid', 'uuid', null, null, null, null, null, 'jsonb', 'timestamptz'],
+        );
+      }
     }
 
     const main = versionBySystem.maxo;
     const total =
       result.concepts +
       result.properties +
+      result.designations +
       result.relationships +
       result.provenance;
     await client.query(

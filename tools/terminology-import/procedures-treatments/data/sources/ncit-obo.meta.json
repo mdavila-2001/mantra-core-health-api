@@ -5,7 +5,7 @@
   "license": "CC BY 4.0 (términos de uso de NCI Thesaurus). Edición OBO derivada: no se presenta como la edición oficial de NCI.",
   "licenseUrl": "https://evs.nci.nih.gov/ftp1/NCI_Thesaurus/ThesaurusTermsofUse.htm",
   "homepage": "https://github.com/NCI-Thesaurus/thesaurus-obo-edition",
-  "retrievedAt": "2026-10-24T00:46:40.151Z",
+  "retrievedAt": "2026-10-27T23:43:49.259Z",
   "tag": "v2024-05-07",
   "files": {
     "ncit.obo": {
