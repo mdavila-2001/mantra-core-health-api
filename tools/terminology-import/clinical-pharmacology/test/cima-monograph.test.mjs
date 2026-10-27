@@ -15,7 +15,7 @@ import { extractTables } from '../lib/literal.mjs';
 import { linameByAtc, loadLiname, loadVademecumAtc } from '../lib/liname.mjs';
 import { CODE_SYSTEM, conceptId, planFor, sectionDiscriminator } from '../lib/load-plan.mjs';
 import { assertSection, atcNameIndex, buildMonograph } from '../lib/monograph.mjs';
-import { CIMA_SECTIONS, requiredCoverage, sectionPropertyCode } from '../lib/sections.mjs';
+import { CIMA_SECTIONS, cimaSectionKey, requiredCoverage, sectionPropertyCode } from '../lib/sections.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const read = (p) => JSON.parse(readFileSync(join(HERE, p), 'utf8'));
@@ -78,13 +78,43 @@ test('CIMA: las secciones son el texto literal de la ficha, con documento, versi
 test('CIMA: reacciones adversas conservan las tablas celda a celda (frecuencia literal)', () => {
   const ref = { product: amoxiProduct, criterion: 'prueba', group: {} };
   const rows = cimaSections(amoxiDoc, ref, WHEN);
-  assert.deepEqual(rows.map((r) => r.key).sort(), ['adverse_reactions', 'indications', 'interactions', 'pharmacodynamics']);
+  assert.deepEqual(rows.map((r) => r.key).sort(), ['adverse_reactions', 'indications', 'interactions', 'pharmacodynamics', 'pharmacodynamics']);
+  assert.deepEqual(rows.filter((r) => r.key === 'pharmacodynamics').map((r) => r.section.number), ['5.1', '5.1.1'], 'la subsección 5.1.1 de la ficha real también es farmacodinamia (antes se perdía)');
   const adr = rows.find((r) => r.key === 'adverse_reactions');
   assert.match(adr.text, /Frecuentes \(≥ 1\/100 a < 1\/10\)/);
   assert.equal(adr.tables.length, 1);
   assert.deepEqual(adr.tables[0].rows[0], [{ text: 'Infecciones e infestaciones', colspan: 2 }]);
   const inter = rows.find((r) => r.key === 'interactions');
   assert.match(inter.text, /^Probenecid/);
+});
+
+test('CIMA real (2026-10-27, DIANBEN nº reg. 55211): subsecciones con el texto que el padre deja vacío', () => {
+  const fx = (n) => JSON.parse(readFileSync(join(HERE, 'fixtures', 'cima', n), 'utf8'));
+  const doc = fx('ft-55211.json');
+  const row = fx('list-row-55211.json');
+  const product = cimaProduct(row, fx('detail-55211.json'));
+  const rows = cimaSections(doc, { product, criterion: 'prueba', group: {} }, WHEN).map(assertSection);
+  const by = (key) => rows.filter((r) => r.key === key).map((r) => r.section.number);
+  assert.deepEqual(by('posology'), ['4.2.1'], 'el padre 4.2 viene vacío: la posología está en 4.2.1');
+  assert.deepEqual(by('pregnancy_lactation'), ['4.6.1', '4.6.2', '4.6.3'], 'embarazo, lactancia y fertilidad, cada una con su título');
+  assert.deepEqual(by('pharmacokinetics'), ['5.2.1', '5.2.2', '5.2.4']);
+  assert.deepEqual(by('warnings'), ['4.4', '4.4.1'], 'cuando el padre tiene texto propio, también se conserva');
+  assert.deepEqual(by('adverse_reactions'), ['4.8', '4.8.1']);
+  const emb = rows.find((r) => r.section.number === '4.6.1');
+  assert.equal(emb.section.title, doc.find((d) => d.seccion === '4.6.1').titulo);
+  assert.equal(emb.text, htmlToText(doc.find((d) => d.seccion === '4.6.1').contenido));
+  assert.equal(emb.section.url, 'https://cima.aemps.es/cima/dochtml/ft/55211/4.6.1/FichaTecnica.html');
+  assert.equal(by('composition').length, 1, 'el resto de las secciones no se duplica');
+});
+
+test('secciones CIMA: una subsección hereda la clave de su ancestro mapeado; lo no mapeado queda fuera', () => {
+  assert.equal(cimaSectionKey('4.6.3'), 'pregnancy_lactation');
+  assert.equal(cimaSectionKey('5.2.4'), 'pharmacokinetics');
+  assert.equal(cimaSectionKey('4.2'), 'posology');
+  assert.equal(cimaSectionKey('6.3'), null, 'caducidad: no es parte de la monografía');
+  assert.equal(cimaSectionKey('4'), null);
+  assert.equal(cimaSectionKey('10'), null);
+  assert.equal(cimaSectionKey('toString'), null, 'sin atajos por el prototipo');
 });
 
 test('tablas: anidadas y celdas vacías no inventan contenido', () => {

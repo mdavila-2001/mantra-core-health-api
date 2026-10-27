@@ -22,7 +22,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { mapPool, progressLogger, writeJson } from '../lib/glossary-es/common.mjs';
-import { PoliteHttpClient } from './lib/polite-http.mjs';
+import { PoliteHttpClient, getJsonCachedGz, writeJsonGz } from './lib/polite-http.mjs';
 import { CIMA_REST, atcMasterUrl, cimaProduct, fullDocUrl, groupByAtc5, missingSections, referenceDocuments, safetyNotesUrl, sectionApiUrl } from './lib/cima.mjs';
 import { parseArgs, readJsonIfExists } from './lib/cli.mjs';
 import { CIMA_SHARED_CACHE, atcMasterPath, cpCache, ftPath, ftSectionPath, notesPath } from './lib/paths.mjs';
@@ -44,6 +44,31 @@ async function fetchPaged(urlOf, pathOf, label) {
     progressLogger(label, 20),
   );
   return { reported: first?.totalFilas ?? null, pages, rows: [first, ...rest].flatMap((d) => d?.resultados ?? []) };
+}
+
+const escapeHtml = (t) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/**
+ * Una sección suelta (respaldo si la ficha completa no la trae). Medido el 2026-10-27: este endpoint NO responde JSON
+ * sino `text/plain` con el texto de la sección (la ficha completa sí es un arreglo JSON). Se guarda en la misma forma
+ * `[{ seccion, titulo, contenido }]` que la ficha completa; el texto va escapado para que `htmlToText` lo devuelva igual
+ * (un «< 1/10» no es una etiqueta). Vacío o 404 → `null`.
+ */
+async function fetchSection(nreg, section) {
+  const path = ftSectionPath(nreg, section);
+  if (existsSync(path)) return;
+  const { status, body } = await http.get(sectionApiUrl(nreg, section), { allow404: true });
+  const text = body.toString('utf8');
+  let value = null;
+  if (status !== 404 && text.trim() !== '') {
+    try {
+      const parsed = JSON.parse(text);
+      value = Array.isArray(parsed) ? parsed : null;
+    } catch {
+      value = [{ seccion: section, titulo: null, contenido: `<div>${escapeHtml(text).replace(/\r?\n/g, '<br/>')}</div>`, formato: 'text/plain' }];
+    }
+  }
+  writeJsonGz(path, value);
 }
 
 async function main() {
@@ -92,10 +117,10 @@ async function main() {
     CONCURRENCY,
     async (r) => {
       const nreg = r.product.nregistro;
-      const doc = await http.getJsonCached(fullDocUrl(nreg), ftPath(nreg), { allow404: true });
+      const doc = await getJsonCachedGz(http, fullDocUrl(nreg), ftPath(nreg), { allow404: true });
       if (!Array.isArray(doc)) return; // 404 o vacío: no hay ficha segmentada que completar
       for (const s of [...missingSections(doc), ...(doc.some((x) => x?.seccion === '10') ? [] : ['10'])]) {
-        await http.getJsonCached(sectionApiUrl(nreg, s), ftSectionPath(nreg, s), { allow404: true });
+        await fetchSection(nreg, s);
         sectionFallbacks++;
       }
       if (flagged.has(nreg)) await http.getJsonCached(safetyNotesUrl(nreg), notesPath(nreg), { allow404: true });

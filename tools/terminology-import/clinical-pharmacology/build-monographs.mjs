@@ -26,11 +26,13 @@ import { join } from 'node:path';
 
 import { writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
 import { cimaSafetyNotes, cimaSections, groupByAtc5, referenceDocuments } from './lib/cima.mjs';
-import { listJson, parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.mjs';
+import { parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.mjs';
 import { readAllInputs, readBridge } from './lib/inputs.mjs';
+import { EMA_LICENSE, EMA_SOURCE, emaByAtc5, emaProductsSummary, emaReferenceRecords, emaSections } from './lib/ema.mjs';
 import { assertSection, atcNameIndex, buildMonograph, hasVersion } from './lib/monograph.mjs';
 import { labelCoversIngredients, labelIdentity, openFdaPharmClasses, openFdaSections, referenceLabels } from './lib/openfda.mjs';
 import { parseLabel, streamLabelObjects } from './lib/openfda-stream.mjs';
+import { readJsonGz } from './lib/polite-http.mjs';
 import { ingredientUnii } from './lib/rxnorm.mjs';
 import { MONOGRAPHS_META, MONOGRAPHS_NDJSON, cpOut, ftPath, ftSectionPath, notesPath, openFdaDir } from './lib/paths.mjs';
 
@@ -43,12 +45,14 @@ const FDA_TMP = () => cpOut('fda-label-sections.tmp.ndjson');
 function readCimaDoc(nreg) {
   const path = ftPath(nreg);
   if (!existsSync(path)) return null;
-  const parts = [readJsonIfExists(path)];
+  const parts = [readJsonGz(path)];
   const dir = join(ftSectionPath(nreg, 'x'), '..');
-  for (const name of listJson(dir)) parts.push(readJsonIfExists(join(dir, name)));
-  const retrievedAt = [path, ...listJson(dir).map((n) => join(dir, n))].map(retrievedAtOf).sort().at(-1);
+  for (const name of listJsonGz(dir)) parts.push(readJsonGz(join(dir, name)));
+  const retrievedAt = [path, ...listJsonGz(dir).map((n) => join(dir, n))].map(retrievedAtOf).sort().at(-1);
   return { doc: parts.filter(Array.isArray).flat(), retrievedAt };
 }
+
+const listJsonGz = (dir) => (existsSync(dir) ? readdirSync(dir).filter((n) => n.endsWith('.json.gz')).sort() : []);
 
 const partitions = () => {
   const dir = join(openFdaDir(), 'label');
@@ -144,7 +148,8 @@ function readChosen({ path, offsets }, c) {
 
 async function main() {
   const t0 = Date.now();
-  const { products, master, liname, universe: fullUniverse } = readAllInputs();
+  const { products, master, liname, ema, universe: fullUniverse } = readAllInputs();
+  const emaIndex = ema ? emaByAtc5(ema.file) : null;
   const names = atcNameIndex({ master, products });
   const { byAtc, withoutAtc5 } = groupByAtc5(products);
   const universe = LIMIT_ATC > 0 ? new Map([...fullUniverse].slice(0, LIMIT_ATC)) : fullUniverse;
@@ -197,13 +202,19 @@ async function main() {
           if (hit.pharmClasses) fdaPharmClasses.push(hit.pharmClasses);
         }
       }
+      let emaInfo = null;
+      const emaRecords = emaIndex?.byAtc.get(code) ?? [];
+      if (emaRecords.length > 0) {
+        for (const ref of emaReferenceRecords(emaRecords)) for (const s of emaSections(ref.record, ref, ema.provenance)) if (hasVersion(s)) sections.push(assertSection(s));
+        emaInfo = { source: EMA_SOURCE, products: emaProductsSummary(emaRecords), retrievedAt: ema.provenance.retrievedAt, fileSha256: ema.provenance.sha256, license: EMA_LICENSE };
+      }
       if (cimaProducts.length === 0 && sections.length === 0) {
         stats.skippedWithoutData++;
         continue;
       }
       const lin = liname.get(code);
       const fallbackName = lin ? { display: lin.presentations[0].name, source: 'liname-bo' } : null;
-      const m = { ...buildMonograph({ code, names, cimaProducts, sections, safetyNotes, rxnorm: bridge, fdaPharmClasses, fallbackName }), universeOrigin: origin };
+      const m = { ...buildMonograph({ code, names, cimaProducts, sections, safetyNotes, rxnorm: bridge, fdaPharmClasses, fallbackName, ema: emaInfo }), universeOrigin: origin };
       counts.monographs++;
       counts.sections += m.sections.length;
       for (const s of m.sections) counts.sectionsBySource[s.source] = (counts.sectionsBySource[s.source] ?? 0) + 1;

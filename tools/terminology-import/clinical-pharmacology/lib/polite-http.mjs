@@ -8,7 +8,11 @@
 // carriles y la consigna fija ≤ 2 pedidos/s por host.
 // =============================================================================
 
-import { HttpClient, sleep } from '../../lib/glossary-es/common.mjs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { gunzipSync, gzipSync } from 'node:zlib';
+
+import { HttpClient, ensureDir, sleep } from '../../lib/glossary-es/common.mjs';
 
 export class PoliteHttpClient extends HttpClient {
   #gap;
@@ -27,4 +31,27 @@ export class PoliteHttpClient extends HttpClient {
     if (at > now) await sleep(at - now);
     return super.get(url, opts);
   }
+}
+
+/** Lee un JSON guardado con `writeJsonGz`; `undefined` si no existe. */
+export function readJsonGz(path) {
+  return existsSync(path) ? JSON.parse(gunzipSync(readFileSync(path)).toString('utf8')) : undefined;
+}
+
+export function writeJsonGz(path, value) {
+  ensureDir(dirname(path));
+  writeFileSync(path, gzipSync(Buffer.from(JSON.stringify(value), 'utf8'), { level: 9 }));
+}
+
+/** Como `getJsonCached`, pero la caché va en gzip. Un 404 permitido se cachea como `null`. */
+export async function getJsonCachedGz(http, url, path, opts = {}) {
+  if (existsSync(path)) {
+    http.stats.cacheHits++;
+    return readJsonGz(path);
+  }
+  const { status, body } = await http.get(url, { accept: 'application/json', ...opts });
+  const text = body.toString('utf8');
+  const value = status === 404 || text.trim() === '' ? null : JSON.parse(text);
+  writeJsonGz(path, value);
+  return value;
 }

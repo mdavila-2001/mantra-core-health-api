@@ -57,6 +57,7 @@ export const PROPERTY = {
   RXNORM: 'pharmacology_rxnorm_bridge',
   SAFETY_NOTES: 'pharmacology_safety_notes',
   FDA_CLASSES: 'pharmacology_fda_pharm_classes',
+  EMA: 'pharmacology_ema_authorisations',
   COVERAGE: 'pharmacology_section_coverage',
 };
 
@@ -94,6 +95,7 @@ export function monographProperties(m) {
   if (m.rxnorm) out.push(prop(m.code, PROPERTY.RXNORM, 'json', m.rxnorm));
   if (m.safetyNotes.length) out.push(prop(m.code, PROPERTY.SAFETY_NOTES, 'json', m.safetyNotes));
   if (m.fdaPharmClasses.length) out.push(prop(m.code, PROPERTY.FDA_CLASSES, 'json', m.fdaPharmClasses));
+  if (m.ema) out.push(prop(m.code, PROPERTY.EMA, 'json', m.ema));
   if (Object.keys(m.coverage).length) out.push(prop(m.code, PROPERTY.COVERAGE, 'json', m.coverage));
   for (const s of m.sections) out.push(prop(m.code, sectionPropertyCode(s.key), 'json', s, sectionDiscriminator(s)));
   return out;

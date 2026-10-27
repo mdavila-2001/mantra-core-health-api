@@ -29,8 +29,9 @@ export const COVERAGE_JSON = () => cpOut('coverage.json');
 export const DRY_RUN_PLAN = () => cpOut('load-plan.dry-run.json');
 
 // CIMA (propias de esta importación)
-export const ftPath = (nreg) => cpCache('cima', 'ft', `${nreg}.json`);
-export const ftSectionPath = (nreg, s) => cpCache('cima', 'ft-sections', String(nreg), `${s}.json`);
+// Las fichas se guardan en gzip (HTML repetitivo: ~7:1) porque el disco de la máquina es compartido y escaso.
+export const ftPath = (nreg) => cpCache('cima', 'ft', `${nreg}.json.gz`);
+export const ftSectionPath = (nreg, s) => cpCache('cima', 'ft-sections', String(nreg), `${s}.json.gz`);
 export const notesPath = (nreg) => cpCache('cima', 'notas', `${nreg}.json`);
 export const atcMasterPath = (page) => cpCache('cima', 'maestra-atc', `page-${page}.json`);
 
@@ -41,3 +42,7 @@ export const rxnavPath = (atc, kind, id = '') => cpCache('rxnav', atc, `${kind}$
 export const rxnavByAtcPath = (atc) => cpCache('rxnav', 'by-atc', `${atc}.json`);
 export const rxnavConceptPath = (rxcui, kind) => cpCache('rxnav', 'rxcui', String(rxcui), `${kind}.json`);
 export const openFdaDir = () => cpCache('openfda');
+
+// EMA (datos abiertos de medicamentos)
+export const emaDataPath = () => cpCache('ema', 'medicines.json');
+export const emaMetaPath = () => cpCache('ema', 'fetch.meta.json');

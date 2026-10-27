@@ -48,9 +48,10 @@ export function atcPath(code5, names) {
  * @param {object[]} [input.safetyNotes]
  * @param {object|null} [input.rxnorm]        de `atcBridge`
  * @param {object[]} [input.fdaPharmClasses]
+ * @param {object|null} [input.ema]            `{ source, products[], retrievedAt, license }` de los medicamentos EMA con este ATC 5
  * @param {{display:string,source:string}|null} [input.fallbackName]  nombre oficial alternativo (LINAME) si CIMA no lo nombra
  */
-export function buildMonograph({ code, names, cimaProducts = [], sections = [], safetyNotes = [], rxnorm = null, fdaPharmClasses = [], fallbackName = null }) {
+export function buildMonograph({ code, names, cimaProducts = [], sections = [], safetyNotes = [], rxnorm = null, fdaPharmClasses = [], fallbackName = null, ema = null }) {
   const path = atcPath(code, names);
   const own = path[4];
   const display = own.name ?? fallbackName?.display ?? null;
@@ -83,6 +84,7 @@ export function buildMonograph({ code, names, cimaProducts = [], sections = [], 
         }
       : null,
     rxnorm,
+    ema,
     sections: sortedSections,
     safetyNotes,
     fdaPharmClasses,

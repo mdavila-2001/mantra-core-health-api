@@ -1,13 +1,15 @@
 // Lectura de lo YA descargado (sin red): productos de CIMA, maestra ATC, LINAME
 // y vademécum, y el universo de ATC 5 que se busca en las demás fuentes.
 
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { atcMasterRows, cimaProduct, groupByAtc5, isAtc5 } from './cima.mjs';
 import { listJson, readJsonIfExists, retrievedAtOf } from './cli.mjs';
 import { loadLiname, loadVademecumAtc } from './liname.mjs';
-import { CIMA_SHARED_CACHE, cpCache, rxnavByAtcPath, rxnavConceptPath } from './paths.mjs';
+import { sha256File } from '../../lib/glossary-es/common.mjs';
+import { emaByAtc5 } from './ema.mjs';
+import { CIMA_SHARED_CACHE, cpCache, emaDataPath, emaMetaPath, rxnavByAtcPath, rxnavConceptPath } from './paths.mjs';
 import { RXNAV_LICENSE, atcBridge, parseProperties, parseRelatedIn, parseRelatedPin, parseRxcuiByAtc } from './rxnorm.mjs';
 
 /** Productos de CIMA desde la caché compartida (listado + detalle). Vacío si nunca se bajó. */
@@ -25,7 +27,7 @@ export function readAtcMaster() {
 }
 
 /** Universo de ATC 5: CIMA (productos y maestra) ∪ LINAME ∪ vademecum. Con el origen de cada código. */
-export function atcUniverse({ products, master, liname, vademecum }) {
+export function atcUniverse({ products, master, liname, vademecum, emaAtc = [] }) {
   const origin = new Map();
   const add = (code, src) => {
     if (!isAtc5(code)) return;
@@ -36,7 +38,17 @@ export function atcUniverse({ products, master, liname, vademecum }) {
   for (const r of master) add(r.code, 'cima-maestra-atc');
   for (const code of liname.keys()) add(code, 'liname-bo');
   for (const code of vademecum.keys()) add(code, 'vademecum');
+  for (const code of emaAtc) add(code, 'ema-medicines');
   return new Map([...origin.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([c, s]) => [c, [...s].sort()]));
+}
+
+/** Archivo de datos abiertos de la EMA ya descargado (o null) y la procedencia del archivo. */
+export function readEma() {
+  const path = emaDataPath();
+  if (!existsSync(path)) return null;
+  const file = JSON.parse(readFileSync(path, 'utf8'));
+  const meta = readJsonIfExists(emaMetaPath());
+  return { file, provenance: { retrievedAt: retrievedAtOf(path), sha256: meta?.sha256 ?? sha256File(path), timestamp: file.meta?.timestamp ?? null } };
 }
 
 export function readAllInputs() {
@@ -44,7 +56,9 @@ export function readAllInputs() {
   const master = readAtcMaster();
   const liname = loadLiname();
   const vademecum = loadVademecumAtc();
-  return { rows, products, master, liname, vademecum, universe: atcUniverse({ products, master, liname, vademecum }) };
+  const ema = readEma();
+  const emaAtc = ema ? [...emaByAtc5(ema.file).byAtc.keys()] : [];
+  return { rows, products, master, liname, vademecum, ema, universe: atcUniverse({ products, master, liname, vademecum, emaAtc }) };
 }
 
 /** Puente RxNav de un ATC desde la caché v2 (sin red). `null` si ese ATC nunca se consultó. */

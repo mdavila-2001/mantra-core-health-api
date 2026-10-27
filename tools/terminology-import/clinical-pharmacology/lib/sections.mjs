@@ -121,6 +121,24 @@ export const REQUIRED_SECTIONS = Object.freeze({
   overdose: ['overdose'],
 });
 
+/**
+ * Clave de una sección de la ficha técnica de CIMA por su número oficial. Una subsección (4.6.1, 5.2.2…)
+ * hereda la clave de su ancestro más cercano que esté en `CIMA_SECTIONS`. Medido el 2026-10-27 contra fichas
+ * reales: la API entrega el texto PROPIO de cada sección, así que muchas fichas dejan vacío el padre (4.2, 4.6,
+ * 5.2) y escriben todo en 4.2.1/4.2.2, 4.6.1–4.6.3, 5.2.1–5.2.4. Sin esto se perdían posología, embarazo y
+ * farmacocinética de esas fichas.
+ */
+export function cimaSectionKey(number) {
+  if (Object.hasOwn(CIMA_SECTIONS, number)) return CIMA_SECTIONS[number];
+  const parts = String(number).split('.');
+  while (parts.length > 1) {
+    parts.pop();
+    const parent = parts.join('.');
+    if (Object.hasOwn(CIMA_SECTIONS, parent)) return CIMA_SECTIONS[parent];
+  }
+  return null;
+}
+
 /** Código de `concept_properties` de una sección. Uno por clave; varias filas por concepto (una por documento). */
 export const sectionPropertyCode = (key) => {
   if (!(key in SECTION_KEYS)) throw new Error(`Clave de sección desconocida: ${key}`);

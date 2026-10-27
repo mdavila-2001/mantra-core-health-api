@@ -14,7 +14,7 @@
 import { CIMA_LICENSE, CIMA_REST, cimaDetailPageUrl, pickReferenceProduct, toProduct } from '../../lib/glossary-es/cima.mjs';
 import { parseRevisionDate } from '../../encyclopedia/s3-farmacos/lib/revision-date.mjs';
 import { literalFromHtml } from './literal.mjs';
-import { CIMA_SECTIONS } from './sections.mjs';
+import { CIMA_SECTIONS, cimaSectionKey } from './sections.mjs';
 
 export { CIMA_LICENSE, CIMA_REST, toProduct };
 
@@ -142,9 +142,10 @@ export function cimaSections(response, ref, retrievedAt) {
   const revision = parseRevisionDate(response);
   const version = p.fichaTecnicaDate ?? null;
   const out = [];
-  for (const [number, key] of Object.entries(CIMA_SECTIONS)) {
-    const item = items.get(number);
-    if (!item?.contenido) continue;
+  // Cada sección del documento con texto propio, la de nivel superior (4.2) o una subsección (4.2.1, 4.6.3…): ver `cimaSectionKey`.
+  for (const [number, item] of items) {
+    const key = cimaSectionKey(number);
+    if (!key || !item?.contenido) continue;
     const literal = literalFromHtml(item.contenido);
     if (!literal) continue;
     out.push({
