@@ -8,6 +8,7 @@ import {
   OSM_ATTRIBUTION,
   ReverseGeocodingService,
   loadReverseGeocodingConfig,
+  photonToResult,
   toResult,
   type ReverseGeocodingHttp,
 } from './reverse-geocoding.service';
@@ -168,10 +169,11 @@ describe('ReverseGeocodingService', () => {
   });
 
   it('inválido: tras una caída, la cola sigue atendiendo', async () => {
-    let primera = true;
+    // Las dos primeras llamadas son el proveedor y su respaldo: caen las dos.
+    let caidas = 2;
     const { service } = crear(() => {
-      if (primera) {
-        primera = false;
+      if (caidas > 0) {
+        caidas -= 1;
         return Promise.reject(new Error('ECONNRESET'));
       }
       return Promise.resolve({ address: { road: 'Calle 2' } });
@@ -235,5 +237,60 @@ describe('ReverseGeocodingService', () => {
     ).toEqual(['latitude', 'longitude']);
     expect(validateSync(scz)).toHaveLength(0);
     expect(validateSync(texto).length).toBeGreaterThan(0);
+  });
+
+  describe('respaldo (Photon) cuando Nominatim falla', () => {
+    it('correcto: Nominatim cae y la calle sale del segundo proveedor', async () => {
+      const http = jest.fn((url: string) =>
+        url.includes('photon')
+          ? Promise.resolve({
+              features: [
+                {
+                  properties: {
+                    street: 'Calle 24 de Septiembre',
+                    housenumber: '12',
+                    district: 'Centro',
+                    city: 'Santa Cruz de la Sierra',
+                  },
+                },
+              ],
+            })
+          : Promise.reject(new Error('403 Forbidden')),
+      );
+      const { service } = crear(http as unknown as ReverseGeocodingHttp);
+
+      const r = await service.reverse(SCZ.lat, SCZ.lng);
+
+      expect(r.line).toBe('Calle 24 de Septiembre 12, Centro');
+      expect(http).toHaveBeenCalledTimes(2);
+    });
+
+    it('borde: una plaza sin calle usa su nombre como calle', () => {
+      expect(
+        photonToResult({
+          features: [
+            {
+              properties: {
+                name: 'Plaza 24 de Septiembre',
+                osm_key: 'place',
+                osm_value: 'square',
+                district: 'Centro',
+              },
+            },
+          ],
+        }).line,
+      ).toBe('Plaza 24 de Septiembre, Centro');
+      expect(photonToResult({ features: [] }).found).toBe(false);
+    });
+
+    it('inválido: si los dos caen, 503', async () => {
+      const http = jest.fn(() => Promise.reject(new Error('timeout')));
+      const { service } = crear(http as unknown as ReverseGeocodingHttp);
+
+      await expect(service.reverse(SCZ.lat, SCZ.lng)).rejects.toBeInstanceOf(
+        ServiceUnavailableException,
+      );
+      expect(http).toHaveBeenCalledTimes(2);
+    });
   });
 });
