@@ -445,6 +445,43 @@ export class IamPractitionerSelfRegistrationService {
         { field: 'sedesLicenseFileId' },
       );
     }
+    // La fecha del SEDES es de SU fila, igual que su archivo.
+    if (
+      dto.sedesLicenseIssueDate !== undefined &&
+      dto.sedesLicenseNumber === undefined
+    ) {
+      throw new PreconditionFailedException(
+        'La fecha del registro del SEDES necesita su número de registro',
+        { field: 'sedesLicenseIssueDate' },
+      );
+    }
+    // El registro del colegio, con las mismas reglas: su fecha, su colegio y su
+    // archivo van pegados a su número, y su archivo no es el de otra fila.
+    if (dto.collegeLicenseNumber === undefined) {
+      const suelto = (
+        [
+          'collegeName',
+          'collegeLicenseIssueDate',
+          'collegeLicenseFileId',
+        ] as const
+      ).find((campo) => dto[campo] !== undefined);
+      if (suelto !== undefined) {
+        throw new PreconditionFailedException(
+          'Los datos del registro del colegio necesitan su número de registro',
+          { field: suelto },
+        );
+      }
+    }
+    if (
+      dto.collegeLicenseFileId !== undefined &&
+      (dto.collegeLicenseFileId === dto.licenseFileId ||
+        dto.collegeLicenseFileId === dto.sedesLicenseFileId)
+    ) {
+      throw new PreconditionFailedException(
+        'El registro del colegio no puede compartir el archivo de otra habilitación',
+        { field: 'collegeLicenseFileId' },
+      );
+    }
 
     // Una foto que no se puede leer se rechaza acá, antes de escribir nada.
     // Antes se descartaba en silencio y el alta respondía 201 sin la foto que
@@ -671,6 +708,12 @@ export class IamPractitionerSelfRegistrationService {
         user.id,
         'El registro del SEDES',
       );
+      const collegeLicenseFileId = await this.claimLicenseDocument(
+        tx,
+        dto.collegeLicenseFileId,
+        user.id,
+        'El registro del colegio',
+      );
       const license = this.profiles.createJurisdictionAuthorization(tx, {
         practitionerProfileId: person.id,
         jurisdictionConceptId:
@@ -701,8 +744,29 @@ export class IamPractitionerSelfRegistrationService {
               practitionerProfileId: person.id,
               jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
               licenseNumber: dto.sedesLicenseNumber,
+              validFrom: dto.sedesLicenseIssueDate
+                ? new Date(dto.sedesLicenseIssueDate)
+                : undefined,
               stateConceptId: PROF.AUTH_PENDING,
               fileId: sedesLicenseFileId,
+              actorUserId: user.id,
+            });
+      // El registro en el colegio de la profesión: la tercera habilitación,
+      // con su fecha y su respaldo. El nombre del colegio viaja como texto en
+      // `regulatoryAuthority`, como el de la matrícula.
+      const collegeLicense =
+        dto.collegeLicenseNumber === undefined
+          ? undefined
+          : this.profiles.createJurisdictionAuthorization(tx, {
+              practitionerProfileId: person.id,
+              jurisdictionConceptId: PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
+              licenseNumber: dto.collegeLicenseNumber,
+              regulatoryAuthority: dto.collegeName,
+              validFrom: dto.collegeLicenseIssueDate
+                ? new Date(dto.collegeLicenseIssueDate)
+                : undefined,
+              stateConceptId: PROF.AUTH_PENDING,
+              fileId: collegeLicenseFileId,
               actorUserId: user.id,
             });
       // La credencial sólo nace si se declara un título de verdad. Dejó de ser
@@ -996,6 +1060,7 @@ export class IamPractitionerSelfRegistrationService {
         licenseId: license.id,
         credentialId: credential?.id,
         sedesLicenseId: sitesLicense?.id,
+        collegeLicenseId: collegeLicense?.id,
         photoFileId,
         emailVerificationToken: raw,
         activacion: activation,
@@ -1034,6 +1099,9 @@ export class IamPractitionerSelfRegistrationService {
       ...(created.credentialId ? { credentialId: created.credentialId } : {}),
       ...(created.sedesLicenseId
         ? { sedesLicenseId: created.sedesLicenseId }
+        : {}),
+      ...(created.collegeLicenseId
+        ? { collegeLicenseId: created.collegeLicenseId }
         : {}),
       verificationStatus: 'PENDING',
       emailVerificationSent,
