@@ -1,6 +1,0 @@
-node --check EXIT=0
-ERROR FATAL en import-cima: Error: ENOENT: no such file or directory, open '/home/user/glossary-data-build/ndjson/cima.ndjson'
-    at readFileSync (node:fs:440:20)
-    at readNdjson (file:///home/user/mantra-core-health-api/tools/terminology-import/lib/glossary-es/common.mjs:283:10)
-    at safety (file:///home/user/mantra-core-health-api/tools/terminology-import/import-cima.mjs:220:16) {
-EXIT=1

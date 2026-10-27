@@ -63,6 +63,9 @@ export class SiatSimulatedInvoices {
   @Property({ type: 'boolean', default: true })
   simulated!: boolean;
 
+  @Property({ fieldName: 'siat_mode', columnType: 'varchar(12)', default: "'simulated'" })
+  siatMode: 'simulated' | 'real' = 'simulated';
+
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
 
