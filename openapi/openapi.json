@@ -56042,6 +56042,66 @@
         "description": "Cerrar un viaje con distancia/duración. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/public/geo/reverse": {
+      "post": {
+        "description": "Sin sesión. 503 si el proveedor no responde: el alta sigue con la calle a mano. Nunca inventa una dirección.",
+        "operationId": "ReverseGeocodingController_reverse",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReverseGeocodingRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReverseGeocodingResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "422": {
+            "$ref": "#/components/responses/PreconditionFailed"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "summary": "Nombre de la calle de un punto en Bolivia",
+        "tags": [
+          "geo"
+        ]
+      }
+    },
     "/graph/projections/nodes/upsert": {
       "post": {
         "description": "Idempotente por la clave de origen. Un evento con versión anterior se descarta (`stale`). Los identificadores entran sólo hasheados.",
@@ -99694,6 +99754,10 @@
       "description": "Operaciones del dominio funcional forms values. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
     {
+      "name": "geo",
+      "description": "Operaciones del dominio funcional geo. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
+    },
+    {
       "name": "geo-geofences",
       "description": "Operaciones del dominio funcional geo geofences. Consulte el catálogo Markdown de endpoints para payloads mínimos, restricciones, ejemplos completos y semántica de negocio."
     },
@@ -102197,7 +102261,26 @@
               "US_LLP",
               "US_BRANCH",
               "AR_SAS",
-              "MX_S_RL"
+              "MX_S_RL",
+              "SAM",
+              "ASOCIACION_ACCIDENTAL",
+              "SOCIEDAD_CIVIL",
+              "PROFESIONAL_INDEPENDIENTE",
+              "COOPERATIVA",
+              "MUTUAL",
+              "EMPRESA_SOCIAL",
+              "ASOCIACION_CIVIL",
+              "FUNDACION",
+              "ONG",
+              "ENTIDAD_RELIGIOSA",
+              "IFD",
+              "ORGANIZACION_SOCIAL",
+              "ENTIDAD_PUBLICA",
+              "EMPRESA_ESTATAL",
+              "EMPRESA_ESTATAL_MIXTA",
+              "EMPRESA_MIXTA",
+              "EMPRESA_ESTATAL_INTERGUBERNAMENTAL",
+              "ORGANISMO_INTERNACIONAL"
             ],
             "example": "SRL"
           },
@@ -107720,7 +107803,26 @@
               "US_LLP",
               "US_BRANCH",
               "AR_SAS",
-              "MX_S_RL"
+              "MX_S_RL",
+              "SAM",
+              "ASOCIACION_ACCIDENTAL",
+              "SOCIEDAD_CIVIL",
+              "PROFESIONAL_INDEPENDIENTE",
+              "COOPERATIVA",
+              "MUTUAL",
+              "EMPRESA_SOCIAL",
+              "ASOCIACION_CIVIL",
+              "FUNDACION",
+              "ONG",
+              "ENTIDAD_RELIGIOSA",
+              "IFD",
+              "ORGANIZACION_SOCIAL",
+              "ENTIDAD_PUBLICA",
+              "EMPRESA_ESTATAL",
+              "EMPRESA_ESTATAL_MIXTA",
+              "EMPRESA_MIXTA",
+              "EMPRESA_ESTATAL_INTERGUBERNAMENTAL",
+              "ORGANISMO_INTERNACIONAL"
             ],
             "example": "SRL"
           },
@@ -107931,7 +108033,26 @@
               "US_LLP",
               "US_BRANCH",
               "AR_SAS",
-              "MX_S_RL"
+              "MX_S_RL",
+              "SAM",
+              "ASOCIACION_ACCIDENTAL",
+              "SOCIEDAD_CIVIL",
+              "PROFESIONAL_INDEPENDIENTE",
+              "COOPERATIVA",
+              "MUTUAL",
+              "EMPRESA_SOCIAL",
+              "ASOCIACION_CIVIL",
+              "FUNDACION",
+              "ONG",
+              "ENTIDAD_RELIGIOSA",
+              "IFD",
+              "ORGANIZACION_SOCIAL",
+              "ENTIDAD_PUBLICA",
+              "EMPRESA_ESTATAL",
+              "EMPRESA_ESTATAL_MIXTA",
+              "EMPRESA_MIXTA",
+              "EMPRESA_ESTATAL_INTERGUBERNAMENTAL",
+              "ORGANISMO_INTERNACIONAL"
             ],
             "example": "SRL"
           },
@@ -130569,6 +130690,59 @@
           }
         },
         "additionalProperties": false
+      },
+      "ReverseGeocodingRequestDto": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "minimum": -23.5,
+            "maximum": -9.2
+          },
+          "longitude": {
+            "type": "number",
+            "minimum": -70,
+            "maximum": -57
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "additionalProperties": false
+      },
+      "ReverseGeocodingResponseDto": {
+        "type": "object",
+        "properties": {
+          "found": {
+            "type": "boolean",
+            "description": "`false` si no se conoce ninguna calle en ese punto"
+          },
+          "line": {
+            "type": "string",
+            "example": "Calle Guapay 3861, Equipetrol"
+          },
+          "road": {
+            "type": "string"
+          },
+          "houseNumber": {
+            "type": "string"
+          },
+          "neighbourhood": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "attribution": {
+            "type": "string",
+            "description": "Atribución que exige la licencia de los datos"
+          }
+        },
+        "required": [
+          "found",
+          "attribution"
+        ]
       },
       "NodeIdentifierDto": {
         "type": "object",

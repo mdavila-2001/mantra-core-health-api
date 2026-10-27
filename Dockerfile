@@ -30,7 +30,10 @@ RUN --mount=type=cache,target=/app/.yarn/cache,sharing=locked \
 # ---- build: compila TS -> dist (incluye main.js y los 20 worker-*.js) ----
 FROM deps AS build
 COPY . .
-RUN yarn build
+# Los seeds grandes (glosario, catálogos) pasan el tope de memoria por defecto
+# de Node (~2 GB) y `nest build` muere con «heap out of memory»: sin esto la
+# imagen no se construye y el servidor se queda con el código anterior.
+RUN NODE_OPTIONS=--max-old-space-size=4096 yarn build
 
 # ---- deps de producción only (para la imagen final, sin devDependencies) ----
 FROM node:24-bookworm-slim AS prod-deps
