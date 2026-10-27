@@ -142,3 +142,60 @@ test('plan de carga: designación EN, definición, PART_OF y propiedades de proc
   const ids = rows.flatMap((r) => propertiesFor(r).map((p) => p.id));
   assert.equal(new Set(ids).size, ids.length);
 });
+
+// --- Licencias de escalas con evidencia primaria (2026-10-27) -----------------------------------------
+import { LICENSE_OVERRIDES, SCALE_LICENSE_NOTES, TERMINOLOGY_LICENSES } from '../lib/licenses.mjs';
+import { classifyContentLicense } from '../lib/ckm.mjs';
+import { parseNdjsonText, readRepoDataset } from '../lib/repo-data.mjs';
+
+test('overrides de licencia: cada uno trae estado, cita, URL https del titular y fecha', () => {
+  for (const [id, ov] of Object.entries(LICENSE_OVERRIDES)) {
+    assert.equal(ov.status, 'verified-free', id);
+    assert.ok(ov.quote.length > 40 && /^https:\/\//.test(ov.url) && /^\d{4}-\d{2}-\d{2}$/.test(ov.checkedAt), id);
+  }
+  assert.deepEqual(Object.keys(LICENSE_OVERRIDES), ['openEHR-EHR-OBSERVATION.glasgow_coma_scale.v1']);
+  // NEWS2 tiene evidencia primaria pero NO se habilita (la condición «no modificar» choca con re-expresarla)
+  assert.equal(SCALE_LICENSE_NOTES['openEHR-EHR-OBSERVATION.news2.v1'].evidence.startsWith('primary'), true);
+  assert.equal(LICENSE_OVERRIDES['openEHR-EHR-OBSERVATION.news2.v1'], undefined);
+});
+
+test('classifyContentLicense: el override gana y deja la evidencia primaria', () => {
+  const a = { archetypeId: 'openEHR-EHR-OBSERVATION.glasgow_coma_scale.v1', definition: { nodes: [] }, originalLanguage: 'en' };
+  const c = classifyContentLicense(a, LICENSE_OVERRIDES);
+  assert.equal(c.status, 'verified-free');
+  assert.equal(c.evidence[0].url, 'https://www.glasgowcomascale.org/permissions/');
+  assert.equal(classifyContentLicense({ ...a, archetypeId: 'openEHR-EHR-OBSERVATION.glasgow_coma_scale_paediatric.v0' }, LICENSE_OVERRIDES).status === 'verified-free', false);
+});
+
+test('Omaha: el registro de terminologías la marca con evidencia primaria y fecha propia', () => {
+  assert.equal(TERMINOLOGY_LICENSES.oms.evidence.startsWith('primary'), true);
+  assert.equal(TERMINOLOGY_LICENSES.oms.checkedAt, '2026-10-27');
+});
+
+test('datos versionados: Glasgow adulto con contenido y puntajes 1–4, 1–5 y 1–6; la pediátrica sigue retenida', () => {
+  const rows = parseNdjsonText(readRepoDataset('openehr-ckm'));
+  const adult = rows.filter((r) => r.archetypeId === 'openEHR-EHR-OBSERVATION.glasgow_coma_scale.v1');
+  assert.equal(adult[0].contentLicense.status, 'verified-free');
+  assert.equal(adult[0].contentLoaded, true);
+  const ordinals = adult.filter((r) => r.kind === 'value').map((r) => r.ordinalValue);
+  assert.deepEqual(ordinals, [1, 2, 3, 4, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6]);
+  const paed = rows.filter((r) => r.archetypeId === 'openEHR-EHR-OBSERVATION.glasgow_coma_scale_paediatric.v0');
+  assert.equal(paed.length, 1);
+  assert.equal(paed[0].contentLoaded, false);
+});
+
+test('datos versionados: Omaha coincide con lo que construye el armado (mismos conteos)', () => {
+  const rows = parseNdjsonText(readRepoDataset('omaha-system'));
+  assert.equal(rows.length, 320);
+  assert.equal(new Set(rows.map((r) => r.code)).size, 320);
+  const cov = JSON.parse(readRepoDataset('omaha-coverage'));
+  assert.equal(cov.concepts, 320);
+  const check = JSON.parse(readRepoDataset('omaha-crosscheck'));
+  assert.equal(check.orderMismatches.length, 0);
+  assert.equal(check.signsSymptomsEqual, check.signsSymptomsCompared);
+  const cmdic = JSON.parse(readRepoDataset('cmdic-license-verification'));
+  assert.equal(cmdic.zipVsCorpus.differing, 0);
+  assert.equal(cmdic.status, 'reuse-allowed-with-conditions');
+  const links = JSON.parse(readRepoDataset('loinc-links-report'));
+  assert.equal(links.resolvedInPublicSubset, links.boundTermCodes);
+});

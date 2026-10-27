@@ -45,7 +45,7 @@ export const SOURCES = {
     name: 'Ministerio de Sanidad (España) — arquetipos ISO 13606 del CMDIC',
     owner: 'Ministerio de Sanidad de España (elaborados por la Universitat Politècnica de València con VeraTech e Indizen)',
     officialUrl: 'https://www.sanidad.gob.es/profesionales/hcdsns/areaRecursosSem/Rec_mod_clinico_arquetipos.htm',
-    license: 'No declarada en los archivos ni en el repositorio de copia (github.com/openEHR/adl-archetypes). Contenido derivado del RD 1093/2010 (CMDIC); art. 13 TRLPI. Pendiente de confirmación con el Ministerio.',
+    license: 'Aviso legal del Ministerio de Sanidad (leído el 2026-10-27): la información del sitio, salvo indicación expresa en contrario, es reutilizable (reproducción, modificación, distribución y comunicación, usos comerciales y no comerciales) con tres condiciones: no desnaturalizar el contenido, citar la fuente y mencionar la fecha de la última actualización. La página de los arquetipos no declara excepción. El fichero oficial Arquetipos_13606.zip da los mismos 617 conceptos que el corpus (copia de github.com/openEHR/adl-archetypes). Los archivos ADL no llevan licencia propia. Base legal adicional: RD 1093/2010; art. 13 TRLPI.',
     csName: 'CMDIC (RD 1093/2010) — arquetipos UNE-EN ISO 13606 del Ministerio de Sanidad',
   },
   [OMAHA_CODE_SYSTEM]: {

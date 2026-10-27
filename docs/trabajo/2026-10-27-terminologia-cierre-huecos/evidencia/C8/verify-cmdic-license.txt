@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-10-27T23:23:48.148Z",
+  "files": {
+    "aviso": {
+      "url": "https://www.sanidad.gob.es/avisoLegal/home.htm",
+      "httpStatus": 200,
+      "contentType": "text/html",
+      "bytes": 31355,
+      "sha256": "cb979d0f8b0cb0d63f108b492704ac8aaa1c99465562ac089233d49a24645877"
+    },
+    "arquetipos": {
+      "url": "https://www.sanidad.gob.es/profesionales/hcdsns/areaRecursosSem/Rec_mod_clinico_arquetipos.htm",
+      "httpStatus": 200,
+      "contentType": "text/html",
+      "bytes": 21634,
+      "sha256": "d76dcd67b943879b89fd1a964116870e747967cdfb709f1f013b67a2b6332571"
+    },
+    "zip": {
+      "url": "https://www.sanidad.gob.es/profesionales/hcdsns/areaRecursosSem/Arquetipos_13606.zip",
+      "httpStatus": 200,
+      "contentType": "application/zip",
+      "bytes": 77114,
+      "sha256": "16c5ad17d642e9780e8b54d789c69ce891f530295c2f8081cac34ca7eb315d4a"
+    },
+    "lista": {
+      "url": "https://www.sanidad.gob.es/profesionales/hcdsns/areaRecursosSem/Lista_arquetipos_CMDIC_v1_20022014.pdf",
+      "httpStatus": 200,
+      "contentType": "application/pdf",
+      "bytes": 1897781,
+      "sha256": "d33263a4f915f9800ce010ffa72b0365ff3bee9306f21aea5fca8d10e6b7b95d"
+    }
+  },
+  "reuseClause": [
+    "La información disponible en este sitio web, salvo indicación expresa en contrario, es susceptible de reutilización; quedando autorizada su reproducción total o parcial, modificación, distribución y comunicación, para usos comerciales y no comerciales, con sujeción a las siguientes condiciones:",
+    "Queda prohibida en cualquier circunstancia la desnaturalización del contenido de la información.",
+    "El usuario queda obligado a citar la fuente de los documentos objeto de la reutilización.",
+    "El usuario queda obligado a mencionar la fecha de la última actualización de los documentos objeto de la reutilización."
+  ],
+  "pageStatesExceptionToReuse": false,
+  "status": "reuse-allowed-with-conditions",
+  "conditions": [
+    "Queda prohibida en cualquier circunstancia la desnaturalización del contenido de la información.",
+    "El usuario queda obligado a citar la fuente de los documentos objeto de la reutilización.",
+    "El usuario queda obligado a mencionar la fecha de la última actualización de los documentos objeto de la reutilización."
+  ],
+  "zipVsCorpus": {
+    "adlFilesInZip": 58,
+    "conceptsFromZip": 617,
+    "conceptsInCorpus": 617,
+    "differing": 0
+  }
+}

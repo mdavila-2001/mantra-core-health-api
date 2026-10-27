@@ -19,6 +19,7 @@ const DATASETS = {
   'omaha-meta': OMAHA_META,
   'omaha-coverage': join(NURSING_OUT, 'coverage-omaha.json'),
   'omaha-crosscheck': join(NURSING_OUT, 'omaha-crosscheck.json'),
+  'cmdic-license-verification': join(NURSING_OUT, 'cmdic-license-verification.json'),
   'loinc-links': join(NURSING_OUT, 'loinc-links.ndjson'),
   'loinc-links-report': join(NURSING_OUT, 'loinc-links-report.json'),
   'loinc-omaha-terms': join(NURSING_OUT, 'loinc-omaha-terms.json'),

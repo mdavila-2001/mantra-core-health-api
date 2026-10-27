@@ -3,15 +3,15 @@
   "datasets": {
     "openehr-ckm": {
       "source": "openehr-ckm.ndjson",
-      "rows": 8015,
+      "rows": 8037,
       "parts": [
         {
           "file": "openehr-ckm.part-001.ndjson.gz",
-          "rows": 8015,
-          "bytes": 28736689,
-          "sha256": "b97e732ee5c9773aa60b79e6546abcac3653f528d4b3201da53ec8774c6ecd53",
-          "gzBytes": 1197315,
-          "gzSha256": "135a850ca4b29ebccca9af0c43ad7b55b5084b78271656ca5b4966ebd3ef7407"
+          "rows": 8037,
+          "bytes": 28874692,
+          "sha256": "9dc5d1b5062e54efbdc8d0ea016afad106949e343abf99c376aba9f1ad5fffa8",
+          "gzBytes": 1202980,
+          "gzSha256": "a28c90748a476be058ff6d3e1e6b1fffbb44d8089b68c0b695651ff963cb53d2"
         }
       ]
     },
@@ -23,9 +23,9 @@
           "file": "es-msssi-cmdic-13606.part-001.ndjson.gz",
           "rows": 617,
           "bytes": 1726251,
-          "sha256": "d8c12d4163f1bac4f24f0a1536f948178770645916e01f9fccf4700810d98f24",
-          "gzBytes": 40663,
-          "gzSha256": "4a008e64d08d46309333ee59aff26628b060f704d5effd06dadcb7f5b3934bc9"
+          "sha256": "e4e8dd603afc68d276e74689d25ce7f8feb84ffd2324bf01156e9289a4f58bb4",
+          "gzBytes": 40664,
+          "gzSha256": "000b77b646cc6f738a8f9525a0b330c01b9687b261b8ac03455023e9a718cc76"
         }
       ]
     },
@@ -36,10 +36,10 @@
         {
           "file": "nursing-terminology-registry.part-001.ndjson.gz",
           "rows": 12,
-          "bytes": 30403,
-          "sha256": "5f8890de75aa2b84473d95ed47ecd0fd24634b47e1e7dc07944925d8134087df",
-          "gzBytes": 5902,
-          "gzSha256": "51715721df4b5a80af92f458abdb9db66e5e78d63f064a745853f4eb64ee4d9a"
+          "bytes": 30947,
+          "sha256": "a8a778d8b44478268e31e6e5c5e79f7c4564d899b46cbe72b53a1347147c5ce4",
+          "gzBytes": 6178,
+          "gzSha256": "88522387ed1fed9ef2d99d956290357016d21808b59b71fa160f8021bbf521f4"
         }
       ]
     },
@@ -50,10 +50,10 @@
         {
           "file": "coverage.json.gz",
           "rows": null,
-          "bytes": 15820,
-          "sha256": "b23c6291db6ee11f47980eb994b89ff7556d48a3f286d6199ec836e6b862fc19",
-          "gzBytes": 3632,
-          "gzSha256": "a43afa8708e970469686129bd0b46bc8b16dad8bb85a2aff4335cf3d2ff2cae3"
+          "bytes": 15864,
+          "sha256": "5205e2670dfdd910cce8802c6930a4c9a8cc1edfe8abb22b5651509ca80fffb4",
+          "gzBytes": 3698,
+          "gzSha256": "08a2adddd5332f7fa243c5ba60eaf783bbd083994ade772bb1ef7309ede7de28"
         }
       ]
     },
@@ -64,10 +64,10 @@
         {
           "file": "link-check.json.gz",
           "rows": null,
-          "bytes": 727,
-          "sha256": "bf31ddec4ac91a2e2b95e004423697a546487730ee70d4f8653e08bbbc62547f",
-          "gzBytes": 301,
-          "gzSha256": "f609d3e8ea6d4ef8e0278a9c41971e837bc8177a2fc68c3d438db1c29689432d"
+          "bytes": 726,
+          "sha256": "61cd5177599e167a64d5bcfeaa6bc1ea8df8468c5c24d3f53c3a2cfbccbd02b3",
+          "gzBytes": 299,
+          "gzSha256": "4da6ba2fc4d6d34d75980f59bd7af5f3332cee6947b0c836c9e34c2728087797"
         }
       ]
     },
@@ -79,9 +79,9 @@
           "file": "sources-meta.json.gz",
           "rows": null,
           "bytes": 999,
-          "sha256": "3f0d7559063ae61b64add111252d0207231c62487d3caae42954762e5e72fcc8",
-          "gzBytes": 533,
-          "gzSha256": "43d82fb9e7e199aace24d08029bf66661492900f664232e462d6cb7efcf876bf"
+          "sha256": "24466ee98010a25f4e886071c277afb2ac8c556d44892c3f4aae6ee288306d1b",
+          "gzBytes": 536,
+          "gzSha256": "bd0219eb1004bb867f71a2fd43177fec6ee27993cf9a9472b21aa27edf7df945"
         }
       ]
     },
@@ -138,6 +138,20 @@
           "sha256": "bd93d194dd73b95b06d34209a0284912253a7dec211edbfd01078e6d47d4dd64",
           "gzBytes": 435,
           "gzSha256": "14f858b337fb4a25cd9ced4ef5217088026770dd59f7f35ece6f55cb9524753f"
+        }
+      ]
+    },
+    "cmdic-license-verification": {
+      "source": "cmdic-license-verification.json",
+      "rows": null,
+      "parts": [
+        {
+          "file": "cmdic-license-verification.json.gz",
+          "rows": null,
+          "bytes": 2451,
+          "sha256": "21d790127c8cf2e45b3556e9b06e69f17601f723c58e2a94b9ad03fe0fba8e71",
+          "gzBytes": 959,
+          "gzSha256": "0a80e1c57cadcd73eb15bb366309cc385654f84f1bf0697053d4af53a7211e3d"
         }
       ]
     },

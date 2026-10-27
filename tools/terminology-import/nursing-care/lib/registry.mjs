@@ -47,7 +47,7 @@ export function registryRows(namingSystems, pkg) {
         oid,
         uris,
       },
-      license: { ...lic, checkedAt: CHECKED_AT },
+      license: { ...lic, checkedAt: lic.checkedAt ?? CHECKED_AT },
       anaRecognition: ANA_RECOGNITION,
       provenance: {
         source: 'HL7 Terminology (THO), paquete npm',

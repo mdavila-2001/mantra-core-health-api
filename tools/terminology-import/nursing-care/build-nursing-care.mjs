@@ -15,7 +15,7 @@ import { join, relative } from 'node:path';
 import { nowIso, writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
 import { parseArchetype } from './lib/adl.mjs';
 import { CODE_SYSTEM, LOADED_ARCHETYPE_CLASSES, NURSING_RULES, archetypeClass, archetypeRmLabel, archetypeRows } from './lib/ckm.mjs';
-import { MISSING_SCALES, SCALE_LICENSE_NOTES } from './lib/licenses.mjs';
+import { LICENSE_OVERRIDES, MISSING_SCALES, SCALE_LICENSE_NOTES } from './lib/licenses.mjs';
 import { MSSSI_CODE_SYSTEM, MSSSI_RULES, MSSSI_SUBDIR, NURSING_REPORT_ID, msssiProfile, slotTargets } from './lib/msssi.mjs';
 import { NURSING_OUT, SOURCES_META } from './lib/paths.mjs';
 import { REGISTRY_CODE_SYSTEM, registryRows } from './lib/registry.mjs';
@@ -55,7 +55,7 @@ async function main() {
     }
     if (seen.has(archetype.archetypeId)) throw new Error(`Arquetipo repetido en el espejo: ${archetype.archetypeId}`);
     seen.add(archetype.archetypeId);
-    const out = archetypeRows(archetype, { path: relative(ckm.dir, f), commit: ckm.commit, retrievedAt: ckm.retrievedAt, repoUrl: ckm.repoUrl });
+    const out = archetypeRows(archetype, { path: relative(ckm.dir, f), commit: ckm.commit, retrievedAt: ckm.retrievedAt, repoUrl: ckm.repoUrl, overrides: LICENSE_OVERRIDES });
     const note = SCALE_LICENSE_NOTES[archetype.archetypeId];
     if (note) out[0].licenseVerification = note;
     rows.push(...out);
