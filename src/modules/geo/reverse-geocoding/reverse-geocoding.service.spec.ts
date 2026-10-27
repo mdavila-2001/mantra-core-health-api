@@ -40,7 +40,10 @@ function crear(http: ReverseGeocodingHttp) {
       return Promise.resolve();
     },
   );
-  return { service, esperas, logger };
+  const avanzar = (ms: number) => {
+    reloj += ms;
+  };
+  return { service, esperas, logger, avanzar };
 }
 
 const responde =
@@ -88,6 +91,25 @@ describe('ReverseGeocodingService', () => {
       'accept-language': 'es',
     });
     expect(headers['User-Agent']).toContain('AloVida');
+    expect(params).not.toHaveProperty('email');
+  });
+
+  it('correcto: con GEOCODING_CONTACT_EMAIL, Nominatim recibe el correo de contacto', async () => {
+    const http = jest.fn(responde({ road: 'Calle 1' }));
+    const logger = { warn: jest.fn() };
+    const service = new ReverseGeocodingService(
+      logger as never,
+      { ...config, contactEmail: 'soporte@alovida.bo' },
+      http as unknown as ReverseGeocodingHttp,
+    );
+
+    await service.reverse(SCZ.lat, SCZ.lng);
+
+    const [, params] = http.mock.calls[0] as unknown as [
+      string,
+      Record<string, string>,
+    ];
+    expect(params.email).toBe('soporte@alovida.bo');
   });
 
   it('correcto: la respuesta REAL de Nominatim para la plaza 24 de Septiembre', () => {
@@ -224,13 +246,18 @@ describe('ReverseGeocodingService', () => {
 
   it('inválido: tras una caída, la cola sigue atendiendo', async () => {
     // Las dos primeras llamadas son el proveedor y su respaldo: caen las dos.
+    // Después, Nominatim queda en pausa y responde el respaldo.
     let caidas = 2;
-    const { service } = crear(() => {
+    const { service } = crear((url) => {
       if (caidas > 0) {
         caidas -= 1;
         return Promise.reject(new Error('ECONNRESET'));
       }
-      return Promise.resolve({ address: { road: 'Calle 2' } });
+      return Promise.resolve(
+        url.includes('photon')
+          ? { features: [{ properties: { street: 'Calle 2' } }] }
+          : { address: { road: 'Calle 2' } },
+      );
     });
 
     await expect(service.reverse(-17.7, -63.1)).rejects.toBeInstanceOf(
@@ -335,6 +362,49 @@ describe('ReverseGeocodingService', () => {
         }).line,
       ).toBe('Plaza 24 de Septiembre, Centro');
       expect(photonToResult({ features: [] }).found).toBe(false);
+    });
+
+    it('correcto: tras una caída de Nominatim, los pedidos siguientes van directo al respaldo', async () => {
+      const http = jest.fn((url: string) =>
+        url.includes('photon')
+          ? Promise.resolve({
+              features: [{ properties: { street: 'Calle 1' } }],
+            })
+          : Promise.reject(new Error('Request failed with status code 403')),
+      );
+      const { service } = crear(http as unknown as ReverseGeocodingHttp);
+
+      await service.reverse(-17.7, -63.1);
+      const r = await service.reverse(-17.8, -63.2);
+
+      expect(r.line).toBe('Calle 1');
+      const urls = http.mock.calls.map(([url]) => url);
+      expect(urls.filter((u) => u.includes('nominatim'))).toHaveLength(1);
+      expect(urls.filter((u) => u.includes('photon'))).toHaveLength(2);
+    });
+
+    it('límite: pasada la pausa, se vuelve a preguntar a Nominatim', async () => {
+      let nominatimCae = true;
+      const http = jest.fn((url: string) =>
+        url.includes('photon')
+          ? Promise.resolve({
+              features: [{ properties: { street: 'Calle 1' } }],
+            })
+          : nominatimCae
+            ? Promise.reject(new Error('timeout'))
+            : Promise.resolve({ address: { road: 'Calle Nominatim' } }),
+      );
+      const { service, avanzar } = crear(
+        http as unknown as ReverseGeocodingHttp,
+      );
+
+      await service.reverse(-17.7, -63.1);
+      nominatimCae = false;
+      avanzar(config.primaryCooldownMs);
+
+      expect((await service.reverse(-17.8, -63.2)).line).toBe(
+        'Calle Nominatim',
+      );
     });
 
     it('inválido: si los dos caen, 503', async () => {
