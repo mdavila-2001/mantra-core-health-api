@@ -1,0 +1,44 @@
+=== Relaciones enfermedad → síntoma (APPLY) — 539154 filas de hpoa, orphadata, mondo, doid, hpo-common-disease ===
+{
+  "loadedDiseaseSystems": {
+    "omim": 8478,
+    "decipher": 47,
+    "orphanet": 4355,
+    "mondo": 699,
+    "doid": 3089,
+    "mesh": 1046
+  },
+  "stats": {
+    "read": 539154,
+    "notPhenotype": 18597,
+    "negatedSkipped": 0,
+    "diseaseUnresolved": 96,
+    "phenotypeUnresolved": 0,
+    "viaMondo": 0,
+    "evidence": 520430,
+    "duplicateEvidence": 31,
+    "byTier": {
+      "CURATED_REFERENCE": 360412,
+      "STATISTICAL_LITERATURE": 160018
+    },
+    "validFromBasis": {
+      "release": 388422,
+      "retrieved": 132008
+    },
+    "relationships": 402633
+  },
+  "unresolvedDiseasesByPrefix": {
+    "DOID": 1
+  },
+  "negatedNeeds": null
+}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "inserted": {
+    "relationships": 0,
+    "evidence": 0
+  },
+  "remappedRelationships": 0,
+  "segundos": 40
+}

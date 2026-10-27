@@ -1,0 +1,102 @@
+=== Carga de síntomas/fenotipos a terminology.* (APPLY explícito) ===
+[
+  {
+    "codeSystem": "hpo",
+    "version": "2026-09-01",
+    "concepts": 19894,
+    "designations": 61927,
+    "properties": 234710,
+    "isA": 24436,
+    "maps": 0,
+    "glossaryMembers": 0
+  },
+  {
+    "codeSystem": "symp",
+    "version": "2026-07-30",
+    "concepts": 895,
+    "designations": 1138,
+    "properties": 8892,
+    "isA": 898,
+    "maps": 0,
+    "glossaryMembers": 0
+  },
+  {
+    "codeSystem": "ncit",
+    "version": "26.02d",
+    "concepts": 3988,
+    "designations": 7682,
+    "properties": 48985,
+    "isA": 4094,
+    "maps": 0,
+    "glossaryMembers": 0
+  },
+  {
+    "codeSystem": "mesh-c23",
+    "version": "2026",
+    "concepts": 966,
+    "designations": 2653,
+    "properties": 11820,
+    "isA": 1037,
+    "maps": 0,
+    "glossaryMembers": 0
+  }
+]
+[load] {"codeSystem":"hpo","storedAs":"hpo","version":"2026-09-01","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
+[load] {"codeSystem":"symp","storedAs":"symp","version":"2026-07-30","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
+[load] {"codeSystem":"ncit","storedAs":"ncit","version":"26.02d","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
+[load] {"codeSystem":"mesh-c23","storedAs":"mesh-c23","version":"2026","concepts":0,"designations":0,"properties":0,"isA":0,"maps":0,"glossaryMembers":0,"remappedIds":0}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": [
+    {
+      "codeSystem": "hpo",
+      "storedAs": "hpo",
+      "version": "2026-09-01",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "isA": 0,
+      "maps": 0,
+      "glossaryMembers": 0,
+      "remappedIds": 0
+    },
+    {
+      "codeSystem": "symp",
+      "storedAs": "symp",
+      "version": "2026-07-30",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "isA": 0,
+      "maps": 0,
+      "glossaryMembers": 0,
+      "remappedIds": 0
+    },
+    {
+      "codeSystem": "ncit",
+      "storedAs": "ncit",
+      "version": "26.02d",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "isA": 0,
+      "maps": 0,
+      "glossaryMembers": 0,
+      "remappedIds": 0
+    },
+    {
+      "codeSystem": "mesh-c23",
+      "storedAs": "mesh-c23",
+      "version": "2026",
+      "concepts": 0,
+      "designations": 0,
+      "properties": 0,
+      "isA": 0,
+      "maps": 0,
+      "glossaryMembers": 0,
+      "remappedIds": 0
+    }
+  ],
+  "segundos": 9
+}

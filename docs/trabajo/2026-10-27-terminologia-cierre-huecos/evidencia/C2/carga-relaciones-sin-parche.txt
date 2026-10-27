@@ -1,0 +1,4 @@
+=== Relaciones enfermedad → síntoma (CHECK) — 539154 filas de hpoa, orphadata, mondo, doid, hpo-common-disease ===
+BLOQUEADO POR EL MODELO: falta terminology.concept_relationship_evidence o sus columnas (id, concept_relationship_id, terminology_source_id, code_system_version_id, evidence_tier_concept_id, source_reference, citation_text, citation_locator, frequency_concept_id, frequency_numerator, frequency_denominator, statistic_value, valid_from).
+Aplicá SQL/03_terminology del repo del modelo, o su patch SQL/patches/2026-10-25_v4250_terminology_relationship_evidence.sql (commit e8bd453).
+exit=2

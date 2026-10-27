@@ -1,0 +1,13 @@
+=== Cruce HPO ↔ Wikidata (APPLY) — 4876 filas, 4843 términos HPO ===
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "hpoTermsWithItem": 4843,
+  "hpoTermsNotLoaded": 0,
+  "glossaryItemsFound": 3,
+  "inserted": {
+    "properties": 4843,
+    "maps": 3
+  },
+  "segundos": 1
+}

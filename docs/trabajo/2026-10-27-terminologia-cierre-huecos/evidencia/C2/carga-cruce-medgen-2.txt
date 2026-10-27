@@ -1,0 +1,8 @@
+=== Cruces por CUI de MedGen (APPLY) — 1790 pares ===
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "pairs": 1790,
+  "withBothConcepts": 1790,
+  "inserted": 0
+}

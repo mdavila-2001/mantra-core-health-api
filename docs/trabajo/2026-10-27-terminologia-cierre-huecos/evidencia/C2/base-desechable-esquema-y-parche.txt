@@ -1,0 +1,7 @@
+>>> tablas de evidencia ANTES del patch:
+0
+>>> patch del modelo, 1.ª aplicación
+>>> patch del modelo, 2.ª aplicación (idempotencia)
+>>> tablas de evidencia DESPUÉS del patch:
+1
+{"internalConcepts":14,"evidenceValueSetConcepts":10,"glossaryDoubles":3}

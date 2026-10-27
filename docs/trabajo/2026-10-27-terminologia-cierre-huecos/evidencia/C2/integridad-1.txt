@@ -1,0 +1,128 @@
+Pager usage is off.
+== 1. conceptos por code system y versión
+ internal_code |  version   | conceptos 
+---------------+------------+-----------
+ hpo           | 2026-09-01 |     19894
+ mesh-c23      | 2026       |       966
+ ncit          | 26.02d     |      3988
+ symp          | 2026-07-30 |       895
+(4 rows)
+
+== 2. duplicados por (code system version, code) en los 4 sistemas: debe dar 0 filas
+ id | code | count 
+----+------+-------
+(0 rows)
+
+== 3. conceptos sin designación preferida: debe dar 0 filas por sistema
+ internal_code | sin_preferida 
+---------------+---------------
+(0 rows)
+
+== 4. procedencia: conceptos sin source_license / source_version / source_url (debe dar 0)
+ internal_code | sin_licencia | sin_version | sin_url 
+---------------+--------------+-------------+---------
+ hpo           |            0 |           0 |       0
+ mesh-c23      |            0 |           0 |       0
+ ncit          |            0 |           0 |       0
+ symp          |            0 |           0 |       0
+(4 rows)
+
+== 5. is-a: huérfanos (origen o destino inexistente) y autorreferencias: debe dar 0
+ huerfanas | autorref 
+-----------+----------
+         0 |        0
+(1 row)
+
+== 6. aristas enfermedad → síntoma por tipo
+                   tipo                    | aristas 
+-------------------------------------------+---------
+ terminology:relationship:symptom          |  401907
+ terminology:relationship:symptom-excluded |     726
+(2 rows)
+
+== 7. duplicados de la clave natural de la arista (source,target,tipo): debe dar 0 filas
+ source_concept_id | target_concept_id | relationship_type_concept_id | count 
+-------------------+-------------------+------------------------------+-------
+(0 rows)
+
+== 8. evidencia: huérfanos (arista, fuente, versión, nivel inexistentes): debe dar 0
+ sin_arista | sin_fuente | sin_version | sin_nivel 
+------------+------------+-------------+-----------
+          0 |          0 |           0 |         0
+(1 row)
+
+== 9. aristas sin ninguna evidencia: debe dar 0 entre las de síntomas
+ aristas_sin_evidencia 
+-----------------------
+                     0
+(1 row)
+
+== 10. duplicados de la clave natural de la evidencia: debe dar 0 filas
+ concept_relationship_id | terminology_source_id | source_reference | count 
+-------------------------+-----------------------+------------------+-------
+(0 rows)
+
+== 11. nulos indebidos en la evidencia (debe dar 0 en todo)
+ sin_referencia | sin_cita | sin_locator | sin_vigencia | ratio_incompleta | ratio_invertida 
+----------------+----------+-------------+--------------+------------------+-----------------
+              0 |        0 |           0 |            0 |                0 |               0
+(1 row)
+
+== 12. evidencia por fuente y nivel
+     fuente      |         nivel          | filas  
+-----------------+------------------------+--------
+ DO_DOID         | Referencia curada      |   2262
+ HPO_CONSORTIUM  | Literatura estadística | 160018
+ HPO_CONSORTIUM  | Referencia curada      | 240865
+ INSERM_ORPHANET | Referencia curada      | 116471
+ MONARCH_MONDO   | Referencia curada      |    814
+(5 rows)
+
+== 13. evidencia con frecuencia (clase del value set) y con n/m
+  frecuencia   | filas  
+---------------+--------
+ (sin clase)   | 284743
+ Ocasional     |  88379
+ Frecuente     |  80317
+ Muy frecuente |  51370
+ Muy rara      |  13619
+ Obligatoria   |   1276
+ Excluida      |    726
+(7 rows)
+
+ con_n_sobre_m | min_m | max_m 
+---------------+-------+-------
+         96928 |     1 |  1827
+(1 row)
+
+== 14. caso Marfan: «Arachnodactyly» (HP:0001166) desde OMIM:154700 (HPOA) y desde ORPHA:558 (HPOA + Orphadata); cada código cuelga de SU concepto de enfermedad
+ enfermedad |            source_reference             |     fuente      |       nivel       |  frecuencia   |  n  |  m  | valid_from |                                                      cita                                                      
+------------+-----------------------------------------+-----------------+-------------------+---------------+-----+-----+------------+----------------------------------------------------------------------------------------------------------------
+ 154700     | hpoa:881f86580b58ac395ab023970300efe5   | HPO_CONSORTIUM  | Referencia curada |               | 124 | 197 | 2026-09-02 | phenotype.hpoa | database_id=OMIM:154700 | disease_name=Marfan syndrome | hpo_id=HP:0001166 | reference=PMID:2
+ 558        | hpoa:3dfdcf3b0c95e5c8a68be1916cd677a2   | HPO_CONSORTIUM  | Referencia curada | Muy frecuente |     |     | 2026-09-02 | phenotype.hpoa | database_id=ORPHA:558 | disease_name=Marfan syndrome | hpo_id=HP:0001166 | reference=ORPHA:55
+ 558        | orphadata:HPODisorderAssociation/588356 | INSERM_ORPHANET | Referencia curada | Muy frecuente |     |     | 2026-06-23 | Orphadata producto 4 | OrphaCode=558 | Name=Marfan syndrome | Name_es=Síndrome de Marfan | HPOId=HP:0001166 | 
+(3 rows)
+
+== 15. marca de criterio diagnóstico / patognomónico de Orphanet cargada en la cita
+ criterio_diagnostico | patognomonico 
+----------------------+---------------
+                 1132 |            19
+(1 row)
+
+== 16. cruce Wikidata P3841 y mapas
+ hpo_con_items_wikidata 
+------------------------
+                   4843
+(1 row)
+
+ mapas_hpo_a_glosario 
+----------------------
+                    3
+(1 row)
+
+== 17. tamaño de la base
+ tamano 
+--------
+ 932 MB
+(1 row)
+

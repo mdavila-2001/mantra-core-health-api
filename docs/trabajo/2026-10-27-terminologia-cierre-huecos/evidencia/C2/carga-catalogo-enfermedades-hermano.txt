@@ -1,0 +1,87 @@
+=== Catálogo de enfermedades → terminology.*  ===
+Leyendo la instantánea versionada /tmp/claude-0/-home-user/d54e8fca-588a-538f-8209-b411160eadd8/scratchpad/snap/tools/terminology-import/diseases/data
+┌─────────┬────────────┬──────────────┬──────────┬──────────────┬────────────┬───────────────┬───────┬────────────────────────┐
+│ (index) │ codeSystem │ version      │ concepts │ designations │ properties │ relationships │ maps  │ externalMapsCandidates │
+├─────────┼────────────┼──────────────┼──────────┼──────────────┼────────────┼───────────────┼───────┼────────────────────────┤
+│ 0       │ 'decipher' │ 'xref-keys'  │ 61       │ 0            │ 122        │ 0             │ 0     │ 0                      │
+│ 1       │ 'doid'     │ '2026-09-30' │ 14854    │ 37793        │ 49959      │ 17479         │ 24666 │ 7400                   │
+│ 2       │ 'mesh'     │ 'xref-keys'  │ 9320     │ 0            │ 18640      │ 0             │ 0     │ 0                      │
+│ 3       │ 'mondo'    │ '2026-10-06' │ 27695    │ 111790       │ 110255     │ 36104         │ 75138 │ 4410                   │
+│ 4       │ 'omim'     │ 'xref-keys'  │ 10871    │ 0            │ 21742      │ 0             │ 0     │ 0                      │
+│ 5       │ 'orphanet' │ '2026-06-23' │ 11645    │ 52894        │ 48992      │ 19711         │ 45767 │ 0                      │
+└─────────┴────────────┴──────────────┴──────────┴──────────────┴────────────┴───────────────┴───────┴────────────────────────┘
+Totales: {
+  concepts: 74446,
+  designations: 202477,
+  properties: 249710,
+  relationships: 73294,
+  maps: 145571,
+  externalMapsCandidates: 11810
+}
+[concepts] decipher +61
+[concepts] doid +14854
+[concepts] mesh +9320
+[concepts] mondo +27695
+[concepts] omim +10871
+[concepts] orphanet +11645
+[load] decipher {"concepts":61,"designations":0,"properties":122,"relationships":0,"maps":0,"externalMaps":0}
+[load] doid {"concepts":14854,"designations":37793,"properties":49959,"relationships":17479,"maps":12693,"externalMaps":0}
+[load] mesh {"concepts":9320,"designations":0,"properties":18640,"relationships":0,"maps":0,"externalMaps":0}
+[load] mondo {"concepts":27695,"designations":111790,"properties":110255,"relationships":36104,"maps":41512,"externalMaps":0}
+[load] omim {"concepts":10871,"designations":0,"properties":21742,"relationships":0,"maps":0,"externalMaps":0}
+[load] orphanet {"concepts":11645,"designations":52894,"properties":48992,"relationships":19711,"maps":20872,"externalMaps":0}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "decipher": {
+      "concepts": 61,
+      "designations": 0,
+      "properties": 122,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "doid": {
+      "concepts": 14854,
+      "designations": 37793,
+      "properties": 49959,
+      "relationships": 17479,
+      "maps": 12693,
+      "externalMaps": 0
+    },
+    "mesh": {
+      "concepts": 9320,
+      "designations": 0,
+      "properties": 18640,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "mondo": {
+      "concepts": 27695,
+      "designations": 111790,
+      "properties": 110255,
+      "relationships": 36104,
+      "maps": 41512,
+      "externalMaps": 0
+    },
+    "omim": {
+      "concepts": 10871,
+      "designations": 0,
+      "properties": 21742,
+      "relationships": 0,
+      "maps": 0,
+      "externalMaps": 0
+    },
+    "orphanet": {
+      "concepts": 11645,
+      "designations": 52894,
+      "properties": 48992,
+      "relationships": 19711,
+      "maps": 20872,
+      "externalMaps": 0
+    }
+  },
+  "segundos": 26
+}
