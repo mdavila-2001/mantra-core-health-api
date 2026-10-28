@@ -482,6 +482,7 @@ Las pasadas del 2026-10-24 daban por bloqueados `nlmpubs.nlm.nih.gov`, `evs.nci.
 | CIE-11 en castellano | `icdcdn.who.int` 200 (SHA-256 `7c7e5a02…`) | **No cargado**: CC BY-ND y exclusión del propietario; lector probado, flag `--with-icd11-es` |
 | GARD oficial | `rarediseases.info.nih.gov` 200 | **No cargado**: sin texto de licencia verificable; lector probado, flag `--with-gard` (ver SOURCES.md) |
 | Orphadata en castellano | 200; el repo oficial sólo tiene `es_product1/4/9`, `es_funct_consequences` | Sin novedad: `es_product1` ya cargado (mismo tamaño que `orphadata.com`); `es_product6` no existe (404); `es_product4` es de síntomas (C2) |
+| Wikidata (CC0; ES de la comunidad) | `query.wikidata.org` 200, pero 429 con `Retry-After` ≈ 1 000 s tras las consultas de alcance | **No cargado**. Alcance medido el 2026-10-28: 34 905 ítems «disease», 9 168 con etiqueta en castellano, 6 485 sin identificador del catálogo (14 336 a bajar en 72 lotes × 4 consultas). Pipeline escrito (`fetch-wikidata.mjs`, `lib/wikidata.mjs`, cableado en el build) pero sin prueba contra archivo real; reanudable |
 | CTD, OMIM, DeCS | CTD: verificación de navegador; OMIM y DeCS: 403 | Hueco de licencia/acceso, sin eludir |
 
 ### Antes / después (instantánea 2026-10-24 → 2026-10-28; conceptos / designaciones / is-a / alineamientos)
