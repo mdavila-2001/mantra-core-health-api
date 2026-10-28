@@ -157,8 +157,6 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
     },
     PrimaryPractitionerService,
     {
-    },
-    {
       provide: PATIENT_COVERAGES_PORT,
       useExisting: PatientCoveragesAdapter,
     },

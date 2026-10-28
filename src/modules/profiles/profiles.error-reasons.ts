@@ -19,7 +19,6 @@ export enum ProfilesErrorReason {
   ACCOUNT_WITHOUT_LINKED_PERSON = 'ACCOUNT_WITHOUT_LINKED_PERSON',
   /** No existe el perfil de paciente pedido (o la persona vinculada no lo tiene). */
   PATIENT_PROFILE_NOT_FOUND = 'PATIENT_PROFILE_NOT_FOUND',
-  PATIENT_HOME_ADDRESS_REQUIRED = 'PATIENT_HOME_ADDRESS_REQUIRED',
   /** El paciente se eligió a sí mismo como médico de cabecera. */
   PRIMARY_PRACTITIONER_SELF = 'PRIMARY_PRACTITIONER_SELF',
   /** El profesional declaró que no acepta pacientes nuevos. */
