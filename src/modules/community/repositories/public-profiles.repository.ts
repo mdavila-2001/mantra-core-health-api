@@ -151,6 +151,39 @@ export class PublicProfilesRepository {
   }
 
   /**
+   * Las vitrinas de varios sujetos, acotadas por tipo y estado, en una
+   * consulta. Ordenadas por nombre visible: es lo que muestra un selector.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param filters - Sujetos (`target_id`), tipos de sujeto y estado.
+   * @returns Los perfiles que cumplen los tres filtros.
+   */
+  listByTargetsTypesAndStatus(
+    em: EntityManager,
+    filters: {
+      targetIds: readonly string[];
+      targetTypeConceptIds: readonly string[];
+      statusConceptId: string;
+    },
+  ): Promise<PublicProfiles[]> {
+    if (
+      filters.targetIds.length === 0 ||
+      filters.targetTypeConceptIds.length === 0
+    ) {
+      return Promise.resolve([]);
+    }
+    return em.find(
+      PublicProfiles,
+      {
+        targetId: { $in: [...filters.targetIds] },
+        targetTypeConceptId: { $in: [...filters.targetTypeConceptIds] },
+        statusConceptId: filters.statusConceptId,
+      },
+      { orderBy: { displayName: 'ASC', id: 'ASC' } },
+    );
+  }
+
+  /**
    * Personas activas que se pueden elegir para iniciar un chat.
    *
    * Es una lectura autenticada y deliberadamente distinta del directorio
