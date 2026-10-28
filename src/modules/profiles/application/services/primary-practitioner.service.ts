@@ -28,7 +28,7 @@ import { ProfilesErrorReason } from '../../profiles.error-reasons';
 
 /**
  * El **médico de cabecera**: el profesional que el paciente elige, con un
- * botón, como su médico personal (pedido del 28/10/2026, v4.2.64).
+ * botón, como su médico personal (pedido del 28/10/2026, v4.2.65).
  *
  * ## Quién decide
  *
