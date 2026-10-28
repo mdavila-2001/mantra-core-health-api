@@ -284,6 +284,75 @@ export class RegisterPractitionerDto {
   sedesLicenseFileId?: string;
 
   /**
+   * Fecha de inscripción en el SEDES (ISO `YYYY-MM-DD`): el `valid_from` de SU
+   * fila. Cada habilitación tiene la suya; antes sólo la matrícula llevaba
+   * fecha y la del SEDES nacía sin saber desde cuándo vale. Exige
+   * {@link sedesLicenseNumber}.
+   */
+  @ApiPropertyOptional({
+    description: 'Fecha de inscripción en el SEDES (ISO)',
+    format: 'date',
+  })
+  @IsOptional()
+  @IsISO8601()
+  sedesLicenseIssueDate?: string;
+
+  /**
+   * Registro en el colegio profesional que corresponde a la profesión: el
+   * Colegio Médico para un médico, el de Odontólogos para un odontólogo.
+   *
+   * Es la tercera habilitación, al lado de la matrícula del Ministerio y del
+   * registro del SEDES. Nace como otra fila de
+   * `profiles.jurisdiction_authorizations`, con jurisdicción
+   * `JURISDICTION_PROFESSIONAL_COLLEGE` y el nombre del colegio en
+   * `regulatory_authority`. Opcional en el contrato para no romper a quien ya
+   * integró; el alta web lo pide.
+   */
+  @ApiPropertyOptional({
+    description: 'Número de registro en el colegio profesional',
+    maxLength: 100,
+    example: 'CMB-12345',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
+  collegeLicenseNumber?: string;
+
+  /** Nombre del colegio que emitió el registro. Exige {@link collegeLicenseNumber}. */
+  @ApiPropertyOptional({
+    description: 'Colegio profesional que emitió el registro',
+    maxLength: 200,
+    example: 'Colegio Médico de Bolivia',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  collegeName?: string;
+
+  /** Fecha de inscripción en el colegio (ISO). Exige {@link collegeLicenseNumber}. */
+  @ApiPropertyOptional({
+    description: 'Fecha de inscripción en el colegio profesional (ISO)',
+    format: 'date',
+  })
+  @IsOptional()
+  @IsISO8601()
+  collegeLicenseIssueDate?: string;
+
+  /**
+   * El respaldo del registro del colegio, con las mismas reglas que
+   * {@link licenseFileId}. Exige {@link collegeLicenseNumber}.
+   */
+  @ApiPropertyOptional({
+    description:
+      'fileId del PDF del registro del colegio subido por POST /iam/auth/upload-registration-document',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  collegeLicenseFileId?: string;
+
+  /**
    * Título profesional visible (p. ej. "Dra.", "Lic.").
    */
   @ApiPropertyOptional({ maxLength: 100 })
@@ -898,6 +967,13 @@ export class RegisterPractitionerResponseDto {
    */
   @ApiPropertyOptional({ format: 'uuid' })
   sedesLicenseId?: string;
+
+  /**
+   * Registro del colegio profesional creado, pendiente de verificación.
+   * Ausente cuando el alta no declara `collegeLicenseNumber`.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  collegeLicenseId?: string;
 
   /**
    * Estado de verificación del perfil al terminar el alta. Siempre PENDING:

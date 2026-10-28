@@ -54,6 +54,11 @@ export interface ReverseGeocodingConfig {
   readonly fallbackUrl: string;
   /** Nominatim exige un User-Agent que identifique a la aplicación. */
   readonly userAgent: string;
+  /**
+   * Correo de contacto que Nominatim acepta en el parámetro `email` para
+   * identificar a quien consulta. Vacío no lo envía.
+   */
+  readonly contactEmail: string;
   readonly timeoutMs: number;
   /** Separación mínima entre consultas: la política pública es 1 por segundo. */
   readonly minIntervalMs: number;
@@ -65,6 +70,13 @@ export interface ReverseGeocodingConfig {
    * instante y el alta sigue con la calle a mano.
    */
   readonly maxQueued: number;
+  /**
+   * Tras una caída de Nominatim, cuánto se va directo al respaldo. Sin esto,
+   * con Nominatim bloqueando al servidor cada pedido esperaba su timeout antes
+   * de preguntar a Photon, la cola de una consulta por segundo se alargaba y
+   * el front se rendía antes de recibir la calle.
+   */
+  readonly primaryCooldownMs: number;
 }
 
 export function loadReverseGeocodingConfig(
@@ -82,11 +94,13 @@ export function loadReverseGeocodingConfig(
       env.GEOCODING_FALLBACK_URL ?? 'https://photon.komoot.io/reverse',
     userAgent:
       env.GEOCODING_USER_AGENT ||
-      'AloVida/1.0 (registro de pacientes; contacto: soporte)',
+      'AloVida/1.0 (+https://alovida.bo; registro de pacientes)',
+    contactEmail: env.GEOCODING_CONTACT_EMAIL?.trim() ?? '',
     timeoutMs: entero(env.GEOCODING_TIMEOUT_MS, 6000),
     minIntervalMs: entero(env.GEOCODING_MIN_INTERVAL_MS, 1100),
     cacheSize: entero(env.GEOCODING_CACHE_SIZE, 2000),
     maxQueued: entero(env.GEOCODING_MAX_QUEUED, 10),
+    primaryCooldownMs: entero(env.GEOCODING_PRIMARY_COOLDOWN_MS, 300_000),
   };
 }
 
@@ -143,6 +157,9 @@ export const OSM_ATTRIBUTION = '© colaboradores de OpenStreetMap (ODbL)';
  * - **Una consulta por segundo**, como pide la política de uso del servidor
  *   público de Nominatim, serializando los pedidos. Con un servidor propio se
  *   baja `GEOCODING_MIN_INTERVAL_MS`.
+ * - **Pausa del primario**: si Nominatim falla, durante
+ *   `GEOCODING_PRIMARY_COOLDOWN_MS` (5 min) se pregunta directo a Photon, en
+ *   vez de esperar otra vez su timeout en cada pedido.
  * - **Caché** por punto redondeado a ~11 m (4 decimales): quien corrige el pin
  *   un par de veces no vuelve a salir a la red, y el redondeo no cambia la calle.
  * - **Timeout** corto. Si el proveedor falla, 503: el alta lo dice y sigue con
@@ -157,6 +174,8 @@ export class ReverseGeocodingService {
   private cola: Promise<unknown> = Promise.resolve();
   private ultimaConsulta = 0;
   private enEspera = 0;
+  /** Hasta cuándo no se le pregunta a Nominatim, tras una caída. */
+  private primarioCaidoHasta = 0;
 
   constructor(
     private readonly logger: PinoLogger,
@@ -214,26 +233,38 @@ export class ReverseGeocodingService {
     latitude: number,
     longitude: number,
   ): Promise<ReverseGeocodingResult> {
-    try {
-      const respuesta = (await this.http(
-        this.config.url,
-        {
-          format: 'jsonv2',
-          lat: String(latitude),
-          lon: String(longitude),
-          zoom: '18',
-          addressdetails: '1',
-          'accept-language': 'es',
-        },
-        { 'User-Agent': this.config.userAgent },
-        this.config.timeoutMs,
-      )) as NominatimReverse;
-      return toResult(respuesta);
-    } catch (error) {
-      this.logger.warn(
-        { operation: 'geo.reverseGeocoding', error: (error as Error)?.message },
-        'Reverse geocoding provider unavailable',
-      );
+    const saltarPrimario =
+      !!this.config.fallbackUrl && this.ahora() < this.primarioCaidoHasta;
+    if (!saltarPrimario) {
+      try {
+        const respuesta = (await this.http(
+          this.config.url,
+          {
+            format: 'jsonv2',
+            lat: String(latitude),
+            lon: String(longitude),
+            zoom: '18',
+            addressdetails: '1',
+            'accept-language': 'es',
+            ...(this.config.contactEmail
+              ? { email: this.config.contactEmail }
+              : {}),
+          },
+          { 'User-Agent': this.config.userAgent },
+          this.config.timeoutMs,
+        )) as NominatimReverse;
+        this.primarioCaidoHasta = 0;
+        return toResult(respuesta);
+      } catch (error) {
+        this.primarioCaidoHasta = this.ahora() + this.config.primaryCooldownMs;
+        this.logger.warn(
+          {
+            operation: 'geo.reverseGeocoding',
+            error: (error as Error)?.message,
+          },
+          'Reverse geocoding provider unavailable',
+        );
+      }
     }
     // Nominatim público limita y a veces bloquea IPs de servidores: antes de
     // rendirse se pregunta a un segundo proveedor con los mismos datos (OSM).
