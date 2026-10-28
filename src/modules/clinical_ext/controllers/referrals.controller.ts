@@ -10,7 +10,12 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   Audited,
   CurrentUser,
@@ -21,8 +26,13 @@ import {
 import { ReferralsService } from '../services';
 import {
   CreateReferralDto,
+  ListReferralTargetServicesQueryDto,
   RespondReferralDto,
+  ReferralListItemDto,
   ReferralResponseDto,
+  ReferralTargetListDto,
+  ReferralTargetServiceListDto,
+  SearchReferralTargetsQueryDto,
   StatusResultDto,
 } from '../dto';
 
@@ -58,6 +68,30 @@ export class ReferralsController {
     return this.referralsService.create(dto, actor);
   }
 
+  /**
+   * Destinos posibles de una derivación (profesionales y organizaciones).
+   *
+   * Va antes de cualquier ruta con `:id` para que `targets` no se lea como id.
+   */
+  @Get('targets')
+  @ApiOperation({ summary: 'Buscar destinos de derivación' })
+  @ApiOkResponse({ type: ReferralTargetListDto })
+  searchTargets(
+    @Query() query: SearchReferralTargetsQueryDto,
+  ): Promise<ReferralTargetListDto> {
+    return this.referralsService.searchTargets(query);
+  }
+
+  /** Servicios activos de un profesional u organización destino. */
+  @Get('target-services')
+  @ApiOperation({ summary: 'Servicios activos de un destino de derivación' })
+  @ApiOkResponse({ type: ReferralTargetServiceListDto })
+  listTargetServices(
+    @Query() query: ListReferralTargetServicesQueryDto,
+  ): Promise<ReferralTargetServiceListDto> {
+    return this.referralsService.listTargetServices(query);
+  }
+
   /** UC-18-08. */
   @Audited({
     action: 'REFERRAL_RESPONDED',
@@ -83,10 +117,11 @@ export class ReferralsController {
   @Get()
   @AccessLogged({ resourceType: 'REFERRALS' })
   @ApiOperation({ summary: 'Listar derivaciones de un paciente' })
+  @ApiOkResponse({ type: [ReferralListItemDto] })
   listByPatient(
     @Query('patientProfileId', ParseUUIDPipe) patientProfileId: string,
     @CurrentUser() actor: AuthenticatedUser,
-  ) {
+  ): Promise<ReferralListItemDto[]> {
     return this.referralsService.listByPatient(patientProfileId, actor);
   }
 
@@ -99,7 +134,10 @@ export class ReferralsController {
   @AccessLogged({ resourceType: 'REFERRALS', patient: 'actor' })
   @Roles('PATIENT')
   @ApiOperation({ summary: 'Mis derivaciones' })
-  listMine(@CurrentUser() actor: AuthenticatedUser) {
+  @ApiOkResponse({ type: [ReferralListItemDto] })
+  listMine(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReferralListItemDto[]> {
     return this.referralsService.listMine(actor);
   }
 }
