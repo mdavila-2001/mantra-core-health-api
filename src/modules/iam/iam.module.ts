@@ -68,6 +68,7 @@ import { InsuranceDeclaredCoverageAdapter } from './infrastructure/adapters/insu
 import { MessagingEmailNoticeAdapter } from './infrastructure/adapters/messaging-email-notice.adapter';
 import { PharmacyRegistrationAdapter } from './infrastructure/adapters/pharmacy-registration.adapter';
 import { PracticeOwnSiteProvisioningAdapter } from './infrastructure/adapters/practice-own-site-provisioning.adapter';
+import { WorkplaceRequestsAdapter } from './infrastructure/adapters/workplace-requests.adapter';
 import { ProfilesAccountProfileIdsAdapter } from './infrastructure/adapters/profiles-account-profile-ids.adapter';
 import { ProfilesRegistrationAdapter } from './infrastructure/adapters/profiles-registration.adapter';
 import { ACCOUNT_PROFILE_IDS_PORT } from './application/ports/account-profile-ids.port';
@@ -77,6 +78,7 @@ import { DECLARED_COVERAGE_PORT } from './application/ports/declared-coverage.po
 import { DIRECTORY_REGISTRATION_PORT } from './application/ports/directory-registration.port';
 import { EMAIL_NOTICE_PORT } from './application/ports/email-notice.port';
 import { OWN_SITE_PROVISIONING_PORT } from './application/ports/own-site.port';
+import { WORKPLACE_REQUESTS_PORT } from './application/ports/workplace-requests.port';
 import { PHARMACY_REGISTRATION_PORT } from './application/ports/pharmacy-registration.port';
 import { PROFILE_REGISTRATION_PORT } from './application/ports/profile-registration.port';
 import { REGISTRATION_FILES_PORT } from './application/ports/registration-files.port';
@@ -139,6 +141,7 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     MessagingEmailNoticeAdapter,
     PharmacyRegistrationAdapter,
     PracticeOwnSiteProvisioningAdapter,
+    WorkplaceRequestsAdapter,
     ProfilesAccountProfileIdsAdapter,
     ProfilesRegistrationAdapter,
     { provide: BUSINESS_ROLES_PORT, useExisting: AuthzBusinessRolesAdapter },
@@ -165,6 +168,7 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
       provide: OWN_SITE_PROVISIONING_PORT,
       useExisting: PracticeOwnSiteProvisioningAdapter,
     },
+    { provide: WORKPLACE_REQUESTS_PORT, useExisting: WorkplaceRequestsAdapter },
     {
       provide: ACCOUNT_PROFILE_IDS_PORT,
       useExisting: ProfilesAccountProfileIdsAdapter,
