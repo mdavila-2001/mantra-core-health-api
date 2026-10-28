@@ -1310,6 +1310,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1317,6 +1319,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1405,16 +1409,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -1547,6 +1555,8 @@ Content-Type: application/json
 | `taxHolderName` | No | `string` | longitud máxima 200 | Nombre o razón social del titular del NIT. Cadena vacía para quitarla. | `Nombre de ejemplo` |
 | `homeAddressLines` | No | `string` | longitud máxima 300 | Domicilio, tal como lo escribe la persona. Vacío para quitarlo. | `valor-ejemplo` |
 | `workAddressLines` | No | `string` | longitud máxima 300 | Dirección de trabajo. Vacío para quitarla. | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio. Vacío para quitarlo. | `valor-ejemplo` |
+| `workDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del trabajo. Vacío para quitarlo. | `valor-ejemplo` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
@@ -1586,6 +1596,8 @@ Content-Type: application/json
   "taxHolderName": "Nombre de ejemplo",
   "homeAddressLines": "valor-ejemplo",
   "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "homeLatitude": {},
   "homeLongitude": {},
@@ -1648,6 +1660,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1655,6 +1669,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1743,16 +1759,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -1901,6 +1921,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1,
     "isPreferred": true
@@ -1989,6 +2011,7 @@ Content-Type: application/json
 | `label` | Sí | `string` | longitud mínima 1; longitud máxima 60 | Sin descripción específica en el contrato OpenAPI. | `Casa de mi mamá` |
 | `municipalityConceptId` | Sí | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `lines` | No | `string` | longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `district` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `isPreferred` | No | `boolean` | Sin restricción adicional declarada | Marcarla como la que se ofrece primero | `true` |
@@ -2007,6 +2030,7 @@ Content-Type: application/json
   "label": "Casa de mi mamá",
   "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
   "lines": "valor-ejemplo",
+  "district": "valor-ejemplo",
   "latitude": 1,
   "longitude": 1,
   "isPreferred": true
@@ -2039,6 +2063,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1,
     "isPreferred": true
@@ -2159,6 +2185,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1,
     "isPreferred": true
@@ -2251,6 +2279,7 @@ Content-Type: application/json
 | `label` | No | `string` | longitud mínima 1; longitud máxima 60 | Sólo para las guardadas: domicilio y trabajo tienen nombre fijo. | `valor-ejemplo` |
 | `municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `lines` | No | `string` | longitud máxima 300 | Vacío para quitarla | `valor-ejemplo` |
+| `district` | No | `string` | longitud máxima 200 | Vacío para quitarlo | `valor-ejemplo` |
 | `latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 
@@ -2268,6 +2297,7 @@ Content-Type: application/json
   "label": "valor-ejemplo",
   "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
   "lines": "valor-ejemplo",
+  "district": "valor-ejemplo",
   "latitude": 1,
   "longitude": 1
 }
@@ -2300,6 +2330,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1,
     "isPreferred": true
@@ -2422,6 +2454,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1,
     "isPreferred": true
@@ -3421,6 +3455,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -3428,6 +3464,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -3516,16 +3554,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -3709,6 +3751,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -3716,6 +3760,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -3804,16 +3850,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -5221,6 +5271,8 @@ Content-Type: application/json
 | `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `workAddressLines` | No | `string` | longitud máxima 300 | Dirección del lugar de trabajo. Vacío para quitarla. | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio. Vacío para quitarlo. | `valor-ejemplo` |
+| `workDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del trabajo. Vacío para quitarlo. | `valor-ejemplo` |
 | `workLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `workLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
@@ -5268,6 +5320,8 @@ Content-Type: application/json
   "homeLatitude": {},
   "homeLongitude": {},
   "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "workLatitude": {},
   "workLongitude": {},
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
@@ -5337,6 +5391,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -5344,6 +5400,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -5464,16 +5522,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -6003,6 +6065,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6010,6 +6074,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6130,16 +6196,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -6359,6 +6429,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6366,6 +6438,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6486,16 +6560,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -6846,6 +6924,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6853,6 +6933,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6973,16 +7055,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -7150,6 +7236,8 @@ Content-Type: application/json
 | `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `workAddressLines` | No | `string` | longitud máxima 300 | Dirección del lugar de trabajo. Vacío para quitarla. | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio. Vacío para quitarlo. | `valor-ejemplo` |
+| `workDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del trabajo. Vacío para quitarlo. | `valor-ejemplo` |
 | `workLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `workLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
@@ -7197,6 +7285,8 @@ Content-Type: application/json
   "homeLatitude": {},
   "homeLongitude": {},
   "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "workLatitude": {},
   "workLongitude": {},
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
@@ -7265,6 +7355,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -7272,6 +7364,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -7392,16 +7486,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -9592,6 +9690,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -9599,6 +9699,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -9719,16 +9821,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
