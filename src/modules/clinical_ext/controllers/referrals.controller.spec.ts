@@ -20,6 +20,9 @@ function build() {
     create: mockFn(),
     respond: mockFn(),
     listMine: mockFn(),
+    get: mockFn(),
+    counterReferral: mockFn(),
+    cancel: mockFn(),
   };
   const controller = new ReferralsController(referralsService as any);
   return { controller, referralsService };
@@ -38,6 +41,21 @@ describe('ReferralsController', () => {
     const dto = { decision: 'ACCEPT' };
     await d.controller.respond('ref1', dto as any, actor);
     expect(d.referralsService.respond).toHaveBeenCalledWith('ref1', dto, actor);
+  });
+
+  it('delegates get, counter-referral and cancel (v4263)', async () => {
+    const d = build();
+    await d.controller.get('ref1', actor);
+    expect(d.referralsService.get).toHaveBeenCalledWith('ref1', actor);
+    const dto = { counterReferralText: 'Alta de fisioterapia' };
+    await d.controller.counterReferral('ref1', dto, actor);
+    expect(d.referralsService.counterReferral).toHaveBeenCalledWith(
+      'ref1',
+      dto,
+      actor,
+    );
+    await d.controller.cancel('ref1', actor);
+    expect(d.referralsService.cancel).toHaveBeenCalledWith('ref1', actor);
   });
 
   it('delegates listMine (CV-10) to the authenticated actor', async () => {

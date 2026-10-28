@@ -53,6 +53,19 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."referrals" (
     "status_concept_id" uuid NOT NULL,
     "valid_until" date,
     "responded_at" timestamptz,
+    "referral_type" varchar(24),
+    "target_branch_id" uuid,
+    "target_external_name" varchar(200),
+    "target_external_contact" varchar(200),
+    "requested_service_text" varchar(500),
+    "requested_service_concept_id" uuid,
+    "diagnosis_text" text,
+    "clinical_summary" text,
+    "treatment_given_text" text,
+    "informed_consent_id" uuid,
+    "reject_reason" text,
+    "counter_referral_text" text,
+    "counter_referral_at" timestamptz,
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
@@ -121,6 +134,20 @@ CREATE TABLE IF NOT EXISTS "clinical_ext"."cds_rules" (
     "updated_by_user_id" uuid,
     "row_version" integer NOT NULL DEFAULT 1,
     CONSTRAINT "pk_cds_rules" PRIMARY KEY ("id")
+);
+
+CREATE TABLE IF NOT EXISTS "clinical_ext"."cds_rule_versions" (
+    "id" uuid NOT NULL,
+    "cds_rule_id" uuid NOT NULL,
+    "version_number" integer NOT NULL,
+    "logic_json" jsonb,
+    "message_template" text,
+    "severity_concept_id" uuid NOT NULL,
+    "approved_by_user_id" uuid,
+    "approved_at" timestamptz,
+    "created_at" timestamptz NOT NULL,
+    "created_by_user_id" uuid,
+    CONSTRAINT "pk_cds_rule_versions" PRIMARY KEY ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "clinical_ext"."drug_interactions" (

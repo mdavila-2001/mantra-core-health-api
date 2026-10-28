@@ -1,0 +1,2 @@
+$ yarn typecheck
+EXIT 0
