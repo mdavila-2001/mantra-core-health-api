@@ -1,3 +1,4 @@
+import { SYSTEM_BASE_SURVEYS } from '../surveys.base-definitions';
 import { jest } from '@jest/globals';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import type { SurveyInsightsDto } from '../dto/insights.dto';
@@ -30,21 +31,18 @@ const otherDoctor = {
 } as any;
 
 /** Textos exactos de la encuesta base de consulta que el resumen reconoce. */
+const baseQuestion = (dimension: string) =>
+  SYSTEM_BASE_SURVEYS.CONSULTATION.questions.find(
+    (q) => q.dimension === dimension,
+  )!;
 const T = {
-  access:
-    '¿Qué tan fácil le resultó tener esta consulta, desde pedir la cita hasta que comenzó la atención? (1 = Muy difícil, 5 = Muy fácil)',
-  safety:
-    'Durante esta consulta, ¿tuvo algún problema de seguridad o de trato que quiera reportar? (por ejemplo: falta de respeto, falta de privacidad, un posible error o una indicación que le pareció insegura)',
-  global:
-    'En general, ¿cómo calificaría su experiencia con esta consulta? (1 = Muy mala, 5 = Excelente)',
-  nps: '¿Qué tan probable es que usted recomiende a este profesional a un familiar o a un amigo que necesite una atención parecida? (0 = Nada probable, 10 = Totalmente probable)',
-  open: 'Si lo desea, cuéntenos qué podríamos hacer mejor.',
+  access: baseQuestion('esfuerzo_acceso').text,
+  safety: baseQuestion('seguridad_percibida').text,
+  global: baseQuestion('satisfaccion_global').text,
+  nps: baseQuestion('recomendacion_nps').text,
+  open: baseQuestion('comentario_abierto').text,
 };
-const SAFETY_OPTIONS = [
-  'No, no tuve ningún problema',
-  'Sí, y deseo que ALOVIDA me contacte para dar seguimiento',
-  'Sí, pero no deseo que me contacten',
-];
+const SAFETY_OPTIONS = [...baseQuestion('seguridad_percibida').options!];
 
 /** Comprueba que el resumen no quedó suprimido y devuelve todos sus campos. */
 function full(result: SurveyInsightsDto): Required<SurveyInsightsDto> {

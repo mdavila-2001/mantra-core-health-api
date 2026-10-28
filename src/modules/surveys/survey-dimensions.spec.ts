@@ -1,47 +1,68 @@
 import {
+  NPS_DIMENSION,
+  SAFETY_DIMENSION,
   SURVEY_DIMENSIONS,
   dimensionOfQuestionText,
+  dimensionOfSystemQuestion,
   isSafetyAlertOption,
   normalizeSurveyText,
 } from './survey-dimensions';
+import {
+  SYSTEM_BASE_SURVEYS,
+  SYSTEM_SURVEY_KINDS,
+} from './surveys.base-definitions';
 
+/**
+ * Los enunciados y las dimensiones salen de `SYSTEM_BASE_SURVEYS`: estas pruebas
+ * no repiten ningún texto, comparan contra esa definición. El contenido literal
+ * de la encuesta base lo cubre `surveys-system-templates.service.spec.ts`.
+ */
 describe('survey-dimensions', () => {
-  it('reconoce las nueve preguntas base de la consulta, en orden', () => {
-    const consulta = [
-      '¿Qué tan fácil le resultó tener esta consulta, desde pedir la cita hasta que comenzó la atención? (1 = Muy difícil, 5 = Muy fácil)',
-      'Desde la hora acordada, ¿cuánto tiempo esperó hasta que comenzó su consulta? Incluya la espera en sala o en la videollamada.',
-      'En esta consulta, ¿con qué frecuencia el profesional le escuchó con atención? (1 = Nunca, 5 = Siempre)',
-      'En esta consulta, ¿con qué frecuencia el profesional le explicó las cosas de una forma que usted pudo entender? (1 = Nunca, 5 = Siempre)',
-      'En esta consulta, ¿con qué frecuencia el profesional le trató con cortesía y respeto? (1 = Nunca, 5 = Siempre)',
-      'Durante esta consulta, ¿tuvo algún problema de seguridad o de trato que quiera reportar? (por ejemplo: falta de respeto, falta de privacidad, un posible error o una indicación que le pareció insegura)',
-      'En general, ¿cómo calificaría su experiencia con esta consulta? (1 = Muy mala, 5 = Excelente)',
-      '¿Qué tan probable es que usted recomiende a este profesional a un familiar o a un amigo que necesite una atención parecida? (0 = Nada probable, 10 = Totalmente probable)',
-      'Si lo desea, cuéntenos qué podríamos hacer mejor.',
-    ];
-    expect(consulta.map(dimensionOfQuestionText)).toEqual([
-      ...SURVEY_DIMENSIONS,
-    ]);
+  it('las dimensiones son las de la definición base, en el orden de la consulta', () => {
+    expect([...SURVEY_DIMENSIONS]).toEqual(
+      SYSTEM_BASE_SURVEYS.CONSULTATION.questions.map((q) => q.dimension),
+    );
+    // Todas las dimensiones del servicio están entre las de la consulta.
+    for (const q of SYSTEM_BASE_SURVEYS.SERVICE.questions) {
+      expect(SURVEY_DIMENSIONS).toContain(q.dimension);
+    }
   });
 
-  it('reconoce las preguntas base del servicio con las mismas dimensiones', () => {
+  it('cada pregunta base se reconoce por su enunciado con la dimensión que declara', () => {
+    for (const kind of SYSTEM_SURVEY_KINDS) {
+      for (const q of SYSTEM_BASE_SURVEYS[kind].questions) {
+        expect(dimensionOfQuestionText(q.text)).toBe(q.dimension);
+        expect(dimensionOfSystemQuestion(kind, q.position, q.text)).toBe(
+          q.dimension,
+        );
+      }
+    }
+  });
+
+  it('en una plantilla de sistema manda la posición de la definición, con el texto guardado como guarda', () => {
+    const nps = SYSTEM_BASE_SURVEYS.CONSULTATION.questions.find(
+      (q) => q.dimension === NPS_DIMENSION,
+    )!;
+    // Mismo enunciado con otra ancla de escala: sigue siendo la misma pregunta.
     expect(
-      dimensionOfQuestionText(
-        'En general, ¿cómo calificaría su experiencia con este servicio? (1 = Muy mala, 5 = Excelente)',
+      dimensionOfSystemQuestion(
+        'CONSULTATION',
+        nps.position,
+        `${nps.text.replace(/\s*\(0 =.*\)$/, '')} (0 = Nada, 10 = Todo)`,
       ),
-    ).toBe('satisfaccion_global');
+    ).toBe(NPS_DIMENSION);
+    // Una versión histórica con otro texto en esa posición no hereda la dimensión.
     expect(
-      dimensionOfQuestionText(
-        'Desde la hora acordada (o desde que llegó, si no tenía hora), ¿cuánto esperó hasta que le atendieron?',
-      ),
-    ).toBe('tiempo_espera');
+      dimensionOfSystemQuestion('CONSULTATION', nps.position, '¿Le gustó?'),
+    ).toBeNull();
   });
 
   it('tolera mayúsculas, tildes, espacios y un cambio en el ancla de la escala', () => {
-    expect(
-      dimensionOfQuestionText(
-        '  EN GENERAL, ¿CÓMO CALIFICARÍA SU EXPERIENCIA  CON ESTA CONSULTA? (1 = Pésima, 5 = Perfecta)',
-      ),
-    ).toBe('satisfaccion_global');
+    const global = SYSTEM_BASE_SURVEYS.CONSULTATION.questions.find(
+      (q) => q.dimension === 'satisfaccion_global',
+    )!;
+    const noisy = `  ${global.text.toUpperCase().replace(/\(.*\)$/, '(1 = Pésima, 5 = Perfecta)')}  `;
+    expect(dimensionOfQuestionText(noisy)).toBe('satisfaccion_global');
   });
 
   it('una pregunta propia no tiene dimensión', () => {
@@ -56,18 +77,13 @@ describe('survey-dimensions', () => {
     expect(normalizeSurveyText('Nivel (1 = poco, 5 = mucho)')).toBe('nivel');
   });
 
-  it('cuenta como alerta sólo la opción que pide contacto', () => {
-    expect(
-      isSafetyAlertOption(
-        'Sí, y deseo que ALOVIDA me contacte para dar seguimiento',
-      ),
-    ).toBe(true);
-    expect(isSafetyAlertOption('si, y deseo que alovida me contacte')).toBe(
-      true,
-    );
-    expect(isSafetyAlertOption('Sí, pero no deseo que me contacten')).toBe(
-      false,
-    );
-    expect(isSafetyAlertOption('No, no tuve ningún problema')).toBe(false);
+  it('cuenta como alerta sólo la opción que pide contacto, la de la definición base', () => {
+    const options = SYSTEM_BASE_SURVEYS.CONSULTATION.questions.find(
+      (q) => q.dimension === SAFETY_DIMENSION,
+    )!.options!;
+    expect(isSafetyAlertOption(options[1])).toBe(true);
+    expect(isSafetyAlertOption(options[0])).toBe(false);
+    expect(isSafetyAlertOption(options[2])).toBe(false);
+    expect(isSafetyAlertOption(options[1].toLowerCase())).toBe(true);
   });
 });

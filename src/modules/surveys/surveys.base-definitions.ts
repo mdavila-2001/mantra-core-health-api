@@ -1,3 +1,4 @@
+import { DEFAULT_RESPONSE_WINDOW_DAYS } from './surveys.constants';
 import type { AnswerTypeCode } from './surveys.concepts';
 
 /**
@@ -45,7 +46,7 @@ export const SYSTEM_SURVEY_KINDS: readonly SystemSurveyKind[] = [
 export const SYSTEM_BASE_SURVEY_VERSION = 1;
 
 /** Plazo, en días, para responder una invitación base. */
-export const SYSTEM_BASE_RESPONSE_WINDOW_DAYS = 30;
+export const SYSTEM_BASE_RESPONSE_WINDOW_DAYS = DEFAULT_RESPONSE_WINDOW_DAYS;
 
 /** Una pregunta de la encuesta base. */
 export interface SystemBaseQuestion {

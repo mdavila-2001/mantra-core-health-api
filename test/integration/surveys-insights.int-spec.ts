@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { SYSTEM_BASE_SURVEYS } from '../../src/modules/surveys/surveys.base-definitions';
 import { randomUUID } from 'node:crypto';
 import { MikroORM, EntityManager, defineConfig } from '@mikro-orm/postgresql';
 import { BadRequestException } from '@nestjs/common';
@@ -30,22 +31,19 @@ const enabled =
   isDisposableDatabaseName(process.env.DB_NAME ?? '');
 const maybe = enabled ? describe : describe.skip;
 
+const baseQuestion = (dimension: string) =>
+  SYSTEM_BASE_SURVEYS.CONSULTATION.questions.find(
+    (q) => q.dimension === dimension,
+  )!;
 const T = {
-  access:
-    '¿Qué tan fácil le resultó tener esta consulta, desde pedir la cita hasta que comenzó la atención? (1 = Muy difícil, 5 = Muy fácil)',
-  safety:
-    'Durante esta consulta, ¿tuvo algún problema de seguridad o de trato que quiera reportar? (por ejemplo: falta de respeto, falta de privacidad, un posible error o una indicación que le pareció insegura)',
-  global:
-    'En general, ¿cómo calificaría su experiencia con esta consulta? (1 = Muy mala, 5 = Excelente)',
-  nps: '¿Qué tan probable es que usted recomiende a este profesional a un familiar o a un amigo que necesite una atención parecida? (0 = Nada probable, 10 = Totalmente probable)',
-  open: 'Si lo desea, cuéntenos qué podríamos hacer mejor.',
+  access: baseQuestion('esfuerzo_acceso').text,
+  safety: baseQuestion('seguridad_percibida').text,
+  global: baseQuestion('satisfaccion_global').text,
+  nps: baseQuestion('recomendacion_nps').text,
+  open: baseQuestion('comentario_abierto').text,
   own: '¿Le gustó el consultorio?',
 };
-const SAFETY_OPTIONS = [
-  'No, no tuve ningún problema',
-  'Sí, y deseo que ALOVIDA me contacte para dar seguimiento',
-  'Sí, pero no deseo que me contacten',
-];
+const SAFETY_OPTIONS = [...baseQuestion('seguridad_percibida').options!];
 const JSONB = new Set(['options', 'value_choices']);
 
 maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
@@ -103,9 +101,12 @@ maybe('GET /surveys/insights · cálculo agregado (PostgreSQL real)', () => {
       tenant_id: tenantId,
       owner_practitioner_id: ownerPractitioner,
       // La base de sistema no tiene dueño profesional: lo declara con el par
-      // alterno (el CHECK `single_owner` exige uno u otro).
-      owner_type_concept_id: ownerPractitioner ? null : randomUUID(),
-      owner_id: ownerPractitioner ? null : randomUUID(),
+      // alterno (el CHECK `single_owner` exige uno u otro), tal como la escribe
+      // `ensureSystemTemplate`: el tipo de sistema y el tenant como dueño.
+      owner_type_concept_id: ownerPractitioner
+        ? null
+        : SURVEYS.SYSTEM_BASE_CONSULTATION,
+      owner_id: ownerPractitioner ? null : tenantId,
       title: 'Plantilla de prueba',
       status_concept_id: SURVEYS.TEMPLATE_ACTIVE,
       ...stamp,

@@ -2,39 +2,56 @@
  * Dimensiones de la encuesta base de experiencia del paciente y cómo se
  * reconoce una pregunta como perteneciente a una de ellas.
  *
+ * ## Una sola fuente
+ *
+ * Las dimensiones, los enunciados y la opción de alerta de seguridad salen de
+ * `SYSTEM_BASE_SURVEYS` (`surveys.base-definitions.ts`), la definición en código
+ * de la encuesta base. Este archivo no repite ningún texto: si la encuesta base
+ * cambia un enunciado, el resumen lo sigue sin tocar nada acá.
+ *
  * ## Por qué la dimensión se deriva y no se guarda
  *
- * `survey_questions` no tiene columna `dimension` y este módulo no la agrega:
- * las preguntas de la encuesta base viven en código (texto exacto del banco de
- * preguntas) y las del profesional son texto libre. El resumen agregado
+ * `survey_questions` no tiene columna `dimension`. El resumen agregado
  * (`GET /surveys/insights`) necesita agrupar «lo mismo» entre versiones y
  * plantillas distintas —cada versión nueva re-crea sus preguntas con ids
- * nuevos—, y el único dato estable es el enunciado. Por eso la dimensión sale de
- * este mapa por **texto normalizado**, no del orden: el orden no es estable
- * (el profesional agrega preguntas después de las base y puede reordenar las
- * suyas).
+ * nuevos—. Hay dos caminos:
  *
- * Una pregunta cuyo texto no figura acá no tiene dimensión (`null`) y se agrupa
- * por su propio texto normalizado. El mapa debe mantenerse alineado con el banco
- * de preguntas base; si la encuesta base cambia un enunciado, el nuevo texto se
- * agrega acá (el viejo se conserva: sigue habiendo respuestas históricas).
+ * 1. **Preguntas de una plantilla de sistema** (`dimensionOfSystemQuestion`): se
+ *    leen por (tipo de encuesta base, posición) contra `SYSTEM_BASE_SURVEYS`,
+ *    siempre que el enunciado guardado coincida con el de esa posición (si una
+ *    versión histórica tenía otro texto, se cae al camino 2).
+ * 2. **Respaldo por enunciado** (`dimensionOfQuestionText`): el mismo mapa, por
+ *    texto normalizado. Sirve a las preguntas del profesional que copian un
+ *    enunciado base; una pregunta propia no tiene dimensión (`null`) y se agrupa
+ *    por su propio texto normalizado.
  */
+import {
+  SYSTEM_BASE_SURVEYS,
+  SYSTEM_SURVEY_KINDS,
+  type SystemSurveyKind,
+} from './surveys.base-definitions';
 
-/** Las nueve dimensiones del banco base, en el orden de la encuesta de consulta. */
-export const SURVEY_DIMENSIONS = [
-  'esfuerzo_acceso',
-  'tiempo_espera',
-  'comunicacion',
-  'claridad_explicacion',
-  'trato_respetuoso',
-  'seguridad_percibida',
-  'satisfaccion_global',
-  'recomendacion_nps',
-  'comentario_abierto',
-] as const;
+/** Una dimensión del banco base: un slug estable (`recomendacion_nps`, ...). */
+export type SurveyDimension = string;
 
-/** Una de las dimensiones del banco base. */
-export type SurveyDimension = (typeof SURVEY_DIMENSIONS)[number];
+/**
+ * Las dimensiones del banco base, en el orden de la encuesta de consulta (la
+ * de servicio usa un subconjunto).
+ */
+export const SURVEY_DIMENSIONS: readonly SurveyDimension[] = Array.from(
+  new Set(
+    SYSTEM_SURVEY_KINDS.flatMap((kind) =>
+      SYSTEM_BASE_SURVEYS[kind].questions.map((q) => q.dimension),
+    ),
+  ),
+);
+
+/** La dimensión de la recomendación (NPS) en la definición base. */
+export const NPS_DIMENSION: SurveyDimension = 'recomendacion_nps';
+/** La dimensión de la satisfacción global. */
+export const SATISFACTION_DIMENSION: SurveyDimension = 'satisfaccion_global';
+/** La dimensión de la pregunta de seguridad y trato. */
+export const SAFETY_DIMENSION: SurveyDimension = 'seguridad_percibida';
 
 /**
  * Normaliza un enunciado u opción para compararlo: sin tildes, en minúscula,
@@ -55,80 +72,19 @@ export function normalizeSurveyText(text: string): string {
     .trim();
 }
 
-/** Enunciados base (consulta y servicio) → dimensión. Textos sin normalizar. */
-const BASE_QUESTION_TEXTS: ReadonlyArray<readonly [string, SurveyDimension]> = [
-  // --- Consulta médica ---
-  [
-    '¿Qué tan fácil le resultó tener esta consulta, desde pedir la cita hasta que comenzó la atención? (1 = Muy difícil, 5 = Muy fácil)',
-    'esfuerzo_acceso',
-  ],
-  [
-    'Desde la hora acordada, ¿cuánto tiempo esperó hasta que comenzó su consulta? Incluya la espera en sala o en la videollamada.',
-    'tiempo_espera',
-  ],
-  [
-    'En esta consulta, ¿con qué frecuencia el profesional le escuchó con atención? (1 = Nunca, 5 = Siempre)',
-    'comunicacion',
-  ],
-  [
-    'En esta consulta, ¿con qué frecuencia el profesional le explicó las cosas de una forma que usted pudo entender? (1 = Nunca, 5 = Siempre)',
-    'claridad_explicacion',
-  ],
-  [
-    'En esta consulta, ¿con qué frecuencia el profesional le trató con cortesía y respeto? (1 = Nunca, 5 = Siempre)',
-    'trato_respetuoso',
-  ],
-  [
-    'Durante esta consulta, ¿tuvo algún problema de seguridad o de trato que quiera reportar? (por ejemplo: falta de respeto, falta de privacidad, un posible error o una indicación que le pareció insegura)',
-    'seguridad_percibida',
-  ],
-  [
-    'En general, ¿cómo calificaría su experiencia con esta consulta? (1 = Muy mala, 5 = Excelente)',
-    'satisfaccion_global',
-  ],
-  [
-    '¿Qué tan probable es que usted recomiende a este profesional a un familiar o a un amigo que necesite una atención parecida? (0 = Nada probable, 10 = Totalmente probable)',
-    'recomendacion_nps',
-  ],
-  ['Si lo desea, cuéntenos qué podríamos hacer mejor.', 'comentario_abierto'],
-  // --- Servicio (laboratorio, imagenología, procedimiento, otro) ---
-  [
-    'Desde la hora acordada (o desde que llegó, si no tenía hora), ¿cuánto esperó hasta que le atendieron?',
-    'tiempo_espera',
-  ],
-  [
-    'Durante este servicio, ¿con qué frecuencia el personal le trató con cortesía y respeto? (1 = Nunca, 5 = Siempre)',
-    'trato_respetuoso',
-  ],
-  [
-    '¿Qué tan claras fueron las explicaciones o instrucciones que recibió sobre este servicio (por ejemplo: preparación previa, cuidados posteriores o cómo recibirá sus resultados)? (1 = Nada claras, 5 = Muy claras)',
-    'claridad_explicacion',
-  ],
-  [
-    'Durante este servicio, ¿tuvo algún problema de seguridad o de trato que quiera reportar? (por ejemplo: falta de respeto, falta de privacidad, un posible error o un manejo que le pareció inseguro)',
-    'seguridad_percibida',
-  ],
-  [
-    'En general, ¿cómo calificaría su experiencia con este servicio? (1 = Muy mala, 5 = Excelente)',
-    'satisfaccion_global',
-  ],
-  [
-    '¿Qué tan probable es que usted recomiende este servicio a un familiar o a un amigo que necesite una atención parecida? (0 = Nada probable, 10 = Totalmente probable)',
-    'recomendacion_nps',
-  ],
-];
-
-/** Enunciado normalizado → dimensión. */
+/** Enunciado normalizado → dimensión, derivado de la definición base. */
 const DIMENSION_BY_NORMALIZED_TEXT: ReadonlyMap<string, SurveyDimension> =
   new Map(
-    BASE_QUESTION_TEXTS.map(([text, dimension]) => [
-      normalizeSurveyText(text),
-      dimension,
-    ]),
+    SYSTEM_SURVEY_KINDS.flatMap((kind) =>
+      SYSTEM_BASE_SURVEYS[kind].questions.map(
+        (q) => [normalizeSurveyText(q.text), q.dimension] as const,
+      ),
+    ),
   );
 
 /**
- * La dimensión del banco base a la que corresponde un enunciado.
+ * La dimensión del banco base a la que corresponde un enunciado (respaldo por
+ * texto, para preguntas del profesional que copian un enunciado base).
  *
  * @param questionText - Enunciado guardado de la pregunta.
  * @returns La dimensión, o `null` si no es una pregunta base.
@@ -142,13 +98,46 @@ export function dimensionOfQuestionText(
 }
 
 /**
- * Prefijo normalizado de la opción «Sí, y deseo que ALOVIDA me contacte para dar
- * seguimiento» de la pregunta de seguridad. Se compara por prefijo para tolerar
- * un ajuste de la frase final.
+ * La dimensión de una pregunta de una plantilla de sistema: la que declara la
+ * definición base en esa posición, si el enunciado guardado es el de la
+ * definición; si no (una versión histórica con otro texto), por enunciado.
+ *
+ * @param kind - Tipo de encuesta base de la plantilla.
+ * @param position - Posición de la pregunta.
+ * @param questionText - Enunciado guardado.
+ * @returns La dimensión, o `null` si no corresponde a ninguna.
+ */
+export function dimensionOfSystemQuestion(
+  kind: SystemSurveyKind,
+  position: number,
+  questionText: string,
+): SurveyDimension | null {
+  const base = SYSTEM_BASE_SURVEYS[kind].questions.find(
+    (q) => q.position === position,
+  );
+  if (
+    base &&
+    normalizeSurveyText(base.text) === normalizeSurveyText(questionText)
+  ) {
+    return base.dimension;
+  }
+  return dimensionOfQuestionText(questionText);
+}
+
+/**
+ * Prefijo normalizado de la opción que pide que ALOVIDA contacte al paciente: las
+ * primeras palabras de la segunda opción de la pregunta de seguridad de la
+ * definición base. Se compara por prefijo para tolerar un ajuste de la frase
+ * final.
  */
 const SAFETY_ALERT_OPTION_PREFIX = normalizeSurveyText(
-  'Sí, y deseo que ALOVIDA me contacte',
-);
+  SYSTEM_BASE_SURVEYS.CONSULTATION.questions.find(
+    (q) => q.dimension === SAFETY_DIMENSION,
+  )?.options?.[1] ?? '',
+)
+  .split(' ')
+  .slice(0, 7)
+  .join(' ');
 
 /**
  * Si la opción elegida es la que pide que ALOVIDA contacte al paciente.
