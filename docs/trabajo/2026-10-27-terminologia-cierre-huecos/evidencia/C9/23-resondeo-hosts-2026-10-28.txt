@@ -1,0 +1,21 @@
+# Re-sondeo C9 2026-10-28T01:06:49Z (curl -I salvo indicado; HTTPS por proxy del agente)
+403 retry-after=  https://loinc.org/
+403 retry-after=  https://loinc.org/download/
+200 retry-after=  https://decs.bvsalud.org/
+200 retry-after=  https://www.sanidad.gob.es/estadEstudios/estadisticas/normalizacion/CIE10/2026/Procedimientos_Tabla_Referencia_CIE10ES_2026.xlsx
+200 retry-after=  https://www.sanidad.gob.es/avisoLegal/home.htm
+200 retry-after=  https://www.aemps.gob.es/aviso-legal/
+200 retry-after=  https://cima.aemps.es/cima/rest/medicamentos?pagina=1
+200 retry-after=  https://medlineplus.gov/xml/mplus_topics_2026-10-27.xml
+200 retry-after=  https://medlineplus.gov/spanish/pruebas-de-laboratorio/
+200 retry-after=  https://medlineplus.gov/about/using/usingcontent/
+404 retry-after=  https://webapis.cancer.gov/glossary/v1/Terms?dictionary=Cancer.gov&audience=Patient&language=es&size=1
+200 retry-after=  https://www.cancer.gov/policies/copyright-reuse
+200 retry-after=  https://www.wikidata.org/wiki/Wikidata:Licensing
+200 retry-after=  https://query.wikidata.org/sparql?query=ASK%7B%7D
+429 retry-after=5  https://commons.wikimedia.org/w/api.php?action=query&format=json
+200 retry-after=  https://www.orphadata.com/data/xml/es_product1.xml
+403 retry-after=  https://github.com/obophenotype/hpo-translations
+200 retry-after=  https://ftp.cdc.gov/pub/Health_Statistics/NCHS/Publications/ICD10CM/2025/icd10cm-table-index-2025.zip
+000 retry-after=  https://www.inlasa.gob.bo/
+200 retry-after=  https://www.minsalud.gob.bo/

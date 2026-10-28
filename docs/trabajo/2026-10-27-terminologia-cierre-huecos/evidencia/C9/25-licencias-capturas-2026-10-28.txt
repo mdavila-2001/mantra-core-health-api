@@ -1,0 +1,13 @@
+# Capturas textuales de licencias, leídas hoy (2026-10-28) de la página viva (texto recortado, verbatim)
+## Ministerio de Sanidad — https://www.sanidad.gob.es/avisoLegal/home.htm (200)
+"La información disponible en este sitio web, salvo indicación expresa en contrario, es susceptible de reutilización; quedando autorizada su reproducción total o parcial, modificación, distribución y comunicación, para usos comerciales y no comerciales, con sujeción a las siguientes condiciones: Queda prohibida en cualquier circunstancia la desnaturalización del contenido de la información. El usuario queda obligado a citar la fuente de los document[os]..."
+## AEMPS — https://www.aemps.gob.es/aviso-legal/ (200)
+"Se autoriza la reproducción total o parcial de los contenidos de la web, siempre que se cite expresamente su origen. El usuario queda obligado a mencionar la fecha de la última actualización de los documentos objeto de la reutilización."
+## MedlinePlus — https://medlineplus.gov/about/using/usingcontent/ (200)
+"Some of the content on MedlinePlus is in the public domain (not copyrighted), and other content is copyrighted and licensed specifically for use on MedlinePlus." Públicos (EN y ES): "Summaries on health topic pages; Medical test information; Summaries on Genetics pages...". Con copyright: "A.D.A.M. Medical Encyclopedia ... Drug monographs from ASHP ... Images, illustrations, and photos, except those noted above, may be copyright protected".
+## NCI — https://www.cancer.gov/policies/copyright-reuse (200)
+"Unless otherwise indicated, all text within National Cancer Institute (NCI) products is free of copyright and may be reused without our permission. Credit the National Cancer Institute as the source." Gráficos: "a mix of copyrighted and copyright-free materials".
+## Wikidata — https://www.wikidata.org/wiki/Wikidata:Licensing (200)
+"All data in Wikidata has a CC0 license." (Texto de otros espacios de nombres: CC BY-SA 4.0 — no se importa.)
+## Wikimedia Commons (imágenes)
+Licencia por archivo (campo imageLicense). El filtro del importador (lib/glossary-es/wikidata.mjs:122) acepta también CC BY-SA, GFDL y ODbL.

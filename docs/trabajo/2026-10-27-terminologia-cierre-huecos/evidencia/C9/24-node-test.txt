@@ -1,0 +1,1036 @@
+TAP version 13
+# Subtest: splitSections corta por <h3> y conserva el texto de la fuente
+ok 1 - splitSections corta por <h3> y conserva el texto de la fuente
+  ---
+  duration_ms: 5.35641
+  type: 'test'
+  ...
+# Subtest: stripTrailingAttribution solo quita lo que la página declara como atribución
+ok 2 - stripTrailingAttribution solo quita lo que la página declara como atribución
+  ---
+  duration_ms: 0.523435
+  type: 'test'
+  ...
+# Subtest: <TOPIC … LINKTEXT/> autocerrado se resuelve a su texto visible (no se pierde palabra)
+ok 3 - <TOPIC … LINKTEXT/> autocerrado se resuelve a su texto visible (no se pierde palabra)
+  ---
+  duration_ms: 0.902571
+  type: 'test'
+  ...
+# Subtest: <ph3> mal formado se repara y la tabla se publica fila por fila
+ok 4 - <ph3> mal formado se repara y la tabla se publica fila por fila
+  ---
+  duration_ms: 2.673925
+  type: 'test'
+  ...
+# Subtest: tablesToParagraphs: una fila por párrafo, celdas unidas por « | »
+ok 5 - tablesToParagraphs: una fila por párrafo, celdas unidas por « | »
+  ---
+  duration_ms: 0.356083
+  type: 'test'
+  ...
+# Subtest: <topic … linktext> en minúscula se lee como texto visible y no duplica el enlace vecino
+ok 6 - <topic … linktext> en minúscula se lee como texto visible y no duplica el enlace vecino
+  ---
+  duration_ms: 1.862209
+  type: 'test'
+  ...
+# Subtest: los elementos de lista que solo apuntan a la Enciclopedia Médica (A.D.A.M.) se quitan y se cuentan
+ok 7 - los elementos de lista que solo apuntan a la Enciclopedia Médica (A.D.A.M.) se quitan y se cuentan
+  ---
+  duration_ms: 86.211868
+  type: 'test'
+  ...
+# Subtest: bulletItems devuelve las viñetas literales en orden
+ok 8 - bulletItems devuelve las viñetas literales en orden
+  ---
+  duration_ms: 0.300822
+  type: 'test'
+  ...
+# Subtest: kindForHeading: encabezados reales de la NLM por familia
+ok 9 - kindForHeading: encabezados reales de la NLM por familia
+  ---
+  duration_ms: 0.686376
+  type: 'test'
+  ...
+# Subtest: kindForHeading: los kinds transversales nombran lo que la NLM publica
+ok 10 - kindForHeading: los kinds transversales nombran lo que la NLM publica
+  ---
+  duration_ms: 0.607125
+  type: 'test'
+  ...
+# Subtest: kindForHeading nunca devuelve null: lo no reconocido es additional_information (con su locator)
+ok 11 - kindForHeading nunca devuelve null: lo no reconocido es additional_information (con su locator)
+  ---
+  duration_ms: 0.55672
+  type: 'test'
+  ...
+# Subtest: toda regla produce un kind del catálogo cerrado de su familia
+ok 12 - toda regla produce un kind del catálogo cerrado de su familia
+  ---
+  duration_ms: 0.142712
+  type: 'test'
+  ...
+# Subtest: doseCheck rechaza dosis y posología reales y deja pasar concentraciones y hábitos
+ok 13 - doseCheck rechaza dosis y posología reales y deja pasar concentraciones y hábitos
+  ---
+  duration_ms: 0.498611
+  type: 'test'
+  ...
+# Subtest: redactDose conserva los párrafos limpios y cuenta los descartados
+ok 14 - redactDose conserva los párrafos limpios y cuenta los descartados
+  ---
+  duration_ms: 0.128886
+  type: 'test'
+  ...
+# Subtest: adamCheck detecta A.D.A.M. pero no al autor «Adam MP» de una cita de GeneReviews
+ok 15 - adamCheck detecta A.D.A.M. pero no al autor «Adam MP» de una cita de GeneReviews
+  ---
+  duration_ms: 0.09974
+  type: 'test'
+  ...
+# Subtest: isoFromSpanishDate
+ok 16 - isoFromSpanishDate
+  ---
+  duration_ms: 0.092452
+  type: 'test'
+  ...
+# Subtest: parseTopicPage: el resumen de la página coincide con el del XML (literalidad) y no hay A.D.A.M.
+ok 17 - parseTopicPage: el resumen de la página coincide con el del XML (literalidad) y no hay A.D.A.M.
+  ---
+  duration_ms: 1.378146
+  type: 'test'
+  ...
+# Subtest: artículo de un tema: secciones literales con los seis campos de procedencia y viñetas
+ok 18 - artículo de un tema: secciones literales con los seis campos de procedencia y viñetas
+  ---
+  duration_ms: 50.891651
+  type: 'test'
+  ...
+# Subtest: el texto de cada sección publicada es subcadena del resumen de la fuente (nada redactado)
+ok 19 - el texto de cada sección publicada es subcadena del resumen de la fuente (nada redactado)
+  ---
+  duration_ms: 50.130494
+  type: 'test'
+  ...
+# Subtest: XML vencido: el artículo se arma desde la página citada; dosis: se publica el resto del texto
+ok 20 - XML vencido: el artículo se arma desde la página citada; dosis: se publica el resto del texto
+  ---
+  duration_ms: 43.597993
+  type: 'test'
+  ...
+# Subtest: secciones repetidas por la fuente se informan; las distintas con el mismo kind se conservan
+ok 21 - secciones repetidas por la fuente se informan; las distintas con el mismo kind se conservan
+  ---
+  duration_ms: 37.829304
+  type: 'test'
+  ...
+# Subtest: sin término en la semilla no se crea artículo (no se inventan términos)
+ok 22 - sin término en la semilla no se crea artículo (no se inventan términos)
+  ---
+  duration_ms: 11.800905
+  type: 'test'
+  ...
+# Subtest: sin página verificada el término no se publica
+ok 23 - sin página verificada el término no se publica
+  ---
+  duration_ms: 25.476263
+  type: 'test'
+  ...
+# Subtest: guía de prueba: cada sección de la NLM sale con su kind, sin fusionar, y «Otros nombres» fuera del texto
+ok 24 - guía de prueba: cada sección de la NLM sale con su kind, sin fusionar, y «Otros nombres» fuera del texto
+  ---
+  duration_ms: 46.813685
+  type: 'test'
+  ...
+# Subtest: «Adam MP» en las referencias de una guía NO dispara el filtro de A.D.A.M.
+ok 25 - «Adam MP» en las referencias de una guía NO dispara el filtro de A.D.A.M.
+  ---
+  duration_ms: 32.193661
+  type: 'test'
+  ...
+# Subtest: invariante: ninguna sección publicada contiene dosis ni A.D.A.M.
+ok 26 - invariante: ninguna sección publicada contiene dosis ni A.D.A.M.
+  ---
+  duration_ms: 37.620663
+  type: 'test'
+  ...
+# Subtest: idempotencia: dos corridas con las mismas entradas dan articles.ndjson idéntico
+ok 27 - idempotencia: dos corridas con las mismas entradas dan articles.ndjson idéntico
+  ---
+  duration_ms: 62.670167
+  type: 'test'
+  ...
+# Subtest: allowedLicense: solo dominio público, CC0, CC BY y CC BY-SA
+ok 28 - allowedLicense: solo dominio público, CC0, CC BY y CC BY-SA
+  ---
+  duration_ms: 0.391479
+  type: 'test'
+  ...
+# Subtest: hosts de imagen: solo los de la CSP del front
+ok 29 - hosts de imagen: solo los de la CSP del front
+  ---
+  duration_ms: 0.162006
+  type: 'test'
+  ...
+# Subtest: normalizeTitleForMatch: MeSH invertido y plural coinciden; descriptor más amplio no
+ok 30 - normalizeTitleForMatch: MeSH invertido y plural coinciden; descriptor más amplio no
+  ---
+  duration_ms: 0.132127
+  type: 'test'
+  ...
+# Subtest: imageCandidates: marca `nameMatch` y entrega un candidato por ítem de Wikidata
+ok 31 - imageCandidates: marca `nameMatch` y entrega un candidato por ítem de Wikidata
+  ---
+  duration_ms: 0.287148
+  type: 'test'
+  ...
+# Subtest: entityMatchesTopic: el ítem de Wikidata debe llamarse como el tema (etiqueta o alias)
+ok 32 - entityMatchesTopic: el ítem de Wikidata debe llamarse como el tema (etiqueta o alias)
+  ---
+  duration_ms: 0.261139
+  type: 'test'
+  ...
+# Subtest: Commons: imagen de dominio público aceptada con autor, página de origen y hosts permitidos
+ok 33 - Commons: imagen de dominio público aceptada con autor, página de origen y hosts permitidos
+  ---
+  duration_ms: 52.702262
+  type: 'test'
+  ...
+# Subtest: buildImage rechaza licencia no permitida, restricciones y hosts fuera de la CSP
+ok 34 - buildImage rechaza licencia no permitida, restricciones y hosts fuera de la CSP
+  ---
+  duration_ms: 0.367731
+  type: 'test'
+  ...
+# Subtest: contrato: una imagen label-match solo es válida apagada por defecto
+ok 35 - contrato: una imagen label-match solo es válida apagada por defecto
+  ---
+  duration_ms: 34.632111
+  type: 'test'
+  ...
+# Subtest: Commons: el pie en castellano da alt «caption»; en otro idioma queda como genérico
+ok 36 - Commons: el pie en castellano da alt «caption»; en otro idioma queda como genérico
+  ---
+  duration_ms: 1.219601
+  type: 'test'
+  ...
+# Subtest: cleanAttribution deja el autor en una línea (caso real de Commons: lista con viñetas)
+ok 37 - cleanAttribution deja el autor en una línea (caso real de Commons: lista con viñetas)
+  ---
+  duration_ms: 0.189805
+  type: 'test'
+  ...
+# Subtest: parseCommonsResponse lee la respuesta real de la API
+ok 38 - parseCommonsResponse lee la respuesta real de la API
+  ---
+  duration_ms: 0.314222
+  type: 'test'
+  ...
+# Subtest: contrato §12.3: los artículos de los fixtures lo cumplen y las violaciones se detectan
+ok 39 - contrato §12.3: los artículos de los fixtures lo cumplen y las violaciones se detectan
+  ---
+  duration_ms: 31.535341
+  type: 'test'
+  ...
+# [1/7] términos del glosario (CIE-10-ES)
+# [2/7] Orphanet (es_product1, prevalencia, edad de inicio)
+# [3/7] MONDO y Disease Ontology
+# [4/7] HPO (etiquetas, traducción oficial y anotaciones)
+# [5/7] identidad por código CIE-10 exacto
+# [6/7] MeSH (notas de alcance), Wikidata y Commons
+# [7/7] ensamblado
+# Subtest: Orphanet: licencia CC BY 4.0 declarada por el propio XML
+ok 40 - Orphanet: licencia CC BY 4.0 declarada por el propio XML
+  ---
+  duration_ms: 2.839231
+  type: 'test'
+  ...
+# Subtest: Orphanet: definición literal y correspondencia exacta E (validada) solo cuando es E
+ok 41 - Orphanet: definición literal y correspondencia exacta E (validada) solo cuando es E
+  ---
+  duration_ms: 2.610658
+  type: 'test'
+  ...
+# Subtest: Orphanet: índice por código separa exactas de aproximadas
+ok 42 - Orphanet: índice por código separa exactas de aproximadas
+  ---
+  duration_ms: 0.298775
+  type: 'test'
+  ...
+# Subtest: Orphanet: edad de inicio, herencia y prevalencia son campos literales de la fuente
+ok 43 - Orphanet: edad de inicio, herencia y prevalencia son campos literales de la fuente
+  ---
+  duration_ms: 6.221675
+  type: 'test'
+  ...
+# Subtest: MONDO: solo skos:exactMatch cuenta, y los obsoletos no entran
+ok 44 - MONDO: solo skos:exactMatch cuenta, y los obsoletos no entran
+  ---
+  duration_ms: 0.603815
+  type: 'test'
+  ...
+# Subtest: MONDO: closeMatch y xrefs planos NO unen (sintético)
+ok 45 - MONDO: closeMatch y xrefs planos NO unen (sintético)
+  ---
+  duration_ms: 0.415101
+  type: 'test'
+  ...
+# Subtest: DOID: definición literal, licencia CC0 y términos obsoletos fuera
+ok 46 - DOID: definición literal, licencia CC0 y términos obsoletos fuera
+  ---
+  duration_ms: 1.036705
+  type: 'test'
+  ...
+# Subtest: HPO: solo traducción OFICIAL; sin ella el ítem queda en inglés y marcado
+ok 47 - HPO: solo traducción OFICIAL; sin ella el ítem queda en inglés y marcado
+  ---
+  duration_ms: 1.873019
+  type: 'test'
+  ...
+# Subtest: HPO: phenotype.hpoa descarta calificador NOT y frecuencia excluida; fracciones y términos de frecuencia
+ok 48 - HPO: phenotype.hpoa descarta calificador NOT y frecuencia excluida; fracciones y términos de frecuencia
+  ---
+  duration_ms: 0.775627
+  type: 'test'
+  ...
+# Subtest: HPO: orden por frecuencia, sin inventar frecuencia
+ok 49 - HPO: orden por frecuencia, sin inventar frecuencia
+  ---
+  duration_ms: 0.534031
+  type: 'test'
+  ...
+# Subtest: Semilla: los términos se leen tal cual, sin crear ninguno
+ok 50 - Semilla: los términos se leen tal cual, sin crear ninguno
+  ---
+  duration_ms: 0.247335
+  type: 'test'
+  ...
+# Subtest: Identidad: Orphanet y MONDO se corroboran → E84 queda unido a los dos
+ok 51 - Identidad: Orphanet y MONDO se corroboran → E84 queda unido a los dos
+  ---
+  duration_ms: 0.602578
+  type: 'test'
+  ...
+# Subtest: Identidad: si Orphanet y MONDO declaran enfermedades distintas se descartan los dos (C69.2, L83)
+ok 52 - Identidad: si Orphanet y MONDO declaran enfermedades distintas se descartan los dos (C69.2, L83)
+  ---
+  duration_ms: 0.410641
+  type: 'test'
+  ...
+# Subtest: Identidad: un concepto de la fuente que corresponde a dos términos es un grupo y no se usa (sintético)
+ok 53 - Identidad: un concepto de la fuente que corresponde a dos términos es un grupo y no se usa (sintético)
+  ---
+  duration_ms: 0.37185
+  type: 'test'
+  ...
+# Subtest: Guarda de dosis: cantidades y palabras de posología
+ok 54 - Guarda de dosis: cantidades y palabras de posología
+  ---
+  duration_ms: 0.553951
+  type: 'test'
+  ...
+# Subtest: Guarda de sección: kind cerrado y los seis campos de procedencia
+ok 55 - Guarda de sección: kind cerrado y los seis campos de procedencia
+  ---
+  duration_ms: 5.255834
+  type: 'test'
+  ...
+# Subtest: Imágenes: solo dominio público, CC0, CC BY y CC BY-SA; hosts de la CSP; autor para CC BY
+ok 56 - Imágenes: solo dominio público, CC0, CC BY y CC BY-SA; hosts de la CSP; autor para CC BY
+  ---
+  duration_ms: 1.197267
+  type: 'test'
+  ...
+# Subtest: MeSH: nota de alcance literal por descriptor
+ok 57 - MeSH: nota de alcance literal por descriptor
+  ---
+  duration_ms: 1.852958
+  type: 'test'
+  ...
+# Subtest: Wikidata/Commons: filas planas, nombre de archivo y metadatos de licencia
+ok 58 - Wikidata/Commons: filas planas, nombre de archivo y metadatos de licencia
+  ---
+  duration_ms: 1.769151
+  type: 'test'
+  ...
+# Subtest: Artículo E84: textos literales con los seis campos, sin dosis, kinds del catálogo
+ok 59 - Artículo E84: textos literales con los seis campos, sin dosis, kinds del catálogo
+  ---
+  duration_ms: 8.056329
+  type: 'test'
+  ...
+# Subtest: Artículo: los síntomas de HPO no salen sin --hpo-license-ack y con él van ordenados y en castellano oficial
+ok 60 - Artículo: los síntomas de HPO no salen sin --hpo-license-ack y con él van ordenados y en castellano oficial
+  ---
+  duration_ms: 16.222874
+  type: 'test'
+  ...
+# Subtest: Artículo: término sin fuente → sin artículo y con motivo (resultado válido)
+ok 61 - Artículo: término sin fuente → sin artículo y con motivo (resultado válido)
+  ---
+  duration_ms: 4.742259
+  type: 'test'
+  ...
+# Subtest: Artículo: una sección con patrón de dosis se rechaza y queda registrada (sintético)
+ok 62 - Artículo: una sección con patrón de dosis se rechaza y queda registrada (sintético)
+  ---
+  duration_ms: 9.425178
+  type: 'test'
+  ...
+# Subtest: Wikidata: un Q-id por código, uno solo por término y sin contradecir a Orphanet
+ok 63 - Wikidata: un Q-id por código, uno solo por término y sin contradecir a Orphanet
+  ---
+  duration_ms: 2.363021
+  type: 'test'
+  ...
+# [ok] 2 artículos · 14 filas en rejected.ndjson → /tmp/s2-cie10-IJ3Qpb/a
+# [1/7] términos del glosario (CIE-10-ES)
+# [2/7] Orphanet (es_product1, prevalencia, edad de inicio)
+# [3/7] MONDO y Disease Ontology
+# [4/7] HPO (etiquetas, traducción oficial y anotaciones)
+# [5/7] identidad por código CIE-10 exacto
+# [6/7] MeSH (notas de alcance), Wikidata y Commons
+# [7/7] ensamblado
+# [ok] 2 artículos · 14 filas en rejected.ndjson → /tmp/s2-cie10-IJ3Qpb/b
+# [1/7] términos del glosario (CIE-10-ES)
+# [2/7] Orphanet (es_product1, prevalencia, edad de inicio)
+# [3/7] MONDO y Disease Ontology
+# [4/7] HPO (etiquetas, traducción oficial y anotaciones)
+# [5/7] identidad por código CIE-10 exacto
+# [6/7] MeSH (notas de alcance), Wikidata y Commons
+# [7/7] ensamblado
+# [ok] 2 artículos · 14 filas en rejected.ndjson → /tmp/s2-cie10-IJ3Qpb/c
+# Subtest: Canalización completa sobre fixtures: contrato, idempotencia y rechazos
+ok 64 - Canalización completa sobre fixtures: contrato, idempotencia y rechazos
+  ---
+  duration_ms: 70.686219
+  type: 'test'
+  ...
+# Subtest: Puente: Wikidata aporta el concepto solo si es único y nadie más lo reclama (sintético)
+ok 65 - Puente: Wikidata aporta el concepto solo si es único y nadie más lo reclama (sintético)
+  ---
+  duration_ms: 3.067018
+  type: 'test'
+  ...
+# Subtest: Artículo: el texto vía puente queda marcado en locator e identity y nunca como corroborado (sintético)
+ok 66 - Artículo: el texto vía puente queda marcado en locator e identity y nunca como corroborado (sintético)
+  ---
+  duration_ms: 3.938879
+  type: 'test'
+  ...
+# Subtest: ICD-10-CM: notas por código, solo las de la categoría y no las de sus subcódigos
+ok 67 - ICD-10-CM: notas por código, solo las de la categoría y no las de sus subcódigos
+  ---
+  duration_ms: 1.616767
+  type: 'test'
+  ...
+# Subtest: cada sección lleva los seis campos de procedencia y el kind correcto
+ok 68 - cada sección lleva los seis campos de procedencia y el kind correcto
+  ---
+  duration_ms: 17.904082
+  type: 'test'
+  ...
+# Subtest: la 4.3 publicada es LITERAL: las dos oraciones de la ficha, sin cambios
+ok 69 - la 4.3 publicada es LITERAL: las dos oraciones de la ficha, sin cambios
+  ---
+  duration_ms: 3.21369
+  type: 'test'
+  ...
+# Subtest: 5.1 publica solo la línea «Grupo farmacoterapéutico», no el resto de la sección
+ok 70 - 5.1 publica solo la línea «Grupo farmacoterapéutico», no el resto de la sección
+  ---
+  duration_ms: 2.221322
+  type: 'test'
+  ...
+# Subtest: 4.4 se publica como special_populations con el título oficial en locator
+ok 71 - 4.4 se publica como special_populations con el título oficial en locator
+  ---
+  duration_ms: 0.226763
+  type: 'test'
+  ...
+# Subtest: una sección sin fecha de la ficha no se publica (el aviso legal de AEMPS exige la fecha)
+ok 72 - una sección sin fecha de la ficha no se publica (el aviso legal de AEMPS exige la fecha)
+  ---
+  duration_ms: 0.310372
+  type: 'test'
+  ...
+# Subtest: una sección vacía o ausente en la fuente produce rechazo explícito, no texto de relleno
+ok 73 - una sección vacía o ausente en la fuente produce rechazo explícito, no texto de relleno
+  ---
+  duration_ms: 0.146809
+  type: 'test'
+  ...
+# Subtest: idempotencia: la misma entrada produce exactamente la misma salida
+ok 74 - idempotencia: la misma entrada produce exactamente la misma salida
+  ---
+  duration_ms: 4.286653
+  type: 'test'
+  ...
+# Subtest: presentations lista formas y vías, sin nombres de presentación (llevan la concentración)
+ok 75 - presentations lista formas y vías, sin nombres de presentación (llevan la concentración)
+  ---
+  duration_ms: 4.108662
+  type: 'test'
+  ...
+# Subtest: imágenes de CIMA: máximo 4, hosts de la CSP, leyenda sin nombre comercial y alt genérico
+ok 76 - imágenes de CIMA: máximo 4, hosts de la CSP, leyenda sin nombre comercial y alt genérico
+  ---
+  duration_ms: 2.14371
+  type: 'test'
+  ...
+# Subtest: validateArticle: acepta el artículo real y rechaza violaciones del contrato
+ok 77 - validateArticle: acepta el artículo real y rechaza violaciones del contrato
+  ---
+  duration_ms: 4.205984
+  type: 'test'
+  ...
+# Subtest: htmlToLines une los saltos de línea del código fuente y separa párrafos y celdas
+ok 78 - htmlToLines une los saltos de línea del código fuente y separa párrafos y celdas
+  ---
+  duration_ms: 0.236027
+  type: 'test'
+  ...
+# Subtest: fechas de la API: se cuentan en hora de Madrid, no en UTC
+ok 79 - fechas de la API: se cuentan en hora de Madrid, no en UTC
+  ---
+  duration_ms: 2.127663
+  type: 'test'
+  ...
+# Subtest: artículo de una sustancia: descripción CC0, clase P2868 y facts con identificadores
+ok 80 - artículo de una sustancia: descripción CC0, clase P2868 y facts con identificadores
+  ---
+  duration_ms: 1.452026
+  type: 'test'
+  ...
+# Subtest: una sustancia sin descripción en castellano no recibe sección definition inventada
+ok 81 - una sustancia sin descripción en castellano no recibe sección definition inventada
+  ---
+  duration_ms: 0.731606
+  type: 'test'
+  ...
+# Subtest: un artículo limpio pasa (el código ATC «A11G» no es «11 g»)
+ok 82 - un artículo limpio pasa (el código ATC «A11G» no es «11 g»)
+  ---
+  duration_ms: 13.209521
+  type: 'test'
+  ...
+# Subtest: una dosis en el texto, en un fact o en rejected.ndjson hace fallar la auditoría
+ok 83 - una dosis en el texto, en un fact o en rejected.ndjson hace fallar la auditoría
+  ---
+  duration_ms: 12.384669
+  type: 'test'
+  ...
+# Subtest: una sección con locator 4.2 hace fallar la auditoría
+ok 84 - una sección con locator 4.2 hace fallar la auditoría
+  ---
+  duration_ms: 3.668209
+  type: 'test'
+  ...
+# Subtest: una imagen fuera de la CSP o con licencia NC hace fallar la auditoría
+ok 85 - una imagen fuera de la CSP o con licencia NC hace fallar la auditoría
+  ---
+  duration_ms: 9.270045
+  type: 'test'
+  ...
+# Subtest: cada patrón de dosis conocido se detecta
+ok 86 - cada patrón de dosis conocido se detecta
+  ---
+  duration_ms: 6.102064
+  type: 'test'
+  ...
+# Subtest: texto sin dosis no se marca (códigos ATC, frecuencias MedDRA, remisiones a otras secciones)
+ok 87 - texto sin dosis no se marca (códigos ATC, frecuencias MedDRA, remisiones a otras secciones)
+  ---
+  duration_ms: 2.273276
+  type: 'test'
+  ...
+# Subtest: assertNoDose rechaza una dosis en cualquier campo de prosa del artículo
+ok 88 - assertNoDose rechaza una dosis en cualquier campo de prosa del artículo
+  ---
+  duration_ms: 0.87848
+  type: 'test'
+  ...
+# Subtest: validateArticle también corta una dosis aunque el resto del contrato esté bien
+ok 89 - validateArticle también corta una dosis aunque el resto del contrato esté bien
+  ---
+  duration_ms: 6.857222
+  type: 'test'
+  ...
+# Subtest: cleanLines retira SOLO la oración con dosis y conserva el resto, literal
+ok 90 - cleanLines retira SOLO la oración con dosis y conserva el resto, literal
+  ---
+  duration_ms: 1.677844
+  type: 'test'
+  ...
+# Subtest: sobre una respuesta real (4.4/4.8 de CIMA) la salida no contiene dosis y es literal
+ok 91 - sobre una respuesta real (4.4/4.8 de CIMA) la salida no contiene dosis y es literal
+  ---
+  duration_ms: 3.444782
+  type: 'test'
+  ...
+# Subtest: splitSentences no corta abreviaturas en minúscula ni números de sección
+ok 92 - splitSentences no corta abreviaturas en minúscula ni números de sección
+  ---
+  duration_ms: 0.18114
+  type: 'test'
+  ...
+# Subtest: cleanLines retira una referencia a la 4.2 partida entre dos párrafos
+ok 93 - cleanLines retira una referencia a la 4.2 partida entre dos párrafos
+  ---
+  duration_ms: 0.219704
+  type: 'test'
+  ...
+# Subtest: hosts: solo los tres de la CSP, por https
+ok 94 - hosts: solo los tres de la CSP, por https
+  ---
+  duration_ms: 2.096598
+  type: 'test'
+  ...
+# Subtest: licencias: admitidas y rechazadas
+ok 95 - licencias: admitidas y rechazadas
+  ---
+  duration_ms: 2.175781
+  type: 'test'
+  ...
+# Subtest: licenseUrlFor arma la URL de CC solo con versión explícita
+ok 96 - licenseUrlFor arma la URL de CC solo con versión explícita
+  ---
+  duration_ms: 0.371512
+  type: 'test'
+  ...
+# Subtest: filas reales de Commons: dominio público y CC BY-SA entran; «No restrictions» y CC BY sin autor, no
+ok 97 - filas reales de Commons: dominio público y CC BY-SA entran; «No restrictions» y CC BY sin autor, no
+  ---
+  duration_ms: 0.713378
+  type: 'test'
+  ...
+# Subtest: 1 petición por segundo como máximo y User-Agent identificable
+ok 98 - 1 petición por segundo como máximo y User-Agent identificable
+  ---
+  duration_ms: 53.380496
+  type: 'test'
+  ...
+# Subtest: reintenta con retroceso ante 429 (respeta Retry-After) y ante 5xx
+ok 99 - reintenta con retroceso ante 429 (respeta Retry-After) y ante 5xx
+  ---
+  duration_ms: 1.145419
+  type: 'test'
+  ...
+# Subtest: se rinde tras maxRetries con un error explícito
+ok 100 - se rinde tras maxRetries con un error explícito
+  ---
+  duration_ms: 1.417351
+  type: 'test'
+  ...
+# Subtest: caché en disco: la segunda lectura no hace petición; un 404 se guarda como null
+ok 101 - caché en disco: la segunda lectura no hace petición; un 404 se guarda como null
+  ---
+  duration_ms: 4.663167
+  type: 'test'
+  ...
+# Subtest: lee la fecha SOLO si el documento la escribe
+ok 102 - lee la fecha SOLO si el documento la escribe
+  ---
+  duration_ms: 4.2748
+  type: 'test'
+  ...
+# Subtest: la lista blanca no contiene la 4.2 ni variantes
+ok 103 - la lista blanca no contiene la 4.2 ni variantes
+  ---
+  duration_ms: 2.380107
+  type: 'test'
+  ...
+# Subtest: no existe forma de armar la URL de la 4.2: ni el endpoint, ni el enlace público, ni la ruta de caché
+ok 104 - no existe forma de armar la URL de la 4.2: ni el endpoint, ni el enlace público, ni la ruta de caché
+  ---
+  duration_ms: 1.068876
+  type: 'test'
+  ...
+# Subtest: buildCimaSection rechaza pedir la 4.2 aunque la respuesta la traiga
+ok 105 - buildCimaSection rechaza pedir la 4.2 aunque la respuesta la traiga
+  ---
+  duration_ms: 0.34469
+  type: 'test'
+  ...
+# Subtest: una respuesta que mezcla 4.3 y 4.2 solo publica la 4.3
+ok 106 - una respuesta que mezcla 4.3 y 4.2 solo publica la 4.3
+  ---
+  duration_ms: 5.052777
+  type: 'test'
+  ...
+# Subtest: un mapa de secciones con una «4.2» inyectada NO aparece en la salida del artículo
+ok 107 - un mapa de secciones con una «4.2» inyectada NO aparece en la salida del artículo
+  ---
+  duration_ms: 5.108929
+  type: 'test'
+  ...
+# Subtest: slimVtm descarta drugFacts.sections (donde el importador anterior dejó la 4.2)
+ok 108 - slimVtm descarta drugFacts.sections (donde el importador anterior dejó la 4.2)
+  ---
+  duration_ms: 0.315753
+  type: 'test'
+  ...
+# Subtest: anatomía (Abdomen): definición literal de Wikidata, MeSH, estructura, imagen CC BY y TA98
+ok 109 - anatomía (Abdomen): definición literal de Wikidata, MeSH, estructura, imagen CC BY y TA98
+  ---
+  duration_ms: 16.745812
+  type: 'test'
+  ...
+# Subtest: toda sección producida cumple el contrato (seis campos de procedencia, catálogo, sin dosis)
+ok 110 - toda sección producida cumple el contrato (seis campos de procedencia, catálogo, sin dosis)
+  ---
+  duration_ms: 2.040949
+  type: 'test'
+  ...
+# Subtest: síntoma (R06.3): HPO en inglés literal, con equivalencia declarada por Wikidata y la etiqueta inglesa de hp.json
+ok 111 - síntoma (R06.3): HPO en inglés literal, con equivalencia declarada por Wikidata y la etiqueta inglesa de hp.json
+  ---
+  duration_ms: 0.629151
+  type: 'test'
+  ...
+# Subtest: HPO cuya etiqueta no concuerda con el ítem NO se publica y queda registrado
+ok 112 - HPO cuya etiqueta no concuerda con el ítem NO se publica y queda registrado
+  ---
+  duration_ms: 0.549582
+  type: 'test'
+  ...
+# Subtest: texto curado interno (sin procedencia externa) no se publica: va a rechazados
+ok 113 - texto curado interno (sin procedencia externa) no se publica: va a rechazados
+  ---
+  duration_ms: 0.15292
+  type: 'test'
+  ...
+# Subtest: INLASA: solo código y nombre oficial, NUNCA el arancel; sale retenido por licencia sin verificar
+ok 114 - INLASA: solo código y nombre oficial, NUNCA el arancel; sale retenido por licencia sin verificar
+  ---
+  duration_ms: 0.512779
+  type: 'test'
+  ...
+# Subtest: CIE-10-ES con definición de MedlinePlus por «mismo concepto» la conserva con su cita
+ok 115 - CIE-10-ES con definición de MedlinePlus por «mismo concepto» la conserva con su cita
+  ---
+  duration_ms: 0.261821
+  type: 'test'
+  ...
+# Subtest: un término con Q-id sin entidad descargada no inventa nada: queda rechazado
+ok 116 - un término con Q-id sin entidad descargada no inventa nada: queda rechazado
+  ---
+  duration_ms: 0.288159
+  type: 'test'
+  ...
+# Subtest: canalización: excluye S1, ordena por categoría+slug, separa retenidos y es idempotente byte a byte
+ok 117 - canalización: excluye S1, ordena por categoría+slug, separa retenidos y es idempotente byte a byte
+  ---
+  duration_ms: 3.046328
+  type: 'test'
+  ...
+# Subtest: conceptRef de todo artículo resuelve contra la semilla: no se crean términos
+ok 118 - conceptRef de todo artículo resuelve contra la semilla: no se crean términos
+  ---
+  duration_ms: 1.177024
+  type: 'test'
+  ...
+# Subtest: catálogo cerrado de secciones por categoría (§12.3)
+ok 119 - catálogo cerrado de secciones por categoría (§12.3)
+  ---
+  duration_ms: 2.2143
+  type: 'test'
+  ...
+# Subtest: una sección válida no tiene problemas y una sin los seis campos de procedencia sí
+ok 120 - una sección válida no tiene problemas y una sin los seis campos de procedencia sí
+  ---
+  duration_ms: 1.584016
+  type: 'test'
+  ...
+# Subtest: una sección con kind fuera del catálogo, idioma inválido o sin texto se rechaza
+ok 121 - una sección con kind fuera del catálogo, idioma inválido o sin texto se rechaza
+  ---
+  duration_ms: 0.184581
+  type: 'test'
+  ...
+# Subtest: la guarda de dosis atrapa cantidad+unidad, posología y la palabra dosis; no atrapa anatomía común
+ok 122 - la guarda de dosis atrapa cantidad+unidad, posología y la palabra dosis; no atrapa anatomía común
+  ---
+  duration_ms: 0.239694
+  type: 'test'
+  ...
+# Subtest: una sección con posible dosis se rechaza aunque tenga toda la procedencia
+ok 123 - una sección con posible dosis se rechaza aunque tenga toda la procedencia
+  ---
+  duration_ms: 0.256951
+  type: 'test'
+  ...
+# Subtest: un fact exige etiqueta, valor, fuente y URL http(s)
+ok 124 - un fact exige etiqueta, valor, fuente y URL http(s)
+  ---
+  duration_ms: 0.209685
+  type: 'test'
+  ...
+# Subtest: S1 se identifica por el codeSystem de la fila, no por la categoría
+ok 125 - S1 se identifica por el codeSystem de la fila, no por la categoría
+  ---
+  duration_ms: 0.223818
+  type: 'test'
+  ...
+# Subtest: el Q-id sale de externalIds.wikidata o del propio código de un sistema wikidata-*
+ok 126 - el Q-id sale de externalIds.wikidata o del propio código de un sistema wikidata-*
+  ---
+  duration_ms: 0.189485
+  type: 'test'
+  ...
+# Subtest: conceptRef = sistema + código + slug existentes; un término inexistente no resuelve
+ok 127 - conceptRef = sistema + código + slug existentes; un término inexistente no resuelve
+  ---
+  duration_ms: 0.645397
+  type: 'test'
+  ...
+# Subtest: cleanText quita caracteres de ancho cero reales de Wikidata sin tocar palabras
+ok 128 - cleanText quita caracteres de ancho cero reales de Wikidata sin tocar palabras
+  ---
+  duration_ms: 0.582959
+  type: 'test'
+  ...
+# Subtest: HPO: el IRI se convierte a HP:id y la versión sale de la fecha de release
+ok 129 - HPO: el IRI se convierte a HP:id y la versión sale de la fecha de release
+  ---
+  duration_ms: 5.780192
+  type: 'test'
+  ...
+# Subtest: HPO: la definición se conserva LITERAL (con el nodo real de Cheyne-Stokes)
+ok 130 - HPO: la definición se conserva LITERAL (con el nodo real de Cheyne-Stokes)
+  ---
+  duration_ms: 0.491177
+  type: 'test'
+  ...
+# Subtest: HPO: la identidad exige que la etiqueta (o un sinónimo) coincida con la del ítem de Wikidata
+ok 131 - HPO: la identidad exige que la etiqueta (o un sinónimo) coincida con la del ítem de Wikidata
+  ---
+  duration_ms: 1.033416
+  type: 'test'
+  ...
+# Subtest: MeSH: se agrupan filas por descriptor y la nota de alcance queda literal
+ok 132 - MeSH: se agrupan filas por descriptor y la nota de alcance queda literal
+  ---
+  duration_ms: 0.386182
+  type: 'test'
+  ...
+# Subtest: MeSH: el control de identidad compara sin mayúsculas, puntuación ni orden de palabras
+ok 133 - MeSH: el control de identidad compara sin mayúsculas, puntuación ni orden de palabras
+  ---
+  duration_ms: 0.540774
+  type: 'test'
+  ...
+# Subtest: Commons: la compuerta de licencia deja pasar PD/CC0/CC BY/CC BY-SA y frena el resto
+ok 134 - Commons: la compuerta de licencia deja pasar PD/CC0/CC BY/CC BY-SA y frena el resto
+  ---
+  duration_ms: 0.513886
+  type: 'test'
+  ...
+# Subtest: Commons: solo los hosts de la CSP
+ok 135 - Commons: solo los hosts de la CSP
+  ---
+  duration_ms: 0.353313
+  type: 'test'
+  ...
+# Subtest: Commons: una foto CC BY real produce la imagen del contrato con autor, licencia y página de origen
+ok 136 - Commons: una foto CC BY real produce la imagen del contrato con autor, licencia y página de origen
+  ---
+  duration_ms: 0.875086
+  type: 'test'
+  ...
+# Subtest: Commons: un SVG CC0 real es un diagrama; sin descripción corta el alt es genérico
+ok 137 - Commons: un SVG CC0 real es un diagrama; sin descripción corta el alt es genérico
+  ---
+  duration_ms: 0.493362
+  type: 'test'
+  ...
+# Subtest: Commons: imágenes con GFDL o «No restrictions» (reales) se rechazan con motivo
+ok 138 - Commons: imágenes con GFDL o «No restrictions» (reales) se rechazan con motivo
+  ---
+  duration_ms: 0.584021
+  type: 'test'
+  ...
+# Subtest: Commons: advertencia de derechos de la personalidad (real) frena la imagen
+ok 139 - Commons: advertencia de derechos de la personalidad (real) frena la imagen
+  ---
+  duration_ms: 0.258634
+  type: 'test'
+  ...
+# Subtest: Commons: CC BY sin autor o sin URL de licencia se rechaza; un host fuera de la CSP también
+ok 140 - Commons: CC BY sin autor o sin URL de licencia se rechaza; un host fuera de la CSP también
+  ---
+  duration_ms: 0.205145
+  type: 'test'
+  ...
+# Subtest: Commons: el kind sale de metadatos y la propiedad de Wikidata manda
+ok 141 - Commons: el kind sale de metadatos y la propiedad de Wikidata manda
+  ---
+  duration_ms: 0.446636
+  type: 'test'
+  ...
+# Subtest: deterministicId replica exacta de src/common/constants/concepts.ts
+ok 142 - deterministicId replica exacta de src/common/constants/concepts.ts
+  ---
+  duration_ms: 1.119555
+  type: 'test'
+  ...
+# Subtest: md5uuid equivale a md5(key)::uuid de Postgres
+ok 143 - md5uuid equivale a md5(key)::uuid de Postgres
+  ---
+  duration_ms: 0.270113
+  type: 'test'
+  ...
+# Subtest: slugify y htmlToText
+ok 144 - slugify y htmlToText
+  ---
+  duration_ms: 0.972702
+  type: 'test'
+  ...
+# Subtest: CIE-10-ES diagnósticos: jerarquía, marcadores y categoría desde el capítulo
+ok 145 - CIE-10-ES diagnósticos: jerarquía, marcadores y categoría desde el capítulo
+  ---
+  duration_ms: 4.074422
+  type: 'test'
+  ...
+# Subtest: CIE-10-ES procedimientos: categoría por sección ICD-10-PCS
+ok 146 - CIE-10-ES procedimientos: categoría por sección ICD-10-PCS
+  ---
+  duration_ms: 0.669799
+  type: 'test'
+  ...
+# Subtest: taxonomías: ATC, capítulos y grupos MedlinePlus
+ok 147 - taxonomías: ATC, capítulos y grupos MedlinePlus
+  ---
+  duration_ms: 0.351302
+  type: 'test'
+  ...
+# Subtest: CIMA: un término por VTM, ficha técnica verbatim con cita, fotos y ATC
+ok 148 - CIMA: un término por VTM, ficha técnica verbatim con cita, fotos y ATC
+  ---
+  duration_ms: 10.379172
+  type: 'test'
+  ...
+# Subtest: MedlinePlus: tema en español con resumen verbatim, sinónimos, MeSH del tema inglés
+ok 149 - MedlinePlus: tema en español con resumen verbatim, sinónimos, MeSH del tema inglés
+  ---
+  duration_ms: 2.213877
+  type: 'test'
+  ...
+# Subtest: MedlinePlus pruebas: «¿Qué es…?» verbatim, «Otros nombres» como sinónimos, categoría lab
+ok 150 - MedlinePlus pruebas: «¿Qué es…?» verbatim, «Otros nombres» como sinónimos, categoría lab
+  ---
+  duration_ms: 2.878135
+  type: 'test'
+  ...
+# Subtest: Wikidata/Commons: atribución y licencia; unión sólo por código idéntico
+ok 151 - Wikidata/Commons: atribución y licencia; unión sólo por código idéntico
+  ---
+  duration_ms: 1.26341
+  type: 'test'
+  ...
+# Subtest: LOINC ES (CSV SINTÉTICO): parser por cabecera y error explícito si faltan columnas
+ok 152 - LOINC ES (CSV SINTÉTICO): parser por cabecera y error explícito si faltan columnas
+  ---
+  duration_ms: 1.267286
+  type: 'test'
+  ...
+# Subtest: plan de carga: membresías a los value sets del glosario con los ids del backend
+ok 153 - plan de carga: membresías a los value sets del glosario con los ids del backend
+  ---
+  duration_ms: 1.225929
+  type: 'test'
+  ...
+# Subtest: Anatomía Wikidata: verificación de dominio y de ids de propiedad
+ok 154 - Anatomía Wikidata: verificación de dominio y de ids de propiedad
+  ---
+  duration_ms: 1.495685
+  type: 'test'
+  ...
+# Subtest: Wikidata: aristas agregadas por enfermedad+destino, con todos los códigos de cada lado
+ok 155 - Wikidata: aristas agregadas por enfermedad+destino, con todos los códigos de cada lado
+  ---
+  duration_ms: 1.139987
+  type: 'test'
+  ...
+# Subtest: Wikidata: resolución por código idéntico, una ficha por Q-id y relaciones en los dos sentidos
+ok 156 - Wikidata: resolución por código idéntico, una ficha por Q-id y relaciones en los dos sentidos
+  ---
+  duration_ms: 1.863367
+  type: 'test'
+  ...
+# Subtest: Wikidata: etiquetas en inglés copiadas al castellano y etiquetas duplicadas
+ok 157 - Wikidata: etiquetas en inglés copiadas al castellano y etiquetas duplicadas
+  ---
+  duration_ms: 0.37493
+  type: 'test'
+  ...
+# Subtest: CIE-10: nivel de glosario, jerarquía oficial y bloques del capítulo R
+ok 158 - CIE-10: nivel de glosario, jerarquía oficial y bloques del capítulo R
+  ---
+  duration_ms: 0.503605
+  type: 'test'
+  ...
+# Subtest: Etiquetas estructurales: capítulo TA98 y mayoría de enfermedades vinculadas
+ok 159 - Etiquetas estructurales: capítulo TA98 y mayoría de enfermedades vinculadas
+  ---
+  duration_ms: 0.526278
+  type: 'test'
+  ...
+# Subtest: Wikidata: identidad CIE-10 ↔ MeSH une la ficha CIE-10-ES con MedlinePlus y cita la definición prestada
+ok 160 - Wikidata: identidad CIE-10 ↔ MeSH une la ficha CIE-10-ES con MedlinePlus y cita la definición prestada
+  ---
+  duration_ms: 0.964208
+  type: 'test'
+  ...
+# Subtest: INLASA: análisis a pacientes con código oficial y precio en Bs; nombre verbatim aparte y sólo la caja cambia
+ok 161 - INLASA: análisis a pacientes con código oficial y precio en Bs; nombre verbatim aparte y sólo la caja cambia
+  ---
+  duration_ms: 4.434171
+  type: 'test'
+  ...
+# Subtest: NCI cáncer: nombre y definición verbatim, nombre en inglés de la propia fuente, etiqueta oncológica
+ok 162 - NCI cáncer: nombre y definición verbatim, nombre en inglés de la propia fuente, etiqueta oncológica
+  ---
+  duration_ms: 2.910711
+  type: 'test'
+  ...
+# Subtest: NCI cáncer: un medicamento con paréntesis y marca comercial conserva su texto intacto
+ok 163 - NCI cáncer: un medicamento con paréntesis y marca comercial conserva su texto intacto
+  ---
+  duration_ms: 0.603775
+  type: 'test'
+  ...
+# Subtest: NCI genética: sistema de códigos propio y sin etiquetas
+ok 164 - NCI genética: sistema de códigos propio y sin etiquetas
+  ---
+  duration_ms: 0.561014
+  type: 'test'
+  ...
+# Subtest: NCI: un término sin definición o sin nombre no genera fila (no se inventa)
+ok 165 - NCI: un término sin definición o sin nombre no genera fila (no se inventa)
+  ---
+  duration_ms: 0.667227
+  type: 'test'
+  ...
+# Subtest: NCI: URL de lote
+ok 166 - NCI: URL de lote
+  ---
+  duration_ms: 0.204272
+  type: 'test'
+  ...
+# Subtest: GLOSSARY_CIE_FULL=1 deja pasar todos los niveles de CIE-10-ES y suma la capa de procedimientos (opt-in)
+ok 167 - GLOSSARY_CIE_FULL=1 deja pasar todos los niveles de CIE-10-ES y suma la capa de procedimientos (opt-in)
+  ---
+  duration_ms: 9.179749
+  type: 'test'
+  ...
+1..167
+# tests 167
+# suites 0
+# pass 167
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 986.728418
