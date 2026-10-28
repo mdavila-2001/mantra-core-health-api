@@ -1,0 +1,5 @@
+Sondeo de licencia de las bases que hoy responden 200 pero NO se cargan (2026-10-28, curl con User-Agent identificable, texto de la portada):
+- allergenonline.org (FARRP, Univ. de Nebraska-Lincoln): portada «Version 24 ... 2372 peer reviewed sequences ... Copyright 2019» (UNL). Sin licencia abierta declarada. Descarga ofrecida: PDF V24. NO CARGADA (licencia no verificada).
+- allergome.org: «Allergome-ReTiME ... obtaining the permission»: exige registro y permiso. NO CARGADA (no se crean cuentas).
+- comparedatabase.org (HESI): «© Copyright 2024 by HESI. All Rights Reserved.» aunque diga «available for download». NO CARGADA (licencia no verificada).
+robots.txt de allergenonline.org y allergome.org: sin contenido útil devuelto.

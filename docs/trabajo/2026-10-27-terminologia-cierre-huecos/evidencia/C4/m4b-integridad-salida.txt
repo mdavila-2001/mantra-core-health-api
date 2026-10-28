@@ -1,0 +1,97 @@
+== conceptos por code system (solo allergy-*)
+        internal_code        | count 
+-----------------------------+-------
+ allergy-rxnorm-ingredients  | 22244
+ allergy-hpo                 | 19178
+ allergy-ndfrt-drug-classes  | 12994
+ allergy-medrt-classes       | 11947
+ allergy-iuis-allergens      |  2801
+ allergy-uniprot             |  1027
+ allergy-off-additives       |   725
+ allergy-fda-unii            |   505
+ allergy-iuis-sources        |   423
+ allergy-chebi               |   352
+ allergy-eu-additives        |   336
+ allergy-cvx-vaccines        |   287
+ allergy-doid                |   176
+ allergy-ncit                |   132
+ allergy-patch-test-series   |   114
+ allergy-mesh                |    68
+ allergy-hl7-fhir            |    50
+ allergy-oae                 |    35
+ allergy-off-allergens       |    26
+ allergy-foodon              |    20
+ allergy-mondo               |    15
+ allergy-eu-allergens        |    14
+ allergy-fda-major-allergens |     9
+
+== total conceptos allergy-*
+ count 
+-------
+ 73478
+
+== duplicados (code system, code) -> esperado 0
+ count 
+-------
+     0
+
+== nulos/vacios en code o display -> esperado 0
+ count 
+-------
+     0
+
+== conceptos allergy-* sin propiedad allergy_provenance -> esperado 0
+ count 
+-------
+     0
+
+== huerfanos: designaciones/propiedades/relaciones/miembros sin concepto -> esperado 0
+ desig | prop | rel | miembros 
+-------+------+-----+----------
+     0 |    0 |   0 |        0
+
+== duplicados de designacion/propiedad/relacion/miembro -> esperado 0
+ prop_dup | rel_dup | miembro_dup 
+----------+---------+-------------
+        0 |       0 |           0
+
+== value sets allergy-* con miembros
+                  internal_code                  | count 
+-------------------------------------------------+-------
+ allergy-substances                              | 53819
+ allergy-substances-medication-ingredient        | 22244
+ allergy-manifestations                          | 19178
+ allergy-substances-drug-class                   | 12994
+ allergy-substances-drug-class-medrt             | 11947
+ allergy-substances-allergen-molecule            |  2801
+ allergy-substances-protein-allergen             |  1027
+ allergy-substances-food-additive                |   725
+ allergy-substances-rxnorm-allergenic-extract    |   702
+ allergy-substances-allergenic-extract-substance |   505
+ allergy-substances-chemical-allergen            |   352
+ allergy-substances-eu-additive                  |   336
+ allergy-substances-allergen-source              |   330
+ allergy-substances-rxnorm-pollen                |   323
+ allergy-conditions                              |   313
+ allergy-substances-vaccine                      |   287
+ allergy-substances-patch-test                   |   114
+ allergy-substances-ncit-allergen                |   106
+ allergy-substances-rxnorm-animal-epithelia      |    53
+ allergy-substances-rxnorm-venom                 |    37
+ allergy-adverse-event-types                     |    35
+ allergy-substances-food-allergen                |    26
+ allergy-food-allergen-labelling                 |    20
+ allergy-substances-eu-allergen                  |    14
+ allergy-substances-us-major-allergen            |     9
+ allergy-substances-rxnorm-house-dust-mite       |     5
+ allergy-substances-mesh-allergen                |     2
+
+== designaciones de conceptos allergy-*: total y en castellano (concepto de idioma terminology:language:es)
+ total  | es_por_codigo 
+--------+---------------
+ 130312 |         25281
+
+ conceptos_con_es 
+------------------
+            20999
+

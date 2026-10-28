@@ -1,87 +1,73 @@
 {
-  "generatedAt": "2026-10-28T00:06:49.440Z",
+  "generatedAt": "2026-10-28T00:59:15.349Z",
   "baseConcepts": 55503,
   "sources": {
     "iuis": {
-      "version": "descarga 2026-10-27 (la base no publica número de versión; cada fila trae DateAdded/DateUpdated)",
-      "retrievedAt": "2026-10-27T23:21:50.255Z",
+      "version": "descarga 2026-10-28 (la base no publica número de versión; cada fila trae DateAdded/DateUpdated)",
+      "retrievedAt": "2026-10-28T00:20:54.798Z",
       "license": "Descarga libre con cita (allergen.org/downloads.php)",
       "files": 5,
       "digest": null
     },
     "uniprot": {
       "version": "UniProt 2026_03 (02-September-2026)",
-      "retrievedAt": "2026-10-27T23:21:53.367Z",
+      "retrievedAt": "2026-10-28T00:20:57.110Z",
       "license": "CC-BY-4.0",
       "files": 2,
       "digest": null
     },
     "cdc-cvx": {
-      "version": "descarga 2026-10-27 (cada fila de cvx.txt trae «Last Updated»)",
-      "retrievedAt": "2026-10-27T23:21:55.556Z",
+      "version": "descarga 2026-10-28 (cada fila de cvx.txt trae «Last Updated»)",
+      "retrievedAt": "2026-10-28T00:20:59.977Z",
       "license": "Dominio público (obra del gobierno de EE. UU.)",
       "files": 3,
       "digest": null
     },
     "chebi-lite": {
       "version": "ChEBI 256 (2026-10-06)",
-      "retrievedAt": "2026-10-27T23:22:03.458Z",
+      "retrievedAt": "2026-10-28T00:21:07.200Z",
       "license": "CC-BY-4.0",
       "files": 3,
       "digest": null
     },
+    "ncit": {
+      "version": "NCIt 26.09d (2026-09-28)",
+      "retrievedAt": "2026-10-28T00:22:23.544Z",
+      "license": "CC-BY-4.0",
+      "files": 135,
+      "digest": null
+    },
     "eurlex-1169": {
       "version": "texto consolidado 02011R1169-20250401",
-      "retrievedAt": "2026-10-27T23:28:31.907Z",
+      "retrievedAt": "2026-10-28T00:22:42.925Z",
       "license": "Reutilización autorizada con cita de la fuente (Decisión 2011/833/UE)",
       "files": 3,
       "digest": null
     },
     "eurlex-1333": {
       "version": "consolidado 02008R1333-20260818",
-      "retrievedAt": "2026-10-27T23:28:31.920Z",
+      "retrievedAt": "2026-10-28T00:22:45.992Z",
       "license": "Reutilización autorizada con cita de la fuente (Decisión 2011/833/UE)",
       "files": 2,
       "digest": null
     },
     "usc-21-321": {
       "version": "United States Code, edición 2023, título 21, §321 (GovInfo todavía no publica 2024 ni 2025: responde 200 con una página de error)",
-      "retrievedAt": "2026-10-27T23:29:09.882Z",
+      "retrievedAt": "2026-10-28T00:22:47.267Z",
       "license": "Dominio público (obra del gobierno de EE. UU.)",
       "files": 1,
       "digest": null
     },
-    "europepmc-ebs": {
-      "version": "Europe PMC fullTextXML",
-      "retrievedAt": "2026-10-27T23:22:31.633Z",
-      "license": "CC-BY-4.0 (PMC13238334 y PMC13441338)",
-      "files": 4,
-      "digest": null
-    },
-    "mesh": {
-      "version": "MeSH 2026 (desc2026.gz, que el servidor entrega descomprimido)",
-      "retrievedAt": "2026-10-28T00:06:33.928Z",
-      "license": "Uso libre con cita: «Courtesy of the U.S. National Library of Medicine» (términos de descarga de NLM)",
-      "files": 2,
-      "digest": null
-    },
-    "ncit": {
-      "version": "NCIt 26.09d (2026-09-28)",
-      "retrievedAt": "2026-10-27T23:24:07.079Z",
-      "license": "CC-BY-4.0",
-      "files": 135,
-      "digest": null
-    },
     "openfda": {
       "version": "openFDA NDC last_updated 2026-10-27",
-      "retrievedAt": "2026-10-27T23:24:11.260Z",
+      "retrievedAt": "2026-10-28T00:22:51.427Z",
       "license": "CC0-1.0 (openFDA)",
       "files": 4,
       "digest": null
     },
     "dailymed": {
       "version": "DailyMed v2 (spls por NDC de openFDA)",
-      "retrievedAt": "2026-10-27T23:43:40.126Z",
+      "retrievedAt": "2026-10-28T00:40:43.231Z",
       "license": "Dominio público (etiquetas SPL enviadas a la FDA; DailyMed sin restricción de uso)",
       "files": null,
       "digest": {
@@ -91,14 +77,14 @@
     },
     "dailymed-true-test": {
       "version": "SPL setid 2f082b68-dc74-418a-9e6f-b3c285b41d44",
-      "retrievedAt": "2026-10-27T23:43:40.619Z",
+      "retrievedAt": "2026-10-28T00:40:43.683Z",
       "license": "Etiqueta pública de un producto licenciado por la FDA (DailyMed)",
       "files": 1,
       "digest": null
     },
     "gsrs": {
-      "version": "GSRS 2026-10-27 (cada sustancia trae lastEdited/version)",
-      "retrievedAt": "2026-10-27T23:48:29.468Z",
+      "version": "GSRS 2026-10-28 (cada sustancia trae lastEdited/version)",
+      "retrievedAt": "2026-10-28T00:45:40.651Z",
       "license": "Dominio público (FDA/NCATS)",
       "files": null,
       "digest": {
@@ -108,14 +94,28 @@
     },
     "rxnav": {
       "version": "RxNorm 05-Oct-2026 (RxNav API 3.1.356)",
-      "retrievedAt": "2026-10-27T23:56:45.665Z",
+      "retrievedAt": "2026-10-28T00:52:44.801Z",
       "license": "RxNorm: sin restricción para las cadenas propias de NLM (SAB=RXNORM); MED-RT (VA) dominio público",
       "files": 9,
       "digest": null
     },
+    "europepmc-ebs": {
+      "version": "Europe PMC fullTextXML",
+      "retrievedAt": "2026-10-28T00:52:48.967Z",
+      "license": "CC-BY-4.0 (PMC13238334 y PMC13441338)",
+      "files": 4,
+      "digest": null
+    },
+    "mesh": {
+      "version": "MeSH 2026 (desc2026.gz, que el servidor entrega descomprimido)",
+      "retrievedAt": "2026-10-28T00:52:57.407Z",
+      "license": "Uso libre con cita: «Courtesy of the U.S. National Library of Medicine» (términos de descarga de NLM)",
+      "files": 2,
+      "digest": null
+    },
     "wikidata": {
       "version": "Wikidata Query Service (consulta por identificador exacto)",
-      "retrievedAt": "2026-10-28T00:02:58.429Z",
+      "retrievedAt": "2026-10-28T00:58:53.352Z",
       "license": "CC0-1.0",
       "files": 168,
       "digest": null
@@ -279,10 +279,10 @@
       "n": 38,
       "key": "wikidata-es",
       "title": "Wikidata (CC0) — etiquetas en castellano por identificador exacto",
-      "read": 3167,
+      "read": 3139,
       "added": 0,
       "duplicates": 0,
-      "patches": 3167
+      "patches": 3139
     }
   ],
   "discarded": [],
@@ -356,10 +356,10 @@
     },
     "wikidata": {
       "targets": 24519,
-      "matched": 7908,
-      "withSpanishLabel": 3167,
-      "ambiguousItem": 40,
-      "noItem": 16571
+      "matched": 7828,
+      "withSpanishLabel": 3139,
+      "ambiguousItem": 38,
+      "noItem": 16653
     }
   },
   "totals": {
@@ -410,6 +410,6 @@
       "allergy-mondo": 3
     }
   },
-  "ndjsonSha256": "380cf4adb78e39d2490142f6fdbe189ea50ca3bfe710a4f1eddd98d498795055",
-  "seconds": 6
+  "ndjsonSha256": "7bc14ed6b75ce8f99aa88739a5376a4e74b34afe2555fe5c46bf4b8791322416",
+  "seconds": 5
 }

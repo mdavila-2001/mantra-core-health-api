@@ -5,8 +5,9 @@
       "owner": "WHO/IUIS Allergen Nomenclature Sub-Committee",
       "license": "Descarga libre con cita (allergen.org/downloads.php)",
       "licenseEvidence": "allergen.org/downloads.php: «The contents of the WHO/IUIS Allergen Nomenclature Database is free to download. Please acknowledge the use of the database in your publications and presentation by citing the URL of the database website (https://www.allergen.org) and one of the recent official publications of the WHO/IUIS Allergen Nomenclature Sub-Committee». robots.txt: Crawl-delay 3 (se respeta).",
-      "retrievedAt": "2026-10-27T23:21:50.255Z",
-      "version": "descarga 2026-10-27 (la base no publica número de versión; cada fila trae DateAdded/DateUpdated)",
+      "retrievedAt": "2026-10-28T00:20:54.798Z",
+      "fingerprint": "eb6bf19e52d7f933288bd094f63e073eb0889ad50e619b0d1c16ef417e1da130",
+      "version": "descarga 2026-10-28 (la base no publica número de versión; cada fila trae DateAdded/DateUpdated)",
       "files": [
         {
           "path": "iuis/allergen.csv",
@@ -62,7 +63,8 @@
       "owner": "UniProt Consortium (EMBL-EBI, SIB, PIR)",
       "license": "CC-BY-4.0",
       "licenseEvidence": "UniProt publica su contenido bajo Creative Commons Attribution 4.0 (https://www.uniprot.org/help/license).",
-      "retrievedAt": "2026-10-27T23:21:53.367Z",
+      "retrievedAt": "2026-10-28T00:20:57.110Z",
+      "fingerprint": "2440c9426eba6d3bbc2ddcb157aebdad416b5fa94e11bca5d35504ff5e7ce3c3",
       "version": "UniProt 2026_03 (02-September-2026)",
       "files": [
         {
@@ -94,8 +96,9 @@
       "owner": "U.S. Centers for Disease Control and Prevention — IIS code sets",
       "license": "Dominio público (obra del gobierno de EE. UU.)",
       "licenseEvidence": "Código CVX publicado por el CDC (www2a.cdc.gov/vaccines/iis/iisstandards). Contenido de una agencia federal de EE. UU.: sin restricción de copyright (17 U.S.C. §105).",
-      "retrievedAt": "2026-10-27T23:21:55.556Z",
-      "version": "descarga 2026-10-27 (cada fila de cvx.txt trae «Last Updated»)",
+      "retrievedAt": "2026-10-28T00:20:59.977Z",
+      "fingerprint": "fa82f7c1bd8633ea18a80c6ed9a3407bc1d217f11fc2edaa5720f1cb823bbb97",
+      "version": "descarga 2026-10-28 (cada fila de cvx.txt trae «Last Updated»)",
       "files": [
         {
           "path": "cdc-cvx/cvx.txt",
@@ -137,7 +140,8 @@
       "owner": "ChEBI (EMBL-EBI)",
       "license": "CC-BY-4.0",
       "licenseEvidence": "LICENSE del directorio es «Attribution 4.0 International» y la cabecera de chebi_lite.obo declara «terms:license https://creativecommons.org/licenses/by/4.0/». AMBIGÜEDAD: el README del mismo directorio dice «CC Attribution-ShareAlike 4.0». Se aplica la más estricta para la atribución (citar la URL y la versión de ChEBI) y se consulta al propietario.",
-      "retrievedAt": "2026-10-27T23:22:03.458Z",
+      "retrievedAt": "2026-10-28T00:21:07.200Z",
+      "fingerprint": "6a6caaa9b6bd2282bb1e24bcbf393d9f6b683748761fd8d3ddd8831fca979d4d",
       "version": "ChEBI 256 (2026-10-06)",
       "files": [
         {
@@ -173,143 +177,13 @@
         }
       ]
     },
-    "eurlex-1169": {
-      "key": "eurlex-1169",
-      "owner": "Unión Europea — Reglamento (UE) n.º 1169/2011 (Oficina de Publicaciones, EUR-Lex/Cellar)",
-      "license": "Reutilización autorizada con cita de la fuente (Decisión 2011/833/UE)",
-      "licenseEvidence": "Decisión 2011/833/UE de la Comisión (reutilización de los documentos de la Comisión), descargada de Cellar (32011D0833). Los textos jurídicos de la UE se reutilizan citando la fuente y sin distorsionarlos.",
-      "retrievedAt": "2026-10-27T23:28:31.907Z",
-      "version": "texto consolidado 02011R1169-20250401",
-      "celex": {
-        "consolidated": "02011R1169-20250401",
-        "reuseDecision": "32011D0833"
-      },
-      "files": [
-        {
-          "path": "eurlex-1169/02011R1169-20250401.spa.xhtml",
-          "url": "http://publications.europa.eu/resource/celex/02011R1169-20250401",
-          "bytes": 434194,
-          "sha256": "033c2593cd4215dba04cf5a88e2ffa30cedeec6ff14a46e83593f3eb41f772ca"
-        },
-        {
-          "path": "eurlex-1169/02011R1169-20250401.eng.xhtml",
-          "url": "http://publications.europa.eu/resource/celex/02011R1169-20250401",
-          "bytes": 400040,
-          "sha256": "6667d2257606b2296602ccb5b7b9f2ea624d67372b27158a22a51d2ec85f1538"
-        },
-        {
-          "path": "eurlex-1169/32011D0833.spa.xhtml",
-          "url": "http://publications.europa.eu/resource/celex/32011D0833",
-          "bytes": 47920,
-          "sha256": "f588665de8101a6d31284c4c21d9b60b8323c03f7ba6841da9d93b99b019b2ef"
-        }
-      ]
-    },
-    "eurlex-1333": {
-      "key": "eurlex-1333",
-      "owner": "Unión Europea — Reglamento (CE) n.º 1333/2008, anexo II (Oficina de Publicaciones, EUR-Lex/Cellar)",
-      "license": "Reutilización autorizada con cita de la fuente (Decisión 2011/833/UE)",
-      "licenseEvidence": "ídem eurlex-1169. Se usa la versión consolidada (informativa); el texto auténtico es el del Diario Oficial.",
-      "retrievedAt": "2026-10-27T23:28:31.920Z",
-      "version": "consolidado 02008R1333-20260818",
-      "celex": {
-        "consolidated": "02008R1333-20260818"
-      },
-      "files": [
-        {
-          "path": "eurlex-1333/02008R1333-20260818.spa.xhtml",
-          "url": "http://publications.europa.eu/resource/celex/02008R1333-20260818",
-          "bytes": 4552726,
-          "sha256": "d7eb69e1a7b845705a7fee082cfab498f42e7535989ed2278bbf58cc4efc3654"
-        },
-        {
-          "path": "eurlex-1333/02008R1333-20260818.eng.xhtml",
-          "url": "http://publications.europa.eu/resource/celex/02008R1333-20260818",
-          "bytes": 4408536,
-          "sha256": "52ec5710c690bcd174ef7f5dfb463e1d2113103a1368851eca683c3ce2944e8c"
-        }
-      ]
-    },
-    "usc-21-321": {
-      "key": "usc-21-321",
-      "owner": "U.S. Government Publishing Office — United States Code, título 21, §321(qq)",
-      "license": "Dominio público (obra del gobierno de EE. UU.)",
-      "licenseEvidence": "Texto de ley federal publicado por GovInfo; las leyes no tienen copyright.",
-      "retrievedAt": "2026-10-27T23:29:09.882Z",
-      "version": "United States Code, edición 2023, título 21, §321 (GovInfo todavía no publica 2024 ni 2025: responde 200 con una página de error)",
-      "files": [
-        {
-          "path": "usc-21-321/USCODE-2023-title21-sec321.htm",
-          "url": "https://www.govinfo.gov/content/pkg/USCODE-2023-title21/html/USCODE-2023-title21-chap9-subchapII-sec321.htm",
-          "bytes": 84631,
-          "sha256": "41a2badfe9201f954a7599cc74b0c47ae17c24fd0db7683e5a7db66274f9e6f2"
-        }
-      ]
-    },
-    "europepmc-ebs": {
-      "key": "europepmc-ebs",
-      "owner": "Contact Dermatitis / ESSCA y grupo EBS (artículo en acceso abierto, vía Europe PMC)",
-      "license": "CC-BY-4.0 (PMC13238334 y PMC13441338)",
-      "licenseEvidence": "Europe PMC (search, resultType=core) devuelve license=«cc by» y isOpenAccess=Y para ambos artículos; el XML de texto completo lleva la declaración de licencia.",
-      "retrievedAt": "2026-10-27T23:22:31.633Z",
-      "version": "Europe PMC fullTextXML",
-      "files": [
-        {
-          "path": "europepmc-ebs/PMC13238334.xml",
-          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13238334/fullTextXML",
-          "bytes": 243592,
-          "sha256": "ef6a703455d87a02b55a903e7bc9b055bd8fb4a5948179eab8064dc711da7001"
-        },
-        {
-          "path": "europepmc-ebs/PMC13238334.search.json",
-          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=PMCID%3APMC13238334&format=json&resultType=core",
-          "bytes": 19444,
-          "sha256": "96c88e1e857618fe7e2d0fbafd4987f97d33c6179b4f871c3a8b0fa0d5e95992"
-        },
-        {
-          "path": "europepmc-ebs/PMC13441338.xml",
-          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13441338/fullTextXML",
-          "bytes": 146732,
-          "sha256": "f0e771b21f014d758846ff640ac21711bfa09f2138c49f64c68f203643770f92"
-        },
-        {
-          "path": "europepmc-ebs/PMC13441338.search.json",
-          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=PMCID%3APMC13441338&format=json&resultType=core",
-          "bytes": 17785,
-          "sha256": "bca7dc78fbee3c85d3248e55d67ffdb8736139477d9951ca5f61635d06d439e2"
-        }
-      ]
-    },
-    "mesh": {
-      "key": "mesh",
-      "owner": "U.S. National Library of Medicine — Medical Subject Headings (MeSH)",
-      "license": "Uso libre con cita: «Courtesy of the U.S. National Library of Medicine» (términos de descarga de NLM)",
-      "licenseEvidence": "nlm.nih.gov/databases/download/terms_and_conditions.html: «No charges, usage fees or royalties are paid to NLM for this data»; quien use los datos acepta citar a NLM («Courtesy of the U.S. National Library of Medicine»), no insinuar respaldo, y quien los redistribuya mantiene la versión vigente o avisa que no lo es. Sólo MeSH en inglés: los términos en castellano (DeCS/BIREME) no se tocan.",
-      "retrievedAt": "2026-10-28T00:06:33.928Z",
-      "fingerprint": "45ee66cc9b25f06e07d104c6cada979edaa14cb1953fde78b72aa3660df23bb9",
-      "version": "MeSH 2026 (desc2026.gz, que el servidor entrega descomprimido)",
-      "files": [
-        {
-          "path": "mesh/desc2026.xml",
-          "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
-          "bytes": 312952703,
-          "sha256": "449792ed59ba4d60035e44724352f7361ec0dc945b67dcd821a50ff32f81bcdb"
-        },
-        {
-          "path": "mesh/desc2026.allergy-subset.xml",
-          "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
-          "bytes": 1012413,
-          "sha256": "470851e061e20dd456d2793cf51f6274dec646432b6f90433eb5ef7cd2b46038",
-          "note": "subconjunto: descriptores bajo D23.050.063 y C20.543 del archivo completo (sha256 en el primer archivo)"
-        }
-      ]
-    },
     "ncit": {
       "key": "ncit",
       "owner": "National Cancer Institute — Enterprise Vocabulary Services (NCI Thesaurus)",
       "license": "CC-BY-4.0",
       "licenseEvidence": "La ficha del NCIt OBO Edition en el registro de OBO Foundry (ontology/ncit.md) declara «license: CC BY 4.0»; las páginas de EVS alcanzables hoy no publican el texto de la licencia (el ReadMe.txt del FTP no la menciona). Confirmar con el propietario.",
-      "retrievedAt": "2026-10-27T23:24:07.079Z",
+      "retrievedAt": "2026-10-28T00:22:23.544Z",
+      "fingerprint": "cad2706cd175def3ea7dbfbce28fd7a4c967772cea037db03f53b76cbe0c118f",
       "version": "NCIt 26.09d (2026-09-28)",
       "roots": [
         "C62651",
@@ -1128,12 +1002,89 @@
         }
       ]
     },
+    "eurlex-1169": {
+      "key": "eurlex-1169",
+      "owner": "Unión Europea — Reglamento (UE) n.º 1169/2011 (Oficina de Publicaciones, EUR-Lex/Cellar)",
+      "license": "Reutilización autorizada con cita de la fuente (Decisión 2011/833/UE)",
+      "licenseEvidence": "Decisión 2011/833/UE de la Comisión (reutilización de los documentos de la Comisión), descargada de Cellar (32011D0833). Los textos jurídicos de la UE se reutilizan citando la fuente y sin distorsionarlos.",
+      "retrievedAt": "2026-10-28T00:22:42.925Z",
+      "fingerprint": "0637dd918635ef1986bd036c01d2007cbadf0ae3fe7892d0c5da90b0a817d992",
+      "version": "texto consolidado 02011R1169-20250401",
+      "celex": {
+        "consolidated": "02011R1169-20250401",
+        "reuseDecision": "32011D0833"
+      },
+      "files": [
+        {
+          "path": "eurlex-1169/02011R1169-20250401.spa.xhtml",
+          "url": "http://publications.europa.eu/resource/celex/02011R1169-20250401",
+          "bytes": 434194,
+          "sha256": "033c2593cd4215dba04cf5a88e2ffa30cedeec6ff14a46e83593f3eb41f772ca"
+        },
+        {
+          "path": "eurlex-1169/02011R1169-20250401.eng.xhtml",
+          "url": "http://publications.europa.eu/resource/celex/02011R1169-20250401",
+          "bytes": 400040,
+          "sha256": "6667d2257606b2296602ccb5b7b9f2ea624d67372b27158a22a51d2ec85f1538"
+        },
+        {
+          "path": "eurlex-1169/32011D0833.spa.xhtml",
+          "url": "http://publications.europa.eu/resource/celex/32011D0833",
+          "bytes": 47920,
+          "sha256": "f588665de8101a6d31284c4c21d9b60b8323c03f7ba6841da9d93b99b019b2ef"
+        }
+      ]
+    },
+    "eurlex-1333": {
+      "key": "eurlex-1333",
+      "owner": "Unión Europea — Reglamento (CE) n.º 1333/2008, anexo II (Oficina de Publicaciones, EUR-Lex/Cellar)",
+      "license": "Reutilización autorizada con cita de la fuente (Decisión 2011/833/UE)",
+      "licenseEvidence": "ídem eurlex-1169. Se usa la versión consolidada (informativa); el texto auténtico es el del Diario Oficial.",
+      "retrievedAt": "2026-10-28T00:22:45.992Z",
+      "fingerprint": "c640ac446a386d3a5f40a9b3126cce2a8b9b492daa0b3ac9ba2cf0a8ec1ef350",
+      "version": "consolidado 02008R1333-20260818",
+      "celex": {
+        "consolidated": "02008R1333-20260818"
+      },
+      "files": [
+        {
+          "path": "eurlex-1333/02008R1333-20260818.spa.xhtml",
+          "url": "http://publications.europa.eu/resource/celex/02008R1333-20260818",
+          "bytes": 4552726,
+          "sha256": "d7eb69e1a7b845705a7fee082cfab498f42e7535989ed2278bbf58cc4efc3654"
+        },
+        {
+          "path": "eurlex-1333/02008R1333-20260818.eng.xhtml",
+          "url": "http://publications.europa.eu/resource/celex/02008R1333-20260818",
+          "bytes": 4408536,
+          "sha256": "52ec5710c690bcd174ef7f5dfb463e1d2113103a1368851eca683c3ce2944e8c"
+        }
+      ]
+    },
+    "usc-21-321": {
+      "key": "usc-21-321",
+      "owner": "U.S. Government Publishing Office — United States Code, título 21, §321(qq)",
+      "license": "Dominio público (obra del gobierno de EE. UU.)",
+      "licenseEvidence": "Texto de ley federal publicado por GovInfo; las leyes no tienen copyright.",
+      "retrievedAt": "2026-10-28T00:22:47.267Z",
+      "fingerprint": "57d09307ec30f250cc095b4503ce65c043795806b3c0f366cf7fe00cb920c58b",
+      "version": "United States Code, edición 2023, título 21, §321 (GovInfo todavía no publica 2024 ni 2025: responde 200 con una página de error)",
+      "files": [
+        {
+          "path": "usc-21-321/USCODE-2023-title21-sec321.htm",
+          "url": "https://www.govinfo.gov/content/pkg/USCODE-2023-title21/html/USCODE-2023-title21-chap9-subchapII-sec321.htm",
+          "bytes": 84631,
+          "sha256": "41a2badfe9201f954a7599cc74b0c47ae17c24fd0db7683e5a7db66274f9e6f2"
+        }
+      ]
+    },
     "openfda": {
       "key": "openfda",
       "owner": "U.S. Food and Drug Administration — openFDA (NDC)",
       "license": "CC0-1.0 (openFDA)",
       "licenseEvidence": "La respuesta de la API enlaza https://open.fda.gov/license/ y https://open.fda.gov/terms/: datos públicos del gobierno de EE. UU., CC0 1.0.",
-      "retrievedAt": "2026-10-27T23:24:11.260Z",
+      "retrievedAt": "2026-10-28T00:22:51.427Z",
+      "fingerprint": "b5b4f22f59b3240759a3e3ae67f90ea9c0138caf44c3307d59bd1817b0453ee1",
       "version": "openFDA NDC last_updated 2026-10-27",
       "files": [
         {
@@ -1167,7 +1118,8 @@
       "owner": "U.S. National Library of Medicine — DailyMed (etiquetas SPL de la FDA)",
       "license": "Dominio público (etiquetas SPL enviadas a la FDA; DailyMed sin restricción de uso)",
       "licenseEvidence": "DailyMed publica las etiquetas SPL como datos públicos (https://dailymed.nlm.nih.gov/dailymed/app-support.cfm). El texto de cada etiqueta es del titular del registro; se toma sólo el identificador UNII y el nombre de cada ingrediente.",
-      "retrievedAt": "2026-10-27T23:43:40.126Z",
+      "retrievedAt": "2026-10-28T00:40:43.231Z",
+      "fingerprint": "f9b515e91f139e307b19ae2382f4e03fddbbbd5f2173c15e719214c427456c6e",
       "version": "DailyMed v2 (spls por NDC de openFDA)",
       "ndcProducts": 2286,
       "ndcWithoutSpl": 0,
@@ -1186,7 +1138,8 @@
       "owner": "SmartPractice (etiqueta SPL del T.R.U.E. TEST, vía DailyMed)",
       "license": "Etiqueta pública de un producto licenciado por la FDA (DailyMed)",
       "licenseEvidence": "Etiqueta SPL publicada en DailyMed. Se toman los nombres y UNII de los alérgenos como figuran en la etiqueta.",
-      "retrievedAt": "2026-10-27T23:43:40.619Z",
+      "retrievedAt": "2026-10-28T00:40:43.683Z",
+      "fingerprint": "37a9fc77ff0eef23294200d631f9f3617097e50c0deb98f7956336834fd8bd5a",
       "version": "SPL setid 2f082b68-dc74-418a-9e6f-b3c285b41d44",
       "files": [
         {
@@ -1205,8 +1158,9 @@
       "owner": "U.S. FDA / NCATS — Global Substance Registration System (GSRS) y UNII",
       "license": "Dominio público (FDA/NCATS)",
       "licenseEvidence": "El GSRS y los UNII son un registro de la FDA, de acceso público y sin restricción (https://gsrs.ncats.nih.gov).",
-      "retrievedAt": "2026-10-27T23:48:29.468Z",
-      "version": "GSRS 2026-10-27 (cada sustancia trae lastEdited/version)",
+      "retrievedAt": "2026-10-28T00:45:40.651Z",
+      "fingerprint": "efb6f6f461028228d793fb7384207b9655da8530f46563e45e897a5008894b79",
+      "version": "GSRS 2026-10-28 (cada sustancia trae lastEdited/version)",
       "uniiCount": 517,
       "digest": {
         "count": 517,
@@ -1218,7 +1172,7 @@
       "owner": "U.S. National Library of Medicine — RxNorm / RxClass (RxNav)",
       "license": "RxNorm: sin restricción para las cadenas propias de NLM (SAB=RXNORM); MED-RT (VA) dominio público",
       "licenseEvidence": "Términos de RxNorm (nlm.nih.gov/research/umls/rxnorm/docs/termsofservice.html): las cadenas de RxNorm (SAB=RXNORM) no tienen restricción adicional. MED-RT es del Department of Veterans Affairs (dominio público). No se toman clases con fuente SNOMED CT (DISPOS, STRUCT) ni ATC (WHO).",
-      "retrievedAt": "2026-10-27T23:56:45.665Z",
+      "retrievedAt": "2026-10-28T00:52:44.801Z",
       "fingerprint": "5c220c058b2696590b95b084d63c2f19cebe71bfa3613c4482e2ae27c7814ebb",
       "version": "RxNorm 05-Oct-2026 (RxNav API 3.1.356)",
       "files": [
@@ -1286,13 +1240,76 @@
         "sha256": "6829364e5936e8d6082555e0cb7f31ef6c6a9ef04de7c59142bfca2c82472e9b"
       }
     },
+    "europepmc-ebs": {
+      "key": "europepmc-ebs",
+      "owner": "Contact Dermatitis / ESSCA y grupo EBS (artículo en acceso abierto, vía Europe PMC)",
+      "license": "CC-BY-4.0 (PMC13238334 y PMC13441338)",
+      "licenseEvidence": "Europe PMC (search, resultType=core) devuelve license=«cc by» y isOpenAccess=Y para ambos artículos; el XML de texto completo lleva la declaración de licencia.",
+      "retrievedAt": "2026-10-28T00:52:48.967Z",
+      "fingerprint": "f134a2fe03db567a44b2a95b092605db02d2c0db633e48141cbea7dece8575d9",
+      "version": "Europe PMC fullTextXML",
+      "files": [
+        {
+          "path": "europepmc-ebs/PMC13238334.xml",
+          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13238334/fullTextXML",
+          "bytes": 243592,
+          "sha256": "ef6a703455d87a02b55a903e7bc9b055bd8fb4a5948179eab8064dc711da7001"
+        },
+        {
+          "path": "europepmc-ebs/PMC13238334.search.json",
+          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=PMCID%3APMC13238334&format=json&resultType=core",
+          "bytes": 19444,
+          "sha256": "96c88e1e857618fe7e2d0fbafd4987f97d33c6179b4f871c3a8b0fa0d5e95992"
+        },
+        {
+          "path": "europepmc-ebs/PMC13441338.xml",
+          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC13441338/fullTextXML",
+          "bytes": 146732,
+          "sha256": "f0e771b21f014d758846ff640ac21711bfa09f2138c49f64c68f203643770f92"
+        },
+        {
+          "path": "europepmc-ebs/PMC13441338.search.json",
+          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=PMCID%3APMC13441338&format=json&resultType=core",
+          "bytes": 17785,
+          "sha256": "bca7dc78fbee3c85d3248e55d67ffdb8736139477d9951ca5f61635d06d439e2"
+        }
+      ]
+    },
+    "mesh": {
+      "key": "mesh",
+      "owner": "U.S. National Library of Medicine — Medical Subject Headings (MeSH)",
+      "license": "Uso libre con cita: «Courtesy of the U.S. National Library of Medicine» (términos de descarga de NLM)",
+      "licenseEvidence": "nlm.nih.gov/databases/download/terms_and_conditions.html: «No charges, usage fees or royalties are paid to NLM for this data»; quien use los datos acepta citar a NLM («Courtesy of the U.S. National Library of Medicine»), no insinuar respaldo, y quien los redistribuya mantiene la versión vigente o avisa que no lo es. Sólo MeSH en inglés: los términos en castellano (DeCS/BIREME) no se tocan.",
+      "retrievedAt": "2026-10-28T00:52:57.407Z",
+      "fingerprint": "45ee66cc9b25f06e07d104c6cada979edaa14cb1953fde78b72aa3660df23bb9",
+      "version": "MeSH 2026 (desc2026.gz, que el servidor entrega descomprimido)",
+      "files": [
+        {
+          "path": "mesh/desc2026.xml",
+          "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
+          "bytes": 312952703,
+          "sha256": "449792ed59ba4d60035e44724352f7361ec0dc945b67dcd821a50ff32f81bcdb",
+          "headers": {
+            "last-modified": "Wed, 12 Aug 2026 18:33:47 GMT",
+            "etag": "\"1008a44-658ddd3fe86cb\""
+          }
+        },
+        {
+          "path": "mesh/desc2026.allergy-subset.xml",
+          "url": "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2026.gz",
+          "bytes": 1012413,
+          "sha256": "470851e061e20dd456d2793cf51f6274dec646432b6f90433eb5ef7cd2b46038",
+          "note": "subconjunto: descriptores bajo D23.050.063 y C20.543 del archivo completo (sha256 en el primer archivo)"
+        }
+      ]
+    },
     "wikidata": {
       "key": "wikidata",
       "owner": "Wikidata (Wikimedia Foundation)",
       "license": "CC0-1.0",
       "licenseEvidence": "Wikidata publica los datos estructurados bajo CC0 1.0 (https://www.wikidata.org/wiki/Wikidata:Licensing).",
-      "retrievedAt": "2026-10-28T00:02:58.429Z",
-      "fingerprint": "f18cf6c9d7f5e45a4ec1465d9fec09db0433d53846cd7304dd1c4ce1785ae69b",
+      "retrievedAt": "2026-10-28T00:58:53.352Z",
+      "fingerprint": "07b24f702e118b1d684b2d32ec349babe5e6d174cad6aa78f6df94ccdeef3dab",
       "version": "Wikidata Query Service (consulta por identificador exacto)",
       "queryTemplate": "SELECT ?v ?item ?es ?alias WHERE { VALUES ?v { \"<id>\" } ?item wdt:Pxxx ?v . OPTIONAL { ?item rdfs:label ?es . FILTER(lang(?es) = \"es\") } OPTIONAL { ?item skos:altLabel ?alias . FILTER(lang(?alias) = \"es\") } }",
       "properties": {
@@ -1310,7 +1327,7 @@
           "path": "wikidata/P1748-0000.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 9617,
-          "sha256": "f421958aa6179503d0ba54d19d57df689ed0ab5c5f5d7b68eebb54bbc2140be4",
+          "sha256": "5b6d0139719fa091199d53d95f3cb335a4ee7d6c9917d5d0dfb6158a05952f43",
           "prop": "P1748",
           "ids": 132
         },
@@ -1414,7 +1431,7 @@
           "path": "wikidata/P3345-0012.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 16201,
-          "sha256": "b1b487432415ccffa6b5b59e8ef18b85d5cec1a43ee9a80f6896d9b8433d5e63",
+          "sha256": "616c287ef8bad692168c411c17b83fe790e97b9bbe3e41024781f2d0ee86d0f0",
           "prop": "P3345",
           "ids": 150
         },
@@ -1422,7 +1439,7 @@
           "path": "wikidata/P3345-0013.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 29095,
-          "sha256": "31fcba43932c9fc4c4389ffa9b4fee7371db9b3f25982b1d491f2facd6beeeff",
+          "sha256": "4de1fe6758b81413b2eca6b002a14221f89d8518fe5a056273a586ff1f84e70a",
           "prop": "P3345",
           "ids": 150
         },
@@ -1430,7 +1447,7 @@
           "path": "wikidata/P3345-0014.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 32603,
-          "sha256": "cea3f4486fb651624f393f52a8b36a578e8232bb10e0735f6b22b2e96e24e03f",
+          "sha256": "2388d423a1611e48d2160e293b391a23059a499bb4cf5cb344def4ebcd7dcdb4",
           "prop": "P3345",
           "ids": 150
         },
@@ -1438,7 +1455,7 @@
           "path": "wikidata/P3345-0015.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 23616,
-          "sha256": "1b63745551af46acb7d18b68d7d3218f28ff03784809f86c972b6f39a62add78",
+          "sha256": "db21e15e4a7ef9abb4cae517f57d5df51184358550f8ef8505783fbccdb4d467",
           "prop": "P3345",
           "ids": 150
         },
@@ -1446,7 +1463,7 @@
           "path": "wikidata/P3345-0016.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 28140,
-          "sha256": "416e101787b264f27bb507e5954b758e29a25cb85cb5456d8a1b72adfa86f171",
+          "sha256": "c49e855d83c34a4e41b71a27f1de90c6404cff5d046e68e81d38f5857a347071",
           "prop": "P3345",
           "ids": 150
         },
@@ -1462,7 +1479,7 @@
           "path": "wikidata/P3345-0018.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 16022,
-          "sha256": "cec7e81a5d55eb4b9992abe2f7e10e49c337a64056c839f7aa1085f8a44c79aa",
+          "sha256": "cc578de8070e8d0919fbeeb0af19a4ece4ada1c9210c064333aa0825c61c8522",
           "prop": "P3345",
           "ids": 150
         },
@@ -1510,7 +1527,7 @@
           "path": "wikidata/P3345-0024.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 1767,
-          "sha256": "88a3adebe7a148df171ab172667c7c697fca7e67c4eca71b8755453c0350843f",
+          "sha256": "9da7ae191fc87e308f0fe537a51ebfa1c80dac5003d1427d456f26eb6dfae8e3",
           "prop": "P3345",
           "ids": 150
         },
@@ -1526,7 +1543,7 @@
           "path": "wikidata/P3345-0026.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 15917,
-          "sha256": "e962020294265d30233037438dedd31a9bc0100c4f891f1f7bc9446fddcba39d",
+          "sha256": "6f2b4ba5855003e21473d5743e4fca42b4e4b4013c11d0430a11eb996cabdc4e",
           "prop": "P3345",
           "ids": 150
         },
@@ -1534,7 +1551,7 @@
           "path": "wikidata/P3345-0027.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 24528,
-          "sha256": "6046b3edd392973ce130caa305c25b77cd50fca94cce769c29ee58147cbee414",
+          "sha256": "146cdef10803d1cf2d5d9b8faa59769cb954f22295bcc5e2f7c7cb29d6f54e31",
           "prop": "P3345",
           "ids": 150
         },
@@ -1542,7 +1559,7 @@
           "path": "wikidata/P3345-0028.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 22146,
-          "sha256": "005cea3d604bf9098d9eada447ef24d1248df656f200b6e22ae0788dc3934217",
+          "sha256": "cbf2c1d33cfff73c02e1c8d56bc0be38052e302fe80e431c00d15076e06cfcbe",
           "prop": "P3345",
           "ids": 150
         },
@@ -1550,7 +1567,7 @@
           "path": "wikidata/P3345-0029.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 23019,
-          "sha256": "6433f4283eac28a269685752161bab297123ed4820b0a96ca41c553e1a029b4d",
+          "sha256": "ac47669274b92bcfed77e28f8d412c1e3d71aebd56b70b5abb4e043c863cd28c",
           "prop": "P3345",
           "ids": 150
         },
@@ -1558,7 +1575,7 @@
           "path": "wikidata/P3345-0030.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 13015,
-          "sha256": "e8bba9b4fef14461e924656fd2c9224fa4b952b40293eeb2e14eb238428947a5",
+          "sha256": "1c083813df7a07ec193bde5b40c9e7163c9ecc800ad52d8dddaf81ada1556e32",
           "prop": "P3345",
           "ids": 150
         },
@@ -1566,7 +1583,7 @@
           "path": "wikidata/P3345-0031.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 18945,
-          "sha256": "6543e050ac2a874ffaee8c84d8d4bc747c5ec033c9395a84fc6d9e49b46a8d01",
+          "sha256": "5e04cc57f1320e657f7bca6d39996ba6e360bc3519d5e3c081f1746ae0221682",
           "prop": "P3345",
           "ids": 150
         },
@@ -1574,7 +1591,7 @@
           "path": "wikidata/P3345-0032.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 19994,
-          "sha256": "789875d51aa09f65a281c603a97e00296a7ee0e41e435cd7a24bf81ec78ced9d",
+          "sha256": "7506442760796ea18e9cf180b0634a64d57cc0c6782be31a9355e59fd8183625",
           "prop": "P3345",
           "ids": 150
         },
@@ -1582,7 +1599,7 @@
           "path": "wikidata/P3345-0033.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 30222,
-          "sha256": "f8dba48eb1c807596231b134f9f1b7cdac8e89eb140bcb5620f02ecaefba22c6",
+          "sha256": "b2d3531810c3f5e45cb932f88b0649b3c07920b307d0847a63c346a62ee1551e",
           "prop": "P3345",
           "ids": 150
         },
@@ -1590,7 +1607,7 @@
           "path": "wikidata/P3345-0034.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 11706,
-          "sha256": "56570b0d1f931bbb7ccb839001259983eb3a2f7347b1785b6d8524573291515d",
+          "sha256": "59fd4da1e809bc579f4e89131df5f7d04d612d748b7a174b7a1fe1f6496d8353",
           "prop": "P3345",
           "ids": 150
         },
@@ -1606,7 +1623,7 @@
           "path": "wikidata/P3345-0036.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 11452,
-          "sha256": "0d93c28648397c486e72956f818a5ca647de06e501260f888c1cc6eeeed646d9",
+          "sha256": "b3dc5657944f7beada54b6e2ca74990f6f4bdbf1064f31814ec5ba9f147736f7",
           "prop": "P3345",
           "ids": 150
         },
@@ -1614,7 +1631,7 @@
           "path": "wikidata/P3345-0037.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 42480,
-          "sha256": "1aefd5b84c758f58959ee163456b37fadd640d10a4f62bc3a40a9494c3c6d8e6",
+          "sha256": "892b1d56fe69fc90177c9f288c985210a70cac8725e65c2a99c040bb5d257b2f",
           "prop": "P3345",
           "ids": 150
         },
@@ -1622,7 +1639,7 @@
           "path": "wikidata/P3345-0038.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 17394,
-          "sha256": "449a819e412ace2a425c87a0198907017efdde9660eca4267edfcc701010d7e9",
+          "sha256": "e7add4370c719db3c08c3adffcb96124fbe4e2cb638d801af21c541bd4cea7eb",
           "prop": "P3345",
           "ids": 150
         },
@@ -1630,7 +1647,7 @@
           "path": "wikidata/P3345-0039.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 18635,
-          "sha256": "89268101e15a15bcef0e790b5dad8e1d5a54f73395f893d7927db0fb03a9de70",
+          "sha256": "4dd0cfab37a0e958e52382fbecef07038cbc5ca3836a2e313100b4a8f610dfd9",
           "prop": "P3345",
           "ids": 150
         },
@@ -1638,7 +1655,7 @@
           "path": "wikidata/P3345-0040.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 24321,
-          "sha256": "8ccdbb9e6e5a36e1c3bfc422476c1ff98ecac988ee232f08fa3f7ccee029a061",
+          "sha256": "f764d4046ffef5329fb0546939098a48b4722742f5e4d96621d3804798037836",
           "prop": "P3345",
           "ids": 150
         },
@@ -1646,7 +1663,7 @@
           "path": "wikidata/P3345-0041.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 22945,
-          "sha256": "4ff124019fa9470a915834e3837ff96f39532eb1cd5235f7a61403c23e4417bb",
+          "sha256": "019a1c2d5e7a2a13f2caf1a8a9463ca5dbee8e848c7452e67a1dd51aa258b09b",
           "prop": "P3345",
           "ids": 150
         },
@@ -1654,7 +1671,7 @@
           "path": "wikidata/P3345-0042.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 20644,
-          "sha256": "2c2444ec95788bd6c52f438b0305a8b7da44e67aadc9eaedb6c2c34fbedc730f",
+          "sha256": "7170db5c1df99955a35076043f63635825bdff5108f7b72cdff363b66d9a396a",
           "prop": "P3345",
           "ids": 150
         },
@@ -1678,7 +1695,7 @@
           "path": "wikidata/P3345-0045.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 26949,
-          "sha256": "707391accdb16af50acc2e869580a6ef4bd67da552edd9ce4d2cd02ebd365fb5",
+          "sha256": "9c95eef36698453d952d268140c23daa1d5e79a735be39bbd401cd9a0a6b65ff",
           "prop": "P3345",
           "ids": 150
         },
@@ -1694,7 +1711,7 @@
           "path": "wikidata/P3345-0047.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 19641,
-          "sha256": "75ae877ca18bebd3515baf048b02c83b932f5d5c39e1b14df700c8583cb1697f",
+          "sha256": "36653a15ba2836cbca9fc3e47cd843d289127cff40f6bb727c341a3ccbcbdb80",
           "prop": "P3345",
           "ids": 150
         },
@@ -1702,7 +1719,7 @@
           "path": "wikidata/P3345-0048.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 25223,
-          "sha256": "ca5ba15a3398923492ec675d5028995a1b3b21e897bf784163a00eac165edf98",
+          "sha256": "69983df8cdc419a86fffbc02d87847c3fce1d6e59c80a83e6f3a8b1eab7c4c4e",
           "prop": "P3345",
           "ids": 150
         },
@@ -1710,7 +1727,7 @@
           "path": "wikidata/P3345-0049.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 30027,
-          "sha256": "0816829ef56c70de5c078a4b95354e1ad4ff75174c6bdabb521ee4357c97bc46",
+          "sha256": "9055edaa708624e4af21a40c39661e0bed82912ac5efeaaa7103f389ad8e35ad",
           "prop": "P3345",
           "ids": 150
         },
@@ -1742,7 +1759,7 @@
           "path": "wikidata/P3345-0053.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 18383,
-          "sha256": "d83c75b2b9dda4784c572128c6d43b2bd6584d60801149955a1bb9d8e7b70862",
+          "sha256": "119486db5e2ae81db572970f0a8c965a4cd816b4bca4ca51a5c531af55ae03fc",
           "prop": "P3345",
           "ids": 150
         },
@@ -1750,7 +1767,7 @@
           "path": "wikidata/P3345-0054.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 13405,
-          "sha256": "25ac9394952503db9a47333be04e2348d87a8dcf1c0b6cf916cdcd1778595b73",
+          "sha256": "666150f673b9a8b0b145272637d16d2b94a1f8902b4216e658cfdd178b3d8131",
           "prop": "P3345",
           "ids": 150
         },
@@ -1766,7 +1783,7 @@
           "path": "wikidata/P3345-0056.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 18484,
-          "sha256": "c7e8e7f36645736625749441035c3afb7af28cf4476362ae168a509fa46e2265",
+          "sha256": "9ec08720a0b25c848f0a508a6ed9fba92c60dde367e061f58952c27a2b773876",
           "prop": "P3345",
           "ids": 150
         },
@@ -1782,7 +1799,7 @@
           "path": "wikidata/P3345-0058.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 26665,
-          "sha256": "08f736a94714ea73560171aa37d2a81bb57049f094a689dec9100e732e56fe13",
+          "sha256": "2d0f3a4b20e0b2ad43934e6e8cc5b493212ad109f207500307748a390568618d",
           "prop": "P3345",
           "ids": 150
         },
@@ -1798,7 +1815,7 @@
           "path": "wikidata/P3345-0060.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 21731,
-          "sha256": "ab42e620f7b429ced31cce9caf4f536362e861d91c736b871a6c9966d2a23e59",
+          "sha256": "ee2ebf0ab6fa1ecf1dfabfcfdf5fb7adab941426e12a153cad0fd20d4321ff4b",
           "prop": "P3345",
           "ids": 150
         },
@@ -1806,7 +1823,7 @@
           "path": "wikidata/P3345-0061.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 17148,
-          "sha256": "54973ce524e30b059708930beb435417372b139cade8c4489dfa31f59f3e162f",
+          "sha256": "161c35ab466581dcddbb62a9c771ce9970eecf7b26b52f68abbb1925f5dbbc56",
           "prop": "P3345",
           "ids": 150
         },
@@ -1814,7 +1831,7 @@
           "path": "wikidata/P3345-0062.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 14712,
-          "sha256": "533e6fc4d0189e184c9b4dfdabf3945ec15cea4d6a9e08a26222b78e0a60e106",
+          "sha256": "a63686d2f07b955bbb8c1ee9663e621bf46dafada4906fd466d00d32f050bcb8",
           "prop": "P3345",
           "ids": 150
         },
@@ -1822,7 +1839,7 @@
           "path": "wikidata/P3345-0063.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 15168,
-          "sha256": "4209a6aa29838cdef75549766287ea12cd40263f8b05ee76cc44e2ad1c0a1133",
+          "sha256": "ae9c4f6b72ad38e30f15ee533e402b153e71f9b641b9595a3f160d9a070a2ec1",
           "prop": "P3345",
           "ids": 150
         },
@@ -1846,7 +1863,7 @@
           "path": "wikidata/P3345-0066.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 33775,
-          "sha256": "356ef7a74b7578e66369e2e626429c7fe491a8b9c8198e854f42e4b9e6fac471",
+          "sha256": "081d329973cb6428c6730138c1437d2b1c756ad72be35a8e1c09c6e0bc2a2b4a",
           "prop": "P3345",
           "ids": 150
         },
@@ -1862,7 +1879,7 @@
           "path": "wikidata/P3345-0068.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 13242,
-          "sha256": "43c9425451ba780953a2a89cd7957992c1c3802076c9ad3c08fcdc5d71e2cd38",
+          "sha256": "a4b53f19f77d6123899425f904b57f2ef8f5b77e5f094f901c4f1fcee73da7f5",
           "prop": "P3345",
           "ids": 150
         },
@@ -1870,7 +1887,7 @@
           "path": "wikidata/P3345-0069.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 16033,
-          "sha256": "766ff05b81999b2de48ef41cf919ff2e97213ef58cfea23e45a3e106402c7eca",
+          "sha256": "ec0de1a1db3f0fd48371858d67a9a53a2da8da54a00d84277d2acbe03a7d3c0b",
           "prop": "P3345",
           "ids": 150
         },
@@ -1886,7 +1903,7 @@
           "path": "wikidata/P3345-0071.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 19138,
-          "sha256": "abfd2b867dd178d5f001a7c30e173518dd8cfb704f871558db33196d520c1f01",
+          "sha256": "b05e1cf98b11dc059596306e4bad84dac43c089fd474fa4145bd1318f33fe6f5",
           "prop": "P3345",
           "ids": 150
         },
@@ -1894,7 +1911,7 @@
           "path": "wikidata/P3345-0072.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 13026,
-          "sha256": "53c601e8688d97a5bf85013b90e5352593ec018c3b9badc2d60571554243ffa5",
+          "sha256": "e01f8ec26c95347f5e77a78bc21d7a2d3e92e999419ace25e46b110a11e46250",
           "prop": "P3345",
           "ids": 150
         },
@@ -1902,7 +1919,7 @@
           "path": "wikidata/P3345-0073.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 30948,
-          "sha256": "2cc12791972ac99cdcd3c06a017cf6108e63cebff6d9ea8b649bb579d1617c96",
+          "sha256": "5a75a561a846f7ca1b1b5bc4e50bcc4444317439e9546da282652b743933a9e6",
           "prop": "P3345",
           "ids": 150
         },
@@ -1934,7 +1951,7 @@
           "path": "wikidata/P3345-0077.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 2911,
-          "sha256": "b270d4c9381dc95be619fa1c929d7c5c78044637546285b23e2e993072345c44",
+          "sha256": "a101688257dd4af6d9038d3fe4d0bb9ea2dacc6b906d84941fd7121dd6c8dfab",
           "prop": "P3345",
           "ids": 150
         },
@@ -1966,7 +1983,7 @@
           "path": "wikidata/P3345-0081.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 8821,
-          "sha256": "856e0d2fb5daf744f683a989b98bbd26f31e037d8daa572a1f55d02d71b88fd7",
+          "sha256": "ca72fc74f92bb041bb130f1d729f1b1eb639a29a6bceeb8710d4324c9b1dfe24",
           "prop": "P3345",
           "ids": 150
         },
@@ -1974,7 +1991,7 @@
           "path": "wikidata/P3345-0082.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 5947,
-          "sha256": "eefa5fc132044b51a91a66261bddd33a13cee30e0cc6eaaa9f4fa5362713c300",
+          "sha256": "c01aecba3b905a5ad45aba8ce742506bc66490b37756562b9f70c9ca6f224efc",
           "prop": "P3345",
           "ids": 150
         },
@@ -1990,7 +2007,7 @@
           "path": "wikidata/P3345-0084.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 15881,
-          "sha256": "35c6aed4d9b2b35aae214181c17eed2025a7846609b7d27d384ea6126656fd01",
+          "sha256": "b7b9e7ece7566e7728a7b441503a57d68e35ecd634ba91f0f75e38cecfabc54f",
           "prop": "P3345",
           "ids": 150
         },
@@ -2022,7 +2039,7 @@
           "path": "wikidata/P3345-0088.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 17889,
-          "sha256": "99fea56babe07fc212a1d1b60b3a0a094304e75cd281be6e08e82d17456d9831",
+          "sha256": "d8f1ea1fd3e7a09a8eedf4bdd9f6e95c156a897290f1ccf5f214795ce9bb26c8",
           "prop": "P3345",
           "ids": 150
         },
@@ -2038,7 +2055,7 @@
           "path": "wikidata/P3345-0090.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 20086,
-          "sha256": "8c27168c673ee37bb5dc066050d3d6760dedadcb3c0e0dcc5231e98caf3e7e5f",
+          "sha256": "59e9e467754ff507ab5158139cb4a9784a4cccce7c85094a08d3fe1f4cb2df4c",
           "prop": "P3345",
           "ids": 150
         },
@@ -2046,7 +2063,7 @@
           "path": "wikidata/P3345-0091.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 21471,
-          "sha256": "7b1369ba43c363abac3ad9b90d334efd00e212b1ee4311e04f0e3123b60be4a0",
+          "sha256": "633275564ff728744d2798dae0a4f6b8921371ac82258048b89ce1f6492aea5e",
           "prop": "P3345",
           "ids": 150
         },
@@ -2102,7 +2119,7 @@
           "path": "wikidata/P3345-0098.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 14250,
-          "sha256": "9cea5c28e83819600efa60b0662808273c38da19861e52cf3cb1d1e59645c1f3",
+          "sha256": "9b7321523b2ce89edd4c1570b67829b80408a7483bdee27fbc11e1631a1fdfaa",
           "prop": "P3345",
           "ids": 150
         },
@@ -2110,7 +2127,7 @@
           "path": "wikidata/P3345-0099.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 9321,
-          "sha256": "6ca10bef467f6163e7bb5905dcbd9b1dcfe930c339abff673ff2645b6cdf2740",
+          "sha256": "7d5ffa87844461a7d29726717a7c6a48bac19b2d70aec0bca44f582ee494d5ab",
           "prop": "P3345",
           "ids": 150
         },
@@ -2118,7 +2135,7 @@
           "path": "wikidata/P3345-0100.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 20778,
-          "sha256": "3f61cf98d07108023a3cb0e01635d759e4e9dd6032b0b18b9b5e1981a1ff30d3",
+          "sha256": "f976997f69cfcef915b9b31c5660355f39f25ae834713a451e28f5afafe4329e",
           "prop": "P3345",
           "ids": 150
         },
@@ -2134,7 +2151,7 @@
           "path": "wikidata/P3345-0102.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 11415,
-          "sha256": "7560e7331315cda0bcb7928fa7066e5fa35512b1bf8a15d68a6a69b56cd39fb6",
+          "sha256": "9b18770c7f9107cb24d364fc5c8b386415c58d09ad5b93614a60b333b0279151",
           "prop": "P3345",
           "ids": 150
         },
@@ -2166,7 +2183,7 @@
           "path": "wikidata/P3345-0106.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 6597,
-          "sha256": "95e78dc5a61eb05d26c1c28c12e02025b76d04e5ab04539b4538b96c0facd269",
+          "sha256": "1566f6574a8b06dfe868bc7691435d4e034fead72e43cc7b8d20bf680d8562f5",
           "prop": "P3345",
           "ids": 150
         },
@@ -2182,7 +2199,7 @@
           "path": "wikidata/P3345-0108.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 5310,
-          "sha256": "a19d6a190d99bf468767cfe323132a70c577f7e027f112facd174b69d23ebb2f",
+          "sha256": "d1d48d613ca252b54f758ab992994391aff2f25d53a3e41c9501816206fbef1b",
           "prop": "P3345",
           "ids": 150
         },
@@ -2190,7 +2207,7 @@
           "path": "wikidata/P3345-0109.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 3178,
-          "sha256": "6c7819d7022c33db87e885958c19fb84b35146f4552af122a47ecb27b3d8d8f5",
+          "sha256": "da90b03f2a52fe63af89cb79f0bdb3b0032ddbfcc73dbf83d98659fe92eab0fc",
           "prop": "P3345",
           "ids": 150
         },
@@ -2214,7 +2231,7 @@
           "path": "wikidata/P3345-0112.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 6188,
-          "sha256": "7d5eb0c368f48d0d7d6fc1a462f0048228826c9892349bb741c072bc3f5a344a",
+          "sha256": "5dca5f71fc579768156082f9f59242cae0d6671ca8fc345908a5dc3f1d98c2d9",
           "prop": "P3345",
           "ids": 150
         },
@@ -2237,256 +2254,256 @@
         {
           "path": "wikidata/P3345-0115.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 4375,
-          "sha256": "df29d1e08e38948cb3b60947c8745cb13f3bad7939718a5d2c0e6e09fd3d8fe0",
+          "bytes": 26243,
+          "sha256": "1da730c01f8032f3be198f678651eac24a74c4fc3c737373c874894ad6d1b09b",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0116.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 3362,
-          "sha256": "7c605c99f4bd898ee93310688a326a79d5ca17a6ba56d15799f403766cac987a",
+          "bytes": 26321,
+          "sha256": "8a14b7a8324d999411e0b8ed41ec76c5f81e1625f9b4a25f68ed8bab592341bc",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0117.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 12255,
-          "sha256": "2b65397f865f12cf5adb274855b09b15939cd68ae85c1095101652f992688dfe",
+          "bytes": 44997,
+          "sha256": "ca561ff1c77f8c3299771bd786a5a5ddc25284d9a7aca43b3e6170e4cad80452",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0118.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 27493,
-          "sha256": "61bab5cb11624abf130607922ad650d6c0901a2fe5d6bcd93cc169e4f3f3d905",
+          "bytes": 21225,
+          "sha256": "6721fb9403be12890ef674969eb1bff041f47a3f45da66e65b360be25e841812",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0119.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 43717,
-          "sha256": "f51002dec722a6a54d45fbe74cd192942d063d480eb8d3951fdcf3671df6ccea",
+          "bytes": 40220,
+          "sha256": "c8e97824747bedbc82acff8c330f9299b7716559431bb3d89fef4a9e8899e6c1",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0120.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 26995,
-          "sha256": "46a27e4a8b190088cf206f71c5a75c9619c644c47f08f92702bc8ce301d75cbe",
+          "bytes": 50027,
+          "sha256": "227b058e8519aee7dae7efc5b003d9136575ebb6062ca63dcef91ad258d5e489",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0121.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 30739,
-          "sha256": "74b23b70af01ccace5e90ce3b2aab98020336c63e15d5731ccf158f5eafaa5ff",
+          "bytes": 59739,
+          "sha256": "ab419c2f5f10986b95f28974eb5e70c45c11b162162f2e048f99481e85f7de41",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0122.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 59394,
-          "sha256": "82567dbabe70191b3f27ecff4f5c9c85d9b583e248514a03de8d1c5c2af293e7",
+          "bytes": 30392,
+          "sha256": "0d2605065637dfc57dee859010ec22387cd3140c92a02208c7b8fcb47864060a",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0123.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 52247,
-          "sha256": "0636ae8ef40082f43002ac229b96320140253b72556a1328ace9836fd65dcf3b",
+          "bytes": 30672,
+          "sha256": "bd522aad2a0449dea67ae21da6280a495beae1be741d6931bf8e296880394da1",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0124.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 38386,
-          "sha256": "8abb3e1670a75ef470767d3c02a67f9abc860e139f83479518ecf49d191ce980",
+          "bytes": 46003,
+          "sha256": "1b855e4d69bad14890986da0ae97e8393f7d9b6696d1234346f202682ee10e2e",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0125.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 24459,
-          "sha256": "469e80308812a184cc006992e4a4a266f049861541ee53cb8d2144ffd0e2955c",
+          "bytes": 28528,
+          "sha256": "13b295624ba2a848b202a442696a689a19c8bce396fa30ee0d16dd32ae343b2f",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0126.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 42596,
-          "sha256": "24281589aef038772281e165353e6cc87d754e88a645435f58e729a517131a1a",
+          "bytes": 39154,
+          "sha256": "6483444acc3a2741dba4a40be3dc97bf4fa105a1db0813538d44a692094988e6",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0127.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 36103,
-          "sha256": "4df117b4a6089dbf32c1e72da4b35685f5ca874cd3c8ca58d284fc725b513092",
+          "bytes": 51590,
+          "sha256": "ded36bc09ecb7bbb5d7621e49a8dcade0ab08edf311153c2e58a70ae84fee776",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0128.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 37661,
-          "sha256": "d52cbc8fd5abe78beef5bca6aa578a7af9dfc0c564737cfda528067e8f0b8ae3",
+          "bytes": 34191,
+          "sha256": "e798450d6d60de67ffc089a664ab9f5d6927a0b749adba47258ba580a1e92fe5",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0129.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 48638,
-          "sha256": "5a8a09c409d735a08b3087ec092d83507749dd5ab6fe1e20aa82ed8595ab582a",
+          "bytes": 42347,
+          "sha256": "a8e404a491c9911a6bfbe968c4569b7bd1cdbfa867b7d62cfddaa8b19900df2d",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0130.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 38331,
-          "sha256": "2df0953a5c9a76bc02c25a2c19c22f667cca430d665f81d8035c06076e4260a3",
+          "bytes": 40981,
+          "sha256": "5f8d5c11f4761f88085bd7b7be9b30124a8805be3afaecda8cad82f8dccf5450",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0131.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 33590,
-          "sha256": "7bdb2a1d261707d6ca1b8e4aaa50dd68aad512f805309327f7030ef58dffb8f9",
+          "bytes": 20462,
+          "sha256": "398a6d5062099e40e2dae647cbf8aac511bb5a99ad5ba592408578f5ff567efe",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0132.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 45114,
-          "sha256": "b17259ca8562ce9f3a87158aff6011d6692a3bc50e1eaac4f738b47bbdcb2765",
+          "bytes": 4200,
+          "sha256": "6178eea26f7e8fa9b9521f8a07a8df002c85786055226c337fb5f925b0b176fa",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0133.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 27849,
-          "sha256": "06d62423de7d6f26f49b1341fbd11d55298add925f5a0568e0c7be46c5f60933",
+          "bytes": 5175,
+          "sha256": "0a506add329dd266fbd400bc0191396e825d368d7502ce95b9a5cea936a734b1",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0134.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 3703,
-          "sha256": "03db52358faa71224dffd9dd3b3e026f2f3c179dbae78593ff18d5ed24a74b17",
+          "bytes": 37140,
+          "sha256": "988b7c4b3b73f768601d6997143e8c94598b38aea5ce5b30e95e2a4b34cbed23",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0135.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 5371,
-          "sha256": "99855aa8b1fec5087923720b233445772e0ca817ac2e8dcd46eec214f6759f5f",
+          "bytes": 57275,
+          "sha256": "12bc0706de2f3e360125a723d16a1cab27d5b7e868b4e7b587c0da945e9b88fc",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0136.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 31945,
-          "sha256": "1e12ab77a789d070b8ebf740c9e9fe7ddb6e026b15ddc3bf8146d8b2fbda303a",
+          "bytes": 26354,
+          "sha256": "b05f148db305f79d521763cb746f9079d8c4705f0b9a2aa7d0436eb3b2545328",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0137.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 53929,
-          "sha256": "489544d49933fe03a199acfb31185f8d04f42b86d6a022637daad8bb884b635e",
+          "bytes": 7444,
+          "sha256": "e0bc6ddde6f9807211168d707c4c279ab0393137627b858b16d3763f702cdb94",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0138.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 33522,
-          "sha256": "f72a8af1bd2244e7d783fa64465ceb31a06e7f775c47a4b99457eb42cb96fe14",
+          "bytes": 15846,
+          "sha256": "1ca1985a2708d7de679bebe15fbbe3ec1a787a574fd488f7fb81172a49c951b5",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0139.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 7858,
-          "sha256": "3ab9e5028522be04cfab666194c61a11c112d7994b03f4b59c3f8a5cc8b86274",
+          "bytes": 27819,
+          "sha256": "773d96504c47f438afdf8a665591e00c60e31c59d7c5482a44a2d8aa32a327b1",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0140.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 14168,
-          "sha256": "3faa125e245bb694da3f70109d325801ff2c4aabecce301796d3d8268c6e3c87",
+          "bytes": 909,
+          "sha256": "c4361ad124e89ad232e76270814f93a4779835189cf5156836e02c86c185a057",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0141.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 27987,
-          "sha256": "8febc266919e79a157d0cd0a19a0036e3e5df6467abdb0d84567f6a2905775cf",
+          "bytes": 28861,
+          "sha256": "78b024f982a5114be2ba5e28245fe2c6c0f852dd19b2748e5267c0048f45f7dc",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0142.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 3876,
-          "sha256": "40db08f52555ac8a31564a83b68b1d827dbe2872cee158bb3b222b5bef1f648b",
+          "bytes": 10541,
+          "sha256": "509cbd4587acf1bd8b51c0970157dc734cc0d6acc3130948f32b3df98227bc5c",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0143.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 20902,
-          "sha256": "21a2e3cf27191d76bd4a473cbc9ceb1ed83d31448ed19bb4bca57bfea98cf8d8",
+          "bytes": 14937,
+          "sha256": "0bf5b24a98a204e1097c56c651509bee148e4a68ddfd3dfd04baa6f32de655ff",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0144.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 17214,
-          "sha256": "0c434c66079b654a4bec93675781ccdfd46d8452c3920199d6c37907b635c85f",
+          "bytes": 23285,
+          "sha256": "e83c9ba519999dc54022214a08d78d1c3b5d341ac05980110f30a63ea4ab868c",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0145.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 14598,
-          "sha256": "324c4017c203523a2c8b6407f2d96f539f8e5a70039951e63be21ff066594b34",
+          "bytes": 40611,
+          "sha256": "15d0f5938b596c23e3dc77e9a210621772d67b40770c1303b48400c5fca12262",
           "prop": "P3345",
           "ids": 150
         },
         {
           "path": "wikidata/P3345-0146.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 19679,
-          "sha256": "961fc6be93ec09b68535276b6d67e6b24cf3e38a2014afe75a62b98317148232",
+          "bytes": 2006,
+          "sha256": "bf800de66c7487425e3129a73902134f06fe3018670732b05a2b363b5931e704",
           "prop": "P3345",
           "ids": 150
         },
@@ -2494,7 +2511,7 @@
           "path": "wikidata/P3345-0147.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 42060,
-          "sha256": "e32bfbfa546c79c58b8d545d2bf3f26ef034b01084f41a8afde7ede3a43939db",
+          "sha256": "e628944ac5c9c706d7a29ece289ca3a62512ed189aa3802041e0c6123428a4a2",
           "prop": "P3345",
           "ids": 150
         },
@@ -2502,7 +2519,7 @@
           "path": "wikidata/P3345-0148.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 5788,
-          "sha256": "fcf0810fb0abe0fd3a1fc11ff342d56a15f582784deba89a370e3a996d51b576",
+          "sha256": "7c7f1dfa26540b8f07ab8ff8074c1a31ac9665e40b4b514c71c1f2c43c2ef6ae",
           "prop": "P3345",
           "ids": 44
         },
@@ -2526,7 +2543,7 @@
           "path": "wikidata/P352-0002.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 4425,
-          "sha256": "f05bf8ed0b96e5b6aa560fb580ec01ad73f018a059762f2efbc8a0d6357389ff",
+          "sha256": "7f0ec2b8c98e1eb2f2f74f72f786812c4407ed9db6f22ebb711e9daed4dbccb7",
           "prop": "P352",
           "ids": 150
         },
@@ -2566,7 +2583,7 @@
           "path": "wikidata/P486-0000.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 43920,
-          "sha256": "abfda2e50504b4784b388d1a61160253d57d47e56a1c4c5e2d1f0f05f8010d12",
+          "sha256": "8a2404570ddf673b4f2e91a390b1fbd7efd260657118023cebf4b83ee47ffae9",
           "prop": "P486",
           "ids": 68
         },
@@ -2582,7 +2599,7 @@
           "path": "wikidata/P652-0000.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 54301,
-          "sha256": "dafc2e18fee9955c53e934469ef87bd40b33a5a2187087833153d71fd0a9d268",
+          "sha256": "6e44be23e11b69c52112261c27599ae975a6c0342692c6b761ac30ae7dffa953",
           "prop": "P652",
           "ids": 150
         },
@@ -2590,7 +2607,7 @@
           "path": "wikidata/P652-0001.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 37292,
-          "sha256": "cf5ae0194947122b671a21a426539909d243c4241cc7202f48d2ca358f258f79",
+          "sha256": "ba8b7aaa5f08a9713156c08839a4d4761ac7e2e367fc96781adda72af1974d67",
           "prop": "P652",
           "ids": 150
         },
@@ -2598,7 +2615,7 @@
           "path": "wikidata/P652-0002.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 41241,
-          "sha256": "db6fb13d1308c07f032a4f84c13dba3a19fd002bd6225dec997ad26fce9097cb",
+          "sha256": "9a2123d40b80d201208a5702e6dccbb165051c254c5cf329658aa0ec41d1b6e2",
           "prop": "P652",
           "ids": 150
         },
@@ -2613,8 +2630,8 @@
         {
           "path": "wikidata/P683-0000.json",
           "url": "https://query.wikidata.org/sparql",
-          "bytes": 78264,
-          "sha256": "662ff5829996f1b9f41af05ffd0fe94717ffd06b21082fb78ab5541207bfa253",
+          "bytes": 57334,
+          "sha256": "350fb2f2315503f44d437a3a83998309f8d6359ecd8df813160c19bcb53b7d00",
           "prop": "P683",
           "ids": 150
         },
@@ -2622,7 +2639,7 @@
           "path": "wikidata/P683-0001.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 33540,
-          "sha256": "b19ea80517c39842995229ca5b1280cf7ac4045c08ab2c3bb25db6b8104e065e",
+          "sha256": "8a1240489589919923346bda413d790df5a8dcd86fd56cdec05e8850eedad2eb",
           "prop": "P683",
           "ids": 150
         },
@@ -2630,7 +2647,7 @@
           "path": "wikidata/P683-0002.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 17257,
-          "sha256": "b3a5c1dab4295bb653f8a3e07b55c04ac683cb426de101bc66af94c9f2b1fe94",
+          "sha256": "b9ba70d41cb548614011f629439274a476e8931fc689ed48d5864147af979fa7",
           "prop": "P683",
           "ids": 52
         },
@@ -2638,7 +2655,7 @@
           "path": "wikidata/P699-0000.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 37189,
-          "sha256": "7321da08e44b2c09dccd4b66993f165c97a366bc57fa6f1e302928623e750aef",
+          "sha256": "614aa2e06dfdd5f020e699bdb8d17596052661873847b12015870a70b750b4c8",
           "prop": "P699",
           "ids": 150
         },
@@ -2646,7 +2663,7 @@
           "path": "wikidata/P699-0001.json",
           "url": "https://query.wikidata.org/sparql",
           "bytes": 13368,
-          "sha256": "6652aaf892d3da300e8a2b9606bbbc1cffd94b84a7355798cfc7872bf2fa4788",
+          "sha256": "0d0a49617cf8bd3e5ec8717deb3933f79e0321539d03603d752959f0a5e679dd",
           "prop": "P699",
           "ids": 26
         }

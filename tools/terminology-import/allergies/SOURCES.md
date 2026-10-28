@@ -51,7 +51,7 @@ así que la URL apunta siempre al mismo contenido.
   International. Tampoco se guardan los xrefs `SCTID`/`SNOMEDCT_US_*` ni MedDRA
   de las ontologías.
 
-## Fuentes que no se pudieron usar (huecos documentados)
+## Fuentes que no se pudieron usar el 2026-10-24 (tanda 1; histórico: ver la tanda 2 más abajo para lo que hoy responde)
 
 La política de red de esta sesión sólo deja salir al registro npm, PyPI, el
 proxy de Go y GitHub (git y `raw.githubusercontent.com`). Cada host de esta
@@ -81,3 +81,44 @@ tampoco sirvió (falló la resolución DNS en todos los hosts probados, incluido
 | SNOMED CT (incluida la edición en castellano y el Global Patient Set) | sustancias, hallazgos, alergias | licencia de país miembro; el GPS tiene licencia propia que habría que revisar |
 | AGEMED (Bolivia) | registro sanitario nacional | portal con reCAPTCHA (no se elude; ver `glossary-data-build/medicines-sources/SOURCES.md`) |
 | Paquetes FHIR fuera de npm (packages.fhir.org, tx.fhir.org) | IG nacionales de Argentina, España, México, Colombia, Brasil | `packages.fhir.org`, `tx.fhir.org`: 403; esos IG no están publicados en npm |
+
+---
+
+# Tanda 2 (descarga 2026-10-28): las fuentes que el 2026-10-24 daban 403
+
+Re-sondeo del 2026-10-28 (`docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C4/m1-sondeo-2026-10-28.txt`):
+responden 200 (o 30x hacia 200) allergen.org, rest.uniprot.org, api.fda.gov, gsrs.ncats.nih.gov, rxnav.nlm.nih.gov,
+ftp.ebi.ac.uk, api-evsrest.nci.nih.gov, www2a.cdc.gov (cvx.txt), dailymed, nlmpubs.nlm.nih.gov. Siguen sin servir:
+`query.wikidata.org/sparql` en `GET /` (000; las consultas de la descarga sí respondieron: 168 lotes),
+`rxnav…/rxclass/version.json` (404; RxClass sí responde por sus rutas de clases), `id.who.int` (404),
+`codexalimentarius.org` (000).
+
+Se bajan con `fetch-allergy-open-sources.mjs` y `fetch-allergy-wikidata.mjs`, **fuera de git**. El manifiesto
+(`data/allergy-open-sources.manifest.json`) trae URL, versión, fecha, SHA-256, bytes y licencia con su evidencia
+de cada archivo. Resumen:
+
+| Clave | Fuente | Versión | Licencia | Evidencia / condición |
+|---|---|---|---|---|
+| `iuis` | WHO/IUIS Allergen Nomenclature (allergen.org, CSV oficiales) | descarga 2026-10-28 (sin número de versión; cada fila trae fechas) | descarga libre con cita | `downloads.php`: «free to download ... acknowledge ... citing the URL ... and one of the recent official publications». `robots.txt`: crawl-delay 3, respetado |
+| `uniprot` | UniProtKB, palabra clave KW-0020 | 2026_03 | CC BY 4.0 | uniprot.org/help/license |
+| `cdc-cvx` | CDC `cvx.txt` y `tradename.txt` | `Last Updated` por fila | dominio público (17 U.S.C. §105) | agencia federal |
+| `chebi-lite` | ChEBI `chebi_lite.obo.gz` | 256 (2026-10-06) | CC BY 4.0 | `LICENSE` y cabecera del OBO. **Ambigüedad**: el README del mismo directorio dice CC BY-SA 4.0 → decisión del propietario |
+| `ncit` | NCI Thesaurus (EVS REST), Allergen C62651 e Hypersensitivity C3114 | 26.09d (2026-09-28) | CC BY 4.0 según OBO Foundry | EVS no publica el texto de la licencia en lo alcanzable → **confirmar con el propietario** |
+| `eurlex-1169`, `eurlex-1333` | Reglamentos (UE) 1169/2011 (anexo II) y (CE) 1333/2008 (anexo II B), texto consolidado de Cellar, es + en | 02011R1169-20250401, 02008R1333-20260818 | reutilización con cita (Decisión 2011/833/UE) | el consolidado es informativo; el auténtico es el del Diario Oficial |
+| `usc-21-321` | 21 U.S.C. §321(qq), edición 2023 de GovInfo | 2023 (GovInfo no publica 2024/2025 aún) | dominio público | ley federal |
+| `openfda`, `dailymed`, `dailymed-true-test`, `gsrs` | openFDA NDC (`*ALLERGENIC`), etiquetas SPL de DailyMed (sólo UNII y nombre del ingrediente), GSRS | openFDA 2026-10-27; GSRS 2026-10-28 | CC0 (openFDA); dominio público (DailyMed, GSRS) | `open.fda.gov/license`; el texto de la etiqueta es del titular y no se toma |
+| `rxnav` | RxNorm IN/PIN/MIN y RxClass (MED-RT, EPC, VA) | RxNorm 05-Oct-2026 (RxNav 3.1.356) | RxNorm SAB=RXNORM sin restricción adicional; MED-RT dominio público | **No se toman** clases con fuente SNOMED CT (DISPOS, STRUCT) ni ATC |
+| `europepmc-ebs` | Serie basal europea: PMC13238334 y PMC13441338 | texto completo | CC BY (Europe PMC `license=cc by`) | sólo los alérgenos de las tablas de la serie |
+| `mesh` | MeSH 2026 `desc2026.xml`, subárboles D23.050.063 y C20.543 | 2026 | uso libre con cita «Courtesy of the U.S. National Library of Medicine» | sólo inglés; DeCS no se toca |
+| `wikidata` | Wikidata Query Service, por identificador exacto (RxCUI P3345, UNII P652, ChEBI P683, DOID P699, Mondo P5270, UniProt P352, MeSH P486, NCIt P1748) | consulta 2026-10-28 | CC0 | etiqueta `es` de la entidad que declara el mismo identificador; nada por parecido de nombre. No se versiona la base viva: sólo lo consultado queda en el manifiesto (168 lotes) |
+
+## Fuentes que responden pero NO se cargan
+
+| Fuente | Motivo (sondeo 2026-10-28, `m1b-licencias-no-cargadas-2026-10-28.txt`) |
+|---|---|
+| AllergenOnline (FARRP, Univ. de Nebraska-Lincoln) | © UNL, sin licencia abierta declarada |
+| Allergome | exige registro y permiso; no se crean cuentas |
+| COMPARE (HESI) | «All Rights Reserved» |
+| WHO ICD-11 | `icd.who.int` responde, pero la API exige cuenta/token y la licencia es CC BY-ND; no se crean cuentas |
+| Codex Alimentarius (FAO) | `codexalimentarius.org` sin respuesta (000) |
+| SNOMED CT, MedDRA, DeCS, ATC/DDD de la OMS, DrugBank, KEGG | licencia; no se leen |

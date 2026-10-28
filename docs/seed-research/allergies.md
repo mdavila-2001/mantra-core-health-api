@@ -26,6 +26,60 @@
   y en las enumeraciones del sistema. No hace falta cambiar el repositorio del
   modelo.
 
+## Tanda 2 (2026-10-28): cierre de huecos con las fuentes que ya responden
+
+**Antes (tanda 1, 2026-10-24): 55 503 conceptos, 12 code systems, 16 value sets en el corpus.
+Después (tanda 1 + 2): 73 478 conceptos, 23 code systems, 27 value sets cargados** en un Postgres 16
+desechable (`+17 975` conceptos nuevos y 30 070 parches sobre conceptos de la tanda 1: castellano de
+Wikidata, estado oficial del CDC, UNII y clases de RxClass). El 2026-10-24 estas fuentes daban 403; el
+re-sondeo de hoy está en `docs/trabajo/2026-10-27-terminologia-cierre-huecos/evidencia/C4/m1-sondeo-2026-10-28.txt`.
+
+| Pasada | Fuente (licencia) | Leídos | Nuevos | Parches |
+|---|---|---:|---:|---:|
+| 21 | WHO/IUIS: fuentes biológicas y su taxonomía (descarga libre con cita) | 423 | 423 | 0 |
+| 22-23 | WHO/IUIS: moléculas alergénicas (Ara h 1, Bet v 1…) e isoalérgenos | 1 169 + 1 632 | 2 801 | 0 |
+| 24 | UniProtKB KW-0020 «Allergen» (CC BY 4.0, release 2026_03) | 1 027 | 1 027 | 0 |
+| 25-26 | CDC CVX completo con estado oficial y nombres comerciales (dominio público) | 287 + 151 | 12 | 426 |
+| 27 | RxNorm vigente IN/PIN/MIN, RxNav 05-Oct-2026 | 22 244 | 321 | 21 923 |
+| 28 | RxClass MED-RT/EPC/VA (sin SNOMED ni ATC) | 16 830 | 11 947 | 4 883 |
+| 29 | ChEBI 256 completo, rol «allergen» (CC BY 4.0; ambigüedad CC BY-SA en su README) | 352 | 266 | 0 (86 ya estaban) |
+| 30 | NCIt 26.09d: Allergen (C62651) e Hypersensitivity (C3114) | 132 | 132 | 0 |
+| 31 | Reglamento (UE) 1169/2011 anexo II: 14 grupos, castellano e inglés oficiales | 14 | 14 | 0 |
+| 32 | Reglamento (CE) 1333/2008 anexo II B: aditivos con número E, oficial | 336 | 336 | 0 |
+| 33 | FDCA §201(qq): 9 alérgenos mayores de EE. UU. | 9 | 9 | 0 |
+| 34 | openFDA NDC + DailyMed SPL + GSRS: sustancias activas (UNII) de extractos alergénicos | 505 | 505 | 0 |
+| 35-36 | Serie basal europea (Europe PMC, CC BY) y T.R.U.E. TEST (DailyMed) | 57 + 57 | 114 | 0 |
+| 37 | MeSH 2026: Allergens (D23.050.063) e Hypersensitivity (C20.543) | 68 | 68 | 0 |
+| 38 | Wikidata (CC0), etiqueta `es` por identificador exacto | 3 139 | 0 | 3 139 |
+
+**Saturación.** Se rehizo la descarga completa el 2026-10-28 desde cero: dio **0 conceptos nuevos** respecto
+de la corrida del 2026-10-27 (17 975 en ambas); sólo cambió Wikidata (3 167 → 3 139 etiquetas, es una base
+viva). Dos builds consecutivos dan el mismo SHA-256 del NDJSON (`7bc14ed6…1322416`). Descartes: ninguno.
+
+**Carga idempotente (Postgres 16 desechable, no la base del stack).** Tanda 1 sola: 55 503 conceptos; sobre
+ella la tanda 2 insertó 17 975 conceptos, 24 941 designaciones, 160 983 propiedades, 2 291 relaciones,
+35 673 miembros de value sets y 5 732 designaciones + 57 673 propiedades de parches; la **2.ª corrida insertó
+0 en todas las tablas**. Integridad: 0 duplicados por (code system, código), 0 códigos o nombres vacíos, 0
+conceptos sin `allergy_provenance`, 0 huérfanos, 0 duplicados de propiedad/relación/miembro. Salida en
+`evidencia/C4/m4b-*.txt`.
+
+**Qué sigue sin cargarse y por qué (re-sondeado hoy):**
+
+- WHO ICD-11: la API exige cuenta/token y la licencia es CC BY-ND. No se crean cuentas.
+- AllergenOnline (© Univ. de Nebraska), Allergome (registro y permiso) y COMPARE (© HESI): responden 200, pero su
+  licencia no es abierta ni verificable. No se cargan.
+- Codex Alimentarius: `codexalimentarius.org` sin respuesta; los 14 grupos UE y los 9 de EE. UU. sí están.
+- SNOMED CT, MedDRA, DeCS, ATC/DDD de la OMS, DrugBank, KEGG: licencia.
+- Castellano: sólo donde la fuente lo publica (HPO, Open Food Facts, Reglamentos UE, Wikidata). RxNorm, MED-RT, IUIS, UniProt
+  y CDC siguen en inglés, declarado en `display_language`.
+- Las enumeraciones internas de la API (`concept_maps`, 20) no se cargaron en la base desechable porque no tiene
+  los 20 conceptos `ALG.*`/`CLIN.ALLERGY_*` que siembra la API (el cargador los omite, `conceptMapsSkipped: 20`).
+
+**Decisiones del propietario nuevas:** (1) ChEBI: LICENSE y cabecera dicen CC BY 4.0, el README dice CC BY-SA 4.0; (2) NCIt:
+CC BY 4.0 sólo según la ficha de OBO Foundry, EVS no publica el texto; (3) WHO/IUIS: «descarga libre con cita», sin
+licencia formal; (4) etiquetas SPL de DailyMed: sólo UNII y nombre del ingrediente (el texto es del titular);
+(5) las clases MED-RT reemplazan a NDF-RT 2018 pero no se fusionan con él (dos code systems).
+
 ## Paso 0: cómo estaba
 
 - `clinical.allergy_intolerances` ya modela FHIR AllergyIntolerance, con
@@ -197,6 +251,8 @@ conceptos nuevos y la corrida siguiente insertó 0.
     los `concept_maps` (interoperabilidad FHIR).
 
 ## Huecos
+
+> Estado al 2026-10-24 (tanda 1). Casi todos los «bloqueados» se cerraron en la tanda 2 (ver arriba y `SOURCES.md`); lo que sigue sin cargarse y su motivo actual está en «Qué sigue sin cargarse».
 
 ### Bloqueados por la red de esta sesión (403 del proxy; ver `SOURCES.md`)
 

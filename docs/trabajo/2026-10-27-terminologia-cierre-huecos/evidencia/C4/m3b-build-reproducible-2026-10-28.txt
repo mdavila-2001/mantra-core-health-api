@@ -1,0 +1,5 @@
+Re-descarga completa (fetch-allergy-open-sources.mjs + fetch-allergy-wikidata.mjs) el 2026-10-28 y dos builds consecutivos de build-allergy-open.mjs:
+build 1: ndjsonSha256 7bc14ed6b75ce8f99aa88739a5376a4e74b34afe2555fe5c46bf4b8791322416 newConcepts 17975 patches 30070
+build 2: ndjsonSha256 7bc14ed6b75ce8f99aa88739a5376a4e74b34afe2555fe5c46bf4b8791322416 newConcepts 17975 patches 30070
+--pack: part-01 descomprimida = 7bc14ed6...1322416 (coincide). Los crudos (~330 MB) se borraron tras normalizar.
+Corrida 2026-10-27 (versionada antes): 17975 nuevos / 30070 parches; el SHA cambia (380cf4ad... -> 7bc14ed6...) por las fechas de descarga y 28 etiquetas de Wikidata menos.

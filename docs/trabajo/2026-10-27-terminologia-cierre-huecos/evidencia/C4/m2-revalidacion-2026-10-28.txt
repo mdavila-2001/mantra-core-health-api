@@ -1,0 +1,55 @@
+# Subtest: parseObo lee nombre, sinónimos EXACT, xrefs con su procedencia e is_a sin comentario
+# Subtest: oboDescendants recorre is_a transitivamente (DOID: rinitis alérgica bajo enfermedad alérgica)
+# Subtest: la traducción oficial de la HPO sólo se usa si traduce la etiqueta vigente
+# Subtest: parseOffTaxonomy arma ids de etiqueta OFF y lee propiedades y padres
+# Subtest: parseOwlClasses lee etiqueta, superclases y restricciones has-role del RDF/XML de ROBOT
+# Subtest: ChEBI: entran los químicos con rol de alérgeno y los descendientes de las clases de alérgeno; la naltrexona no
+# Subtest: enumeraciones HL7: la jerarquía anidada del CodeSystem se conserva (presumed ⊂ unconfirmed)
+# Subtest: Mondo: lo equivalentTo un DOID cargado no se duplica y el hijo cuelga del DOID
+# Subtest: el plan de carga es determinista y no deja relaciones colgando
+# Subtest: concept_maps de las enumeraciones: 20, desde el UUIDv5 de la clave del seed de la API
+# Subtest: display en castellano sólo cuando la fuente lo publica
+# Subtest: grupos léxicos RxNorm: polen, veneno, ácaro y epitelio por el nombre de RxNorm
+# Subtest: parseCsv respeta comillas, comas y saltos de línea dentro de una celda
+# Subtest: parseIuis lee alérgenos e isoalérgenos reales de allergen.org
+# Subtest: parseUniprotTsv y uniprotMainName: el nombre principal es lo anterior al primer paréntesis
+# Subtest: parseCvx: los códigos del CDC vienen rellenados con espacios y traen estado oficial
+# Subtest: parseChebiObo conserva las relaciones «has role» (RO:0000087)
+# Subtest: parseNcitConcept: nombre, sinónimos FULL_SYN, definición y padres
+# Subtest: parseEuAnnex1169: 14 grupos en castellano y en inglés con sus excepciones
+# Subtest: parseEuAdditives1333: número E y denominación oficial, con E 170 y E 172 en dos secciones
+# Subtest: parseMajorFoodAllergens: los nueve alérgenos del FDCA §201(qq)(1) con sus ejemplos
+# Subtest: parseJatsTable: filas con encabezados de grupo y exponentes pegados al texto
+# Subtest: meshDescriptors: Allergens y Hypersensitivity por número de árbol, con términos de entrada y nota de alcance
+# Subtest: pasadas 21–23: fuentes, moléculas e isoalérgenos de WHO/IUIS con jerarquía y vínculo por accesión exacta
+# Subtest: pasada 24: UniProt enlaza con IUIS sólo por accesión exacta
+# Subtest: pasada 25: CVX nuevo se crea, el existente recibe parche con el estado del CDC y 998/999 no son sustancias
+# Subtest: pasada 29: ChEBI toma el rol «allergen», sus roles descendientes y los compuestos con ese rol
+# Subtest: pasadas 31–33: normas oficiales con castellano e inglés de EUR-Lex y número E exacto
+# Subtest: pasada 35: serie basal europea con grupo y concentración tal como los publica el artículo abierto
+# Subtest: pasada 37: MeSH con padres por número de árbol dentro del conjunto
+# Subtest: ejecutor: un concepto repetido no se vuelve a emitir, un parche sólo agrega lo que falta y uno huérfano es error
+# Subtest: plan de carga: la tanda 2 es otra versión del mismo code system y los parches usan ids deterministas
+# Subtest: Wikidata: sólo por identificador exacto; un id con dos ítems no se usa
+# Subtest: SPL y GSRS (extractos reales)
+# tests 34
+# suites 0
+# pass 34
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 151.536966
+--- gzip -t
+ok tools/terminology-import/allergies/data/allergy-catalog-open.part-01.ndjson.gz
+ok tools/terminology-import/allergies/data/allergy-catalog.ndjson.gz
+--- sha256sum -c
+allergy-catalog.ndjson.gz: OK
+allergy-catalog.meta.json: OK
+allergy-sources.manifest.json: OK
+allergy-catalog-open.part-01.ndjson.gz: OK
+allergy-catalog-open.meta.json: OK
+allergy-open-sources.manifest.json: OK
+descomprimidos:
+d0124219a82f326d803ba4549262e4afbf8127c6c79ff7ad3609ca3c2c0da8ee  -
+7bc14ed6b75ce8f99aa88739a5376a4e74b34afe2555fe5c46bf4b8791322416  -

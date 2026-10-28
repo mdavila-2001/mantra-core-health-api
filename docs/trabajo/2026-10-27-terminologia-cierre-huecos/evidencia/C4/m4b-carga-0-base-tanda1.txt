@@ -1,0 +1,169 @@
+=== Carga del catálogo de alergias a terminology.*  ===
+Leyendo /home/user/mantra-core-health-api/tools/terminology-import/allergies/data/allergy-catalog.ndjson.gz
+{
+  "codeSystems": [
+    {
+      "codeSystem": "allergy-chebi",
+      "origin": "base",
+      "version": "ecto@http://purl.obolibrary.org/obo/ecto/releases/2026-07-28/ecto.owl",
+      "concepts": 86
+    },
+    {
+      "codeSystem": "allergy-cvx-vaccines",
+      "origin": "base",
+      "version": "phinvads@0.12.0+vsac@0.24.0",
+      "concepts": 275
+    },
+    {
+      "codeSystem": "allergy-doid",
+      "origin": "base",
+      "version": "doid@releases/2026-09-30/doid.obo",
+      "concepts": 176
+    },
+    {
+      "codeSystem": "allergy-foodon",
+      "origin": "base",
+      "version": "foodon@http://purl.obolibrary.org/obo/foodon/releases/2026-09-20/foodon.owl",
+      "concepts": 20
+    },
+    {
+      "codeSystem": "allergy-hl7-fhir",
+      "origin": "base",
+      "version": "fhir-r5-core@5.0.0+hl7-terminology@1.0.0+hl7-terminology@1.0.1+hl7-terminology@3.0.0",
+      "concepts": 50
+    },
+    {
+      "codeSystem": "allergy-hpo",
+      "origin": "base",
+      "version": "hpo@hp/releases/2026-09-01",
+      "concepts": 19178
+    },
+    {
+      "codeSystem": "allergy-mondo",
+      "origin": "base",
+      "version": "mondo@a645ab571f5b0881a184c28b84d0f9050432dc53",
+      "concepts": 15
+    },
+    {
+      "codeSystem": "allergy-ndfrt-drug-classes",
+      "origin": "base",
+      "version": "vsac@20180301",
+      "concepts": 12994
+    },
+    {
+      "codeSystem": "allergy-oae",
+      "origin": "base",
+      "version": "oae@http://purl.obolibrary.org/obo/oae/releases/2026-04-15/oae.owl",
+      "concepts": 35
+    },
+    {
+      "codeSystem": "allergy-off-additives",
+      "origin": "base",
+      "version": "off-additives@c8bb42e08aefdb8b5b8577ab787120b1bde9cf34",
+      "concepts": 725
+    },
+    {
+      "codeSystem": "allergy-off-allergens",
+      "origin": "base",
+      "version": "off-allergens@c8bb42e08aefdb8b5b8577ab787120b1bde9cf34",
+      "concepts": 26
+    },
+    {
+      "codeSystem": "allergy-rxnorm-ingredients",
+      "origin": "base",
+      "version": "vsac@05052025",
+      "concepts": 21923
+    }
+  ],
+  "concepts": 55503,
+  "designations": 99639,
+  "properties": 354869,
+  "relationships": 24187,
+  "valueSets": 27,
+  "members": 92631,
+  "conceptMaps": 20,
+  "patches": 0,
+  "patchDesignations": 0,
+  "patchProperties": 0,
+  "patchMembers": 0
+}
+
+=== RESUMEN (filas NUEVAS; 0 en la segunda corrida = idempotente) ===
+{
+  "result": {
+    "codeSystems": [
+      {
+        "codeSystem": "allergy-chebi",
+        "origin": "base",
+        "concepts": 86
+      },
+      {
+        "codeSystem": "allergy-cvx-vaccines",
+        "origin": "base",
+        "concepts": 275
+      },
+      {
+        "codeSystem": "allergy-doid",
+        "origin": "base",
+        "concepts": 176
+      },
+      {
+        "codeSystem": "allergy-foodon",
+        "origin": "base",
+        "concepts": 20
+      },
+      {
+        "codeSystem": "allergy-hl7-fhir",
+        "origin": "base",
+        "concepts": 50
+      },
+      {
+        "codeSystem": "allergy-hpo",
+        "origin": "base",
+        "concepts": 19178
+      },
+      {
+        "codeSystem": "allergy-mondo",
+        "origin": "base",
+        "concepts": 15
+      },
+      {
+        "codeSystem": "allergy-ndfrt-drug-classes",
+        "origin": "base",
+        "concepts": 12994
+      },
+      {
+        "codeSystem": "allergy-oae",
+        "origin": "base",
+        "concepts": 35
+      },
+      {
+        "codeSystem": "allergy-off-additives",
+        "origin": "base",
+        "concepts": 725
+      },
+      {
+        "codeSystem": "allergy-off-allergens",
+        "origin": "base",
+        "concepts": 26
+      },
+      {
+        "codeSystem": "allergy-rxnorm-ingredients",
+        "origin": "base",
+        "concepts": 21923
+      }
+    ],
+    "designations": 99639,
+    "properties": 354869,
+    "relationships": 24187,
+    "valueSets": 27,
+    "valueSetVersions": 27,
+    "members": 92631,
+    "patchDesignations": 0,
+    "patchProperties": 0,
+    "patchMembers": 0,
+    "conceptMapsSkipped": 20,
+    "conceptMaps": 0
+  },
+  "segundos": 29
+}
