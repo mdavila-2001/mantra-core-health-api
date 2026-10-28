@@ -1005,3 +1005,142 @@ describe('SurveysResponsesService · invitación única: base del sistema + exte
     });
   });
 });
+
+describe('SurveysResponsesService · B-3: texto en blanco', () => {
+  /** La base de consulta: una escala obligatoria y el comentario libre (P9) opcional. */
+  function baseInvitation(d: ReturnType<typeof build>) {
+    const invitation = pendingInvitation({ surveyVersionId: 'ver-base' });
+    d.invitationsRepo.findById.mockResolvedValue(invitation);
+    d.templatesRepo.listQuestions.mockResolvedValue([
+      {
+        id: 'p-1',
+        surveyVersionId: 'ver-base',
+        position: 1,
+        questionText: 'Satisfacción',
+        answerTypeConceptId: ANSWER_TYPE_BY_CODE.SCALE,
+        required: true,
+        scaleMin: 1,
+        scaleMax: 5,
+      },
+      {
+        id: 'p-9',
+        surveyVersionId: 'ver-base',
+        position: 9,
+        questionText: 'Si lo desea, cuéntenos qué podríamos hacer mejor.',
+        answerTypeConceptId: ANSWER_TYPE_BY_CODE.TEXT,
+        required: false,
+      },
+    ]);
+    return invitation;
+  }
+
+  it.each(['', '   ', '\n\t'])(
+    'el comentario libre opcional (P9) en blanco (%j) se trata como ausente: se envía y no se guarda',
+    async (blank) => {
+      const d = build();
+      const invitation = baseInvitation(d);
+
+      const res = await withTenant(() =>
+        d.service.submitResponse(
+          'inv-1',
+          {
+            answers: [
+              { questionId: 'p-1', valueNumber: 4 },
+              { questionId: 'p-9', valueText: blank },
+            ],
+          },
+          patientActor,
+        ),
+      );
+
+      expect(res).toEqual({ id: 'res-1' });
+      expect(invitation.statusConceptId).toBe(SURVEYS.INVITATION_ANSWERED);
+      expect(d.responsesRepo.createAnswer).toHaveBeenCalledTimes(1);
+      expect(d.responsesRepo.createAnswer).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ surveyQuestionId: 'p-1' }),
+      );
+    },
+  );
+
+  it('con texto real el comentario libre se guarda', async () => {
+    const d = build();
+    baseInvitation(d);
+
+    await withTenant(() =>
+      d.service.submitResponse(
+        'inv-1',
+        {
+          answers: [
+            { questionId: 'p-1', valueNumber: 4 },
+            { questionId: 'p-9', valueText: 'Todo bien' },
+          ],
+        },
+        patientActor,
+      ),
+    );
+
+    expect(d.responsesRepo.createAnswer).toHaveBeenCalledTimes(2);
+  });
+
+  it('en una pregunta de texto OBLIGATORIA el texto en blanco sigue siendo 422', async () => {
+    const d = build();
+    d.invitationsRepo.findById.mockResolvedValue(pendingInvitation());
+    d.templatesRepo.listQuestions.mockResolvedValue([textQuestion()]);
+
+    await expect(
+      withTenant(() =>
+        d.service.submitResponse(
+          'inv-1',
+          { answers: [{ questionId: 'q-1', valueText: '  ' }] },
+          patientActor,
+        ),
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+    expect(d.responsesRepo.createAnswer).not.toHaveBeenCalled();
+  });
+
+  it('una pregunta del médico (siempre opcional) en blanco también se ignora', async () => {
+    const d = build();
+    d.invitationsRepo.findById.mockResolvedValue(
+      pendingInvitation({
+        surveyVersionId: 'ver-base',
+        extensionSurveyVersionId: 'ver-ext',
+      }),
+    );
+    d.templatesRepo.listQuestions.mockImplementation(
+      async (_: unknown, versionId: string) =>
+        versionId === 'ver-base'
+          ? [
+              textQuestion({
+                id: 'b-1',
+                surveyVersionId: 'ver-base',
+                required: false,
+              }),
+            ]
+          : [
+              textQuestion({
+                id: 'e-1',
+                surveyVersionId: 'ver-ext',
+                required: true,
+              }),
+            ],
+    );
+
+    await expect(
+      withTenant(() =>
+        d.service.submitResponse(
+          'inv-1',
+          {
+            answers: [
+              { questionId: 'b-1', valueText: 'ok' },
+              { questionId: 'e-1', valueText: '' },
+            ],
+          },
+          patientActor,
+        ),
+      ),
+    ).resolves.toEqual({ id: 'res-1' });
+    expect(d.responsesRepo.createAnswer).toHaveBeenCalledTimes(1);
+  });
+});

@@ -197,7 +197,11 @@ export class SurveysResponsesService {
           'PRACTITIONER',
         );
         const byId = new Map(items.map((item) => [item.question.id, item]));
-        this.validateAnswers(dto.answers, items, byId);
+        // Un texto en blanco en una pregunta opcional es «no contestó», no un
+        // error: el comentario libre del final llega vacío cuando el paciente
+        // no tiene nada que decir.
+        const answers = this.withoutBlankOptionalText(dto.answers, byId);
+        this.validateAnswers(answers, items, byId);
 
         const response = this.responsesRepo.createResponse(tx, {
           surveyInvitationId: invitation.id,
@@ -211,7 +215,7 @@ export class SurveysResponsesService {
         });
         await tx.flush();
 
-        for (const answer of dto.answers) {
+        for (const answer of answers) {
           const question = byId.get(answer.questionId)!.question;
           this.responsesRepo.createAnswer(tx, {
             surveyResponseId: response.id,
@@ -232,7 +236,7 @@ export class SurveysResponsesService {
             operation: 'surveys.response.submit',
             invitationId,
             responseId: response.id,
-            answers: dto.answers.length,
+            answers: answers.length,
           },
           'Survey response submitted',
         );
@@ -480,6 +484,26 @@ export class SurveysResponsesService {
       );
     }
     return items;
+  }
+
+  /**
+   * Quita las respuestas de texto vacías o en blanco a preguntas NO obligatorias:
+   * se tratan como ausentes (no se validan ni se guardan). En una obligatoria el
+   * texto en blanco se deja pasar a la validación, que lo rechaza con 422.
+   */
+  private withoutBlankOptionalText(
+    answers: AnswerInputDto[],
+    byId: Map<string, QuestionnaireItem>,
+  ): AnswerInputDto[] {
+    return answers.filter((answer) => {
+      const item = byId.get(answer.questionId);
+      if (!item || item.required) return true;
+      if (ANSWER_TYPE_CODE_BY_ID[item.question.answerTypeConceptId] !== 'TEXT')
+        return true;
+      return !(
+        typeof answer.valueText === 'string' && answer.valueText.trim() === ''
+      );
+    });
   }
 
   /**
