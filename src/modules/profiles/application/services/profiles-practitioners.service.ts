@@ -811,6 +811,8 @@ export class ProfilesPractitionersService {
     changes: {
       municipalityConceptId?: string;
       lines?: string;
+      /** Distrito o zona; `''` lo quita (ADR-0028). */
+      district?: string;
       /** `null` en las dos quita el punto. Ver `ReplaceResidenceAddressData`. */
       latitude?: number | null;
       longitude?: number | null;
@@ -825,6 +827,7 @@ export class ProfilesPractitionersService {
         useConceptId,
         municipalityConceptId: changes.municipalityConceptId,
         lines: changes.lines,
+        district: changes.district,
         latitude: changes.latitude,
         longitude: changes.longitude,
         actorUserId,
@@ -1101,6 +1104,16 @@ export class ProfilesPractitionersService {
         ? { sexAtBirth: BIRTH_SEX_CODE_BY_CONCEPT[person.sexAtBirthConceptId] }
         : {}),
       nationalId: affiliation.nationalId,
+      // Si el número se puede corregir: sólo la lectura propia lo necesita.
+      ...(includesContact
+        ? {
+            identityVerified:
+              await this.personRecords.hasCurrentIdentityAssertion(
+                em,
+                personId,
+              ),
+          }
+        : {}),
       issuerAdministrativeAreaConceptId: affiliation.issuerArea,
       taxId: affiliation.taxId,
       taxHolderName: affiliation.taxHolderName,
@@ -1224,15 +1237,77 @@ export class ProfilesPractitionersService {
           ProfilesErrorReason.ACCOUNT_WITHOUT_LINKED_PERSON,
         );
       }
-      const practitioner = await this.practitionersRepo.findById(
-        tx,
-        link.personId,
-      );
+      await this.applyProfileUpdate(tx, link.personId, dto, actor);
+    });
+
+    // Se relee entero en vez de armar la respuesta con lo que se acaba de
+    // escribir: así quien edita ve lo mismo que va a ver al recargar, incluidas
+    // las colecciones y la actividad, que esta operación no toca.
+    return this.getOwnPractitionerProfile(actor);
+  }
+
+  /**
+   * Corregir el perfil de OTRO profesional — el gemelo de plataforma de
+   * {@link updateOwnPractitionerProfile} (P28).
+   *
+   * Mismo cuerpo y mismas reglas: lo único que cambia es de dónde sale el
+   * sujeto. Quién puede lo decide `ProfileOwnershipService` —titular o rol de
+   * plataforma—, el mismo criterio que la foto: así un administrador que
+   * corrige la cédula mal tipeada de un médico deja escrita su intención en la
+   * ruta, y un médico que apunta al perfil de un colega recibe 403.
+   *
+   * La respuesta incluye los datos personales (`includesContact`): quien puede
+   * escribirlos tiene que poder ver lo que acaba de escribir.
+   *
+   * @param profileId - El perfil a corregir.
+   * @param dto - Los campos a cambiar.
+   * @param actor - Quien pide la operación.
+   * @returns El perfil completo, ya actualizado.
+   * @throws ForbiddenException si no es el titular ni plataforma.
+   */
+  async updatePractitionerProfile(
+    profileId: string,
+    dto: UpdateOwnPractitionerProfileDto,
+    actor: AuthenticatedUser,
+  ): Promise<PractitionerProfileSummaryDto> {
+    this.logger.info(
+      {
+        operation: 'profiles.practitioner.update',
+        profileId,
+        actorId: actor.id,
+      },
+      'Updating practitioner profile',
+    );
+
+    await this.em.transactional(async (tx) => {
+      await this.ownership.assertOwnsPractitionerProfile(tx, profileId, actor);
+      await this.applyProfileUpdate(tx, profileId, dto, actor);
+    });
+
+    const em = this.em.fork();
+    const link = await this.accountLinksRepo.findActiveByPerson(em, profileId);
+    return this.buildSummary(em, profileId, link?.userId, true);
+  }
+
+  /**
+   * Aplica el `PATCH` del perfil profesional sobre la persona ya resuelta.
+   *
+   * Compartido entre `me` y `:profileId`: el contrato es uno solo y la
+   * autorización ya la decidió quien llama.
+   */
+  private async applyProfileUpdate(
+    tx: EntityManager,
+    personId: string,
+    dto: UpdateOwnPractitionerProfileDto,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    {
+      const practitioner = await this.practitionersRepo.findById(tx, personId);
       if (!practitioner) {
         throw new ResourceNotFoundException(
           'Perfil profesional no encontrado',
           {
-            personId: link.personId,
+            personId,
           },
           ProfilesErrorReason.PRACTITIONER_PROFILE_NOT_FOUND,
         );
@@ -1264,7 +1339,7 @@ export class ProfilesPractitionersService {
       }
 
       // --- los datos personales, que viven en `persons` y no en el perfil ----
-      const person = await this.personsRepo.findById(tx, link.personId);
+      const person = await this.personsRepo.findById(tx, personId);
       if (person) {
         const now = new Date();
         // Una cadena vacía BORRA el dato opcional: es lo que hace falta cuando
@@ -1314,7 +1389,23 @@ export class ProfilesPractitionersService {
         applyCompany(person, dto);
         touch(person, actor.id);
 
-        if (dto.issuerAdministrativeAreaConceptId !== undefined) {
+        // Si el número cambia, la fila nueva ya nace con el departamento del
+        // mismo cuerpo; corregirlo además sobre la vieja tocaría una fila
+        // cerrada a la que otros registros todavía apuntan.
+        const documentReplaced =
+          dto.nationalId !== undefined &&
+          (await this.fixNationalId(
+            tx,
+            person.id,
+            dto.nationalId,
+            dto.issuerAdministrativeAreaConceptId,
+            actor.id,
+            now,
+          ));
+        if (
+          !documentReplaced &&
+          dto.issuerAdministrativeAreaConceptId !== undefined
+        ) {
           await this.fixIssuance(
             tx,
             person.id,
@@ -1354,6 +1445,7 @@ export class ProfilesPractitionersService {
         if (
           dto.residenceMunicipalityConceptId !== undefined ||
           dto.homeAddressLines !== undefined ||
+          dto.homeDistrict !== undefined ||
           // `null` también cuenta: quitar el punto es un cambio.
           dto.homeLatitude !== undefined ||
           dto.homeLongitude !== undefined
@@ -1365,6 +1457,7 @@ export class ProfilesPractitionersService {
             {
               municipalityConceptId: dto.residenceMunicipalityConceptId,
               lines: dto.homeAddressLines,
+              district: dto.homeDistrict,
               latitude: dto.homeLatitude,
               longitude: dto.homeLongitude,
             },
@@ -1374,6 +1467,7 @@ export class ProfilesPractitionersService {
         }
         if (
           dto.workAddressLines !== undefined ||
+          dto.workDistrict !== undefined ||
           dto.workLatitude !== undefined ||
           dto.workLongitude !== undefined
         ) {
@@ -1383,6 +1477,7 @@ export class ProfilesPractitionersService {
             CONCEPTS.ADDR_USE_WORK,
             {
               lines: dto.workAddressLines,
+              district: dto.workDistrict,
               latitude: dto.workLatitude,
               longitude: dto.workLongitude,
             },
@@ -1393,12 +1488,7 @@ export class ProfilesPractitionersService {
       }
 
       await tx.flush();
-    });
-
-    // Se relee entero en vez de armar la respuesta con lo que se acaba de
-    // escribir: así quien edita ve lo mismo que va a ver al recargar, incluidas
-    // las colecciones y la actividad, que esta operación no toca.
-    return this.getOwnPractitionerProfile(actor);
+    }
   }
 
   /**
@@ -1456,6 +1546,90 @@ export class ProfilesPractitionersService {
         actorUserId,
       });
     }
+  }
+
+  /**
+   * Corrige el número del documento de identidad (P28).
+   *
+   * ## Sólo mientras nadie lo verificó ni lo está verificando
+   *
+   * Una aserción vigente en `identity_assurance` dice «esta persona es la del
+   * documento N». Cambiar N después dejaría la aserción hablando de otro
+   * documento, y el guard de identidad verificada seguiría dejando pasar a la
+   * cuenta. Lo mismo con un caso de verificación **en curso**: lo que se está
+   * revisando es el número de hoy, y cambiarlo a mitad del caso haría que la
+   * aserción final certifique un documento que nadie miró. En los dos casos,
+   * 409 `NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY`: la corrección pasa por un
+   * caso nuevo, no por el perfil.
+   *
+   * ## Cierra y abre, nunca edita el número en el lugar
+   *
+   * `common.identifiers` lleva vigencia (`valid_to`), y hay registros que
+   * apuntan a la fila del documento (`tenant_legal_representatives.
+   * ci_identifier_id`, `tenant_affiliation_documents.identifier_id`). Cambiar
+   * el valor en el lugar alteraría en silencio lo que esos registros dicen.
+   * Se cierra la fila vigente —quien la referencia sigue viendo el número que
+   * declaró— y se abre otra con el número corregido, el departamento del mismo
+   * cuerpo (o el que tenía) y el mismo uso. Mismo patrón que el NIT.
+   *
+   * No se comprueba que el número esté libre, igual que en el alta del
+   * profesional: la misma cédula de dos departamentos distintos son dos
+   * documentos, y por valor solo no se distinguen.
+   *
+   * @returns `true` si abrió una fila nueva (el departamento ya viajó en ella).
+   */
+  private async fixNationalId(
+    tx: EntityManager,
+    personId: string,
+    nationalId: string,
+    issuerAdministrativeAreaConceptId: string | undefined,
+    actorUserId: string,
+    now: Date,
+  ): Promise<boolean> {
+    const rows =
+      await this.personRecords.findCurrentIdentifiers<PersonIdentifierRecord>(
+        tx,
+        personId,
+      );
+    const document = rows.find(
+      (f) => f.typeConceptId === CONCEPTS.ID_TYPE_NATIONAL,
+    );
+    if (document?.value === nationalId) return false;
+    if (
+      (await this.personRecords.hasCurrentIdentityAssertion(tx, personId)) ||
+      (await this.personRecords.hasOpenIdentityCase(tx, personId))
+    ) {
+      throw new ConflictException(
+        'El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número',
+        {},
+        ProfilesErrorReason.NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY,
+      );
+    }
+    // El departamento se valida antes de escribir nada: fuera de
+    // `VS_BO_DEPARTMENT`, 422 y la fila vigente queda como estaba.
+    if (issuerAdministrativeAreaConceptId !== undefined) {
+      await this.administrativeAreas.assertIsAdministrativeArea(
+        tx,
+        issuerAdministrativeAreaConceptId,
+      );
+    }
+    if (document) {
+      document.validTo = now;
+      touch(document, actorUserId);
+    }
+    this.personRecords.createIdentifier(tx, {
+      ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
+      ownerId: personId,
+      typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+      value: nationalId,
+      useConceptId: CONCEPTS.USE_OFFICIAL,
+      stateConceptId: CONCEPTS.STATE_ACTIVE,
+      issuerAdministrativeAreaConceptId:
+        issuerAdministrativeAreaConceptId ??
+        document?.issuerAdministrativeAreaConceptId,
+      actorUserId,
+    });
+    return true;
   }
 
   /**

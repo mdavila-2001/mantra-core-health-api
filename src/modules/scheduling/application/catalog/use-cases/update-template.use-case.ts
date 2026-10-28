@@ -19,6 +19,8 @@ import {
   UpdateTemplateDto,
 } from '../../../presentation/dto';
 import { assertFirstSlotFits } from '../support/assert-first-slot-fits';
+import { assertFlexibleRules } from '../support/assert-flexible-rules';
+import { isFlexibleBand } from '../../../domain/catalog/flexible-band';
 
 /** Edita las franjas de una plantilla. */
 @Injectable()
@@ -114,6 +116,18 @@ export class UpdateTemplateUseCase {
         const effectiveSlotMinutes =
           dto.slotMinutes ?? template.slotMinutes ?? DEFAULT_SLOT_MINUTES;
 
+        // Horario flexible (P36): el modo de la plantilla no cambia por PATCH,
+        // pero las franjas nuevas tienen que respetarlo. Con la plantilla en
+        // turnos fijos, cada franja nueva dice el suyo (v4.2.64), igual que al
+        // publicar.
+        const flexible = template.flexibleHours === true;
+        const flexibleRules = dto.rules.filter((rule) =>
+          isFlexibleBand(flexible, rule),
+        );
+        if (flexibleRules.length > 0) {
+          assertFlexibleRules(flexibleRules, effectiveSlotMinutes);
+        }
+
         for (const rule of dto.rules) {
           if (rule.startTime >= rule.endTime) {
             throw new PreconditionFailedException(
@@ -121,25 +135,33 @@ export class UpdateTemplateUseCase {
               { dayOfWeek: rule.dayOfWeek },
             );
           }
-          assertFirstSlotFits(
-            rule,
-            dto.rules,
-            rule.slotMinutes ?? effectiveSlotMinutes,
-          );
+          if (!isFlexibleBand(flexible, rule)) {
+            assertFirstSlotFits(
+              rule,
+              dto.rules,
+              rule.slotMinutes ?? effectiveSlotMinutes,
+            );
+          }
         }
 
         await this.catalogRepo.deleteRulesByTemplate(tx, templateId);
         for (const rule of dto.rules) {
+          const flexibleBand = isFlexibleBand(flexible, rule);
           this.catalogRepo.createRule(tx, {
             scheduleTemplateId: templateId,
             dayOfWeek: rule.dayOfWeek,
             startTime: rule.startTime,
             endTime: rule.endTime,
-            slotMinutes: rule.slotMinutes ?? effectiveSlotMinutes,
-            capacityPerSlot: rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY,
+            slotMinutes: flexibleBand
+              ? undefined
+              : (rule.slotMinutes ?? effectiveSlotMinutes),
+            capacityPerSlot: flexibleBand
+              ? undefined
+              : (rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY),
             gapMinutes: rule.gapMinutes,
             bookingModeConceptId: bandMode(rule.bookingMode),
             telemedicineEnabled: rule.telemedicineEnabled === true,
+            flexibleHours: flexibleBand,
             actorUserId: actor.id,
           });
         }
@@ -154,6 +176,7 @@ export class UpdateTemplateUseCase {
         name: template.name,
         ruleCount,
         statusConceptId: template.statusConceptId,
+        flexibleHours: template.flexibleHours === true,
       };
     });
   }

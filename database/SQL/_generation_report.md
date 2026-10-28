@@ -6,19 +6,19 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 |-----|--------|-----------|----|-------------|---------|----------|
 | 00 | platform _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 0 |
 | 01 | iam | 14 | 75 | 13 | 65 | 0 |
-| 02 | common | 7 | 48 | 0 | 52 | 0 |
+| 02 | common | 7 | 49 | 0 | 55 | 0 |
 | 03 | terminology | 16 | 80 | 0 | 103 | 0 |
 | 04 | directory | 7 | 59 | 4 | 55 | 0 |
 | 05 | profiles | 20 | 134 | 7 | 145 | 0 |
 | 06 | authz | 15 | 100 | 15 | 90 | 0 |
 | 07 | consent | 10 | 81 | 0 | 101 | 0 |
-| 08 | clinical | 23 | 238 | 7 | 260 | 10 |
+| 08 | clinical | 24 | 241 | 9 | 264 | 11 |
 | 09 | forms | 16 | 103 | 0 | 113 | 1 |
 | 10 | audit | 133 | 554 | 40 | 705 | 1 |
 | 11 | system_ops | 29 | 169 | 0 | 178 | 0 |
 | 12 | integrations | 10 | 49 | 0 | 56 | 0 |
 | 13 | geo | 6 | 31 | 0 | 35 | 0 |
-| 14 | practice | 11 | 83 | 1 | 88 | 1 |
+| 14 | practice | 11 | 84 | 2 | 89 | 1 |
 | 15 | chart | 11 | 71 | 0 | 81 | 2 |
 | 16 | accounting | 45 | 316 | 1 | 369 | 15 |
 | 17 | billing | 24 | 156 | 0 | 174 | 21 |
@@ -28,7 +28,7 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 | 21 | deployment _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 0 |
 | 22 | organization_extensions | 5 | 49 | 0 | 55 | 0 |
 | 23 | diagnostic_units | 15 | 109 | 38 | 117 | 1 |
-| 24 | pharmacy | 9 | 65 | 1 | 75 | 0 |
+| 24 | pharmacy | 12 | 78 | 10 | 94 | 1 |
 | 25 | pharmacy_inventory | 20 | 142 | 0 | 154 | 6 |
 | 26 | insurance | 32 | 218 | 15 | 237 | 0 |
 | 27 | identity_assurance | 11 | 70 | 1 | 77 | 0 |
@@ -37,7 +37,7 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 | 30 | read_models | 13 | 74 | 0 | 89 | 76 |
 | 31 | integration_contracts | 9 | 48 | 1 | 57 | 0 |
 | 32 | workflow | 8 | 49 | 0 | 55 | 9 |
-| 33 | integrity _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 46 |
+| 33 | integrity _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 47 |
 | 34 | portal_catalog _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 0 |
 | 35 | messaging | 22 | 142 | 0 | 150 | 0 |
 | 36 | qa_lab | 13 | 79 | 0 | 92 | 0 |
@@ -45,7 +45,7 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 | 38 | erp | 51 | 429 | 0 | 494 | 14 |
 | 39 | reporting | 12 | 70 | 0 | 86 | 0 |
 | 40 | auth_providers | 9 | 50 | 0 | 58 | 1 |
-| 41 | scheduling | 18 | 126 | 19 | 129 | 3 |
+| 41 | scheduling | 19 | 134 | 27 | 138 | 3 |
 | 42 | payments | 52 | 349 | 0 | 404 | 6 |
 | 43 | ads | 73 | 388 | 0 | 497 | 0 |
 | 44 | health_context | 10 | 53 | 0 | 62 | 0 |
@@ -74,7 +74,7 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 | 67 | data_catalog | 13 | 43 | 23 | 24 | 0 |
 | 68 | qa_execution | 4 | 14 | 6 | 6 | 0 |
 | 69 | pharma_lab | 31 | 182 | 173 | 182 | 1 |
-| **Σ** | **70** | **1255** | | **393** | | **355** |
+| **Σ** | **70** | **1260** | | **413** | | **358** |
 
 ## Detalle de entidades saltadas y avisos
 
@@ -98,6 +98,7 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 - `forms_form_instances` — stub de cruce (tabla real en su módulo dueño)
 - `profiles_health_practitioner_profiles` — stub de cruce (tabla real en su módulo dueño)
 - `practice_practice_sites` — stub de cruce (tabla real en su módulo dueño)
+- `chart_clinical_note_headers` — stub de cruce (tabla real en su módulo dueño)
 - ⚠ índice 'gist_appointments_practitioner_time': predicado referencia función(es) placeholder del modelo → emitido COMENTADO (la función no existe en la base).
 
 ### 09 · forms
@@ -173,6 +174,9 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 
 ### 23 · diagnostic_units
 - `directory_tenants` — stub de cruce (tabla real en su módulo dueño)
+
+### 24 · pharmacy
+- `practice_practice_sites` — stub de cruce (tabla real en su módulo dueño)
 
 ### 25 · pharmacy_inventory
 - `erp_business_partners` — stub de cruce (tabla real en su módulo dueño)
@@ -291,6 +295,7 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 - `user_activity_events` — stub de cruce (tabla real en su módulo dueño)
 - `practitioner_delegate_assignments` — stub de cruce (tabla real en su módulo dueño)
 - `appointments` — stub de cruce (tabla real en su módulo dueño)
+- `pharmacy_on_call_shifts` — stub de cruce (tabla real en su módulo dueño)
 - `claim_appeal_decisions` — stub de cruce (tabla real en su módulo dueño)
 - `claim_reversals` — stub de cruce (tabla real en su módulo dueño)
 - `coordination_of_benefits` — stub de cruce (tabla real en su módulo dueño)

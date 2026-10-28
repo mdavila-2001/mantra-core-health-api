@@ -65,6 +65,24 @@ export interface CreateReferralData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** Sede destino. */
+  targetBranchId?: string;
+  /** Destino externo. */
+  targetExternalName?: string;
+  /** Contacto del destino externo. */
+  targetExternalContact?: string;
+  /** Servicio pedido. */
+  requestedServiceText?: string;
+  /** Servicio codificado. */
+  requestedServiceConceptId?: string;
+  /** Diagnóstico. */
+  diagnosisText?: string;
+  /** Resumen clínico. */
+  clinicalSummary?: string;
+  /** Tratamiento previo. */
+  treatmentGivenText?: string;
+  /** Consentimiento informado asociado. */
+  informedConsentId?: string;
 }
 
 /** Acceso a datos de `clinical_ext.referrals`. */
@@ -170,6 +188,15 @@ export class ReferralsRepository {
         priorityConceptId: data.priorityConceptId,
         statusConceptId: data.statusConceptId,
         validUntil: data.validUntil,
+        targetBranchId: data.targetBranchId,
+        targetExternalName: data.targetExternalName,
+        targetExternalContact: data.targetExternalContact,
+        requestedServiceText: data.requestedServiceText,
+        requestedServiceConceptId: data.requestedServiceConceptId,
+        diagnosisText: data.diagnosisText,
+        clinicalSummary: data.clinicalSummary,
+        treatmentGivenText: data.treatmentGivenText,
+        informedConsentId: data.informedConsentId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

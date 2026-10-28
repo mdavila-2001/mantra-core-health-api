@@ -2201,7 +2201,17 @@ POST /telemetry/onboarding-events HTTP/1.1
 Host: localhost:3000
 Content-Type: application/json
 
-{}
+{
+  "events": [
+    {
+      "eventType": "start",
+      "formType": "valor-ejemplo",
+      "draftId": "00000000-0000-4000-8000-000000000001",
+      "stepIndex": 1,
+      "timestamp": "valor-ejemplo"
+    }
+  ]
+}
 ```
 
 ### Restricciones a considerar
@@ -2211,7 +2221,19 @@ Content-Type: application/json
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
 - CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
 
-El body no declara campos documentables.
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `events` | Sí | `array<OnboardingEventDto>` | máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"eventType":"start","formType":"valor-ejemplo","draftId":"00000000-0000-4000-8000-000000000001","stepIndex":1,"stepKey":"valor-ejemplo","fieldKey":"valor-ejemplo","interactionType":"focus","errorCategory":"valor-ejemplo","durationMs":1,"timestamp":"valor-ejemplo"}]` |
+| `events[].eventType` | Sí | `string` | valores: `start`, `step_view`, `field_interaction`, `field_error`, `abandon`, `complete` | Sin descripción específica en el contrato OpenAPI. | `start` |
+| `events[].formType` | Sí | `string` | longitud máxima 40 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].draftId` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `events[].stepIndex` | Sí | `number` | mínimo 0; máximo 100 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `events[].stepKey` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].fieldKey` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].interactionType` | No | `string` | valores: `focus`, `blur`, `change`, `error` | Sin descripción específica en el contrato OpenAPI. | `focus` |
+| `events[].errorCategory` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `events[].durationMs` | No | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `events[].timestamp` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 
 ### Payload completo de ejemplo
 
@@ -2222,7 +2244,22 @@ POST /telemetry/onboarding-events HTTP/1.1
 Host: localhost:3000
 Content-Type: application/json
 
-{}
+{
+  "events": [
+    {
+      "eventType": "start",
+      "formType": "valor-ejemplo",
+      "draftId": "00000000-0000-4000-8000-000000000001",
+      "stepIndex": 1,
+      "stepKey": "valor-ejemplo",
+      "fieldKey": "valor-ejemplo",
+      "interactionType": "focus",
+      "errorCategory": "valor-ejemplo",
+      "durationMs": 1,
+      "timestamp": "valor-ejemplo"
+    }
+  ]
+}
 ```
 
 ### Respuestas generales esperadas

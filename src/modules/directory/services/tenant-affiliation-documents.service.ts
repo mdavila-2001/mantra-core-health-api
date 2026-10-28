@@ -191,6 +191,41 @@ export class TenantAffiliationDocumentsService {
   }
 
   /**
+   * Vincula **un** documento de la empresa a un tenant ya existente (P50).
+   *
+   * Es la puerta para completar después del alta los papeles que el alta
+   * pública dejó opcionales (`POST /tenants/{id}/affiliation-documents`). Usa
+   * el mismo reclamo y la misma fila que el autorregistro; quién puede
+   * llamarla y si el tipo ya estaba presentado lo decide el llamador.
+   *
+   * @param tx - Transacción activa.
+   * @param role - Rol del documento (no el poder: ese va con su persona).
+   * @param input - Tenant, quien sube, tipo societario y archivo.
+   * @returns El id de la fila creada.
+   */
+  async attachDocument(
+    tx: EntityManager,
+    role: RegistrationDocumentRole,
+    input: {
+      readonly tenantId: string;
+      readonly ownerUserId: string;
+      readonly legalEntityType?: string;
+      readonly fileId: string;
+      readonly documentNumber?: string;
+    },
+  ): Promise<string> {
+    const concepts = await this.concepts.resolve(tx);
+    return this.attachOne(tx, role, input.fileId, {
+      tenantId: input.tenantId,
+      ownerUserId: input.ownerUserId,
+      countryIso: countryIsoForLegalEntityType(input.legalEntityType),
+      concepts,
+      today: new Date(),
+      documentNumber: input.documentNumber,
+    });
+  }
+
+  /**
    * Reclama un archivo y crea la fila que lo envuelve.
    *
    * Es el cuerpo que compartían los cinco documentos del autorregistro y que

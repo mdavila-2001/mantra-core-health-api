@@ -27,3 +27,4 @@ export * from './linkable-organization.dto';
 export * from './create-dependent.dto';
 export * from './dependent-summary.dto';
 export * from './dependent-link-request.dto';
+export * from './patient-address-book.dto';

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS } from '../../../common';
+import { adminDivisionLineage } from '../../../common/seed/admin-divisions.catalog';
 import { AddressesRepository } from '../../common/repositories';
 import { PRAC } from '../../practice/practice.concepts';
 import {
@@ -11,7 +12,10 @@ import {
 import { siteCodeBase, uniqueCode } from '../../practice/site-code';
 import type { OwnSiteAddressDto } from '../../practice/dto';
 import { DUNIT } from '../diagnostic_units.concepts';
-import { findDiagnosticUnitModality } from '../diagnostic-unit-modalities';
+import {
+  findDiagnosticUnitModality,
+  resolveDiagnosticUnitType,
+} from '../diagnostic-unit-modalities';
 import {
   DiagnosticUnitsRepository,
   DiagnosticUnitSitesRepository,
@@ -141,8 +145,7 @@ export class DiagnosticUnitProvisioningService {
       owner.tenantCode ??
       siteCodeBase(owner.legalName, 'UNIDAD');
     const unitName = profile.name ?? owner.legalName;
-    const unitTypeConceptId =
-      profile.diagnosticUnitTypeConceptId ?? DUNIT.UNIT_TYPE_IMAGING;
+    const unitTypeConceptId = resolveDiagnosticUnitType(profile);
     const isLaboratory = unitTypeConceptId === DUNIT.UNIT_TYPE_LABORATORY;
 
     // 1) La práctica propia de la unidad: nace ACTIVA con el owner de la
@@ -295,6 +298,13 @@ export class DiagnosticUnitProvisioningService {
         municipalityConceptId: declaredAddress.municipalityConceptId,
         administrativeAreaConceptId:
           declaredAddress.administrativeAreaConceptId,
+        // ADR-0028: la provincia sale del municipio y el distrito viaja aparte
+        // de las líneas, igual que en el consultorio propio.
+        administrativeArea2ConceptId: declaredAddress.municipalityConceptId
+          ? adminDivisionLineage(declaredAddress.municipalityConceptId)
+              ?.level2ConceptId
+          : undefined,
+        districtText: declaredAddress.district?.trim() || undefined,
         countryConceptId: CONCEPTS.COUNTRY_BO,
         useConceptId: CONCEPTS.ADDR_USE_WORK,
         typeConceptId: CONCEPTS.ADDR_TYPE_POSTAL,

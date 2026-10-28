@@ -23,7 +23,7 @@
 --      `true` en todas sus franjas. `ADD COLUMN … DEFAULT <constante>` no
 --      reescribe la tabla en PG 11+.
 --      SOLO para bases de la rama `dev`: `test` no tiene el horario flexible
---      (P36). ESTA copia es la de `test` y no trae la sección B.
+--      (P36). En `test` se omite la sección B.
 --   C. scheduling.appointment_payment_receipts — el comprobante que sube el
 --      paciente y revisa el médico de la agenda. DDL idéntico al que generó
 --      gen_ddl.py, con sus índices y FKs.
@@ -33,6 +33,7 @@
 --
 -- DELTAS ESPERADOS sobre la base viva:
 --   columnas de practice.practice_sites   +1  (logo_file_id)
+--   columnas de scheduling.schedule_rules +1  (flexible_hours)
 --   tablas                                +1  (scheduling.appointment_payment_receipts)
 --   FKs                                   +9  (1 de la sede, 8 del comprobante)
 --   índices                              +11  (1 de la sede, PK + 9 del comprobante)
@@ -40,6 +41,7 @@
 --
 -- Reversible:
 --   DROP TABLE IF EXISTS "scheduling"."appointment_payment_receipts";
+--   ALTER TABLE "scheduling"."schedule_rules" DROP COLUMN IF EXISTS "flexible_hours";
 --   ALTER TABLE "practice"."practice_sites" DROP COLUMN IF EXISTS "logo_file_id";
 -- ============================================================================
 
@@ -63,6 +65,10 @@ DO $$ BEGIN
             REFERENCES "common"."files" ("id");
     END IF;
 END $$;
+
+-- ------------------------------- B. horario flexible por franja (M-02, dev)
+ALTER TABLE "scheduling"."schedule_rules"
+    ADD COLUMN IF NOT EXISTS "flexible_hours" boolean NOT NULL DEFAULT false;
 
 -- ------------------------------------------ C. comprobantes de pago (M-03)
 CREATE TABLE IF NOT EXISTS "scheduling"."appointment_payment_receipts" (
@@ -173,7 +179,8 @@ BEGIN
     SELECT count(*) INTO n_columnas
     FROM information_schema.columns
     WHERE (table_schema, table_name, column_name) IN (
-        ('practice', 'practice_sites', 'logo_file_id'));
+        ('practice', 'practice_sites', 'logo_file_id'),
+        ('scheduling', 'schedule_rules', 'flexible_hours'));
 
     SELECT count(*) INTO n_tabla
     FROM information_schema.tables
@@ -190,13 +197,13 @@ BEGIN
     WHERE n.nspname = 'scheduling' AND c.relname = 'appointment_payment_receipts'
       AND c.relrowsecurity AND c.relforcerowsecurity;
 
-    IF n_columnas <> 1 OR n_tabla <> 1 OR n_fk <> 9 OR n_rls <> 1 THEN
+    IF n_columnas <> 2 OR n_tabla <> 1 OR n_fk <> 9 OR n_rls <> 1 THEN
         RAISE EXCEPTION
-            'v4.2.64 incompleto: columnas=% (1), tabla=% (1), fk=% (9), rls=% (1)',
+            'v4.2.64 incompleto: columnas=% (2), tabla=% (1), fk=% (9), rls=% (1)',
             n_columnas, n_tabla, n_fk, n_rls;
     END IF;
 
-    RAISE NOTICE 'v4.2.64 aplicado: 1 columna, 1 tabla con RLS, 9 FKs validadas.';
+    RAISE NOTICE 'v4.2.64 aplicado: 2 columnas, 1 tabla con RLS, 9 FKs validadas.';
 END $$;
 
 COMMIT;

@@ -21,7 +21,7 @@ Referencia exhaustiva de 11 operación(es) del módulo `geo`, derivada del contr
 8. [POST /geo/tracking-sessions/{id}/close](#8-post-geo-tracking-sessions-id-close) — Cerrar una sesión de tracking
 9. [POST /geo/trips](#9-post-geo-trips) — Iniciar un viaje (trip)
 10. [POST /geo/trips/{id}/close](#10-post-geo-trips-id-close) — Cerrar un viaje con distancia/duración
-11. [POST /public/geo/reverse](#11-post-public-geo-reverse) — Nombre de la calle de un punto en Bolivia
+11. [POST /public/geo/reverse](#11-post-public-geo-reverse) — Nombre de la calle de un punto del mapa
 
 ---
 
@@ -1366,7 +1366,7 @@ Ejemplo de error normalizado:
 
 - **Módulo:** `geo`
 - **Etiqueta OpenAPI:** `geo`
-- **Nombre:** Nombre de la calle de un punto en Bolivia
+- **Nombre:** Nombre de la calle de un punto del mapa
 - **Operation ID:** `ReverseGeocodingController_reverse`
 - **Autenticación:** Pública
 - **Implementación:** [ReverseGeocodingController.reverse](../../src/modules/geo/reverse-geocoding/reverse-geocoding.controller.ts)
@@ -1408,8 +1408,8 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `latitude` | Sí | `number` | mínimo -23.5; máximo -9.2 | Sin descripción específica en el contrato OpenAPI. | `1` |
-| `longitude` | Sí | `number` | mínimo -70; máximo -57 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `latitude` | Sí | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `longitude` | Sí | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 
 ### Payload completo de ejemplo
 
@@ -1432,8 +1432,6 @@ Content-Type: application/json
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | Sí |
 | 400 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
 | 409 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
 | 413 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
 | 422 | Operación completada correctamente. | `Promise<ReverseGeocodingResponseDto>` | No |
@@ -1451,6 +1449,13 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "houseNumber": "valor-ejemplo",
   "neighbourhood": "valor-ejemplo",
   "city": "valor-ejemplo",
+  "countryCode": "BO",
+  "adminAreas": {
+    "level1": "Santa Cruz",
+    "level2": "Provincia Andrés Ibáñez",
+    "level3": "Santa Cruz de la Sierra",
+    "district": "Equipetrol"
+  },
   "attribution": "valor-ejemplo"
 }
 ```
@@ -1465,6 +1470,12 @@ Campos de la respuesta:
 | `houseNumber` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `neighbourhood` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `city` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `countryCode` | No | `string` | Sin restricción adicional declarada | País del punto, ISO 3166-1 alfa-2 en mayúsculas | `BO` |
+| `adminAreas` | No | `ReverseGeocodingAdminAreasDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"level1":"Santa Cruz","level2":"Provincia Andrés Ibáñez","level3":"Santa Cruz de la Sierra","district":"Equipetrol"}` |
+| `adminAreas.level1` | No | `string` | Sin restricción adicional declarada | Nivel 1: departamento, estado o región | `Santa Cruz` |
+| `adminAreas.level2` | No | `string` | Sin restricción adicional declarada | Nivel 2: provincia o condado | `Provincia Andrés Ibáñez` |
+| `adminAreas.level3` | No | `string` | Sin restricción adicional declarada | Nivel 3: municipio o ciudad | `Santa Cruz de la Sierra` |
+| `adminAreas.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona dentro del municipio | `Equipetrol` |
 | `attribution` | Sí | `string` | Sin restricción adicional declarada | Atribución que exige la licencia de los datos | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.

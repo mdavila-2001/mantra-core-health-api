@@ -805,12 +805,13 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}]},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","pharmacy":{"latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}}` |
+| `organization` | Sí | `RegisterOrganizationDetailsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CLINICA_SAN_RAFAEL","legalName":"Nombre de ejemplo","tradeName":"Nombre de ejemplo","tenantType":"HOSPITAL","legalEntityType":"SRL","taxIdentifier":"1023456029","legalDocuments":{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"},"legalRepresentative":{"name":"Mariana","middleName":"Elena","lastName":"Siles","motherLastName":"Justiniano","fullName":"Mariana Siles Justiniano","idNumber":"4872190 SC","email":"legal@aseguradora.com","phone":"+591 70012345","powerOfAttorneyFileId":"00000000-0000-4000-8000-000000000001"},"executives":{"generalManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"commercialManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"},"marketingManager":{"name":"Carlos","middleName":"Eduardo","lastName":"Mendoza","motherLastName":"Rivero","fullName":"Carlos Mendoza Rivero","phone":"+591 70012345","email":"cmendoza@aseguradora.com"}},"payer":{"carrierCode":"CODIGO_EJEMPLO","sigla":"BUPA","address":"valor-ejemplo","latitude":-17.7833,"longitude":-63.1821,"regulatorIdentifier":"valor-ejemplo","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001"},"broker":{"id":"00000000-0000-4000-8000-000000000001","brokerCode":"CODIGO_EJEMPLO","legalName":"Nombre de ejemplo","licenseNumber":"valor-ejemplo","jurisdiction":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"verification":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"independent":true,"currentCarrierCount":1,"createdAt":"2026-07-31T12:00:00.000Z","agreements":[{"id":"00000000-0000-4000-8000-000000000001","insuranceCarrierId":"00000000-0000-4000-8000-000000000001","carrierLegalName":"Nombre de ejemplo","agreementCode":"CODIGO_EJEMPLO","commissionModel":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"effectiveFrom":"valor-ejemplo","effectiveTo":"valor-ejemplo","status":{"code":"CARRIER_ACTIVE","display":"Aseguradora activa"},"current":true,"contractFileId":"00000000-0000-4000-8000-000000000001"}],"publicProfileId":"00000000-0000-4000-8000-000000000001"},"diagnosticUnit":{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18"}]},"countryConceptId":"00000000-0000-4000-8000-000000000001","jurisdictionConceptId":"00000000-0000-4000-8000-000000000001","timeZone":"America/La_Paz","pharmacy":{"address":"Av. Cristo Redentor 1234, Santa Cruz de la Sierra","latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}}` |
 | `organization.code` | Sí | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Código único global de la organización | `CLINICA_SAN_RAFAEL` |
 | `organization.legalName` | Sí | `string` | longitud mínima 1; longitud máxima 300 | Razón social / nombre legal | `Nombre de ejemplo` |
 | `organization.tradeName` | No | `string` | longitud máxima 300 | Nombre comercial | `Nombre de ejemplo` |
 | `organization.tenantType` | Sí | `string` | valores: `PROVIDER`, `PAYER`, `BROKER`, `UNIVERSITY`, `PHARMACY`, `HOSPITAL`, `CLINIC`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`, `HEALTH_BUSINESS`, `DIAGNOSTIC_CENTER` | Tipo de organización. Obligatorio: cada tipo exige sus propios datos. PAYER exige el bloque `payer` y BROKER el bloque `broker`. El resto —PROVIDER, UNIVERSITY, PHARMACY, DIAGNOSTIC_CENTER y las cinco institucionales (HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING, HEALTH_OTHER) y HEALTH_BUSINESS— exigen país y jurisdicción, que es lo que determina bajo qué regulador operan. | `HOSPITAL` |
 | `organization.legalEntityType` | No | `string` | valores: `UNIPERSONAL`, `SRL`, `LTDA`, `SA`, `SOCIEDAD_COLECTIVA`, `COMANDITA_SIMPLE`, `COMANDITA_ACCIONES`, `SUCURSAL_EXTRANJERA`, `BR_LTDA`, `BR_SA`, `BR_MEI`, `BR_EI`, `BR_SLU`, `BR_FILIAL_EST`, `US_LLC`, `US_CORP`, `US_SOLE_PROP`, `US_LLP`, `US_BRANCH`, `AR_SAS`, `MX_S_RL`, `SAM`, `ASOCIACION_ACCIDENTAL`, `SOCIEDAD_CIVIL`, `PROFESIONAL_INDEPENDIENTE`, `COOPERATIVA`, `MUTUAL`, `EMPRESA_SOCIAL`, `ASOCIACION_CIVIL`, `FUNDACION`, `ONG`, `ENTIDAD_RELIGIOSA`, `IFD`, `ORGANIZACION_SOCIAL`, `ENTIDAD_PUBLICA`, `EMPRESA_ESTATAL`, `EMPRESA_ESTATAL_MIXTA`, `EMPRESA_MIXTA`, `EMPRESA_ESTATAL_INTERGUBERNAMENTAL`, `ORGANISMO_INTERNACIONAL` | Tipo societario del diccionario internacional (BO/BR/US/AR/MX). Sin él, la organización nace con la forma legada `COMPANY`. | `SRL` |
+| `organization.taxIdentifier` | No | `string` | longitud mínima 1; longitud máxima 50 | Identificación tributaria (NIT en Bolivia); se registra como número del documento tributario | `1023456029` |
 | `organization.legalDocuments` | No | `RegisterOrganizationLegalDocumentsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"constitutionFileId":"00000000-0000-4000-8000-000000000001","taxIdentifierFileId":"00000000-0000-4000-8000-000000000001","commerceRegistryFileId":"00000000-0000-4000-8000-000000000001","operatingLicenseFileId":"00000000-0000-4000-8000-000000000001","healthAuthorityCertificateFileId":"00000000-0000-4000-8000-000000000001"}` |
 | `organization.legalDocuments.constitutionFileId` | No | `string` | formato `uuid` | Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL, que no la tiene; el servicio responde 422 nombrando el documento faltante | `00000000-0000-4000-8000-000000000001` |
 | `organization.legalDocuments.taxIdentifierFileId` | No | `string` | formato `uuid` | Identificación tributaria (NIT en Bolivia) | `00000000-0000-4000-8000-000000000001` |
@@ -893,42 +894,47 @@ Content-Type: application/json
 | `organization.broker.agreements[].current` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `organization.broker.agreements[].contractFileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.broker.publicProfileId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `organization.diagnosticUnit` | No | `DiagnosticUnitProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}]}` |
+| `organization.diagnosticUnit` | No | `DiagnosticUnitProfileDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"code":"CENTRO_IMAGEN_CENTRAL","name":"Centro de Diagnóstico por Imágenes","diagnosticUnitTypeConceptId":"00000000-0000-4000-8000-000000000001","modalityConceptIds":["00000000-0000-4000-8000-000000000001"],"walkInAvailable":true,"homeCollectionAvailable":false,"primarySite":{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}},"branches":[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18"}]}` |
 | `organization.diagnosticUnit.code` | No | `string` | longitud mínima 3; longitud máxima 100; patrón runtime `/^[A-Za-z0-9._-]+$/` | Sin descripción específica en el contrato OpenAPI. | `CENTRO_IMAGEN_CENTRAL` |
 | `organization.diagnosticUnit.name` | No | `string` | longitud mínima 1; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Centro de Diagnóstico por Imágenes` |
 | `organization.diagnosticUnit.diagnosticUnitTypeConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.diagnosticUnit.modalityConceptIds` | No | `array<string>` | formato `uuid`; máximo 20 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
 | `organization.diagnosticUnit.walkInAvailable` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `organization.diagnosticUnit.homeCollectionAvailable` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `false` |
-| `organization.diagnosticUnit.primarySite` | No | `DiagnosticUnitPrimarySiteDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}` |
+| `organization.diagnosticUnit.primarySite` | No | `DiagnosticUnitPrimarySiteDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Sede central","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}` |
 | `organization.diagnosticUnit.primarySite.name` | No | `string` | longitud mínima 2; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Sede central` |
 | `organization.diagnosticUnit.primarySite.timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
-| `organization.diagnosticUnit.primarySite.address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `organization.diagnosticUnit.primarySite.address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
 | `organization.diagnosticUnit.primarySite.address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
 | `organization.diagnosticUnit.primarySite.address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `organization.diagnosticUnit.primarySite.address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.diagnosticUnit.primarySite.address.district` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `organization.diagnosticUnit.primarySite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.diagnosticUnit.primarySite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `organization.diagnosticUnit.primarySite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
-| `organization.diagnosticUnit.branches` | No | `array<DiagnosticUnitBranchDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}}]` |
+| `organization.diagnosticUnit.branches` | No | `array<DiagnosticUnitBranchDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Sucursal Equipetrol","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"description":"Frente al mercado","locationUrl":"https://maps.google.com/?q=-17.78,-63.18"}]` |
 | `organization.diagnosticUnit.branches[].name` | No | `string` | longitud mínima 2; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Sucursal Equipetrol` |
-| `organization.diagnosticUnit.branches[].address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `organization.diagnosticUnit.branches[].address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
 | `organization.diagnosticUnit.branches[].address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
 | `organization.diagnosticUnit.branches[].address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `organization.diagnosticUnit.branches[].address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `organization.diagnosticUnit.branches[].address.district` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `organization.diagnosticUnit.branches[].address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.diagnosticUnit.branches[].address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `organization.diagnosticUnit.branches[].address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `organization.diagnosticUnit.branches[].description` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `Frente al mercado` |
+| `organization.diagnosticUnit.branches[].locationUrl` | No | `string` | longitud máxima 2000; patrón runtime `/^https?:\/\//i` | Sin descripción específica en el contrato OpenAPI. | `https://maps.google.com/?q=-17.78,-63.18` |
 | `organization.countryConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.jurisdictionConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `organization.timeZone` | No | `string` | longitud máxima 100 | Zona horaria IANA | `America/La_Paz` |
-| `organization.pharmacy` | No | `RegisterPharmacyBlockDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}` |
-| `organization.pharmacy.latitude` | No | `number` | Sin restricción adicional declarada | Latitud de la casa central | `1` |
-| `organization.pharmacy.longitude` | No | `number` | Sin restricción adicional declarada | Longitud de la casa central | `1` |
-| `organization.pharmacy.branches` | No | `array<RegisterPharmacyBranchDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]` |
+| `organization.pharmacy` | No | `RegisterPharmacyBlockDto` | Sin restricción adicional declarada | Sólo para PHARMACY: dirección y punto de la casa central y sucursales | `{"address":"Av. Cristo Redentor 1234, Santa Cruz de la Sierra","latitude":1,"longitude":1,"branches":[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]}` |
+| `organization.pharmacy.address` | No | `string` | longitud máxima 500 | Dirección escrita de la casa central (dirección legal) | `Av. Cristo Redentor 1234, Santa Cruz de la Sierra` |
+| `organization.pharmacy.latitude` | No | `number` | Sin restricción adicional declarada | Latitud de la casa central; va junto con longitude o no va | `1` |
+| `organization.pharmacy.longitude` | No | `number` | Sin restricción adicional declarada | Longitud de la casa central; va junto con latitude o no va | `1` |
+| `organization.pharmacy.branches` | No | `array<RegisterPharmacyBranchDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"name":"Nombre de ejemplo","latitude":-17.769,"longitude":-63.196,"description":"Texto descriptivo de ejemplo","locationUrl":"valor-ejemplo"}]` |
 | `organization.pharmacy.branches[].name` | No | `string` | longitud mínima 1; longitud máxima 300 | Nombre de la sucursal | `Nombre de ejemplo` |
-| `organization.pharmacy.branches[].latitude` | No | `number` | Sin restricción adicional declarada | Latitud | `-17.769` |
-| `organization.pharmacy.branches[].longitude` | No | `number` | Sin restricción adicional declarada | Longitud | `-63.196` |
+| `organization.pharmacy.branches[].latitude` | No | `number` | Sin restricción adicional declarada | Latitud; va junto con longitude o no va | `-17.769` |
+| `organization.pharmacy.branches[].longitude` | No | `number` | Sin restricción adicional declarada | Longitud; va junto con latitude o no va | `-63.196` |
 | `organization.pharmacy.branches[].description` | No | `string` | longitud máxima 1000 | Descripción | `Texto descriptivo de ejemplo` |
 | `organization.pharmacy.branches[].locationUrl` | No | `string` | longitud máxima 2000; patrón runtime `/^https?:\/\//i` | Enlace de ubicación (http/https) | `valor-ejemplo` |
 | `owner` | Sí | `RegisterOrganizationOwnerDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"email":"usuario@example.com","password":"ClaveSegura2026!","name":"Ana","middleName":"Lucía","lastName":"Rojas","motherLastName":"Paz","displayName":"Nombre de ejemplo","timeZone":"America/La_Paz"}` |
@@ -957,6 +963,7 @@ Content-Type: application/json
     "tradeName": "Nombre de ejemplo",
     "tenantType": "HOSPITAL",
     "legalEntityType": "SRL",
+    "taxIdentifier": "1023456029",
     "legalDocuments": {
       "constitutionFileId": "00000000-0000-4000-8000-000000000001",
       "taxIdentifierFileId": "00000000-0000-4000-8000-000000000001",
@@ -1073,6 +1080,7 @@ Content-Type: application/json
           ],
           "city": "valor-ejemplo",
           "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+          "district": "valor-ejemplo",
           "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
           "latitude": 1,
           "longitude": 1
@@ -1087,10 +1095,13 @@ Content-Type: application/json
             ],
             "city": "valor-ejemplo",
             "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+            "district": "valor-ejemplo",
             "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
             "latitude": 1,
             "longitude": 1
-          }
+          },
+          "description": "Frente al mercado",
+          "locationUrl": "https://maps.google.com/?q=-17.78,-63.18"
         }
       ]
     },
@@ -1098,6 +1109,7 @@ Content-Type: application/json
     "jurisdictionConceptId": "00000000-0000-4000-8000-000000000001",
     "timeZone": "America/La_Paz",
     "pharmacy": {
+      "address": "Av. Cristo Redentor 1234, Santa Cruz de la Sierra",
       "latitude": 1,
       "longitude": 1,
       "branches": [
@@ -1148,6 +1160,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "status": "00000000-0000-4000-8000-000000000001",
   "emailVerificationSent": true,
   "diagnosticUnitId": "00000000-0000-4000-8000-000000000001",
+  "pharmacyId": "00000000-0000-4000-8000-000000000001",
   "legalDocumentsRegistered": 1,
   "representativesRegistered": 1
 }
@@ -1164,6 +1177,7 @@ Campos de la respuesta:
 | `status` | Sí | `string` | formato `uuid` | Concepto de estado del tenant (pendiente de verificación) | `00000000-0000-4000-8000-000000000001` |
 | `emailVerificationSent` | Sí | `boolean` | Sin restricción adicional declarada | Si se pudo encolar el correo de verificación | `true` |
 | `diagnosticUnitId` | No | `string` | formato `uuid` | Id de la unidad diagnóstica creada (sólo DIAGNOSTIC_CENTER) | `00000000-0000-4000-8000-000000000001` |
+| `pharmacyId` | No | `string` | formato `uuid` | Id de la farmacia creada (sólo PHARMACY) | `00000000-0000-4000-8000-000000000001` |
 | `legalDocumentsRegistered` | No | `number` | Sin restricción adicional declarada | Cuántos documentos legales quedaron registrados pendientes de | `1` |
 | `representativesRegistered` | No | `number` | Sin restricción adicional declarada | Vínculos de representación registrados (representante legal + gerencias) | `1` |
 
@@ -1270,10 +1284,12 @@ Content-Type: application/json
 | `sexAtBirthConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `timeZone` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
 | `homeAddressLines` | No | `string` | longitud mínima 1; longitud máxima 500 | Calle y número del domicilio | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio | `valor-ejemplo` |
 | `homeLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `homeLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `workMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio del trabajo (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `workAddressLines` | No | `string` | longitud mínima 1; longitud máxima 500 | Calle y número del lugar de trabajo | `valor-ejemplo` |
+| `workDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del lugar de trabajo | `valor-ejemplo` |
 | `workLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `workLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `guardianName` | No | `string` | longitud mínima 1; longitud máxima 200 | Nombre del tutor o persona autorizada | `Nombre de ejemplo` |
@@ -1323,10 +1339,12 @@ Content-Type: application/json
   "sexAtBirthConceptId": "00000000-0000-4000-8000-000000000001",
   "timeZone": "America/La_Paz",
   "homeAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
   "homeLatitude": 1,
   "homeLongitude": 1,
   "workMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
   "workAddressLines": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "workLatitude": 1,
   "workLongitude": 1,
   "guardianName": "Nombre de ejemplo",
@@ -1484,6 +1502,7 @@ Content-Type: application/json
 | `issuerAdministrativeAreaConceptId` | Sí | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `homeAddressLines` | No | `string` | longitud mínima 1; longitud máxima 500 | Calle y número del domicilio particular | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio particular | `valor-ejemplo` |
 | `homeLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `homeLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `workAddressLines` | No | `string` | longitud mínima 1; longitud máxima 500 | Calle y número de la dirección laboral | `valor-ejemplo` |
@@ -1509,13 +1528,14 @@ Content-Type: application/json
 | `profilePhotoBase64` | No | `string` | longitud máxima 2800000 | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
 | `signatureFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `sealFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"contactPhone":"+591 72123456","logoFileId":"00000000-0000-4000-8000-000000000001"}` |
+| `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"contactPhone":"+591 72123456","logoFileId":"00000000-0000-4000-8000-000000000001"}` |
 | `ownSite.name` | No | `string` | longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
 | `ownSite.timeZone` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
-| `ownSite.address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `ownSite.address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
 | `ownSite.address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
 | `ownSite.address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `ownSite.address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ownSite.address.district` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
@@ -1570,6 +1590,7 @@ Content-Type: application/json
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
   "homeAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
   "homeLatitude": 1,
   "homeLongitude": 1,
   "workAddressLines": "valor-ejemplo",
@@ -1604,6 +1625,7 @@ Content-Type: application/json
       ],
       "city": "valor-ejemplo",
       "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+      "district": "valor-ejemplo",
       "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
       "latitude": 1,
       "longitude": 1
@@ -5159,6 +5181,7 @@ Content-Type: application/json
 | `issuerAdministrativeAreaConceptId` | Sí | `string` | formato `uuid` | Departamento emisor del documento (catálogo VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (catálogo VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
 | `homeAddressLines` | No | `string` | longitud máxima 500 | Calle y número del domicilio particular | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio particular | `valor-ejemplo` |
 | `homeLatitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `homeLongitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `workAddressLines` | No | `string` | longitud máxima 500 | Calle y número de la dirección laboral | `valor-ejemplo` |
@@ -5184,13 +5207,14 @@ Content-Type: application/json
 | `profilePhotoBase64` | No | `string` | longitud máxima 2800000 | Foto de perfil en formato Base64 (Data URI o base64 plano) | `valor-ejemplo` |
 | `signatureFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `sealFileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"contactPhone":"+591 72123456","logoFileId":"00000000-0000-4000-8000-000000000001"}` |
+| `ownSite` | No | `CreateOwnSiteDto` | Sin restricción adicional declarada | Consultorio propio a dar de alta en la misma transacción (ALV-005/006 · P20). Mismo contrato que POST /practitioners/me/sites | `{"name":"Nombre de ejemplo","timeZone":"America/La_Paz","address":{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1},"contactPhone":"+591 72123456","logoFileId":"00000000-0000-4000-8000-000000000001"}` |
 | `ownSite.name` | No | `string` | longitud máxima 200 | Nombre del consultorio | `Nombre de ejemplo` |
 | `ownSite.timeZone` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
-| `ownSite.address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `ownSite.address` | No | `OwnSiteAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":["valor-ejemplo"],"city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","administrativeAreaConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
 | `ownSite.address.lines` | No | `array<string>` | longitud máxima 500 | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `["valor-ejemplo"]` |
 | `ownSite.address.city` | No | `string` | longitud máxima 255 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `ownSite.address.municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ownSite.address.district` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `ownSite.address.administrativeAreaConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `ownSite.address.latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `ownSite.address.longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
@@ -5247,6 +5271,7 @@ Content-Type: application/json
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "residenceMunicipalityConceptId": "00000000-0000-4000-8000-000000000001",
   "homeAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
   "homeLatitude": 1,
   "homeLongitude": 1,
   "workAddressLines": "valor-ejemplo",
@@ -5281,6 +5306,7 @@ Content-Type: application/json
       ],
       "city": "valor-ejemplo",
       "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+      "district": "valor-ejemplo",
       "administrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
       "latitude": 1,
       "longitude": 1

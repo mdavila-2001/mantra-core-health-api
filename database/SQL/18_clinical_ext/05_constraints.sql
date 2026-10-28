@@ -16,3 +16,7 @@ REVOKE UPDATE ON "clinical_ext"."cds_rule_versions" FROM PUBLIC;
 DROP TRIGGER IF EXISTS trg_forbid_update ON "clinical_ext"."cds_rule_versions";
 CREATE TRIGGER trg_forbid_update BEFORE UPDATE ON "clinical_ext"."cds_rule_versions"
     FOR EACH ROW EXECUTE FUNCTION "integrity"."forbid_mutation"();
+
+
+-- ═══ referrals ═══
+-- CHECK concreto declarado por el modelo (CHECK_SQL).

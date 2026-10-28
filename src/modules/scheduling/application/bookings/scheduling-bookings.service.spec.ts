@@ -739,6 +739,123 @@ describe('SchedulingBookingsService', () => {
       );
     });
 
+    it('P36 · el cupo de un horario flexible tampoco se reofrece: muere con la retención', async () => {
+      const d = build();
+      const hold = {
+        bookableSlotId: SLOT_ID,
+        statusConceptId: CONCEPTS.HOLD_ACTIVE,
+      };
+      const slot = openSlot({
+        capacity: 1,
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_HELD,
+        endAt: new Date(Date.now() + 2 * IN_ONE_HOUR),
+        scheduleTemplateId: 'tpl-flexible',
+      });
+      d.bookingsRepo.findExpiredHolds.mockResolvedValue([hold]);
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-flexible',
+        flexibleHours: true,
+      });
+
+      await d.service.expireHolds(10);
+
+      // Reabrirlo publicaría un turno fijo en una agenda que el médico
+      // publicó sin turnos.
+      expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+      expect(d.catalogRepo.findTemplateById).toHaveBeenCalledWith(
+        d.tx,
+        'tpl-flexible',
+      );
+    });
+
+    it('el cupo de una plantilla de turnos fijos sí se reofrece', async () => {
+      const d = build();
+      const hold = {
+        bookableSlotId: SLOT_ID,
+        statusConceptId: CONCEPTS.HOLD_ACTIVE,
+      };
+      const slot = openSlot({
+        remainingCapacity: 0,
+        statusConceptId: CONCEPTS.SLOT_HELD,
+        scheduleTemplateId: 'tpl-fijo',
+      });
+      d.bookingsRepo.findExpiredHolds.mockResolvedValue([hold]);
+      d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-fijo',
+        flexibleHours: false,
+      });
+
+      await d.service.expireHolds(10);
+
+      expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+    });
+
+    describe('v4.2.64 · plantilla mixta: la franja del cupo se ubica por día y hora', () => {
+      // Lunes de turnos fijos y martes flexible, en la misma plantilla.
+      const mixta = [
+        {
+          scheduleTemplateId: 'tpl-mixta',
+          dayOfWeek: 1,
+          startTime: '09:00:00',
+          endTime: '11:00:00',
+          flexibleHours: false,
+        },
+        {
+          scheduleTemplateId: 'tpl-mixta',
+          dayOfWeek: 2,
+          startTime: '09:00:00',
+          endTime: '11:00:00',
+          flexibleHours: true,
+        },
+      ];
+
+      function expiring(d: ReturnType<typeof build>, startAt: string) {
+        const slot = openSlot({
+          remainingCapacity: 0,
+          statusConceptId: CONCEPTS.SLOT_HELD,
+          scheduleTemplateId: 'tpl-mixta',
+          startAt: new Date(startAt),
+          endAt: new Date(new Date(startAt).getTime() + 20 * 60_000),
+        });
+        d.bookingsRepo.findExpiredHolds.mockResolvedValue([
+          { bookableSlotId: SLOT_ID, statusConceptId: CONCEPTS.HOLD_ACTIVE },
+        ]);
+        d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-mixta',
+          resourceId: 'res-1',
+          flexibleHours: false,
+        });
+        d.catalogRepo.findRulesByTemplates.mockResolvedValue(mixta);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          timeZone: 'UTC',
+        });
+        return slot;
+      }
+
+      it('el cupo del martes (franja flexible) no se reofrece', async () => {
+        const d = build();
+        const slot = expiring(d, '2026-06-02T09:30:00Z');
+
+        await d.service.expireHolds(10);
+
+        expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+      });
+
+      it('el cupo del lunes (franja fija) sí se reofrece', async () => {
+        const d = build();
+        const slot = expiring(d, '2026-06-01T09:40:00Z');
+
+        await d.service.expireHolds(10);
+
+        expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+      });
+    });
+
     it('is a no-op when there is nothing expired', async () => {
       const d = build();
       d.bookingsRepo.findExpiredHolds.mockResolvedValue([]);
@@ -780,6 +897,34 @@ describe('SchedulingBookingsService', () => {
       expect(origin.remainingCapacity).toBe(1);
       expect(target.remainingCapacity).toBe(0);
       expect(d.bookingsRepo.recordReschedule).toHaveBeenCalled();
+    });
+
+    it('P36 · un turno de horario flexible no se reprograma: se cancela y se pide otra hora', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+        id: 'booking-1',
+        bookableSlotId: SLOT_ID,
+        statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      });
+      d.bookingsRepo.findSlotById.mockResolvedValue(
+        openSlot({ scheduleTemplateId: 'tpl-flexible' }),
+      );
+      d.catalogRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-flexible',
+        flexibleHours: true,
+      });
+
+      await expect(
+        d.service.reschedule(
+          'booking-1',
+          {
+            toSlotId: '44444444-4444-4444-4444-444444444444',
+            reasonText: REASON,
+          },
+          actor as any,
+        ),
+      ).rejects.toThrow(/horario flexible/);
+      expect(d.bookingsRepo.recordReschedule).not.toHaveBeenCalled();
     });
 
     it('rejects moving to a slot with no seats', async () => {

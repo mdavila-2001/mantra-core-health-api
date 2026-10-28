@@ -40,7 +40,10 @@ function crear(http: ReverseGeocodingHttp) {
       return Promise.resolve();
     },
   );
-  return { service, esperas, logger };
+  const avanzar = (ms: number) => {
+    reloj += ms;
+  };
+  return { service, esperas, logger, avanzar };
 }
 
 const responde =
@@ -72,6 +75,7 @@ describe('ReverseGeocodingService', () => {
       houseNumber: '3861',
       neighbourhood: 'Equipetrol',
       city: 'Santa Cruz de la Sierra',
+      adminAreas: { level3: 'Santa Cruz de la Sierra', district: 'Equipetrol' },
       attribution: OSM_ATTRIBUTION,
     });
     const [url, params, headers] = http.mock.calls[0] as unknown as [
@@ -87,6 +91,25 @@ describe('ReverseGeocodingService', () => {
       'accept-language': 'es',
     });
     expect(headers['User-Agent']).toContain('AloVida');
+    expect(params).not.toHaveProperty('email');
+  });
+
+  it('correcto: con GEOCODING_CONTACT_EMAIL, Nominatim recibe el correo de contacto', async () => {
+    const http = jest.fn(responde({ road: 'Calle 1' }));
+    const logger = { warn: jest.fn() };
+    const service = new ReverseGeocodingService(
+      logger as never,
+      { ...config, contactEmail: 'soporte@alovida.bo' },
+      http as unknown as ReverseGeocodingHttp,
+    );
+
+    await service.reverse(SCZ.lat, SCZ.lng);
+
+    const [, params] = http.mock.calls[0] as unknown as [
+      string,
+      Record<string, string>,
+    ];
+    expect(params.email).toBe('soporte@alovida.bo');
   });
 
   it('correcto: la respuesta REAL de Nominatim para la plaza 24 de Septiembre', () => {
@@ -108,7 +131,59 @@ describe('ReverseGeocodingService', () => {
       found: true,
       line: 'Calle 24 de Septiembre, Bartos',
       city: 'Santa Cruz de la Sierra',
+      countryCode: 'BO',
+      adminAreas: {
+        level1: 'Santa Cruz',
+        level2: 'Provincia Andrés Ibáñez',
+        level3: 'Santa Cruz de la Sierra',
+        district: 'Centro',
+      },
     });
+  });
+
+  it('correcto: otro país usa los mismos niveles (Argentina: provincia, departamento, ciudad, barrio)', () => {
+    // Forma de la respuesta de Nominatim para Córdoba (AR); valores sintéticos.
+    expect(
+      toResult({
+        address: {
+          road: 'Avenida Colón',
+          house_number: '500',
+          suburb: 'Centro',
+          city: 'Córdoba',
+          state_district: 'Departamento Capital',
+          state: 'Córdoba',
+          country_code: 'ar',
+        },
+      }),
+    ).toMatchObject({
+      found: true,
+      countryCode: 'AR',
+      adminAreas: {
+        level1: 'Córdoba',
+        level2: 'Departamento Capital',
+        level3: 'Córdoba',
+        district: 'Centro',
+      },
+    });
+  });
+
+  it('límite: un país que sólo informa región y pueblo deja vacíos los niveles que no conoce', () => {
+    expect(
+      toResult({
+        address: {
+          road: 'Jirón Lima',
+          region: 'Cusco',
+          town: 'Urubamba',
+          country_code: 'pe',
+        },
+      }),
+    ).toMatchObject({
+      countryCode: 'PE',
+      adminAreas: { level1: 'Cusco', level3: 'Urubamba' },
+    });
+    expect(
+      toResult({ address: { road: 'Calle 1', state: '  ' } }).adminAreas,
+    ).toBeUndefined();
   });
 
   it('límite: sin número de casa, la línea es la calle y el barrio', async () => {
@@ -125,6 +200,7 @@ describe('ReverseGeocodingService', () => {
     expect(await service.reverse(-11.03, -68.76)).toEqual({
       found: false,
       city: 'Cobija',
+      adminAreas: { level3: 'Cobija' },
       attribution: OSM_ATTRIBUTION,
     });
   });
@@ -170,13 +246,18 @@ describe('ReverseGeocodingService', () => {
 
   it('inválido: tras una caída, la cola sigue atendiendo', async () => {
     // Las dos primeras llamadas son el proveedor y su respaldo: caen las dos.
+    // Después, Nominatim queda en pausa y responde el respaldo.
     let caidas = 2;
-    const { service } = crear(() => {
+    const { service } = crear((url) => {
       if (caidas > 0) {
         caidas -= 1;
         return Promise.reject(new Error('ECONNRESET'));
       }
-      return Promise.resolve({ address: { road: 'Calle 2' } });
+      return Promise.resolve(
+        url.includes('photon')
+          ? { features: [{ properties: { street: 'Calle 2' } }] }
+          : { address: { road: 'Calle 2' } },
+      );
     });
 
     await expect(service.reverse(-17.7, -63.1)).rejects.toBeInstanceOf(
@@ -216,27 +297,26 @@ describe('ReverseGeocodingService', () => {
     expect(http).toHaveBeenCalledTimes(config.maxQueued + 1);
   });
 
-  it('inválido: un punto fuera de Bolivia no pasa la validación del cuerpo', () => {
-    const madrid = plainToInstance(ReverseGeocodingRequestDto, {
-      latitude: 40.41,
-      longitude: -3.7,
-    });
-    const scz = plainToInstance(ReverseGeocodingRequestDto, {
-      latitude: SCZ.lat,
-      longitude: SCZ.lng,
-    });
-    const texto = plainToInstance(ReverseGeocodingRequestDto, {
-      latitude: '-17',
-      longitude: '-63',
-    });
-
-    expect(
-      validateSync(madrid)
+  it('correcto/límite/inválido: el cuerpo acepta cualquier punto del planeta y nada más', () => {
+    const valida = (cuerpo: object) =>
+      validateSync(plainToInstance(ReverseGeocodingRequestDto, cuerpo))
         .map((e) => e.property)
-        .sort(),
-    ).toEqual(['latitude', 'longitude']);
-    expect(validateSync(scz)).toHaveLength(0);
-    expect(validateSync(texto).length).toBeGreaterThan(0);
+        .sort();
+
+    // Correcto: Bolivia y el exterior (antes Madrid daba 400).
+    expect(valida({ latitude: SCZ.lat, longitude: SCZ.lng })).toEqual([]);
+    expect(valida({ latitude: 40.41, longitude: -3.7 })).toEqual([]);
+    // Límite: los bordes exactos del planeta.
+    expect(valida({ latitude: -90, longitude: 180 })).toEqual([]);
+    expect(valida({ latitude: 90, longitude: -180 })).toEqual([]);
+    // Inválido: fuera del planeta o texto.
+    expect(valida({ latitude: 90.1, longitude: -180.1 })).toEqual([
+      'latitude',
+      'longitude',
+    ]);
+    expect(
+      valida({ latitude: '-17', longitude: '-63' }).length,
+    ).toBeGreaterThan(0);
   });
 
   describe('respaldo (Photon) cuando Nominatim falla', () => {
@@ -262,6 +342,7 @@ describe('ReverseGeocodingService', () => {
       const r = await service.reverse(SCZ.lat, SCZ.lng);
 
       expect(r.line).toBe('Calle 24 de Septiembre 12, Centro');
+      expect(r.adminAreas?.district).toBe('Centro');
       expect(http).toHaveBeenCalledTimes(2);
     });
 
@@ -281,6 +362,49 @@ describe('ReverseGeocodingService', () => {
         }).line,
       ).toBe('Plaza 24 de Septiembre, Centro');
       expect(photonToResult({ features: [] }).found).toBe(false);
+    });
+
+    it('correcto: tras una caída de Nominatim, los pedidos siguientes van directo al respaldo', async () => {
+      const http = jest.fn((url: string) =>
+        url.includes('photon')
+          ? Promise.resolve({
+              features: [{ properties: { street: 'Calle 1' } }],
+            })
+          : Promise.reject(new Error('Request failed with status code 403')),
+      );
+      const { service } = crear(http as unknown as ReverseGeocodingHttp);
+
+      await service.reverse(-17.7, -63.1);
+      const r = await service.reverse(-17.8, -63.2);
+
+      expect(r.line).toBe('Calle 1');
+      const urls = http.mock.calls.map(([url]) => url);
+      expect(urls.filter((u) => u.includes('nominatim'))).toHaveLength(1);
+      expect(urls.filter((u) => u.includes('photon'))).toHaveLength(2);
+    });
+
+    it('límite: pasada la pausa, se vuelve a preguntar a Nominatim', async () => {
+      let nominatimCae = true;
+      const http = jest.fn((url: string) =>
+        url.includes('photon')
+          ? Promise.resolve({
+              features: [{ properties: { street: 'Calle 1' } }],
+            })
+          : nominatimCae
+            ? Promise.reject(new Error('timeout'))
+            : Promise.resolve({ address: { road: 'Calle Nominatim' } }),
+      );
+      const { service, avanzar } = crear(
+        http as unknown as ReverseGeocodingHttp,
+      );
+
+      await service.reverse(-17.7, -63.1);
+      nominatimCae = false;
+      avanzar(config.primaryCooldownMs);
+
+      expect((await service.reverse(-17.8, -63.2)).line).toBe(
+        'Calle Nominatim',
+      );
     });
 
     it('inválido: si los dos caen, 503', async () => {

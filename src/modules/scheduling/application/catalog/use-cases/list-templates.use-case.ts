@@ -9,6 +9,7 @@ import { Injectable } from '@nestjs/common';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 import { TemplateListDto, TemplateRuleDto } from '../../../presentation/dto';
 import { modeOfConcept } from '../../../domain/catalog/catalog-concepts';
+import { isFlexibleBand } from '../../../domain/catalog/flexible-band';
 
 /** Lista las plantillas de un recurso. */
 @Injectable()
@@ -67,6 +68,11 @@ export class ListTemplatesUseCase {
     // Se agrupan en memoria porque ya vinieron todas en una consulta: volver a
     // filtrar por plantilla sería una consulta por fila.
     const byTemplate = new Map<string, TemplateRuleDto[]>();
+    const flexibleTemplates = new Set(
+      templates
+        .filter((template) => template.flexibleHours === true)
+        .map((template) => template.id),
+    );
     for (const band of bands) {
       const list = byTemplate.get(band.scheduleTemplateId) ?? [];
       list.push({
@@ -87,6 +93,10 @@ export class ListTemplatesUseCase {
           ? {}
           : { bookingMode: modeOfConcept(band.bookingModeConceptId) }),
         telemedicineEnabled: band.telemedicineEnabled === true,
+        flexibleHours: isFlexibleBand(
+          flexibleTemplates.has(band.scheduleTemplateId),
+          band,
+        ),
       });
       byTemplate.set(band.scheduleTemplateId, list);
     }
@@ -109,6 +119,7 @@ export class ListTemplatesUseCase {
         : { bookingPolicyId: template.bookingPolicyId }),
       statusConceptId: template.statusConceptId,
       retired: template.statusConceptId === CONCEPTS.TEMPLATE_RETIRED,
+      flexibleHours: template.flexibleHours === true,
     }));
 
     return { items, count: items.length };

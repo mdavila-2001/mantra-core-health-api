@@ -92,3 +92,36 @@ export function findDiagnosticUnitModality(
 ): DiagnosticUnitModality | undefined {
   return MODALITY_BY_CONCEPT_ID.get(conceptId);
 }
+
+/**
+ * Lo que mira {@link resolveDiagnosticUnitType} del alta de una unidad.
+ */
+export interface DiagnosticUnitTypeHints {
+  readonly diagnosticUnitTypeConceptId?: string;
+  readonly modalityConceptIds?: readonly string[];
+}
+
+/**
+ * El tipo de la unidad diagnóstica que nace con un alta (P51, decisión D-1).
+ *
+ * El tipo explícito siempre manda. Sin él, se infiere de las modalidades:
+ * alguna de imágenes (cualquiera distinta de `DU_MODALITY_LAB`) → unidad de
+ * imágenes; en cualquier otro caso —sólo laboratorio, sucursales, o nada— →
+ * laboratorio clínico. Antes el valor por omisión era imágenes a secas, y el
+ * alta de laboratorio que no mandaba el tipo terminaba como centro de
+ * imágenes.
+ *
+ * @param hints - Tipo y modalidades declarados.
+ * @returns El concepto `DUNIT.UNIT_TYPE_*` que corresponde.
+ */
+export function resolveDiagnosticUnitType(
+  hints: DiagnosticUnitTypeHints,
+): string {
+  if (hints.diagnosticUnitTypeConceptId !== undefined) {
+    return hints.diagnosticUnitTypeConceptId;
+  }
+  const declaresImaging = (hints.modalityConceptIds ?? []).some(
+    (conceptId) => conceptId !== DUNIT.MODALITY_LABORATORY,
+  );
+  return declaresImaging ? DUNIT.UNIT_TYPE_IMAGING : DUNIT.UNIT_TYPE_LABORATORY;
+}

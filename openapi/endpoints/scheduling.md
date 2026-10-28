@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `scheduling`
 
-Referencia exhaustiva de 64 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 66 operación(es) del módulo `scheduling`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda`
-- **Controladores:** `SchedulingAgendaController`, `SchedulingBookingsController`, `SchedulingConfirmationController`, `SchedulingController`, `SchedulingInternalController`, `SchedulingServiceOfferingsController`, `TenantAgendaController`
+- **Controladores:** `SchedulingAgendaController`, `SchedulingBookingsController`, `SchedulingConfirmationController`, `SchedulingController`, `SchedulingFlexibleController`, `SchedulingInternalController`, `SchedulingServiceOfferingsController`, `TenantAgendaController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -55,26 +55,28 @@ Referencia exhaustiva de 64 operación(es) del módulo `scheduling`, derivada de
 42. [POST /scheduling/resources/{id}/delay](#42-post-scheduling-resources-id-delay) — Informar una demora que alcanza a toda la agenda del recurso
 43. [GET /scheduling/resources/{id}/exceptions](#43-get-scheduling-resources-id-exceptions) — Listar las excepciones de disponibilidad de un recurso
 44. [POST /scheduling/resources/{id}/exceptions](#44-post-scheduling-resources-id-exceptions) — Registrar una excepción de disponibilidad
-45. [POST /scheduling/resources/{id}/shift-slots](#45-post-scheduling-resources-id-shift-slots) — Correr los cupos de una agenda N minutos
-46. [GET /scheduling/resources/{id}/slots](#46-get-scheduling-resources-id-slots) — UC-41-14: agenda publicada del recurso en una ventana
-47. [GET /scheduling/resources/{id}/templates](#47-get-scheduling-resources-id-templates) — Listar las plantillas de agenda de un recurso
-48. [POST /scheduling/resources/{id}/templates](#48-post-scheduling-resources-id-templates) — Publicar una plantilla de agenda con sus franjas
-49. [GET /scheduling/resources/{resourceId}/waitlist](#49-get-scheduling-resources-resourceid-waitlist) — Listar quiénes esperan turno en una agenda
-50. [GET /scheduling/service-availability](#50-get-scheduling-service-availability) — Horarios donde cabe un servicio
-51. [GET /scheduling/service-offerings](#51-get-scheduling-service-offerings) — Los servicios que ofrece un profesional
-52. [POST /scheduling/service-offerings](#52-post-scheduling-service-offerings) — Declarar cómo ofrezco un servicio
-53. [PATCH /scheduling/service-offerings/{id}](#53-patch-scheduling-service-offerings-id) — Editar o apagar la oferta de un servicio
-54. [POST /scheduling/service-offerings/{id}/holds](#54-post-scheduling-service-offerings-id-holds) — Retener el turno de un servicio
-55. [GET /scheduling/slots](#55-get-scheduling-slots) — Consultar los cupos de una ventana
-56. [POST /scheduling/slots/{id}/holds](#56-post-scheduling-slots-id-holds) — Reservar temporalmente un cupo del slot
-57. [DELETE /scheduling/templates/{id}](#57-delete-scheduling-templates-id) — Retirar una plantilla de agenda y soltar sus cupos libres
-58. [PATCH /scheduling/templates/{id}](#58-patch-scheduling-templates-id) — Editar una plantilla de agenda ya publicada
-59. [POST /scheduling/templates/{id}/generate-slots](#59-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
-60. [GET /scheduling/templates/{id}/live-bookings](#60-get-scheduling-templates-id-live-bookings) — Listar las citas vivas de una plantilla antes de retirarla
-61. [POST /scheduling/templates/{id}/reactivate](#61-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
-62. [GET /scheduling/waitlist](#62-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
-63. [POST /scheduling/waitlist](#63-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
-64. [GET /tenants/{tenantId}/agenda](#64-get-tenants-tenantid-agenda) — La agenda de la organización
+45. [GET /scheduling/resources/{id}/flexible-availability](#45-get-scheduling-resources-id-flexible-availability) — Horas que se pueden pedir en un horario flexible
+46. [POST /scheduling/resources/{id}/flexible-holds](#46-post-scheduling-resources-id-flexible-holds) — Retener una hora de un horario flexible
+47. [POST /scheduling/resources/{id}/shift-slots](#47-post-scheduling-resources-id-shift-slots) — Correr los cupos de una agenda N minutos
+48. [GET /scheduling/resources/{id}/slots](#48-get-scheduling-resources-id-slots) — UC-41-14: agenda publicada del recurso en una ventana
+49. [GET /scheduling/resources/{id}/templates](#49-get-scheduling-resources-id-templates) — Listar las plantillas de agenda de un recurso
+50. [POST /scheduling/resources/{id}/templates](#50-post-scheduling-resources-id-templates) — Publicar una plantilla de agenda con sus franjas
+51. [GET /scheduling/resources/{resourceId}/waitlist](#51-get-scheduling-resources-resourceid-waitlist) — Listar quiénes esperan turno en una agenda
+52. [GET /scheduling/service-availability](#52-get-scheduling-service-availability) — Horarios donde cabe un servicio
+53. [GET /scheduling/service-offerings](#53-get-scheduling-service-offerings) — Los servicios que ofrece un profesional
+54. [POST /scheduling/service-offerings](#54-post-scheduling-service-offerings) — Declarar cómo ofrezco un servicio
+55. [PATCH /scheduling/service-offerings/{id}](#55-patch-scheduling-service-offerings-id) — Editar o apagar la oferta de un servicio
+56. [POST /scheduling/service-offerings/{id}/holds](#56-post-scheduling-service-offerings-id-holds) — Retener el turno de un servicio
+57. [GET /scheduling/slots](#57-get-scheduling-slots) — Consultar los cupos de una ventana
+58. [POST /scheduling/slots/{id}/holds](#58-post-scheduling-slots-id-holds) — Reservar temporalmente un cupo del slot
+59. [DELETE /scheduling/templates/{id}](#59-delete-scheduling-templates-id) — Retirar una plantilla de agenda y soltar sus cupos libres
+60. [PATCH /scheduling/templates/{id}](#60-patch-scheduling-templates-id) — Editar una plantilla de agenda ya publicada
+61. [POST /scheduling/templates/{id}/generate-slots](#61-post-scheduling-templates-id-generate-slots) — Materializar los slots de la plantilla en una ventana
+62. [GET /scheduling/templates/{id}/live-bookings](#62-get-scheduling-templates-id-live-bookings) — Listar las citas vivas de una plantilla antes de retirarla
+63. [POST /scheduling/templates/{id}/reactivate](#63-post-scheduling-templates-id-reactivate) — Reactivar un horario retirado
+64. [GET /scheduling/waitlist](#64-get-scheduling-waitlist) — Listar las entradas de lista de espera de un paciente
+65. [POST /scheduling/waitlist](#65-post-scheduling-waitlist) — Inscribir a un paciente en la lista de espera
+66. [GET /tenants/{tenantId}/agenda](#66-get-tenants-tenantid-agenda) — La agenda de la organización
 
 ---
 
@@ -2932,6 +2934,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El horario propuesto es el que ya tiene la solicitud | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/propose-schedule.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | Sólo se opera así sobre una solicitud pendiente | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un servicio: cancele la reserva y pida otro horario. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
+| 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un turno de horario flexible: cancele la reserva y pida otra hora. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
 | 422 | `PRECONDITION_FAILED` | Transición de estado de cita no permitida | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-transition-recorder.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3480,6 +3483,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El slot destino es el mismo que el actual | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | El paciente ya tiene una cita confirmada a esa hora${             clash.resourceName ? ` en «${clash.resourceName}»` : ''           }. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/reschedule-booking.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un servicio: cancele la reserva y pida otro horario. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
+| 422 | `PRECONDITION_FAILED` | Todavía no se puede ${action} un turno de horario flexible: cancele la reserva y pida otra hora. | Excepción explícita en src/modules/scheduling/application/bookings/support/service-slot-lifecycle.ts |
 | 422 | `PRECONDITION_FAILED` | El profesional ya tiene ${who} de ${localTime(         first.startAt,         first.timeZone,       )} a ${localTime(         first.endAt,         first.timeZone,       )}${first.resourceName ? ` en «${first.resourceName}»` : ''}. No puede estar en dos lugares a la vez. | Excepción explícita en src/modules/scheduling/application/professional-time/scheduling-professional-time.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -6282,7 +6286,279 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. POST /scheduling/resources/{id}/shift-slots
+## 45. GET /scheduling/resources/{id}/flexible-availability
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling`
+- **Nombre:** Horas que se pueden pedir en un horario flexible
+- **Operation ID:** `SchedulingFlexibleController_availability`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingFlexibleController.availability](../../src/modules/scheduling/presentation/controllers/scheduling-flexible.controller.ts)
+
+### Descripción de negocio
+
+Se calculan en lectura a partir de las franjas de las plantillas flexibles de la agenda y del tiempo ocupado del profesional en todas sus sedes. No reserva nada. Una agenda sin horario flexible responde la lista vacía.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /scheduling/resources/{id}/flexible-availability` en `SchedulingFlexibleController_availability`. El controlador delega en `SchedulingFlexibleBookingService.availability`. No recibe body. El tipo de retorno estático es `Promise<FlexibleAvailabilityResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `from` | query | Sí | `string` | formato `date-time` | Sin descripción específica en OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `to` | query | Sí | `string` | formato `date-time` | Sin descripción específica en OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /scheduling/resources/00000000-0000-4000-8000-000000000001/flexible-availability?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`, `PRACTITIONER`, `CLINICIAN`, `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /scheduling/resources/00000000-0000-4000-8000-000000000001/flexible-availability?from=2026-07-31T12%3A00%3A00.000Z&to=2026-07-31T12%3A00%3A00.000Z HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<FlexibleAvailabilityResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<FlexibleAvailabilityResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<FlexibleAvailabilityResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<FlexibleAvailabilityResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<FlexibleAvailabilityResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<FlexibleAvailabilityResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<FlexibleAvailabilityResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<FlexibleAvailabilityResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FlexibleAvailabilityResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "resourceId": "00000000-0000-4000-8000-000000000001",
+  "stepMinutes": 1,
+  "items": [
+    {
+      "templateId": "00000000-0000-4000-8000-000000000001",
+      "startAt": "2026-07-31T12:00:00.000Z",
+      "endAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `resourceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `stepMinutes` | Sí | `number` | Sin restricción adicional declarada | Cada cuántos minutos se ofrece una hora. Al retener se acepta cualquier minuto dentro de la franja. | `1` |
+| `items` | Sí | `array<FlexibleStartDto>` | Sin restricción adicional declarada | Horas libres, ordenadas. Vacío si la agenda no tiene horario flexible publicado o no queda lugar. | `[{"templateId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].templateId` | Sí | `string` | formato `uuid` | Plantilla flexible que la ofrece | `00000000-0000-4000-8000-000000000001` |
+| `items[].startAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].endAt` | Sí | `string` | formato `date-time` | Hasta cuándo se reserva: inicio más el tiempo por paciente | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 404 | `NOT_FOUND` | Agenda no encontrada | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | La ventana debe empezar antes de terminar. | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Se pueden mirar hasta ${MAX_QUERY_DAYS} días de una vez. | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/resources/{id}/flexible-availability"
+}
+```
+
+---
+
+## 46. POST /scheduling/resources/{id}/flexible-holds
+
+- **Módulo:** `scheduling`
+- **Etiqueta OpenAPI:** `scheduling`
+- **Nombre:** Retener una hora de un horario flexible
+- **Operation ID:** `SchedulingFlexibleController_placeHold`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SchedulingFlexibleController.placeHold](../../src/modules/scheduling/presentation/controllers/scheduling-flexible.controller.ts)
+
+### Descripción de negocio
+
+Crea el cupo de la hora pedida, con el tiempo por paciente de la plantilla, y lo retiene bajo el candado del profesional. 409 si la hora ya no está libre; 422 si no cae en una franja flexible o ya pasó. Se confirma con POST /scheduling/holds/{token}/confirm o /request.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /scheduling/resources/{id}/flexible-holds` en `SchedulingFlexibleController_placeHold`. El controlador delega en `SchedulingFlexibleBookingService.placeHold`. Valida el body como `CreateFlexibleHoldDto` y consume `application/json`. El tipo de retorno estático es `Promise<FlexibleHoldResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateFlexibleHoldDto`; los campos opcionales se omiten.
+
+```http
+POST /scheduling/resources/00000000-0000-4000-8000-000000000001/flexible-holds HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "startAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PATIENT`, `SCHEDULING_ADMIN`, `SCHEDULING_AGENT`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `startAt` | Sí | `string` | formato `date-time` | La hora que pidió el paciente, en un minuto entero, dentro de una franja flexible | `2026-07-31T12:00:00.000Z` |
+| `patientProfileId` | No | `string` | formato `uuid` | Paciente para el que se reserva | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /scheduling/resources/00000000-0000-4000-8000-000000000001/flexible-holds HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "startAt": "2026-07-31T12:00:00.000Z",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<FlexibleHoldResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<FlexibleHoldResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<FlexibleHoldResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<FlexibleHoldResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<FlexibleHoldResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<FlexibleHoldResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<FlexibleHoldResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<FlexibleHoldResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<FlexibleHoldResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<FlexibleHoldResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FlexibleHoldResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FlexibleHoldResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "holdToken": "valor-ejemplo",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "bookableSlotId": "00000000-0000-4000-8000-000000000001",
+  "startAt": "2026-07-31T12:00:00.000Z",
+  "endAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `holdToken` | Sí | `string` | Sin restricción adicional declarada | Token con el que se confirma o solicita la reserva. Se entrega una sola vez. | `valor-ejemplo` |
+| `expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `bookableSlotId` | Sí | `string` | formato `uuid` | El cupo que nació para este turno | `00000000-0000-4000-8000-000000000001` |
+| `startAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `endAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La agenda indicada pertenece a otra organización. | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 404 | `NOT_FOUND` | Agenda no encontrada | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 409 | `CONFLICT` | Esa hora ya no está disponible. Elija otra. | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 409 | `CONFLICT` | El paciente alcanzó el máximo de citas activas | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La hora pedida tiene que caer en un minuto entero. | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Ese horario ya pasó. | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa hora no está dentro del horario que atiende este profesional. | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | verdict === 'pendiente'         ? 'Su vínculo con esta organización todavía está pendiente de aprobación.'         : 'Su vínculo con esta organización ya no está vigente.' | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa cita empieza demasiado pronto: hay que pedirla con al menos ${notice} minutos de anticipación. | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 422 | `PRECONDITION_FAILED` | Sólo se puede pedir con hasta ${advance} días de anticipación. | Excepción explícita en src/modules/scheduling/application/flexible/scheduling-flexible-booking.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/scheduling/resources/{id}/flexible-holds"
+}
+```
+
+---
+
+## 47. POST /scheduling/resources/{id}/shift-slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6425,7 +6701,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /scheduling/resources/{id}/slots
+## 48. GET /scheduling/resources/{id}/slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6574,7 +6850,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. GET /scheduling/resources/{id}/templates
+## 49. GET /scheduling/resources/{id}/templates
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6720,7 +6996,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. POST /scheduling/resources/{id}/templates
+## 50. POST /scheduling/resources/{id}/templates
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -6778,7 +7054,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
-| `rules` | Sí | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS","telemedicineEnabled":false}]` |
+| `rules` | Sí | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS","telemedicineEnabled":false,"flexibleHours":false}]` |
 | `rules[].dayOfWeek` | Sí | `number` | mínimo 0; máximo 6 | 0 = domingo … 6 = sábado | `1` |
 | `rules[].startTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de inicio HH:MM:SS | `08:00:00` |
 | `rules[].endTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de fin HH:MM:SS | `12:00:00` |
@@ -6787,10 +7063,12 @@ Content-Type: application/json
 | `rules[].gapMinutes` | No | `number` | mínimo 0 | Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0 | `1` |
 | `rules[].bookingMode` | No | `string` | valores: `CONSULTATIONS`, `SERVICES`, `MIXED` | Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS | `CONSULTATIONS` |
 | `rules[].telemedicineEnabled` | No | `boolean` | Sin restricción adicional declarada | La franja atiende también por telemedicina. Ausente ≡ false (sólo presencial) | `false` |
+| `rules[].flexibleHours` | No | `boolean` | Sin restricción adicional declarada | Horario flexible de esta franja: sin turnos fijos, el paciente elige la hora. No admite slotMinutes, capacityPerSlot ni gapMinutes. Ausente ≡ false | `false` |
 | `slotMinutes` | No | `number` | Sin restricción adicional declarada | Duración por defecto del slot, en minutos | `30` |
 | `bookingPolicyId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
 | `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `flexibleHours` | No | `boolean` | Sin restricción adicional declarada | Horario flexible: sin turnos fijos, el paciente elige la hora dentro de la franja. slotMinutes es lo que se reserva por paciente. Ausente ≡ false | `false` |
 
 ### Payload completo de ejemplo
 
@@ -6813,13 +7091,15 @@ Content-Type: application/json
       "capacityPerSlot": 1,
       "gapMinutes": 1,
       "bookingMode": "CONSULTATIONS",
-      "telemedicineEnabled": false
+      "telemedicineEnabled": false,
+      "flexibleHours": false
     }
   ],
   "slotMinutes": 30,
   "bookingPolicyId": "00000000-0000-4000-8000-000000000001",
   "validFrom": "2026-07-31T12:00:00.000Z",
-  "validTo": "2026-07-31T12:00:00.000Z"
+  "validTo": "2026-07-31T12:00:00.000Z",
+  "flexibleHours": false
 }
 ```
 
@@ -6846,6 +7126,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "name": "Nombre de ejemplo",
   "ruleCount": 1,
+  "flexibleHours": true,
   "statusConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -6857,6 +7138,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
 | `ruleCount` | Sí | `number` | Sin restricción adicional declarada | Franjas creadas | `1` |
+| `flexibleHours` | Sí | `boolean` | Sin restricción adicional declarada | true cuando el horario es flexible, sin turnos fijos | `true` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -6891,7 +7173,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. GET /scheduling/resources/{resourceId}/waitlist
+## 51. GET /scheduling/resources/{resourceId}/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7025,7 +7307,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. GET /scheduling/service-availability
+## 52. GET /scheduling/service-availability
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7152,7 +7434,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. GET /scheduling/service-offerings
+## 53. GET /scheduling/service-offerings
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7291,7 +7573,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. POST /scheduling/service-offerings
+## 54. POST /scheduling/service-offerings
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7462,7 +7744,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. PATCH /scheduling/service-offerings/{id}
+## 55. PATCH /scheduling/service-offerings/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7627,7 +7909,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. POST /scheduling/service-offerings/{id}/holds
+## 56. POST /scheduling/service-offerings/{id}/holds
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -7775,7 +8057,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. GET /scheduling/slots
+## 57. GET /scheduling/slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-agenda`
@@ -7915,7 +8197,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. POST /scheduling/slots/{id}/holds
+## 58. POST /scheduling/slots/{id}/holds
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8049,7 +8331,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. DELETE /scheduling/templates/{id}
+## 59. DELETE /scheduling/templates/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8185,7 +8467,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 58. PATCH /scheduling/templates/{id}
+## 60. PATCH /scheduling/templates/{id}
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8235,7 +8517,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `name` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
-| `rules` | No | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla. Si viene, reemplaza TODAS las existentes. | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS","telemedicineEnabled":false}]` |
+| `rules` | No | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla. Si viene, reemplaza TODAS las existentes. | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS","telemedicineEnabled":false,"flexibleHours":false}]` |
 | `rules[].dayOfWeek` | No | `number` | mínimo 0; máximo 6 | 0 = domingo … 6 = sábado | `1` |
 | `rules[].startTime` | No | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de inicio HH:MM:SS | `08:00:00` |
 | `rules[].endTime` | No | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de fin HH:MM:SS | `12:00:00` |
@@ -8244,6 +8526,7 @@ Content-Type: application/json
 | `rules[].gapMinutes` | No | `number` | mínimo 0 | Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0 | `1` |
 | `rules[].bookingMode` | No | `string` | valores: `CONSULTATIONS`, `SERVICES`, `MIXED` | Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS | `CONSULTATIONS` |
 | `rules[].telemedicineEnabled` | No | `boolean` | Sin restricción adicional declarada | La franja atiende también por telemedicina. Ausente ≡ false (sólo presencial) | `false` |
+| `rules[].flexibleHours` | No | `boolean` | Sin restricción adicional declarada | Horario flexible de esta franja: sin turnos fijos, el paciente elige la hora. No admite slotMinutes, capacityPerSlot ni gapMinutes. Ausente ≡ false | `false` |
 | `slotMinutes` | No | `number` | Sin restricción adicional declarada | Duración por defecto del slot, en minutos | `1` |
 | `bookingPolicyId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
@@ -8270,7 +8553,8 @@ Content-Type: application/json
       "capacityPerSlot": 1,
       "gapMinutes": 1,
       "bookingMode": "CONSULTATIONS",
-      "telemedicineEnabled": false
+      "telemedicineEnabled": false,
+      "flexibleHours": false
     }
   ],
   "slotMinutes": 1,
@@ -8303,6 +8587,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "id": "00000000-0000-4000-8000-000000000001",
   "name": "Nombre de ejemplo",
   "ruleCount": 1,
+  "flexibleHours": true,
   "statusConceptId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -8314,6 +8599,7 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `name` | Sí | `string` | Sin restricción adicional declarada | Valor de name mantenido por la instancia. | `Nombre de ejemplo` |
 | `ruleCount` | Sí | `number` | Sin restricción adicional declarada | Franjas creadas | `1` |
+| `flexibleHours` | Sí | `boolean` | Sin restricción adicional declarada | true cuando el horario es flexible, sin turnos fijos | `true` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
@@ -8347,7 +8633,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 59. POST /scheduling/templates/{id}/generate-slots
+## 61. POST /scheduling/templates/{id}/generate-slots
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8483,7 +8769,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 60. GET /scheduling/templates/{id}/live-bookings
+## 62. GET /scheduling/templates/{id}/live-bookings
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8627,7 +8913,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 61. POST /scheduling/templates/{id}/reactivate
+## 63. POST /scheduling/templates/{id}/reactivate
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8744,7 +9030,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 62. GET /scheduling/waitlist
+## 64. GET /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -8876,7 +9162,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 63. POST /scheduling/waitlist
+## 65. POST /scheduling/waitlist
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling`
@@ -9012,7 +9298,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 64. GET /tenants/{tenantId}/agenda
+## 66. GET /tenants/{tenantId}/agenda
 
 - **Módulo:** `scheduling`
 - **Etiqueta OpenAPI:** `scheduling-tenant-agenda`

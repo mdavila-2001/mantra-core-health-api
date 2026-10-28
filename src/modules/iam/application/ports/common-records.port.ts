@@ -5,6 +5,8 @@ export interface PersonAddressInput {
   readonly personId: string;
   readonly municipalityConceptId?: string;
   readonly lines?: string;
+  /** Distrito o zona, como texto (ADR-0028). */
+  readonly district?: string;
   readonly latitude?: number;
   readonly longitude?: number;
   readonly actorUserId: string;

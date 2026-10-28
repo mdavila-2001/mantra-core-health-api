@@ -205,10 +205,12 @@ export class AvailabilityProductDto {
   medication!: InventoryConceptDto | null;
 
   /**
-   * Disponible en la sede (suma de sus ubicaciones).
+   * Disponible en la sede: la suma de sus ubicaciones si la sede lleva
+   * inventario por lotes, o el conteo declarado en el catálogo si no. `null`
+   * cuando la sede no lleva lotes y la farmacia declaró «hay» sin conteo.
    */
-  @ApiProperty()
-  availableQuantity!: number;
+  @ApiProperty({ type: Number, nullable: true })
+  availableQuantity!: number | null;
 
   /**
    * Precio público vigente en esa sede, si hay uno publicado.
