@@ -846,6 +846,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
+    {
+      display: 'Colegio profesional',
+      definition:
+        'Registro en el colegio de la profesión (Colegio Médico, de Odontólogos, etc.). Se suma a la matrícula y al SEDES, no los reemplaza.',
+    },
+  ],
+  [
     PROF.AUTH_PENDING,
     {
       display: 'Habilitación pendiente',

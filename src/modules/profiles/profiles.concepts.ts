@@ -132,6 +132,14 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       code: 'JURISDICTION_SEDES_PANDO',
       display: 'SEDES — Gobierno Autónomo Departamental de Pando',
     },
+    // El registro en el colegio de la profesión (Colegio Médico, de
+    // Odontólogos…): la tercera habilitación del alta. No es territorial, pero
+    // vive en la misma tabla que las otras dos para que el perfil las muestre
+    // juntas; el nombre del colegio va en `regulatory_authority`.
+    JURISDICTION_PROFESSIONAL_COLLEGE: {
+      code: 'JURISDICTION_PROFESSIONAL_COLLEGE',
+      display: 'Professional college registration',
+    },
     AUTH_PENDING: { code: 'AUTH_PENDING', display: 'Authorization pending' },
     AUTH_ACTIVE: { code: 'AUTH_ACTIVE', display: 'Authorization active' },
     AUTH_EXPIRED: { code: 'AUTH_EXPIRED', display: 'Authorization expired' },

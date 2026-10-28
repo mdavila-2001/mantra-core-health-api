@@ -467,6 +467,233 @@ describe('IamPractitionerSelfRegistrationService', () => {
     expect(d.professionalCredentialsRepo.create).not.toHaveBeenCalled();
   });
 
+  describe('los respaldos de la matrícula y del SEDES (P29)', () => {
+    const base = () => ({
+      ...PROFESSIONAL_IDENTITY,
+      email: dto.email,
+      password: dto.password,
+      licenseNumber: dto.licenseNumber,
+    });
+
+    it('reclama el PDF de la matrícula y lo deja en su fila', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...base(),
+        licenseFileId: 'file-license-1',
+      });
+
+      expect(d.attachableFileService.claimAnonymousUpload).toHaveBeenCalledWith(
+        d.tx,
+        'file-license-1',
+        { tenantId: SEED.tenantId, ownerUserId: 'user-1' },
+        expect.objectContaining({
+          allowedMimeTypes: ['application/pdf'],
+          allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+          operation: 'iam.practitioner.self-register.license',
+        }),
+        expect.objectContaining({ subject: 'La matrícula profesional' }),
+      );
+      expect(d.authorizationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          jurisdictionConceptId: PROF.JURISDICTION_NATIONAL,
+          licenseNumber: dto.licenseNumber,
+          fileId: 'file-license-1',
+          stateConceptId: PROF.AUTH_PENDING,
+        }),
+      );
+    });
+
+    it('cada habilitación se lleva SU archivo, no el de la otra', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...base(),
+        licenseFileId: 'file-license-1',
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseFileId: 'file-sedes-1',
+      });
+
+      const filas: Record<string, unknown>[] =
+        d.authorizationsRepo.create.mock.calls.map(
+          (call: unknown[]) => call[1] as Record<string, unknown>,
+        );
+      expect(
+        filas.map((fila) => [fila.jurisdictionConceptId, fila.fileId]),
+      ).toEqual([
+        [PROF.JURISDICTION_NATIONAL, 'file-license-1'],
+        [PROF.JURISDICTION_SEDES_SANTA_CRUZ, 'file-sedes-1'],
+      ]);
+    });
+
+    it('sin archivo la matrícula nace sin respaldo y no reclama nada', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner(base());
+
+      expect(d.authorizationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ fileId: undefined }),
+      );
+      expect(
+        d.attachableFileService.claimAnonymousUpload,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('si el PDF no se puede reclamar, la matrícula no nace', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockRejectedValue(
+        new PreconditionFailedException('El documento ya fue reclamado'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({
+          ...base(),
+          licenseFileId: 'file-ajeno',
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el archivo del SEDES sin su número se rechaza antes de escribir nada', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          ...base(),
+          sedesLicenseFileId: 'file-sedes-1',
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+      expect(
+        d.attachableFileService.claimAnonymousUpload,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('cada habilitación lleva SU fecha de inscripción', async () => {
+      const d = build();
+
+      await d.service.registerPractitioner({
+        ...base(),
+        licenseIssueDate: '2015-03-02',
+        sedesLicenseNumber: 'T.I. 538/14',
+        sedesLicenseIssueDate: '2016-07-11',
+        collegeLicenseNumber: 'CMB-4410',
+        collegeLicenseIssueDate: '2015-09-20',
+      });
+
+      const filas: Record<string, unknown>[] =
+        d.authorizationsRepo.create.mock.calls.map(
+          (call: unknown[]) => call[1] as Record<string, unknown>,
+        );
+      expect(
+        filas.map((fila) => [
+          fila.jurisdictionConceptId,
+          (fila.validFrom as Date | undefined)?.toISOString().slice(0, 10),
+        ]),
+      ).toEqual([
+        [PROF.JURISDICTION_NATIONAL, '2015-03-02'],
+        [PROF.JURISDICTION_SEDES_SANTA_CRUZ, '2016-07-11'],
+        [PROF.JURISDICTION_PROFESSIONAL_COLLEGE, '2015-09-20'],
+      ]);
+    });
+
+    it('el registro del colegio nace como tercera habilitación, con su colegio y su archivo', async () => {
+      const d = build();
+
+      const respuesta = await d.service.registerPractitioner({
+        ...base(),
+        collegeLicenseNumber: 'CMB-4410',
+        collegeName: 'Colegio Médico de Bolivia',
+        collegeLicenseFileId: 'file-college-1',
+      });
+
+      expect(d.attachableFileService.claimAnonymousUpload).toHaveBeenCalledWith(
+        d.tx,
+        'file-college-1',
+        { tenantId: SEED.tenantId, ownerUserId: 'user-1' },
+        expect.anything(),
+        expect.objectContaining({ subject: 'El registro del colegio' }),
+      );
+      expect(d.authorizationsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          jurisdictionConceptId: PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
+          licenseNumber: 'CMB-4410',
+          regulatoryAuthority: 'Colegio Médico de Bolivia',
+          fileId: 'file-college-1',
+          stateConceptId: PROF.AUTH_PENDING,
+        }),
+      );
+      expect(respuesta).toHaveProperty('collegeLicenseId');
+    });
+
+    it('sin número del colegio no nace su fila ni viaja su id', async () => {
+      const d = build();
+
+      const respuesta = await d.service.registerPractitioner(base());
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          jurisdictionConceptId: PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
+        }),
+      );
+      expect(respuesta).not.toHaveProperty('collegeLicenseId');
+    });
+
+    it.each([
+      ['sedesLicenseIssueDate', { sedesLicenseIssueDate: '2016-07-11' }],
+      ['collegeName', { collegeName: 'Colegio Médico de Bolivia' }],
+      ['collegeLicenseIssueDate', { collegeLicenseIssueDate: '2015-09-20' }],
+      ['collegeLicenseFileId', { collegeLicenseFileId: 'file-college-1' }],
+    ])(
+      '%s sin el número de su habilitación se rechaza antes de escribir nada',
+      async (_campo, extra) => {
+        const d = build();
+
+        await expect(
+          d.service.registerPractitioner({ ...base(), ...extra }),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+        expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+      },
+    );
+
+    it('el colegio no comparte archivo con la matrícula ni con el SEDES', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          ...base(),
+          licenseFileId: 'file-1',
+          collegeLicenseNumber: 'CMB-4410',
+          collegeLicenseFileId: 'file-1',
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un mismo archivo no respalda las dos habilitaciones', async () => {
+      const d = build();
+
+      await expect(
+        d.service.registerPractitioner({
+          ...base(),
+          licenseFileId: 'file-1',
+          sedesLicenseNumber: 'T.I. 538/14',
+          sedesLicenseFileId: 'file-1',
+        }),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+      expect(d.authorizationsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
   it('still creates the degree credential when a real credential number is sent', async () => {
     const d = build();
 

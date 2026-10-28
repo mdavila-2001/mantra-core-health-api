@@ -1471,6 +1471,13 @@ Content-Type: application/json
 | `sedesLicenseNumber` | No | `string` | longitud mínima 1; longitud máxima 100 | Número de registro del SEDES departamental | `T.I. 538/14` |
 | `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad reguladora que emitió la licencia | `valor-ejemplo` |
 | `licenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción de la matrícula (ISO) | `2026-07-31` |
+| `licenseFileId` | No | `string` | formato `uuid` | fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
+| `sedesLicenseFileId` | No | `string` | formato `uuid` | fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
+| `sedesLicenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción en el SEDES (ISO) | `2026-07-31` |
+| `collegeLicenseNumber` | No | `string` | longitud mínima 1; longitud máxima 100 | Número de registro en el colegio profesional | `CMB-12345` |
+| `collegeName` | No | `string` | longitud máxima 200 | Colegio profesional que emitió el registro | `Colegio Médico de Bolivia` |
+| `collegeLicenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción en el colegio profesional (ISO) | `2026-07-31` |
+| `collegeLicenseFileId` | No | `string` | formato `uuid` | fileId del PDF del registro del colegio subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
 | `professionalTitle` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `specialtyConceptIds` | No | `array<string>` | formato `uuid`; máximo 4 elemento(s) | Especialidades declaradas (una principal y hasta tres adicionales). | `["00000000-0000-4000-8000-000000000001"]` |
 | `nationalId` | Sí | `string` | longitud máxima 40; patrón runtime `/^[A-Za-z0-9.-]+$/` | Documento de identidad obligatorio; se guarda como identificador oficial | `00000000-0000-4000-8000-000000000001` |
@@ -1548,6 +1555,13 @@ Content-Type: application/json
   "sedesLicenseNumber": "T.I. 538/14",
   "regulatoryAuthority": "valor-ejemplo",
   "licenseIssueDate": "2026-07-31",
+  "licenseFileId": "00000000-0000-4000-8000-000000000001",
+  "sedesLicenseFileId": "00000000-0000-4000-8000-000000000001",
+  "sedesLicenseIssueDate": "2026-07-31",
+  "collegeLicenseNumber": "CMB-12345",
+  "collegeName": "Colegio Médico de Bolivia",
+  "collegeLicenseIssueDate": "2026-07-31",
+  "collegeLicenseFileId": "00000000-0000-4000-8000-000000000001",
   "professionalTitle": "valor-ejemplo",
   "specialtyConceptIds": [
     "00000000-0000-4000-8000-000000000001"
@@ -1636,6 +1650,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "licenseId": "00000000-0000-4000-8000-000000000001",
   "credentialId": "00000000-0000-4000-8000-000000000001",
   "sedesLicenseId": "00000000-0000-4000-8000-000000000001",
+  "collegeLicenseId": "00000000-0000-4000-8000-000000000001",
   "verificationStatus": "PENDING",
   "emailVerificationSent": true,
   "photoFileId": "00000000-0000-4000-8000-000000000001",
@@ -1656,6 +1671,7 @@ Campos de la respuesta:
 | `licenseId` | Sí | `string` | formato `uuid` | Licencia registrada, pendiente de verificación por la plataforma. | `00000000-0000-4000-8000-000000000001` |
 | `credentialId` | No | `string` | formato `uuid` | Credencial profesional creada, pendiente de verificación. Se devuelve porque `POST /profiles/credentials/{credentialId}/verify` —el acto que habilita al profesional a ejercer— la exige por id, y no había ninguna otra forma de obtenerla: el alta no la devolvía y `profiles` no expone ningún listado de credenciales. La verificación quedaba fuera de alcance salvo consultando la base de datos a mano. Ausente cuando el alta no declara `credentialNumber`, que dejó de ser obligatorio: sin credencial no hay id que devolver. | `00000000-0000-4000-8000-000000000001` |
 | `sedesLicenseId` | No | `string` | formato `uuid` | Autorización del SEDES creada, pendiente de verificación. El equivalente de para la habilitación departamental: se devuelve para poder verificarla por id sin consultar la base. Ausente cuando el alta no declara `sedesLicenseNumber`. | `00000000-0000-4000-8000-000000000001` |
+| `collegeLicenseId` | No | `string` | formato `uuid` | Registro del colegio profesional creado, pendiente de verificación. Ausente cuando el alta no declara `collegeLicenseNumber`. | `00000000-0000-4000-8000-000000000001` |
 | `verificationStatus` | Sí | `string` | Sin restricción adicional declarada | Estado de verificación del perfil al terminar el alta. Siempre PENDING: registrarse no habilita a ejercer. | `PENDING` |
 | `emailVerificationSent` | Sí | `boolean` | Sin restricción adicional declarada | Si se pudo encolar el correo de verificación. | `true` |
 | `photoFileId` | No | `string` | formato `uuid` | Identificador del archivo de foto de perfil (FK → common.files), si se subió. | `00000000-0000-4000-8000-000000000001` |
@@ -1674,6 +1690,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo del registro del SEDES necesita su número de registro | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La matrícula y el registro del SEDES no pueden compartir el mismo archivo | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La fecha del registro del SEDES necesita su número de registro | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los datos del registro del colegio necesitan su número de registro | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El registro del colegio no puede compartir el archivo de otra habilitación | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | La firma y el sello requieren una imagen privada de hasta 2 MB | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
@@ -5125,6 +5146,13 @@ Content-Type: application/json
 | `sedesLicenseNumber` | No | `string` | longitud máxima 100 | Número de registro del SEDES departamental | `T.I. 538/14` |
 | `regulatoryAuthority` | No | `string` | longitud máxima 200 | Autoridad reguladora que emitió la licencia | `valor-ejemplo` |
 | `licenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción de la matrícula (ISO) | `2026-07-31` |
+| `licenseFileId` | No | `string` | formato `uuid` | fileId del PDF de la matrícula subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
+| `sedesLicenseFileId` | No | `string` | formato `uuid` | fileId del PDF del registro del SEDES subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
+| `sedesLicenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción en el SEDES (ISO) | `2026-07-31` |
+| `collegeLicenseNumber` | No | `string` | longitud máxima 100 | Número de registro en el colegio profesional | `CMB-12345` |
+| `collegeName` | No | `string` | longitud máxima 200 | Colegio profesional que emitió el registro | `Colegio Médico de Bolivia` |
+| `collegeLicenseIssueDate` | No | `string` | formato `date` | Fecha de inscripción en el colegio profesional (ISO) | `2026-07-31` |
+| `collegeLicenseFileId` | No | `string` | formato `uuid` | fileId del PDF del registro del colegio subido por POST /iam/auth/upload-registration-document | `00000000-0000-4000-8000-000000000001` |
 | `professionalTitle` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `specialtyConceptIds` | No | `array<string>` | máximo 4 elemento(s) | Especialidades declaradas (una principal y hasta tres adicionales). | `["00000000-0000-4000-8000-000000000001"]` |
 | `nationalId` | Sí | `string` | longitud máxima 40 | Documento de identidad obligatorio; se guarda como identificador oficial | `00000000-0000-4000-8000-000000000001` |
@@ -5204,6 +5232,13 @@ Content-Type: application/json
   "sedesLicenseNumber": "T.I. 538/14",
   "regulatoryAuthority": "valor-ejemplo",
   "licenseIssueDate": "2026-07-31",
+  "licenseFileId": "00000000-0000-4000-8000-000000000001",
+  "sedesLicenseFileId": "00000000-0000-4000-8000-000000000001",
+  "sedesLicenseIssueDate": "2026-07-31",
+  "collegeLicenseNumber": "CMB-12345",
+  "collegeName": "Colegio Médico de Bolivia",
+  "collegeLicenseIssueDate": "2026-07-31",
+  "collegeLicenseFileId": "00000000-0000-4000-8000-000000000001",
   "professionalTitle": "valor-ejemplo",
   "specialtyConceptIds": [
     "00000000-0000-4000-8000-000000000001"
@@ -5321,6 +5356,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 409 | `CONFLICT` | El practitioner_code ya está en uso | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El archivo del registro del SEDES necesita su número de registro | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La matrícula y el registro del SEDES no pueden compartir el mismo archivo | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | La fecha del registro del SEDES necesita su número de registro | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | Los datos del registro del colegio necesitan su número de registro | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
+| 422 | `PRECONDITION_FAILED` | El registro del colegio no puede compartir el archivo de otra habilitación | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | La foto de perfil no es una imagen válida | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | La firma y el sello requieren una imagen privada de hasta 2 MB | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
 | 422 | `PRECONDITION_FAILED` | Ese concepto no es un tipo de credencial profesional | Excepción explícita en src/modules/iam/application/services/iam-practitioner-self-registration.service.ts |
