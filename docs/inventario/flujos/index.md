@@ -2,9 +2,9 @@
 
 # Inventario de flujos
 
-**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1574 árboles de decisión**.
+**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1582 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1418 · sin ellas: 156
+- Operaciones con decisiones propias: 1426 · sin ellas: 156
 - Operaciones sin proceso asignado: 0
 - Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 32 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
 
@@ -39,13 +39,13 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `education` | 1 | 14 | 0 | [education.md](education.md) |
 | `erp` | 1 | 17 | 0 | [erp.md](erp.md) |
 | `forms` | 1 | 25 | 0 | [forms.md](forms.md) |
-| `geo` | 1 | 10 | 0 | [geo.md](geo.md) |
+| `geo` | 1 | 11 | 0 | [geo.md](geo.md) |
 | `graph_intelligence` | 1 | 15 | 1 | [graph_intelligence.md](graph_intelligence.md) |
 | `health_context` | 1 | 13 | 0 | [health_context.md](health_context.md) |
 | `health_data` | 1 | 16 | 0 | [health_data.md](health_data.md) |
-| `iam` | 1 | 39 | 0 | [iam.md](iam.md) |
+| `iam` | 1 | 40 | 0 | [iam.md](iam.md) |
 | `identity_assurance` | 1 | 28 | 0 | [identity_assurance.md](identity_assurance.md) |
-| `insurance` | 1 | 71 | 1 | [insurance.md](insurance.md) |
+| `insurance` | 1 | 72 | 1 | [insurance.md](insurance.md) |
 | `integration_contracts` | 1 | 12 | 0 | [integration_contracts.md](integration_contracts.md) |
 | `integrations` | 1 | 15 | 0 | [integrations.md](integrations.md) |
 | `lakehouse` | 1 | 13 | 0 | [lakehouse.md](lakehouse.md) |
@@ -73,7 +73,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `read_models` | 1 | 15 | 0 | [read_models.md](read_models.md) |
 | `redis_runtime` | 1 | 6 | 0 | [redis_runtime.md](redis_runtime.md) |
 | `reporting` | 1 | 12 | 0 | [reporting.md](reporting.md) |
-| `scheduling` | 2 | 59 | 1 | [scheduling.md](scheduling.md) |
+| `scheduling` | 2 | 64 | 1 | [scheduling.md](scheduling.md) |
 | `search_platform` | 1 | 4 | 0 | [search_platform.md](search_platform.md) |
 | `surveys` | 1 | 17 | 0 | [surveys.md](surveys.md) |
 | `system_context` | 1 | 13 | 0 | [system_context.md](system_context.md) |
