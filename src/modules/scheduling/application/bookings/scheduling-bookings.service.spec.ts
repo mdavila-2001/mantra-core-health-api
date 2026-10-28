@@ -4361,6 +4361,23 @@ describe('SchedulingBookingsService · el estado de pago', () => {
       service.getPaymentState(BOOKING, actor as any),
     ).resolves.toBeNull();
   });
+
+  it('la lectura carga la cita dentro de una transacción (lleva FOR UPDATE)', async () => {
+    // Fuera de una transacción MikroORM rechaza el bloqueo y la ruta
+    // respondía 500 siempre.
+    const { service, bookingsRepo, tx } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      bookingAt(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    await service.getPaymentState(BOOKING, actor as any);
+
+    expect(bookingsRepo.findBookingByIdForUpdate).toHaveBeenCalledWith(
+      tx,
+      BOOKING,
+    );
+    expect(bookingsRepo.findPaymentState).toHaveBeenCalledWith(tx, BOOKING);
+  });
 });
 
 describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', () => {
