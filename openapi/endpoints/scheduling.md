@@ -6310,7 +6310,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
-| `rules` | Sí | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS","telemedicineEnabled":false}]` |
+| `rules` | Sí | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS","telemedicineEnabled":false,"flexibleHours":false}]` |
 | `rules[].dayOfWeek` | Sí | `number` | mínimo 0; máximo 6 | 0 = domingo … 6 = sábado | `1` |
 | `rules[].startTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de inicio HH:MM:SS | `08:00:00` |
 | `rules[].endTime` | Sí | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de fin HH:MM:SS | `12:00:00` |
@@ -6319,6 +6319,7 @@ Content-Type: application/json
 | `rules[].gapMinutes` | No | `number` | mínimo 0 | Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0 | `1` |
 | `rules[].bookingMode` | No | `string` | valores: `CONSULTATIONS`, `SERVICES`, `MIXED` | Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS | `CONSULTATIONS` |
 | `rules[].telemedicineEnabled` | No | `boolean` | Sin restricción adicional declarada | La franja atiende también por telemedicina. Ausente ≡ false (sólo presencial) | `false` |
+| `rules[].flexibleHours` | No | `boolean` | Sin restricción adicional declarada | Horario flexible de esta franja: sin turnos fijos, el paciente elige la hora. No admite slotMinutes, capacityPerSlot ni gapMinutes. Ausente ≡ false | `false` |
 | `slotMinutes` | No | `number` | Sin restricción adicional declarada | Duración por defecto del slot, en minutos | `30` |
 | `bookingPolicyId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
@@ -6346,7 +6347,8 @@ Content-Type: application/json
       "capacityPerSlot": 1,
       "gapMinutes": 1,
       "bookingMode": "CONSULTATIONS",
-      "telemedicineEnabled": false
+      "telemedicineEnabled": false,
+      "flexibleHours": false
     }
   ],
   "slotMinutes": 30,
@@ -7771,7 +7773,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `name` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
-| `rules` | No | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla. Si viene, reemplaza TODAS las existentes. | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS","telemedicineEnabled":false}]` |
+| `rules` | No | `array<ScheduleRuleDto>` | Sin restricción adicional declarada | Franjas semanales de la plantilla. Si viene, reemplaza TODAS las existentes. | `[{"dayOfWeek":1,"startTime":"08:00:00","endTime":"12:00:00","slotMinutes":5,"capacityPerSlot":1,"gapMinutes":1,"bookingMode":"CONSULTATIONS","telemedicineEnabled":false,"flexibleHours":false}]` |
 | `rules[].dayOfWeek` | No | `number` | mínimo 0; máximo 6 | 0 = domingo … 6 = sábado | `1` |
 | `rules[].startTime` | No | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de inicio HH:MM:SS | `08:00:00` |
 | `rules[].endTime` | No | `string` | patrón runtime `/^\d{2}:\d{2}(:\d{2})?$/` | Hora de fin HH:MM:SS | `12:00:00` |
@@ -7780,6 +7782,7 @@ Content-Type: application/json
 | `rules[].gapMinutes` | No | `number` | mínimo 0 | Minutos de respiro entre un turno y el siguiente. Ausente ≡ 0 | `1` |
 | `rules[].bookingMode` | No | `string` | valores: `CONSULTATIONS`, `SERVICES`, `MIXED` | Qué admite la franja: consultas, servicios o ambos. Ausente ≡ CONSULTATIONS | `CONSULTATIONS` |
 | `rules[].telemedicineEnabled` | No | `boolean` | Sin restricción adicional declarada | La franja atiende también por telemedicina. Ausente ≡ false (sólo presencial) | `false` |
+| `rules[].flexibleHours` | No | `boolean` | Sin restricción adicional declarada | Horario flexible de esta franja: sin turnos fijos, el paciente elige la hora. No admite slotMinutes, capacityPerSlot ni gapMinutes. Ausente ≡ false | `false` |
 | `slotMinutes` | No | `number` | Sin restricción adicional declarada | Duración por defecto del slot, en minutos | `1` |
 | `bookingPolicyId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
@@ -7806,7 +7809,8 @@ Content-Type: application/json
       "capacityPerSlot": 1,
       "gapMinutes": 1,
       "bookingMode": "CONSULTATIONS",
-      "telemedicineEnabled": false
+      "telemedicineEnabled": false,
+      "flexibleHours": false
     }
   ],
   "slotMinutes": 1,

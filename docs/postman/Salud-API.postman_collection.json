@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "ALOVIDA Health API · 1591 endpoints",
-    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1591 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
+    "name": "ALOVIDA Health API · 1593 endpoints",
+    "description": "Colección generada desde `openapi/openapi.json` con `yarn postman:generate` — **no editar a mano**.\n\n- 1593 requests en 146 dominios; un folder por primer segmento de ruta (los dominios grandes se parten por tag).\n- Auth Bearer heredada de la colección: correr **POST /iam/auth/login** y el test guarda `accessToken`/`refreshToken` en el entorno automáticamente.\n- Los query params opcionales van deshabilitados. `X-Tenant-Id` va habilitada con el tenant sembrado: sin ella, un actor sin membresía recibe 403.\n- Los bodies son ejemplos derivados de los schemas: revisar los valores antes de enviar.\n\nContrato v0.0.1.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -45576,7 +45576,7 @@
       ]
     },
     {
-      "name": "iam (39)",
+      "name": "iam (40)",
       "item": [
         {
           "name": "iam-auth",
@@ -46410,6 +46410,63 @@
                       "  const body = pm.response.json();",
                       "  const id = body && (body.id || body.uploadRegistrationDocumentId);",
                       "  if (id) pm.environment.set('uploadRegistrationDocumentId', id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "POST /iam/auth/upload-registration-logo · Pre-cargar el logo del consultorio propio para el registro",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/iam/auth/upload-registration-logo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "iam",
+                    "auth",
+                    "upload-registration-logo"
+                  ]
+                },
+                "description": "png, jpeg o webp de hasta 2 MB. El `fileId` se reenvía en `ownSite.logoFileId` del alta, que lo reclama en su misma transacción.\n\n`POST /iam/auth/upload-registration-logo`\n\nRespuesta esperada: **201**\n\nAuth: pública (sin JWT)\n\nErrores documentados: 400, 409, 413, 422, 429, 500, 504\n\noperationId: `IamAuthController_uploadRegistrationLogo`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"<binario>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 201', function () {",
+                      "  pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "// Deja el id en el entorno: los PATCH/PUT/DELETE de este recurso usan {{uploadRegistrationLogoId}}.",
+                      "if (pm.response.code < 300) {",
+                      "  const body = pm.response.json();",
+                      "  const id = body && (body.id || body.uploadRegistrationLogoId);",
+                      "  if (id) pm.environment.set('uploadRegistrationLogoId', id);",
                       "}"
                     ]
                   }
@@ -73026,7 +73083,7 @@
       ]
     },
     {
-      "name": "practitioners (10)",
+      "name": "practitioners (11)",
       "item": [
         {
           "name": "insurance",
@@ -73529,6 +73586,68 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"contactPhone\": \"+591 72123456\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('status 200', function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "PUT /practitioners/me/sites/{siteId}/logo · Fijar o quitar el logo del consultorio propio",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Tenant-Id",
+                    "value": "{{tenantId}}",
+                    "description": "Tenant del request; debe pertenecer al actor salvo SUPERADMIN",
+                    "disabled": false
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/practitioners/me/sites/:siteId/logo",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "practitioners",
+                    "me",
+                    "sites",
+                    ":siteId",
+                    "logo"
+                  ],
+                  "variable": [
+                    {
+                      "key": "siteId",
+                      "value": "{{siteId}}",
+                      "description": "Identificador de ruta · variable `{{siteId}}`"
+                    }
+                  ]
+                },
+                "description": "Asocia una imagen ya subida (png, jpeg o webp, NORMAL, hasta 2 MB) como logo del consultorio. `fileId: null` lo quita. 404 si la sede no es un consultorio propio; 422 si el archivo no sirve como logo.\n\n`PUT /practitioners/me/sites/{siteId}/logo`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `PractitionerSitesController_setSiteLogo`",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fileId\": {}\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -86866,7 +86985,7 @@
                 "description": "Publicar una plantilla de agenda con sus franjas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.\n\n`POST /scheduling/resources/{id}/templates`\n\nRespuesta esperada: **201**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingController_createTemplate`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false\n    }\n  ],\n  \"slotMinutes\": 30,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\",\n  \"flexibleHours\": false\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false,\n      \"flexibleHours\": false\n    }\n  ],\n  \"slotMinutes\": 30,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\",\n  \"flexibleHours\": false\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -87716,7 +87835,7 @@
                 "description": "Todo opcional; lo que no se manda se conserva. `rules`, si viene, reemplaza el conjunto entero y no toca los cupos ya materializados.\n\n`PATCH /scheduling/templates/{id}`\n\nRespuesta esperada: **200**\n\nAuth: Bearer `{{accessToken}}`\n\nErrores documentados: 400, 401, 403, 404, 409, 413, 422, 429, 500, 504\n\noperationId: `SchedulingController_updateTemplate`",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false\n    }\n  ],\n  \"slotMinutes\": 1,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
+                  "raw": "{\n  \"name\": \"name-ejemplo\",\n  \"rules\": [\n    {\n      \"dayOfWeek\": 0,\n      \"startTime\": \"08:00:00\",\n      \"endTime\": \"12:00:00\",\n      \"slotMinutes\": 1,\n      \"capacityPerSlot\": 1,\n      \"gapMinutes\": 0,\n      \"bookingMode\": \"CONSULTATIONS\",\n      \"telemedicineEnabled\": false,\n      \"flexibleHours\": false\n    }\n  ],\n  \"slotMinutes\": 1,\n  \"bookingPolicyId\": \"{{bookingPolicyId}}\",\n  \"validFrom\": \"2026-01-01T00:00:00.000Z\",\n  \"validTo\": \"2026-01-01T00:00:00.000Z\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
