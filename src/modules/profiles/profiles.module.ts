@@ -37,6 +37,7 @@ import {
   PersonProfilesRepository,
   PatientProfilesRepository,
   PersonAccountLinksRepository,
+  PatientPrimaryPractitionersRepository,
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
   ProfessionalCredentialsRepository,
@@ -68,6 +69,8 @@ import { DependentLinkContextAdapter } from './infrastructure/adapters/dependent
 import { PRACTITIONER_CONTEXT_PORT } from './application/ports/practitioner-context.port';
 import { PractitionerContextAdapter } from './infrastructure/adapters/practitioner-context.adapter';
 import { PERSON_RECORDS_PORT } from './application/ports/person-records.port';
+import { PrimaryPractitionerService } from './application/services/primary-practitioner.service';
+import { PrimaryPractitionerController } from './presentation/controllers/primary-practitioner.controller';
 import { PersonRecordsAdapter } from './infrastructure/adapters/person-records.adapter';
 import { PATIENT_COVERAGES_PORT } from './application/ports/patient-coverages.port';
 import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-coverages.adapter';
@@ -99,6 +102,7 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
   controllers: [
     PractitionerSignatureAssetsController,
     ProfilesPatientsController,
+    PrimaryPractitionerController,
     ProfilesDependentRequestsController,
     ProfilesPractitionersController,
     TenantPractitionerRequestsController,
@@ -151,6 +155,9 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
       provide: PERSON_RECORDS_PORT,
       useExisting: PersonRecordsAdapter,
     },
+    PrimaryPractitionerService,
+    {
+    },
     {
       provide: PATIENT_COVERAGES_PORT,
       useExisting: PatientCoveragesAdapter,
@@ -179,6 +186,7 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
     PatientMergeEventsRepository,
     RelatedPersonsRepository,
     PatientPortalProxiesRepository,
+    PatientPrimaryPractitionersRepository,
     // Servicios
     ProfilesPatientsService,
     ProfilesPractitionersService,
