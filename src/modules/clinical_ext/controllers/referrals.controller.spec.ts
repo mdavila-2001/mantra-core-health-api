@@ -30,6 +30,9 @@ function build() {
     respond: mockFn(),
     listMine: mockFn(),
     listByPatient: mockFn(),
+    get: mockFn(),
+    counterReferral: mockFn(),
+    cancel: mockFn(),
     searchTargets: mockFn(),
     listTargetServices: mockFn(),
   };
@@ -56,6 +59,21 @@ describe('ReferralsController', () => {
     const d = build();
     await d.controller.listByPatient('p1', actor);
     expect(d.referralsService.listByPatient).toHaveBeenCalledWith('p1', actor);
+  });
+
+  it('delegates get, counter-referral and cancel (v4266)', async () => {
+    const d = build();
+    await d.controller.get('ref1', actor);
+    expect(d.referralsService.get).toHaveBeenCalledWith('ref1', actor);
+    const dto = { counterReferralText: 'Alta de fisioterapia' };
+    await d.controller.counterReferral('ref1', dto, actor);
+    expect(d.referralsService.counterReferral).toHaveBeenCalledWith(
+      'ref1',
+      dto,
+      actor,
+    );
+    await d.controller.cancel('ref1', actor);
+    expect(d.referralsService.cancel).toHaveBeenCalledWith('ref1', actor);
   });
 
   it('delegates listMine (CV-10) to the authenticated actor', async () => {
@@ -130,7 +148,7 @@ describe('ReferralsController', () => {
       ).toEqual(['targetProfileId']);
     });
 
-    it('create: referralType sólo admite los cinco códigos', async () => {
+    it('create: referralType sólo admite los ocho códigos', async () => {
       const base = {
         patientProfileId: '6f1c1b1e-1111-4111-8111-111111111111',
         targetServiceCatalogId: '6f1c1b1e-2222-4222-8222-222222222222',
@@ -144,6 +162,9 @@ describe('ReferralsController', () => {
         'DIAGNOSTIC_STUDY',
         'PROCEDURE',
         'SECOND_OPINION',
+        'THERAPY',
+        'HOSPITALIZATION',
+        'OTHER',
       ]) {
         expect(
           await errorsOf(CreateReferralDto, { ...base, referralType }),
