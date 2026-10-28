@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TABLE>
+   <ALIM>
+      <alim_code> 1000 </alim_code>
+      <alim_nom_fr> Pastis </alim_nom_fr>
+      <alim_nom_eng> Pastis (anise-flavoured spirit) </alim_nom_eng>
+      <alim_nom_sci missing=" " />
+      <alim_grp_code> 06 </alim_grp_code>
+      <alim_ssgrp_code> 0603 </alim_ssgrp_code>
+      <alim_ssssgrp_code> 060303 </alim_ssssgrp_code>
+      <facteur_Jones> 6.25 </facteur_Jones>
+   </ALIM>
+   <ALIM>
+      <alim_code> 1001 </alim_code>
+      <alim_nom_fr> Eau de vie de fruits </alim_nom_fr>
+      <alim_nom_eng> Fruit brandy or eau-de-vie </alim_nom_eng>
+      <alim_nom_sci missing=" " />
+      <alim_grp_code> 06 </alim_grp_code>
+      <alim_ssgrp_code> 0603 </alim_ssgrp_code>
+      <alim_ssssgrp_code> 060303 </alim_ssssgrp_code>
+      <facteur_Jones> 6.25 </facteur_Jones>
+   </ALIM>
+   <ALIM>
+      <alim_code> 13000 </alim_code>
+      <alim_nom_fr> Abricot, dénoyauté, cru </alim_nom_fr>
+      <alim_nom_eng> Apricot, pitted, raw </alim_nom_eng>
+      <alim_nom_sci> Prunus armeniaca L. </alim_nom_sci>
+      <alim_grp_code> 02 </alim_grp_code>
+      <alim_ssgrp_code> 0204 </alim_ssgrp_code>
+      <alim_ssssgrp_code> 020401 </alim_ssssgrp_code>
+      <facteur_Jones> 6.25 </facteur_Jones>
+   </ALIM>
+   <ALIM>
+      <alim_code> 20904 </alim_code>
+      <alim_nom_fr> Tofu nature, préemballé </alim_nom_fr>
+      <alim_nom_eng> Tofu, plain, prepacked </alim_nom_eng>
+      <alim_nom_sci missing=" " />
+      <alim_grp_code> 10 </alim_grp_code>
+      <alim_ssgrp_code> 1009 </alim_ssgrp_code>
+      <alim_ssssgrp_code> 000000 </alim_ssssgrp_code>
+      <facteur_Jones> 5.7 </facteur_Jones>
+   </ALIM>
+   <ALIM>
+      <alim_code> 31001 </alim_code>
+      <alim_nom_fr> Barre chocolatée non biscuitée enrobée </alim_nom_fr>
+      <alim_nom_eng> Chocolate bar, chocolate-coated, without biscuit </alim_nom_eng>
+      <alim_nom_sci missing=" " />
+      <alim_grp_code> 07 </alim_grp_code>
+      <alim_ssgrp_code> 0702 </alim_ssgrp_code>
+      <alim_ssssgrp_code> 000000 </alim_ssssgrp_code>
+      <facteur_Jones> 6.25 </facteur_Jones>
+   </ALIM>
+</TABLE>

@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://purl.obolibrary.org/obo/foodon.owl#"
+     xml:base="http://purl.obolibrary.org/obo/foodon.owl"
+     xmlns:cc="http://creativecommons.org/ns#"
+     xmlns:wd="https://www.wikidata.org/wiki/"
+     xmlns:efo="http://www.ebi.ac.uk/efo/"
+     xmlns:obo="http://purl.obolibrary.org/obo/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:dc11="http://purl.org/dc/elements/1.1/"
+     xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:grin="http://www.ars-grin.gov/cgi-bin/npgs/html/taxon.pl?"
+     xmlns:itis="http://www.itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&amp;search_value="
+     xmlns:prov="http://www.w3.org/ns/prov#"
+     xmlns:rdfa="http://www.w3.org/ns/rdfa#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     xmlns:void="http://rdfs.org/ns/void#"
+     xmlns:asfis="https://www.fao.org/fishery/en/aqspecies/"
+     xmlns:chebi="http://purl.obolibrary.org/obo/chebi/"
+     xmlns:siren="https://bioregistry.io/reference/siren:"
+     xmlns:eolife="http://eol.org/pages/"
+     xmlns:schema="http://schema.org/"
+     xmlns:dcterms="http://purl.org/dc/terms/"
+     xmlns:langual="http://www.langual.org/langual_thesaurus.asp?termid="
+     xmlns:oboInOwl="http://www.geneontology.org/formats/oboInOwl#"
+     xmlns:wikipedia="https://en.wikipedia.org/wiki/"
+     xmlns:indexfungorum="http://www.indexfungorum.org/names/NamesRecord.asp?RecordID=">
+    <owl:Ontology rdf:about="http://purl.obolibrary.org/obo/foodon.owl">
+        <owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/foodon/releases/2026-09-20/foodon.owl"/>
+        <dcterms:contributor rdf:resource="https://orcid.org/0000-0002-1107-9135"/>
+        <dcterms:contributor rdf:resource="https://orcid.org/0000-0002-3410-4655"/>
+        <dcterms:contributor rdf:resource="https://orcid.org/0000-0002-8844-9165"/>
+        <dcterms:contributor>Adrien Barton</dcterms:contributor>
+        <dcterms:contributor>Anoosha Sehar</dcterms:contributor>
+        <dcterms:contributor>Diane Alexander</dcterms:contributor>
+        <dcterms:contributor>Fumiaki Toyoshima</dcterms:contributor>
+        <dcterms:contributor>Gurinder Gosal</dcterms:contributor>
+        <dcterms:contributor>Hande Küçük McGinty</dcterms:contributor>
+        <dcterms:contributor>Lauren Chen</dcterms:contributor>
+        <dcterms:contributor>Magalie Weber</dcterms:contributor>
+        <dcterms:contributor>Rhiannon Cameron</dcterms:contributor>
+        <dcterms:date>2026-02-02</dcterms:date>
+        <dcterms:description xml:lang="en">FoodOn is a consortium-driven project to build a comprehensive and easily accessible global farm-to-fork ontology about food, that accurately and consistently describes foods commonly known in cultures from around the world. See https://foodon.org for more details.</dcterms:description>
+        <dcterms:license rdf:resource="https://creativecommons.org/licenses/by/4.0/"/>
+        <dcterms:title xml:lang="en">FoodOn Food Ontology</dcterms:title>
+        <oboInOwl:default-namespace>FOODON</oboInOwl:default-namespace>
+        <owl:versionInfo>2026-02-02</owl:versionInfo>
+        <owl:versionInfo>2026-09-20</owl:versionInfo>
+    </owl:Ontology>
+
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/FOODON_00001057">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://purl.obolibrary.org/obo/FOODON_00001261"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/RO_0001000"/>
+                        <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/FOODON_03411140"/>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/FOODON_00001261"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/RO_0001000"/>
+                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/FOODON_03411140"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/RO_0002350"/>
+                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/FOODON_03400143"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <obo:IAO_0000115 xml:lang="en">A food product derived from plant fruit.</obo:IAO_0000115>
+        <rdfs:label xml:lang="en">plant fruit food product</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/FOODON_00001002">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/FOODON_00002403"/>
+        <obo:IAO_0000115 xml:lang="en">Food material for humans and animals which is processed with the intention that it be consumable as a whole or added to other food products.</obo:IAO_0000115>
+        <obo:IAO_0000117 xml:lang="en">Damion Dooley</obo:IAO_0000117>
+        <obo:IAO_0000118 xml:lang="en">Foodon product type</obo:IAO_0000118>
+        <obo:IAO_0000119 rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">https://en.wikipedia.org/wiki/Food</obo:IAO_0000119>
+        <rdfs:comment xml:lang="en">The FoodOn &quot;food product&quot; class is provided as a branch under which new food product categories and food products themselves can be placed. Here classes are provided to differentiate a food product by its food composition, processing and/or consumption characteristics. This avoids brand name products but it may include generic food dish categories. It has a much greater depth and polyhierarchy than other agency product type schemes have in an effort to group related products together.  The upper level basis of this tree originated in the environment ontology (ENVO) and from the US Code of Federal Regulations.</rdfs:comment>
+        <rdfs:label xml:lang="en">food product</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/FOODON_00001015">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/FOODON_00001002"/>
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/FOODON_00004331"/>
+        <obo:IAO_0000114 rdf:resource="http://purl.obolibrary.org/obo/IAO_0000122"/>
+        <obo:IAO_0000115 xml:lang="en">A food product which has as a defining ingredient some plant material.</obo:IAO_0000115>
+        <dc11:contributor rdf:resource="https://orcid.org/0000-0002-8844-9165"/>
+        <rdfs:label xml:lang="en">plant food product</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/FOODON_00001026">
+        <obo:IAO_0100001 rdf:datatype="http://www.w3.org/2001/XMLSchema#anyURI">http://purl.obolibrary.org/obo/FOODON_03301348</obo:IAO_0100001>
+        <rdfs:label xml:lang="en">obsolete: cane sugar</rdfs:label>
+        <owl:deprecated rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:deprecated>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/FOODON_00001047">
+        <obo:IAO_0000115 xml:lang="en">A fermented salty fish of Korean cuisine.</obo:IAO_0000115>
+        <obo:IAO_0100001 rdf:resource="http://purl.obolibrary.org/obo/FOODON_03315293"/>
+        <rdfs:label xml:lang="en">obsolete: jeotgal food product</rdfs:label>
+        <owl:deprecated rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:deprecated>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/FOODON_00002403">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/BFO_0000040"/>
+        <obo:IAO_0000115 xml:lang="en">Any substance that can be consumed by an organism to satisfy nutritional or other health needs, or to provide a social or organoleptic food experience</obo:IAO_0000115>
+        <obo:IAO_0000119 rdf:resource="https://en.wikipedia.org/wiki/Food"/>
+        <obo:IAO_0000412 rdf:resource="http://purl.obolibrary.org/obo/ons.owl"/>
+        <oboInOwl:hasExactSynonym xml:lang="en">food</oboInOwl:hasExactSynonym>
+        <oboInOwl:hasExactSynonym xml:lang="en">foodstuff</oboInOwl:hasExactSynonym>
+        <oboInOwl:hasNarrowSynonym xml:lang="en">nourishment</oboInOwl:hasNarrowSynonym>
+        <oboInOwl:hasNarrowSynonym xml:lang="en">sustenance</oboInOwl:hasNarrowSynonym>
+        <rdfs:comment xml:lang="en">This class is the top of FOODON&apos;s main food product hierarchy which is described in the https://www.foodon.org website, and can be searched in lookup services like https://www.ebi.ac.uk/ols/</rdfs:comment>
+        <rdfs:label xml:lang="en">food material</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/FOODON_00001261">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/FOODON_00001015"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/RO_0001000"/>
+                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/FOODON_03411579"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/RO_0002350"/>
+                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/FOODON_03400152"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <obo:IAO_0000115 xml:lang="en">A plant food product which derives from one or more vegetables.</obo:IAO_0000115>
+        <rdfs:comment xml:lang="en">FAO definition for vegetable: &quot;Vegetables are plants cultivated both as field crops and garden crops, both in the open and under glass.&quot; and also: &quot;Vegetables are grouped according to botanic characteristics as follows: leafy or stem vegetables (e.g., cabbage); fruit-bearing vegetables (e.g., melons); flower vegetables (e.g., cauliflowers); root, bulb and tuberous vegetables (e.g., onion); leguminous vegetables (e.g., green peas); other vegetables (e.g., green maize and mushrooms).&quot;</rdfs:comment>
+        <rdfs:label xml:lang="en">vegetable food product</rdfs:label>
+        <rdfs:seeAlso rdf:resource="https://www.fao.org/economic/the-statistics-division-ess/methodology/methodology-systems/crops-statistics-concepts-definitions-and-classifications/en/"/>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/FOODON_03411140">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/PO_0000003"/>
+        <obo:IAO_0000114 rdf:resource="http://purl.obolibrary.org/obo/IAO_0000428"/>
+        <oboInOwl:hasDbXref rdf:resource="http://www.langual.org/langual_thesaurus.asp?termid=B1140"/>
+        <rdfs:label xml:lang="en">fruit-producing plant</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/FOODON_00000072">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/FOODON_02010223"/>
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/FOODON_03317170"/>
+        <obo:IAO_0000115 xml:lang="en">Ground meat of unspecified animal (not fish).</obo:IAO_0000115>
+        <dcterms:contributor rdf:resource="https://orcid.org/0000-0002-8844-9165"/>
+        <oboInOwl:hasDbXref rdf:resource="https://bioregistry.io/reference/siren:F17415"/>
+        <oboInOwl:hasExactSynonym>gehakt</oboInOwl:hasExactSynonym>
+        <oboInOwl:hasExactSynonym xml:lang="en">ground meat</oboInOwl:hasExactSynonym>
+        <rdfs:label xml:lang="en">mammalian meat (ground)</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/FOODON_00002507">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/NCBITaxon_9913"/>
+        <obo:IAO_0000114 rdf:resource="http://purl.obolibrary.org/obo/IAO_0000122"/>
+        <obo:IAO_0000115 xml:lang="en">Taurine cattle (Bos taurus taurus), also called European cattle, are a subspecies of domesticated cattle originating in the Near East. Both taurine cattle and indicine cattle (zebus) are descended from the aurochs. Taurine cattle were originally considered a distinct species, but are now typically grouped with zebus and aurochs into one species, Bos taurus. Most modern breeds of cattle are taurine cattle.</obo:IAO_0000115>
+        <obo:IAO_0000117 rdf:resource="https://orcid.org/0000-0002-8844-9165"/>
+        <obo:IAO_0000119 rdf:resource="https://en.wikipedia.org/wiki/Taurine_cattle"/>
+        <dcterms:date rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-01-28T02:41:04Z</dcterms:date>
+        <oboInOwl:hasDbXref rdf:resource="http://www.langual.org/langual_thesaurus.asp?termid=B5186"/>
+        <rdfs:label xml:lang="en">taurine cattle</rdfs:label>
+    </owl:Class>
+
+</rdf:RDF>

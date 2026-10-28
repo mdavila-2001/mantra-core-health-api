@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="https://raw.githubusercontent.com/enpadasi/Ontology-for-Nutritional-Studies/master/ons.owl"
+     xml:base="https://raw.githubusercontent.com/enpadasi/Ontology-for-Nutritional-Studies/master/ons.owl"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:efo="http://www.ebi.ac.uk/efo/"
+     xmlns:obo="http://purl.obolibrary.org/obo/"
+     xmlns:ont="http://www.co-ode.org/ontologies/ont.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:doap="http://usefulinc.com/ns/doap#"
+     xmlns:foaf="http://xmlns.com/foaf/0.1/"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+     xmlns:terms="http://purl.org/dc/terms/"
+     xmlns:schema="http://schema.org/"
+     xmlns:oboInOwl="http://www.geneontology.org/formats/oboInOwl#"
+     xmlns:resource="http://semanticscience.org/resource/"
+     xmlns:ncbitaxon="http://purl.obolibrary.org/obo/ncbitaxon#"
+     xmlns:edamontology="http://edamontology.org/">
+    <owl:Ontology rdf:about="https://raw.githubusercontent.com/enpadasi/Ontology-for-Nutritional-Studies/master/ons.owl">
+        <owl:versionIRI rdf:resource="https://raw.githubusercontent.com/enpadasi/Ontology-for-Nutritional-Studies/releases/download/2026-02-06/ons.owl"/>
+        <terms:description xml:lang="en">The Ontology for Nutritional Studies (ONS) has been developed as part of the ENPADASI European project (http://www.enpadasi.eu/) with the aim to define a common language and building ontologies for nutritional studies.</terms:description>
+        <oboInOwl:created_by xml:lang="en">ENPADASI_WP4</oboInOwl:created_by>
+        <rdfs:label xml:lang="en">ONS</rdfs:label>
+        <owl:versionInfo>2026-02-06</owl:versionInfo>
+    </owl:Ontology>
+
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/ONS_0000001">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/IAO_0000027"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/IAO_0000136"/>
+                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/ONS_0000067"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <obo:IAO_0000111 xml:lang="en">Partecipants&apos; identification number</obo:IAO_0000111>
+        <obo:IAO_0000115 xml:lang="en">Aphanumeric string (1 to 8 digits) which univocally identify a partecipant/subject.</obo:IAO_0000115>
+        <obo:IAO_0000117 xml:lang="en">ENPADASI_WP4</obo:IAO_0000117>
+        <rdfs:label xml:lang="en">participants&apos; identification number</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/ONS_0000003">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/ONS_0000066"/>
+        <owl:deprecated rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:deprecated>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/ONS_0000021">
+        <obo:IAO_0000115 xml:lang="en">Dietary assessment used for uploaded dietary variables
+1=24-hour recall; 2=FFQ; 3=Food record; 4=other</obo:IAO_0000115>
+        <efo:definition_editor xml:lang="en">ENPADASI_WP4</efo:definition_editor>
+        <oboInOwl:created_by xml:lang="en">ENPADASI_WP4</oboInOwl:created_by>
+        <rdfs:label xml:lang="en">obsolete Dietary assessment method</rdfs:label>
+        <owl:deprecated rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</owl:deprecated>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/ONS_0000082">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/ONS_1000007"/>
+        <obo:IAO_0000115 xml:lang="en">A diet prescribed by a physician/ nutritionist to meet specific nutritional needs of a person.</obo:IAO_0000115>
+        <obo:IAO_0000117>ENPADASI_WP4</obo:IAO_0000117>
+        <obo:IAO_0000117>https://github.com/FoodOntology/joint-food-ontology-wg</obo:IAO_0000117>
+        <oboInOwl:hasExactSynonym xml:lang="en">clinical treatment protocol</oboInOwl:hasExactSynonym>
+        <oboInOwl:hasExactSynonym xml:lang="en">diet therapy</oboInOwl:hasExactSynonym>
+        <oboInOwl:hasExactSynonym xml:lang="en">dietetic diet</oboInOwl:hasExactSynonym>
+        <oboInOwl:hasExactSynonym xml:lang="en">medically proscribed diet</oboInOwl:hasExactSynonym>
+        <rdfs:label xml:lang="en">clinically prescribed diet</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/ONS_0000066">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/OBI_0000070"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/IAO_0000136"/>
+                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/ONS_0000067"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/OBI_0000299"/>
+                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/ONS_0000088"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <obo:IAO_0000115 xml:lang="en">An assay which purpose is to collect all the general information (e.g. anthropometric measurement) available on the subjects of nutritional studies</obo:IAO_0000115>
+        <obo:IAO_0000117 xml:lang="en">ENPADASI_WP4</obo:IAO_0000117>
+        <rdfs:label xml:lang="en">Subject Information collection</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/ONS_1000007">
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/ONS_1000001"/>
+        <obo:IAO_0000115 xml:lang="en">A diet which is prescribed to meet some dietary pattern objective for an individual organism or group.</obo:IAO_0000115>
+        <obo:IAO_0000117>https://github.com/FoodOntology/joint-food-ontology-wg</obo:IAO_0000117>
+        <rdfs:label xml:lang="en">prescribed diet</rdfs:label>
+    </owl:Class>
+
+</rdf:RDF>

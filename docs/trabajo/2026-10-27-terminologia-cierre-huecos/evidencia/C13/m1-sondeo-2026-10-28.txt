@@ -1,0 +1,30 @@
+# Sondeo de hosts 2026-10-28 (curl -sS -I -L cuando HEAD sirve; GET si no). Columnas: código HTTP | url | nota
+206	https://fdc.nal.usda.gov/download-datasets.html	FDC: página de descargas (lista los .zip)
+206	https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_csv_2026-04-30.zip	FDC Foundation CSV (cargado)
+200	https://fdc.nal.usda.gov/api-guide/	FDC: texto de licencia CC0
+429	https://api.nal.usda.gov/fdc/v1/foods/list?api_key=DEMO_KEY	FDC API con DEMO_KEY: 429 (límite); no hace falta: los CSV completos son públicos
+200	https://raw.githubusercontent.com/FoodOntology/foodon/master/foodon.owl	FoodOn OWL (cargado)
+200	https://purl.obolibrary.org/obo/foodon.owl	PURL FoodOn (redirige a raw.githubusercontent)
+200	https://obofoundry.org/ontology/foodon.html	OBO Foundry FoodOn (licencia CC BY 4.0)
+200	https://www.ebi.ac.uk/ols4/api/ontologies/foodon	OLS4 FoodOn (alternativa de lectura)
+200	https://zenodo.org/api/records/17550133	Ciqual 2025 en Zenodo (cargado)
+200	https://open.canada.ca/data/api/3/action/package_show?id=1b6139bd-ed7e-4043-bc28-ff00e10f3109	CNF 2026 en open.canada.ca (cargado)
+200	https://open.canada.ca/en/open-government-licence-canada	Texto OGL-Canada
+455	https://www.langual.org/	LanguaL thesaurus (sitio del titular)
+455	https://www.langual.org/langual_thesaurus.asp	LanguaL thesaurus: tesauro
+200	https://world.openfoodfacts.org/data	Open Food Facts (ODbL: decisión del propietario, NO se carga acá)
+503	https://ciqual.anses.fr/	Ciqual (sitio de ANSES)
+200	https://www.data.gouv.fr/	data.gouv.fr (alternativa de Ciqual)
+403	https://fineli.fi/fineli/en/index	Fineli (Finlandia)
+000	https://www.frida.dtu.dk	Frida (Dinamarca)
+200	https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid	UK CoFID (OGL)
+200	https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd	AFCD Australia
+200	https://www.fao.org/infoods/infoods/tables-and-databases/en/	FAO/INFOODS tablas y bases
+200	https://www.efsa.europa.eu/en/data/data-standardisation	EFSA FoodEx2
+200	https://zenodo.org/api/records/10716098	FoodOn to FoodEx2 mappings (gpl-3.0-or-later)
+200	https://zenodo.org/api/records/14267474	SKOS-FoodEx2 (sin licencia declarada, sin archivos)
+
+# Nota: fdc.nal.usda.gov corta una de cada tres conexiones con «Connection reset by peer» (se ve en el estado del proxy como ws_closed_mid_exchange);
+# con reintento responde. Las filas FDC arriba se repitieron con `curl -r 0-0` y reintentos (206 = Partial Content: el servidor sirve rangos).
+# Las 000 de otros hosts (frida.dtu.dk) son «sin respuesta» tras 3 intentos.
+# Obtención de la ontología ONS/CDNO/FOBI: purl.obolibrary.org redirige a raw.githubusercontent.com (200). FIDEO: gitub.u-bordeaux.fr, túnel cortado por el proxy (no alcanzable).

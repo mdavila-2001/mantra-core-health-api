@@ -1,0 +1,52 @@
+# Licencias leídas el 2026-10-28 (capturas textuales, recortadas)
+
+## USDA FoodData Central — https://fdc.nal.usda.gov/api-guide/ (sección Licensing)
+USDA FoodData Central data are in the public domain and they are not copyrighted. They are published under CC0 1.0 Universal (CC0 1.0) No permission is needed for their use, but we request that users list FoodData Central as the source of the data, and when possible, notify us of the product that uses the data so we may better track how FDC is being used in the public domain. The suggested citation is: U.S. Department of Agriculture, Agricultural Research Service. FoodData Central, 2019. fdc.nal.usda.gov. Note: Release numbers and years change as new versions are released. For more information, please see Download Data . API Endpoints URL Verb Purpose /food/{fdcId} GET Fetches details for on
+
+## FoodOn — dcterms:license del propio foodon.owl (versionIRI 2026-09-20)
+        <owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/foodon/releases/2026-09-20/foodon.owl"/>
+        <dcterms:license rdf:resource="https://creativecommons.org/licenses/by/4.0/"/>
+        <dcterms:title xml:lang="en">FoodOn Food Ontology</dcterms:title>
+
+## FoodOn — OBO Foundry (https://obofoundry.org/ontology/foodon.html)
+tated with the term FOODON:03301364. ID Space foodon PURL http://purl.obolibrary.org/obo/foodon.owl License CC BY 4.0 Homepage https://foodon.org/ Contact Damion Dooley 0000-0002-8844-9165 @ddooley Repository https://github.com/FoodOntology/foodon Tracker https://git
+
+## CIQUAL 2025 — Zenodo 17550133 (metadata.license, rights, creators)
+{"doi": "10.5281/zenodo.17550133", "title": "Ciqual French food composition table 2025", "license": {"id": "cc-by-4.0"}, "rights": null, "creators": [{"name": "Ciqual", "affiliation": null}], "publication_date": "2025-11-19", "resource_type": {"title": "Dataset", "type": "dataset"}}
+
+## Canadian Nutrient File 2026 — open.canada.ca (license_id/license_title/url)
+{"id": "1b6139bd-ed7e-4043-bc28-ff00e10f3109", "name": "1b6139bd-ed7e-4043-bc28-ff00e10f3109", "license_id": "ca-ogl-lgo", "license_title": "Open Government Licence - Canada", "license_url": "https://open.canada.ca/en/open-government-licence-canada", "metadata_modified": "2026-10-04T06:45:58.876972", "organization": {"id": "BD26DB5E-82D2-42C1-99BB-08FCF6068FEE", "name": "hc-sc", "title": "Health Canada | Santé Canada", "type": "organization", "description": "", "image_url": "", "created": "2016-09-23T17:25:33.001625", "is_organization": true, "approval_status": "approved", "state": "active"}}
+Using Information under this licence Use of any Information indicates your acceptance of the terms below. The Information Provider grants you a worldwide, royalty-free, perpetual, non-exclusive licence to use the Information, including for commercial purposes, subject to the terms below. You are free to: Copy, modify, publish, translate, adapt, distribute or otherwise use the Information in any medium, mode or format for any lawful purpose. You must, where you do any of the above: Acknowledge the source of the Information by including any attribution statement specified by the Information Provider(s) and, where possible, provide a link to this licence. If the Information Provider does not pr
+
+## CDNO — cdno.owl (dcterms:license / versionIRI) y LICENSE del repositorio
+        <owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/cdno/releases/2026-06-10/cdno.owl"/>
+        <dcterms:license rdf:resource="https://creativecommons.org/licenses/by/3.0/"/>
+Creative Commons Legal Code
+
+CC0 1.0 Universal
+
+
+## FOBI — fobi.owl (terms:license) y LICENSE del repositorio
+        <terms:license>http://creativecommons.org/licenses/by/4.0/</terms:license>
+
+## Attribution 4.0 International (CC BY 4.0)
+Attribution 4.0 International
+
+curl: (23) Failure writing output to destination
+
+## ONS — LICENSE del repositorio enpadasi/Ontology-for-Nutritional-Studies (el ons.owl no declara licencia)
+Attribution 4.0 International
+
+=======================================================================
+curl: (23) Failure writing output to destination
+
+## Registro OBO Foundry (https://obofoundry.org/registry/ontologies.jsonld), campo license
+cdno => CC BY 3.0
+fideo => CC0 1.0
+fobi => CC BY 3.0
+foodon => CC BY 4.0
+one => CC BY 4.0
+ons => CC BY 4.0
+
+## ONE — Ontology for Nutritional Epidemiology: one.owl sin dcterms:license ni terms:license
+LICENSE del repo cyang0128/Nutritional-epidemiologic-ontologies: HTTP 404

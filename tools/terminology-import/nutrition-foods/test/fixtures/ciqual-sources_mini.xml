@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TABLE>
+   <SOURCES>
+      <source_code> 1 </source_code>
+      <ref_citation missing=" " />
+   </SOURCES>
+   <SOURCES>
+      <source_code> 281 </source_code>
+      <ref_citation> Analyses Ciqual 2009 (1a) </ref_citation>
+   </SOURCES>
+   <SOURCES>
+      <source_code> 349 </source_code>
+      <ref_citation> Extraction BDD Oqali au 07/02/2014 </ref_citation>
+   </SOURCES>
+   <SOURCES>
+      <source_code> 355 </source_code>
+      <ref_citation> Données industrielles françaises (2014) </ref_citation>
+   </SOURCES>
+   <SOURCES>
+      <source_code> 391 </source_code>
+      <ref_citation> Analyses Ciqual-Aprifel 2017 (MS 2.5) </ref_citation>
+   </SOURCES>
+   <SOURCES>
+      <source_code> 398 </source_code>
+      <ref_citation> Analyses Ciqual 2019 (MS 2.12) </ref_citation>
+   </SOURCES>
+   <SOURCES>
+      <source_code> 444 </source_code>
+      <ref_citation> Valeur ajustée/calculée/imputée Ciqual </ref_citation>
+   </SOURCES>
+   <SOURCES>
+      <source_code> 1373 </source_code>
+      <ref_citation> Pernod-Ricard (1994). Rapport de laboratoire.-Calculs Ciqual (2007). </ref_citation>
+   </SOURCES>
+   <SOURCES>
+      <source_code> 1376 </source_code>
+      <ref_citation> Pernod-Ricard (1994). Rapport de laboratoire.-Saxholt E, Christensen AT, Møller A, Hartkopp HB, Hess Ygil K, Hels OH (2009). Danish Food Composition Databank, revision 7.01. Department of Nutrition, National Food Institute, Technical University of Denmark, version 7.1, 2009. </ref_citation>
+   </SOURCES>
+   <SOURCES>
+      <source_code> 1382 </source_code>
+      <ref_citation> Pernod-Ricard (1994). Rapport de laboratoire.-Salvini S, Parpinel M, Gnagnarella P, Maisonneuve P, Turrini A (1998). Banca Dati di Composizione degli Alimenti per Studi Epidemiologici in Italia. Ed. Istituto Europeo di Oncologia.-Calculs Ciqual (2007).-Saxholt E, Christensen AT, Møller A, Hartkopp HB, Hess Ygil K, Hels OH (2009). Danish Food Composition Databank, revision 7.01. Department of Nutrition, National Food Institute, Technical University of Denmark, version 7.1, 2009. </ref_citation>
+   </SOURCES>
+</TABLE>

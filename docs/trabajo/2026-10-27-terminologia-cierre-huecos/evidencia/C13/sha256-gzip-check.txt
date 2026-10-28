@@ -1,0 +1,31 @@
+gzip -t OK nutrition-foods-branded.part-01.ndjson.gz
+gzip -t OK nutrition-foods-branded.part-02.ndjson.gz
+gzip -t OK nutrition-foods-branded.part-03.ndjson.gz
+gzip -t OK nutrition-foods-branded.part-04.ndjson.gz
+gzip -t OK nutrition-foods-branded.part-05.ndjson.gz
+gzip -t OK nutrition-foods-branded.part-06.ndjson.gz
+gzip -t OK nutrition-foods-branded.part-07.ndjson.gz
+gzip -t OK nutrition-foods-branded.part-08.ndjson.gz
+gzip -t OK nutrition-foods-branded.part-09.ndjson.gz
+gzip -t OK nutrition-foods-branded.part-10.ndjson.gz
+gzip -t OK nutrition-foods-branded.part-11.ndjson.gz
+gzip -t OK nutrition-foods-branded.part-12.ndjson.gz
+gzip -t OK nutrition-foods-codesystems.ndjson.gz
+gzip -t OK nutrition-foods-concepts.part-01.ndjson.gz
+gzip -t OK nutrition-foods-concepts.part-02.ndjson.gz
+nutrition-foods-branded.part-01.ndjson.gz: OK
+nutrition-foods-branded.part-02.ndjson.gz: OK
+nutrition-foods-branded.part-03.ndjson.gz: OK
+nutrition-foods-branded.part-04.ndjson.gz: OK
+nutrition-foods-branded.part-05.ndjson.gz: OK
+nutrition-foods-branded.part-06.ndjson.gz: OK
+nutrition-foods-branded.part-07.ndjson.gz: OK
+nutrition-foods-branded.part-08.ndjson.gz: OK
+nutrition-foods-branded.part-09.ndjson.gz: OK
+nutrition-foods-branded.part-10.ndjson.gz: OK
+nutrition-foods-branded.part-11.ndjson.gz: OK
+nutrition-foods-branded.part-12.ndjson.gz: OK
+nutrition-foods-codesystems.ndjson.gz: OK
+nutrition-foods-concepts.part-01.ndjson.gz: OK
+nutrition-foods-concepts.part-02.ndjson.gz: OK
+nutrition-foods.meta.json: OK

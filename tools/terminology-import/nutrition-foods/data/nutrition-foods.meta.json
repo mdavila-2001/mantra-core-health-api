@@ -1,0 +1,188 @@
+{
+  "notes": {
+    "ciqualCompositionRows": 257816,
+    "cnfFoodsWithUsdaNdbCode": 4798,
+    "cnfFoodsNdbExactMatchInFdc": 3377,
+    "cnfFoodsNdbNotInFdcFoundationOrSrLegacy": 1421
+  },
+  "conflicts": [
+    {
+      "table": "nutrient",
+      "key": "1071",
+      "field": "rank",
+      "kept": "2225",
+      "keptIn": "fdc-foundation",
+      "other": "999999.0",
+      "otherIn": "fdc-survey"
+    },
+    {
+      "table": "nutrient",
+      "key": "1188",
+      "field": "rank",
+      "kept": "8975",
+      "keptIn": "fdc-foundation",
+      "other": "999999.0",
+      "otherIn": "fdc-survey"
+    },
+    {
+      "table": "nutrient",
+      "key": "2057",
+      "field": "rank",
+      "kept": "18500",
+      "keptIn": "fdc-foundation",
+      "other": "16255.0",
+      "otherIn": "fdc-survey"
+    },
+    {
+      "table": "nutrient",
+      "key": "1024",
+      "field": "rank",
+      "kept": "8955",
+      "keptIn": "fdc-foundation",
+      "other": "999999.0",
+      "otherIn": "fdc-sr-legacy"
+    },
+    {
+      "table": "nutrient",
+      "key": "1063",
+      "field": "name",
+      "kept": "Sugars, Total",
+      "keptIn": "fdc-foundation",
+      "other": "Sugars, Total NLEA",
+      "otherIn": "fdc-sr-legacy"
+    },
+    {
+      "table": "nutrient",
+      "key": "1071",
+      "field": "rank",
+      "kept": "2225",
+      "keptIn": "fdc-foundation",
+      "other": "999999.0",
+      "otherIn": "fdc-sr-legacy"
+    },
+    {
+      "table": "nutrient",
+      "key": "1188",
+      "field": "rank",
+      "kept": "8975",
+      "keptIn": "fdc-foundation",
+      "other": "999999.0",
+      "otherIn": "fdc-sr-legacy"
+    },
+    {
+      "table": "nutrient",
+      "key": "1406",
+      "field": "name",
+      "kept": "PUFA 20:3 n-6",
+      "keptIn": "fdc-foundation",
+      "other": "PUFA 20:4 n-6",
+      "otherIn": "fdc-sr-legacy"
+    },
+    {
+      "table": "nutrient",
+      "key": "1408",
+      "field": "name",
+      "kept": "PUFA 20:4 n-6",
+      "keptIn": "fdc-foundation",
+      "other": "PUFA 2:4 n-6",
+      "otherIn": "fdc-sr-legacy"
+    },
+    {
+      "table": "nutrient",
+      "key": "2000",
+      "field": "name",
+      "kept": "Total Sugars",
+      "keptIn": "fdc-foundation",
+      "other": "Sugars, Total",
+      "otherIn": "fdc-sr-legacy"
+    },
+    {
+      "table": "nutrient",
+      "key": "2057",
+      "field": "rank",
+      "kept": "18500",
+      "keptIn": "fdc-foundation",
+      "other": "16255.0",
+      "otherIn": "fdc-sr-legacy"
+    },
+    {
+      "table": "nutrient",
+      "key": "2061",
+      "field": "name",
+      "kept": "Ergosta-7,22-dienol",
+      "keptIn": "fdc-foundation",
+      "other": " Ergosta-7,22-dienol",
+      "otherIn": "fdc-sr-legacy"
+    },
+    {
+      "table": "nutrient",
+      "key": "2062",
+      "field": "name",
+      "kept": "Ergosta-5,7-dienol",
+      "keptIn": "fdc-foundation",
+      "other": " Ergosta-5,7-dienol",
+      "otherIn": "fdc-sr-legacy"
+    }
+  ],
+  "skipped": {
+    "brandedFoodWithoutBrandedRow": 0,
+    "foodonParentsNotDefinedInFile": 0,
+    "cdnoParentsNotDefinedInFile": 0,
+    "fobiParentsNotDefinedInFile": 0,
+    "onsParentsNotDefinedInFile": 0,
+    "ciqualSourceWithoutCitation": 1,
+    "ciqualCompositionFoodsNotInAlim": 0
+  },
+  "counts": {
+    "usda-fdc-foundation": 469,
+    "usda-fdc-sr-legacy": 7793,
+    "usda-fdc-survey": 5432,
+    "usda-fdc-branded": 1999950,
+    "usda-fdc-nutrient": 477,
+    "usda-fdc-food-category": 28,
+    "usda-fdc-wweia-category": 172,
+    "usda-fdc-branded-category": 448,
+    "usda-fdc-measure-unit": 123,
+    "usda-fdc-attribute-type": 5,
+    "usda-fdc-fndds-derivation": 49,
+    "usda-fdc-nutrient-derivation": 64,
+    "usda-fdc-nutrient-source": 10,
+    "foodon": 29255,
+    "cdno": 1163,
+    "fobi": 626,
+    "ons": 336,
+    "ciqual-food": 3484,
+    "ciqual-food-group": 161,
+    "ciqual-source": 1977,
+    "ciqual-constituent": 74,
+    "cnf-food": 5993,
+    "cnf-food-group": 23,
+    "cnf-nutrient": 173,
+    "cnf-food-source": 16,
+    "cnf-nutrient-source": 21,
+    "cnf-measure": 1494,
+    "cnf-measure-type": 3
+  },
+  "totalConcepts": 2059819,
+  "parts": {
+    "main": [
+      "nutrition-foods-concepts.part-01.ndjson.gz",
+      "nutrition-foods-concepts.part-02.ndjson.gz"
+    ],
+    "branded": [
+      "nutrition-foods-branded.part-01.ndjson.gz",
+      "nutrition-foods-branded.part-02.ndjson.gz",
+      "nutrition-foods-branded.part-03.ndjson.gz",
+      "nutrition-foods-branded.part-04.ndjson.gz",
+      "nutrition-foods-branded.part-05.ndjson.gz",
+      "nutrition-foods-branded.part-06.ndjson.gz",
+      "nutrition-foods-branded.part-07.ndjson.gz",
+      "nutrition-foods-branded.part-08.ndjson.gz",
+      "nutrition-foods-branded.part-09.ndjson.gz",
+      "nutrition-foods-branded.part-10.ndjson.gz",
+      "nutrition-foods-branded.part-11.ndjson.gz",
+      "nutrition-foods-branded.part-12.ndjson.gz"
+    ]
+  },
+  "noBranded": false
+}

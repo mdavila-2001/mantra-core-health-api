@@ -1,0 +1,5 @@
+-- 00_shared/00_types.sql
+-- 03_terminology/01_schema.sql
+-- 03_terminology/02_tables.sql
+-- 03_terminology/03_fk_intra.sql
+-- 03_terminology/04_indexes.sql

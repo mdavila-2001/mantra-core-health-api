@@ -1,0 +1,118 @@
+TAP version 13
+# Subtest: csvRows: igual que parseCsv sin importar dónde se corten los bloques (comillas, «""», saltos, BOM)
+ok 1 - csvRows: igual que parseCsv sin importar dónde se corten los bloques (comillas, «""», saltos, BOM)
+  ---
+  duration_ms: 24.831919
+  type: 'test'
+  ...
+# Subtest: csvObjects falla ante una fila con columnas de menos (no corrige en silencio)
+ok 2 - csvObjects falla ante una fila con columnas de menos (no corrige en silencio)
+  ---
+  duration_ms: 1.929047
+  type: 'test'
+  ...
+# Subtest: openZipStream: mismas entradas y mismo contenido que el lector en memoria
+ok 3 - openZipStream: mismas entradas y mismo contenido que el lector en memoria
+  ---
+  duration_ms: 17.167393
+  type: 'test'
+  ...
+# Subtest: FDC Foundation: alimento real 321358 (hummus) con categoría, NDB, valores y atributos tal cual la fuente
+ok 4 - FDC Foundation: alimento real 321358 (hummus) con categoría, NDB, valores y atributos tal cual la fuente
+  ---
+  duration_ms: 37.589029
+  type: 'test'
+  ...
+# Subtest: FDC SR Legacy y Survey: padres por la clave que cita la propia fuente
+ok 5 - FDC SR Legacy y Survey: padres por la clave que cita la propia fuente
+  ---
+  duration_ms: 21.747627
+  type: 'test'
+  ...
+# Subtest: FDC Branded: une food.csv y branded_food.csv; descripción vacía real (776874) → display = código y marca de fallback
+ok 6 - FDC Branded: une food.csv y branded_food.csv; descripción vacía real (776874) → display = código y marca de fallback
+  ---
+  duration_ms: 4.470509
+  type: 'test'
+  ...
+# Subtest: FDC vocabularios: unión por clave, gana la edición más nueva y las diferencias quedan como conflictos
+ok 7 - FDC vocabularios: unión por clave, gana la edición más nueva y las diferencias quedan como conflictos
+  ---
+  duration_ms: 77.96282
+  type: 'test'
+  ...
+# Subtest: FoodOn: clases FOODON_ del archivo real, jerarquía, restricciones, obsoletas y referencias externas
+ok 8 - FoodOn: clases FOODON_ del archivo real, jerarquía, restricciones, obsoletas y referencias externas
+  ---
+  duration_ms: 4.727251
+  type: 'test'
+  ...
+# Subtest: OBO genérico: CDNO, FOBI y ONS se leen por su prefijo; padres propios, obsoletas y clases sin etiqueta con marca de fallback
+ok 9 - OBO genérico: CDNO, FOBI y ONS se leen por su prefijo; padres propios, obsoletas y clases sin etiqueta con marca de fallback
+  ---
+  duration_ms: 2.553306
+  type: 'test'
+  ...
+# Subtest: decodeXml: entidades nombradas y numéricas; una desconocida falla
+ok 10 - decodeXml: entidades nombradas y numéricas; una desconocida falla
+  ---
+  duration_ms: 0.600593
+  type: 'test'
+  ...
+# Subtest: Ciqual: grupos jerárquicos, constituyentes, fuentes y alimentos con composición verbatim
+ok 11 - Ciqual: grupos jerárquicos, constituyentes, fuentes y alimentos con composición verbatim
+  ---
+  duration_ms: 3.458313
+  type: 'test'
+  ...
+# Subtest: parseFlatRows: columnas «missing» omitidas y espacios recortados
+ok 12 - parseFlatRows: columnas «missing» omitidas y espacios recortados
+  ---
+  duration_ms: 0.294643
+  type: 'test'
+  ...
+# Subtest: CNF: nombres EN/FR de la fuente, grupo, valores y cruce exacto por NDB con FDC
+ok 13 - CNF: nombres EN/FR de la fuente, grupo, valores y cruce exacto por NDB con FDC
+  ---
+  duration_ms: 29.338683
+  type: 'test'
+  ...
+# Subtest: planConcept: ids deterministas, procedencia con licencia, idiomas no sembrados como propiedad, is-a con extremo exacto
+ok 14 - planConcept: ids deterministas, procedencia con licencia, idiomas no sembrados como propiedad, is-a con extremo exacto
+  ---
+  duration_ms: 1.881758
+  type: 'test'
+  ...
+# Subtest: planConcept: Branded colapsa sus campos en una sola propiedad; padres sin jerarquía is-a declarada fallan
+ok 15 - planConcept: Branded colapsa sus campos en una sola propiedad; padres sin jerarquía is-a declarada fallan
+  ---
+  duration_ms: 0.837411
+  type: 'test'
+  ...
+# Subtest: modelo: toda fuente y artefacto tienen licencia leída; todo code system apunta a una fuente definida
+ok 16 - modelo: toda fuente y artefacto tienen licencia leída; todo code system apunta a una fuente definida
+  ---
+  duration_ms: 1.086893
+  type: 'test'
+  ...
+# Subtest: data/: SHA256SUMS coincide, cada parte < 45 MB, gzip válido y conteos = meta
+ok 17 - data/: SHA256SUMS coincide, cada parte < 45 MB, gzip válido y conteos = meta
+  ---
+  duration_ms: 3680.451329
+  type: 'test'
+  ...
+# Subtest: data/: el manifiesto de descarga registra todos los artefactos con SHA-256
+ok 18 - data/: el manifiesto de descarga registra todos los artefactos con SHA-256
+  ---
+  duration_ms: 0.414964
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4087.329249

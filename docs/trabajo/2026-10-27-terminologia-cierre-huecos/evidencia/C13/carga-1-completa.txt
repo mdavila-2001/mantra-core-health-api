@@ -1,0 +1,3 @@
+=== Carga de nutrición y alimentos a terminology.*  · corpus /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data ===
+Conectado a 127.0.0.1:55443/c13
+pasada 1: /home/user/mantra-core-health-api/tools/terminology-import/nutrition-foods/data/nutrition-foods-concepts.part-01.ndjson.gz

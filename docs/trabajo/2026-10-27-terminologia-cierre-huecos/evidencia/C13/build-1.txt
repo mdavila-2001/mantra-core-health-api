@@ -1,0 +1,71 @@
+FDC: vocabularios…
+FDC: usda-fdc-foundation…
+FDC: usda-fdc-sr-legacy…
+FDC: usda-fdc-survey…
+FDC: Branded (streaming)…
+  …250000
+  …500000
+  …750000
+  …1000000
+  …1250000
+  …1500000
+  …1750000
+foodon…
+cdno…
+fobi…
+ons…
+Ciqual…
+CNF…
+    7.0 MB  nutrition-foods-branded.part-01.ndjson.gz
+    7.5 MB  nutrition-foods-branded.part-02.ndjson.gz
+    8.1 MB  nutrition-foods-branded.part-03.ndjson.gz
+    7.4 MB  nutrition-foods-branded.part-04.ndjson.gz
+    8.1 MB  nutrition-foods-branded.part-05.ndjson.gz
+    7.9 MB  nutrition-foods-branded.part-06.ndjson.gz
+    8.6 MB  nutrition-foods-branded.part-07.ndjson.gz
+    8.3 MB  nutrition-foods-branded.part-08.ndjson.gz
+    8.4 MB  nutrition-foods-branded.part-09.ndjson.gz
+    8.2 MB  nutrition-foods-branded.part-10.ndjson.gz
+    6.9 MB  nutrition-foods-branded.part-11.ndjson.gz
+    1.3 MB  nutrition-foods-branded.part-12.ndjson.gz
+    0.0 MB  nutrition-foods-codesystems.ndjson.gz
+    7.3 MB  nutrition-foods-concepts.part-01.ndjson.gz
+    4.3 MB  nutrition-foods-concepts.part-02.ndjson.gz
+    0.0 MB  nutrition-foods.meta.json
+{
+ "totalConcepts": 2059819,
+ "counts": {
+  "usda-fdc-foundation": 469,
+  "usda-fdc-sr-legacy": 7793,
+  "usda-fdc-survey": 5432,
+  "usda-fdc-branded": 1999950,
+  "usda-fdc-nutrient": 477,
+  "usda-fdc-food-category": 28,
+  "usda-fdc-wweia-category": 172,
+  "usda-fdc-branded-category": 448,
+  "usda-fdc-measure-unit": 123,
+  "usda-fdc-attribute-type": 5,
+  "usda-fdc-fndds-derivation": 49,
+  "usda-fdc-nutrient-derivation": 64,
+  "usda-fdc-nutrient-source": 10,
+  "foodon": 29255,
+  "cdno": 1163,
+  "fobi": 626,
+  "ons": 336,
+  "ciqual-food": 3484,
+  "ciqual-food-group": 161,
+  "ciqual-source": 1977,
+  "ciqual-constituent": 74,
+  "cnf-food": 5993,
+  "cnf-food-group": 23,
+  "cnf-nutrient": 173,
+  "cnf-food-source": 16,
+  "cnf-nutrient-source": 21,
+  "cnf-measure": 1494,
+  "cnf-measure-type": 3
+ }
+}
+
+real	2m8.678s
+user	1m30.455s
+sys	0m21.586s
