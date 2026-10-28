@@ -15,6 +15,7 @@ import {
   ResponsesRepository,
   TemplatesRepository,
 } from '../repositories';
+import type { InvitationCardContext } from '../repositories';
 import {
   AnswerDto,
   AnswerInputDto,
@@ -106,12 +107,19 @@ export class SurveysResponsesService {
       tenantId,
     );
 
+    // Una sola consulta agregada trae título y contexto de la atención de todas
+    // las tarjetas: la lista no hace una lectura por invitación.
+    const context = await this.invitationsRepo.listCardContext(
+      this.em,
+      invitations.map((invitation) => invitation.id),
+    );
+
     const now = new Date();
     const result: PatientInvitationDto[] = [];
     for (const invitation of invitations) {
-      const template = await this.loadTemplateOfInvitation(invitation);
-      if (!template) continue;
-      result.push(this.toInvitationDto(invitation, template, now));
+      const card = context.get(invitation.id);
+      if (!card) continue;
+      result.push(this.toInvitationDto(invitation, card, now));
     }
     return result;
   }
@@ -143,8 +151,24 @@ export class SurveysResponsesService {
         : 'PRACTITIONER',
     );
 
+    const card = (
+      await this.invitationsRepo.listCardContext(this.em, [invitation.id])
+    ).get(invitation.id);
+
     return {
-      ...this.toInvitationDto(invitation, template, new Date()),
+      ...this.toInvitationDto(
+        invitation,
+        card ?? {
+          invitationId: invitation.id,
+          title: template.title,
+          description: template.description ?? null,
+          kind: 'CONSULTATION',
+          serviceName: null,
+          practitionerDisplayName: null,
+          attendedAt: null,
+        },
+        new Date(),
+      ),
       // Posiciones corridas sobre la unión: la base primero, el profesional después.
       questions: items.map((item, index) =>
         this.toQuestionDto(item, index + 1),
@@ -666,16 +690,20 @@ export class SurveysResponsesService {
   /** Proyecta la invitación al contrato del paciente. */
   private toInvitationDto(
     invitation: SurveyInvitations,
-    template: SurveyTemplates,
+    card: InvitationCardContext,
     now: Date,
   ): PatientInvitationDto {
     return {
       id: invitation.id,
-      title: template.title,
-      description: template.description,
+      title: card.title,
+      description: card.description ?? undefined,
       status: this.invitationStatus(invitation, now),
       issuedAt: invitation.issuedAt,
       expiresAt: invitation.expiresAt,
+      kind: card.kind,
+      serviceName: card.serviceName,
+      practitionerDisplayName: card.practitionerDisplayName,
+      attendedAt: card.attendedAt,
       answeredAt: invitation.answeredAt,
       appointmentBookingId: invitation.appointmentBookingId ?? '',
     };

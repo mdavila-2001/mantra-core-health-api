@@ -7,7 +7,10 @@ export type {
 export { AssignmentsRepository } from './assignments.repository';
 export type { CreateAssignmentData } from './assignments.repository';
 export { InvitationsRepository } from './invitations.repository';
-export type { CreateInvitationData } from './invitations.repository';
+export type {
+  CreateInvitationData,
+  InvitationCardContext,
+} from './invitations.repository';
 export { TargetsRepository } from './targets.repository';
 export { InsightsRepository } from './insights.repository';
 export { ResponsesRepository } from './responses.repository';

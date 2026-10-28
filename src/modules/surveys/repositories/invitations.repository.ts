@@ -3,6 +3,7 @@ import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { SurveyInvitations } from '../entities';
 import { createdBy } from '../../../common';
+import { PRACTITIONER_PROFILE_TABLES } from '../../scheduling/domain/resource/practitioner-profile-tables';
 
 /** Alta de una invitación a responder. */
 export interface CreateInvitationData {
@@ -47,6 +48,35 @@ export interface CreateInvitationData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+}
+
+/** Lo que la bandeja del paciente muestra de una invitación además de sus columnas. */
+export interface InvitationCardContext {
+  /** Invitación a la que corresponde. */
+  invitationId: string;
+  /** Título de la plantilla de la versión principal. */
+  title: string;
+  /** Consigna de la plantilla. */
+  description: string | null;
+  /** `SERVICE` si la reserva es de un servicio ofrecido; `CONSULTATION` si no. */
+  kind: 'CONSULTATION' | 'SERVICE';
+  /** Nombre del servicio reservado; `null` en una consulta. */
+  serviceName: string | null;
+  /** Nombre visible de quien atendió; `null` si no se puede determinar. */
+  practitionerDisplayName: string | null;
+  /** Fecha y hora de la atención (inicio del cupo reservado), ISO 8601. */
+  attendedAt: string | null;
+}
+
+/** Fila cruda de la consulta de {@link InvitationsRepository.listCardContext}. */
+interface InvitationCardContextRow {
+  invitationId: string;
+  title: string;
+  description: string | null;
+  isService: boolean;
+  serviceName: string | null;
+  practitionerDisplayName: string | null;
+  attendedAt: Date | string | null;
 }
 
 /** Acceso a datos de `surveys.survey_invitations`. */
@@ -175,5 +205,73 @@ export class InvitationsRepository {
       { ...rest, ...createdBy(actorUserId) },
       { partial: true },
     );
+  }
+
+  /**
+   * El contexto de cada invitación para la bandeja del paciente: título de la
+   * plantilla y, de la reserva que la originó, el tipo de atención, el servicio,
+   * quién atendió y cuándo.
+   *
+   * **Una sola consulta agregada por lista** (la cantidad de consultas no
+   * depende de cuántas invitaciones haya). Los `LEFT JOIN` hacen que una reserva
+   * que ya no se pueda resolver degrade a campos `null` en vez de ocultar la
+   * invitación. Una invitación sin plantilla no aparece (la lista la omite).
+   *
+   * El profesional es el dueño de la oferta si la reserva es de un servicio y,
+   * si no, el del recurso reservado (el de la reserva o el del cupo), igual que
+   * al decidir a quién evalúa la encuesta.
+   *
+   * @param em - Contexto de persistencia.
+   * @param invitationIds - Invitaciones ya acotadas a paciente y tenant.
+   * @returns El contexto por identificador de invitación.
+   */
+  async listCardContext(
+    em: EntityManager,
+    invitationIds: readonly string[],
+  ): Promise<Map<string, InvitationCardContext>> {
+    const result = new Map<string, InvitationCardContext>();
+    if (invitationIds.length === 0) return result;
+    const rows = await em.getConnection().execute<InvitationCardContextRow[]>(
+      `SELECT i.id AS "invitationId",
+                t.title AS "title",
+                t.description AS "description",
+                (b.practitioner_service_offering_id IS NOT NULL) AS "isService",
+                CASE WHEN b.practitioner_service_offering_id IS NOT NULL
+                     THEN COALESCE(sc.name, b.service_snapshot ->> 'serviceName')
+                END AS "serviceName",
+                pe.display_name AS "practitionerDisplayName",
+                s.start_at AS "attendedAt"
+           FROM surveys.survey_invitations i
+           JOIN surveys.survey_versions v ON v.id = i.survey_version_id
+           JOIN surveys.survey_templates t ON t.id = v.survey_template_id
+           LEFT JOIN scheduling.appointment_bookings b
+                  ON b.id = i.appointment_booking_id
+           LEFT JOIN scheduling.bookable_slots s ON s.id = b.bookable_slot_id
+           LEFT JOIN scheduling.practitioner_service_offerings po
+                  ON po.id = b.practitioner_service_offering_id
+           LEFT JOIN billing.service_catalog sc ON sc.id = po.service_catalog_id
+           LEFT JOIN scheduling.schedulable_resources r
+                  ON r.id = COALESCE(b.resource_id, s.resource_id)
+                 AND r.resource_ref_type IN (?, ?)
+           LEFT JOIN profiles.persons pe
+                  ON pe.id = COALESCE(po.practitioner_profile_id, r.resource_ref_id)
+          WHERE i.id IN (${invitationIds.map(() => '?').join(', ')})`,
+      [...PRACTITIONER_PROFILE_TABLES, ...invitationIds],
+    );
+    for (const row of rows) {
+      result.set(row.invitationId, {
+        invitationId: row.invitationId,
+        title: row.title,
+        description: row.description,
+        kind: row.isService ? 'SERVICE' : 'CONSULTATION',
+        serviceName: row.serviceName,
+        practitionerDisplayName: row.practitionerDisplayName,
+        attendedAt:
+          row.attendedAt === null
+            ? null
+            : new Date(row.attendedAt).toISOString(),
+      });
+    }
+    return result;
   }
 }

@@ -49,7 +49,7 @@ import { runWithTenant, type AuthenticatedUser } from '../../src/common';
  *
  * Opt-in con `SURVEYS_IT_DB_URL` (base **desechable**: el nombre debe contener
  * `test`, `it`, `ci`, `tmp`, `scratch`, `disposable` o `smoke`). Recrea los
- * esquemas `surveys`, `scheduling`, `billing` y `practice`; no aplica las FK
+ * esquemas `surveys`, `scheduling`, `billing`, `practice` y `profiles`; no aplica las FK
  * entre esquemas, así que no necesita el resto del modelo.
  */
 const DB_URL = process.env.SURVEYS_IT_DB_URL;
@@ -210,11 +210,13 @@ describeIfDb(
       client = new pg.Client({ connectionString: DB_URL });
       await client.connect();
       await sql(
-        'DROP SCHEMA IF EXISTS surveys, scheduling, billing, practice CASCADE',
+        'DROP SCHEMA IF EXISTS surveys, scheduling, billing, practice, profiles CASCADE',
       );
       // El DDL canónico del repositorio: sin las FK entre esquemas (90_fk_deferred).
       for (const file of [
         '00_shared/00_types.sql',
+        '05_profiles/01_schema.sql',
+        '05_profiles/02_tables.sql',
         '14_practice/01_schema.sql',
         '14_practice/02_tables.sql',
         '17_billing/01_schema.sql',
@@ -266,6 +268,13 @@ describeIfDb(
          requires_approval, status_concept_id, created_at, updated_at)
        VALUES ($1, $2, $3, 15, 30, true, false, $4, now(), now())`,
         [ids.offering, DOCTOR, ids.catalog, ANY],
+      );
+
+      // Quien atiende tiene nombre visible: la bandeja del paciente lo muestra.
+      await sql(
+        `INSERT INTO profiles.persons (id, person_status_concept_id, display_name, created_at, updated_at)
+       VALUES ($1, $2, 'Dra. Ana Pérez', now(), now())`,
+        [DOCTOR, ANY],
       );
 
       orm = await MikroORM.init({
@@ -474,6 +483,155 @@ describeIfDb(
           ),
         ).rejects.toMatchObject({ status: 422 });
         expect(await invitationsOf(booking)).toHaveLength(0);
+      });
+    });
+
+    describe('la bandeja del paciente distingue las tarjetas', () => {
+      const BAY_PATIENT = randomUUID();
+      const bayActor = {
+        id: randomUUID(),
+        roles: ['PATIENT'],
+        patientProfileId: BAY_PATIENT,
+      } as AuthenticatedUser;
+
+      async function issued(opts: {
+        offering?: boolean;
+        resource?: string;
+      }): Promise<{ booking: string; invitation: string }> {
+        const booking = await insertBooking({
+          ...opts,
+          patient: BAY_PATIENT,
+        });
+        const [id] = (
+          await inTenant(() =>
+            services().assignments.issueForBooking(
+              { appointmentBookingId: booking },
+              doctorActor,
+            ),
+          )
+        ).ids;
+        return { booking, invitation: id };
+      }
+
+      const slotStart = async (booking: string) =>
+        new Date(
+          (
+            await rows(
+              `SELECT s.start_at FROM scheduling.bookable_slots s
+               JOIN scheduling.appointment_bookings b ON b.bookable_slot_id = s.id
+              WHERE b.id = $1`,
+              [booking],
+            )
+          )[0].start_at,
+        ).toISOString();
+
+      it('una consulta dice CONSULTATION, quién atendió y cuándo; un servicio trae además su nombre', async () => {
+        const consultation = await issued({});
+        const service = await issued({ offering: true });
+
+        const list = await inTenant(() =>
+          services().responses.listMyInvitations(bayActor),
+        );
+
+        const byId = new Map(list.map((i) => [i.id, i]));
+        expect(byId.get(consultation.invitation)).toMatchObject({
+          kind: 'CONSULTATION',
+          serviceName: null,
+          practitionerDisplayName: 'Dra. Ana Pérez',
+          attendedAt: await slotStart(consultation.booking),
+        });
+        expect(byId.get(service.invitation)).toMatchObject({
+          kind: 'SERVICE',
+          serviceName: 'LAB-01',
+          practitionerDisplayName: 'Dra. Ana Pérez',
+          attendedAt: await slotStart(service.booking),
+        });
+
+        // La invitación abierta lleva lo mismo que su tarjeta.
+        const opened = await inTenant(() =>
+          services().responses.getMyQuestionnaire(service.invitation, bayActor),
+        );
+        expect(opened).toMatchObject({
+          kind: 'SERVICE',
+          serviceName: 'LAB-01',
+          practitionerDisplayName: 'Dra. Ana Pérez',
+          attendedAt: await slotStart(service.booking),
+        });
+      });
+
+      it('si la reserva ya no se resuelve a un profesional, la tarjeta sigue ahí con el campo en null', async () => {
+        const orphanResource = randomUUID();
+        await sql(
+          `INSERT INTO scheduling.schedulable_resources (id, tenant_id, resource_type_concept_id,
+           resource_ref_type, resource_ref_id, name, state_concept_id, created_at, updated_at)
+         VALUES ($1, $2, $3, 'rooms', $4, 'Sala', $3, now(), now())`,
+          [orphanResource, TENANT, ANY, randomUUID()],
+        );
+        const room = await issued({});
+        // Después de emitida, la reserva pasa a un recurso que no es un profesional.
+        await sql(
+          `UPDATE scheduling.appointment_bookings SET resource_id = $2 WHERE id = $1`,
+          [room.booking, orphanResource],
+        );
+        await sql(
+          `UPDATE scheduling.bookable_slots SET resource_id = $2
+            WHERE id = (SELECT bookable_slot_id FROM scheduling.appointment_bookings WHERE id = $1)`,
+          [room.booking, orphanResource],
+        );
+
+        const list = await inTenant(() =>
+          services().responses.listMyInvitations(bayActor),
+        );
+
+        expect(list.find((i) => i.id === room.invitation)).toMatchObject({
+          kind: 'CONSULTATION',
+          practitionerDisplayName: null,
+        });
+      });
+
+      it('sin N+1: la cantidad de consultas a la base no crece con las invitaciones', async () => {
+        const solo = randomUUID();
+        const soloActor = {
+          id: randomUUID(),
+          roles: ['PATIENT'],
+          patientProfileId: solo,
+        } as AuthenticatedUser;
+        const emit = async (patient: string) => {
+          const booking = await insertBooking({ patient });
+          await inTenant(() =>
+            services().assignments.issueForBooking(
+              { appointmentBookingId: booking },
+              doctorActor,
+            ),
+          );
+        };
+        const countQueries = async (actor: AuthenticatedUser) => {
+          const connection = orm.em.getConnection();
+          const original = connection.execute.bind(connection);
+          let calls = 0;
+          (connection as any).execute = (...args: unknown[]) => {
+            calls += 1;
+            return (original as any)(...args);
+          };
+          try {
+            const result = await inTenant(() =>
+              services().responses.listMyInvitations(actor),
+            );
+            return { calls, size: result.length };
+          } finally {
+            (connection as any).execute = original;
+          }
+        };
+
+        await emit(solo);
+        const one = await countQueries(soloActor);
+        await emit(solo);
+        await emit(solo);
+        const three = await countQueries(soloActor);
+
+        expect(one.size).toBe(1);
+        expect(three.size).toBe(3);
+        expect(three.calls).toBe(one.calls);
       });
     });
 
