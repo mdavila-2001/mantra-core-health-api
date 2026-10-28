@@ -3903,7 +3903,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 17,
       "indices": 8,
-      "operaciones": 44,
+      "operaciones": 46,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -12186,7 +12186,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 27,
       "indices": 14,
-      "operaciones": 125,
+      "operaciones": 127,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12857,7 +12857,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 22,
       "indices": 15,
-      "operaciones": 125,
+      "operaciones": 127,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -12912,7 +12912,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 7,
-      "operaciones": 141,
+      "operaciones": 143,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12989,7 +12989,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 16,
       "indices": 6,
-      "operaciones": 19,
+      "operaciones": 21,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13000,7 +13000,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 7,
-      "operaciones": 130,
+      "operaciones": 132,
       "orm": "COINCIDE",
       "appendOnly": false
     },

@@ -28,7 +28,7 @@
 | [quotations](#quotations) | Representa cotizaciones de prestaciones ligadas a una práctica y a una persona paciente, para informar y acordar costos antes de la atención. | 20 | 9 | 3 | COINCIDE |
 | [receivable_payment_allocations](#receivable_payment_allocations) | Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se cancelaron obligaciones. | 11 | 7 | 10 | COINCIDE |
 | [reimbursements](#reimbursements) | Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servicios de salud. | 11 | 5 | 2 | COINCIDE |
-| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 17 | 8 | 44 | DIVERGE |
+| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 17 | 8 | 46 | DIVERGE |
 | [tax_codes](#tax_codes) | Cataloga códigos tributarios usados para calcular impuestos en documentos financieros del sistema médico. | 14 | 6 | 0 | COINCIDE |
 | [tax_periods](#tax_periods) | Define períodos tributarios para agrupar obligaciones y reportes fiscales de la organización sanitaria. | 13 | 4 | 0 | COINCIDE |
 | [vendors](#vendors) | Cataloga proveedores a quienes la organización sanitaria compra bienes o servicios. | 14 | 6 | 2 | COINCIDE |
@@ -1768,7 +1768,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: service_catalog`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `ServiceCatalog` — `src/modules/billing/entities/service_catalog.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 4 entrantes · 44 operaciones
+- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 4 entrantes · 46 operaciones
 
 #### Columnas
 
@@ -1869,6 +1869,8 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | PATCH /scheduling/service-offerings/{id} | LEE | DIRECTA |
 | POST /scheduling/service-offerings/{id}/holds | LEE | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
+| GET /surveys/me/invitations | LEE | POR_SQL |
+| GET /surveys/me/invitations/{id} | LEE | POR_SQL |
 | GET /surveys/templates/{id} | LEE | DIRECTA |
 
 #### Gobierno

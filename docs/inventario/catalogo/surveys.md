@@ -527,7 +527,7 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 | POST /surveys/invitations | ACTUALIZA | POR_TIPO |
 | POST /surveys/invitations | CREA | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
-| GET /surveys/me/invitations | LEE | DIRECTA |
+| GET /surveys/me/invitations | LEE | POR_SQL |
 | GET /surveys/me/invitations/{id} | LEE | DIRECTA |
 | GET /surveys/templates | LEE | DIRECTA |
 | POST /surveys/templates | CREA | DIRECTA |
@@ -619,7 +619,7 @@ Preserva versiones inmutables de cuestionarios para conocer qué preguntas se pr
 | POST /surveys/invitations | ACTUALIZA | POR_TIPO |
 | POST /surveys/invitations | CREA | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
-| GET /surveys/me/invitations | LEE | DIRECTA |
+| GET /surveys/me/invitations | LEE | POR_SQL |
 | GET /surveys/me/invitations/{id} | LEE | DIRECTA |
 | GET /surveys/templates | LEE | DIRECTA |
 | POST /surveys/templates | CREA | DIRECTA |

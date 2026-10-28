@@ -26,8 +26,8 @@ _Fuente: `src/modules/surveys/README.md:3`_
 | `ctrl:SurveysAssignmentsController` | Operaciones de SurveysAssignmentsController que el README no asigna a un caso de uso | POST /surveys/assignments | PRACTITIONER · CLINICIAN | MEDIO | 10 |
 |  |  | POST /surveys/invitations | PRACTITIONER · CLINICIAN | MEDIO | 16 |
 | `ctrl:SurveysInsightsController` | Operaciones de SurveysInsightsController que el README no asigna a un caso de uso | GET /surveys/insights | PRACTITIONER · CLINICIAN | BAJO | 11 |
-| `ctrl:SurveysPatientController` | Operaciones de SurveysPatientController que el README no asigna a un caso de uso | GET /surveys/me/invitations | Cualquier sesión válida | BAJO | 3 |
-|  |  | GET /surveys/me/invitations/{id} | Cualquier sesión válida | BAJO | 4 |
+| `ctrl:SurveysPatientController` | Operaciones de SurveysPatientController que el README no asigna a un caso de uso | GET /surveys/me/invitations | Cualquier sesión válida | BAJO | 9 |
+|  |  | GET /surveys/me/invitations/{id} | Cualquier sesión válida | BAJO | 10 |
 |  |  | POST /surveys/me/invitations/{id}/responses | Cualquier sesión válida | ALTO | 5 |
 | `ctrl:SurveysTemplatesController` | Operaciones de SurveysTemplatesController que el README no asigna a un caso de uso | GET /surveys/templates | PRACTITIONER · CLINICIAN | BAJO | 3 |
 |  |  | POST /surveys/templates | PRACTITIONER · CLINICIAN | MEDIO | 2 |
@@ -56,11 +56,12 @@ flowchart LR
   t8[("scheduling.schedulable_resources")]:::tabla
   t11[("surveys.survey_assignments")]:::tabla
   t14[("surveys.survey_answers")]:::tabla
-  t18[("surveys.survey_invitations")]:::tabla
-  t19[("surveys.survey_templates")]:::tabla
-  t20[("surveys.survey_versions")]:::tabla
-  t22[("surveys.survey_questions")]:::tabla
-  t24[("surveys.survey_responses")]:::tabla
+  t18[("profiles.persons")]:::tabla
+  t23[("surveys.survey_invitations")]:::tabla
+  t24[("surveys.survey_questions")]:::tabla
+  t25[("surveys.survey_responses")]:::tabla
+  t27[("surveys.survey_templates")]:::tabla
+  t28[("surveys.survey_versions")]:::tabla
   t9[("+4 tablas más")]
   t12[("+10 tablas más")]
   subgraph s0["ctrl:SurveysAssignmentsController · Operaciones de SurveysAssignmentsController…"]
@@ -71,24 +72,26 @@ flowchart LR
   subgraph s1["ctrl:SurveysInsightsController · Operaciones de SurveysInsightsController que e…"]
     o13["GET /surveys/insights"]:::op
   end
+  t19[("+3 tablas más")]
+  t21[("+4 tablas más")]
   subgraph s2["ctrl:SurveysPatientController · Operaciones de SurveysPatientController que el…"]
     o16["GET /surveys/me/invitations"]:::op
-    o21["GET /surveys/me/invitations/{id}"]:::op
-    o23["POST /surveys/me/invitations/{id}/responses"]:::op
+    o20["GET /surveys/me/invitations/{id}"]:::op
+    o22["POST /surveys/me/invitations/{id}/responses"]:::op
   end
   subgraph s3["ctrl:SurveysTemplatesController · Operaciones de SurveysTemplatesController que…"]
-    o25["GET /surveys/templates"]:::op
-    o26["POST /surveys/templates"]:::op
-    o27["GET /surveys/templates/{id}"]:::op
-    o28["PATCH /surveys/templates/{id}"]:::op
-    o29["POST /surveys/templates/{id}/deactivate"]:::op
-    o30["POST /surveys/templates/{id}/questions"]:::op
-    o31["DELETE /surveys/templates/{id}/questions/{questionId}"]:::op
-    o32["PATCH /surveys/templates/{id}/questions/{questionId}"]:::op
-    o33["PUT /surveys/templates/{id}/questions/order"]:::op
-    o34["GET /surveys/templates/{id}/responses"]:::op
-    o35["POST /surveys/templates/{id}/versions"]:::op
-    o36["POST /surveys/templates/{id}/versions/{versionNumber}/publish"]:::op
+    o26["GET /surveys/templates"]:::op
+    o29["POST /surveys/templates"]:::op
+    o30["GET /surveys/templates/{id}"]:::op
+    o31["PATCH /surveys/templates/{id}"]:::op
+    o32["POST /surveys/templates/{id}/deactivate"]:::op
+    o33["POST /surveys/templates/{id}/questions"]:::op
+    o34["DELETE /surveys/templates/{id}/questions/{questionId}"]:::op
+    o35["PATCH /surveys/templates/{id}/questions/{questionId}"]:::op
+    o36["PUT /surveys/templates/{id}/questions/order"]:::op
+    o37["GET /surveys/templates/{id}/responses"]:::op
+    o38["POST /surveys/templates/{id}/versions"]:::op
+    o39["POST /surveys/templates/{id}/versions/{versionNumber}/publish"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -115,77 +118,84 @@ flowchart LR
   o13 -->|"LEE"| t11
   o13 -.-> t15
   a17 --> o16
+  o16 -->|"LEE"| t3
   o16 -->|"LEE"| t18
-  o16 -->|"LEE"| t19
-  o16 -->|"LEE"| t20
-  a17 --> o21
-  o21 -->|"LEE"| t18
-  o21 -->|"LEE"| t22
-  o21 -->|"LEE"| t19
-  o21 -->|"LEE"| t20
-  a17 --> o23
-  o23 -->|"CREA"| t14
-  o23 -->|"ACTUALIZA"| t18
-  o23 -->|"LEE"| t18
-  o23 -->|"LEE"| t22
-  o23 -->|"CREA"| t24
-  a2 --> o25
-  o25 -->|"LEE"| t22
-  o25 -->|"LEE"| t19
-  o25 -->|"LEE"| t20
+  o16 -->|"LEE"| t5
+  o16 -->|"LEE"| t6
+  o16 -->|"LEE"| t7
+  o16 -->|"LEE"| t8
+  o16 -.-> t19
+  a17 --> o20
+  o20 -->|"LEE"| t3
+  o20 -->|"LEE"| t18
+  o20 -->|"LEE"| t5
+  o20 -->|"LEE"| t6
+  o20 -->|"LEE"| t7
+  o20 -->|"LEE"| t8
+  o20 -.-> t21
+  a17 --> o22
+  o22 -->|"CREA"| t14
+  o22 -->|"ACTUALIZA"| t23
+  o22 -->|"LEE"| t23
+  o22 -->|"LEE"| t24
+  o22 -->|"CREA"| t25
   a2 --> o26
-  o26 -->|"CREA"| t19
-  o26 -->|"CREA"| t20
-  a2 --> o27
-  o27 -->|"LEE"| t3
-  o27 -->|"LEE"| t11
-  o27 -->|"LEE"| t22
-  o27 -->|"LEE"| t19
-  o27 -->|"LEE"| t20
-  a2 --> o28
-  o28 -->|"ACTUALIZA"| t19
-  o28 -->|"LEE"| t19
-  o28 -->|"ACTUALIZA"| t20
-  o28 -->|"LEE"| t20
+  o26 -->|"LEE"| t24
+  o26 -->|"LEE"| t27
+  o26 -->|"LEE"| t28
   a2 --> o29
-  o29 -->|"ACTUALIZA"| t19
-  o29 -->|"LEE"| t19
+  o29 -->|"CREA"| t27
+  o29 -->|"CREA"| t28
   a2 --> o30
-  o30 -->|"CREA"| t22
-  o30 -->|"LEE"| t22
-  o30 -->|"LEE"| t19
-  o30 -->|"LEE"| t20
+  o30 -->|"LEE"| t3
+  o30 -->|"LEE"| t11
+  o30 -->|"LEE"| t24
+  o30 -->|"LEE"| t27
+  o30 -->|"LEE"| t28
   a2 --> o31
-  o31 -->|"BORRA"| t22
-  o31 -->|"LEE"| t22
-  o31 -->|"LEE"| t19
-  o31 -->|"LEE"| t20
+  o31 -->|"ACTUALIZA"| t27
+  o31 -->|"LEE"| t27
+  o31 -->|"ACTUALIZA"| t28
+  o31 -->|"LEE"| t28
   a2 --> o32
-  o32 -->|"ACTUALIZA"| t22
-  o32 -->|"LEE"| t22
-  o32 -->|"LEE"| t19
-  o32 -->|"LEE"| t20
+  o32 -->|"ACTUALIZA"| t27
+  o32 -->|"LEE"| t27
   a2 --> o33
-  o33 -->|"LEE"| t22
-  o33 -->|"LEE"| t19
-  o33 -->|"LEE"| t20
+  o33 -->|"CREA"| t24
+  o33 -->|"LEE"| t24
+  o33 -->|"LEE"| t27
+  o33 -->|"LEE"| t28
   a2 --> o34
-  o34 -->|"LEE"| t14
-  o34 -->|"LEE"| t18
-  o34 -->|"LEE"| t22
+  o34 -->|"BORRA"| t24
   o34 -->|"LEE"| t24
-  o34 -->|"LEE"| t19
-  o34 -->|"LEE"| t20
+  o34 -->|"LEE"| t27
+  o34 -->|"LEE"| t28
   a2 --> o35
-  o35 -->|"LEE"| t19
-  o35 -->|"CREA"| t20
-  o35 -->|"LEE"| t20
+  o35 -->|"ACTUALIZA"| t24
+  o35 -->|"LEE"| t24
+  o35 -->|"LEE"| t27
+  o35 -->|"LEE"| t28
   a2 --> o36
-  o36 -->|"LEE"| t22
-  o36 -->|"ACTUALIZA"| t19
-  o36 -->|"LEE"| t19
-  o36 -->|"ACTUALIZA"| t20
-  o36 -->|"LEE"| t20
+  o36 -->|"LEE"| t24
+  o36 -->|"LEE"| t27
+  o36 -->|"LEE"| t28
+  a2 --> o37
+  o37 -->|"LEE"| t14
+  o37 -->|"LEE"| t23
+  o37 -->|"LEE"| t24
+  o37 -->|"LEE"| t25
+  o37 -->|"LEE"| t27
+  o37 -->|"LEE"| t28
+  a2 --> o38
+  o38 -->|"LEE"| t27
+  o38 -->|"CREA"| t28
+  o38 -->|"LEE"| t28
+  a2 --> o39
+  o39 -->|"LEE"| t24
+  o39 -->|"ACTUALIZA"| t27
+  o39 -->|"LEE"| t27
+  o39 -->|"ACTUALIZA"| t28
+  o39 -->|"LEE"| t28
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -604,21 +614,12 @@ flowchart TD
   n7 --> n8
   n9[("LEE surveys.survey_invitations")]:::efecto
   n8 --> n9
-  n10["Repite: por cada const invitation de invitations"]:::bucle
+  n10["Llama a InvitationsRepository.listCardContext"]:::llamada
   n9 --> n10
-  n11["Llama a SurveysResponsesService.loadTemplateOfInvitation"]:::llamada
-  n10 -->|"cada elemento"| n11
-  n12["Llama a TemplatesRepository.findVersionById"]:::llamada
+  n11[("LEE surveys.survey_invitations · LEE surveys.survey_versions · LEE surveys.survey_templates · LEE scheduling.…")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
   n11 --> n12
-  n13[("LEE surveys.survey_versions")]:::efecto
-  n12 --> n13
-  n14["Llama a TemplatesRepository.findTemplateById"]:::llamada
-  n13 --> n14
-  n15[("LEE surveys.survey_templates")]:::efecto
-  n14 --> n15
-  n16(("200 Responde con éxito")):::ok
-  n15 --> n16
-  n10 -->|"al terminar"| n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -689,9 +690,13 @@ flowchart TD
   n22 -->|"sí"| n23
   n24[("LEE surveys.survey_questions")]:::efecto
   n23 --> n24
-  n25(("200 Responde con éxito")):::ok
+  n25["Llama a InvitationsRepository.listCardContext"]:::llamada
   n24 --> n25
   n22 -->|"no"| n25
+  n26[("LEE surveys.survey_invitations · LEE surveys.survey_versions · LEE surveys.survey_templates · LEE scheduling.…")]:::efecto
+  n25 --> n26
+  n27(("200 Responde con éxito")):::ok
+  n26 --> n27
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

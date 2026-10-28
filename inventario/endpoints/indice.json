@@ -27037,7 +27037,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -27053,7 +27053,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"

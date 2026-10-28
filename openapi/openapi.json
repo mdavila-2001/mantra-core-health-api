@@ -112746,11 +112746,12 @@
           },
           "displayMode": {
             "type": "string",
-            "description": "Modo de visualización del reviewer",
+            "description": "Modo de visualización del reviewer. Si no se envía, la reseña es ANONYMOUS (privacidad por defecto); el nombre real se muestra sólo si se pide REAL_NAME",
             "enum": [
               "REAL_NAME",
               "ANONYMOUS"
-            ]
+            ],
+            "default": "ANONYMOUS"
           },
           "dimensions": {
             "type": "array",

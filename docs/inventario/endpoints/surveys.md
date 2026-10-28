@@ -5,7 +5,7 @@
 - **Bloque:** —
 - **Operaciones:** 18 (18 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 2 · MEDIO 9 · BAJO 7
-- **Tablas distintas que tocan:** 13
+- **Tablas distintas que tocan:** 14
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/surveys.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -15,8 +15,8 @@
 | 1 | POST | `/surveys/assignments` | Asociar una encuesta a una consulta o servicio | MEDIO | 10 | PRACTITIONER, CLINICIAN |
 | 2 | GET | `/surveys/insights` | Resumen general de mis encuestas (agregado, sin pacientes) | BAJO | 11 | PRACTITIONER, CLINICIAN |
 | 3 | POST | `/surveys/invitations` | Emitir los cuestionarios de una atención completada | MEDIO | 16 | PRACTITIONER, CLINICIAN |
-| 4 | GET | `/surveys/me/invitations` | Ver mis cuestionarios | BAJO | 3 | sesión (sin roles) |
-| 5 | GET | `/surveys/me/invitations/{id}` | Abrir un cuestionario para responderlo | BAJO | 4 | sesión (sin roles) |
+| 4 | GET | `/surveys/me/invitations` | Ver mis cuestionarios | BAJO | 9 | sesión (sin roles) |
+| 5 | GET | `/surveys/me/invitations/{id}` | Abrir un cuestionario para responderlo | BAJO | 10 | sesión (sin roles) |
 | 6 | POST | `/surveys/me/invitations/{id}/responses` | Responder el cuestionario | ALTO | 5 | sesión (sin roles) |
 | 7 | GET | `/surveys/templates` | Listar mis encuestas | BAJO | 3 | PRACTITIONER, CLINICIAN |
 | 8 | POST | `/surveys/templates` | Crear una encuesta para pacientes | MEDIO | 2 | PRACTITIONER, CLINICIAN |
@@ -297,8 +297,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysAssignmentsService.resolveTargets → TargetsRepository.findPractitionerOfBooking | `src/modules/surveys/repositories/targets.repository.ts:176` |
 | `surveys.survey_assignments` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → AssignmentsRepository.create | `src/modules/surveys/repositories/assignments.repository.ts:143` |
 | `surveys.survey_assignments` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → AssignmentsRepository.listActiveByTargets | `src/modules/surveys/repositories/assignments.repository.ts:93` |
-| `surveys.survey_invitations` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → InvitationsRepository.create | `src/modules/surveys/repositories/invitations.repository.ts:173` |
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → InvitationsRepository.listByBooking | `src/modules/surveys/repositories/invitations.repository.ts:126` |
+| `surveys.survey_invitations` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → InvitationsRepository.create | `src/modules/surveys/repositories/invitations.repository.ts:203` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → InvitationsRepository.listByBooking | `src/modules/surveys/repositories/invitations.repository.ts:156` |
 | `surveys.survey_questions` | ESCRIBE | CREA | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize → TemplatesRepository.createQuestion | `src/modules/surveys/repositories/templates.repository.ts:365` |
 | `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.read → TemplatesRepository.countQuestions | `src/modules/surveys/repositories/templates.repository.ts:324` |
 | `surveys.survey_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysAssignmentsController.issueInvitations → SurveysAssignmentsService.issueForBooking → SurveysAssignmentsService.issue → SurveysSystemTemplatesService.ensureSystemTemplate → SurveysSystemTemplatesService.materialize | `src/modules/surveys/services/surveys-system-templates.service.ts:211` |
@@ -381,7 +381,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /surveys/me/invitations` la atiende `SurveysPatientController.listMyInvitations` (src/modules/surveys/controllers/surveys-patient.controller.ts:42). Exige sesión; el controlador no declara roles. Delega en `SurveysResponsesService.listMyInvitations`. Lee surveys.survey_invitations, surveys.survey_templates, surveys.survey_versions.
+`GET /surveys/me/invitations` la atiende `SurveysPatientController.listMyInvitations` (src/modules/surveys/controllers/surveys-patient.controller.ts:42). Exige sesión; el controlador no declara roles. Delega en `SurveysResponsesService.listMyInvitations`. Lee billing.service_catalog, profiles.persons, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, surveys.survey_invitations, surveys.survey_templates y 1 más.
 
 ### Requerimientos
 
@@ -396,9 +396,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.listInvitationsOf → InvitationsRepository.listByPatient | `src/modules/surveys/repositories/invitations.repository.ts:105` |
-| `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
-| `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:227` |
+| `billing.service_catalog` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → SurveysResponsesService.listInvitationsOf → InvitationsRepository.listByPatient | `src/modules/surveys/repositories/invitations.repository.ts:135` |
+| `surveys.survey_templates` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `surveys.survey_versions` | LEE | LEE | POR_SQL | SurveysPatientController.listMyInvitations → SurveysResponsesService.listMyInvitations → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
 
 ### Cuerpo
 
@@ -416,6 +422,10 @@ La operación no recibe cuerpo.
 | `expiresAt` | `string` | Sí | formato date-time | — | Valor de expires at mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:286` |
 | `answeredAt` | `string` | No | formato date-time | — | Valor de answered at mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:292` |
 | `appointmentBookingId` | `string` | Sí | formato uuid | — | Atención que la originó | `src/modules/surveys/dto/responses.dto.ts:298` |
+| `kind` | `string` | No | valores: CONSULTATION, SERVICE | — | Tipo de atención: SERVICE si la reserva fue de un servicio ofrecido, CONSULTATION si fue una consulta | `src/modules/surveys/dto/responses.dto.ts:308` |
+| `serviceName` | `string` | No | admite null | — | Servicio reservado; null en una consulta | `src/modules/surveys/dto/responses.dto.ts:318` |
+| `practitionerDisplayName` | `string` | No | admite null | — | Profesional que atendió; null si no se pudo determinar | `src/modules/surveys/dto/responses.dto.ts:328` |
+| `attendedAt` | `string` | No | formato date-time; admite null | — | Fecha y hora de la atención de la reserva | `src/modules/surveys/dto/responses.dto.ts:339` |
 
 ### Respuestas posibles
 
@@ -455,7 +465,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /surveys/me/invitations/{id}` la atiende `SurveysPatientController.getMyQuestionnaire` (src/modules/surveys/controllers/surveys-patient.controller.ts:51). Exige sesión; el controlador no declara roles. Delega en `SurveysResponsesService.getMyQuestionnaire`. Lee surveys.survey_invitations, surveys.survey_questions, surveys.survey_templates, surveys.survey_versions.
+`GET /surveys/me/invitations/{id}` la atiende `SurveysPatientController.getMyQuestionnaire` (src/modules/surveys/controllers/surveys-patient.controller.ts:51). Exige sesión; el controlador no declara roles. Delega en `SurveysResponsesService.getMyQuestionnaire`. Lee billing.service_catalog, profiles.persons, scheduling.appointment_bookings, scheduling.bookable_slots, scheduling.practitioner_service_offerings, scheduling.schedulable_resources, surveys.survey_invitations, surveys.survey_questions y 2 más.
 
 ### Requerimientos
 
@@ -471,7 +481,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findByIdForUpdate | `src/modules/surveys/repositories/invitations.repository.ts:81` |
+| `billing.service_catalog` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.practitioner_service_offerings` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → InvitationsRepository.listCardContext | `src/modules/surveys/repositories/invitations.repository.ts:235` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findByIdForUpdate | `src/modules/surveys/repositories/invitations.repository.ts:111` |
 | `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadQuestionnaire → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:309` |
 | `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
 | `surveys.survey_versions` | LEE | LEE | DIRECTA | SurveysPatientController.getMyQuestionnaire → SurveysResponsesService.getMyQuestionnaire → SurveysResponsesService.loadTemplateOfInvitation → TemplatesRepository.findVersionById | `src/modules/surveys/repositories/templates.repository.ts:227` |
@@ -490,7 +506,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `questions` | `array<QuestionDto>` | Sí | — | — | Valor de questions mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:307` |
+| `questions` | `array<QuestionDto>` | Sí | — | — | Valor de questions mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:348` |
 | `questions[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:55` |
 | `questions[].position` | `number` | Sí | — | — | Posición dentro del cuestionario | `src/modules/surveys/dto/responses.dto.ts:61` |
 | `questions[].questionText` | `string` | Sí | — | — | Enunciado | `src/modules/surveys/dto/responses.dto.ts:67` |
@@ -560,8 +576,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `surveys.survey_answers` | ESCRIBE | CREA | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → ResponsesRepository.createAnswer | `src/modules/surveys/repositories/responses.repository.ts:144` |
-| `surveys.survey_invitations` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse | `src/modules/surveys/services/surveys-responses.service.ts:188` |
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findByIdForUpdate | `src/modules/surveys/repositories/invitations.repository.ts:81` |
+| `surveys.survey_invitations` | ESCRIBE | ACTUALIZA | POR_TIPO | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse | `src/modules/surveys/services/surveys-responses.service.ts:212` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → SurveysResponsesService.loadOwnInvitation → InvitationsRepository.findByIdForUpdate | `src/modules/surveys/repositories/invitations.repository.ts:111` |
 | `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → SurveysResponsesService.loadQuestionnaire → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:309` |
 | `surveys.survey_responses` | ESCRIBE | CREA | DIRECTA | SurveysPatientController.submitResponse → SurveysResponsesService.submitResponse → ResponsesRepository.createResponse | `src/modules/surveys/repositories/responses.repository.ts:128` |
 
@@ -1543,7 +1559,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `surveys.survey_answers` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → ResponsesRepository.listAnswers | `src/modules/surveys/repositories/responses.repository.ts:114` |
-| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → InvitationsRepository.listByVersions | `src/modules/surveys/repositories/invitations.repository.ts:141` |
+| `surveys.survey_invitations` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → InvitationsRepository.listByVersions | `src/modules/surveys/repositories/invitations.repository.ts:171` |
 | `surveys.survey_questions` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → TemplatesRepository.listQuestions | `src/modules/surveys/repositories/templates.repository.ts:309` |
 | `surveys.survey_responses` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → ResponsesRepository.listByInvitations | `src/modules/surveys/repositories/responses.repository.ts:95` |
 | `surveys.survey_templates` | LEE | LEE | DIRECTA | SurveysTemplatesController.listResponses → SurveysResponsesService.listTemplateResponses → SurveysResponsesService.loadOwnedTemplate → TemplatesRepository.findTemplateById | `src/modules/surveys/repositories/templates.repository.ts:143` |
@@ -1563,18 +1579,17 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:369` |
-| `invitationId` | `string` | Sí | formato uuid | — | Identificador asociado a invitation. | `src/modules/surveys/dto/responses.dto.ts:375` |
-| `appointmentBookingId` | `string` | Sí | formato uuid | — | Identificador asociado a appointment booking. | `src/modules/surveys/dto/responses.dto.ts:381` |
-| `submittedAt` | `string` | Sí | formato date-time | — | Valor de submitted at mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:387` |
-| `answers` | `array<AnswerDto>` | Sí | — | — | Valor de answers mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:393` |
-| `answers[].questionId` | `string` | Sí | formato uuid | — | Identificador asociado a question. | `src/modules/surveys/dto/responses.dto.ts:316` |
-| `answers[].questionText` | `string` | Sí | — | — | Enunciado, para no tener que reunirlo aparte | `src/modules/surveys/dto/responses.dto.ts:322` |
-| `answers[].answerType` | `string` | Sí | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | — | Valor de answer type mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:328` |
-| `answers[].valueText` | `string` | No | — | — | Valor de value text mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:334` |
-| `answers[].valueNumber` | `number` | No | — | — | Valor de value number mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:340` |
-| `answers[].valueBoolean` | `boolean` | No | — | — | Valor de value boolean mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:346` |
-| `answers[].valueChoices` | `array<string>` | No | — | — | Valor de value choices mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:352` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/surveys/dto/responses.dto.ts:414` |
+| `invitationId` | `string` | Sí | formato uuid | — | Identificador asociado a invitation. | `src/modules/surveys/dto/responses.dto.ts:420` |
+| `submittedAt` | `string` | Sí | formato date-time | — | Día en que se envió la respuesta, redondeado a la medianoche UTC (sin hora, para preservar el anonimato) | `src/modules/surveys/dto/responses.dto.ts:430` |
+| `answers` | `array<AnswerDto>` | Sí | — | — | Valor de answers mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:436` |
+| `answers[].questionId` | `string` | Sí | formato uuid | — | Identificador asociado a question. | `src/modules/surveys/dto/responses.dto.ts:357` |
+| `answers[].questionText` | `string` | Sí | — | — | Enunciado, para no tener que reunirlo aparte | `src/modules/surveys/dto/responses.dto.ts:363` |
+| `answers[].answerType` | `string` | Sí | valores: TEXT, SCALE, BOOLEAN, SINGLE_CHOICE, MULTIPLE_CHOICE | — | Valor de answer type mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:369` |
+| `answers[].valueText` | `string` | No | — | — | Valor de value text mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:375` |
+| `answers[].valueNumber` | `number` | No | — | — | Valor de value number mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:381` |
+| `answers[].valueBoolean` | `boolean` | No | — | — | Valor de value boolean mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:387` |
+| `answers[].valueChoices` | `array<string>` | No | — | — | Valor de value choices mantenido por la instancia. | `src/modules/surveys/dto/responses.dto.ts:393` |
 
 ### Respuestas posibles
 
