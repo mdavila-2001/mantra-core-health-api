@@ -29,6 +29,7 @@ import {
   ConfirmPharmacyOrderDto,
   CreatePharmacyOrderDto,
   DispensePharmacyOrderDto,
+  PharmacyOrderConversationDto,
   PharmacyOrderDto,
   PharmacyOrderListResponseDto,
   RejectPharmacyOrderDto,
@@ -139,6 +140,27 @@ export class PharmacyOrdersController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PharmacyOrderDto> {
     return this.orders.getOrder(id, actor);
+  }
+
+  /**
+   * El chat del pedido: abre o reutiliza el hilo paciente ↔ vitrina de la
+   * farmacia. Titular o personal de la farmacia del pedido; terceros: 404.
+   * La autorización por recurso vive en el servicio (como `GET :id`).
+   */
+  @Post(':id/conversation')
+  @AccessLogged({ resourceType: 'PHARMACY_ORDER', resourceId: 'param:id' })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Abrir el chat del pedido con la farmacia',
+    description:
+      'Idempotente: devuelve el mismo hilo directo entre el paciente titular y la vitrina pública de la farmacia. Lo piden el titular o el personal (PHARMACY_STAFF con membresía activa) de la farmacia del pedido; cualquier tercero recibe 404. 422 con reason ORGANIZATION_CHAT_PROFILE_UNAVAILABLE (farmacia sin vitrina activa/verificada), PATIENT_CHAT_PROFILE_MISSING (paciente sin perfil comunitario; no se crea) o bloqueo entre perfiles.',
+  })
+  @ApiOkResponse({ type: PharmacyOrderConversationDto })
+  openConversation(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderConversationDto> {
+    return this.orders.openConversation(id, actor);
   }
 
   /** FAR-E1: cancelar el propio pedido (libera el stock reservado). */

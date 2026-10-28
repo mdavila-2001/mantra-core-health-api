@@ -17,7 +17,10 @@ import { ConversationsRepository } from '../repositories';
 // re-exporta `community-messaging.service.ts`, que importa este gateway — el
 // barrel cierra un ciclo que deja `CommunityVisibilityService` `undefined` en
 // tiempo de ejecución (Nest lo reporta como "dependencia en el índice [3]").
-import { CommunityVisibilityService } from '../services/community-visibility.service';
+import {
+  CommunityVisibilityService,
+  type MessagingProfileAccess,
+} from '../services/community-visibility.service';
 import { CommunityPresenceService } from '../services/community-presence.service';
 
 /** Un mensaje directo, tal como lo devuelve la lectura REST (`DirectMessageDto`). */
@@ -79,7 +82,29 @@ interface GatewaySocketData {
   user?: AuthenticatedUser;
   /** Con qué perfiles se unió este socket (bandeja o hilo), para la presencia. */
   profileIds?: Set<string>;
+  /**
+   * Perfiles de organización a los que este socket entró **por membresía**,
+   * con los hilos que abrió con cada uno. Es un acceso revocable: se vuelve a
+   * validar cada {@link STAFF_GRANT_RECHECK_MS}.
+   */
+  staffGrants?: Map<string, Set<string>>;
+  /** El temporizador de esa revalidación, mientras haya alguna concesión. */
+  staffRecheck?: ReturnType<typeof setInterval>;
 }
+
+/**
+ * Cada cuánto se revalida la membresía de un socket que entró a la bandeja de
+ * una organización por ser su personal.
+ *
+ * Unirse a una sala de socket.io es para siempre mientras el socket viva: sin
+ * esto, a quien le dieran de baja la membresía seguiría recibiendo en tiempo
+ * real los mensajes de la farmacia hasta cerrar la pestaña. No hay evento de
+ * dominio de «membresía terminada» que escuchar (y la baja tiene más de un
+ * camino: baja individual, suspensión del tenant), así que se revalida contra
+ * la base con un plazo corto: la ventana de exposición queda acotada a esto,
+ * aunque el cliente no mande nada.
+ */
+export const STAFF_GRANT_RECHECK_MS = 30_000;
 
 /** Tope de conversaciones a las que se avisa un cambio de presencia. */
 const CONVERSATIONS_BY_PRESENCE = 100;
@@ -176,6 +201,7 @@ export class CommunityMessagingGateway
    * «en línea»: cerrar una no lo apaga.
    */
   async handleDisconnect(client: Socket): Promise<void> {
+    this.stopStaffRecheck(client);
     const profiles = (client.data as GatewaySocketData).profileIds;
     if (!profiles || profiles.size === 0) return;
     for (const profileId of profiles) {
@@ -194,14 +220,22 @@ export class CommunityMessagingGateway
     if (!user || !body?.profileId) return;
 
     const em = this.em.fork();
+    let access: MessagingProfileAccess | void;
     try {
-      await this.visibility.assertOwnMessagingProfile(em, body.profileId, user);
+      access = await this.visibility.assertOwnMessagingProfile(
+        em,
+        body.profileId,
+        user,
+      );
     } catch {
       client.emit('error', { code: 'NOT_OWN_PROFILE', event: 'join:inbox' });
       return;
     }
     await client.join(this.profileRoom(body.profileId));
     this.rememberProfile(client, body.profileId);
+    if (access === 'ORGANIZATION_STAFF') {
+      this.rememberStaffGrant(client, body.profileId);
+    }
 
     // Entrar a la bandeja es estar en línea. Se avisa sólo cuando de verdad
     // cambió: renovar una presencia que ya existía no es noticia para nadie.
@@ -224,8 +258,13 @@ export class CommunityMessagingGateway
     if (!user || !body?.conversationId || !body?.profileId) return;
 
     const em = this.em.fork();
+    let access: MessagingProfileAccess | void;
     try {
-      await this.visibility.assertOwnMessagingProfile(em, body.profileId, user);
+      access = await this.visibility.assertOwnMessagingProfile(
+        em,
+        body.profileId,
+        user,
+      );
     } catch {
       client.emit('error', {
         code: 'NOT_OWN_PROFILE',
@@ -250,6 +289,9 @@ export class CommunityMessagingGateway
 
     await client.join(this.conversationRoom(body.conversationId));
     this.rememberProfile(client, body.profileId);
+    if (access === 'ORGANIZATION_STAFF') {
+      this.rememberStaffGrant(client, body.profileId, body.conversationId);
+    }
   }
 
   @SubscribeMessage('leave:conversation')
@@ -459,6 +501,84 @@ export class CommunityMessagingGateway
         'No se pudo empujar por WS; el REST ya lo guardó',
       );
     }
+  }
+
+  /**
+   * Revalida las concesiones por membresía de este socket y lo saca de las
+   * salas (bandeja y hilos) de las que ya no tiene derecho. Falla cerrado:
+   * si la comprobación no se puede hacer, se revoca —el cliente puede volver
+   * a unirse y la unión vuelve a validar—.
+   *
+   * Lo llama el temporizador de {@link STAFF_GRANT_RECHECK_MS}; es público
+   * para poder probarlo sin esperar el plazo.
+   */
+  async recheckStaffGrants(client: Socket): Promise<void> {
+    const data = client.data as GatewaySocketData;
+    const user = data.user;
+    const grants = data.staffGrants;
+    if (!grants || grants.size === 0) {
+      this.stopStaffRecheck(client);
+      return;
+    }
+    for (const [profileId, conversationIds] of [...grants]) {
+      let stillAllowed = false;
+      if (user) {
+        try {
+          await this.visibility.assertOwnMessagingProfile(
+            this.em.fork(),
+            profileId,
+            user,
+          );
+          stillAllowed = true;
+        } catch {
+          stillAllowed = false;
+        }
+      }
+      if (stillAllowed) continue;
+
+      grants.delete(profileId);
+      data.profileIds?.delete(profileId);
+      await client.leave(this.profileRoom(profileId));
+      for (const conversationId of conversationIds) {
+        await client.leave(this.conversationRoom(conversationId));
+      }
+      client.emit('error', {
+        code: 'NOT_OWN_PROFILE',
+        event: 'membership:recheck',
+        profileId,
+      });
+      this.logger.info(
+        { operation: 'community.gateway.staff-grant.revoked', profileId },
+        'Socket removed from an organization inbox: membership no longer valid',
+      );
+    }
+    if (grants.size === 0) this.stopStaffRecheck(client);
+  }
+
+  private rememberStaffGrant(
+    client: Socket,
+    profileId: string,
+    conversationId?: string,
+  ): void {
+    const data = client.data as GatewaySocketData;
+    data.staffGrants ??= new Map<string, Set<string>>();
+    const conversations = data.staffGrants.get(profileId) ?? new Set<string>();
+    if (conversationId) conversations.add(conversationId);
+    data.staffGrants.set(profileId, conversations);
+    if (!data.staffRecheck) {
+      const timer = setInterval(() => {
+        void this.recheckStaffGrants(client);
+      }, STAFF_GRANT_RECHECK_MS);
+      // No retiene el proceso vivo por un socket abierto.
+      timer.unref?.();
+      data.staffRecheck = timer;
+    }
+  }
+
+  private stopStaffRecheck(client: Socket): void {
+    const data = client.data as GatewaySocketData;
+    if (data.staffRecheck) clearInterval(data.staffRecheck);
+    data.staffRecheck = undefined;
   }
 
   private rememberProfile(client: Socket, profileId: string): void {

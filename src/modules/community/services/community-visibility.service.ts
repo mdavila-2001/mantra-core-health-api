@@ -11,6 +11,12 @@ import { COMM } from '../community.concepts';
 // Directo y no por el barrel: el barrel re-exporta servicios que importan éste.
 import { CommunityOrganizationStaffService } from './community-organization-staff.service';
 
+/** Por qué un actor puede leer la mensajería de un perfil. */
+export type MessagingProfileAccess =
+  | 'PLATFORM'
+  | 'HOLDER'
+  | 'ORGANIZATION_STAFF';
+
 /** Roles de plataforma que leen cualquier perfil. */
 const PLATFORM_ROLES = ['SECURITY_ADMIN', 'SUPERADMIN', 'SYSTEM'];
 
@@ -160,6 +166,9 @@ export class CommunityVisibilityService {
    * Sólo la mensajería lo usa. Publicar, reseñar, seguir o bloquear como la
    * organización siguen exigiendo la titularidad estricta.
    *
+   * @returns Por qué pasa. `ORGANIZATION_STAFF` es un acceso **revocable**
+   *   (depende de una membresía): quien lo conserve en el tiempo —el gateway,
+   *   con un socket abierto— tiene que volver a validarlo.
    * @throws ForbiddenException si el perfil no es suyo ni de una organización
    *   cuya bandeja atiende.
    */
@@ -167,11 +176,12 @@ export class CommunityVisibilityService {
     em: EntityManager,
     profileId: string,
     actor: AuthenticatedUser,
-  ): Promise<void> {
-    if (this.isPlatform(actor)) return;
+  ): Promise<MessagingProfileAccess> {
+    if (this.isPlatform(actor)) return 'PLATFORM';
     const profile = await this.profilesRepo.findById(em, profileId);
-    if (this.isHolder(profile, actor)) return;
-    if (await this.organizationStaff.canAttend(em, profile, actor)) return;
+    if (this.isHolder(profile, actor)) return 'HOLDER';
+    if (await this.organizationStaff.canAttend(em, profile, actor))
+      return 'ORGANIZATION_STAFF';
     throw new ForbiddenException(
       'Sólo el titular del perfil puede leer su contenido privado',
     );
