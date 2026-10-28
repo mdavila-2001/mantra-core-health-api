@@ -28,7 +28,7 @@ import { CommunityOrganizationStaffService } from './community-organization-staf
  *
  * Si ninguna resuelve, **no se avisa y no se falla**.
  *
- * La vitrina de una **organización** (farmacia o clínica) no la encarna ninguna
+ * La vitrina de un **tenant** (farmacia o clínica) no la encarna ninguna
  * cuenta: la atiende su personal. A ésa se le avisa a cada miembro activo que
  * atiende la bandeja (`CommunityOrganizationStaffService.attendantUserIds`) y
  * **nunca** a `created_by_user_id`, que en una vitrina proyectada al verificar
@@ -128,7 +128,10 @@ export class CommunityMessageNotificationsService {
     const profile = await this.profilesRepo.findById(em, profileId);
     if (!profile) return [];
 
-    if (this.organizationStaff.isOrganizationProfile(profile)) {
+    // Sólo la vitrina de un tenant se atiende por membresía. Una de tipo
+    // organización que no es de un tenant (SupportAdmin, con `target_id` = la
+    // cuenta del sistema) sigue avisando por vínculo o `created_by_user_id`.
+    if (await this.organizationStaff.isTenantBacked(em, profile)) {
       return this.organizationStaff.attendantUserIds(em, profile);
     }
 

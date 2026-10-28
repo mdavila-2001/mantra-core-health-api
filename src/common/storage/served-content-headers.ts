@@ -63,14 +63,28 @@ export function servedContentHeaders(
   const disposition = INLINE_MIME_TYPES.has(contentType)
     ? 'inline'
     : 'attachment';
-  // Codificado (RFC 5987): un nombre con comillas o saltos de línea podría
-  // inyectar cabeceras.
-  const filename = originalName
-    ? `; filename*=UTF-8''${encodeURIComponent(originalName)}`
-    : '';
+  const filename = encodedFilename(originalName);
   return {
     'Content-Type': contentType,
     'Content-Disposition': `${disposition}${filename}`,
     'X-Content-Type-Options': 'nosniff',
   };
+}
+
+/**
+ * El parámetro `filename*` (RFC 5987), o vacío.
+ *
+ * Codificado porque un nombre con comillas o saltos de línea podría inyectar
+ * cabeceras. `encodeURIComponent` lanza `URIError` ante un surrogate UTF-16
+ * suelto (un nombre mal formado que llega del cliente); en ese caso se omite el
+ * nombre en vez de convertir la descarga en un 500. `String#toWellFormed` lo
+ * resolvería, pero es ES2024 y el `lib` del proyecto es ES2023.
+ */
+function encodedFilename(originalName?: string | null): string {
+  if (!originalName) return '';
+  try {
+    return `; filename*=UTF-8''${encodeURIComponent(originalName)}`;
+  } catch {
+    return '';
+  }
 }

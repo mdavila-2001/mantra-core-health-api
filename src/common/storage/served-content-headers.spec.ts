@@ -63,4 +63,10 @@ describe('servedContentHeaders', () => {
     expect(headers['Content-Disposition']).not.toMatch(/[\r\n"]/);
     expect(headers['Content-Disposition']).toContain('%0D%0A');
   });
+
+  it('un nombre con un surrogate suelto omite el filename en vez de lanzar', () => {
+    const headers = servedContentHeaders('application/pdf', 'informe\uD800.pdf');
+    expect(headers['Content-Disposition']).toBe('attachment');
+    expect(headers['Content-Type']).toBe('application/pdf');
+  });
 });

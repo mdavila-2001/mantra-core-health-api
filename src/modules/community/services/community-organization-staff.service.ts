@@ -29,6 +29,12 @@ const INBOX_TENANT_ROLES: ReadonlySet<string> = new Set([
   DIR.ROLE_STAFF,
 ]);
 
+/** Roles de membresía que administran la vitrina de la organización. */
+const ADMIN_TENANT_ROLES: ReadonlySet<string> = new Set([
+  DIR.ROLE_OWNER,
+  DIR.ROLE_ADMIN,
+]);
+
 /**
  * Rol de runtime del personal de farmacia (lo materializa el login a partir de
  * una membresía activa en un tenant `PHARMACY`).
@@ -57,8 +63,8 @@ type OrganizationProfileRef = {
  *
  * ## Qué tan estrecha es
  *
- * Sólo para la **mensajería** (no publicar, reseñar ni seguir como la
- * organización), sólo para vitrinas de organización **activas**, y sólo con una
+ * `canAttend` es sólo para la **mensajería**, sólo para vitrinas de
+ * organización **activas**, y sólo con una
  * membresía **activa en la base** —no la lista de tenants del token, que es una
  * foto del login— en el tenant que la vitrina representa (`target_id`), con rol
  * OWNER, ADMIN o STAFF. Una vitrina de farmacia exige además el rol de runtime
@@ -82,7 +88,66 @@ export class CommunityOrganizationStaffService {
   }
 
   /**
+   * ¿Es la vitrina **de un tenant**? Organización por tipo y con un tenant
+   * real cuyo id es su `target_id`.
+   *
+   * No toda vitrina de tipo organización lo es: la de SupportAdmin tiene
+   * `target_id` = la cuenta del sistema, y la de una unidad diagnóstica,
+   * `target_id` = la unidad. Esas siguen las reglas de siempre (vínculo de
+   * cuenta y `created_by_user_id`); sólo la de un tenant se atiende y se
+   * administra por membresía.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param profile - La vitrina.
+   */
+  async isTenantBacked(
+    em: EntityManager,
+    profile: Pick<
+      OrganizationProfileRef,
+      'targetId' | 'targetTypeConceptId'
+    > | null,
+  ): Promise<boolean> {
+    if (!profile || !this.isOrganizationProfile(profile)) return false;
+    return (await em.count(Tenants, { id: profile.targetId })) > 0;
+  }
+
+  /**
+   * ¿Puede este actor **administrar** la vitrina de su organización (publicar,
+   * reseñar, responder reseñas, seguir, bloquear)? Membresía activa OWNER o
+   * ADMIN en el tenant de la vitrina. El STAFF atiende la bandeja, pero no
+   * firma el muro de la organización.
+   *
+   * Reemplaza, para vitrinas de tenant, a `created_by_user_id`: quien la creó
+   * es el administrador de plataforma que verificó el tenant, o quien subió el
+   * logo —que puede haber dejado la organización—, y ninguno de los dos es por
+   * eso su titular.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param profile - Vitrina de tenant (ver {@link isTenantBacked}).
+   * @param actor - La sesión.
+   */
+  async canAdminister(
+    em: EntityManager,
+    profile: Pick<OrganizationProfileRef, 'targetId'>,
+    actor: AuthenticatedUser,
+  ): Promise<boolean> {
+    const membership = await this.membershipsRepo.findActiveByUserTenant(
+      em,
+      actor.id,
+      profile.targetId,
+      DIR.MEMBERSHIP_ACTIVE,
+    );
+    return Boolean(
+      membership && ADMIN_TENANT_ROLES.has(membership.tenantRoleConceptId),
+    );
+  }
+
+  /**
    * ¿Puede este actor atender la bandeja de esta vitrina de organización?
+   *
+   * Implícitamente exige una vitrina de tenant: la membresía se busca con
+   * `tenant_id = target_id` (FK a `directory.tenants`), así que una vitrina
+   * cuyo `target_id` no es un tenant nunca la encuentra.
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param profile - La vitrina.
