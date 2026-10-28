@@ -2329,6 +2329,59 @@ describe('ProfilesPractitionersService', () => {
       );
     });
 
+    it('ADR-0028: homeDistrict viaja aparte de la calle y abre otra fila', async () => {
+      const d = build();
+      prepareForEdit(d, practitionerBase());
+      const current = {
+        id: 'addr-1',
+        lines: 'Calle Warnes 45',
+        districtText: 'Centro',
+      };
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(current);
+
+      await d.service.updateOwnPractitionerProfile(
+        { homeDistrict: 'Equipetrol' },
+        { id: 'u-1' } as any,
+      );
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          lines: 'Calle Warnes 45',
+          districtText: 'Equipetrol',
+        }),
+      );
+    });
+
+    it("ADR-0028: workDistrict '' borra el distrito del trabajo y conserva la calle", async () => {
+      const d = build();
+      prepareForEdit(d, practitionerBase());
+      const current = {
+        id: 'addr-work-1',
+        lines: 'Calle Ayacucho 241',
+        districtText: 'Casco Viejo',
+      };
+      d.addressesRepo.findCurrentByOwnerAndUse.mockImplementation(
+        (_em: unknown, _ownerId: string, useConceptId: string) =>
+          Promise.resolve(
+            useConceptId === CONCEPTS.ADDR_USE_WORK ? current : null,
+          ),
+      );
+
+      await d.service.updateOwnPractitionerProfile({ workDistrict: '' }, {
+        id: 'u-1',
+      } as any);
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          lines: 'Calle Ayacucho 241',
+          districtText: undefined,
+          useConceptId: CONCEPTS.ADDR_USE_WORK,
+        }),
+      );
+    });
+
     /** Sin dirección previa, la primera escritura no intenta cerrar nada. */
     it('sin dirección previa, sólo crea la nueva', async () => {
       const d = build();

@@ -56,6 +56,16 @@ export class OwnSiteAddressDto {
   @IsUUID()
   municipalityConceptId?: string;
 
+  /**
+   * Distrito o zona de la sede, tal como lo da el mapa (ADR-0028). Va en
+   * `common.addresses.district_text`, aparte de las líneas.
+   */
+  @ApiPropertyOptional({ maxLength: 200 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  district?: string;
+
   /** Departamento boliviano, miembro de `VS_BO_DEPARTMENT`. */
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()

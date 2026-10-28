@@ -102702,6 +102702,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "district": {
+            "type": "string",
+            "maxLength": 200
+          },
           "administrativeAreaConceptId": {
             "type": "string",
             "format": "uuid"
@@ -106534,6 +106538,16 @@
             "type": "string",
             "maxLength": 300,
             "description": "Dirección del lugar de trabajo. Vacío para quitarla."
+          },
+          "homeDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del domicilio. Vacío para quitarlo."
+          },
+          "workDistrict": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Distrito o zona del trabajo. Vacío para quitarlo."
           },
           "workLatitude": {
             "type": "object",
