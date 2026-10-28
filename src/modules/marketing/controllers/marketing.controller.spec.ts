@@ -34,6 +34,7 @@ function build() {
     exitEnrollment: mockFn(),
     createTrackedLink: mockFn(),
     registerClick: mockFn(),
+    issueTrackedLinkToken: mockFn(),
     recordTouchpoint: mockFn(),
     computeAttribution: mockFn(),
   };
@@ -214,20 +215,48 @@ describe('MarketingController', () => {
   });
 });
 
+describe('MarketingController · token de destinatario (MKT-03)', () => {
+  it('delegates the recipient token issuance', async () => {
+    const d = build();
+    const dto = { memberType: 'PATIENT', memberRefId: ID } as any;
+    d.journeysService.issueTrackedLinkToken.mockResolvedValue({
+      token: 't',
+      expiresAt: new Date(),
+    });
+
+    await d.controller.issueTrackedLinkToken(ID, dto);
+
+    expect(d.journeysService.issueTrackedLinkToken).toHaveBeenCalledWith(
+      ID,
+      dto,
+    );
+  });
+});
+
 describe('TrackedLinkRedirectController', () => {
-  it('resolves the link with the optional member identity (UC-50-10)', async () => {
+  it('resolves the link with the optional recipient token (UC-50-10, MKT-03)', async () => {
     const d = build();
     d.journeysService.registerClick.mockResolvedValue({
       targetUrl: 'https://x',
     });
 
-    await d.redirect.resolve('ABC123', 'CONTACT', ID);
+    await d.redirect.resolve('ABC123', 'opaque.token');
 
     expect(d.journeysService.registerClick).toHaveBeenCalledWith(
       'ABC123',
-      'CONTACT',
-      ID,
+      'opaque.token',
     );
+  });
+
+  it('does not accept the recipient identity as public parameters (MKT-03)', async () => {
+    const d = build();
+    d.journeysService.registerClick.mockResolvedValue({
+      targetUrl: 'https://x',
+    });
+
+    // La firma del handler sólo admite el código y el token: una identidad
+    // declarada en la query ya no llega al servicio.
+    expect(d.redirect.resolve.length).toBe(2);
   });
 
   it('resolves an anonymous click without member identity', async () => {
@@ -240,7 +269,6 @@ describe('TrackedLinkRedirectController', () => {
 
     expect(d.journeysService.registerClick).toHaveBeenCalledWith(
       'ABC123',
-      undefined,
       undefined,
     );
   });

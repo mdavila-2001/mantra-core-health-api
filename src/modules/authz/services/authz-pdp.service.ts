@@ -176,12 +176,19 @@ export class AuthzPdpService {
       dto.userId,
     );
     const now = Date.now();
+    // Una asignación concedida en otro tenant no cuenta en éste; la que no
+    // declara tenant es global (misma regla que `roleAuthorizesInTenant`).
     const directRoleIds = assignments
-      .filter((a) => this.isWithinWindow(a.validFrom, a.validTo, now))
+      .filter(
+        (a) =>
+          this.isWithinWindow(a.validFrom, a.validTo, now) &&
+          (!a.tenantId || a.tenantId === dto.tenantId),
+      )
       .map((a) => a.roleId);
     const effectiveRoleIds = await this.resolveRoleInheritance(
       em,
       directRoleIds,
+      dto.tenantId,
     );
 
     let hasAllow = false;
@@ -222,6 +229,8 @@ export class AuthzPdpService {
       for (const g of grants) {
         if (g.permissionId !== permission.id) continue;
         if (!this.isWithinWindow(g.validFrom, g.validTo, now)) continue;
+        // Una excepción acotada a otro tenant no aplica en éste.
+        if (g.tenantId && g.tenantId !== dto.tenantId) continue;
         if (g.effectConceptId === AUTHZ.EFFECT_DENY) {
           hasDeny = true;
           reasons.push('deny por excepción de usuario');
@@ -413,23 +422,39 @@ export class AuthzPdpService {
     };
   }
 
-  /** Expande un conjunto de roles con sus ancestros (herencia parent_role_id). */
+  /**
+   * Expande un conjunto de roles con sus ancestros (herencia parent_role_id).
+   *
+   * Un rol que ya no está activo, o que es de otro tenant, no concede nada ni
+   * propaga la herencia hacia su padre: ni el rol directo ni un ancestro
+   * desactivado o ajeno entran en el resultado.
+   */
   private async resolveRoleInheritance(
     em: EntityManager,
     roleIds: string[],
+    tenantId: string,
   ): Promise<string[]> {
-    const visited = new Set<string>();
+    const seen = new Set<string>();
+    const effective = new Set<string>();
     const queue = [...roleIds];
     while (queue.length > 0) {
       const id = queue.shift()!;
-      if (visited.has(id)) continue;
-      visited.add(id);
+      if (seen.has(id)) continue;
+      seen.add(id);
       const role = await this.rolesRepo.findById(em, id);
-      if (role?.parentRoleId && !visited.has(role.parentRoleId)) {
+      if (
+        role &&
+        (role.stateConceptId !== CONCEPTS.STATE_ACTIVE ||
+          (role.tenantId && role.tenantId !== tenantId))
+      ) {
+        continue;
+      }
+      effective.add(id);
+      if (role?.parentRoleId && !seen.has(role.parentRoleId)) {
         queue.push(role.parentRoleId);
       }
     }
-    return [...visited];
+    return [...effective];
   }
 
   /** Deriva la matriz de enmascaramiento (campos no legibles o con estrategia). */

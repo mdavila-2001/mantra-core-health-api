@@ -98,6 +98,69 @@ function whereOf(stack: string | undefined): { where?: string[] } {
   return frames.length > 0 ? { where: frames } : {};
 }
 
+/** Techo de marcos del stack en el log y de eslabones de la cadena de causas. */
+const MAX_LOG_FRAMES = 15;
+const MAX_CAUSE_DEPTH = 5;
+
+/**
+ * Forma de una excepción que **sí** puede escribirse en el log.
+ *
+ * Reemplaza a `{ err: exception }`: el serializador estándar de pino vuelca
+ * toda propiedad enumerable de la excepción, y en un error de base de datos
+ * eso incluye el `detail` de PostgreSQL (`Key (email)=(ana@…) already
+ * exists`), los parámetros de la consulta y un `message` de MikroORM que trae
+ * el SQL con los valores ya interpolados. En una plataforma de salud, esos
+ * valores son datos de pacientes.
+ *
+ * Lista permitida, no de denegación: tipo de la excepción y de su cadena de
+ * causas, SQLSTATE, restricción/tabla/columna (nombres de esquema, no de
+ * fila) y los marcos del stack sin la primera línea, que es el mensaje. El
+ * `message` sólo se escribe con `API_ERROR_DIAGNOSTICS=true` (entornos con
+ * datos sintéticos).
+ *
+ * @param exception - Lo que capturó el filtro.
+ * @param internals - SQLSTATE/restricción/tabla/columna ya extraídos por el filtro.
+ */
+export function safeErrorForLog(
+  exception: unknown,
+  internals?: unknown,
+): Record<string, unknown> {
+  const integrity = isRecord(internals) ? internals : {};
+  const error = exception instanceof Error ? exception : undefined;
+
+  const causes: string[] = [];
+  let current: unknown = error?.cause;
+  for (let depth = 0; depth < MAX_CAUSE_DEPTH && current; depth += 1) {
+    causes.push(
+      current instanceof Error
+        ? (current.constructor?.name ?? 'Error')
+        : typeof current,
+    );
+    current = (current as { cause?: unknown }).cause;
+  }
+
+  const frames = (error?.stack ?? '')
+    .split('\n')
+    .filter((line) => /^\s+at\s/.test(line))
+    .map((line) => line.trim())
+    .slice(0, MAX_LOG_FRAMES);
+
+  return {
+    type: error?.constructor?.name ?? typeof exception,
+    ...(causes.length > 0 ? { causes } : {}),
+    ...(typeof integrity.sqlstate === 'string'
+      ? { sqlstate: integrity.sqlstate }
+      : {}),
+    ...(integrity.constraint ? { constraint: integrity.constraint } : {}),
+    ...(integrity.table ? { table: integrity.table } : {}),
+    ...(integrity.column ? { column: integrity.column } : {}),
+    ...(errorDiagnosticsEnabled() && error?.message
+      ? { message: error.message.slice(0, MAX_MESSAGE_LENGTH) }
+      : {}),
+    ...(frames.length > 0 ? { stack: frames } : {}),
+  };
+}
+
 /**
  * Qué campos fallaron, en la forma que se puede escribir en el log: la ruta y
  * el nombre de la restricción. Los mensajes no, porque un mensaje propio de un

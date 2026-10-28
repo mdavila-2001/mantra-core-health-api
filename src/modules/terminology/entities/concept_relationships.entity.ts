@@ -36,6 +36,26 @@ export class ConceptRelationships {
   @Property({ columnType: 'int', nullable: true })
   ordinal?: number;
 
+  @Property({
+    fieldName: 'strength_score',
+    columnType: 'numeric',
+    nullable: true,
+  })
+  strengthScore?: string;
+
+  @Property({ fieldName: 'evidence_count', columnType: 'int', nullable: true })
+  evidenceCount?: number;
+
+  @Property({
+    fieldName: 'best_evidence_tier_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  bestEvidenceTierConceptId?: string;
+
+  @Property({ fieldName: 'frequency_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  frequencyConceptId?: string;
+
   /**
    * Fecha y hora en que se creó el registro.
    */

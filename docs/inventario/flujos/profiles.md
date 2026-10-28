@@ -24,9 +24,9 @@ _Fuente: `src/modules/profiles/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `H4 §C` | Search accounts by name to choose whom to ask (≥3 letters, ≤8 rows, CI masked) | GET /profiles/patients/me/dependent-candidates | Cualquier sesión válida | BAJO | 5 |
-|  |  | POST /profiles/patients/me/dependent-requests | Cualquier sesión válida | ALTO | 14 |
-|  |  | POST /profiles/patients/me/dependent-requests/{id}/accept | Cualquier sesión válida | ALTO | 13 |
-|  |  | POST /profiles/patients/me/dependent-requests/{id}/reject | Cualquier sesión válida | ALTO | 12 |
+|  |  | POST /profiles/patients/me/dependent-requests | Cualquier sesión válida | ALTO | 16 |
+|  |  | POST /profiles/patients/me/dependent-requests/{id}/accept | Cualquier sesión válida | ALTO | 15 |
+|  |  | POST /profiles/patients/me/dependent-requests/{id}/reject | Cualquier sesión válida | ALTO | 14 |
 |  |  | GET /profiles/patients/me/dependent-requests/incoming | Cualquier sesión válida | BAJO | 4 |
 |  |  | POST /profiles/patients/search | SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER | BAJO | 6 |
 | `P5 §3` | Clear the practitioner profile photo (the file is not deleted) | DELETE /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | ALTO | 16 |
@@ -55,13 +55,13 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | POST /profiles/credentials/{credentialId}/verify | SECURITY_ADMIN | MEDIO | 8 |
 |  |  | GET /profiles/practitioners | Cualquier sesión válida | BAJO | 4 |
 |  |  | POST /profiles/practitioners | SECURITY_ADMIN | MEDIO | 12 |
-|  |  | POST /profiles/practitioners/{profileId}/affiliations | SECURITY_ADMIN | MEDIO | 23 |
+|  |  | POST /profiles/practitioners/{profileId}/affiliations | SECURITY_ADMIN | MEDIO | 25 |
 |  |  | POST /profiles/practitioners/{profileId}/jurisdiction-authorizations | Cualquier sesión válida | ALTO | 5 |
 |  |  | POST /profiles/practitioners/{profileId}/specialties | Cualquier sesión válida | ALTO | 9 |
 |  |  | GET /profiles/practitioners/{profileId}/summary | Cualquier sesión válida | BAJO | 15 |
 |  |  | PATCH /profiles/practitioners/me | Cualquier sesión válida | ALTO | 26 |
 |  |  | GET /profiles/practitioners/me/affiliations | Cualquier sesión válida | BAJO | 3 |
-|  |  | POST /profiles/practitioners/me/affiliations | Cualquier sesión válida | ALTO | 23 |
+|  |  | POST /profiles/practitioners/me/affiliations | Cualquier sesión válida | ALTO | 25 |
 |  |  | DELETE /profiles/practitioners/me/affiliations/{affiliationId} | Cualquier sesión válida | ALTO | 4 |
 |  |  | PATCH /profiles/practitioners/me/affiliations/{affiliationId} | Cualquier sesión válida | ALTO | 4 |
 |  |  | POST /profiles/practitioners/me/credentials | Cualquier sesión válida | ALTO | 5 |
@@ -77,58 +77,57 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | GET /profiles/practitioners/me/summary | Cualquier sesión válida | BAJO | 15 |
 |  |  | GET /profiles/practitioners/specialty-counts | Cualquier sesión válida | BAJO | 2 |
 | `ctrl:TenantPractitionerRequestsController` | Operaciones de TenantPractitionerRequestsController que el README no asigna a un caso de uso | GET /tenants/{tenantId}/practitioner-requests | Cualquier sesión válida | BAJO | 5 |
-|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | Cualquier sesión válida | ALTO | 17 |
-|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | Cualquier sesión válida | ALTO | 17 |
-|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | Cualquier sesión válida | ALTO | 17 |
+|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | Cualquier sesión válida | ALTO | 19 |
+|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | Cualquier sesión válida | ALTO | 19 |
+|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | Cualquier sesión válida | ALTO | 19 |
 
 ### Diagrama 1 de 4 — etapas `H4 §C`, `P5 §3`, `ctrl:PractitionerSignatureAssetsController`
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a21(["SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER"]):::actor
+  a20(["SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER"]):::actor
   t3[("common.identifiers")]:::tabla
   t4[("profiles.patient_portal_proxies")]:::tabla
   t5[("profiles.patient_profiles")]:::tabla
   t6[("profiles.person_account_links")]:::tabla
   t7[("profiles.persons")]:::tabla
-  t9[("messaging.in_app_notifications")]:::tabla
-  t10[("messaging.message_channels")]:::tabla
-  t11[("messaging.messaging_providers")]:::tabla
-  t12[("messaging.notification_deliveries")]:::tabla
-  t15[("messaging.notification_requests")]:::tabla
-  t22[("terminology.value_set_members")]:::tabla
-  t23[("terminology.value_set_versions")]:::tabla
-  t24[("terminology.value_sets")]:::tabla
-  t26[("chart.clinical_note_headers")]:::tabla
-  t27[("chart.document_records")]:::tabla
-  t28[("clinical.encounters")]:::tabla
-  t29[("clinical.medication_requests")]:::tabla
-  t30[("common.addresses")]:::tabla
-  t31[("common.contact_points")]:::tabla
-  t36[("profiles.health_practitioner_profiles")]:::tabla
-  t38[("common.file_versions")]:::tabla
-  t39[("common.files")]:::tabla
-  t13[("+8 tablas más")]
-  t16[("+7 tablas más")]
-  t18[("+6 tablas más")]
+  t9[("iam.devices")]:::tabla
+  t10[("messaging.in_app_notifications")]:::tabla
+  t11[("messaging.message_channels")]:::tabla
+  t14[("messaging.messaging_providers")]:::tabla
+  t21[("terminology.value_set_members")]:::tabla
+  t22[("terminology.value_set_versions")]:::tabla
+  t23[("terminology.value_sets")]:::tabla
+  t25[("chart.clinical_note_headers")]:::tabla
+  t26[("chart.document_records")]:::tabla
+  t27[("clinical.encounters")]:::tabla
+  t28[("clinical.medication_requests")]:::tabla
+  t29[("common.addresses")]:::tabla
+  t30[("common.contact_points")]:::tabla
+  t35[("profiles.health_practitioner_profiles")]:::tabla
+  t37[("common.file_versions")]:::tabla
+  t38[("common.files")]:::tabla
+  t12[("+10 tablas más")]
+  t15[("+9 tablas más")]
+  t17[("+8 tablas más")]
   subgraph s0["H4 §C · Search accounts by name to choose whom to ask (≥3 letters, ≤8 rows, CI…"]
     o1["GET /profiles/patients/me/dependent-candidates"]:::op
     o8["POST /profiles/patients/me/dependent-requests"]:::op
-    o14["POST /profiles/patients/me/dependent-requests/{id}/accept"]:::op
-    o17["POST /profiles/patients/me/dependent-requests/{id}/reject"]:::op
-    o19["GET /profiles/patients/me/dependent-requests/incoming"]:::op
-    o20["POST /profiles/patients/search"]:::op
+    o13["POST /profiles/patients/me/dependent-requests/{id}/accept"]:::op
+    o16["POST /profiles/patients/me/dependent-requests/{id}/reject"]:::op
+    o18["GET /profiles/patients/me/dependent-requests/incoming"]:::op
+    o19["POST /profiles/patients/search"]:::op
   end
-  t32[("+10 tablas más")]
-  t34[("+12 tablas más")]
+  t31[("+10 tablas más")]
+  t33[("+12 tablas más")]
   subgraph s1["P5 §3 · Clear the practitioner profile photo (the file is not deleted)"]
-    o25["DELETE /profiles/practitioners/{profileId}/photo"]:::op
-    o33["PUT /profiles/practitioners/{profileId}/photo"]:::op
+    o24["DELETE /profiles/practitioners/{profileId}/photo"]:::op
+    o32["PUT /profiles/practitioners/{profileId}/photo"]:::op
   end
   subgraph s2["ctrl:PractitionerSignatureAssetsController · Operaciones de PractitionerSignatu…"]
-    o35["GET /profiles/practitioners/me/signature-assets"]:::op
-    o37["PUT /profiles/practitioners/me/signature-assets"]:::op
+    o34["GET /profiles/practitioners/me/signature-assets"]:::op
+    o36["PUT /profiles/practitioners/me/signature-assets"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -138,65 +137,65 @@ flowchart LR
   o1 -->|"LEE"| t7
   a2 --> o8
   o8 -->|"LEE"| t3
-  o8 -->|"CREA"| t9
+  o8 -->|"ACTUALIZA"| t9
   o8 -->|"LEE"| t9
+  o8 -->|"CREA"| t10
   o8 -->|"LEE"| t10
   o8 -->|"LEE"| t11
-  o8 -->|"CREA"| t12
-  o8 -.-> t13
-  a2 --> o14
-  o14 -->|"CREA"| t9
-  o14 -->|"LEE"| t9
-  o14 -->|"LEE"| t10
-  o14 -->|"LEE"| t11
-  o14 -->|"CREA"| t12
-  o14 -->|"CREA"| t15
-  o14 -.-> t16
-  a2 --> o17
-  o17 -->|"CREA"| t9
-  o17 -->|"LEE"| t9
-  o17 -->|"LEE"| t10
-  o17 -->|"LEE"| t11
-  o17 -->|"CREA"| t12
-  o17 -->|"CREA"| t15
-  o17 -.-> t18
-  a2 --> o19
-  o19 -->|"LEE"| t4
+  o8 -.-> t12
+  a2 --> o13
+  o13 -->|"ACTUALIZA"| t9
+  o13 -->|"LEE"| t9
+  o13 -->|"CREA"| t10
+  o13 -->|"LEE"| t10
+  o13 -->|"LEE"| t11
+  o13 -->|"LEE"| t14
+  o13 -.-> t15
+  a2 --> o16
+  o16 -->|"ACTUALIZA"| t9
+  o16 -->|"LEE"| t9
+  o16 -->|"CREA"| t10
+  o16 -->|"LEE"| t10
+  o16 -->|"LEE"| t11
+  o16 -->|"LEE"| t14
+  o16 -.-> t17
+  a2 --> o18
+  o18 -->|"LEE"| t4
+  o18 -->|"LEE"| t5
+  o18 -->|"LEE"| t6
+  o18 -->|"LEE"| t7
+  a20 --> o19
+  o19 -->|"LEE"| t3
   o19 -->|"LEE"| t5
-  o19 -->|"LEE"| t6
   o19 -->|"LEE"| t7
-  a21 --> o20
-  o20 -->|"LEE"| t3
-  o20 -->|"LEE"| t5
-  o20 -->|"LEE"| t7
-  o20 -->|"LEE"| t22
-  o20 -->|"LEE"| t23
-  o20 -->|"LEE"| t24
-  a2 --> o25
-  o25 -->|"LEE"| t26
-  o25 -->|"LEE"| t27
-  o25 -->|"LEE"| t28
-  o25 -->|"LEE"| t29
-  o25 -->|"LEE"| t30
-  o25 -->|"LEE"| t31
-  o25 -.-> t32
-  a2 --> o33
-  o33 -->|"LEE"| t26
-  o33 -->|"LEE"| t27
-  o33 -->|"LEE"| t28
-  o33 -->|"LEE"| t29
-  o33 -->|"LEE"| t30
-  o33 -->|"LEE"| t31
-  o33 -.-> t34
-  a2 --> o35
-  o35 -->|"LEE"| t36
-  o35 -->|"LEE"| t6
-  a2 --> o37
-  o37 -->|"LEE"| t38
-  o37 -->|"LEE"| t39
-  o37 -->|"ACTUALIZA"| t36
-  o37 -->|"LEE"| t36
-  o37 -->|"LEE"| t6
+  o19 -->|"LEE"| t21
+  o19 -->|"LEE"| t22
+  o19 -->|"LEE"| t23
+  a2 --> o24
+  o24 -->|"LEE"| t25
+  o24 -->|"LEE"| t26
+  o24 -->|"LEE"| t27
+  o24 -->|"LEE"| t28
+  o24 -->|"LEE"| t29
+  o24 -->|"LEE"| t30
+  o24 -.-> t31
+  a2 --> o32
+  o32 -->|"LEE"| t25
+  o32 -->|"LEE"| t26
+  o32 -->|"LEE"| t27
+  o32 -->|"LEE"| t28
+  o32 -->|"LEE"| t29
+  o32 -->|"LEE"| t30
+  o32 -.-> t33
+  a2 --> o34
+  o34 -->|"LEE"| t35
+  o34 -->|"LEE"| t6
+  a2 --> o36
+  o36 -->|"LEE"| t37
+  o36 -->|"LEE"| t38
+  o36 -->|"ACTUALIZA"| t35
+  o36 -->|"LEE"| t35
+  o36 -->|"LEE"| t6
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -389,63 +388,62 @@ flowchart LR
   t16[("profiles.jurisdiction_authorizations")]:::tabla
   t17[("profiles.person_profiles")]:::tabla
   t20[("directory.tenant_memberships")]:::tabla
-  t21[("messaging.in_app_notifications")]:::tabla
-  t22[("messaging.message_channels")]:::tabla
-  t23[("messaging.message_templates")]:::tabla
-  t24[("messaging.messaging_providers")]:::tabla
-  t25[("messaging.notification_deliveries")]:::tabla
-  t28[("common.file_versions")]:::tabla
-  t29[("common.files")]:::tabla
-  t33[("chart.clinical_note_headers")]:::tabla
-  t34[("chart.document_records")]:::tabla
-  t35[("clinical.encounters")]:::tabla
-  t36[("clinical.medication_requests")]:::tabla
-  t37[("common.addresses")]:::tabla
-  t38[("common.contact_points")]:::tabla
-  t51[("audit.jurisdiction_authorizations_history")]:::tabla
-  t52[("identity_assurance.identity_verification_cases")]:::tabla
-  t55[("terminology.catalog_concepts")]:::tabla
-  t56[("terminology.concept_properties")]:::tabla
-  t57[("terminology.value_set_members")]:::tabla
-  t58[("terminology.value_set_versions")]:::tabla
-  t59[("terminology.value_sets")]:::tabla
-  t61[("scheduling.bookable_slots")]:::tabla
+  t21[("iam.devices")]:::tabla
+  t22[("messaging.in_app_notifications")]:::tabla
+  t23[("messaging.message_channels")]:::tabla
+  t24[("messaging.message_templates")]:::tabla
+  t27[("common.file_versions")]:::tabla
+  t28[("common.files")]:::tabla
+  t32[("chart.clinical_note_headers")]:::tabla
+  t33[("chart.document_records")]:::tabla
+  t34[("clinical.encounters")]:::tabla
+  t35[("clinical.medication_requests")]:::tabla
+  t36[("common.addresses")]:::tabla
+  t37[("common.contact_points")]:::tabla
+  t50[("audit.jurisdiction_authorizations_history")]:::tabla
+  t51[("identity_assurance.identity_verification_cases")]:::tabla
+  t54[("terminology.catalog_concepts")]:::tabla
+  t55[("terminology.concept_properties")]:::tabla
+  t56[("terminology.value_set_members")]:::tabla
+  t57[("terminology.value_set_versions")]:::tabla
+  t58[("terminology.value_sets")]:::tabla
+  t60[("scheduling.bookable_slots")]:::tabla
   t9[("+2 tablas más")]
   t18[("+6 tablas más")]
-  t26[("+17 tablas más")]
-  t31[("+3 tablas más")]
-  t39[("+9 tablas más")]
-  t41[("+20 tablas más")]
-  t44[("+17 tablas más")]
-  t62[("+1 tablas más")]
-  t65[("+1 tablas más")]
-  t68[("+9 tablas más")]
+  t25[("+19 tablas más")]
+  t30[("+3 tablas más")]
+  t38[("+9 tablas más")]
+  t40[("+20 tablas más")]
+  t43[("+19 tablas más")]
+  t61[("+1 tablas más")]
+  t64[("+1 tablas más")]
+  t67[("+9 tablas más")]
   subgraph s0["ctrl:ProfilesPractitionersController · Operaciones de ProfilesPractitionersCont…"]
     o1["GET /profiles/credentials"]:::op
     o4["POST /profiles/credentials/{credentialId}/verify"]:::op
     o10["GET /profiles/practitioners"]:::op
     o15["POST /profiles/practitioners"]:::op
     o19["POST /profiles/practitioners/{profileId}/affiliations"]:::op
-    o27["POST /profiles/practitioners/{profileId}/jurisdiction-authorizations"]:::op
-    o30["POST /profiles/practitioners/{profileId}/specialties"]:::op
-    o32["GET /profiles/practitioners/{profileId}/summary"]:::op
-    o40["PATCH /profiles/practitioners/me"]:::op
-    o42["GET /profiles/practitioners/me/affiliations"]:::op
-    o43["POST /profiles/practitioners/me/affiliations"]:::op
-    o45["DELETE /profiles/practitioners/me/affiliations/{affiliationId}"]:::op
-    o46["PATCH /profiles/practitioners/me/affiliations/{affiliationId}"]:::op
-    o47["POST /profiles/practitioners/me/credentials"]:::op
-    o48["DELETE /profiles/practitioners/me/credentials/{credentialId}"]:::op
-    o49["PATCH /profiles/practitioners/me/credentials/{credentialId}"]:::op
-    o50["DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licens…"]:::op
-    o53["PATCH /profiles/practitioners/me/jurisdiction-authorizations/{license…"]:::op
-    o54["GET /profiles/practitioners/me/linkable-organizations"]:::op
-    o60["GET /profiles/practitioners/me/onboarding"]:::op
-    o63["DELETE /profiles/practitioners/me/specialties/{specialtyId}"]:::op
-    o64["PATCH /profiles/practitioners/me/specialties/{specialtyId}"]:::op
-    o66["PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary"]:::op
-    o67["GET /profiles/practitioners/me/summary"]:::op
-    o69["GET /profiles/practitioners/specialty-counts"]:::op
+    o26["POST /profiles/practitioners/{profileId}/jurisdiction-authorizations"]:::op
+    o29["POST /profiles/practitioners/{profileId}/specialties"]:::op
+    o31["GET /profiles/practitioners/{profileId}/summary"]:::op
+    o39["PATCH /profiles/practitioners/me"]:::op
+    o41["GET /profiles/practitioners/me/affiliations"]:::op
+    o42["POST /profiles/practitioners/me/affiliations"]:::op
+    o44["DELETE /profiles/practitioners/me/affiliations/{affiliationId}"]:::op
+    o45["PATCH /profiles/practitioners/me/affiliations/{affiliationId}"]:::op
+    o46["POST /profiles/practitioners/me/credentials"]:::op
+    o47["DELETE /profiles/practitioners/me/credentials/{credentialId}"]:::op
+    o48["PATCH /profiles/practitioners/me/credentials/{credentialId}"]:::op
+    o49["DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licens…"]:::op
+    o52["PATCH /profiles/practitioners/me/jurisdiction-authorizations/{license…"]:::op
+    o53["GET /profiles/practitioners/me/linkable-organizations"]:::op
+    o59["GET /profiles/practitioners/me/onboarding"]:::op
+    o62["DELETE /profiles/practitioners/me/specialties/{specialtyId}"]:::op
+    o63["PATCH /profiles/practitioners/me/specialties/{specialtyId}"]:::op
+    o65["PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary"]:::op
+    o66["GET /profiles/practitioners/me/summary"]:::op
+    o68["GET /profiles/practitioners/specialty-counts"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -472,139 +470,139 @@ flowchart LR
   o15 -.-> t18
   a2 --> o19
   o19 -->|"LEE"| t20
-  o19 -->|"CREA"| t21
-  o19 -->|"LEE"| t22
+  o19 -->|"ACTUALIZA"| t21
+  o19 -->|"LEE"| t21
+  o19 -->|"CREA"| t22
   o19 -->|"LEE"| t23
   o19 -->|"LEE"| t24
-  o19 -->|"CREA"| t25
-  o19 -.-> t26
-  a11 --> o27
-  o27 -->|"LEE"| t28
-  o27 -->|"LEE"| t29
-  o27 -->|"LEE"| t7
-  o27 -->|"CREA"| t16
-  o27 -->|"LEE"| t8
-  a11 --> o30
-  o30 -->|"LEE"| t7
-  o30 -->|"LEE"| t8
-  o30 -->|"ACTUALIZA"| t14
-  o30 -->|"CREA"| t14
-  o30 -->|"LEE"| t14
-  o30 -->|"LEE"| t3
-  o30 -.-> t31
-  a11 --> o32
-  o32 -->|"LEE"| t33
-  o32 -->|"LEE"| t34
-  o32 -->|"LEE"| t35
-  o32 -->|"LEE"| t36
-  o32 -->|"LEE"| t37
-  o32 -->|"LEE"| t38
-  o32 -.-> t39
-  a11 --> o40
-  o40 -->|"LEE"| t33
-  o40 -->|"LEE"| t34
-  o40 -->|"LEE"| t35
-  o40 -->|"LEE"| t36
-  o40 -->|"LEE"| t37
-  o40 -->|"ACTUALIZA"| t38
-  o40 -.-> t41
+  o19 -.-> t25
+  a11 --> o26
+  o26 -->|"LEE"| t27
+  o26 -->|"LEE"| t28
+  o26 -->|"LEE"| t7
+  o26 -->|"CREA"| t16
+  o26 -->|"LEE"| t8
+  a11 --> o29
+  o29 -->|"LEE"| t7
+  o29 -->|"LEE"| t8
+  o29 -->|"ACTUALIZA"| t14
+  o29 -->|"CREA"| t14
+  o29 -->|"LEE"| t14
+  o29 -->|"LEE"| t3
+  o29 -.-> t30
+  a11 --> o31
+  o31 -->|"LEE"| t32
+  o31 -->|"LEE"| t33
+  o31 -->|"LEE"| t34
+  o31 -->|"LEE"| t35
+  o31 -->|"LEE"| t36
+  o31 -->|"LEE"| t37
+  o31 -.-> t38
+  a11 --> o39
+  o39 -->|"LEE"| t32
+  o39 -->|"LEE"| t33
+  o39 -->|"LEE"| t34
+  o39 -->|"LEE"| t35
+  o39 -->|"LEE"| t36
+  o39 -->|"ACTUALIZA"| t37
+  o39 -.-> t40
+  a11 --> o41
+  o41 -->|"LEE"| t7
+  o41 -->|"LEE"| t8
+  o41 -->|"LEE"| t13
   a11 --> o42
-  o42 -->|"LEE"| t7
-  o42 -->|"LEE"| t8
-  o42 -->|"LEE"| t13
-  a11 --> o43
-  o43 -->|"LEE"| t20
-  o43 -->|"CREA"| t21
-  o43 -->|"LEE"| t22
-  o43 -->|"LEE"| t23
-  o43 -->|"LEE"| t24
-  o43 -->|"CREA"| t25
-  o43 -.-> t44
+  o42 -->|"LEE"| t20
+  o42 -->|"ACTUALIZA"| t21
+  o42 -->|"LEE"| t21
+  o42 -->|"CREA"| t22
+  o42 -->|"LEE"| t23
+  o42 -->|"LEE"| t24
+  o42 -.-> t43
+  a11 --> o44
+  o44 -->|"LEE"| t7
+  o44 -->|"LEE"| t8
+  o44 -->|"BORRA"| t13
+  o44 -->|"LEE"| t13
   a11 --> o45
   o45 -->|"LEE"| t7
   o45 -->|"LEE"| t8
-  o45 -->|"BORRA"| t13
+  o45 -->|"ACTUALIZA"| t13
   o45 -->|"LEE"| t13
   a11 --> o46
+  o46 -->|"LEE"| t27
+  o46 -->|"LEE"| t28
   o46 -->|"LEE"| t7
   o46 -->|"LEE"| t8
-  o46 -->|"ACTUALIZA"| t13
-  o46 -->|"LEE"| t13
+  o46 -->|"CREA"| t3
   a11 --> o47
-  o47 -->|"LEE"| t28
-  o47 -->|"LEE"| t29
   o47 -->|"LEE"| t7
   o47 -->|"LEE"| t8
-  o47 -->|"CREA"| t3
+  o47 -->|"BORRA"| t3
+  o47 -->|"LEE"| t3
   a11 --> o48
+  o48 -->|"LEE"| t27
+  o48 -->|"LEE"| t28
   o48 -->|"LEE"| t7
   o48 -->|"LEE"| t8
-  o48 -->|"BORRA"| t3
+  o48 -->|"ACTUALIZA"| t3
   o48 -->|"LEE"| t3
   a11 --> o49
-  o49 -->|"LEE"| t28
-  o49 -->|"LEE"| t29
+  o49 -->|"LEE"| t50
+  o49 -->|"LEE"| t51
   o49 -->|"LEE"| t7
+  o49 -->|"BORRA"| t16
+  o49 -->|"LEE"| t16
   o49 -->|"LEE"| t8
-  o49 -->|"ACTUALIZA"| t3
-  o49 -->|"LEE"| t3
-  a11 --> o50
-  o50 -->|"LEE"| t51
-  o50 -->|"LEE"| t52
-  o50 -->|"LEE"| t7
-  o50 -->|"BORRA"| t16
-  o50 -->|"LEE"| t16
-  o50 -->|"LEE"| t8
+  a11 --> o52
+  o52 -->|"LEE"| t27
+  o52 -->|"LEE"| t28
+  o52 -->|"LEE"| t51
+  o52 -->|"LEE"| t7
+  o52 -->|"LEE"| t16
+  o52 -->|"LEE"| t8
   a11 --> o53
-  o53 -->|"LEE"| t28
-  o53 -->|"LEE"| t29
-  o53 -->|"LEE"| t52
-  o53 -->|"LEE"| t7
-  o53 -->|"LEE"| t16
-  o53 -->|"LEE"| t8
-  a11 --> o54
-  o54 -->|"LEE"| t55
-  o54 -->|"LEE"| t56
-  o54 -->|"LEE"| t57
-  o54 -->|"LEE"| t58
-  o54 -->|"LEE"| t59
-  a11 --> o60
-  o60 -->|"LEE"| t7
-  o60 -->|"LEE"| t16
-  o60 -->|"LEE"| t8
-  o60 -->|"LEE"| t13
-  o60 -->|"LEE"| t14
-  o60 -->|"LEE"| t61
-  o60 -.-> t62
+  o53 -->|"LEE"| t54
+  o53 -->|"LEE"| t55
+  o53 -->|"LEE"| t56
+  o53 -->|"LEE"| t57
+  o53 -->|"LEE"| t58
+  a11 --> o59
+  o59 -->|"LEE"| t7
+  o59 -->|"LEE"| t16
+  o59 -->|"LEE"| t8
+  o59 -->|"LEE"| t13
+  o59 -->|"LEE"| t14
+  o59 -->|"LEE"| t60
+  o59 -.-> t61
+  a11 --> o62
+  o62 -->|"LEE"| t7
+  o62 -->|"LEE"| t8
+  o62 -->|"BORRA"| t14
+  o62 -->|"LEE"| t14
   a11 --> o63
   o63 -->|"LEE"| t7
   o63 -->|"LEE"| t8
-  o63 -->|"BORRA"| t14
+  o63 -->|"ACTUALIZA"| t14
   o63 -->|"LEE"| t14
-  a11 --> o64
-  o64 -->|"LEE"| t7
-  o64 -->|"LEE"| t8
-  o64 -->|"ACTUALIZA"| t14
-  o64 -->|"LEE"| t14
-  o64 -->|"LEE"| t57
-  o64 -->|"LEE"| t58
-  o64 -.-> t65
+  o63 -->|"LEE"| t56
+  o63 -->|"LEE"| t57
+  o63 -.-> t64
+  a11 --> o65
+  o65 -->|"LEE"| t7
+  o65 -->|"LEE"| t8
+  o65 -->|"ACTUALIZA"| t14
+  o65 -->|"LEE"| t14
   a11 --> o66
-  o66 -->|"LEE"| t7
-  o66 -->|"LEE"| t8
-  o66 -->|"ACTUALIZA"| t14
-  o66 -->|"LEE"| t14
-  a11 --> o67
-  o67 -->|"LEE"| t33
-  o67 -->|"LEE"| t34
-  o67 -->|"LEE"| t35
-  o67 -->|"LEE"| t36
-  o67 -->|"LEE"| t37
-  o67 -->|"LEE"| t38
-  o67 -.-> t68
-  a11 --> o69
-  o69 -->|"LEE"| t7
-  o69 -->|"LEE"| t14
+  o66 -->|"LEE"| t32
+  o66 -->|"LEE"| t33
+  o66 -->|"LEE"| t34
+  o66 -->|"LEE"| t35
+  o66 -->|"LEE"| t36
+  o66 -->|"LEE"| t37
+  o66 -.-> t67
+  a11 --> o68
+  o68 -->|"LEE"| t7
+  o68 -->|"LEE"| t14
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -621,18 +619,17 @@ flowchart LR
   t5[("profiles.jurisdiction_authorizations")]:::tabla
   t6[("profiles.persons")]:::tabla
   t7[("profiles.practitioner_affiliations")]:::tabla
-  t9[("messaging.in_app_notifications")]:::tabla
-  t10[("messaging.message_channels")]:::tabla
-  t11[("messaging.message_templates")]:::tabla
-  t12[("messaging.messaging_providers")]:::tabla
-  t13[("+11 tablas más")]
-  t15[("+11 tablas más")]
-  t17[("+11 tablas más")]
+  t9[("iam.devices")]:::tabla
+  t10[("messaging.in_app_notifications")]:::tabla
+  t11[("messaging.message_channels")]:::tabla
+  t12[("+13 tablas más")]
+  t14[("+13 tablas más")]
+  t16[("+13 tablas más")]
   subgraph s0["ctrl:TenantPractitionerRequestsController · Operaciones de TenantPractitionerRe…"]
     o1["GET /tenants/{tenantId}/practitioner-requests"]:::op
     o8["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve"]:::op
-    o14["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject"]:::op
-    o16["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke"]:::op
+    o13["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject"]:::op
+    o15["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -643,27 +640,27 @@ flowchart LR
   a2 --> o8
   o8 -->|"CREA"| t3
   o8 -->|"LEE"| t3
-  o8 -->|"CREA"| t9
-  o8 -->|"LEE"| t10
+  o8 -->|"ACTUALIZA"| t9
+  o8 -->|"LEE"| t9
+  o8 -->|"CREA"| t10
   o8 -->|"LEE"| t11
-  o8 -->|"LEE"| t12
-  o8 -.-> t13
-  a2 --> o14
-  o14 -->|"CREA"| t3
-  o14 -->|"LEE"| t3
-  o14 -->|"CREA"| t9
-  o14 -->|"LEE"| t10
-  o14 -->|"LEE"| t11
-  o14 -->|"LEE"| t12
-  o14 -.-> t15
-  a2 --> o16
-  o16 -->|"CREA"| t3
-  o16 -->|"LEE"| t3
-  o16 -->|"CREA"| t9
-  o16 -->|"LEE"| t10
-  o16 -->|"LEE"| t11
-  o16 -->|"LEE"| t12
-  o16 -.-> t17
+  o8 -.-> t12
+  a2 --> o13
+  o13 -->|"CREA"| t3
+  o13 -->|"LEE"| t3
+  o13 -->|"ACTUALIZA"| t9
+  o13 -->|"LEE"| t9
+  o13 -->|"CREA"| t10
+  o13 -->|"LEE"| t11
+  o13 -.-> t14
+  a2 --> o15
+  o15 -->|"CREA"| t3
+  o15 -->|"LEE"| t3
+  o15 -->|"ACTUALIZA"| t9
+  o15 -->|"LEE"| t9
+  o15 -->|"CREA"| t10
+  o15 -->|"LEE"| t11
+  o15 -.-> t16
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1610,8 +1607,17 @@ flowchart TD
   n57 -->|"no"| n59
   n60(["404 NOT_FOUND El proveedor configurado para el canal in-app no existe"]):::error
   n59 -->|"sí"| n60
-  n61(("201 Responde con éxito")):::ok
+  n61{"!result.suppressed && result.inAppNotificationId && result.availableAt && new Date(result.availableAt).getTim…"}:::decision
   n59 -->|"no"| n61
+  n62["Llama a WebPushService.pushToUser"]:::llamada
+  n61 -->|"sí"| n62
+  n63["Intenta"]:::intento
+  n62 --> n63
+  n64[("LEE iam.devices")]:::efecto
+  n63 --> n64
+  n65(("201 Responde con éxito")):::ok
+  n64 --> n65
+  n61 -->|"no"| n65
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

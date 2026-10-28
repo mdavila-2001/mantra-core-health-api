@@ -3,9 +3,11 @@
 // `|`) → nodos de la taxonomía `fda-product-code`.
 //
 // El archivo oficial se baja de https://www.fda.gov/medical-devices/classify-your-medical-device/download-product-code-classification-files
-// (se actualiza los domingos). Desde este entorno la FDA no responde (403 del
-// proxy), así que se lee una copia publicada en git (ver `sources.mjs`); el
-// parser es el mismo para el oficial: misma cabecera.
+// (se actualiza los domingos). Desde este entorno la FDA no lo entrega (403 del
+// proxy hasta la pasada 10; detección de abuso después), así que se lee una
+// copia publicada en git (ver `sources.mjs`); el parser es el mismo para el
+// oficial: misma cabecera. Desde la pasada 11 la principal es openFDA
+// (`openfda-classification.mjs`), con las mismas columnas.
 // =============================================================================
 
 import { IVD_PARTS, classifyRegulation } from './cfr.mjs';

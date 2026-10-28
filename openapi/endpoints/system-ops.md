@@ -122,6 +122,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -260,6 +261,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FindingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FindingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -418,6 +420,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RemediationPlanResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RemediationPlanResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RemediationPlanResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RemediationPlanResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RemediationPlanResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -561,6 +564,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -695,6 +699,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DraftResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -822,6 +827,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DraftResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DraftResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1020,6 +1026,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EntityRegistryResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EntityRegistryResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EntityRegistryResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EntityRegistryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EntityRegistryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1158,6 +1165,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1285,6 +1293,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1414,6 +1423,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1538,6 +1548,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1671,6 +1682,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1793,6 +1805,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1950,6 +1963,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<FrameworkResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<FrameworkResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<FrameworkResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FrameworkResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FrameworkResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2083,6 +2097,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2226,6 +2241,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2357,6 +2373,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2487,6 +2504,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2511,7 +2529,11 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | El tenant o la política de residencia no existen | Excepción explícita en src/modules/system_ops/services/residency.service.ts |
+| 404 | `NOT_FOUND` | Una de las regiones indicadas no existe | Excepción explícita en src/modules/system_ops/services/residency.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La política de residencia no está activa | Excepción explícita en src/modules/system_ops/services/residency.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una de las regiones queda fuera de las que la política permite | Excepción explícita en src/modules/system_ops/services/residency.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2624,6 +2646,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2767,6 +2790,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2907,6 +2931,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3047,6 +3072,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IdResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IdResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3141,6 +3167,7 @@ Content-Type: application/json
 | `retentionPolicyId` | Sí | `string` | formato `uuid` | Política de retención ACTIVE a ejecutar | `00000000-0000-4000-8000-000000000001` |
 | `entityRegistryId` | Sí | `string` | formato `uuid` | Entidad objetivo del registro (entity_registry.id) | `00000000-0000-4000-8000-000000000001` |
 | `maxBatchSize` | No | `number` | mínimo 1 | Tamaño máximo de lote a barrer | `1` |
+| `cursor` | No | `string` | formato `uuid` | Cursor devuelto por la corrida anterior (`nextCursor`); continúa tras esa fila | `00000000-0000-4000-8000-000000000001` |
 
 ### Payload completo de ejemplo
 
@@ -3155,7 +3182,8 @@ Content-Type: application/json
 {
   "retentionPolicyId": "00000000-0000-4000-8000-000000000001",
   "entityRegistryId": "00000000-0000-4000-8000-000000000001",
-  "maxBatchSize": 1
+  "maxBatchSize": 1,
+  "cursor": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -3172,6 +3200,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RetentionExecutionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RetentionExecutionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RetentionExecutionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RetentionExecutionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RetentionExecutionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3183,7 +3212,10 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "totalDeleted": 1,
   "totalAnonymized": 1,
   "totalArchived": 1,
-  "blockedByLegalHold": true
+  "blockedByLegalHold": true,
+  "totalHeld": 1,
+  "hasMore": true,
+  "nextCursor": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -3198,6 +3230,9 @@ Campos de la respuesta:
 | `totalAnonymized` | Sí | `number` | Sin restricción adicional declarada | Valor de total anonymized mantenido por la instancia. | `1` |
 | `totalArchived` | Sí | `number` | Sin restricción adicional declarada | Valor de total archived mantenido por la instancia. | `1` |
 | `blockedByLegalHold` | No | `boolean` | Sin restricción adicional declarada | true si se detuvo por legal hold activo | `true` |
+| `totalHeld` | No | `number` | Sin restricción adicional declarada | Filas vencidas conservadas por legal hold activo | `1` |
+| `hasMore` | No | `boolean` | Sin restricción adicional declarada | true si el lote se llenó y quedan filas vencidas sin examinar; repetir con `cursor` | `true` |
+| `nextCursor` | No | `string` | formato `uuid` | Cursor para continuar el barrido cuando `hasMore` es true | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -3212,6 +3247,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Entidad objetivo no encontrada | Excepción explícita en src/modules/system_ops/services/retention-execution.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La política de retención no está ACTIVE | Excepción explícita en src/modules/system_ops/services/retention-execution.service.ts |
+| 422 | `PRECONDITION_FAILED` | La entidad no tiene un ejecutor de retención registrado | Excepción explícita en src/modules/system_ops/services/retention-execution.service.ts |
+| 422 | `PRECONDITION_FAILED` | La política de retención no declara plazo y disposición ejecutables | Excepción explícita en src/modules/system_ops/services/retention-execution.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -3321,6 +3358,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RestoreTestRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RestoreTestRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RestoreTestRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RestoreTestRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RestoreTestRunResponseDto`. Ejemplo completo derivado de ese DTO:
 

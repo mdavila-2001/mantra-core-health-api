@@ -122,6 +122,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EquipmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EquipmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EquipmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EquipmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EquipmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -150,7 +151,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Equipo no encontrado | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-equipment.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-unit-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -236,6 +237,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -260,7 +262,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Oferta no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-studies.service.ts |
 | 409 | `CONFLICT` | La oferta ya está retirada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-studies.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -364,6 +365,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccreditationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -394,7 +396,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Acreditación no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -498,6 +499,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SiteResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -532,7 +534,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -646,6 +647,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<EquipmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<EquipmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<EquipmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EquipmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EquipmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -674,7 +676,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-equipment.service.ts |
 | 409 | `CONFLICT` | Ya existe un equipo con ese número de serie en el sitio | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-equipment.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El sitio no está activo | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-equipment.service.ts |
@@ -756,6 +757,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<DiagnosticUnitDirectoryResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DiagnosticUnitDirectoryResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DiagnosticUnitDirectoryResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DiagnosticUnitDirectoryResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticUnitDirectoryResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -859,7 +861,6 @@ Authorization: Bearer <access_token_jwt>
 Content-Type: application/json
 
 {
-  "tenantId": "00000000-0000-4000-8000-000000000001",
   "code": "CODIGO_EJEMPLO",
   "name": "Nombre de ejemplo"
 }
@@ -875,7 +876,7 @@ Content-Type: application/json
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `tenantId` | Sí | `string` | formato `uuid` | Tenant propietario de la unidad | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | No | `string` | formato `uuid` | Se ignora como propietario: la unidad pertenece al tenant activo (X-Tenant-Id). Si se envía y no coincide, responde 404. | `00000000-0000-4000-8000-000000000001` |
 | `code` | Sí | `string` | longitud mínima 1; longitud máxima 60 | Código único de la unidad en el tenant | `CODIGO_EJEMPLO` |
 | `name` | Sí | `string` | longitud mínima 1; longitud máxima 200 | Nombre de la unidad | `Nombre de ejemplo` |
 | `diagnosticUnitTypeConceptId` | No | `string` | formato `uuid` | Tipo de unidad (concept id) | `00000000-0000-4000-8000-000000000001` |
@@ -947,6 +948,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DiagnosticUnitResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DiagnosticUnitResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DiagnosticUnitResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DiagnosticUnitResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticUnitResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -985,6 +987,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-unit-scope.service.ts |
 | 409 | `CONFLICT` | El código ya existe en el tenant | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1069,6 +1072,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<DiagnosticUnitDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DiagnosticUnitDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DiagnosticUnitDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DiagnosticUnitDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticUnitDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1361,6 +1365,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccreditationResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccreditationResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1391,7 +1396,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-unit-scope.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La unidad no está activa | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1477,6 +1482,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `Promise<DiagnosticUnitAdminDetailDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DiagnosticUnitAdminDetailDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DiagnosticUnitAdminDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DiagnosticUnitAdminDetailDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticUnitAdminDetailDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1892,6 +1898,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssignmentResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssignmentResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1918,7 +1925,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-unit-scope.service.ts |
 | 409 | `CONFLICT` | El profesional ya tiene una asignación activa en ese rol/sitio | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La unidad no está activa | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
@@ -2036,6 +2043,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<PriceScheduleResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<PriceScheduleResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<PriceScheduleResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PriceScheduleResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PriceScheduleResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2064,7 +2072,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-pricing.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-unit-scope.service.ts |
 | 409 | `CONFLICT` | El código de cronograma ya existe en la unidad | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-pricing.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La unidad no está activa | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-pricing.service.ts |
@@ -2152,6 +2160,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<ReprojectResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReprojectResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReprojectResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReprojectResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReprojectResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2178,7 +2187,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2285,6 +2293,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SiteResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SiteResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2319,7 +2328,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La unidad no está activa | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -2431,6 +2439,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<SpecialtiesResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<SpecialtiesResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<SpecialtiesResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SpecialtiesResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SpecialtiesResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2457,7 +2466,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | A lo sumo una especialidad puede ser primaria | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 422 | `PRECONDITION_FAILED` | La unidad no está activa | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
@@ -2600,6 +2608,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StudyOfferingResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StudyOfferingResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StudyOfferingResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StudyOfferingResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StudyOfferingResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2630,7 +2639,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-studies.service.ts |
+| 404 | `NOT_FOUND` | Sitio no encontrado | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-unit-scope.service.ts |
 | 409 | `CONFLICT` | El código de estudio ya existe en la unidad | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-studies.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La unidad no está activa | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-studies.service.ts |
@@ -2719,6 +2728,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<DiagnosticUnitResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DiagnosticUnitResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DiagnosticUnitResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DiagnosticUnitResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticUnitResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2757,9 +2767,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Unidad no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 422 | `PRECONDITION_FAILED` | La unidad no tiene ningún sitio activo para publicar | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 422 | `PRECONDITION_FAILED` | La unidad no está activa | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
+| 422 | `PRECONDITION_FAILED` | El laboratorio no se publica hasta que la plataforma verifique a su organización con la matrícula del SEPREC, la licencia de funcionamiento y el certificado del SEDES | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-units.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2839,6 +2849,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<DiagnosticUnitAdminListDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<DiagnosticUnitAdminListDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<DiagnosticUnitAdminListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<DiagnosticUnitAdminListDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DiagnosticUnitAdminListDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2936,13 +2947,13 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, prestaciones, precio y calificación. A diferencia del directorio, no se acota a la organización de la sesión: quien busca dónde hacerse un estudio busca en la ciudad, no en su institución.
+Filtra por texto, tipo, estudio ofrecido, convenio con aseguradora, prestaciones, precio y calificación. A diferencia del directorio, no se acota a la organización de la sesión: quien busca dónde hacerse un estudio busca en la ciudad, no en su institución. Con `studyConceptIds` responde por cobertura —cada centro con `complete`, `missingStudyConceptIds` y `distanceKm`—: completos primero, después por distancia en línea recta desde `lat`/`lng`.
 
-Contexto declarado en el controlador: El buscador del paciente: centros publicados de toda la plataforma — CARRIL 11. Va declarado **antes** que `:id` por el mismo motivo que la consola de administración: el parámetro lleva `ParseUUIDPipe` y se comería `search`. No lleva `@Roles` porque es un directorio de prestadores publicados, no datos de nadie: qué centros hay, qué hacen y cuánto cuestan. Exigir un rol lo dejaría fuera del alcance del paciente, que es para quien existe.
+Contexto declarado en el controlador: El buscador del paciente: centros publicados de toda la plataforma — CARRIL 11. Va declarado **antes** que `:id` por el mismo motivo que la consola de administración: el parámetro lleva `ParseUUIDPipe` y se comería `search`. No lleva `@Roles` porque es un directorio de prestadores publicados, no datos de nadie: qué centros hay, qué hacen y cuánto cuestan. Exigir un rol lo dejaría fuera del alcance del paciente, que es para quien existe. Con `studyConceptIds` responde por cobertura: si cada centro tiene todos los estudios pedidos, cuáles le faltan y a qué distancia queda. Sin ese parámetro la respuesta es la de siempre.
 
 ### Descripción del sistema
 
-NestJS resuelve `GET /diagnostic-units/search` en `DiagnosticUnitsController_search`. El controlador delega en `DiagnosticUnitsSearchService.search`. No recibe body. El tipo de retorno estático es `Promise<SearchDiagnosticUnitsResponseDto>`.
+NestJS resuelve `GET /diagnostic-units/search` en `DiagnosticUnitsController_search`. El controlador delega en `DiagnosticUnitsSearchService.searchCoverage`, `DiagnosticUnitsSearchService.search`. No recibe body. El tipo de retorno estático es `Promise<SearchDiagnosticUnitsResponseDto>`.
 
 ### Parámetros
 
@@ -2952,6 +2963,9 @@ NestJS resuelve `GET /diagnostic-units/search` en `DiagnosticUnitsController_sea
 | `tenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `kind` | query | No | `string` | valores: `LABORATORY`, `IMAGING` | Sin descripción específica en OpenAPI. | `LABORATORY` |
 | `studyCode` | query | No | `string` | Sin restricción adicional declarada | Código del estudio buscado | `CODIGO_EJEMPLO` |
+| `studyConceptIds` | query | No | `string` | Sin restricción adicional declarada | Conceptos de estudio separados por coma (uuid). Activa la búsqueda por cobertura. | `1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c,2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d` |
+| `lat` | query | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en OpenAPI. | `1` |
+| `lng` | query | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en OpenAPI. | `1` |
 | `insurerTenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `homeCollection` | query | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `true` |
 | `walkIn` | query | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `true` |
@@ -2984,7 +2998,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /diagnostic-units/search?q=valor-ejemplo&tenantId=00000000-0000-4000-8000-000000000001&kind=LABORATORY&studyCode=CODIGO_EJEMPLO&insurerTenantId=00000000-0000-4000-8000-000000000001&homeCollection=true&walkIn=true&acceptsExternalOrders=true&maxAmount=1&minRating=1&limit=20&offset=0 HTTP/1.1
+GET /diagnostic-units/search?q=valor-ejemplo&tenantId=00000000-0000-4000-8000-000000000001&kind=LABORATORY&studyCode=CODIGO_EJEMPLO&studyConceptIds=1f0c5b6e-2a1d-4c3e-9b8a-7d6e5f4a3b2c%2C2a1b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d&lat=1&lng=1&insurerTenantId=00000000-0000-4000-8000-000000000001&homeCollection=true&walkIn=true&acceptsExternalOrders=true&maxAmount=1&minRating=1&limit=20&offset=0 HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -2999,6 +3013,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<SearchDiagnosticUnitsResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<SearchDiagnosticUnitsResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<SearchDiagnosticUnitsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SearchDiagnosticUnitsResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SearchDiagnosticUnitsResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3026,7 +3041,15 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "minAmountCurrency": {},
       "cities": [
         "valor-ejemplo"
-      ]
+      ],
+      "complete": true,
+      "missingStudyConceptIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "distanceKm": 1,
+      "addressText": "valor-ejemplo",
+      "latitude": 1,
+      "longitude": 1
     }
   ],
   "total": 1,
@@ -3039,7 +3062,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<DiagnosticUnitSearchItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"siteCount":1,"equipmentCount":1,"studyCount":1,"acceptsExternalOrders":{},"walkInAvailable":{},"homeCollectionAvailable":{},"tenantId":"00000000-0000-4000-8000-000000000001","rating":{},"ratingCount":1,"minAmount":{},"minAmountCurrency":{},"cities":["valor-ejemplo"]}]` |
+| `items` | Sí | `array<DiagnosticUnitSearchItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","type":{"code":"CODIGO_EJEMPLO","display":"valor-ejemplo"},"siteCount":1,"equipmentCount":1,"studyCount":1,"acceptsExternalOrders":{},"walkInAvailable":{},"homeCollectionAvailable":{},"tenantId":"00000000-0000-4000-8000-000000000001","rating":{},"ratingCount":1,"minAmount":{},"minAmountCurrency":{},"cities":["valor-ejemplo"],"complete":true,"missingStudyConceptIds":["00000000-0000-4000-8000-000000000001"],"distanceKm":1,"addressText":"valor-ejemplo","latitude":1,"longitude":1}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
@@ -3058,6 +3081,12 @@ Campos de la respuesta:
 | `items[].minAmount` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `items[].minAmountCurrency` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `items[].cities` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `items[].complete` | No | `boolean` | Sin restricción adicional declarada | Solo con `studyConceptIds`: ofrece todos los estudios pedidos | `true` |
+| `items[].missingStudyConceptIds` | No | `array<string>` | Sin restricción adicional declarada | Solo con `studyConceptIds`: los estudios pedidos que no ofrece | `["00000000-0000-4000-8000-000000000001"]` |
+| `items[].distanceKm` | No | `number` | admite null | Solo con `studyConceptIds`: km en línea recta desde `lat`/`lng` hasta la sede principal | `1` |
+| `items[].addressText` | No | `string` | admite null | Solo con `studyConceptIds`: dirección de la sede principal | `valor-ejemplo` |
+| `items[].latitude` | No | `number` | admite null | Solo con `studyConceptIds`: latitud de la sede principal | `1` |
+| `items[].longitude` | No | `number` | admite null | Solo con `studyConceptIds`: longitud de la sede principal | `1` |
 | `total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
 | `offset` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
@@ -3184,6 +3213,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<StudyPriceResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StudyPriceResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StudyPriceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StudyPriceResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StudyPriceResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3214,8 +3244,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Cronograma no encontrado | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-pricing.service.ts |
-| 404 | `NOT_FOUND` | Oferta de estudio no encontrada | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-pricing.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El cronograma no está activo | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-pricing.service.ts |
 | 422 | `PRECONDITION_FAILED` | La oferta no pertenece a la misma unidad que el cronograma | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-pricing.service.ts |
@@ -3303,6 +3331,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StatusResultDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StatusResultDto`. Ejemplo completo derivado de ese DTO:
 
@@ -3327,7 +3356,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Precio no encontrado | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-pricing.service.ts |
+| 404 | `NOT_FOUND` | message | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-unit-scope.service.ts |
 | 422 | `PRECONDITION_FAILED` | Solo se puede cerrar una versión de precio activa y aún abierta | Excepción explícita en src/modules/diagnostic_units/services/diagnostic-pricing.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |

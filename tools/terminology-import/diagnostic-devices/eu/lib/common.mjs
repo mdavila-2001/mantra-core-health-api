@@ -60,6 +60,14 @@ export function md5uuid(key) {
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
 }
 
+/** Página de una API guardada en el caché (gzip o JSON plano de corridas viejas). */
+export function readPageFile(path) {
+  const buf = readFileSync(path);
+  return JSON.parse(
+    (path.endsWith('.gz') ? gunzipSync(buf) : buf).toString('utf8'),
+  );
+}
+
 export function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'));
 }
@@ -189,7 +197,7 @@ export function clean(value) {
 
 /** Fecha ISO (con o sin hora) → `YYYY-MM-DD`; cualquier otra forma → null. */
 export function isoDate(value) {
-  const m = /^(\d{4}-\d{2}-\d{2})(?:$|T)/.exec(clean(value) ?? '');
+  const m = /^(\d{4}-\d{2}-\d{2})(?:$|[T ])/.exec(clean(value) ?? '');
   return m ? m[1] : null;
 }
 
@@ -201,15 +209,43 @@ function compactExtra(extra = {}) {
   );
 }
 
+// Un correo dentro de un campo descriptivo es dato de contacto, no del equipo
+// (p. ej. un fabricante que cargó en «modelo» la dirección y el correo de su
+// representante). No se publica: el campo va en null y su NOMBRE (nunca el
+// contenido) queda en extra.redactedFields. «Easy@Home» no es correo: exige
+// dominio con punto.
+export const EMAIL_RE =
+  /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/;
+
 export function makeDeviceRecord(input) {
   const r = {};
   for (const f of DEVICE_FIELDS) r[f] = clean(input[f]);
+  const redacted = [];
+  for (const f of DEVICE_FIELDS)
+    if (
+      !NOT_NULL.includes(f) &&
+      typeof r[f] === 'string' &&
+      EMAIL_RE.test(r[f])
+    ) {
+      r[f] = null;
+      redacted.push(f);
+    }
+  const extra = { ...(input.extra ?? {}) };
+  for (const [k, v] of Object.entries(extra))
+    if (typeof v === 'string' && EMAIL_RE.test(v)) {
+      extra[k] = null;
+      redacted.push(`extra.${k}`);
+    }
+  if (redacted.length) extra.redactedFields = redacted;
   const fail = (msg) => {
     throw new RowError(
       `${msg} (${r.source ?? '¿fuente?'}:${r.sourceRecordId ?? '¿id?'})`,
     );
   };
   for (const f of NOT_NULL) if (!r[f]) fail(`${f} no puede ser null`);
+  for (const f of NOT_NULL)
+    if (EMAIL_RE.test(r[f]) && f !== 'sourceUrl')
+      fail(`${f} contiene un correo electrónico`);
   if (!SOURCE_RE.test(r.source)) fail(`source inválido: ${r.source}`);
   if (!/^https?:\/\//.test(r.sourceUrl)) fail(`sourceUrl no es http(s)`);
   if (!ISO_DATETIME_RE.test(r.retrievedAt))
@@ -229,7 +265,7 @@ export function makeDeviceRecord(input) {
     fail(`deviceTypeSystem desconocido: ${r.deviceTypeSystem}`);
   if ((r.deviceTypeCode === null) !== (r.deviceTypeSystem === null))
     fail('deviceTypeCode y deviceTypeSystem van juntos');
-  r.extra = compactExtra(input.extra);
+  r.extra = compactExtra(extra);
   return r;
 }
 
@@ -245,16 +281,27 @@ export const rowKey = (r) => `${r.source}\u0000${r.sourceRecordId}`;
 export const normKey = (s) =>
   clean(s)?.normalize('NFKC').toUpperCase().replace(/\s+/g, ' ') ?? null;
 
+/**
+ * Claves de deduplicación. `check` son las que pueden marcar una fila como
+ * duplicada; `register` las que deja anotadas para las siguientes. Si la fila
+ * tiene UDI-DI, solo cuenta como duplicada por fila o por UDI-DI: dos UDI-DI
+ * distintos con el mismo fabricante + modelo (variantes de tamaño o de
+ * presentación de una misma Basic UDI-DI) son equipos distintos. Fabricante +
+ * modelo y certificado + modelo solo deciden cuando la fila no trae UDI-DI.
+ */
 export function dedupeKeys(r) {
-  const keys = [`row:${rowKey(r)}`];
-  if (r.udiDi) keys.push(`udi:${normKey(r.udiDi)}`);
+  const row = `row:${rowKey(r)}`;
+  const udi = r.udiDi ? `udi:${normKey(r.udiDi)}` : null;
+  const soft = [];
   if (r.authorizationId && r.model)
-    keys.push(`cert+model:${normKey(r.authorizationId)}|${normKey(r.model)}`);
+    soft.push(`cert+model:${normKey(r.authorizationId)}|${normKey(r.model)}`);
   if (r.model)
-    keys.push(
+    soft.push(
       `mf+model:${normKey(r.manufacturerRegistryId ?? r.manufacturerName)}|${normKey(r.model)}|${normKey(r.brandName) ?? ''}`,
     );
-  return keys;
+  return udi
+    ? { check: [row, udi], register: [row, udi, ...soft] }
+    : { check: [row, ...soft], register: [row, ...soft] };
 }
 
 export function dedupe(records) {
@@ -262,8 +309,8 @@ export function dedupe(records) {
   const kept = [];
   const duplicates = [];
   for (const r of records) {
-    const keys = dedupeKeys(r);
-    const hit = keys.find((k) => seen.has(k));
+    const { check, register } = dedupeKeys(r);
+    const hit = check.find((k) => seen.has(k));
     if (hit) {
       duplicates.push({
         row: rowKey(r),
@@ -272,7 +319,7 @@ export function dedupe(records) {
       });
       continue;
     }
-    for (const k of keys) seen.set(k, rowKey(r));
+    for (const k of register) if (!seen.has(k)) seen.set(k, rowKey(r));
     kept.push(r);
   }
   return { kept, duplicates };
@@ -397,8 +444,10 @@ export function parseCsv(text, { delimiter = ',' } = {}) {
  * nunca se rellena un campo adivinando la columna.
  */
 export function resolveHeaders(header, spec, label) {
+  // Sin el sufijo entre paréntesis («TERM EMDN (v.2026)» → «TERM EMDN»).
   const norm = (h) =>
     String(h)
+      .replace(/\([^)]*\)/g, '')
       .normalize('NFKD')
       .replace(/[̀-ͯ]/g, '')
       .toLowerCase()

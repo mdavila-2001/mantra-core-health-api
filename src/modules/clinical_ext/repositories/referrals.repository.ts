@@ -58,7 +58,7 @@ export interface CreateReferralData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
-  /** Tipo de derivación (v4263). */
+  /** Tipo de derivación (v4266). */
   referralType?: ReferralType;
   /** Sede destino. */
   targetBranchId?: string;

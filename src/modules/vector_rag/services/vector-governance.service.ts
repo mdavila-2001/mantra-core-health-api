@@ -9,6 +9,11 @@ import {
 } from '../../../common';
 import { OutboxService } from '../../messaging/services';
 import { VectorCatalogRepository } from '../repositories';
+import {
+  effectiveTenant,
+  inScopeOrNotFound,
+  resolveVectorScope,
+} from '../vector-scope';
 import { ACTIVE_JOB_STATUSES } from '../constants';
 import {
   RegisterModelVersionDto,
@@ -141,17 +146,24 @@ export class VectorGovernanceService {
     dto: CreateCollectionDto,
     actor: AuthenticatedUser,
   ): Promise<CollectionResponseDto> {
+    // El tenant de la colección es el activo de la petición: el del cuerpo sólo
+    // puede repetirlo.
+    const tenantId = effectiveTenant(
+      resolveVectorScope(actor),
+      dto.tenantId,
+      'Tenant no encontrado.',
+    );
     return this.em.transactional(async (tx) => {
       const duplicate = await this.catalogRepo.findCollectionByCode(
         tx,
-        dto.tenantId,
+        tenantId,
         dto.code,
       );
       if (duplicate) {
         throw new ConflictException(
           'Ya existe una colección con ese código para el tenant.',
           {
-            tenantId: dto.tenantId,
+            tenantId,
             code: dto.code,
           },
         );
@@ -198,22 +210,20 @@ export class VectorGovernanceService {
       }
 
       if (dto.accessPolicyId) {
-        const policy = await this.catalogRepo.findPolicyById(
-          tx,
-          dto.accessPolicyId,
+        // La política enlazada tiene que ser del mismo tenant que la colección.
+        inScopeOrNotFound(
+          { tenantId },
+          await this.catalogRepo.findPolicyById(
+            tx,
+            dto.accessPolicyId,
+            tenantId,
+          ),
+          'Política de acceso RAG no encontrada.',
         );
-        if (!policy) {
-          throw new ResourceNotFoundException(
-            'Política de acceso RAG no encontrada.',
-            {
-              accessPolicyId: dto.accessPolicyId,
-            },
-          );
-        }
       }
 
       const collection = this.catalogRepo.createCollection(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         name: dto.name,
         // Del modelo, no del cuerpo: el vector que produce tiene la dimensión y la
@@ -227,7 +237,7 @@ export class VectorGovernanceService {
       });
 
       const binding = this.catalogRepo.createBinding(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         vectorCollectionId: collection.id,
         namespace: dto.namespace,
         encryptionProfileCode: dto.encryptionProfileCode,
@@ -235,7 +245,7 @@ export class VectorGovernanceService {
       });
 
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'VectorCollectionProvisioned',
         aggregateType: 'vector_rag.vector_collections',
         aggregateId: collection.id,
@@ -271,19 +281,24 @@ export class VectorGovernanceService {
   /** UC-59-03 (primera mitad): definir la política de acceso RAG en borrador. */
   async defineRagPolicy(
     dto: DefineRagPolicyDto,
-    _actor: AuthenticatedUser,
+    actor: AuthenticatedUser,
   ): Promise<RagPolicyResponseDto> {
+    const tenantId = effectiveTenant(
+      resolveVectorScope(actor),
+      dto.tenantId,
+      'Tenant no encontrado.',
+    );
     return this.em.transactional(async (tx) => {
       const duplicate = await this.catalogRepo.findPolicyByCodeForUpdate(
         tx,
-        dto.tenantId,
+        tenantId,
         dto.code,
       );
       if (duplicate) {
         throw new ConflictException(
           'Ya existe una política con ese código para el tenant.',
           {
-            tenantId: dto.tenantId,
+            tenantId,
             code: dto.code,
           },
         );
@@ -299,7 +314,7 @@ export class VectorGovernanceService {
       }
 
       const policy = this.catalogRepo.createPolicy(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         code: dto.code,
         allowedPrincipalTypes: dto.allowedPrincipalTypes,
         allowedPurposeCodes: dto.allowedPurposeCodes,
@@ -336,34 +351,29 @@ export class VectorGovernanceService {
     dto: PublishRagPolicyDto,
     actor: AuthenticatedUser,
   ): Promise<RagPolicyResponseDto> {
+    const scope = resolveVectorScope(actor);
     return this.em.transactional(async (tx) => {
-      const policy = await this.catalogRepo.findPolicyById(tx, policyId);
-      if (!policy) {
-        throw new ResourceNotFoundException(
-          'Política de acceso RAG no encontrada.',
-          { policyId },
-        );
-      }
+      const policy = inScopeOrNotFound(
+        scope,
+        await this.catalogRepo.findPolicyById(tx, policyId, scope.tenantId),
+        'Política de acceso RAG no encontrada.',
+      );
 
       policy.state = 'published';
 
       let rebound = 0;
       for (const collectionId of dto.rebindCollectionIds ?? []) {
-        const collection = await this.catalogRepo.findCollectionForUpdate(
-          tx,
-          collectionId,
-        );
-        if (!collection) {
-          throw new ResourceNotFoundException('Colección no encontrada.', {
+        // Las colecciones se buscan en el tenant de la política: una de otra
+        // organización responde como inexistente, sin revelar de quién es.
+        const collection = inScopeOrNotFound(
+          { tenantId: policy.tenantId },
+          await this.catalogRepo.findCollectionForUpdate(
+            tx,
             collectionId,
-          });
-        }
-        if (collection.tenantId !== policy.tenantId) {
-          throw new PreconditionFailedException(
-            'La colección pertenece a otro tenant que la política.',
-            { collectionId, tenantId: collection.tenantId },
-          );
-        }
+            policy.tenantId,
+          ),
+          'Colección no encontrada.',
+        );
         collection.accessPolicyId = policy.id;
         rebound += 1;
       }
@@ -506,16 +516,17 @@ export class VectorGovernanceService {
     dto: UpdateCollectionLifecycleDto,
     actor: AuthenticatedUser,
   ): Promise<LifecycleResponseDto> {
+    const scope = resolveVectorScope(actor);
     return this.em.transactional(async (tx) => {
-      const collection = await this.catalogRepo.findCollectionForUpdate(
-        tx,
-        collectionId,
-      );
-      if (!collection) {
-        throw new ResourceNotFoundException('Colección no encontrada.', {
+      const collection = inScopeOrNotFound(
+        scope,
+        await this.catalogRepo.findCollectionForUpdate(
+          tx,
           collectionId,
-        });
-      }
+          scope.tenantId,
+        ),
+        'Colección no encontrada.',
+      );
       if (collection.lifecycleState === dto.lifecycleState) {
         return {
           id: collection.id,

@@ -68,6 +68,10 @@ import { DependentLinkContextAdapter } from './infrastructure/adapters/dependent
 import { PRACTITIONER_CONTEXT_PORT } from './application/ports/practitioner-context.port';
 import { PractitionerContextAdapter } from './infrastructure/adapters/practitioner-context.adapter';
 import { PERSON_RECORDS_PORT } from './application/ports/person-records.port';
+import { PATIENT_ADDRESS_BOOK_PORT } from './application/ports/patient-address-book.port';
+import { PatientAddressBookAdapter } from './infrastructure/adapters/patient-address-book.adapter';
+import { PatientAddressBookService } from './application/services/patient-address-book.service';
+import { PatientAddressBookController } from './presentation/controllers/patient-address-book.controller';
 import { PersonRecordsAdapter } from './infrastructure/adapters/person-records.adapter';
 import { PATIENT_COVERAGES_PORT } from './application/ports/patient-coverages.port';
 import { PatientCoveragesAdapter } from './infrastructure/adapters/patient-coverages.adapter';
@@ -99,6 +103,7 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
   controllers: [
     PractitionerSignatureAssetsController,
     ProfilesPatientsController,
+    PatientAddressBookController,
     ProfilesDependentRequestsController,
     ProfilesPractitionersController,
     TenantPractitionerRequestsController,
@@ -150,6 +155,12 @@ import { CLINICAL_PATIENT_HISTORY_PORT } from './application/ports/clinical-pati
     {
       provide: PERSON_RECORDS_PORT,
       useExisting: PersonRecordsAdapter,
+    },
+    PatientAddressBookService,
+    PatientAddressBookAdapter,
+    {
+      provide: PATIENT_ADDRESS_BOOK_PORT,
+      useExisting: PatientAddressBookAdapter,
     },
     {
       provide: PATIENT_COVERAGES_PORT,

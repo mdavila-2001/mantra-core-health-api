@@ -13,7 +13,12 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { SurveysTemplatesService, SurveysResponsesService } from '../services';
 import {
   AddQuestionDto,
@@ -54,6 +59,11 @@ export class SurveysTemplatesController {
   ) {}
 
   /** Crea la plantilla y su versión 1 en borrador. */
+  @Audited({
+    action: 'SURVEY_TEMPLATE_CREATED',
+    entity: 'survey_template',
+    entityId: 'result.id',
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear una encuesta para pacientes' })
@@ -84,6 +94,11 @@ export class SurveysTemplatesController {
   }
 
   /** CL-72: corrige título, consigna y plazo de la versión en borrador. */
+  @Audited({
+    action: 'SURVEY_TEMPLATE_UPDATED',
+    entity: 'survey_template',
+    entityId: 'param:id',
+  })
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Corregir título, consigna y plazo del borrador' })
@@ -96,6 +111,11 @@ export class SurveysTemplatesController {
   }
 
   /** Agrega una pregunta a la versión en borrador. */
+  @Audited({
+    action: 'SURVEY_QUESTION_ADDED',
+    entity: 'survey_question',
+    entityId: 'result.id',
+  })
   @Post(':id/questions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Configurar una pregunta y su tipo de respuesta' })
@@ -111,6 +131,11 @@ export class SurveysTemplatesController {
    * CL-60: reordena el cuestionario entero. **Declarada antes** que las rutas
    * con `:questionId` para que `order` nunca se lea como un identificador.
    */
+  @Audited({
+    action: 'SURVEY_QUESTIONS_REORDERED',
+    entity: 'survey_template',
+    entityId: 'param:id',
+  })
   @Put(':id/questions/order')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reordenar el cuestionario del borrador' })
@@ -123,6 +148,11 @@ export class SurveysTemplatesController {
   }
 
   /** CL-60: corrige una pregunta del borrador (opciones y escala enteras). */
+  @Audited({
+    action: 'SURVEY_QUESTION_UPDATED',
+    entity: 'survey_question',
+    entityId: 'param:questionId',
+  })
   @Patch(':id/questions/:questionId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Corregir una pregunta del borrador' })
@@ -136,6 +166,11 @@ export class SurveysTemplatesController {
   }
 
   /** CL-60: quita una pregunta del borrador y renumera las que quedan. */
+  @Audited({
+    action: 'SURVEY_QUESTION_DELETED',
+    entity: 'survey_question',
+    entityId: 'param:questionId',
+  })
   @Delete(':id/questions/:questionId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Quitar una pregunta del borrador' })
@@ -148,6 +183,11 @@ export class SurveysTemplatesController {
   }
 
   /** Abre una versión nueva en borrador, para corregir una plantilla ya publicada (FT-31). */
+  @Audited({
+    action: 'SURVEY_VERSION_CREATED',
+    entity: 'survey_version',
+    entityId: 'result.id',
+  })
   @Post(':id/versions')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Abrir una versión nueva del cuestionario' })
@@ -159,6 +199,10 @@ export class SurveysTemplatesController {
   }
 
   /** Publica la versión y le fija vigencia. */
+  @Audited({
+    action: 'SURVEY_VERSION_PUBLISHED',
+    entity: 'survey_version',
+  })
   @Post(':id/versions/:versionNumber/publish')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Publicar la encuesta y configurar su vigencia' })
@@ -172,6 +216,11 @@ export class SurveysTemplatesController {
   }
 
   /** Desactiva la encuesta: corta las emisiones nuevas sin borrar nada. */
+  @Audited({
+    action: 'SURVEY_TEMPLATE_DEACTIVATED',
+    entity: 'survey_template',
+    entityId: 'param:id',
+  })
   @Post(':id/deactivate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Desactivar la encuesta' })

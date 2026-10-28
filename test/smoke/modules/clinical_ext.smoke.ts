@@ -403,7 +403,7 @@ export const CLINICAL_EXT_SMOKE: SmokeCase[] = [
     name: 'límite: referencia inexistente',
     method: 'patch',
     path: () => `/referrals/${UUID_ABSENT}/respond`,
-    // v4263: REJECT exige rejectReason (sin él la respuesta es 400 antes de buscar).
+    // v4266: REJECT exige rejectReason (sin él la respuesta es 400 antes de buscar).
     body: () => ({ decision: 'REJECT', rejectReason: 'Sin cupo' }),
     expectedStatus: 404,
   },

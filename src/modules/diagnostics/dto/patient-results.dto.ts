@@ -5,6 +5,10 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsDate, IsUUID } from 'class-validator';
+import {
+  ANALYSIS_CATEGORIES,
+  type AnalysisCategory,
+} from '../../clinical/service-request-category';
 
 /**
  * Un archivo del informe: lo que se descarga.
@@ -146,11 +150,39 @@ export class PatientOrderSummaryDto implements PatientSettlementProjection {
   /** Laboratorio o imagenología (concept id). */
   @ApiPropertyOptional({ format: 'uuid' }) categoryConceptId?: string;
 
+  /**
+   * P40: categoría de análisis derivada del concepto; ausente = sin clasificar.
+   * Las notas que motivan la orden (`basedOnNoteIds`) no viajan al portal:
+   * una nota puede no estar liberada al paciente.
+   */
+  @ApiPropertyOptional({ enum: ANALYSIS_CATEGORIES })
+  category?: AnalysisCategory;
+
   /** Estado de la orden (concept id). */
   @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
 
   /** Prioridad (concept id). */
   @ApiPropertyOptional({ format: 'uuid' }) priorityConceptId?: string;
+
+  /**
+   * Quién ejecuta la orden según la recomendación del médico (concept id del
+   * conjunto `service-request-performer-selection`); `null` en una orden
+   * anterior a ese dato. Es una recomendación: el paciente puede elegir otro centro.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerSelectionConceptId!: string | null;
+
+  /** Médico ejecutor («lo hago yo»), o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerPractitionerProfileId!: string | null;
+
+  /** Sede que el médico sugirió, o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  suggestedPracticeSiteId!: string | null;
+
+  /** Nombre de la sede sugerida: el paciente ve un nombre y nunca un uuid. */
+  @ApiProperty({ nullable: true, type: String })
+  suggestedPracticeSiteName!: string | null;
 
   /** Cuándo se pidió. */
   @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;

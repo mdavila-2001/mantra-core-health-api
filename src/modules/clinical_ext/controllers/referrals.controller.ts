@@ -76,7 +76,7 @@ export class ReferralsController {
     return this.referralsService.respond(id, dto, actor);
   }
 
-  /** v4263: contrarreferencia del destino; cierra la derivación. */
+  /** v4266: contrarreferencia del destino; cierra la derivación. */
   @Audited({
     action: 'REFERRAL_COUNTER_REFERRAL_RECORDED',
     entity: 'referral',
@@ -93,7 +93,7 @@ export class ReferralsController {
     return this.referralsService.counterReferral(id, dto, actor);
   }
 
-  /** v4263: anula una derivación pendiente o aceptada. */
+  /** v4266: anula una derivación pendiente o aceptada. */
   @Audited({
     action: 'REFERRAL_CANCELLED',
     entity: 'referral',
@@ -140,7 +140,7 @@ export class ReferralsController {
   }
 
   /**
-   * v4263: una derivación por id. Declarada después de `me` para que esa ruta
+   * v4266: una derivación por id. Declarada después de `me` para que esa ruta
    * no caiga acá. La lee quien puede leer la historia o el destino.
    */
   @Get(':id')

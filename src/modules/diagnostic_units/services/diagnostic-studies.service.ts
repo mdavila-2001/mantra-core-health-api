@@ -4,12 +4,10 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
 import {
-  DiagnosticUnitsRepository,
   DiagnosticStudyOfferingsRepository,
   DiagnosticStudyComponentsRepository,
 } from '../repositories';
@@ -19,6 +17,7 @@ import {
   StudyOfferingResponseDto,
 } from '../dto';
 import { DUNIT } from '../diagnostic_units.concepts';
+import { DiagnosticUnitScopeService } from './diagnostic-unit-scope.service';
 
 /**
  * Casos de uso del catálogo de estudios: publicar una oferta con sus componentes
@@ -30,14 +29,14 @@ export class DiagnosticStudiesService {
    * Inicializa la instancia y sus dependencias.
    *
    * @param em - Contexto de persistencia o transacción activa.
-   * @param unitsRepo - Valor de units repo requerido por la operación.
+   * @param scope - Resolvedor de recursos acotados al tenant activo.
    * @param offeringsRepo - Valor de offerings repo requerido por la operación.
    * @param componentsRepo - Valor de components repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
-    private readonly unitsRepo: DiagnosticUnitsRepository,
+    private readonly scope: DiagnosticUnitScopeService,
     private readonly offeringsRepo: DiagnosticStudyOfferingsRepository,
     private readonly componentsRepo: DiagnosticStudyComponentsRepository,
     private readonly logger: PinoLogger,
@@ -60,9 +59,10 @@ export class DiagnosticStudiesService {
       'Publishing study offering',
     );
     return this.em.transactional(async (tx) => {
-      const unit = await this.unitsRepo.findById(tx, unitId);
-      if (!unit)
-        throw new ResourceNotFoundException('Unidad no encontrada', { unitId });
+      const unit = await this.scope.unit(tx, unitId);
+      if (dto.diagnosticUnitSiteId) {
+        await this.scope.siteOfUnit(tx, dto.diagnosticUnitSiteId, unit.id);
+      }
       if (unit.statusConceptId !== DUNIT.UNIT_ACTIVE) {
         throw new PreconditionFailedException('La unidad no está activa', {
           unitId,
@@ -81,6 +81,11 @@ export class DiagnosticStudiesService {
             studyCode: dto.studyCode,
           },
         );
+      }
+
+      // Cada componente debe ser una oferta del tenant activo, antes de escribir.
+      for (const c of dto.components ?? []) {
+        await this.scope.offering(tx, c.componentOfferingId);
       }
 
       const offering = this.offeringsRepo.create(tx, {
@@ -149,11 +154,7 @@ export class DiagnosticStudiesService {
       'Retiring study offering',
     );
     return this.em.transactional(async (tx) => {
-      const offering = await this.offeringsRepo.findById(tx, offeringId);
-      if (!offering)
-        throw new ResourceNotFoundException('Oferta no encontrada', {
-          offeringId,
-        });
+      const offering = await this.scope.offering(tx, offeringId);
 
       if (offering.statusConceptId === DUNIT.OFFERING_RETIRED) {
         throw new ConflictException('La oferta ya está retirada', {

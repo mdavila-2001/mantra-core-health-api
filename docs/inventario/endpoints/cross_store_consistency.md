@@ -38,7 +38,7 @@
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreAdminController.archiveData` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:185`
+- **Implementación:** `CrossStoreAdminController.archiveData` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:225`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -48,18 +48,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/archive-jobs` la atiende `CrossStoreAdminController.archiveData` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:185). Exige sesión con alguno de los roles SYSTEM, DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ArchiveDataDto` (6 campos, 4 obligatorios). Delega en `StorageMaintenanceService.archiveData`. Crea filas en cross_store_consistency.archive_jobs, cross_store_consistency.cache_invalidation_jobs, messaging.domain_events, messaging.outbox_messages. Actualiza cross_store_consistency.archive_jobs. Lee cross_store_consistency.archive_jobs, messaging.outbox_messages. Publica DataArchived.
+`POST /admin/archive-jobs` la atiende `CrossStoreAdminController.archiveData` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:225). Exige sesión con alguno de los roles SYSTEM, DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ArchiveDataDto` (6 campos, 4 obligatorios). Delega en `StorageMaintenanceService.archiveData`. Crea filas en cross_store_consistency.archive_jobs, cross_store_consistency.cache_invalidation_jobs, messaging.domain_events, messaging.outbox_messages. Actualiza cross_store_consistency.archive_jobs. Lee cross_store_consistency.archive_jobs, messaging.outbox_messages. Publica DataArchived.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:185` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SYSTEM, DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:225` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -70,8 +70,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `cross_store_consistency.archive_jobs` | LEE | LEE | DIRECTA | CrossStoreAdminController.archiveData → StorageMaintenanceService.archiveData → DeletionRepository.findArchiveJob | `src/modules/cross_store_consistency/repositories/deletion.repository.ts:530` |
 | `cross_store_consistency.cache_invalidation_jobs` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.archiveData → StorageMaintenanceService.archiveData → DeletionRepository.createCacheJob | `src/modules/cross_store_consistency/repositories/deletion.repository.ts:408` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.archiveData → StorageMaintenanceService.archiveData → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.archiveData → StorageMaintenanceService.archiveData → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.archiveData → StorageMaintenanceService.archiveData → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.archiveData → StorageMaintenanceService.archiveData → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.archiveData → StorageMaintenanceService.archiveData → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
@@ -156,7 +156,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreAdminController.moveData` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:169`
+- **Implementación:** `CrossStoreAdminController.moveData` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:204`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -166,18 +166,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/data-movement-jobs` la atiende `CrossStoreAdminController.moveData` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:169). Exige sesión con alguno de los roles DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `MoveDataDto` (10 campos, 6 obligatorios). Delega en `StorageMaintenanceService.moveData`. Crea filas en cross_store_consistency.cache_invalidation_jobs, cross_store_consistency.data_movement_jobs, cross_store_consistency.schema_migration_jobs, messaging.domain_events, messaging.outbox_messages. Lee cross_store_consistency.data_movement_jobs, messaging.outbox_messages. Publica DataMovementRequested.
+`POST /admin/data-movement-jobs` la atiende `CrossStoreAdminController.moveData` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:204). Exige sesión con alguno de los roles DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `MoveDataDto` (10 campos, 6 obligatorios). Delega en `StorageMaintenanceService.moveData`. Crea filas en cross_store_consistency.cache_invalidation_jobs, cross_store_consistency.data_movement_jobs, cross_store_consistency.schema_migration_jobs, messaging.domain_events, messaging.outbox_messages. Lee cross_store_consistency.data_movement_jobs, messaging.outbox_messages. Publica DataMovementRequested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:169` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:204` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -188,8 +188,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `cross_store_consistency.data_movement_jobs` | LEE | LEE | DIRECTA | CrossStoreAdminController.moveData → StorageMaintenanceService.moveData → DeletionRepository.findMovementJob | `src/modules/cross_store_consistency/repositories/deletion.repository.ts:424` |
 | `cross_store_consistency.schema_migration_jobs` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.moveData → StorageMaintenanceService.moveData → DeletionRepository.createSchemaMigrationJob | `src/modules/cross_store_consistency/repositories/deletion.repository.ts:514` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.moveData → StorageMaintenanceService.moveData → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.moveData → StorageMaintenanceService.moveData → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.moveData → StorageMaintenanceService.moveData → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.moveData → StorageMaintenanceService.moveData → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.moveData → StorageMaintenanceService.moveData → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
@@ -284,7 +284,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreAdminController.requestDeletion` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:136`
+- **Implementación:** `CrossStoreAdminController.requestDeletion` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:161`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -294,18 +294,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/deletion-requests` la atiende `CrossStoreAdminController.requestDeletion` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:136). Exige sesión con alguno de los roles PRIVACY_OFFICER, DPO, PLATFORM_ADMIN. Valida el cuerpo como `CrossStoreConsistencyRequestDeletionDto` (6 campos, 5 obligatorios). Delega en `DeletionService.requestDeletion`. Crea filas en cross_store_consistency.deletion_requests, messaging.domain_events, messaging.outbox_messages. Lee cross_store_consistency.deletion_requests, messaging.outbox_messages. Publica DeletionRequested.
+`POST /admin/deletion-requests` la atiende `CrossStoreAdminController.requestDeletion` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:161). Exige sesión con alguno de los roles PRIVACY_OFFICER, DPO, PLATFORM_ADMIN. Valida el cuerpo como `CrossStoreConsistencyRequestDeletionDto` (6 campos, 5 obligatorios). Delega en `DeletionService.requestDeletion`. Crea filas en cross_store_consistency.deletion_requests, messaging.domain_events, messaging.outbox_messages. Lee cross_store_consistency.deletion_requests, messaging.outbox_messages. Publica DeletionRequested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:136` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:161` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -314,8 +314,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `cross_store_consistency.deletion_requests` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.requestDeletion → DeletionService.requestDeletion → DeletionRepository.createRequest | `src/modules/cross_store_consistency/repositories/deletion.repository.ts:67` |
 | `cross_store_consistency.deletion_requests` | LEE | LEE | DIRECTA | CrossStoreAdminController.requestDeletion → DeletionService.requestDeletion → DeletionRepository.findLiveRequestBySubject | `src/modules/cross_store_consistency/repositories/deletion.repository.ts:103` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.requestDeletion → DeletionService.requestDeletion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.requestDeletion → DeletionService.requestDeletion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.requestDeletion → DeletionService.requestDeletion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.requestDeletion → DeletionService.requestDeletion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.requestDeletion → DeletionService.requestDeletion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
@@ -399,7 +399,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreAdminController.closeDeletionRequest` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:152`
+- **Implementación:** `CrossStoreAdminController.closeDeletionRequest` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:182`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -409,19 +409,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`PATCH /admin/deletion-requests/{id}` la atiende `CrossStoreAdminController.closeDeletionRequest` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:152). Exige sesión con alguno de los roles PRIVACY_OFFICER, DPO, PLATFORM_ADMIN. Valida el cuerpo como `CloseDeletionRequestDto` (1 campo, 0 obligatorios). Delega en `DeletionService.closeDeletionRequest`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza cross_store_consistency.deletion_requests. Lee cross_store_consistency.deletion_requests, cross_store_consistency.deletion_targets, messaging.outbox_messages. Publica DeletionRequestClosed.
+`PATCH /admin/deletion-requests/{id}` la atiende `CrossStoreAdminController.closeDeletionRequest` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:182). Exige sesión con alguno de los roles PRIVACY_OFFICER, DPO, PLATFORM_ADMIN. Valida el cuerpo como `CloseDeletionRequestDto` (1 campo, 0 obligatorios). Delega en `DeletionService.closeDeletionRequest`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza cross_store_consistency.deletion_requests. Lee cross_store_consistency.deletion_requests, cross_store_consistency.deletion_targets, messaging.outbox_messages. Publica DeletionRequestClosed.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:152` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:152` |
+| ROL | Alguno de: PRIVACY_OFFICER, DPO, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:182` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:182` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -431,8 +431,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `cross_store_consistency.deletion_requests` | LEE | LEE | DIRECTA | CrossStoreAdminController.closeDeletionRequest → DeletionService.closeDeletionRequest → DeletionRepository.findRequestForUpdate | `src/modules/cross_store_consistency/repositories/deletion.repository.ts:85` |
 | `cross_store_consistency.deletion_targets` | LEE | LEE | DIRECTA | CrossStoreAdminController.closeDeletionRequest → DeletionService.closeDeletionRequest → DeletionRepository.findTargetsByRequest | `src/modules/cross_store_consistency/repositories/deletion.repository.ts:195` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.closeDeletionRequest → DeletionService.closeDeletionRequest → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.closeDeletionRequest → DeletionService.closeDeletionRequest → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.closeDeletionRequest → DeletionService.closeDeletionRequest → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.closeDeletionRequest → DeletionService.closeDeletionRequest → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.closeDeletionRequest → DeletionService.closeDeletionRequest → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
@@ -510,7 +510,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreAdminController.replayDeadLetter` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:81`
+- **Implementación:** `CrossStoreAdminController.replayDeadLetter` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:91`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -520,19 +520,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/projections/dead-letters/{id}/replay` la atiende `CrossStoreAdminController.replayDeadLetter` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:81). Exige sesión con alguno de los roles DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ReplayDeadLetterDto` (1 campo, 0 obligatorios). Delega en `ProjectionDeliveryService.replayDeadLetter`. Crea filas en cross_store_consistency.projection_delivery_attempts. Actualiza cross_store_consistency.projection_dead_letters. Lee cross_store_consistency.projection_dead_letters, cross_store_consistency.projection_delivery_attempts.
+`POST /admin/projections/dead-letters/{id}/replay` la atiende `CrossStoreAdminController.replayDeadLetter` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:91). Exige sesión con alguno de los roles DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `ReplayDeadLetterDto` (1 campo, 0 obligatorios). Delega en `ProjectionDeliveryService.replayDeadLetter`. Crea filas en cross_store_consistency.projection_delivery_attempts. Actualiza cross_store_consistency.projection_dead_letters. Lee cross_store_consistency.projection_dead_letters, cross_store_consistency.projection_delivery_attempts.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:81` |
+| ROL | Alguno de: DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:91` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:91` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -611,7 +611,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreAdminController.registerProjection` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:64`
+- **Implementación:** `CrossStoreAdminController.registerProjection` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:69`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -621,18 +621,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/projections/definitions` la atiende `CrossStoreAdminController.registerProjection` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:64). Exige sesión con alguno de los roles DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RegisterProjectionDto` (18 campos, 8 obligatorios). Delega en `ProjectionDeliveryService.registerProjection`. Crea filas en cross_store_consistency.projection_definitions, cross_store_consistency.projection_subscriptions, cross_store_consistency.store_consistency_slos. Actualiza cross_store_consistency.store_consistency_slos. Lee cross_store_consistency.projection_definitions, cross_store_consistency.store_consistency_slos.
+`POST /admin/projections/definitions` la atiende `CrossStoreAdminController.registerProjection` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:69). Exige sesión con alguno de los roles DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RegisterProjectionDto` (18 campos, 8 obligatorios). Delega en `ProjectionDeliveryService.registerProjection`. Crea filas en cross_store_consistency.projection_definitions, cross_store_consistency.projection_subscriptions, cross_store_consistency.store_consistency_slos. Actualiza cross_store_consistency.store_consistency_slos. Lee cross_store_consistency.projection_definitions, cross_store_consistency.store_consistency_slos.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:69` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -759,7 +759,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreAdminController.repairDrift` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:119`
+- **Implementación:** `CrossStoreAdminController.repairDrift` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:139`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -769,19 +769,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/projections/drift/{id}/repair-jobs` la atiende `CrossStoreAdminController.repairDrift` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:119). Exige sesión con alguno de los roles DATA_GOVERNANCE_ADMIN, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RepairDriftDto` (4 campos, 1 obligatorio). Delega en `ReconciliationService.repairDrift`. Crea filas en cross_store_consistency.projection_repair_jobs, cross_store_consistency.reindex_jobs, messaging.domain_events, messaging.outbox_messages. Actualiza cross_store_consistency.projection_drift_events. Lee cross_store_consistency.projection_drift_events, cross_store_consistency.projection_repair_jobs, messaging.outbox_messages. Publica ProjectionRepairRequested.
+`POST /admin/projections/drift/{id}/repair-jobs` la atiende `CrossStoreAdminController.repairDrift` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:139). Exige sesión con alguno de los roles DATA_GOVERNANCE_ADMIN, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RepairDriftDto` (4 campos, 1 obligatorio). Delega en `ReconciliationService.repairDrift`. Crea filas en cross_store_consistency.projection_repair_jobs, cross_store_consistency.reindex_jobs, messaging.domain_events, messaging.outbox_messages. Actualiza cross_store_consistency.projection_drift_events. Lee cross_store_consistency.projection_drift_events, cross_store_consistency.projection_repair_jobs, messaging.outbox_messages. Publica ProjectionRepairRequested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_GOVERNANCE_ADMIN, SYSTEM, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:119` |
+| ROL | Alguno de: DATA_GOVERNANCE_ADMIN, SYSTEM, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:139` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:139` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -793,8 +793,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `cross_store_consistency.projection_repair_jobs` | LEE | LEE | DIRECTA | CrossStoreAdminController.repairDrift → ReconciliationService.repairDrift → ReconciliationRepository.findRepairJobByKey | `src/modules/cross_store_consistency/repositories/reconciliation.repository.ts:246` |
 | `cross_store_consistency.reindex_jobs` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.repairDrift → ReconciliationService.repairDrift → ReconciliationRepository.createReindexJob | `src/modules/cross_store_consistency/repositories/reconciliation.repository.ts:328` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.repairDrift → ReconciliationService.repairDrift → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.repairDrift → ReconciliationService.repairDrift → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.repairDrift → ReconciliationService.repairDrift → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.repairDrift → ReconciliationService.repairDrift → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.repairDrift → ReconciliationService.repairDrift → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
@@ -880,7 +880,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreAdminController.runReconciliation` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:98`
+- **Implementación:** `CrossStoreAdminController.runReconciliation` — `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:113`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -890,18 +890,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /admin/reconciliation/runs` la atiende `CrossStoreAdminController.runReconciliation` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:98). Exige sesión con alguno de los roles SYSTEM, RECONCILIATION_WORKER, DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RunReconciliationDto` (13 campos, 7 obligatorios). Delega en `ReconciliationService.runReconciliation`. Crea filas en cross_store_consistency.projection_drift_events, cross_store_consistency.reconciliation_items, cross_store_consistency.reconciliation_runs, messaging.domain_events, messaging.outbox_messages. Actualiza cross_store_consistency.reconciliation_runs. Lee cross_store_consistency.projection_drift_events, messaging.outbox_messages. Publica ProjectionDriftDetected.
+`POST /admin/reconciliation/runs` la atiende `CrossStoreAdminController.runReconciliation` (src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:113). Exige sesión con alguno de los roles SYSTEM, RECONCILIATION_WORKER, DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN. Valida el cuerpo como `RunReconciliationDto` (13 campos, 7 obligatorios). Delega en `ReconciliationService.runReconciliation`. Crea filas en cross_store_consistency.projection_drift_events, cross_store_consistency.reconciliation_items, cross_store_consistency.reconciliation_runs, messaging.domain_events, messaging.outbox_messages. Actualiza cross_store_consistency.reconciliation_runs. Lee cross_store_consistency.projection_drift_events, messaging.outbox_messages. Publica ProjectionDriftDetected.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, RECONCILIATION_WORKER, DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SYSTEM, RECONCILIATION_WORKER, DATA_GOVERNANCE_ADMIN, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-admin.controller.ts:113` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -913,8 +913,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `cross_store_consistency.reconciliation_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | CrossStoreAdminController.runReconciliation → ReconciliationService.runReconciliation | `src/modules/cross_store_consistency/services/reconciliation.service.ts:148` |
 | `cross_store_consistency.reconciliation_runs` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.runReconciliation → ReconciliationService.runReconciliation → ReconciliationRepository.createRun | `src/modules/cross_store_consistency/repositories/reconciliation.repository.ts:65` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.runReconciliation → ReconciliationService.runReconciliation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.runReconciliation → ReconciliationService.runReconciliation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.runReconciliation → ReconciliationService.runReconciliation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreAdminController.runReconciliation → ReconciliationService.runReconciliation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreAdminController.runReconciliation → ReconciliationService.runReconciliation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
@@ -1024,7 +1024,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreWorkerController.invalidateCache` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:183`
+- **Implementación:** `CrossStoreWorkerController.invalidateCache` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:209`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1034,18 +1034,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /workers/cache/invalidations` la atiende `CrossStoreWorkerController.invalidateCache` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:183). Exige sesión con alguno de los roles SYSTEM, MAINTENANCE_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `CrossStoreConsistencyInvalidateCacheDto` (5 campos, 5 obligatorios). Delega en `StorageMaintenanceService.invalidateCache`. Crea filas en cross_store_consistency.cache_invalidation_jobs, messaging.domain_events, messaging.outbox_messages. Lee cross_store_consistency.cache_invalidation_jobs, messaging.outbox_messages. Publica CacheInvalidationRequested.
+`POST /workers/cache/invalidations` la atiende `CrossStoreWorkerController.invalidateCache` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:209). Exige sesión con alguno de los roles SYSTEM, MAINTENANCE_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `CrossStoreConsistencyInvalidateCacheDto` (5 campos, 5 obligatorios). Delega en `StorageMaintenanceService.invalidateCache`. Crea filas en cross_store_consistency.cache_invalidation_jobs, messaging.domain_events, messaging.outbox_messages. Lee cross_store_consistency.cache_invalidation_jobs, messaging.outbox_messages. Publica CacheInvalidationRequested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, MAINTENANCE_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:183` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SYSTEM, MAINTENANCE_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:209` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1054,8 +1054,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `cross_store_consistency.cache_invalidation_jobs` | ESCRIBE | CREA | DIRECTA | CrossStoreWorkerController.invalidateCache → StorageMaintenanceService.invalidateCache → DeletionRepository.createCacheJob | `src/modules/cross_store_consistency/repositories/deletion.repository.ts:408` |
 | `cross_store_consistency.cache_invalidation_jobs` | LEE | LEE | DIRECTA | CrossStoreWorkerController.invalidateCache → StorageMaintenanceService.invalidateCache → DeletionRepository.findCacheJob | `src/modules/cross_store_consistency/repositories/deletion.repository.ts:369` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | CrossStoreWorkerController.invalidateCache → StorageMaintenanceService.invalidateCache → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreWorkerController.invalidateCache → StorageMaintenanceService.invalidateCache → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreWorkerController.invalidateCache → StorageMaintenanceService.invalidateCache → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreWorkerController.invalidateCache → StorageMaintenanceService.invalidateCache → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreWorkerController.invalidateCache → StorageMaintenanceService.invalidateCache → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
@@ -1136,7 +1136,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreWorkerController.expandDeletion` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:98`
+- **Implementación:** `CrossStoreWorkerController.expandDeletion` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:109`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1146,19 +1146,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /workers/deletion-requests/{id}/expand` la atiende `CrossStoreWorkerController.expandDeletion` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:98). Exige sesión con alguno de los roles SYSTEM, DELETION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `ExpandDeletionDto` (6 campos, 5 obligatorios). Delega en `DeletionService.expandDeletion`. Crea filas en cross_store_consistency.deletion_targets. Actualiza cross_store_consistency.deletion_requests. Lee cross_store_consistency.deletion_requests, cross_store_consistency.deletion_targets.
+`POST /workers/deletion-requests/{id}/expand` la atiende `CrossStoreWorkerController.expandDeletion` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:109). Exige sesión con alguno de los roles SYSTEM, DELETION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `ExpandDeletionDto` (6 campos, 5 obligatorios). Delega en `DeletionService.expandDeletion`. Crea filas en cross_store_consistency.deletion_targets. Actualiza cross_store_consistency.deletion_requests. Lee cross_store_consistency.deletion_requests, cross_store_consistency.deletion_targets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:98` |
+| ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:109` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:109` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1260,7 +1260,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreWorkerController.executeDeletion` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:134`
+- **Implementación:** `CrossStoreWorkerController.executeDeletion` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:150`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1270,19 +1270,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /workers/deletion-targets/{id}/executions` la atiende `CrossStoreWorkerController.executeDeletion` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:134). Exige sesión con alguno de los roles SYSTEM, DELETION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `ExecuteDeletionDto` (3 campos, 0 obligatorios). Delega en `DeletionService.executeDeletion`. Crea filas en cross_store_consistency.deletion_executions. Actualiza cross_store_consistency.deletion_executions, cross_store_consistency.deletion_targets. Lee cross_store_consistency.deletion_executions, cross_store_consistency.deletion_targets.
+`POST /workers/deletion-targets/{id}/executions` la atiende `CrossStoreWorkerController.executeDeletion` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:150). Exige sesión con alguno de los roles SYSTEM, DELETION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `ExecuteDeletionDto` (3 campos, 0 obligatorios). Delega en `DeletionService.executeDeletion`. Crea filas en cross_store_consistency.deletion_executions. Actualiza cross_store_consistency.deletion_executions, cross_store_consistency.deletion_targets. Lee cross_store_consistency.deletion_executions, cross_store_consistency.deletion_targets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:134` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:134` |
+| ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:150` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:150` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1367,7 +1367,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreWorkerController.verifyDeletion` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:166`
+- **Implementación:** `CrossStoreWorkerController.verifyDeletion` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:187`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1377,19 +1377,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /workers/deletion-targets/{id}/verifications` la atiende `CrossStoreWorkerController.verifyDeletion` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:166). Exige sesión con alguno de los roles SYSTEM, DELETION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `VerifyDeletionDto` (4 campos, 2 obligatorios). Delega en `DeletionService.verifyDeletion`. Crea filas en cross_store_consistency.deletion_verifications. Actualiza cross_store_consistency.deletion_targets. Lee cross_store_consistency.deletion_targets.
+`POST /workers/deletion-targets/{id}/verifications` la atiende `CrossStoreWorkerController.verifyDeletion` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:187). Exige sesión con alguno de los roles SYSTEM, DELETION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `VerifyDeletionDto` (4 campos, 2 obligatorios). Delega en `DeletionService.verifyDeletion`. Crea filas en cross_store_consistency.deletion_verifications. Actualiza cross_store_consistency.deletion_targets. Lee cross_store_consistency.deletion_targets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:166` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:166` |
+| ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:187` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:187` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1475,7 +1475,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreWorkerController.listExecutedDeletionTargets` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:154`
+- **Implementación:** `CrossStoreWorkerController.listExecutedDeletionTargets` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:175`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1485,17 +1485,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /workers/deletion-targets/executed` la atiende `CrossStoreWorkerController.listExecutedDeletionTargets` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:154). Exige sesión con alguno de los roles SYSTEM, DELETION_WORKER, PLATFORM_ADMIN. Delega en `DeletionService.listExecutedTargets`. Lee cross_store_consistency.deletion_targets.
+`GET /workers/deletion-targets/executed` la atiende `CrossStoreWorkerController.listExecutedDeletionTargets` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:175). Exige sesión con alguno de los roles SYSTEM, DELETION_WORKER, PLATFORM_ADMIN. Delega en `DeletionService.listExecutedTargets`. Lee cross_store_consistency.deletion_targets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:154` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:175` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1554,7 +1554,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreWorkerController.listPendingDeletionTargets` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:122`
+- **Implementación:** `CrossStoreWorkerController.listPendingDeletionTargets` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:138`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1564,17 +1564,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /workers/deletion-targets/pending` la atiende `CrossStoreWorkerController.listPendingDeletionTargets` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:122). Exige sesión con alguno de los roles SYSTEM, DELETION_WORKER, PLATFORM_ADMIN. Delega en `DeletionService.listPendingTargets`. Lee cross_store_consistency.deletion_targets.
+`GET /workers/deletion-targets/pending` la atiende `CrossStoreWorkerController.listPendingDeletionTargets` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:138). Exige sesión con alguno de los roles SYSTEM, DELETION_WORKER, PLATFORM_ADMIN. Delega en `DeletionService.listPendingTargets`. Lee cross_store_consistency.deletion_targets.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:122` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SYSTEM, DELETION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:138` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1633,7 +1633,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreWorkerController.sendToDeadLetter` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:82`
+- **Implementación:** `CrossStoreWorkerController.sendToDeadLetter` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:88`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1643,18 +1643,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /workers/projections/dead-letters` la atiende `CrossStoreWorkerController.sendToDeadLetter` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:82). Exige sesión con alguno de los roles SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `SendToDeadLetterDto` (3 campos, 2 obligatorios). Delega en `ProjectionDeliveryService.sendToDeadLetter`. Crea filas en cross_store_consistency.projection_dead_letters, messaging.domain_events, messaging.outbox_messages. Actualiza cross_store_consistency.projection_delivery_attempts. Lee cross_store_consistency.projection_dead_letters, cross_store_consistency.projection_delivery_attempts, cross_store_consistency.projection_subscriptions, messaging.outbox_messages. Publica ProjectionDeadLettered.
+`POST /workers/projections/dead-letters` la atiende `CrossStoreWorkerController.sendToDeadLetter` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:88). Exige sesión con alguno de los roles SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `SendToDeadLetterDto` (3 campos, 2 obligatorios). Delega en `ProjectionDeliveryService.sendToDeadLetter`. Crea filas en cross_store_consistency.projection_dead_letters, messaging.domain_events, messaging.outbox_messages. Actualiza cross_store_consistency.projection_delivery_attempts. Lee cross_store_consistency.projection_dead_letters, cross_store_consistency.projection_delivery_attempts, cross_store_consistency.projection_subscriptions, messaging.outbox_messages. Publica ProjectionDeadLettered.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:82` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:88` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1666,8 +1666,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 | `cross_store_consistency.projection_delivery_attempts` | LEE | LEE | DIRECTA | CrossStoreWorkerController.sendToDeadLetter → ProjectionDeliveryService.sendToDeadLetter → ProjectionRepository.findAttemptForUpdate | `src/modules/cross_store_consistency/repositories/projection.repository.ts:382` |
 | `cross_store_consistency.projection_subscriptions` | LEE | LEE | DIRECTA | CrossStoreWorkerController.sendToDeadLetter → ProjectionDeliveryService.sendToDeadLetter → ProjectionRepository.findSubscriptionById | `src/modules/cross_store_consistency/repositories/projection.repository.ts:165` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | CrossStoreWorkerController.sendToDeadLetter → ProjectionDeliveryService.sendToDeadLetter → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreWorkerController.sendToDeadLetter → ProjectionDeliveryService.sendToDeadLetter → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreWorkerController.sendToDeadLetter → ProjectionDeliveryService.sendToDeadLetter → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | CrossStoreWorkerController.sendToDeadLetter → ProjectionDeliveryService.sendToDeadLetter → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | CrossStoreWorkerController.sendToDeadLetter → ProjectionDeliveryService.sendToDeadLetter → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
@@ -1743,7 +1743,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `CrossStoreWorkerController.processDelivery` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:66`
+- **Implementación:** `CrossStoreWorkerController.processDelivery` — `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:67`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1753,18 +1753,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/cross_s
 
 ### Cómo se atiende (sistema)
 
-`POST /workers/projections/deliveries/process` la atiende `CrossStoreWorkerController.processDelivery` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:66). Exige sesión con alguno de los roles SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `ProcessDeliveryDto` (9 campos, 6 obligatorios). Delega en `ProjectionDeliveryService.processDelivery`. Crea filas en cross_store_consistency.projection_checkpoints, cross_store_consistency.projection_consumers, cross_store_consistency.projection_delivery_attempts. Actualiza cross_store_consistency.projection_checkpoints, cross_store_consistency.projection_consumers, cross_store_consistency.projection_delivery_attempts. Lee cross_store_consistency.projection_checkpoints, cross_store_consistency.projection_consumers, cross_store_consistency.projection_delivery_attempts, cross_store_consistency.projection_subscriptions.
+`POST /workers/projections/deliveries/process` la atiende `CrossStoreWorkerController.processDelivery` (src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:67). Exige sesión con alguno de los roles SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `ProcessDeliveryDto` (9 campos, 6 obligatorios). Delega en `ProjectionDeliveryService.processDelivery`. Crea filas en cross_store_consistency.projection_checkpoints, cross_store_consistency.projection_consumers, cross_store_consistency.projection_delivery_attempts. Actualiza cross_store_consistency.projection_checkpoints, cross_store_consistency.projection_consumers, cross_store_consistency.projection_delivery_attempts. Lee cross_store_consistency.projection_checkpoints, cross_store_consistency.projection_consumers, cross_store_consistency.projection_delivery_attempts, cross_store_consistency.projection_subscriptions.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SYSTEM, PROJECTION_WORKER, PLATFORM_ADMIN | `src/modules/cross_store_consistency/controllers/cross-store-worker.controller.ts:67` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 

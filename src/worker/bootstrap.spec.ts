@@ -115,6 +115,7 @@ function buildApp() {
 
 const baseEnv = {
   healthPort: 9310,
+  healthHost: '127.0.0.1',
   tickTimeoutMs: 45_000,
   stuckTickMs: 90_000,
   shutdownTimeoutMs: 12_000,
@@ -180,6 +181,7 @@ describe('bootstrapWorker', () => {
     });
     expect(startWorkerHealthServer).toHaveBeenCalledWith({
       port: 9310,
+      host: '127.0.0.1',
       logger,
     });
     expect(logger.warn).not.toHaveBeenCalled();

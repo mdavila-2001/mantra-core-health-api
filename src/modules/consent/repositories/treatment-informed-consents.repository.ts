@@ -10,7 +10,7 @@ import type {
 } from '../informed-consent.enums';
 
 /**
- * Campos del consentimiento dirigido (v4263): a qué se consiente, la
+ * Campos del consentimiento dirigido (v4266): a qué se consiente, la
  * información dada, quién otorga y bajo qué excepción. Todos opcionales.
  */
 export interface TreatmentInformedConsentDetails {
@@ -68,7 +68,7 @@ export interface TreatmentInformedConsentDetails {
   revocationRightInformed?: boolean;
 }
 
-/** Filtros del listado por paciente (v4263). */
+/** Filtros del listado por paciente (v4266). */
 export interface TreatmentInformedConsentFilters {
   /** Paciente titular. */
   patientProfileId: string;
@@ -145,7 +145,7 @@ export class TreatmentInformedConsentsRepository {
 
   /**
    * Consentimientos de un paciente, del más reciente al más antiguo,
-   * opcionalmente filtrados por el objeto consentido (v4263).
+   * opcionalmente filtrados por el objeto consentido (v4266).
    *
    * @param em - Contexto de persistencia o transacción activa.
    * @param filters - Paciente y, opcionalmente, tipo e id del objeto.

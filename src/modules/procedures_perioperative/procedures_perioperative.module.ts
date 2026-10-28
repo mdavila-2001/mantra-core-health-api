@@ -10,6 +10,7 @@ import {
   PeriopPreopService,
   PeriopIntraopService,
   PeriopDentalService,
+  PeriopReacceptanceService,
 } from './services';
 import {
   PeriopCasesRepository,
@@ -47,6 +48,8 @@ import { ClinicalModule } from '../clinical/clinical.module';
     PeriopDentalRepository,
     // Fuente autoritativa de vigencia de credencial del equipo (C-14).
     ProfessionalCredentialsRepository,
+    // Regla compartida por el caso, el equipo y la valoración preoperatoria.
+    PeriopReacceptanceService,
     PeriopCasesService,
     PeriopPreopService,
     PeriopIntraopService,

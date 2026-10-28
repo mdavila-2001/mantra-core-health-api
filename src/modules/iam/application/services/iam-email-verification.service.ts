@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { TokenService, type AuthenticatedUser } from '../../../../common';
-import { MESSAGING_SEED } from '../../../../common/seed/messaging-seed.service';
-import { NotificationsService } from '../../../messaging/services';
+import { TokenService } from '../../../../common';
+import {
+  EMAIL_NOTICE_PORT,
+  type EmailNoticePort,
+} from '../ports/email-notice.port';
 import {
   CredentialsRepository,
   EmailVerificationsRepository,
@@ -50,7 +52,7 @@ export class IamEmailVerificationService {
    * @param credentialsRepo - Resuelve la cuenta desde el identificador de login.
    * @param usersRepo - Repositorio de cuentas.
    * @param emailVerificationsRepo - Repositorio de verificaciones de correo.
-   * @param notificationsService - Encolado del correo.
+   * @param emailNotice - Encolado del correo.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -59,7 +61,8 @@ export class IamEmailVerificationService {
     private readonly credentialsRepo: CredentialsRepository,
     private readonly usersRepo: UsersRepository,
     private readonly emailVerificationsRepo: EmailVerificationsRepository,
-    private readonly notificationsService: NotificationsService,
+    @Inject(EMAIL_NOTICE_PORT)
+    private readonly emailNotice: EmailNoticePort,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(IamEmailVerificationService.name);
@@ -162,22 +165,15 @@ export class IamEmailVerificationService {
     email: string,
     token: string,
   ): Promise<void> {
-    const actor: AuthenticatedUser = { id: userId, roles: [] };
     try {
-      await this.notificationsService.createRequest(
-        {
-          channelId: MESSAGING_SEED.emailChannelId,
-          recipientUserId: userId,
-          recipientAddress: email,
-          payloadJson: {
-            subject: 'Verifique su correo',
-            bodyText:
-              'Para verificar su correo, use este código: ' +
-              `${token}\n\nEl enlace caduca en 24 horas.`,
-          },
-        },
-        actor,
-      );
+      await this.emailNotice.enqueueEmail({
+        recipientUserId: userId,
+        recipientAddress: email,
+        subject: 'Verifique su correo',
+        bodyText:
+          'Para verificar su correo, use este código: ' +
+          `${token}\n\nEl enlace caduca en 24 horas.`,
+      });
     } catch (error) {
       this.logger.warn(
         { operation: 'iam.auth.resend-verification', userId, err: error },

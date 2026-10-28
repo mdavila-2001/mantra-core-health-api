@@ -17,3 +17,4 @@ export * from './status-result.dto';
 export * from './tenant-type-profile.dto';
 export * from './directory-read.dto';
 export * from './my-organizations.dto';
+export * from './affiliation-documents-completion.dto';

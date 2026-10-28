@@ -96,7 +96,7 @@ export class Referrals {
   respondedAt?: Date;
 
   /**
-   * Tipo de derivación (v4263): atención, tratamiento, procedimiento, diagnóstico, terapia, internación u otro.
+   * Tipo de derivación (v4266): atención, tratamiento, procedimiento, diagnóstico, terapia, internación u otro.
    */
   @Property({
     fieldName: 'referral_type',

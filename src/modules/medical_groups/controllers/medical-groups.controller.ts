@@ -27,6 +27,7 @@ import {
   CreateMedicalGroupDto,
   MedicalGroupConditionOptionDto,
   MedicalGroupDto,
+  MedicalGroupEligibleMemberDto,
   MedicalGroupPageDto,
   RequestMedicalGroupRescheduleDto,
   RespondMedicalGroupInvitationDto,
@@ -75,6 +76,23 @@ export class MedicalGroupsController {
   }
 
   /** AC-21-06/07: diagnósticos del paciente, más reciente primero. */
+  /**
+   * Los colegas que se pueden invitar a un grupo del servicio elegido. Va
+   * antes de `:id` por el mismo motivo que `patients/...`: el router de Nest
+   * resuelve en orden de declaración.
+   */
+  @Get('eligible-members')
+  @ApiOperation({
+    summary: 'Colegas que se pueden invitar a un grupo de este servicio',
+  })
+  @ApiQuery({ name: 'serviceCatalogId', required: true })
+  listEligibleMembers(
+    @Query('serviceCatalogId', ParseUUIDPipe) serviceCatalogId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MedicalGroupEligibleMemberDto[]> {
+    return this.service.listEligibleMembers(serviceCatalogId, actor);
+  }
+
   @Get('patients/:patientProfileId/conditions')
   @ApiOperation({
     summary: 'Diagnósticos del paciente para el selector del formulario',

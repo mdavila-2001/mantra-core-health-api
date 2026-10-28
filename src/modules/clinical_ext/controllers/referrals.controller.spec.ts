@@ -44,13 +44,13 @@ describe('ReferralsController', () => {
     expect(d.referralsService.respond).toHaveBeenCalledWith('ref1', dto, actor);
   });
 
-  it('delegates listByPatient with the actor (authz en el servicio)', async () => {
+  it('delegates listByPatient with the actor so the service can authorize', async () => {
     const d = build();
     await d.controller.listByPatient('p1', actor);
     expect(d.referralsService.listByPatient).toHaveBeenCalledWith('p1', actor);
   });
 
-  it('delegates get, counter-referral and cancel (v4263)', async () => {
+  it('delegates get, counter-referral and cancel (v4266)', async () => {
     const d = build();
     await d.controller.get('ref1', actor);
     expect(d.referralsService.get).toHaveBeenCalledWith('ref1', actor);

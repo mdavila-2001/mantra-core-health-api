@@ -105,6 +105,19 @@ export const ormEnvSchema = Joi.object({
   DB_PASSWORD: Joi.string().required(),
   DB_NAME: Joi.string().required(),
 
+  // Rol de runtime (HZ-05): sin BYPASSRLS ni dueño de las tablas. `DB_USER` /
+  // `DB_PASSWORD` quedan para migraciones y seed. Si se declara el usuario, la
+  // contraseña es obligatoria: sin ella la API intentaría autenticar al rol de
+  // runtime con la contraseña del dueño.
+  DB_APP_USER: Joi.string().allow('').optional(),
+  DB_APP_PASSWORD: Joi.string()
+    .allow('')
+    .optional()
+    .when('DB_APP_USER', {
+      is: Joi.string().min(1).required(),
+      then: Joi.string().min(1).required(),
+    }),
+
   // Cifrado de la conexión. Por defecto `false`: el despliegue de referencia es
   // el compose, donde la base vive en una red privada del propio host y exigir
   // TLS ahí sólo añadiría un certificado que mantener. Contra un PostgreSQL

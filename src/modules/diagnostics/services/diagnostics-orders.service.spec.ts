@@ -26,12 +26,17 @@ function build() {
     findReportsByPatient: mockFn().mockResolvedValue([]),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const siteNames = { namesFor: mockFn().mockResolvedValue(new Map()) };
+  // P40: las notas que motivan cada orden. Por defecto, ninguna.
+  const basedOnNotes = { noteIdsFor: mockFn().mockResolvedValue(new Map()) };
   const service = new DiagnosticsOrdersService(
     em as any,
     repo as any,
+    siteNames as any,
     logger as any,
+    basedOnNotes as any,
   );
-  return { service, repo, em, fork };
+  return { service, repo, em, fork, siteNames, basedOnNotes };
 }
 
 /**
@@ -98,7 +103,9 @@ describe('DiagnosticsOrdersService', () => {
       );
     });
 
-    it('pide exactamente las dos categorías diagnósticas', async () => {
+    // P40 amplía el requisito: la orden de análisis «otro» de C2 también es
+    // de esta ficha. Siguen fuera procedimientos, derivaciones e interconsultas.
+    it('pide las dos categorías diagnósticas y la orden de análisis «otro» (P40)', async () => {
       const d = build();
 
       await d.service.getPatientOrders(TENANT, PATIENT, 50);
@@ -107,7 +114,9 @@ describe('DiagnosticsOrdersService', () => {
       expect(categories).toEqual([
         CLIN.SERVICE_REQUEST_CATEGORY_LAB,
         DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+        CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
       ]);
+      expect(categories).not.toContain(CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE);
     });
 
     it('proyecta órdenes e informes con el tope aplicado', async () => {
@@ -160,6 +169,81 @@ describe('DiagnosticsOrdersService', () => {
       expect(out.orders).toEqual([]);
       expect(out.reports).toEqual([]);
       expect(out.truncated).toEqual([]);
+    });
+  });
+
+  it('cada orden del personal trae los campos del ejecutor recomendado y el nombre de la sede', async () => {
+    const { service, repo, siteNames } = build();
+    repo.findOrdersByPatient.mockResolvedValue([
+      {
+        ...order('o1'),
+        performerSelectionConceptId: 'modo-self',
+        performerPractitionerProfileId: 'doc-1',
+        suggestedPracticeSiteId: 'site-1',
+      },
+      order('o2'),
+    ]);
+    siteNames.namesFor.mockResolvedValue(new Map([['site-1', 'Centro Norte']]));
+
+    const res = await service.getPatientOrders('t1', PATIENT, 50);
+
+    expect(res.orders[0]).toMatchObject({
+      performerSelectionConceptId: 'modo-self',
+      performerPractitionerProfileId: 'doc-1',
+      suggestedPracticeSiteId: 'site-1',
+      suggestedPracticeSiteName: 'Centro Norte',
+    });
+    expect(res.orders[1]).toMatchObject({
+      performerSelectionConceptId: null,
+      suggestedPracticeSiteName: null,
+    });
+    expect(siteNames.namesFor).toHaveBeenCalledTimes(1);
+  });
+
+  describe('P40 · categoría textual y notas que motivan la orden', () => {
+    it('deriva la categoría del concepto y adjunta las notas de cada orden', async () => {
+      const d = build();
+      d.repo.findOrdersByPatient.mockResolvedValue([
+        order('o1'),
+        {
+          ...order('o2'),
+          categoryConceptId: DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+        },
+        {
+          ...order('o3'),
+          categoryConceptId: CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
+        },
+      ]);
+      d.basedOnNotes.noteIdsFor.mockResolvedValue(
+        new Map([['o1', ['n1', 'n2']]]),
+      );
+
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50);
+
+      expect(out.orders.map((o) => o.category)).toEqual([
+        'LAB',
+        'IMAGING',
+        'OTHER',
+      ]);
+      expect(out.orders[0].basedOnNoteIds).toEqual(['n1', 'n2']);
+      expect(out.orders[1].basedOnNoteIds).toEqual([]);
+      expect(d.basedOnNotes.noteIdsFor).toHaveBeenCalledTimes(1);
+      expect(d.basedOnNotes.noteIdsFor).toHaveBeenCalledWith(d.fork, [
+        'o1',
+        'o2',
+        'o3',
+      ]);
+    });
+
+    it('una orden sin concepto de categoría no inventa una', async () => {
+      const d = build();
+      d.repo.findOrdersByPatient.mockResolvedValue([
+        { ...order('o1'), categoryConceptId: undefined },
+      ]);
+
+      const out = await d.service.getPatientOrders(TENANT, PATIENT, 50);
+
+      expect(out.orders[0].category).toBeUndefined();
     });
   });
 });

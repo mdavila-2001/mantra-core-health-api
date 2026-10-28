@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `terminology`.
- * 69 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 80 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const terminologyForeignKeys: readonly ForeignKeyTuple[] = [
@@ -17,15 +17,15 @@ export const terminologyForeignKeys: readonly ForeignKeyTuple[] = [
   ['catalog_import_batches', 'recorded_by_user_id', 'iam', 'users', 'id'],
   ['catalog_import_batches', 'source_id', 'terminology', 'terminology_sources', 'id'],
   ['catalog_import_batches', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['code_system_versions', 'code_system_id', 'terminology', 'code_systems', 'id'],
+  ['code_system_versions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['code_system_versions', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['code_system_versions', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['code_systems', 'content_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['code_systems', 'created_by_user_id', 'iam', 'users', 'id'],
   ['code_systems', 'source_id', 'terminology', 'terminology_sources', 'id'],
   ['code_systems', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['code_systems', 'updated_by_user_id', 'iam', 'users', 'id'],
-  ['code_system_versions', 'code_system_id', 'terminology', 'code_systems', 'id'],
-  ['code_system_versions', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['code_system_versions', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['code_system_versions', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['concept_designations', 'concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['concept_designations', 'created_by_user_id', 'iam', 'users', 'id'],
   ['concept_designations', 'designation_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -40,7 +40,18 @@ export const terminologyForeignKeys: readonly ForeignKeyTuple[] = [
   ['concept_properties', 'concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['concept_properties', 'created_by_user_id', 'iam', 'users', 'id'],
   ['concept_properties', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['concept_relationship_evidence', 'care_level_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['concept_relationship_evidence', 'code_system_version_id', 'terminology', 'code_system_versions', 'id'],
+  ['concept_relationship_evidence', 'concept_relationship_id', 'terminology', 'concept_relationships', 'id'],
+  ['concept_relationship_evidence', 'evidence_tier_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['concept_relationship_evidence', 'frequency_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['concept_relationship_evidence', 'line_of_therapy_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['concept_relationship_evidence', 'pregnancy_applicability_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['concept_relationship_evidence', 'sex_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['concept_relationship_evidence', 'terminology_source_id', 'terminology', 'terminology_sources', 'id'],
+  ['concept_relationships', 'best_evidence_tier_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['concept_relationships', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['concept_relationships', 'frequency_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['concept_relationships', 'relationship_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['concept_relationships', 'source_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['concept_relationships', 'target_concept_id', 'terminology', 'catalog_concepts', 'id'],
@@ -59,10 +70,6 @@ export const terminologyForeignKeys: readonly ForeignKeyTuple[] = [
   ['terminology_sources', 'source_type_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['terminology_sources', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['terminology_sources', 'updated_by_user_id', 'iam', 'users', 'id'],
-  ['value_sets', 'created_by_user_id', 'iam', 'users', 'id'],
-  ['value_sets', 'jurisdiction_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['value_sets', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
-  ['value_sets', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['value_set_members', 'concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['value_set_members', 'created_by_user_id', 'iam', 'users', 'id'],
   ['value_set_members', 'updated_by_user_id', 'iam', 'users', 'id'],
@@ -76,4 +83,8 @@ export const terminologyForeignKeys: readonly ForeignKeyTuple[] = [
   ['value_set_versions', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['value_set_versions', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['value_set_versions', 'value_set_id', 'terminology', 'value_sets', 'id'],
+  ['value_sets', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['value_sets', 'jurisdiction_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['value_sets', 'state_concept_id', 'terminology', 'catalog_concepts', 'id'],
+  ['value_sets', 'updated_by_user_id', 'iam', 'users', 'id'],
 ];

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS "billing"."service_catalog" (
     "code" varchar NOT NULL,
     "name" varchar NOT NULL,
     "description_text" text,
+    "terms_text" text,
     "image_file_id" uuid,
     "service_concept_id" uuid,
     "default_price" numeric NOT NULL,
@@ -226,6 +227,7 @@ CREATE TABLE IF NOT EXISTS "billing"."siat_simulated_invoices" (
     "siat_response" jsonb NOT NULL,
     "events" jsonb NOT NULL,
     "simulated" boolean NOT NULL DEFAULT true,
+    "siat_mode" varchar(12) NOT NULL DEFAULT 'simulated',
     "created_at" timestamptz NOT NULL,
     "updated_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
@@ -240,6 +242,7 @@ CREATE TABLE IF NOT EXISTS "billing"."siat_simulated_outbox" (
     "to_email" varchar(320) NOT NULL,
     "attachments" jsonb NOT NULL,
     "status" varchar(24) NOT NULL,
+    "siat_mode" varchar(12) NOT NULL DEFAULT 'simulated',
     "queued_at" timestamptz NOT NULL,
     "created_by_user_id" uuid,
     CONSTRAINT "pk_siat_simulated_outbox" PRIMARY KEY ("id")

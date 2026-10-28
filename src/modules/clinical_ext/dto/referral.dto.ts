@@ -17,7 +17,7 @@ import {
 /**
  * Cuerpo de `POST /referrals` (UC-18-07).
  *
- * v4263: la derivación puede ser **tipada** (`referralType`) hacia un servicio
+ * v4266: la derivación puede ser **tipada** (`referralType`) hacia un servicio
  * específico en un profesional, tenant, sede (`targetBranchId`) o destino
  * externo. Con `referralType` el servicio exige al menos un destino, el
  * resumen clínico y el servicio pedido. Sin `referralType` se conserva el
@@ -270,7 +270,7 @@ export class RespondReferralDto {
   rejectReason?: string;
 }
 
-/** Cuerpo de `PATCH /referrals/{id}/counter-referral` (v4263). */
+/** Cuerpo de `PATCH /referrals/{id}/counter-referral` (v4266). */
 export class CounterReferralDto {
   /**
    * Contrarreferencia: lo que el destino devuelve a quien derivó.
@@ -282,7 +282,7 @@ export class CounterReferralDto {
   counterReferralText!: string;
 }
 
-/** Respuesta de una referencia (v4263: todos los campos y estado legible). */
+/** Respuesta de una referencia (v4266: todos los campos y estado legible). */
 @ApiSchema({ name: 'ClinicalExtReferralResponseDto' })
 export class ReferralResponseDto {
   /**

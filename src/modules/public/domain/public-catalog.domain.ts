@@ -24,6 +24,24 @@ export interface PharmacyProductPureRow {
   readonly currency: string | null;
   readonly availableQuantity: string | number;
   readonly requiresPrescription: boolean | null;
+  /**
+   * Sedes activas donde el producto está **disponible** según la regla única
+   * de existencias (`siteProductAvailabilitySql`: lotes si la sede los lleva,
+   * lo declarado en el catálogo si no, y nunca lo marcado «no tengo»).
+   * Ausente = no se consultó.
+   */
+  readonly availableSites?: string | number;
+}
+
+/**
+ * Si se rotula «hay»: si el producto está disponible en alguna sede activa.
+ * La decisión por sede no se repite acá: la toma `siteProductAvailabilitySql`
+ * en la base (defecto A1, 26/10/2026). Sin ese dato, como antes de P47: lo
+ * disponible del libro.
+ */
+export function publicInStock(row: PharmacyProductPureRow): boolean {
+  if (row.availableSites !== undefined) return Number(row.availableSites) > 0;
+  return Number(row.availableQuantity) > 0;
 }
 
 /** Proyección pública pura de un servicio: campo por campo, nada interno. */
@@ -54,7 +72,7 @@ export function formatPublicProduct(row: PharmacyProductPureRow) {
     therapeuticGroup: null,
     price: row.price,
     currency: row.price === null ? null : row.currency,
-    inStock: Number(row.availableQuantity) > 0,
+    inStock: publicInStock(row),
     requiresPrescription: row.requiresPrescription === true,
   };
 }

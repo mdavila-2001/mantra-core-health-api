@@ -36,16 +36,16 @@ lo retira del mercado, y el paciente ya lo lleva puesto.
 
 ## DTO por área
 
-| Área | Entrada | Respuesta |
-| --- | --- | --- |
-| Caso | `ScheduleCaseDto`, `AddDiagnosesDto` (+ `CaseDiagnosisDto`), `AssignTeamMemberDto` | `CaseResponseDto`, `DiagnosesResponseDto`, `TeamMemberResponseDto` |
-| Preoperatorio | `CreatePreopAssessmentDto` (+ `RiskScoreDto`), `VerifyOrdersDto` | `PreopAssessmentResponseDto`, `VerifyOrdersResponseDto` |
-| Seguridad | `SubmitChecklistPhaseDto` (+ `ChecklistResponseItemDto`) | `ChecklistPhaseResponseDto` |
-| Anestesia | `CreateAnesthesiaPlanDto` (+ `AirwayAssessmentDto`), `RecordAnesthesiaEventDto` | `AnesthesiaPlanResponseDto`, `ApprovePlanResponseDto`, `AnesthesiaEventResponseDto` |
-| Intervención | `CreateOperativeStepDto`, `RecordFindingDto`, `RecordImplantDto` (+ `ImplantIdentifierDto`), `RecordMedicationUseDto`, `RecordSpecimenDto` | `OperativeStepResponseDto`, `FindingResponseDto`, `ImplantResponseDto`, `SuppliesResponseDto` |
-| Reporte | `DraftOperativeReportDto` (+ `ComplicationDto`), `SignReportDto` | `OperativeReportResponseDto`, `SignReportResponseDto` |
-| Recuperación | `AdmitToPacuDto`, `RecordPacuAssessmentDto`, `DischargePacuDto` (+ `PostoperativeOrderDto`, `PostoperativeFollowupDto`) | `PacuStayResponseDto`, `PacuAssessmentResponseDto`, `DischargePacuResponseDto` |
-| Cierre | `CancelCaseDto`, `PostChargesDto` (+ `ChargeItemDto`) | `CancelCaseResponseDto`, `PostChargesResponseDto` |
+| Área          | Entrada                                                                                                                                    | Respuesta                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| Caso          | `ScheduleCaseDto`, `AddDiagnosesDto` (+ `CaseDiagnosisDto`), `AssignTeamMemberDto`                                                         | `CaseResponseDto`, `DiagnosesResponseDto`, `TeamMemberResponseDto`                            |
+| Preoperatorio | `CreatePreopAssessmentDto` (+ `RiskScoreDto`), `VerifyOrdersDto`                                                                           | `PreopAssessmentResponseDto`, `VerifyOrdersResponseDto`                                       |
+| Seguridad     | `SubmitChecklistPhaseDto` (+ `ChecklistResponseItemDto`)                                                                                   | `ChecklistPhaseResponseDto`                                                                   |
+| Anestesia     | `CreateAnesthesiaPlanDto` (+ `AirwayAssessmentDto`), `RecordAnesthesiaEventDto`                                                            | `AnesthesiaPlanResponseDto`, `ApprovePlanResponseDto`, `AnesthesiaEventResponseDto`           |
+| Intervención  | `CreateOperativeStepDto`, `RecordFindingDto`, `RecordImplantDto` (+ `ImplantIdentifierDto`), `RecordMedicationUseDto`, `RecordSpecimenDto` | `OperativeStepResponseDto`, `FindingResponseDto`, `ImplantResponseDto`, `SuppliesResponseDto` |
+| Reporte       | `DraftOperativeReportDto` (+ `ComplicationDto`), `SignReportDto`                                                                           | `OperativeReportResponseDto`, `SignReportResponseDto`                                         |
+| Recuperación  | `AdmitToPacuDto`, `RecordPacuAssessmentDto`, `DischargePacuDto` (+ `PostoperativeOrderDto`, `PostoperativeFollowupDto`)                    | `PacuStayResponseDto`, `PacuAssessmentResponseDto`, `DischargePacuResponseDto`                |
+| Cierre        | `CancelCaseDto`, `PostChargesDto` (+ `ChargeItemDto`)                                                                                      | `CancelCaseResponseDto`, `PostChargesResponseDto`                                             |
 
 ## Campos que documentan su obligación condicional
 

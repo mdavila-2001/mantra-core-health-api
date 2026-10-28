@@ -29,6 +29,7 @@ Entidades y relaciones que representan el modelo persistente.
 | `observations.entity.ts` | Mapeo de una entidad persistente y sus relaciones. |
 | `prescription_signature_policies.entity.ts` | Mapeo de una entidad persistente y sus relaciones. |
 | `procedures.entity.ts` | Mapeo de una entidad persistente y sus relaciones. |
+| `received_services.entity.ts` | Mapeo de una entidad persistente y sus relaciones. |
 | `service_requests.entity.ts` | Mapeo de una entidad persistente y sus relaciones. |
 | `social_history.entity.ts` | Mapeo de una entidad persistente y sus relaciones. |
 

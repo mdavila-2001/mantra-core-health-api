@@ -1,5 +1,5 @@
 /**
- * Enumeraciones del consentimiento informado dirigido (v4263).
+ * Enumeraciones del consentimiento informado dirigido (v4266).
  *
  * En la base son `varchar` + `CHECK` (mismo criterio que `siat_mode`, v4262),
  * no conceptos: los valores son parte del contrato de la API y del CHECK, y el

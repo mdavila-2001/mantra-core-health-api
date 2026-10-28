@@ -135,6 +135,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -231,6 +232,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -354,6 +356,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -367,8 +370,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: QA_ADMIN, QA_ENGINEER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Plan no encontrado | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
-| 404 | `NOT_FOUND` | Suite no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 404 | `NOT_FOUND` | Entorno no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
+| 404 | `NOT_FOUND` | Suite no encontrada | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
+| 404 | `NOT_FOUND` | Entorno no encontrado | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
 | 409 | `CONFLICT` | La suite ya tiene una corrida en marcha | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
 | 409 | `CONFLICT` | No se pudo asignar número de corrida | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -457,6 +460,7 @@ Authorization: Bearer <access_token_jwt>
 | 404 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -576,6 +580,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -676,6 +681,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -798,6 +804,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -891,6 +898,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `no declarado` | No |
 | 429 | Consulta completada correctamente. | `no declarado` | No |
 | 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -982,6 +990,7 @@ Authorization: Bearer <access_token_jwt>
 | 422 | Operación completada correctamente. | `no declarado` | No |
 | 429 | Operación completada correctamente. | `no declarado` | No |
 | 500 | Operación completada correctamente. | `no declarado` | No |
+| 504 | Operación completada correctamente. | `no declarado` | No |
 
 El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
 
@@ -993,11 +1002,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Corrida no encontrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
 | 404 | `NOT_FOUND` | Suite no encontrada | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
 | 404 | `NOT_FOUND` | Entorno no encontrado | Excepción explícita en src/modules/qa_execution/services/qa-execution.service.ts |
-| 404 | `NOT_FOUND` | Caso no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
-| 404 | `NOT_FOUND` | Resultado no encontrado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
 | 409 | `CONFLICT` | La corrida ya está cerrada | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
 | 409 | `CONFLICT` | El caso ya se ejecutó en esta corrida | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |
 | 409 | `CONFLICT` | El resultado ya fue evaluado | Excepción explícita en src/modules/qa_lab/services/qa-runs.service.ts |

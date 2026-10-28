@@ -101,7 +101,7 @@ export class TreatmentInformedConsents {
   withdrawnAt?: Date;
 
   /**
-   * A qué se consiente (v4263): `MEDICATION_REQUEST`, `SERVICE_REQUEST`, `REFERRAL`, `PROCEDURE` o `CARE_PLAN`.
+   * A qué se consiente (v4266): `MEDICATION_REQUEST`, `SERVICE_REQUEST`, `REFERRAL`, `PROCEDURE` o `CARE_PLAN`.
    */
   @Property({
     fieldName: 'target_type',
@@ -111,7 +111,7 @@ export class TreatmentInformedConsents {
   targetType?: InformedConsentTargetType;
 
   /**
-   * Id del objeto consentido (polimórfico, sin FK física; v4263).
+   * Id del objeto consentido (polimórfico, sin FK física; v4266).
    */
   @Property({ fieldName: 'target_id', type: 'uuid', nullable: true })
   targetId?: string;

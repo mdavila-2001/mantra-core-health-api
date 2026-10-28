@@ -3,7 +3,7 @@
 # Flujos del módulo `diagnostics`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 31 (27 con decisiones propias, 4 sin ellas)
+- **Operaciones:** 31 (29 con decisiones propias, 2 sin ellas)
 - Inventario de endpoints del módulo: [diagnostics](../endpoints/diagnostics.md)
 
 ## Proceso: Módulo Diagnostics (20) — Laboratorio, Imagen Médica y Media Clínica
@@ -23,194 +23,228 @@ _Fuente: `src/modules/diagnostics/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `UC-20-01` | Acesionar especímenes recibidos | POST /diagnostics/accessions | Cualquier sesión válida | ALTO | 5 |
-| `UC-20-02` | Rechazar espécimen y solicitar recolección | POST /diagnostics/specimens/{id}/rejection | Cualquier sesión válida | ALTO | 4 |
-| `UC-20-03` | Cadena de custodia / traslado | POST /diagnostics/containers/{id}/custody-events | Cualquier sesión válida | ALTO | 4 |
-| `UC-20-04` | Abrir orden de trabajo y desglosar pruebas | POST /diagnostics/work-orders | Cualquier sesión válida | ALTO | 4 |
-| `UC-20-05` | Ingerir mensaje de resultado (LIS/HL7/ASTM) | POST /diagnostics/analyzer-runs/{id}/messages | Cualquier sesión válida | ALTO | 5 |
-| `UC-20-06` | Verificar (técnica/facultativa) | POST /diagnostics/results/{observationId}/verifications | Cualquier sesión válida | ALTO | 2 |
-| `UC-20-07` | Crear/enmendar versión de informe | POST /diagnostics/reports/{reportId}/versions | CLINICIAN · PRACTITIONER | MEDIO | 4 |
+| `UC-20-01` | Acesionar especímenes recibidos | POST /diagnostics/accessions | Cualquier sesión válida | ALTO | 6 |
+| `UC-20-02` | Rechazar espécimen y solicitar recolección | POST /diagnostics/specimens/{id}/rejection | Cualquier sesión válida | ALTO | 5 |
+| `UC-20-03` | Cadena de custodia / traslado | POST /diagnostics/containers/{id}/custody-events | Cualquier sesión válida | ALTO | 5 |
+| `UC-20-04` | Abrir orden de trabajo y desglosar pruebas | POST /diagnostics/work-orders | Cualquier sesión válida | ALTO | 6 |
+| `UC-20-05` | Ingerir mensaje de resultado (LIS/HL7/ASTM) | POST /diagnostics/analyzer-runs/{id}/messages | Cualquier sesión válida | ALTO | 8 |
+| `UC-20-06` | Verificar (técnica/facultativa) | POST /diagnostics/results/{observationId}/verifications | Cualquier sesión válida | ALTO | 3 |
+| `UC-20-07` | Crear/enmendar versión de informe | POST /diagnostics/reports/{reportId}/versions | CLINICIAN · PRACTITIONER | MEDIO | 7 |
 | `UC-20-08` | Validar y liberar | POST /diagnostics/reports/{reportId}/versions/{versionId}/release | CLINICIAN · PRACTITIONER | MEDIO | 5 |
-| `UC-20-09` | Detectar y notificar resultado crítico | POST /diagnostics/critical-results | CLINICIAN · PRACTITIONER | MEDIO | 2 |
+| `UC-20-09` | Detectar y notificar resultado crítico | POST /diagnostics/critical-results | CLINICIAN · PRACTITIONER | MEDIO | 4 |
 | `UC-20-10` | Acusar recibo / escalar | POST /diagnostics/critical-results/{id}/acknowledge | CLINICIAN · PRACTITIONER | MEDIO | 2 |
-| `UC-20-11` | Ingestar estudio DICOM (STOW-RS) | POST /dicomweb/studies | CLINICIAN · PRACTITIONER | MEDIO | 6 |
-| `UC-20-12` | Adjuntar media clínica / imagen | POST /diagnostics/clinical-media | CLINICIAN · PRACTITIONER | MEDIO | 3 |
-| `UC-20-13` | Registrar dosis de radiación | POST /diagnostics/imaging-studies/{id}/dose-events | CLINICIAN · PRACTITIONER | MEDIO | 2 |
-| `UC-20-14` | Evento de calidad de datos + provenance | POST /diagnostics/data-quality-events | CLINICIAN · PRACTITIONER | MEDIO | 2 |
+| `UC-20-11` | Ingestar estudio DICOM (STOW-RS) | POST /dicomweb/studies | CLINICIAN · PRACTITIONER | MEDIO | 8 |
+| `UC-20-12` | Adjuntar media clínica / imagen | POST /diagnostics/clinical-media | CLINICIAN · PRACTITIONER | MEDIO | 6 |
+| `UC-20-13` | Registrar dosis de radiación | POST /diagnostics/imaging-studies/{id}/dose-events | CLINICIAN · PRACTITIONER | MEDIO | 3 |
+| `UC-20-14` | Evento de calidad de datos + provenance | POST /diagnostics/data-quality-events | CLINICIAN · PRACTITIONER | MEDIO | 5 |
 | `ctrl:DiagnosticsImagingController` | Operaciones de DiagnosticsImagingController que el README no asigna a un caso de uso | POST /diagnostics/imaging-endpoints | CLINICIAN · PRACTITIONER | MEDIO | 1 |
-|  |  | GET /diagnostics/patients/{patientProfileId}/imaging-studies | CLINICIAN · PRACTITIONER | BAJO | 1 |
+|  |  | GET /diagnostics/patients/{patientProfileId}/imaging-studies | CLINICIAN · PRACTITIONER | BAJO | 4 |
 | `ctrl:DiagnosticsLabController` | Operaciones de DiagnosticsLabController que el README no asigna a un caso de uso | POST /diagnostics/analyzer-runs | Cualquier sesión válida | ALTO | 1 |
 |  |  | GET /diagnostics/work-orders | Cualquier sesión válida | BAJO | 1 |
-| `ctrl:DiagnosticsOrdersController` | Operaciones de DiagnosticsOrdersController que el README no asigna a un caso de uso | GET /diagnostics/patients/{patientProfileId}/orders | CLINICIAN · PRACTITIONER | BAJO | 2 |
+| `ctrl:DiagnosticsOrdersController` | Operaciones de DiagnosticsOrdersController que el README no asigna a un caso de uso | GET /diagnostics/patients/{patientProfileId}/orders | CLINICIAN · PRACTITIONER | BAJO | 3 |
 | `ctrl:DiagnosticsPatientResultsController` | Operaciones de DiagnosticsPatientResultsController que el README no asigna a un caso de uso | GET /diagnostic-results/me | PATIENT | BAJO | 7 |
 |  |  | GET /diagnostic-results/me/{reportId} | PATIENT | BAJO | 7 |
 |  |  | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | PATIENT | BAJO | 9 |
 |  |  | GET /diagnostic-results/me/{reportId}/shares | PATIENT | BAJO | 4 |
 |  |  | POST /diagnostic-results/me/{reportId}/shares | PATIENT | MEDIO | 11 |
 |  |  | POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke | PATIENT | MEDIO | 5 |
-|  |  | GET /diagnostic-results/me/orders | PATIENT | BAJO | 26 |
+|  |  | GET /diagnostic-results/me/orders | PATIENT | BAJO | 27 |
 | `ctrl:DiagnosticsReceptionController` | Operaciones de DiagnosticsReceptionController que el README no asigna a un caso de uso | POST /diagnostics/service-requests/inbox | Cualquier sesión válida | BAJO | 10 |
 | `ctrl:DiagnosticsSpecimensController` | Operaciones de DiagnosticsSpecimensController que el README no asigna a un caso de uso | GET /diagnostics/accessions/{id} | Cualquier sesión válida | BAJO | 5 |
-|  |  | POST /diagnostics/specimens | Cualquier sesión válida | ALTO | 1 |
+|  |  | POST /diagnostics/specimens | Cualquier sesión válida | ALTO | 3 |
 |  |  | GET /diagnostics/specimens/{id} | Cualquier sesión válida | BAJO | 3 |
-|  |  | POST /diagnostics/specimens/{id}/containers | Cualquier sesión válida | ALTO | 2 |
+|  |  | POST /diagnostics/specimens/{id}/containers | Cualquier sesión válida | ALTO | 3 |
 
 ### Diagrama 1 de 2 — etapas `UC-20-01`, `UC-20-02`, `UC-20-03`…
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a21(["CLINICIAN · PRACTITIONER"]):::actor
-  t3[("diagnostics.accession_specimens")]:::tabla
-  t4[("diagnostics.laboratory_accessions")]:::tabla
-  t5[("diagnostics.specimen_chain_of_custody_events")]:::tabla
-  t6[("diagnostics.specimens")]:::tabla
-  t8[("diagnostics.laboratory_work_order_tests")]:::tabla
-  t9[("diagnostics.specimen_rejection_events")]:::tabla
-  t11[("diagnostics.specimen_container_events")]:::tabla
-  t12[("diagnostics.specimen_containers")]:::tabla
-  t14[("diagnostics.laboratory_work_orders")]:::tabla
-  t16[("diagnostics.analyzer_result_messages")]:::tabla
-  t17[("diagnostics.analyzer_runs")]:::tabla
-  t19[("diagnostics.result_verifications")]:::tabla
-  t22[("diagnostics.diagnostic_report_files")]:::tabla
-  t23[("diagnostics.diagnostic_report_results")]:::tabla
-  t24[("diagnostics.diagnostic_report_versions")]:::tabla
+  a25(["CLINICIAN · PRACTITIONER"]):::actor
+  t3[("clinical.service_requests")]:::tabla
+  t4[("diagnostics.accession_specimens")]:::tabla
+  t5[("diagnostics.laboratory_accessions")]:::tabla
+  t6[("diagnostics.specimen_chain_of_custody_events")]:::tabla
+  t7[("diagnostics.specimens")]:::tabla
+  t9[("diagnostics.laboratory_work_order_tests")]:::tabla
+  t10[("diagnostics.specimen_rejection_events")]:::tabla
+  t12[("diagnostics.specimen_container_events")]:::tabla
+  t13[("diagnostics.specimen_containers")]:::tabla
+  t15[("diagnostics.laboratory_work_orders")]:::tabla
+  t17[("clinical.observations")]:::tabla
+  t18[("common.files")]:::tabla
+  t19[("diagnostics.analyzer_result_messages")]:::tabla
+  t20[("diagnostics.analyzer_runs")]:::tabla
+  t23[("diagnostics.result_verifications")]:::tabla
   t26[("clinical.diagnostic_reports")]:::tabla
-  t27[("diagnostics.diagnostic_release_events")]:::tabla
-  t29[("diagnostics.critical_result_notifications")]:::tabla
-  t32[("diagnostics.dicom_object_locations")]:::tabla
-  t33[("diagnostics.imaging_endpoints")]:::tabla
-  t34[("diagnostics.imaging_instances")]:::tabla
-  t35[("diagnostics.imaging_series")]:::tabla
-  t36[("diagnostics.imaging_studies")]:::tabla
-  t38[("diagnostics.clinical_media")]:::tabla
-  t39[("diagnostics.media_annotations")]:::tabla
-  t41[("diagnostics.radiation_dose_events")]:::tabla
-  t43[("diagnostics.diagnostic_data_quality_events")]:::tabla
-  t44[("diagnostics.diagnostic_provenance_links")]:::tabla
+  t27[("diagnostics.diagnostic_report_files")]:::tabla
+  t28[("diagnostics.diagnostic_report_results")]:::tabla
+  t29[("diagnostics.diagnostic_report_versions")]:::tabla
+  t32[("diagnostics.diagnostic_release_events")]:::tabla
+  t34[("diagnostics.critical_result_notifications")]:::tabla
+  t37[("clinical.encounters")]:::tabla
+  t38[("diagnostics.dicom_object_locations")]:::tabla
+  t39[("diagnostics.imaging_endpoints")]:::tabla
+  t40[("diagnostics.imaging_instances")]:::tabla
+  t41[("diagnostics.imaging_series")]:::tabla
+  t44[("diagnostics.clinical_media")]:::tabla
+  t45[("diagnostics.media_annotations")]:::tabla
+  t47[("diagnostics.imaging_studies")]:::tabla
+  t48[("diagnostics.radiation_dose_events")]:::tabla
+  t50[("diagnostics.diagnostic_data_quality_events")]:::tabla
+  t51[("diagnostics.diagnostic_provenance_links")]:::tabla
+  t54[("authz.care_relationships")]:::tabla
+  t55[("profiles.health_practitioner_profiles")]:::tabla
+  t56[("profiles.person_account_links")]:::tabla
   subgraph s0["UC-20-01 · Acesionar especímenes recibidos"]
     o1["POST /diagnostics/accessions"]:::op
   end
   subgraph s1["UC-20-02 · Rechazar espécimen y solicitar recolección"]
-    o7["POST /diagnostics/specimens/{id}/rejection"]:::op
+    o8["POST /diagnostics/specimens/{id}/rejection"]:::op
   end
   subgraph s2["UC-20-03 · Cadena de custodia / traslado"]
-    o10["POST /diagnostics/containers/{id}/custody-events"]:::op
+    o11["POST /diagnostics/containers/{id}/custody-events"]:::op
   end
   subgraph s3["UC-20-04 · Abrir orden de trabajo y desglosar pruebas"]
-    o13["POST /diagnostics/work-orders"]:::op
+    o14["POST /diagnostics/work-orders"]:::op
   end
+  t21[("+2 tablas más")]
   subgraph s4["UC-20-05 · Ingerir mensaje de resultado (LIS/HL7/ASTM)"]
-    o15["POST /diagnostics/analyzer-runs/{id}/messages"]:::op
+    o16["POST /diagnostics/analyzer-runs/{id}/messages"]:::op
   end
   subgraph s5["UC-20-06 · Verificar (técnica/facultativa)"]
-    o18["POST /diagnostics/results/{observationId}/verifications"]:::op
+    o22["POST /diagnostics/results/{observationId}/verifications"]:::op
   end
+  t30[("+1 tablas más")]
   subgraph s6["UC-20-07 · Crear/enmendar versión de informe"]
-    o20["POST /diagnostics/reports/{reportId}/versions"]:::op
+    o24["POST /diagnostics/reports/{reportId}/versions"]:::op
   end
   subgraph s7["UC-20-08 · Validar y liberar"]
-    o25["POST /diagnostics/reports/{reportId}/versions/{versionId}/release"]:::op
+    o31["POST /diagnostics/reports/{reportId}/versions/{versionId}/release"]:::op
   end
   subgraph s8["UC-20-09 · Detectar y notificar resultado crítico"]
-    o28["POST /diagnostics/critical-results"]:::op
+    o33["POST /diagnostics/critical-results"]:::op
   end
   subgraph s9["UC-20-10 · Acusar recibo / escalar"]
-    o30["POST /diagnostics/critical-results/{id}/acknowledge"]:::op
+    o35["POST /diagnostics/critical-results/{id}/acknowledge"]:::op
   end
+  t42[("+2 tablas más")]
   subgraph s10["UC-20-11 · Ingestar estudio DICOM (STOW-RS)"]
-    o31["POST /dicomweb/studies"]:::op
+    o36["POST /dicomweb/studies"]:::op
   end
   subgraph s11["UC-20-12 · Adjuntar media clínica / imagen"]
-    o37["POST /diagnostics/clinical-media"]:::op
+    o43["POST /diagnostics/clinical-media"]:::op
   end
   subgraph s12["UC-20-13 · Registrar dosis de radiación"]
-    o40["POST /diagnostics/imaging-studies/{id}/dose-events"]:::op
+    o46["POST /diagnostics/imaging-studies/{id}/dose-events"]:::op
   end
   subgraph s13["UC-20-14 · Evento de calidad de datos + provenance"]
-    o42["POST /diagnostics/data-quality-events"]:::op
+    o49["POST /diagnostics/data-quality-events"]:::op
   end
   subgraph s14["ctrl:DiagnosticsImagingController · Operaciones de DiagnosticsImagingController…"]
-    o45["POST /diagnostics/imaging-endpoints"]:::op
-    o46["GET /diagnostics/patients/{patientProfileId}/imaging-studies"]:::op
+    o52["POST /diagnostics/imaging-endpoints"]:::op
+    o53["GET /diagnostics/patients/{patientProfileId}/imaging-studies"]:::op
   end
   subgraph s15["ctrl:DiagnosticsLabController · Operaciones de DiagnosticsLabController que el…"]
-    o47["POST /diagnostics/analyzer-runs"]:::op
-    o48["GET /diagnostics/work-orders"]:::op
+    o57["POST /diagnostics/analyzer-runs"]:::op
+    o58["GET /diagnostics/work-orders"]:::op
   end
   a2 --> o1
-  o1 -->|"CREA"| t3
+  o1 -->|"LEE"| t3
   o1 -->|"CREA"| t4
   o1 -->|"CREA"| t5
-  o1 -->|"ACTUALIZA"| t6
-  o1 -->|"LEE"| t6
-  a2 --> o7
-  o7 -->|"ACTUALIZA"| t8
-  o7 -->|"CREA"| t9
-  o7 -->|"ACTUALIZA"| t6
-  o7 -->|"LEE"| t6
-  a2 --> o10
-  o10 -->|"CREA"| t5
-  o10 -->|"CREA"| t11
-  o10 -->|"ACTUALIZA"| t12
-  o10 -->|"LEE"| t12
-  a2 --> o13
-  o13 -->|"ACTUALIZA"| t4
-  o13 -->|"LEE"| t4
-  o13 -->|"CREA"| t8
-  o13 -->|"CREA"| t14
-  a2 --> o15
-  o15 -->|"CREA"| t16
-  o15 -->|"LEE"| t16
-  o15 -->|"LEE"| t17
-  o15 -->|"ACTUALIZA"| t8
-  o15 -->|"LEE"| t8
-  a2 --> o18
-  o18 -->|"ACTUALIZA"| t8
-  o18 -->|"CREA"| t19
-  a21 --> o20
-  o20 -->|"CREA"| t22
-  o20 -->|"CREA"| t23
-  o20 -->|"CREA"| t24
-  o20 -->|"LEE"| t24
-  a21 --> o25
-  o25 -->|"ACTUALIZA"| t26
-  o25 -->|"LEE"| t26
-  o25 -->|"CREA"| t27
-  o25 -->|"ACTUALIZA"| t24
-  o25 -->|"LEE"| t24
-  a21 --> o28
-  o28 -->|"CREA"| t29
-  o28 -->|"LEE"| t29
-  a21 --> o30
-  o30 -->|"ACTUALIZA"| t29
-  o30 -->|"LEE"| t29
-  a21 --> o31
+  o1 -->|"CREA"| t6
+  o1 -->|"ACTUALIZA"| t7
+  o1 -->|"LEE"| t7
+  a2 --> o8
+  o8 -->|"LEE"| t3
+  o8 -->|"ACTUALIZA"| t9
+  o8 -->|"CREA"| t10
+  o8 -->|"ACTUALIZA"| t7
+  o8 -->|"LEE"| t7
+  a2 --> o11
+  o11 -->|"CREA"| t6
+  o11 -->|"CREA"| t12
+  o11 -->|"ACTUALIZA"| t13
+  o11 -->|"LEE"| t13
+  o11 -->|"LEE"| t7
+  a2 --> o14
+  o14 -->|"LEE"| t3
+  o14 -->|"ACTUALIZA"| t5
+  o14 -->|"LEE"| t5
+  o14 -->|"CREA"| t9
+  o14 -->|"CREA"| t15
+  o14 -->|"LEE"| t7
+  a2 --> o16
+  o16 -->|"LEE"| t17
+  o16 -->|"LEE"| t18
+  o16 -->|"CREA"| t19
+  o16 -->|"LEE"| t19
+  o16 -->|"LEE"| t20
+  o16 -->|"ACTUALIZA"| t9
+  o16 -.-> t21
+  a2 --> o22
+  o22 -->|"LEE"| t17
+  o22 -->|"ACTUALIZA"| t9
+  o22 -->|"CREA"| t23
+  a25 --> o24
+  o24 -->|"LEE"| t26
+  o24 -->|"LEE"| t17
+  o24 -->|"LEE"| t18
+  o24 -->|"CREA"| t27
+  o24 -->|"CREA"| t28
+  o24 -->|"CREA"| t29
+  o24 -.-> t30
+  a25 --> o31
+  o31 -->|"ACTUALIZA"| t26
+  o31 -->|"LEE"| t26
   o31 -->|"CREA"| t32
-  o31 -->|"LEE"| t33
-  o31 -->|"CREA"| t34
-  o31 -->|"CREA"| t35
-  o31 -->|"CREA"| t36
-  o31 -->|"LEE"| t36
-  a21 --> o37
-  o37 -->|"CREA"| t38
-  o37 -->|"LEE"| t38
-  o37 -->|"CREA"| t39
-  a21 --> o40
-  o40 -->|"LEE"| t36
-  o40 -->|"CREA"| t41
-  a21 --> o42
-  o42 -->|"CREA"| t43
-  o42 -->|"CREA"| t44
-  a21 --> o45
-  o45 -->|"CREA"| t33
-  a21 --> o46
-  o46 -->|"LEE"| t36
-  a2 --> o47
-  o47 -->|"CREA"| t17
-  a2 --> o48
-  o48 -->|"LEE"| t14
+  o31 -->|"ACTUALIZA"| t29
+  o31 -->|"LEE"| t29
+  a25 --> o33
+  o33 -->|"LEE"| t26
+  o33 -->|"LEE"| t17
+  o33 -->|"CREA"| t34
+  o33 -->|"LEE"| t34
+  a25 --> o35
+  o35 -->|"ACTUALIZA"| t34
+  o35 -->|"LEE"| t34
+  a25 --> o36
+  o36 -->|"LEE"| t37
+  o36 -->|"LEE"| t3
+  o36 -->|"CREA"| t38
+  o36 -->|"LEE"| t39
+  o36 -->|"CREA"| t40
+  o36 -->|"CREA"| t41
+  o36 -.-> t42
+  a25 --> o43
+  o43 -->|"LEE"| t26
+  o43 -->|"LEE"| t37
+  o43 -->|"LEE"| t18
+  o43 -->|"CREA"| t44
+  o43 -->|"LEE"| t44
+  o43 -->|"CREA"| t45
+  a25 --> o46
+  o46 -->|"LEE"| t41
+  o46 -->|"LEE"| t47
+  o46 -->|"CREA"| t48
+  a25 --> o49
+  o49 -->|"LEE"| t17
+  o49 -->|"CREA"| t50
+  o49 -->|"CREA"| t51
+  o49 -->|"LEE"| t47
+  o49 -->|"LEE"| t7
+  a25 --> o52
+  o52 -->|"CREA"| t39
+  a25 --> o53
+  o53 -->|"LEE"| t54
+  o53 -->|"LEE"| t47
+  o53 -->|"LEE"| t55
+  o53 -->|"LEE"| t56
+  a2 --> o57
+  o57 -->|"CREA"| t20
+  a2 --> o58
+  o58 -->|"LEE"| t15
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -222,132 +256,138 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["CLINICIAN · PRACTITIONER"]):::actor
-  a6(["PATIENT"]):::actor
-  a31(["Cualquier sesión válida"]):::actor
+  a7(["PATIENT"]):::actor
+  a32(["Cualquier sesión válida"]):::actor
   t3[("clinical.diagnostic_reports")]:::tabla
   t4[("clinical.service_requests")]:::tabla
-  t7[("diagnostics.diagnostic_release_events")]:::tabla
-  t8[("diagnostics.diagnostic_report_files")]:::tabla
-  t9[("diagnostics.diagnostic_report_results")]:::tabla
-  t10[("diagnostics.diagnostic_report_versions")]:::tabla
-  t11[("profiles.patient_profiles")]:::tabla
-  t16[("common.file_versions")]:::tabla
-  t17[("common.files")]:::tabla
-  t20[("authz.resource_scope_grants")]:::tabla
-  t21[("profiles.person_account_links")]:::tabla
-  t23[("authz.care_relationships")]:::tabla
-  t27[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t28[("diagnostic_units.diagnostic_units")]:::tabla
-  t32[("diagnostics.laboratory_accessions")]:::tabla
-  t33[("diagnostics.specimen_chain_of_custody_events")]:::tabla
-  t34[("diagnostics.specimen_containers")]:::tabla
-  t35[("diagnostics.specimens")]:::tabla
-  t36[("directory.tenants")]:::tabla
-  t39[("diagnostics.accession_specimens")]:::tabla
+  t5[("practice.practice_sites")]:::tabla
+  t8[("diagnostics.diagnostic_release_events")]:::tabla
+  t9[("diagnostics.diagnostic_report_files")]:::tabla
+  t10[("diagnostics.diagnostic_report_results")]:::tabla
+  t11[("diagnostics.diagnostic_report_versions")]:::tabla
+  t12[("profiles.patient_profiles")]:::tabla
+  t17[("common.file_versions")]:::tabla
+  t18[("common.files")]:::tabla
+  t21[("authz.resource_scope_grants")]:::tabla
+  t22[("profiles.person_account_links")]:::tabla
+  t24[("authz.care_relationships")]:::tabla
+  t28[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t29[("diagnostic_units.diagnostic_units")]:::tabla
+  t33[("diagnostics.laboratory_accessions")]:::tabla
+  t34[("diagnostics.specimen_chain_of_custody_events")]:::tabla
+  t35[("diagnostics.specimen_containers")]:::tabla
+  t36[("diagnostics.specimens")]:::tabla
+  t37[("directory.tenants")]:::tabla
+  t40[("diagnostics.accession_specimens")]:::tabla
+  t42[("clinical.encounters")]:::tabla
   subgraph s0["ctrl:DiagnosticsOrdersController · Operaciones de DiagnosticsOrdersController q…"]
     o1["GET /diagnostics/patients/{patientProfileId}/orders"]:::op
   end
-  t12[("+1 tablas más")]
-  t14[("+1 tablas más")]
-  t18[("+3 tablas más")]
-  t24[("+5 tablas más")]
-  t29[("+20 tablas más")]
+  t13[("+1 tablas más")]
+  t15[("+1 tablas más")]
+  t19[("+3 tablas más")]
+  t25[("+5 tablas más")]
+  t30[("+21 tablas más")]
   subgraph s1["ctrl:DiagnosticsPatientResultsController · Operaciones de DiagnosticsPatientRes…"]
-    o5["GET /diagnostic-results/me"]:::op
-    o13["GET /diagnostic-results/me/{reportId}"]:::op
-    o15["GET /diagnostic-results/me/{reportId}/files/{fileId}/content"]:::op
-    o19["GET /diagnostic-results/me/{reportId}/shares"]:::op
-    o22["POST /diagnostic-results/me/{reportId}/shares"]:::op
-    o25["POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke"]:::op
-    o26["GET /diagnostic-results/me/orders"]:::op
+    o6["GET /diagnostic-results/me"]:::op
+    o14["GET /diagnostic-results/me/{reportId}"]:::op
+    o16["GET /diagnostic-results/me/{reportId}/files/{fileId}/content"]:::op
+    o20["GET /diagnostic-results/me/{reportId}/shares"]:::op
+    o23["POST /diagnostic-results/me/{reportId}/shares"]:::op
+    o26["POST /diagnostic-results/me/{reportId}/shares/{shareId}/revoke"]:::op
+    o27["GET /diagnostic-results/me/orders"]:::op
   end
-  t37[("+4 tablas más")]
+  t38[("+4 tablas más")]
   subgraph s2["ctrl:DiagnosticsReceptionController · Operaciones de DiagnosticsReceptionContro…"]
-    o30["POST /diagnostics/service-requests/inbox"]:::op
+    o31["POST /diagnostics/service-requests/inbox"]:::op
   end
   subgraph s3["ctrl:DiagnosticsSpecimensController · Operaciones de DiagnosticsSpecimensContro…"]
-    o38["GET /diagnostics/accessions/{id}"]:::op
-    o40["POST /diagnostics/specimens"]:::op
-    o41["GET /diagnostics/specimens/{id}"]:::op
-    o42["POST /diagnostics/specimens/{id}/containers"]:::op
+    o39["GET /diagnostics/accessions/{id}"]:::op
+    o41["POST /diagnostics/specimens"]:::op
+    o43["GET /diagnostics/specimens/{id}"]:::op
+    o44["POST /diagnostics/specimens/{id}/containers"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
-  a6 --> o5
-  o5 -->|"LEE"| t3
-  o5 -->|"LEE"| t7
-  o5 -->|"LEE"| t8
-  o5 -->|"LEE"| t9
-  o5 -->|"LEE"| t10
-  o5 -->|"LEE"| t11
-  o5 -.-> t12
-  a6 --> o13
-  o13 -->|"LEE"| t3
-  o13 -->|"LEE"| t7
-  o13 -->|"LEE"| t8
-  o13 -->|"LEE"| t9
-  o13 -->|"LEE"| t10
-  o13 -->|"LEE"| t11
-  o13 -.-> t14
-  a6 --> o15
-  o15 -->|"LEE"| t3
-  o15 -->|"LEE"| t16
-  o15 -->|"LEE"| t17
-  o15 -->|"LEE"| t7
-  o15 -->|"LEE"| t8
-  o15 -->|"LEE"| t9
-  o15 -.-> t18
-  a6 --> o19
-  o19 -->|"LEE"| t20
-  o19 -->|"LEE"| t3
-  o19 -->|"LEE"| t11
-  o19 -->|"LEE"| t21
-  a6 --> o22
-  o22 -->|"LEE"| t23
-  o22 -->|"ACTUALIZA"| t20
-  o22 -->|"CREA"| t20
-  o22 -->|"LEE"| t20
-  o22 -->|"LEE"| t3
-  o22 -->|"LEE"| t7
-  o22 -.-> t24
-  a6 --> o25
-  o25 -->|"ACTUALIZA"| t20
-  o25 -->|"LEE"| t20
-  o25 -->|"LEE"| t3
-  o25 -->|"LEE"| t11
-  o25 -->|"LEE"| t21
-  a6 --> o26
+  o1 -->|"LEE"| t5
+  a7 --> o6
+  o6 -->|"LEE"| t3
+  o6 -->|"LEE"| t8
+  o6 -->|"LEE"| t9
+  o6 -->|"LEE"| t10
+  o6 -->|"LEE"| t11
+  o6 -->|"LEE"| t12
+  o6 -.-> t13
+  a7 --> o14
+  o14 -->|"LEE"| t3
+  o14 -->|"LEE"| t8
+  o14 -->|"LEE"| t9
+  o14 -->|"LEE"| t10
+  o14 -->|"LEE"| t11
+  o14 -->|"LEE"| t12
+  o14 -.-> t15
+  a7 --> o16
+  o16 -->|"LEE"| t3
+  o16 -->|"LEE"| t17
+  o16 -->|"LEE"| t18
+  o16 -->|"LEE"| t8
+  o16 -->|"LEE"| t9
+  o16 -->|"LEE"| t10
+  o16 -.-> t19
+  a7 --> o20
+  o20 -->|"LEE"| t21
+  o20 -->|"LEE"| t3
+  o20 -->|"LEE"| t12
+  o20 -->|"LEE"| t22
+  a7 --> o23
+  o23 -->|"LEE"| t24
+  o23 -->|"ACTUALIZA"| t21
+  o23 -->|"CREA"| t21
+  o23 -->|"LEE"| t21
+  o23 -->|"LEE"| t3
+  o23 -->|"LEE"| t8
+  o23 -.-> t25
+  a7 --> o26
+  o26 -->|"ACTUALIZA"| t21
+  o26 -->|"LEE"| t21
   o26 -->|"LEE"| t3
-  o26 -->|"LEE"| t4
-  o26 -->|"LEE"| t27
-  o26 -->|"LEE"| t28
-  o26 -->|"LEE"| t7
-  o26 -->|"LEE"| t8
-  o26 -.-> t29
-  a31 --> o30
-  o30 -->|"LEE"| t4
-  o30 -->|"LEE"| t32
-  o30 -->|"LEE"| t33
-  o30 -->|"LEE"| t34
-  o30 -->|"LEE"| t35
-  o30 -->|"LEE"| t36
-  o30 -.-> t37
-  a31 --> o38
-  o38 -->|"LEE"| t39
-  o38 -->|"LEE"| t32
-  o38 -->|"LEE"| t33
-  o38 -->|"LEE"| t34
-  o38 -->|"LEE"| t35
-  a31 --> o40
-  o40 -->|"CREA"| t35
-  a31 --> o41
-  o41 -->|"LEE"| t33
-  o41 -->|"LEE"| t34
-  o41 -->|"LEE"| t35
-  a31 --> o42
-  o42 -->|"CREA"| t34
-  o42 -->|"LEE"| t35
+  o26 -->|"LEE"| t12
+  o26 -->|"LEE"| t22
+  a7 --> o27
+  o27 -->|"LEE"| t3
+  o27 -->|"LEE"| t4
+  o27 -->|"LEE"| t28
+  o27 -->|"LEE"| t29
+  o27 -->|"LEE"| t8
+  o27 -->|"LEE"| t9
+  o27 -.-> t30
+  a32 --> o31
+  o31 -->|"LEE"| t4
+  o31 -->|"LEE"| t33
+  o31 -->|"LEE"| t34
+  o31 -->|"LEE"| t35
+  o31 -->|"LEE"| t36
+  o31 -->|"LEE"| t37
+  o31 -.-> t38
+  a32 --> o39
+  o39 -->|"LEE"| t40
+  o39 -->|"LEE"| t33
+  o39 -->|"LEE"| t34
+  o39 -->|"LEE"| t35
+  o39 -->|"LEE"| t36
+  a32 --> o41
+  o41 -->|"LEE"| t42
+  o41 -->|"LEE"| t4
+  o41 -->|"CREA"| t36
+  a32 --> o43
+  o43 -->|"LEE"| t34
+  o43 -->|"LEE"| t35
+  o43 -->|"LEE"| t36
+  a32 --> o44
+  o44 -->|"CREA"| t35
+  o44 -->|"LEE"| t35
+  o44 -->|"LEE"| t36
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1029,8 +1069,12 @@ flowchart TD
   n41 --> n42
   n43[("LEE diagnostics.diagnostic_report_results")]:::efecto
   n42 --> n43
-  n44(("200 Responde con éxito")):::ok
+  n44["Llama a SuggestedSiteNamesReader.namesFor"]:::llamada
   n43 --> n44
+  n45[("LEE practice.practice_sites")]:::efecto
+  n44 --> n45
+  n46(("200 Responde con éxito")):::ok
+  n45 --> n46
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1049,7 +1093,7 @@ Acesionar especímenes recibidos en laboratorio
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Espécimen no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message}; ResourceNotFoundException: Espécimen no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El espécimen está rechazado y no puede acesionarse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1062,50 +1106,67 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a DiagnosticsSpecimensService.tenantOfSpecimen"]:::llamada
+  n5["Llama a DiagnosticsScopeService.activeTenantFor"]:::llamada
   n4 --> n5
-  n6["Llama a SpecimensRepository.findSpecimen"]:::llamada
+  n6{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
   n5 --> n6
-  n7[("LEE diagnostics.specimens")]:::efecto
-  n6 --> n7
-  n8{"!specimen"}:::decision
+  n7["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n6 -->|"sí"| n7
+  n8(["404 NOT_FOUND {message}"]):::error
   n7 --> n8
-  n9(["404 NOT_FOUND Espécimen no encontrado"]):::error
-  n8 -->|"sí"| n9
-  n10["Repite: por cada const specimenId de dto.specimenIds"]:::bucle
-  n8 -->|"no"| n10
-  n11["Llama a SpecimensRepository.findSpecimen"]:::llamada
-  n10 -->|"cada elemento"| n11
-  n12[("LEE diagnostics.specimens")]:::efecto
+  n9{"dto.serviceRequestId"}:::decision
+  n6 -->|"no"| n9
+  n10["Llama a DiagnosticsScopeService.serviceRequest"]:::llamada
+  n9 -->|"sí"| n10
+  n11["Llama a ClinicalRefsRepository.findServiceRequest"]:::llamada
+  n10 --> n11
+  n12[("LEE clinical.service_requests")]:::efecto
   n11 --> n12
-  n13{"!specimen"}:::decision
+  n13["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
   n12 --> n13
-  n14(["404 NOT_FOUND Espécimen no encontrado"]):::error
-  n13 -->|"sí"| n14
-  n15{"specimen.statusConceptId === DIAG.SPECIMEN_REJECTED"}:::decision
-  n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED El espécimen está rechazado y no puede acesionarse"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a SpecimensRepository.createAccession"]:::llamada
-  n15 -->|"no"| n17
-  n10 -->|"al terminar"| n17
-  n18[("CREA diagnostics.laboratory_accessions")]:::efecto
-  n17 --> n18
-  n19["Repite: por cada const specimen de specimens"]:::bucle
+  n14{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n13 --> n14
+  n15["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n14 -->|"sí"| n15
+  n16(["404 NOT_FOUND {message}"]):::error
+  n15 --> n16
+  n17["Repite: por cada const specimenId de dto.specimenIds"]:::bucle
+  n14 -->|"no"| n17
+  n9 -->|"no"| n17
+  n18["Llama a DiagnosticsScopeService.specimen"]:::llamada
+  n17 -->|"cada elemento"| n18
+  n19["Llama a SpecimensRepository.findSpecimen"]:::llamada
   n18 --> n19
-  n20["Llama a SpecimensRepository.addAccessionSpecimen"]:::llamada
-  n19 -->|"cada elemento"| n20
-  n21[("CREA diagnostics.accession_specimens")]:::efecto
+  n20[("LEE diagnostics.specimens")]:::efecto
+  n19 --> n20
+  n21{"specimen.patientProfileId !== dto.patientProfileId"}:::decision
   n20 --> n21
-  n22[("ACTUALIZA diagnostics.specimens · ACTUALIZA diagnostics.specimens")]:::efecto
-  n21 --> n22
-  n23["Llama a SpecimensRepository.recordCustodyEvent"]:::llamada
-  n22 --> n23
-  n24[("CREA diagnostics.specimen_chain_of_custody_events")]:::efecto
-  n23 --> n24
-  n25(("201 Responde con éxito")):::ok
-  n24 --> n25
-  n19 -->|"al terminar"| n25
+  n22(["404 NOT_FOUND Espécimen no encontrado"]):::error
+  n21 -->|"sí"| n22
+  n23{"specimen.statusConceptId === DIAG.SPECIMEN_REJECTED"}:::decision
+  n21 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED El espécimen está rechazado y no puede acesionarse"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a SpecimensRepository.createAccession"]:::llamada
+  n23 -->|"no"| n25
+  n17 -->|"al terminar"| n25
+  n26[("CREA diagnostics.laboratory_accessions")]:::efecto
+  n25 --> n26
+  n27["Repite: por cada const specimen de specimens"]:::bucle
+  n26 --> n27
+  n28["Llama a SpecimensRepository.addAccessionSpecimen"]:::llamada
+  n27 -->|"cada elemento"| n28
+  n29[("CREA diagnostics.accession_specimens")]:::efecto
+  n28 --> n29
+  n30[("ACTUALIZA diagnostics.specimens · ACTUALIZA diagnostics.specimens")]:::efecto
+  n29 --> n30
+  n31["Llama a SpecimensRepository.recordCustodyEvent"]:::llamada
+  n30 --> n31
+  n32[("CREA diagnostics.specimen_chain_of_custody_events")]:::efecto
+  n31 --> n32
+  n33(("201 Responde con éxito")):::ok
+  n32 --> n33
+  n27 -->|"al terminar"| n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1178,7 +1239,7 @@ Abrir una corrida de analizador (soporte para ingesta)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio de la corrida |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1188,18 +1249,22 @@ flowchart TD
   n1 --> n2
   n3["Llama a DiagnosticsLabService.createAnalyzerRun"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a DiagnosticsScopeService.activeTenantFor"]:::llamada
   n3 --> n4
-  n5{"!tenantId"}:::decision
+  n5{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED Falta el tenant custodio de la corrida"]):::error
+  n6["Llama a DiagnosticsScopeService.notFound"]:::llamada
   n5 -->|"sí"| n6
-  n7["Llama a LabWorkRepository.createAnalyzerRun"]:::llamada
-  n5 -->|"no"| n7
-  n8[("CREA diagnostics.analyzer_runs")]:::efecto
-  n7 --> n8
-  n9(("201 Responde con éxito")):::ok
+  n7(["404 NOT_FOUND {message}"]):::error
+  n6 --> n7
+  n8["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n8
+  n9["Llama a LabWorkRepository.createAnalyzerRun"]:::llamada
   n8 --> n9
+  n10[("CREA diagnostics.analyzer_runs")]:::efecto
+  n9 --> n10
+  n11(("201 Responde con éxito")):::ok
+  n10 --> n11
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1218,7 +1283,7 @@ Ingerir mensaje de resultado de analizador (LIS/HL7/ASTM)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Corrida de analizador no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 409 | `CONFLICT` | ConflictException: El mensaje ya fue ingerido para esta corrida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1235,39 +1300,65 @@ flowchart TD
   n4 --> n5
   n6[("LEE diagnostics.analyzer_runs")]:::efecto
   n5 --> n6
-  n7{"!run"}:::decision
+  n7{"dto.laboratoryWorkOrderTestId"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Corrida de analizador no encontrada"]):::error
+  n8["Llama a LabWorkRepository.findWorkOrderTest"]:::llamada
   n7 -->|"sí"| n8
-  n9{"dto.messageControlId"}:::decision
-  n7 -->|"no"| n9
-  n10["Llama a LabWorkRepository.findMessageByControlId"]:::llamada
-  n9 -->|"sí"| n10
-  n11[("LEE diagnostics.analyzer_result_messages")]:::efecto
+  n9[("LEE diagnostics.laboratory_work_order_tests")]:::efecto
+  n8 --> n9
+  n10["Llama a LabWorkRepository.findWorkOrder"]:::llamada
+  n9 --> n10
+  n11[("LEE diagnostics.laboratory_work_orders")]:::efecto
   n10 --> n11
-  n12{"dup"}:::decision
+  n12{"dto.mappedObservationId"}:::decision
   n11 --> n12
-  n13(["409 CONFLICT El mensaje ya fue ingerido para esta corrida"]):::error
+  n7 -->|"no"| n12
+  n13["Llama a DiagnosticsScopeService.observation"]:::llamada
   n12 -->|"sí"| n13
-  n14["Llama a LabWorkRepository.recordMessage"]:::llamada
-  n12 -->|"no"| n14
-  n9 -->|"no"| n14
-  n15[("CREA diagnostics.analyzer_result_messages")]:::efecto
+  n14["Llama a ClinicalRefsRepository.findObservation"]:::llamada
+  n13 --> n14
+  n15[("LEE clinical.observations")]:::efecto
   n14 --> n15
-  n16{"dto.laboratoryWorkOrderTestId"}:::decision
+  n16["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
   n15 --> n16
-  n17["Llama a LabWorkRepository.findWorkOrderTest"]:::llamada
-  n16 -->|"sí"| n17
-  n18[("LEE diagnostics.laboratory_work_order_tests")]:::efecto
-  n17 --> n18
-  n19{"test"}:::decision
+  n17{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n16 --> n17
+  n18["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n17 -->|"sí"| n18
+  n19(["404 NOT_FOUND {message}"]):::error
   n18 --> n19
-  n20[("ACTUALIZA diagnostics.laboratory_work_order_tests · ACTUALIZA diagnostics.laboratory_work_order_tests · ACTUA…")]:::efecto
-  n19 -->|"sí"| n20
-  n21(("201 Responde con éxito")):::ok
-  n20 --> n21
-  n19 -->|"no"| n21
-  n16 -->|"no"| n21
+  n20{"dto.rawMessageFileId"}:::decision
+  n17 -->|"no"| n20
+  n12 -->|"no"| n20
+  n21["Llama a DiagnosticsScopeService.file"]:::llamada
+  n20 -->|"sí"| n21
+  n22["Llama a ClinicalRefsRepository.findFile"]:::llamada
+  n21 --> n22
+  n23[("LEE common.files")]:::efecto
+  n22 --> n23
+  n24{"dto.messageControlId"}:::decision
+  n23 --> n24
+  n20 -->|"no"| n24
+  n25["Llama a LabWorkRepository.findMessageByControlId"]:::llamada
+  n24 -->|"sí"| n25
+  n26[("LEE diagnostics.analyzer_result_messages")]:::efecto
+  n25 --> n26
+  n27{"dup"}:::decision
+  n26 --> n27
+  n28(["409 CONFLICT El mensaje ya fue ingerido para esta corrida"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a LabWorkRepository.recordMessage"]:::llamada
+  n27 -->|"no"| n29
+  n24 -->|"no"| n29
+  n30[("CREA diagnostics.analyzer_result_messages")]:::efecto
+  n29 --> n30
+  n31{"test"}:::decision
+  n30 --> n31
+  n32[("ACTUALIZA diagnostics.laboratory_work_order_tests · ACTUALIZA diagnostics.laboratory_work_order_tests · ACTUA…")]:::efecto
+  n31 -->|"sí"| n32
+  n33(("201 Responde con éxito")):::ok
+  n32 --> n33
+  n31 -->|"no"| n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1286,8 +1377,8 @@ Adjuntar media clínica / imagen al chart
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 409 | `CONFLICT` | ConflictException: El archivo ya está adjunto como media clínica |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio de la media |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1299,31 +1390,75 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5{"!tenantId"}:::decision
+  n5["Llama a DiagnosticsScopeService.activeTenantFor"]:::llamada
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED Falta el tenant custodio de la media"]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a MediaQualityRepository.findMediaByFile"]:::llamada
-  n5 -->|"no"| n7
-  n8[("LEE diagnostics.clinical_media")]:::efecto
+  n6{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
+  n5 --> n6
+  n7["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n6 -->|"sí"| n7
+  n8(["404 NOT_FOUND {message}"]):::error
   n7 --> n8
-  n9{"dup"}:::decision
-  n8 --> n9
-  n10(["409 CONFLICT El archivo ya está adjunto como media clínica"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a MediaQualityRepository.createMedia"]:::llamada
-  n9 -->|"no"| n11
-  n12[("CREA diagnostics.clinical_media")]:::efecto
+  n9["Llama a DiagnosticsScopeService.file"]:::llamada
+  n6 -->|"no"| n9
+  n10["Llama a ClinicalRefsRepository.findFile"]:::llamada
+  n9 --> n10
+  n11[("LEE common.files")]:::efecto
+  n10 --> n11
+  n12{"dto.encounterId"}:::decision
   n11 --> n12
-  n13["Repite: por cada const a de dto.annotations ?? []"]:::bucle
-  n12 --> n13
-  n14["Llama a MediaQualityRepository.addAnnotation"]:::llamada
-  n13 -->|"cada elemento"| n14
-  n15[("CREA diagnostics.media_annotations")]:::efecto
+  n13["Llama a DiagnosticsScopeService.encounter"]:::llamada
+  n12 -->|"sí"| n13
+  n14["Llama a ClinicalRefsRepository.findEncounter"]:::llamada
+  n13 --> n14
+  n15[("LEE clinical.encounters")]:::efecto
   n14 --> n15
-  n16(("201 Responde con éxito")):::ok
+  n16["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
   n15 --> n16
-  n13 -->|"al terminar"| n16
+  n17{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n16 --> n17
+  n18["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n17 -->|"sí"| n18
+  n19(["404 NOT_FOUND {message}"]):::error
+  n18 --> n19
+  n20{"dto.diagnosticReportId"}:::decision
+  n17 -->|"no"| n20
+  n12 -->|"no"| n20
+  n21["Llama a DiagnosticsScopeService.report"]:::llamada
+  n20 -->|"sí"| n21
+  n22["Llama a DiagnosticOrdersRepository.findReportById"]:::llamada
+  n21 --> n22
+  n23[("LEE clinical.diagnostic_reports")]:::efecto
+  n22 --> n23
+  n24["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
+  n23 --> n24
+  n25{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n24 --> n25
+  n26["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n25 -->|"sí"| n26
+  n27(["404 NOT_FOUND {message}"]):::error
+  n26 --> n27
+  n28["Llama a MediaQualityRepository.findMediaByFile"]:::llamada
+  n25 -->|"no"| n28
+  n20 -->|"no"| n28
+  n29[("LEE diagnostics.clinical_media")]:::efecto
+  n28 --> n29
+  n30{"dup"}:::decision
+  n29 --> n30
+  n31(["409 CONFLICT El archivo ya está adjunto como media clínica"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a MediaQualityRepository.createMedia"]:::llamada
+  n30 -->|"no"| n32
+  n33[("CREA diagnostics.clinical_media")]:::efecto
+  n32 --> n33
+  n34["Repite: por cada const a de dto.annotations ?? []"]:::bucle
+  n33 --> n34
+  n35["Llama a MediaQualityRepository.addAnnotation"]:::llamada
+  n34 -->|"cada elemento"| n35
+  n36[("CREA diagnostics.media_annotations")]:::efecto
+  n35 --> n36
+  n37(("201 Responde con éxito")):::ok
+  n36 --> n37
+  n34 -->|"al terminar"| n37
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1354,26 +1489,38 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a SpecimensRepository.findContainer"]:::llamada
+  n5["Llama a DiagnosticsScopeService.container"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostics.specimen_containers")]:::efecto
+  n6["Llama a SpecimensRepository.findContainer"]:::llamada
   n5 --> n6
-  n7{"!container"}:::decision
+  n7[("LEE diagnostics.specimen_containers")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Contenedor no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a SpecimensRepository.recordContainerEvent"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA diagnostics.specimen_container_events")]:::efecto
+  n8["Llama a SpecimensRepository.findSpecimen"]:::llamada
+  n7 --> n8
+  n9[("LEE diagnostics.specimens")]:::efecto
+  n8 --> n9
+  n10["Llama a DiagnosticsScopeService.specimen"]:::llamada
   n9 --> n10
-  n11["Llama a SpecimensRepository.recordCustodyEvent"]:::llamada
+  n11["Llama a SpecimensRepository.findSpecimen"]:::llamada
   n10 --> n11
-  n12[("CREA diagnostics.specimen_chain_of_custody_events")]:::efecto
+  n12[("LEE diagnostics.specimens")]:::efecto
   n11 --> n12
-  n13[("ACTUALIZA diagnostics.specimen_containers")]:::efecto
+  n13{"specimen.id !== container.specimenId"}:::decision
   n12 --> n13
-  n14(("201 Responde con éxito")):::ok
-  n13 --> n14
+  n14(["404 NOT_FOUND Contenedor no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a SpecimensRepository.recordContainerEvent"]:::llamada
+  n13 -->|"no"| n15
+  n16[("CREA diagnostics.specimen_container_events")]:::efecto
+  n15 --> n16
+  n17["Llama a SpecimensRepository.recordCustodyEvent"]:::llamada
+  n16 --> n17
+  n18[("CREA diagnostics.specimen_chain_of_custody_events")]:::efecto
+  n17 --> n18
+  n19[("ACTUALIZA diagnostics.specimen_containers")]:::efecto
+  n18 --> n19
+  n20(("201 Responde con éxito")):::ok
+  n19 --> n20
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1392,8 +1539,8 @@ Detectar y notificar un resultado crítico
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 409 | `CONFLICT` | ConflictException: Ya existe una notificación crítica para la observación |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio de la notificación |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1405,24 +1552,59 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5{"!tenantId"}:::decision
+  n5["Llama a DiagnosticsScopeService.activeTenantFor"]:::llamada
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED Falta el tenant custodio de la notificación"]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a ReportsRepository.criticalExistsForObservation"]:::llamada
-  n5 -->|"no"| n7
-  n8[("LEE diagnostics.critical_result_notifications")]:::efecto
+  n6{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
+  n5 --> n6
+  n7["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n6 -->|"sí"| n7
+  n8(["404 NOT_FOUND {message}"]):::error
   n7 --> n8
-  n9{"await this.repo.criticalExistsForObservation(tx, dto.observationId)"}:::decision
-  n8 --> n9
-  n10(["409 CONFLICT Ya existe una notificación crítica para la observación"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a ReportsRepository.createCriticalNotification"]:::llamada
-  n9 -->|"no"| n11
-  n12[("CREA diagnostics.critical_result_notifications")]:::efecto
+  n9["Llama a DiagnosticsScopeService.observation"]:::llamada
+  n6 -->|"no"| n9
+  n10["Llama a ClinicalRefsRepository.findObservation"]:::llamada
+  n9 --> n10
+  n11[("LEE clinical.observations")]:::efecto
+  n10 --> n11
+  n12["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
   n11 --> n12
-  n13(("201 Responde con éxito")):::ok
+  n13{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
   n12 --> n13
+  n14["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n13 -->|"sí"| n14
+  n15(["404 NOT_FOUND {message}"]):::error
+  n14 --> n15
+  n16{"dto.diagnosticReportId"}:::decision
+  n13 -->|"no"| n16
+  n17["Llama a DiagnosticsScopeService.report"]:::llamada
+  n16 -->|"sí"| n17
+  n18["Llama a DiagnosticOrdersRepository.findReportById"]:::llamada
+  n17 --> n18
+  n19[("LEE clinical.diagnostic_reports")]:::efecto
+  n18 --> n19
+  n20["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
+  n19 --> n20
+  n21{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n20 --> n21
+  n22["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n21 -->|"sí"| n22
+  n23(["404 NOT_FOUND {message}"]):::error
+  n22 --> n23
+  n24["Llama a ReportsRepository.criticalExistsForObservation"]:::llamada
+  n21 -->|"no"| n24
+  n16 -->|"no"| n24
+  n25[("LEE diagnostics.critical_result_notifications")]:::efecto
+  n24 --> n25
+  n26{"await this.repo.criticalExistsForObservation(tx, dto.observationId)"}:::decision
+  n25 --> n26
+  n27(["409 CONFLICT Ya existe una notificación crítica para la observación"]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a ReportsRepository.createCriticalNotification"]:::llamada
+  n26 -->|"no"| n28
+  n29[("CREA diagnostics.critical_result_notifications")]:::efecto
+  n28 --> n29
+  n30(("201 Responde con éxito")):::ok
+  n29 --> n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1440,8 +1622,7 @@ Acusar recibo / escalar notificación crítica
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Notificación crítica no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: El autor debe ser el profesional que firma |
 | 409 | `CONFLICT` | ConflictException: La notificación ya fue reconocida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1454,22 +1635,28 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a ReportsRepository.findCriticalNotification"]:::llamada
+  n5["Llama a DiagnosticsScopeService.criticalNotification"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostics.critical_result_notifications")]:::efecto
+  n6["Llama a ReportsRepository.findCriticalNotification"]:::llamada
   n5 --> n6
-  n7{"!notification"}:::decision
+  n7[("LEE diagnostics.critical_result_notifications")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Notificación crítica no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"notification.notificationStatusConceptId === DIAG.CRITICAL_ACKNOWLEDGED"}:::decision
-  n7 -->|"no"| n9
-  n10(["409 CONFLICT La notificación ya fue reconocida"]):::error
-  n9 -->|"sí"| n10
-  n11[("ACTUALIZA diagnostics.critical_result_notifications · ACTUALIZA diagnostics.critical_result_notifications · A…")]:::efecto
-  n9 -->|"no"| n11
-  n12(("200 Responde con éxito")):::ok
+  n8{"notification.notificationStatusConceptId === DIAG.CRITICAL_ACKNOWLEDGED"}:::decision
+  n7 --> n8
+  n9(["409 CONFLICT La notificación ya fue reconocida"]):::error
+  n8 -->|"sí"| n9
+  n10[("ACTUALIZA diagnostics.critical_result_notifications")]:::efecto
+  n8 -->|"no"| n10
+  n11["Llama a DiagnosticsScopeService.authorFor"]:::llamada
+  n10 --> n11
+  n12{"own && supplied !== undefined && supplied !== own"}:::decision
   n11 --> n12
+  n13(["403 FORBIDDEN El autor debe ser el profesional que firma"]):::error
+  n12 -->|"sí"| n13
+  n14[("ACTUALIZA diagnostics.critical_result_notifications · ACTUALIZA diagnostics.critical_result_notifications · A…")]:::efecto
+  n12 -->|"no"| n14
+  n15(("200 Responde con éxito")):::ok
+  n14 --> n15
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1487,8 +1674,8 @@ Registrar evento de calidad de datos + enlazar provenance
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio del evento de calidad |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: El autor debe ser el profesional que firma |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1500,23 +1687,82 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5{"!tenantId"}:::decision
+  n5["Llama a DiagnosticsScopeService.activeTenantFor"]:::llamada
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED Falta el tenant custodio del evento de calidad"]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a MediaQualityRepository.createDataQualityEvent"]:::llamada
-  n5 -->|"no"| n7
-  n8[("CREA diagnostics.diagnostic_data_quality_events")]:::efecto
+  n6{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
+  n5 --> n6
+  n7["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n6 -->|"sí"| n7
+  n8(["404 NOT_FOUND {message}"]):::error
   n7 --> n8
-  n9{"dto.provenanceSourceId"}:::decision
-  n8 --> n9
-  n10["Llama a MediaQualityRepository.addProvenanceLink"]:::llamada
-  n9 -->|"sí"| n10
-  n11[("CREA diagnostics.diagnostic_provenance_links")]:::efecto
+  n9["Llama a DiagnosticsScopeService.dataQualityTarget"]:::llamada
+  n6 -->|"no"| n9
+  n10["Llama a SpecimensRepository.findSpecimen"]:::llamada
+  n9 --> n10
+  n11[("LEE diagnostics.specimens")]:::efecto
   n10 --> n11
-  n12(("201 Responde con éxito")):::ok
+  n12["Llama a ClinicalRefsRepository.findObservation"]:::llamada
   n11 --> n12
-  n9 -->|"no"| n12
+  n13[("LEE clinical.observations")]:::efecto
+  n12 --> n13
+  n14["Llama a ImagingRepository.findStudy"]:::llamada
+  n13 --> n14
+  n15[("LEE diagnostics.imaging_studies")]:::efecto
+  n14 --> n15
+  n16["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n15 --> n16
+  n17(["404 NOT_FOUND {message}"]):::error
+  n16 --> n17
+  n18{"!inScope"}:::decision
+  n19["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n18 -->|"sí"| n19
+  n20(["404 NOT_FOUND {message}"]):::error
+  n19 --> n20
+  n21{"dto.provenanceSourceId"}:::decision
+  n18 -->|"no"| n21
+  n22["Llama a DiagnosticsScopeService.dataQualityTarget"]:::llamada
+  n21 -->|"sí"| n22
+  n23["Llama a SpecimensRepository.findSpecimen"]:::llamada
+  n22 --> n23
+  n24[("LEE diagnostics.specimens")]:::efecto
+  n23 --> n24
+  n25["Llama a ClinicalRefsRepository.findObservation"]:::llamada
+  n24 --> n25
+  n26[("LEE clinical.observations")]:::efecto
+  n25 --> n26
+  n27["Llama a ImagingRepository.findStudy"]:::llamada
+  n26 --> n27
+  n28[("LEE diagnostics.imaging_studies")]:::efecto
+  n27 --> n28
+  n29["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n28 --> n29
+  n30(["404 NOT_FOUND {message}"]):::error
+  n29 --> n30
+  n31{"!inScope"}:::decision
+  n32["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n31 -->|"sí"| n32
+  n33(["404 NOT_FOUND {message}"]):::error
+  n32 --> n33
+  n34["Llama a MediaQualityRepository.createDataQualityEvent"]:::llamada
+  n31 -->|"no"| n34
+  n21 -->|"no"| n34
+  n35[("CREA diagnostics.diagnostic_data_quality_events")]:::efecto
+  n34 --> n35
+  n36{"dto.provenanceSourceId"}:::decision
+  n35 --> n36
+  n37["Llama a MediaQualityRepository.addProvenanceLink"]:::llamada
+  n36 -->|"sí"| n37
+  n38[("CREA diagnostics.diagnostic_provenance_links")]:::efecto
+  n37 --> n38
+  n39["Llama a DiagnosticsScopeService.authorFor"]:::llamada
+  n38 --> n39
+  n40{"own && supplied !== undefined && supplied !== own"}:::decision
+  n39 --> n40
+  n41(["403 FORBIDDEN El autor debe ser el profesional que firma"]):::error
+  n40 -->|"sí"| n41
+  n42(("201 Responde con éxito")):::ok
+  n40 -->|"no"| n42
+  n36 -->|"no"| n42
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1535,7 +1781,7 @@ Registrar un endpoint DICOM (soporte para STOW-RS)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Falta el tenant del endpoint de imagen |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1545,18 +1791,22 @@ flowchart TD
   n1 --> n2
   n3["Llama a DiagnosticsImagingService.createEndpoint"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a DiagnosticsScopeService.activeTenantFor"]:::llamada
   n3 --> n4
-  n5{"!dto.tenantId"}:::decision
+  n5{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
   n4 --> n5
-  n6(["409 CONFLICT Falta el tenant del endpoint de imagen"]):::error
+  n6["Llama a DiagnosticsScopeService.notFound"]:::llamada
   n5 -->|"sí"| n6
-  n7["Llama a ImagingRepository.createEndpoint"]:::llamada
-  n5 -->|"no"| n7
-  n8[("CREA diagnostics.imaging_endpoints")]:::efecto
-  n7 --> n8
-  n9(("201 Responde con éxito")):::ok
+  n7(["404 NOT_FOUND {message}"]):::error
+  n6 --> n7
+  n8["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n8
+  n9["Llama a ImagingRepository.createEndpoint"]:::llamada
   n8 --> n9
+  n10[("CREA diagnostics.imaging_endpoints")]:::efecto
+  n9 --> n10
+  n11(("201 Responde con éxito")):::ok
+  n10 --> n11
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1575,7 +1825,6 @@ Registrar evento de dosis de radiación
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Estudio de imagen no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1587,20 +1836,27 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a ImagingRepository.findStudy"]:::llamada
+  n5["Llama a DiagnosticsScopeService.study"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostics.imaging_studies")]:::efecto
+  n6["Llama a ImagingRepository.findStudy"]:::llamada
   n5 --> n6
-  n7{"!study"}:::decision
+  n7[("LEE diagnostics.imaging_studies")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Estudio de imagen no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a ImagingRepository.recordDoseEvent"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA diagnostics.radiation_dose_events")]:::efecto
+  n8{"dto.imagingSeriesId"}:::decision
+  n7 --> n8
+  n9["Llama a DiagnosticsScopeService.seriesOfStudy"]:::llamada
+  n8 -->|"sí"| n9
+  n10["Llama a ImagingRepository.findSeriesInStudy"]:::llamada
   n9 --> n10
-  n11(("201 Responde con éxito")):::ok
+  n11[("LEE diagnostics.imaging_series")]:::efecto
   n10 --> n11
+  n12["Llama a ImagingRepository.recordDoseEvent"]:::llamada
+  n11 --> n12
+  n8 -->|"no"| n12
+  n13[("CREA diagnostics.radiation_dose_events")]:::efecto
+  n12 --> n13
+  n14(("201 Responde con éxito")):::ok
+  n13 --> n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1609,7 +1865,59 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /diagnostics/reports/{reportId}/versions
+#### 19. GET /diagnostics/patients/{patientProfileId}/imaging-studies
+
+Listar los estudios de imagen del paciente
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · parámetros de consulta (400)…"}}:::acceso
+  n1 --> n2
+  n3["Llama a DiagnosticsImagingService.listStudiesByPatient"]:::llamada
+  n2 --> n3
+  n4["Llama a DiagnosticsPatientAccessService.assertCanReadPatient"]:::llamada
+  n3 --> n4
+  n5["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n4 --> n5
+  n6[("LEE profiles.person_account_links")]:::efecto
+  n5 --> n6
+  n7["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n6 --> n7
+  n8[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n7 --> n8
+  n9{"practitioner"}:::decision
+  n8 --> n9
+  n10["Llama a CareRelationshipsRepository.findActiveForPractitionerPatient"]:::llamada
+  n9 -->|"sí"| n10
+  n11[("LEE authz.care_relationships")]:::efecto
+  n10 --> n11
+  n12(["404 NOT_FOUND Paciente no encontrado"]):::error
+  n11 --> n12
+  n9 -->|"no"| n12
+  n13["Llama a ImagingRepository.findStudiesByPatient"]:::llamada
+  n14[("LEE diagnostics.imaging_studies")]:::efecto
+  n13 --> n14
+  n15(("200 Responde con éxito")):::ok
+  n14 --> n15
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 20. POST /diagnostics/reports/{reportId}/versions
 
 Crear/enmendar versión de informe diagnóstico
 
@@ -1618,9 +1926,8 @@ Crear/enmendar versión de informe diagnóstico
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: La versión que se enmienda no existe en este informe |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio del informe |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: El autor debe ser el profesional que firma |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message}; ResourceNotFoundException: La versión que se enmienda no existe en este informe |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1632,45 +1939,95 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5{"!tenantId"}:::decision
+  n5["Llama a DiagnosticsScopeService.activeTenantFor"]:::llamada
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED Falta el tenant custodio del informe"]):::error
-  n5 -->|"sí"| n6
-  n7{"dto.supersedesVersionId"}:::decision
-  n5 -->|"no"| n7
-  n8["Llama a ReportsRepository.findVersionInReport"]:::llamada
-  n7 -->|"sí"| n8
-  n9[("LEE diagnostics.diagnostic_report_versions")]:::efecto
-  n8 --> n9
-  n10{"!prev"}:::decision
+  n6{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
+  n5 --> n6
+  n7["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n6 -->|"sí"| n7
+  n8(["404 NOT_FOUND {message}"]):::error
+  n7 --> n8
+  n9["Llama a DiagnosticsScopeService.report"]:::llamada
+  n6 -->|"no"| n9
+  n10["Llama a DiagnosticOrdersRepository.findReportById"]:::llamada
   n9 --> n10
-  n11(["404 NOT_FOUND La versión que se enmienda no existe en este informe"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a ReportsRepository.maxVersionNumber"]:::llamada
-  n10 -->|"no"| n12
-  n7 -->|"no"| n12
-  n13[("LEE diagnostics.diagnostic_report_versions")]:::efecto
+  n11[("LEE clinical.diagnostic_reports")]:::efecto
+  n10 --> n11
+  n12["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
+  n11 --> n12
+  n13{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
   n12 --> n13
-  n14["Llama a ReportsRepository.createVersion"]:::llamada
-  n13 --> n14
-  n15[("CREA diagnostics.diagnostic_report_versions")]:::efecto
+  n14["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n13 -->|"sí"| n14
+  n15(["404 NOT_FOUND {message}"]):::error
   n14 --> n15
   n16["Repite: por cada const r de dto.results ?? []"]:::bucle
-  n15 --> n16
-  n17["Llama a ReportsRepository.addResult"]:::llamada
+  n13 -->|"no"| n16
+  n17["Llama a DiagnosticsScopeService.observation"]:::llamada
   n16 -->|"cada elemento"| n17
-  n18[("CREA diagnostics.diagnostic_report_results")]:::efecto
+  n18["Llama a ClinicalRefsRepository.findObservation"]:::llamada
   n17 --> n18
-  n19["Repite: por cada const f de dto.files ?? []"]:::bucle
+  n19[("LEE clinical.observations")]:::efecto
   n18 --> n19
-  n16 -->|"al terminar"| n19
-  n20["Llama a ReportsRepository.addFile"]:::llamada
-  n19 -->|"cada elemento"| n20
-  n21[("CREA diagnostics.diagnostic_report_files")]:::efecto
+  n20["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
+  n19 --> n20
+  n21{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
   n20 --> n21
-  n22(("201 Responde con éxito")):::ok
-  n21 --> n22
-  n19 -->|"al terminar"| n22
+  n22["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n21 -->|"sí"| n22
+  n23(["404 NOT_FOUND {message}"]):::error
+  n22 --> n23
+  n24["Repite: por cada const f de dto.files ?? []"]:::bucle
+  n21 -->|"no"| n24
+  n16 -->|"al terminar"| n24
+  n25["Llama a DiagnosticsScopeService.file"]:::llamada
+  n24 -->|"cada elemento"| n25
+  n26["Llama a ClinicalRefsRepository.findFile"]:::llamada
+  n25 --> n26
+  n27[("LEE common.files")]:::efecto
+  n26 --> n27
+  n28{"dto.supersedesVersionId"}:::decision
+  n27 --> n28
+  n24 -->|"al terminar"| n28
+  n29["Llama a ReportsRepository.findVersionInReport"]:::llamada
+  n28 -->|"sí"| n29
+  n30[("LEE diagnostics.diagnostic_report_versions")]:::efecto
+  n29 --> n30
+  n31{"!prev"}:::decision
+  n30 --> n31
+  n32(["404 NOT_FOUND La versión que se enmienda no existe en este informe"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a ReportsRepository.maxVersionNumber"]:::llamada
+  n31 -->|"no"| n33
+  n28 -->|"no"| n33
+  n34[("LEE diagnostics.diagnostic_report_versions")]:::efecto
+  n33 --> n34
+  n35["Llama a ReportsRepository.createVersion"]:::llamada
+  n34 --> n35
+  n36[("CREA diagnostics.diagnostic_report_versions")]:::efecto
+  n35 --> n36
+  n37["Llama a DiagnosticsScopeService.authorFor"]:::llamada
+  n36 --> n37
+  n38{"own && supplied !== undefined && supplied !== own"}:::decision
+  n37 --> n38
+  n39(["403 FORBIDDEN El autor debe ser el profesional que firma"]):::error
+  n38 -->|"sí"| n39
+  n40["Repite: por cada const r de dto.results ?? []"]:::bucle
+  n38 -->|"no"| n40
+  n41["Llama a ReportsRepository.addResult"]:::llamada
+  n40 -->|"cada elemento"| n41
+  n42[("CREA diagnostics.diagnostic_report_results")]:::efecto
+  n41 --> n42
+  n43["Repite: por cada const f de dto.files ?? []"]:::bucle
+  n42 --> n43
+  n40 -->|"al terminar"| n43
+  n44["Llama a ReportsRepository.addFile"]:::llamada
+  n43 -->|"cada elemento"| n44
+  n45[("CREA diagnostics.diagnostic_report_files")]:::efecto
+  n44 --> n45
+  n46(("201 Responde con éxito")):::ok
+  n45 --> n46
+  n43 -->|"al terminar"| n46
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1679,7 +2036,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
+#### 21. POST /diagnostics/reports/{reportId}/versions/{versionId}/release
 
 Validar y liberar una versión del informe
 
@@ -1689,7 +2046,7 @@ Validar y liberar una versión del informe
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de informe no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message}; ResourceNotFoundException: Versión de informe no encontrada |
 | 409 | `CONFLICT` | ConflictException: La versión ya fue liberada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión no es elegible para liberación |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1703,41 +2060,48 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a ReportsRepository.findVersionInReport"]:::llamada
+  n5["Llama a DiagnosticsScopeService.report"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostics.diagnostic_report_versions")]:::efecto
+  n6["Llama a DiagnosticOrdersRepository.findReportById"]:::llamada
   n5 --> n6
-  n7{"!version"}:::decision
+  n7[("LEE clinical.diagnostic_reports")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Versión de informe no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9{"version.releaseEligibilityConceptId !== DIAG.RELEASE_ELIGIBLE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La versión no es elegible para liberación"]):::error
+  n8["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
+  n7 --> n8
+  n9{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n8 --> n9
+  n10["Llama a DiagnosticsScopeService.notFound"]:::llamada
   n9 -->|"sí"| n10
-  n11{"version.clinicalStatusConceptId === DIAG.REPORT_FINAL"}:::decision
-  n9 -->|"no"| n11
-  n12(["409 CONFLICT La versión ya fue liberada"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a ReportsRepository.recordReleaseEvent"]:::llamada
-  n11 -->|"no"| n13
-  n14[("CREA diagnostics.diagnostic_release_events")]:::efecto
+  n11(["404 NOT_FOUND {message}"]):::error
+  n10 --> n11
+  n12["Llama a ReportsRepository.findVersionInReport"]:::llamada
+  n9 -->|"no"| n12
+  n13[("LEE diagnostics.diagnostic_report_versions")]:::efecto
+  n12 --> n13
+  n14{"!version"}:::decision
   n13 --> n14
-  n15[("ACTUALIZA diagnostics.diagnostic_report_versions · ACTUALIZA diagnostics.diagnostic_report_versions")]:::efecto
-  n14 --> n15
-  n16["Llama a DiagnosticOrdersRepository.findReportById"]:::llamada
-  n15 --> n16
-  n17[("LEE clinical.diagnostic_reports")]:::efecto
-  n16 --> n17
-  n18{"report"}:::decision
-  n17 --> n18
-  n19["Llama a DiagnosticOrdersRepository.markReportReleased"]:::llamada
+  n15(["404 NOT_FOUND Versión de informe no encontrada"]):::error
+  n14 -->|"sí"| n15
+  n16{"version.releaseEligibilityConceptId !== DIAG.RELEASE_ELIGIBLE"}:::decision
+  n14 -->|"no"| n16
+  n17(["422 PRECONDITION_FAILED La versión no es elegible para liberación"]):::error
+  n16 -->|"sí"| n17
+  n18{"version.clinicalStatusConceptId === DIAG.REPORT_FINAL"}:::decision
+  n16 -->|"no"| n18
+  n19(["409 CONFLICT La versión ya fue liberada"]):::error
   n18 -->|"sí"| n19
-  n20[("ACTUALIZA clinical.diagnostic_reports · ACTUALIZA clinical.diagnostic_reports · ACTUALIZA clinical.diagnostic…")]:::efecto
-  n19 --> n20
-  n21(("200 Responde con éxito")):::ok
+  n20["Llama a ReportsRepository.recordReleaseEvent"]:::llamada
+  n18 -->|"no"| n20
+  n21[("CREA diagnostics.diagnostic_release_events")]:::efecto
   n20 --> n21
-  n18 -->|"no"| n21
+  n22[("ACTUALIZA diagnostics.diagnostic_report_versions · ACTUALIZA diagnostics.diagnostic_report_versions")]:::efecto
+  n21 --> n22
+  n23["Llama a DiagnosticOrdersRepository.markReportReleased"]:::llamada
+  n22 --> n23
+  n24[("ACTUALIZA clinical.diagnostic_reports · ACTUALIZA clinical.diagnostic_reports · ACTUALIZA clinical.diagnostic…")]:::efecto
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n24 --> n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1746,7 +2110,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /diagnostics/results/{observationId}/verifications
+#### 22. POST /diagnostics/results/{observationId}/verifications
 
 Verificar (técnica/facultativa) un resultado
 
@@ -1755,8 +2119,8 @@ Verificar (técnica/facultativa) un resultado
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Falta el tenant custodio de la verificación |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: El autor debe ser el profesional que firma |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1766,22 +2130,46 @@ flowchart TD
   n1 --> n2
   n3["Llama a DiagnosticsLabService.verifyResult"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a DiagnosticsScopeService.activeTenantFor"]:::llamada
   n3 --> n4
-  n5{"!tenantId"}:::decision
+  n5{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED Falta el tenant custodio de la verificación"]):::error
+  n6["Llama a DiagnosticsScopeService.notFound"]:::llamada
   n5 -->|"sí"| n6
-  n7["Llama a LabWorkRepository.recordVerification"]:::llamada
-  n5 -->|"no"| n7
-  n8[("CREA diagnostics.result_verifications")]:::efecto
-  n7 --> n8
-  n9["Llama a LabWorkRepository.markTestsVerifiedForObservation"]:::llamada
+  n7(["404 NOT_FOUND {message}"]):::error
+  n6 --> n7
+  n8["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n8
+  n9["Llama a DiagnosticsScopeService.observation"]:::llamada
   n8 --> n9
-  n10[("ACTUALIZA diagnostics.laboratory_work_order_tests")]:::efecto
+  n10["Llama a ClinicalRefsRepository.findObservation"]:::llamada
   n9 --> n10
-  n11(("201 Responde con éxito")):::ok
+  n11[("LEE clinical.observations")]:::efecto
   n10 --> n11
+  n12["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
+  n11 --> n12
+  n13{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n12 --> n13
+  n14["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n13 -->|"sí"| n14
+  n15(["404 NOT_FOUND {message}"]):::error
+  n14 --> n15
+  n16["Llama a LabWorkRepository.recordVerification"]:::llamada
+  n13 -->|"no"| n16
+  n17[("CREA diagnostics.result_verifications")]:::efecto
+  n16 --> n17
+  n18["Llama a DiagnosticsScopeService.authorFor"]:::llamada
+  n17 --> n18
+  n19{"own && supplied !== undefined && supplied !== own"}:::decision
+  n18 --> n19
+  n20(["403 FORBIDDEN El autor debe ser el profesional que firma"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a LabWorkRepository.markTestsVerifiedForObservation"]:::llamada
+  n19 -->|"no"| n21
+  n22[("ACTUALIZA diagnostics.laboratory_work_order_tests")]:::efecto
+  n21 --> n22
+  n23(("201 Responde con éxito")):::ok
+  n22 --> n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1790,7 +2178,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /diagnostics/service-requests/inbox
+#### 23. POST /diagnostics/service-requests/inbox
 
 Bandeja de órdenes de laboratorio por recibir
 
@@ -1867,7 +2255,85 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. GET /diagnostics/specimens/{id}
+#### 24. POST /diagnostics/specimens
+
+Registrar un espécimen (soporte para acesión)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a DiagnosticsSpecimensService.createSpecimen"]:::llamada
+  n2 --> n3
+  n4["Llama a DiagnosticsScopeService.activeTenantFor"]:::llamada
+  n3 --> n4
+  n5{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
+  n4 --> n5
+  n6["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n5 -->|"sí"| n6
+  n7(["404 NOT_FOUND {message}"]):::error
+  n6 --> n7
+  n8["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n8
+  n9{"dto.encounterId"}:::decision
+  n8 --> n9
+  n10["Llama a DiagnosticsScopeService.encounter"]:::llamada
+  n9 -->|"sí"| n10
+  n11["Llama a ClinicalRefsRepository.findEncounter"]:::llamada
+  n10 --> n11
+  n12[("LEE clinical.encounters")]:::efecto
+  n11 --> n12
+  n13["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
+  n12 --> n13
+  n14{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n13 --> n14
+  n15["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n14 -->|"sí"| n15
+  n16(["404 NOT_FOUND {message}"]):::error
+  n15 --> n16
+  n17{"dto.serviceRequestId"}:::decision
+  n14 -->|"no"| n17
+  n9 -->|"no"| n17
+  n18["Llama a DiagnosticsScopeService.serviceRequest"]:::llamada
+  n17 -->|"sí"| n18
+  n19["Llama a ClinicalRefsRepository.findServiceRequest"]:::llamada
+  n18 --> n19
+  n20[("LEE clinical.service_requests")]:::efecto
+  n19 --> n20
+  n21["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
+  n20 --> n21
+  n22{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n21 --> n22
+  n23["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n22 -->|"sí"| n23
+  n24(["404 NOT_FOUND {message}"]):::error
+  n23 --> n24
+  n25["Llama a SpecimensRepository.createSpecimen"]:::llamada
+  n22 -->|"no"| n25
+  n17 -->|"no"| n25
+  n26[("CREA diagnostics.specimens")]:::efecto
+  n25 --> n26
+  n27(("201 Responde con éxito")):::ok
+  n26 --> n27
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 25. GET /diagnostics/specimens/{id}
 
 Detalle de un espécimen (con su cadena de custodia)
 
@@ -1913,7 +2379,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /diagnostics/specimens/{id}/containers
+#### 26. POST /diagnostics/specimens/{id}/containers
 
 Registrar un contenedor de espécimen (soporte para custodia)
 
@@ -1923,7 +2389,7 @@ Registrar un contenedor de espécimen (soporte para custodia)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Espécimen no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Contenedor no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1935,20 +2401,35 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a SpecimensRepository.findSpecimen"]:::llamada
+  n5["Llama a DiagnosticsScopeService.specimen"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostics.specimens")]:::efecto
+  n6["Llama a SpecimensRepository.findSpecimen"]:::llamada
   n5 --> n6
-  n7{"!specimen"}:::decision
+  n7[("LEE diagnostics.specimens")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Espécimen no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a SpecimensRepository.createContainer"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA diagnostics.specimen_containers")]:::efecto
+  n8{"dto.parentContainerId"}:::decision
+  n7 --> n8
+  n9["Llama a DiagnosticsScopeService.container"]:::llamada
+  n8 -->|"sí"| n9
+  n10["Llama a SpecimensRepository.findContainer"]:::llamada
   n9 --> n10
-  n11(("201 Responde con éxito")):::ok
+  n11[("LEE diagnostics.specimen_containers")]:::efecto
   n10 --> n11
+  n12["Llama a SpecimensRepository.findSpecimen"]:::llamada
+  n11 --> n12
+  n13[("LEE diagnostics.specimens")]:::efecto
+  n12 --> n13
+  n14{"parent.specimenId !== specimen.id"}:::decision
+  n13 --> n14
+  n15(["404 NOT_FOUND Contenedor no encontrado"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a SpecimensRepository.createContainer"]:::llamada
+  n14 -->|"no"| n16
+  n8 -->|"no"| n16
+  n17[("CREA diagnostics.specimen_containers")]:::efecto
+  n16 --> n17
+  n18(("201 Responde con éxito")):::ok
+  n17 --> n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1957,7 +2438,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /diagnostics/specimens/{id}/rejection
+#### 27. POST /diagnostics/specimens/{id}/rejection
 
 Rechazar espécimen y solicitar recolección
 
@@ -1967,7 +2448,7 @@ Rechazar espécimen y solicitar recolección
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Espécimen no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El espécimen ya está rechazado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1980,30 +2461,45 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a SpecimensRepository.findSpecimen"]:::llamada
+  n5["Llama a DiagnosticsScopeService.specimen"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostics.specimens")]:::efecto
+  n6["Llama a SpecimensRepository.findSpecimen"]:::llamada
   n5 --> n6
-  n7{"!specimen"}:::decision
+  n7[("LEE diagnostics.specimens")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Espécimen no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"specimen.statusConceptId === DIAG.SPECIMEN_REJECTED"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El espécimen ya está rechazado"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a SpecimensRepository.recordRejection"]:::llamada
-  n9 -->|"no"| n11
-  n12[("CREA diagnostics.specimen_rejection_events")]:::efecto
+  n8{"dto.recollectionServiceRequestId"}:::decision
+  n7 --> n8
+  n9["Llama a DiagnosticsScopeService.serviceRequest"]:::llamada
+  n8 -->|"sí"| n9
+  n10["Llama a ClinicalRefsRepository.findServiceRequest"]:::llamada
+  n9 --> n10
+  n11[("LEE clinical.service_requests")]:::efecto
+  n10 --> n11
+  n12["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
   n11 --> n12
-  n13[("ACTUALIZA diagnostics.specimens")]:::efecto
+  n13{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
   n12 --> n13
-  n14["Llama a SpecimensRepository.cancelTestsForSpecimen"]:::llamada
-  n13 --> n14
-  n15[("ACTUALIZA diagnostics.laboratory_work_order_tests")]:::efecto
+  n14["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n13 -->|"sí"| n14
+  n15(["404 NOT_FOUND {message}"]):::error
   n14 --> n15
-  n16(("201 Responde con éxito")):::ok
-  n15 --> n16
+  n16{"specimen.statusConceptId === DIAG.SPECIMEN_REJECTED"}:::decision
+  n13 -->|"no"| n16
+  n8 -->|"no"| n16
+  n17(["422 PRECONDITION_FAILED El espécimen ya está rechazado"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a SpecimensRepository.recordRejection"]:::llamada
+  n16 -->|"no"| n18
+  n19[("CREA diagnostics.specimen_rejection_events")]:::efecto
+  n18 --> n19
+  n20[("ACTUALIZA diagnostics.specimens")]:::efecto
+  n19 --> n20
+  n21["Llama a SpecimensRepository.cancelTestsForSpecimen"]:::llamada
+  n20 --> n21
+  n22[("ACTUALIZA diagnostics.laboratory_work_order_tests")]:::efecto
+  n21 --> n22
+  n23(("201 Responde con éxito")):::ok
+  n22 --> n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2012,7 +2508,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /diagnostics/work-orders
+#### 28. POST /diagnostics/work-orders
 
 Abrir orden de trabajo y desglosar pruebas
 
@@ -2022,7 +2518,7 @@ Abrir orden de trabajo y desglosar pruebas
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Acesión no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2032,31 +2528,76 @@ flowchart TD
   n1 --> n2
   n3["Llama a DiagnosticsLabService.createWorkOrder"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4["Llama a DiagnosticsScopeService.activeTenantFor"]:::llamada
   n3 --> n4
-  n5["Llama a SpecimensRepository.findAccession"]:::llamada
+  n5{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
   n4 --> n5
-  n6[("LEE diagnostics.laboratory_accessions")]:::efecto
-  n5 --> n6
-  n7{"!accession"}:::decision
+  n6["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n5 -->|"sí"| n6
+  n7(["404 NOT_FOUND {message}"]):::error
   n6 --> n7
-  n8(["404 NOT_FOUND Acesión no encontrada"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a LabWorkRepository.createWorkOrder"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA diagnostics.laboratory_work_orders")]:::efecto
+  n8["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n8
+  n9["Llama a DiagnosticsScopeService.accession"]:::llamada
+  n8 --> n9
+  n10["Llama a SpecimensRepository.findAccession"]:::llamada
   n9 --> n10
-  n11["Repite: por cada const t de dto.tests"]:::bucle
+  n11[("LEE diagnostics.laboratory_accessions")]:::efecto
   n10 --> n11
-  n12["Llama a LabWorkRepository.createWorkOrderTest"]:::llamada
-  n11 -->|"cada elemento"| n12
-  n13[("CREA diagnostics.laboratory_work_order_tests")]:::efecto
-  n12 --> n13
-  n14[("ACTUALIZA diagnostics.laboratory_accessions")]:::efecto
-  n13 --> n14
-  n11 -->|"al terminar"| n14
-  n15(("201 Responde con éxito")):::ok
+  n12["Repite: por cada const t de dto.tests"]:::bucle
+  n11 --> n12
+  n13{"t.serviceRequestId"}:::decision
+  n12 -->|"cada elemento"| n13
+  n14["Llama a DiagnosticsScopeService.serviceRequest"]:::llamada
+  n13 -->|"sí"| n14
+  n15["Llama a ClinicalRefsRepository.findServiceRequest"]:::llamada
   n14 --> n15
+  n16[("LEE clinical.service_requests")]:::efecto
+  n15 --> n16
+  n17["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
+  n16 --> n17
+  n18{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n17 --> n18
+  n19["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n18 -->|"sí"| n19
+  n20(["404 NOT_FOUND {message}"]):::error
+  n19 --> n20
+  n21{"t.specimenId"}:::decision
+  n18 -->|"no"| n21
+  n13 -->|"no"| n21
+  n22["Llama a DiagnosticsScopeService.specimenOfPatient"]:::llamada
+  n21 -->|"sí"| n22
+  n23["Llama a DiagnosticsScopeService.specimen"]:::llamada
+  n22 --> n23
+  n24["Llama a SpecimensRepository.findSpecimen"]:::llamada
+  n23 --> n24
+  n25[("LEE diagnostics.specimens")]:::efecto
+  n24 --> n25
+  n26["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
+  n25 --> n26
+  n27{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n26 --> n27
+  n28["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n27 -->|"sí"| n28
+  n29(["404 NOT_FOUND {message}"]):::error
+  n28 --> n29
+  n30["Llama a LabWorkRepository.createWorkOrder"]:::llamada
+  n27 -->|"no"| n30
+  n21 -->|"no"| n30
+  n12 -->|"al terminar"| n30
+  n31[("CREA diagnostics.laboratory_work_orders")]:::efecto
+  n30 --> n31
+  n32["Repite: por cada const t de dto.tests"]:::bucle
+  n31 --> n32
+  n33["Llama a LabWorkRepository.createWorkOrderTest"]:::llamada
+  n32 -->|"cada elemento"| n33
+  n34[("CREA diagnostics.laboratory_work_order_tests")]:::efecto
+  n33 --> n34
+  n35[("ACTUALIZA diagnostics.laboratory_accessions")]:::efecto
+  n34 --> n35
+  n32 -->|"al terminar"| n35
+  n36(("201 Responde con éxito")):::ok
+  n35 --> n36
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2065,7 +2606,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /dicomweb/studies
+#### 29. POST /dicomweb/studies
 
 Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
 
@@ -2075,7 +2616,7 @@ Ingestar estudio DICOM (STOW-RS) y ubicaciones de objeto
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Endpoint de imagen no encontrado |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {message} |
 | 409 | `CONFLICT` | ConflictException: El estudio DICOM ya fue almacenado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2088,49 +2629,89 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a ImagingRepository.findEndpoint"]:::llamada
+  n5["Llama a DiagnosticsScopeService.activeTenantFor"]:::llamada
   n4 --> n5
-  n6[("LEE diagnostics.imaging_endpoints")]:::efecto
+  n6{"bodyTenantId !== undefined && bodyTenantId !== tenantId"}:::decision
   n5 --> n6
-  n7{"!endpoint"}:::decision
-  n6 --> n7
-  n8(["404 NOT_FOUND Endpoint de imagen no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a ImagingRepository.findStudyByUid"]:::llamada
-  n7 -->|"no"| n9
-  n10[("LEE diagnostics.imaging_studies")]:::efecto
+  n7["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n6 -->|"sí"| n7
+  n8(["404 NOT_FOUND {message}"]):::error
+  n7 --> n8
+  n9["Llama a DiagnosticsScopeService.endpoint"]:::llamada
+  n6 -->|"no"| n9
+  n10["Llama a ImagingRepository.findEndpoint"]:::llamada
   n9 --> n10
-  n11{"existing"}:::decision
+  n11[("LEE diagnostics.imaging_endpoints")]:::efecto
   n10 --> n11
-  n12(["409 CONFLICT El estudio DICOM ya fue almacenado"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a ImagingRepository.createStudy"]:::llamada
-  n11 -->|"no"| n13
-  n14[("CREA diagnostics.imaging_studies")]:::efecto
+  n12{"dto.encounterId"}:::decision
+  n11 --> n12
+  n13["Llama a DiagnosticsScopeService.encounter"]:::llamada
+  n12 -->|"sí"| n13
+  n14["Llama a ClinicalRefsRepository.findEncounter"]:::llamada
   n13 --> n14
-  n15["Repite: por cada const s de dto.series"]:::bucle
+  n15[("LEE clinical.encounters")]:::efecto
   n14 --> n15
-  n16["Llama a ImagingRepository.createSeries"]:::llamada
-  n15 -->|"cada elemento"| n16
-  n17[("CREA diagnostics.imaging_series")]:::efecto
+  n16["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
+  n15 --> n16
+  n17{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
   n16 --> n17
-  n18["Repite: por cada const inst de s.instances ?? []"]:::bucle
-  n17 --> n18
-  n19["Llama a ImagingRepository.createInstance"]:::llamada
-  n18 -->|"cada elemento"| n19
-  n20[("CREA diagnostics.imaging_instances")]:::efecto
-  n19 --> n20
-  n21{"inst.storageBackendId && inst.objectKey"}:::decision
-  n20 --> n21
-  n22["Llama a ImagingRepository.createObjectLocation"]:::llamada
-  n21 -->|"sí"| n22
-  n23[("CREA diagnostics.dicom_object_locations")]:::efecto
+  n18["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n17 -->|"sí"| n18
+  n19(["404 NOT_FOUND {message}"]):::error
+  n18 --> n19
+  n20{"dto.serviceRequestId"}:::decision
+  n17 -->|"no"| n20
+  n12 -->|"no"| n20
+  n21["Llama a DiagnosticsScopeService.serviceRequest"]:::llamada
+  n20 -->|"sí"| n21
+  n22["Llama a ClinicalRefsRepository.findServiceRequest"]:::llamada
+  n21 --> n22
+  n23[("LEE clinical.service_requests")]:::efecto
   n22 --> n23
-  n24(("201 Responde con éxito")):::ok
+  n24["Llama a DiagnosticsScopeService.assertPatientMatches"]:::llamada
   n23 --> n24
-  n21 -->|"no"| n24
-  n18 -->|"al terminar"| n24
-  n15 -->|"al terminar"| n24
+  n25{"resource && patientProfileId !== undefined && resource.patientProfileId !== patientProfileId"}:::decision
+  n24 --> n25
+  n26["Llama a DiagnosticsScopeService.notFound"]:::llamada
+  n25 -->|"sí"| n26
+  n27(["404 NOT_FOUND {message}"]):::error
+  n26 --> n27
+  n28["Llama a ImagingRepository.findStudyByUid"]:::llamada
+  n25 -->|"no"| n28
+  n20 -->|"no"| n28
+  n29[("LEE diagnostics.imaging_studies")]:::efecto
+  n28 --> n29
+  n30{"existing"}:::decision
+  n29 --> n30
+  n31(["409 CONFLICT El estudio DICOM ya fue almacenado"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a ImagingRepository.createStudy"]:::llamada
+  n30 -->|"no"| n32
+  n33[("CREA diagnostics.imaging_studies")]:::efecto
+  n32 --> n33
+  n34["Repite: por cada const s de dto.series"]:::bucle
+  n33 --> n34
+  n35["Llama a ImagingRepository.createSeries"]:::llamada
+  n34 -->|"cada elemento"| n35
+  n36[("CREA diagnostics.imaging_series")]:::efecto
+  n35 --> n36
+  n37["Repite: por cada const inst de s.instances ?? []"]:::bucle
+  n36 --> n37
+  n38["Llama a ImagingRepository.createInstance"]:::llamada
+  n37 -->|"cada elemento"| n38
+  n39[("CREA diagnostics.imaging_instances")]:::efecto
+  n38 --> n39
+  n40{"inst.storageBackendId && inst.objectKey"}:::decision
+  n39 --> n40
+  n41["Llama a ImagingRepository.createObjectLocation"]:::llamada
+  n40 -->|"sí"| n41
+  n42[("CREA diagnostics.dicom_object_locations")]:::efecto
+  n41 --> n42
+  n43(("201 Responde con éxito")):::ok
+  n42 --> n43
+  n40 -->|"no"| n43
+  n37 -->|"al terminar"| n43
+  n34 -->|"al terminar"| n43
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2145,7 +2726,5 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
-| GET /diagnostics/patients/{patientProfileId}/imaging-studies | 200, 400, 401, 403, 429 | 1 |
-| GET /diagnostics/patients/{patientProfileId}/orders | 200, 400, 401, 403, 429 | 2 |
-| POST /diagnostics/specimens | 201, 400, 401, 403, 429 | 1 |
+| GET /diagnostics/patients/{patientProfileId}/orders | 200, 400, 401, 403, 429 | 3 |
 | GET /diagnostics/work-orders | 200, 401, 403, 429 | 1 |

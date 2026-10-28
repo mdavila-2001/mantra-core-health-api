@@ -10,17 +10,21 @@ import {
   AuthzCareRelationshipsController,
   AuthzPdpController,
   AuthzMeController,
+  AuthzAdminController,
 } from './controllers';
 import {
   AuthzCatalogService,
   AuthzPoliciesService,
   AuthzRolesService,
   AuthzGrantsService,
+  AuthzClinicalScopeService,
   AuthzClinicalService,
   AuthzCareRelationshipsService,
   AuthzPdpService,
   AuthzEffectiveRolesService,
   AuthzMeService,
+  AuthzAdminReadService,
+  AuthzAssignmentRevocationService,
 } from './services';
 import {
   PermissionCategoriesRepository,
@@ -37,6 +41,8 @@ import {
   FieldPermissionsRepository,
   ResourceScopeGrantsRepository,
   AuthzServicePrincipalsRepository,
+  AuthzAdminReadRepository,
+  AuthzClinicalScopeRepository,
 } from './repositories';
 import { DataAccessLogRepository } from '../audit/repositories';
 import { AuditModule } from '../audit/audit.module';
@@ -73,6 +79,7 @@ import {
     AuthzCareRelationshipsController,
     AuthzPdpController,
     AuthzMeController,
+    AuthzAdminController,
   ],
   providers: [
     // Repositorios
@@ -90,6 +97,9 @@ import {
     FieldPermissionsRepository,
     ResourceScopeGrantsRepository,
     AuthzServicePrincipalsRepository,
+    AuthzAdminReadRepository,
+    // Lecturas de alcance (paciente, encuentro, consentimiento) de otros módulos.
+    AuthzClinicalScopeRepository,
     // Repositorio de auditoría reutilizado para el evento de acceso de emergencia
     DataAccessLogRepository,
     PersonAccountLinksRepository,
@@ -97,6 +107,7 @@ import {
     // estado sobre el `EntityManager`, como `PersonAccountLinksRepository`.
     PatientProfilesRepository,
     // Servicios
+    AuthzClinicalScopeService,
     AuthzCatalogService,
     AuthzPoliciesService,
     AuthzRolesService,
@@ -106,6 +117,8 @@ import {
     AuthzPdpService,
     AuthzEffectiveRolesService,
     AuthzMeService,
+    AuthzAdminReadService,
+    AuthzAssignmentRevocationService,
   ],
   // `iam` consume el primero al emitir y refrescar el token: es la única forma
   // de que un rol asistencial llegue al `RolesGuard`. El segundo lo consume
@@ -122,6 +135,9 @@ import {
     // para exigir una relación asistencial ACTIVE antes de compartir un
     // resultado con un profesional.
     CareRelationshipsRepository,
+    // El check-in de un encuentro deja constancia de la relación asistencial que
+    // exige el cobro con seguro (REQ-16-035), en la transacción del encuentro.
+    AuthzCareRelationshipsService,
     AuthzPdpService,
     // AG-31 (BR-26): `pharma_lab` necesita asignar/consultar MEDICAL_VISITOR al
     // vincular o desvincular un visitador, en la misma transacción del caso de

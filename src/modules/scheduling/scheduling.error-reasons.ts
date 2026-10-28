@@ -32,9 +32,19 @@ export enum SchedulingErrorReason {
   TEMPLATE_NOT_FOUND = 'TEMPLATE_NOT_FOUND',
   TEMPLATE_RESOURCE_NOT_FOUND = 'TEMPLATE_RESOURCE_NOT_FOUND',
   TEMPLATE_HAS_ACTIVE_BOOKINGS = 'TEMPLATE_HAS_ACTIVE_BOOKINGS',
+  /**
+   * Cita por TELECONSULTA fuera de una franja con la telemedicina habilitada
+   * (v4.2.61). Por defecto ninguna franja la tiene: la activa el profesional.
+   */
+  TELEMEDICINE_NOT_ENABLED = 'TELEMEDICINE_NOT_ENABLED',
 
   // Recursos agendables.
   RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
+  /**
+   * Recurso inexistente o de otra organización: se responde igual para los dos
+   * (404 uniforme) porque distinguirlos confirmaría que el UUID existe.
+   */
+  RESOURCE_NOT_AVAILABLE = 'SCHEDULING_RESOURCE_NOT_AVAILABLE',
 
   // Cupos (slots) de una agenda.
   SLOT_NOT_FOUND = 'SLOT_NOT_FOUND',

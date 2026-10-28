@@ -77,7 +77,7 @@ export const { seeds: CLINICAL_EXT_CONCEPT_SEEDS, ids: CEXT } =
     },
     REFERRAL_ACCEPTED: { code: 'REF_ACCEPTED', display: 'Referral accepted' },
     REFERRAL_REJECTED: { code: 'REF_REJECTED', display: 'Referral rejected' },
-    // v4263: cierre con contrarreferencia y anulación por quien deriva.
+    // v4266: cierre con contrarreferencia y anulación por quien deriva.
     REFERRAL_COMPLETED: {
       code: 'REF_COMPLETED',
       display: 'Referral completed (counter-referral received)',
@@ -89,6 +89,11 @@ export const { seeds: CLINICAL_EXT_CONCEPT_SEEDS, ids: CEXT } =
     REFERRAL_PRIORITY_ROUTINE: {
       code: 'REF_ROUTINE',
       display: 'Routine referral priority',
+    },
+    // Categoría de la campana cuando el médico recomienda a otro profesional.
+    NOTICE_REFERRAL_RECOMMENDED: {
+      code: 'REF_NOTICE_RECOMMENDED',
+      display: 'Referral recommended notice',
     },
 
     // --- care_gaps -----------------------------------------------------------

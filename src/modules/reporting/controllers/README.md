@@ -12,13 +12,13 @@ Un único controlador (`ReportingController`, prefijo `reporting`) con 12 endpoi
 
 `JwtAuthGuard` global + `@Roles(...)`:
 
-| Rol | Alcance |
-| --- | --- |
-| `REPORTING_ADMIN` | Todo el módulo |
-| `DATA_STEWARD` | Registrar fuentes de datos |
-| `REPORT_AUTHOR` | Definiciones, versiones, programaciones y tableros |
-| `REPORT_VIEWER` | Ejecutar bajo demanda y suscribirse |
-| `SYSTEM` | Snapshot, tick del planificador, distribuciones y reintentos |
+| Rol               | Alcance                                                      |
+| ----------------- | ------------------------------------------------------------ |
+| `REPORTING_ADMIN` | Todo el módulo                                               |
+| `DATA_STEWARD`    | Registrar fuentes de datos                                   |
+| `REPORT_AUTHOR`   | Definiciones, versiones, programaciones y tableros           |
+| `REPORT_VIEWER`   | Ejecutar bajo demanda y suscribirse                          |
+| `SYSTEM`          | Snapshot, tick del planificador, distribuciones y reintentos |
 
 Es deliberado que `REPORT_AUTHOR` no pueda registrar fuentes: quien diseña reportes no debería poder
 ampliar de dónde se leen los datos. Y que sólo `REPORTING_ADMIN` deprece, porque arrastra la

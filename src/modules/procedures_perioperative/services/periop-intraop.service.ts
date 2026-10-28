@@ -14,10 +14,18 @@ import {
   PeriopIntraopRepository,
 } from '../repositories';
 import { SEVERITY_CONCEPT } from './periop-preop.service';
+import {
+  assertProcedureOfCasePatient,
+  isCaseInScope,
+  loadCaseForUpdateInScope,
+} from './periop-scope';
 import { ProceduresPerioperativeErrorReason } from '../procedures_perioperative.error-reasons';
 // El procedimiento que el informe describe vive en la historia clínica: se pide
 // a su dueño en vez de escribir `clinical.procedures` desde este módulo.
-import { ProceduresService } from '../../clinical/services';
+import {
+  ProceduresService,
+  ReceivedServicesProjector,
+} from '../../clinical/services';
 import {
   CreateOperativeStepDto,
   OperativeStepResponseDto,
@@ -127,6 +135,7 @@ export class PeriopIntraopService {
     private readonly intraopRepo: PeriopIntraopRepository,
     private readonly casesRepo: PeriopCasesRepository,
     private readonly procedures: ProceduresService,
+    private readonly receivedServices: ReceivedServicesProjector,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PeriopIntraopService.name);
@@ -148,6 +157,7 @@ export class PeriopIntraopService {
 
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.assertCaseInProgress(tx, caseId);
+      await this.assertClientProcedure(tx, surgicalCase, dto.procedureId);
 
       const steps = await this.intraopRepo.findStepsByCase(tx, caseId);
       const stepNumber = steps.length + 1;
@@ -207,6 +217,18 @@ export class PeriopIntraopService {
           );
         }
         if (step.procedureCaseId !== caseId) {
+          // «Es de otro caso» sólo se revela si ese caso es del tenant activo.
+          if (
+            !(await isCaseInScope(this.casesRepo, tx, step.procedureCaseId))
+          ) {
+            throw new ResourceNotFoundException(
+              'Paso operatorio no encontrado',
+              {
+                operativeStepId: dto.operativeStepId,
+              },
+              ProceduresPerioperativeErrorReason.OPERATIVE_STEP_NOT_FOUND,
+            );
+          }
           throw new PreconditionFailedException(
             'El paso pertenece a otro caso',
             {
@@ -277,7 +299,8 @@ export class PeriopIntraopService {
     );
 
     return this.em.transactional(async (tx) => {
-      await this.assertCaseInProgress(tx, caseId);
+      const surgicalCase = await this.assertCaseInProgress(tx, caseId);
+      await this.assertClientProcedure(tx, surgicalCase, dto.procedureId);
 
       const implant = this.intraopRepo.createImplant(tx, {
         procedureCaseId: caseId,
@@ -346,6 +369,7 @@ export class PeriopIntraopService {
 
     return this.em.transactional(async (tx) => {
       const surgicalCase = await this.assertCaseInProgress(tx, caseId);
+      await this.assertClientProcedure(tx, surgicalCase, dto.procedureId);
 
       if (dto.operativeStepId) {
         const step = await this.intraopRepo.findStepById(
@@ -392,7 +416,8 @@ export class PeriopIntraopService {
     );
 
     return this.em.transactional(async (tx) => {
-      await this.assertCaseInProgress(tx, caseId);
+      const surgicalCase = await this.assertCaseInProgress(tx, caseId);
+      await this.assertClientProcedure(tx, surgicalCase, dto.procedureId);
 
       if (dto.operativeStepId) {
         const step = await this.intraopRepo.findStepById(
@@ -442,16 +467,11 @@ export class PeriopIntraopService {
     );
 
     return this.em.transactional(async (tx) => {
-      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-      if (!surgicalCase) {
-        throw new ResourceNotFoundException(
-          'Caso quirúrgico no encontrado',
-          {
-            caseId,
-          },
-          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-        );
-      }
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
         throw new PreconditionFailedException(
           'El caso está cancelado',
@@ -461,6 +481,10 @@ export class PeriopIntraopService {
           ProceduresPerioperativeErrorReason.CASE_CANCELLED,
         );
       }
+
+      // El procedimiento que cita el informe lo manda el cliente: tiene que ser
+      // del paciente del caso y del tenant (404 uniforme si no lo es).
+      await this.assertClientProcedure(tx, surgicalCase, dto.procedureId);
 
       const last = await this.intraopRepo.findLastReport(tx, caseId);
       // Un reporte firmado no se edita: la corrección es una versión nueva.
@@ -579,6 +603,12 @@ export class PeriopIntraopService {
     );
 
     return this.em.transactional(async (tx) => {
+      // El caso primero: el informe se resuelve dentro de un caso del tenant activo.
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
       const report = await this.intraopRepo.findReportForUpdate(tx, reportId);
       if (!report) {
         throw new ResourceNotFoundException(
@@ -588,6 +618,16 @@ export class PeriopIntraopService {
         );
       }
       if (report.procedureCaseId !== caseId) {
+        // «Es de otro caso» sólo se revela si ese caso es del tenant activo.
+        if (
+          !(await isCaseInScope(this.casesRepo, tx, report.procedureCaseId))
+        ) {
+          throw new ResourceNotFoundException(
+            'Reporte operatorio no encontrado',
+            { reportId },
+            ProceduresPerioperativeErrorReason.REPORT_NOT_FOUND,
+          );
+        }
         throw new PreconditionFailedException(
           'El reporte pertenece a otro caso',
           {
@@ -602,17 +642,6 @@ export class PeriopIntraopService {
           'El reporte ya está firmado',
           { reportId },
           ProceduresPerioperativeErrorReason.REPORT_ALREADY_SIGNED,
-        );
-      }
-
-      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-      if (!surgicalCase) {
-        throw new ResourceNotFoundException(
-          'Caso quirúrgico no encontrado',
-          {
-            caseId,
-          },
-          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
         );
       }
 
@@ -639,6 +668,16 @@ export class PeriopIntraopService {
           statusConceptId: CONCEPTS.MILESTONE_REACHED,
         });
         touch(surgicalCase, actor.id);
+        // El cierre del caso es la intervención realizada: entra a «Servicios
+        // recibidos» en esta misma transacción. El flush previo va porque las FK de
+        // la tabla son columnas, no relaciones, y el ORM no ordena los inserts.
+        await tx.flush();
+        await this.receivedServices.projectCompletedCase(
+          tx,
+          surgicalCase,
+          actor.id,
+          report.procedureId,
+        );
       }
 
       return {
@@ -661,16 +700,11 @@ export class PeriopIntraopService {
     );
 
     return this.em.transactional(async (tx) => {
-      const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-      if (!surgicalCase) {
-        throw new ResourceNotFoundException(
-          'Caso quirúrgico no encontrado',
-          {
-            caseId,
-          },
-          ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-        );
-      }
+      const surgicalCase = await loadCaseForUpdateInScope(
+        this.casesRepo,
+        tx,
+        caseId,
+      );
       if (surgicalCase.statusConceptId === CONCEPTS.CASE_CANCELLED) {
         throw new PreconditionFailedException(
           'El caso está cancelado',
@@ -733,14 +767,7 @@ export class PeriopIntraopService {
     );
 
     return this.em.transactional(async (tx) => {
-      const stay = await this.intraopRepo.findPacuStayForUpdate(tx, stayId);
-      if (!stay) {
-        throw new ResourceNotFoundException(
-          'Estancia en recuperación no encontrada',
-          { stayId },
-          ProceduresPerioperativeErrorReason.PACU_STAY_NOT_FOUND,
-        );
-      }
+      const stay = await this.loadPacuStayInScope(tx, stayId);
       if (stay.statusConceptId === CONCEPTS.PACU_DISCHARGED) {
         throw new ConflictException(
           'El paciente ya salió de recuperación',
@@ -795,14 +822,7 @@ export class PeriopIntraopService {
     );
 
     return this.em.transactional(async (tx) => {
-      const stay = await this.intraopRepo.findPacuStayForUpdate(tx, stayId);
-      if (!stay) {
-        throw new ResourceNotFoundException(
-          'Estancia en recuperación no encontrada',
-          { stayId },
-          ProceduresPerioperativeErrorReason.PACU_STAY_NOT_FOUND,
-        );
-      }
+      const stay = await this.loadPacuStayInScope(tx, stayId);
       if (stay.statusConceptId === CONCEPTS.PACU_DISCHARGED) {
         throw new ConflictException(
           'El paciente ya salió de recuperación',
@@ -886,21 +906,66 @@ export class PeriopIntraopService {
   // --- Apoyo ---
 
   /**
+   * Carga una estancia en recuperación por UUID para escribir, exigiendo que su
+   * caso sea del tenant activo. La estancia no lleva tenant: es el de su caso.
+   * El caso se comprueba **antes** de bloquear la estancia.
+   *
+   * @throws ResourceNotFoundException (`PACU_STAY_NOT_FOUND`) si la estancia no
+   * existe o su caso es de otro tenant, con la misma respuesta en ambos casos.
+   */
+  private async loadPacuStayInScope(tx: EntityManager, stayId: string) {
+    const notFound = () =>
+      new ResourceNotFoundException(
+        'Estancia en recuperación no encontrada',
+        { stayId },
+        ProceduresPerioperativeErrorReason.PACU_STAY_NOT_FOUND,
+      );
+    const unlocked = await this.intraopRepo.findPacuStayById(tx, stayId);
+    if (
+      !unlocked ||
+      !(await isCaseInScope(this.casesRepo, tx, unlocked.procedureCaseId))
+    ) {
+      throw notFound();
+    }
+    const stay = await this.intraopRepo.findPacuStayForUpdate(tx, stayId);
+    if (!stay) throw notFound();
+    return stay;
+  }
+
+  /**
+   * Exige que el procedimiento que manda el cliente —si lo manda— sea del
+   * paciente del caso y del tenant activo (#864, #892).
+   *
+   * @param tx - Transacción activa.
+   * @param surgicalCase - Caso ya cargado y acotado al tenant.
+   * @param procedureId - `procedureId` del cuerpo, opcional.
+   * @throws ResourceNotFoundException (`PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT`) si no existe, es de otro paciente o de otro tenant.
+   */
+  private async assertClientProcedure(
+    tx: EntityManager,
+    surgicalCase: { patientProfileId: string },
+    procedureId: string | undefined,
+  ): Promise<void> {
+    if (!procedureId) return;
+    await assertProcedureOfCasePatient(
+      this.casesRepo,
+      tx,
+      procedureId,
+      surgicalCase.patientProfileId,
+    );
+  }
+
+  /**
    * Un registro intraoperatorio exige que el caso esté realmente en curso:
    * anotar pasos, hallazgos o implantes en un caso que no ha empezado —o que ya
    * se cerró— produciría una historia clínica que no ocurrió.
    */
   private async assertCaseInProgress(tx: EntityManager, caseId: string) {
-    const surgicalCase = await this.casesRepo.findCaseForUpdate(tx, caseId);
-    if (!surgicalCase) {
-      throw new ResourceNotFoundException(
-        'Caso quirúrgico no encontrado',
-        {
-          caseId,
-        },
-        ProceduresPerioperativeErrorReason.CASE_NOT_FOUND,
-      );
-    }
+    const surgicalCase = await loadCaseForUpdateInScope(
+      this.casesRepo,
+      tx,
+      caseId,
+    );
     if (surgicalCase.statusConceptId !== CONCEPTS.SURGICAL_CASE_IN_PROGRESS) {
       throw new PreconditionFailedException(
         'El caso no está en curso',

@@ -4,3 +4,5 @@ export * from './audit-history.service';
 export * from './compliance.service';
 export * from './moderation.service';
 export * from './third-party-access.service';
+export * from './audit-query.service';
+export * from './my-data-access.service';

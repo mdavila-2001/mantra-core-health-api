@@ -3,45 +3,51 @@
 # Endpoints del módulo `practice`
 
 - **Bloque:** Práctica y Agenda (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
-- **Operaciones:** 30 (30 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 22 · BAJO 8
-- **Tablas distintas que tocan:** 17
+- **Operaciones:** 36 (36 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 4 · MEDIO 18 · BAJO 14
+- **Tablas distintas que tocan:** 21
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/practice.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/accreditations/{id}/verify` | Verificar o caducar una acreditación (transición de estado) | MEDIO | 2 | SECURITY_ADMIN |
+| 1 | POST | `/accreditations/{id}/verify` | Verificar o caducar una acreditación (transición de estado) | BAJO | 2 | SECURITY_ADMIN |
 | 2 | POST | `/inventory-items/{itemId}/movements` | Registrar un movimiento de inventario (ajuste de stock) | MEDIO | 3 | SECURITY_ADMIN |
-| 3 | GET | `/practices` | Listar las prácticas activas del tenant | BAJO | 1 | SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER |
+| 3 | GET | `/practices` | Listar las prácticas activas del tenant | BAJO | 3 | sesión (sin roles) |
 | 4 | POST | `/practices` | Dar de alta una práctica (organización raíz) | MEDIO | 2 | SECURITY_ADMIN |
-| 5 | POST | `/practices/{practiceId}/accreditations` | Registrar una acreditación con evidencia | MEDIO | 3 | SECURITY_ADMIN |
-| 6 | POST | `/practices/{practiceId}/healthcare-services` | Publicar un servicio de salud | MEDIO | 4 | SECURITY_ADMIN |
-| 7 | POST | `/practices/{practiceId}/inventory-items` | Dar de alta un insumo de inventario de práctica | MEDIO | 1 | SECURITY_ADMIN |
-| 8 | GET | `/practices/{practiceId}/organization` | Consola de organización médica: estructura, plantilla y legajo | BAJO | 9 | SECURITY_ADMIN, PERIOP_ADMIN, SURGERY_SCHEDULER, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER |
-| 9 | GET | `/practices/{practiceId}/role-assignments` | Listar las vinculaciones profesional-organización de la práctica | BAJO | 2 | SECURITY_ADMIN |
-| 10 | POST | `/practices/{practiceId}/role-assignments` | Asignar un rol de profesional a sitio/unidad/servicio | MEDIO | 3 | SECURITY_ADMIN |
-| 11 | POST | `/practices/{practiceId}/role-assignments/self-request` | Solicitar la propia vinculación a una organización | MEDIO | 3 | PRACTITIONER |
-| 12 | PUT | `/practices/{practiceId}/settings/{settingKey}` | Configurar un ajuste de práctica (upsert) | MEDIO | 4 | SECURITY_ADMIN |
-| 13 | GET | `/practices/{practiceId}/sites` | Listar las sedes de una práctica | BAJO | 2 | SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN |
-| 14 | POST | `/practices/{practiceId}/sites` | Dar de alta un sitio de práctica | MEDIO | 3 | SECURITY_ADMIN |
-| 15 | DELETE | `/practices/{practiceId}/sites/{siteId}` | Desmantelar un sitio en cascada (soft-delete) | MEDIO | 10 | SECURITY_ADMIN |
-| 16 | GET | `/practitioners/{profileId}/sites` | Consultorios donde atiende el profesional | BAJO | 5 | SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT |
-| 17 | GET | `/practitioners/me/role-assignments` | Mis vinculaciones con organizaciones | BAJO | 3 | PRACTITIONER |
-| 18 | POST | `/practitioners/me/sites` | Registrar un consultorio propio | MEDIO | 8 | PRACTITIONER, CLINICIAN |
-| 19 | DELETE | `/practitioners/me/sites/{siteId}` | Retirar un consultorio propio | MEDIO | 4 | PRACTITIONER, CLINICIAN |
-| 20 | PATCH | `/practitioners/me/sites/{siteId}` | Corregir un consultorio propio | MEDIO | 9 | PRACTITIONER, CLINICIAN |
-| 21 | PUT | `/practitioners/me/sites/{siteId}/bank-qr` | Fijar o quitar el QR bancario de una sede | BAJO | 6 | PRACTITIONER, CLINICIAN |
-| 22 | PUT | `/practitioners/me/sites/{siteId}/contact-phone` | Guardar o quitar mi teléfono en una sede | MEDIO | 7 | PRACTITIONER, CLINICIAN |
-| 23 | POST | `/role-assignments/{roleId}/approve` | Aprobar una vinculación pendiente | MEDIO | 2 | SECURITY_ADMIN |
-| 24 | POST | `/role-assignments/{roleId}/end` | Finalizar una vinculación | MEDIO | 2 | SECURITY_ADMIN |
-| 25 | POST | `/role-assignments/{roleId}/reject` | Rechazar una vinculación pendiente | MEDIO | 2 | SECURITY_ADMIN |
-| 26 | POST | `/role-assignments/{roleId}/support-assignments` | Adjuntar personal de apoyo a un rol de profesional | MEDIO | 2 | SECURITY_ADMIN |
-| 27 | POST | `/role-assignments/{roleId}/suspend` | Suspender una vinculación activa | MEDIO | 2 | SECURITY_ADMIN |
-| 28 | GET | `/sites/{siteId}/care-spaces` | Listar los espacios de atención de la sede | BAJO | 3 | SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN |
-| 29 | POST | `/sites/{siteId}/care-spaces` | Crear un espacio de atención bajo una unidad/sitio | MEDIO | 4 | SECURITY_ADMIN |
-| 30 | POST | `/sites/{siteId}/clinical-units` | Crear una unidad clínica jerárquica | MEDIO | 3 | SECURITY_ADMIN |
+| 5 | POST | `/practices/{practiceId}/accreditations` | Registrar una acreditación con evidencia | MEDIO | 2 | SECURITY_ADMIN |
+| 6 | GET | `/practices/{practiceId}/healthcare-services` | Listar los procedimientos que ofrecen las sedes de la práctica | BAJO | 6 | sesión (sin roles) |
+| 7 | POST | `/practices/{practiceId}/healthcare-services` | Publicar un procedimiento del nomenclador en una sede | ALTO | 7 | sesión (sin roles) |
+| 8 | PATCH | `/practices/{practiceId}/healthcare-services/{id}` | Actualizar el precio o el estado de un procedimiento de la sede | ALTO | 7 | sesión (sin roles) |
+| 9 | POST | `/practices/{practiceId}/inventory-items` | Dar de alta un insumo de inventario de práctica | MEDIO | 1 | SECURITY_ADMIN |
+| 10 | GET | `/practices/{practiceId}/organization` | Consola de organización médica: estructura, plantilla y legajo | BAJO | 9 | SECURITY_ADMIN, PERIOP_ADMIN, SURGERY_SCHEDULER, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER |
+| 11 | GET | `/practices/{practiceId}/role-assignments` | Listar las vinculaciones profesional-organización de la práctica | BAJO | 3 | sesión (sin roles) |
+| 12 | POST | `/practices/{practiceId}/role-assignments` | Asignar un rol de profesional a sitio/unidad/servicio | MEDIO | 4 | SECURITY_ADMIN |
+| 13 | POST | `/practices/{practiceId}/role-assignments/invitations` | Invitar a un profesional a procedimientos de una sede | ALTO | 7 | sesión (sin roles) |
+| 14 | POST | `/practices/{practiceId}/role-assignments/self-request` | Solicitar la propia vinculación a una organización | MEDIO | 5 | PRACTITIONER |
+| 15 | PUT | `/practices/{practiceId}/settings/{settingKey}` | Configurar un ajuste de práctica (upsert) | MEDIO | 3 | SECURITY_ADMIN |
+| 16 | GET | `/practices/{practiceId}/sites` | Listar las sedes de una práctica | BAJO | 3 | sesión (sin roles) |
+| 17 | POST | `/practices/{practiceId}/sites` | Dar de alta un sitio de práctica | MEDIO | 2 | SECURITY_ADMIN |
+| 18 | DELETE | `/practices/{practiceId}/sites/{siteId}` | Desmantelar un sitio en cascada (soft-delete) | MEDIO | 10 | SECURITY_ADMIN |
+| 19 | GET | `/practitioners/{profileId}/sites` | Consultorios donde atiende el profesional | BAJO | 5 | SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT |
+| 20 | GET | `/practitioners/me/role-assignments` | Mis vinculaciones con organizaciones | BAJO | 3 | PRACTITIONER |
+| 21 | POST | `/practitioners/me/role-assignments/{roleId}/accept` | Aceptar una invitación de un centro | MEDIO | 2 | PRACTITIONER |
+| 22 | POST | `/practitioners/me/role-assignments/{roleId}/decline` | Declinar una invitación de un centro | MEDIO | 2 | PRACTITIONER |
+| 23 | POST | `/practitioners/me/sites` | Registrar un consultorio propio | MEDIO | 8 | PRACTITIONER, CLINICIAN |
+| 24 | DELETE | `/practitioners/me/sites/{siteId}` | Retirar un consultorio propio | MEDIO | 4 | PRACTITIONER, CLINICIAN |
+| 25 | PATCH | `/practitioners/me/sites/{siteId}` | Corregir un consultorio propio | MEDIO | 9 | PRACTITIONER, CLINICIAN |
+| 26 | PUT | `/practitioners/me/sites/{siteId}/bank-qr` | Fijar o quitar el QR bancario de una sede | BAJO | 6 | PRACTITIONER, CLINICIAN |
+| 27 | PUT | `/practitioners/me/sites/{siteId}/contact-phone` | Guardar o quitar mi teléfono en una sede | MEDIO | 7 | PRACTITIONER, CLINICIAN |
+| 28 | POST | `/role-assignments/{roleId}/approve` | Aprobar una vinculación pendiente | BAJO | 3 | sesión (sin roles) |
+| 29 | POST | `/role-assignments/{roleId}/end` | Finalizar una vinculación | BAJO | 3 | SECURITY_ADMIN |
+| 30 | POST | `/role-assignments/{roleId}/reject` | Rechazar una vinculación pendiente | BAJO | 3 | sesión (sin roles) |
+| 31 | POST | `/role-assignments/{roleId}/support-assignments` | Adjuntar personal de apoyo a un rol de profesional | MEDIO | 3 | SECURITY_ADMIN |
+| 32 | POST | `/role-assignments/{roleId}/suspend` | Suspender una vinculación activa | BAJO | 3 | SECURITY_ADMIN |
+| 33 | GET | `/sites/{siteId}/care-spaces` | Listar los espacios de atención de la sede | BAJO | 3 | SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN |
+| 34 | POST | `/sites/{siteId}/care-spaces` | Crear un espacio de atención bajo una unidad/sitio | MEDIO | 3 | SECURITY_ADMIN |
+| 35 | POST | `/sites/{siteId}/clinical-units` | Crear una unidad clínica jerárquica | MEDIO | 2 | SECURITY_ADMIN |
+| 36 | POST | `/tenants/{tenantId}/practices` | Crear la práctica y la primera sede de una organización | ALTO | 7 | sesión (sin roles) |
 
 ---
 
@@ -50,38 +56,38 @@
 - **Origen:** CONTRATO
 - **Nombre:** Verificar o caducar una acreditación (transición de estado)
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AccreditationsController.verify` — `src/modules/practice/controllers/accreditations.controller.ts:30`
+- **Implementación:** `AccreditationsController.verify` — `src/modules/practice/controllers/accreditations.controller.ts:35`
 
 ### Qué es y para qué sirve (negocio)
 
 Verificar o caducar una acreditación (transición de estado). Caso de uso UC-14-03: Verificar (→VERIFIED) o caducar (→EXPIRED). Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:102`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:85`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /accreditations/{id}/verify` la atiende `AccreditationsController.verify` (src/modules/practice/controllers/accreditations.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyAccreditationDto` (1 campo, 0 obligatorios). Delega en `PracticeAccreditationsService.verify`. Actualiza practice.practice_accreditations. Lee practice.practice_accreditations.
+`POST /accreditations/{id}/verify` la atiende `AccreditationsController.verify` (src/modules/practice/controllers/accreditations.controller.ts:35). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyAccreditationDto` (1 campo, 0 obligatorios). Delega en `PracticeAccreditationsService.verify`. Lee practice.practice_accreditations, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/accreditations.controller.ts:30` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/practice/controllers/accreditations.controller.ts:30` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/accreditations.controller.ts:35` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/practice/controllers/accreditations.controller.ts:35` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `practice.practice_accreditations` | ESCRIBE | ACTUALIZA | POR_TIPO | AccreditationsController.verify → PracticeAccreditationsService.verify | `src/modules/practice/services/practice-accreditations.service.ts:126` |
 | `practice.practice_accreditations` | LEE | LEE | DIRECTA | AccreditationsController.verify → PracticeAccreditationsService.verify → PracticeAccreditationsRepository.findById | `src/modules/practice/repositories/practice-accreditations.repository.ts:68` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccreditationsController.verify → PracticeAccreditationsService.verify → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Parámetros
 
@@ -115,10 +121,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:56` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:60` |
-| `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:64` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:68` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:57` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:61` |
+| `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:65` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:69` |
 
 ### Respuestas posibles
 
@@ -128,7 +134,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Acreditación no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acreditación no está pendiente de verificación |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -151,37 +156,37 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `InventoryItemsController.recordMovement` — `src/modules/practice/controllers/inventory-items.controller.ts:28`
+- **Implementación:** `InventoryItemsController.recordMovement` — `src/modules/practice/controllers/inventory-items.controller.ts:33`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar un movimiento de inventario (ajuste de stock). Caso de uso UC-14-11: Movimiento de stock (IN/OUT/ADJUST). Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:110`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:93`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /inventory-items/{itemId}/movements` la atiende `InventoryItemsController.recordMovement` (src/modules/practice/controllers/inventory-items.controller.ts:28). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateMovementDto` (5 campos, 2 obligatorios). Delega en `PracticeInventoryService.recordMovement`. Crea filas en practice.inventory_movements. Actualiza practice.inventory_items. Lee practice.inventory_items.
+`POST /inventory-items/{itemId}/movements` la atiende `InventoryItemsController.recordMovement` (src/modules/practice/controllers/inventory-items.controller.ts:33). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateMovementDto` (5 campos, 2 obligatorios). Delega en `PracticeInventoryService.recordMovement`. Crea filas en practice.inventory_movements. Lee practice.inventory_items, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/inventory-items.controller.ts:28` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: itemId | `src/modules/practice/controllers/inventory-items.controller.ts:28` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/inventory-items.controller.ts:33` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: itemId | `src/modules/practice/controllers/inventory-items.controller.ts:33` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `practice.inventory_items` | ESCRIBE | ACTUALIZA | POR_TIPO | InventoryItemsController.recordMovement → PracticeInventoryService.recordMovement | `src/modules/practice/services/practice-inventory.service.ts:142` |
 | `practice.inventory_items` | LEE | LEE | DIRECTA | InventoryItemsController.recordMovement → PracticeInventoryService.recordMovement → InventoryItemsRepository.findById | `src/modules/practice/repositories/inventory-items.repository.ts:61` |
 | `practice.inventory_movements` | ESCRIBE | CREA | DIRECTA | InventoryItemsController.recordMovement → PracticeInventoryService.recordMovement → InventoryMovementsRepository.create | `src/modules/practice/repositories/inventory-movements.repository.ts:55` |
+| `practice.practices` | LEE | LEE | DIRECTA | InventoryItemsController.recordMovement → PracticeInventoryService.recordMovement → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Parámetros
 
@@ -226,10 +231,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:272` |
-| `inventoryItemId` | `string` | Sí | — | — | Identificador asociado a inventory item. | `src/modules/practice/dto/responses.dto.ts:276` |
-| `quantityOnHand` | `string` | Sí | — | — | Valor de quantity on hand mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:280` |
-| `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:284` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:273` |
+| `inventoryItemId` | `string` | Sí | — | — | Identificador asociado a inventory item. | `src/modules/practice/dto/responses.dto.ts:277` |
+| `quantityOnHand` | `string` | Sí | — | — | Valor de quantity on hand mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:281` |
+| `recordedAt` | `string` | Sí | formato date-time | — | Valor de recorded at mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:285` |
 
 ### Respuestas posibles
 
@@ -239,7 +244,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Insumo de inventario no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El insumo no está activo; PreconditionFailedException: Stock insuficiente para la salida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -262,7 +266,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.listPractices` — `src/modules/practice/controllers/practices.controller.ts:98`
+- **Implementación:** `PracticesController.listPractices` — `src/modules/practice/controllers/practices.controller.ts:108`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -272,22 +276,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /practices` la atiende `PracticesController.listPractices` (src/modules/practice/controllers/practices.controller.ts:98). Exige sesión con alguno de los roles SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER. Delega en `PracticeSitesService.listPractices`. Lee practice.practices.
+`GET /practices` la atiende `PracticesController.listPractices` (src/modules/practice/controllers/practices.controller.ts:108). Exige sesión; el controlador no declara roles. Delega en `PracticeSitesService.listPractices`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER | `src/modules/practice/controllers/practices.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/practice/controllers/practices.controller.ts:108` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listPractices → PracticeSitesService.listPractices → PracticeSitesService.assertCanReadPractices → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
 | `practice.practices` | LEE | LEE | DIRECTA | PracticesController.listPractices → PracticeSitesService.listPractices → PracticesRepository.findByTenant | `src/modules/practice/repositories/practices.repository.ts:69` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PracticesController.listPractices → PracticeSitesService.listPractices → PracticeAccessService.allowedPracticeIds → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Cuerpo
 
@@ -297,10 +303,10 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador de la práctica. | `src/modules/practice/dto/responses.dto.ts:303` |
-| `code` | `string` | Sí | — | — | Código único dentro del tenant. | `src/modules/practice/dto/responses.dto.ts:305` |
-| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:307` |
-| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:309` |
+| `id` | `string` | Sí | formato uuid | — | Identificador de la práctica. | `src/modules/practice/dto/responses.dto.ts:304` |
+| `code` | `string` | Sí | — | — | Código único dentro del tenant. | `src/modules/practice/dto/responses.dto.ts:306` |
+| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:308` |
+| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:310` |
 
 ### Respuestas posibles
 
@@ -315,7 +321,9 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/practice-ownership.int-spec.ts:46` |
 
 ### Flujos
 
@@ -330,7 +338,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.createPractice` — `src/modules/practice/controllers/practices.controller.ts:211`
+- **Implementación:** `PracticesController.createPractice` — `src/modules/practice/controllers/practices.controller.ts:213`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -340,25 +348,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /practices` la atiende `PracticesController.createPractice` (src/modules/practice/controllers/practices.controller.ts:211). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePracticeDto` (7 campos, 3 obligatorios). Delega en `PracticeSitesService.createPractice`. Crea filas en billing.service_catalog, practice.practices.
+`POST /practices` la atiende `PracticesController.createPractice` (src/modules/practice/controllers/practices.controller.ts:213). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePracticeDto` (7 campos, 3 obligatorios). Delega en `PracticeSitesService.createPractice`. Crea filas en billing.service_catalog, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:211` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:213` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | PracticesController.createPractice → PracticeSitesService.createPractice → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:154` |
-| `practice.practices` | ESCRIBE | CREA | DIRECTA | PracticesController.createPractice → PracticeSitesService.createPractice → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:130` |
+| `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | PracticesController.createPractice → PracticeSitesService.createPractice → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:169` |
+| `practice.practices` | ESCRIBE | CREA | DIRECTA | PracticesController.createPractice → PracticeSitesService.createPractice → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:150` |
 
 ### Cuerpo — DTO `CreatePracticeDto` · `application/json`
 
@@ -402,10 +410,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:8` |
-| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:12` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:16` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:20` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:9` |
+| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:13` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:17` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:21` |
 
 ### Respuestas posibles
 
@@ -423,10 +431,12 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 | Tipo | Archivo |
 |---|---|
+| INTEGRACION | `test/integration/accounting-practitioner-simple-http.int-spec.ts:91` |
 | INTEGRACION | `test/integration/admin-listados.int-spec.ts:40` |
 | INTEGRACION | `test/integration/fx14-cockpit-contable.int-spec.ts:59` |
 | INTEGRACION | `test/integration/fx2-medico-multisede-publica-agenda.int-spec.ts:125` |
 | INTEGRACION | `test/integration/hardening/mch-018.int-spec.ts:70` |
+| INTEGRACION | `test/integration/practice-ownership.int-spec.ts:79` |
 
 ### Flujos
 
@@ -441,29 +451,29 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.createAccreditation` — `src/modules/practice/controllers/practices.controller.ts:249`
+- **Implementación:** `PracticesController.createAccreditation` — `src/modules/practice/controllers/practices.controller.ts:266`
 
 ### Qué es y para qué sirve (negocio)
 
 Registrar una acreditación con evidencia. Caso de uso UC-14-02: Registrar acreditación (PENDING). Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:101`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:84`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /practices/{practiceId}/accreditations` la atiende `PracticesController.createAccreditation` (src/modules/practice/controllers/practices.controller.ts:249). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeCreateAccreditationDto` (8 campos, 0 obligatorios). Delega en `PracticeAccreditationsService.create`. Crea filas en practice.practice_accreditations. Lee practice.practice_sites, practice.practices.
+`POST /practices/{practiceId}/accreditations` la atiende `PracticesController.createAccreditation` (src/modules/practice/controllers/practices.controller.ts:266). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeCreateAccreditationDto` (8 campos, 0 obligatorios). Delega en `PracticeAccreditationsService.create`. Crea filas en practice.practice_accreditations. Lee practice.practice_sites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:249` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:249` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:266` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:266` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -471,7 +481,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 |---|---|---|---|---|---|
 | `practice.practice_accreditations` | ESCRIBE | CREA | DIRECTA | PracticesController.createAccreditation → PracticeAccreditationsService.create → PracticeAccreditationsRepository.create | `src/modules/practice/repositories/practice-accreditations.repository.ts:82` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PracticesController.createAccreditation → PracticeAccreditationsService.create → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
-| `practice.practices` | LEE | LEE | DIRECTA | PracticesController.createAccreditation → PracticeAccreditationsService.create → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Parámetros
 
@@ -519,10 +528,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:56` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:60` |
-| `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:64` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:68` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:57` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:61` |
+| `verificationStatus` | `string` | Sí | — | — | Valor de verification status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:65` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:69` |
 
 ### Respuestas posibles
 
@@ -532,7 +541,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sitio no pertenece a la práctica |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -548,45 +556,141 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 6. POST /practices/{practiceId}/healthcare-services
+## 6. GET /practices/{practiceId}/healthcare-services
 
 - **Origen:** CONTRATO
-- **Nombre:** Publicar un servicio de salud
+- **Nombre:** Listar los procedimientos que ofrecen las sedes de la práctica
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.publishHealthcareService` — `src/modules/practice/controllers/practices.controller.ts:262`
+- **Implementación:** `PracticesController.listHealthcareServices` — `src/modules/practice/controllers/practices.controller.ts:312`
 
 ### Qué es y para qué sirve (negocio)
 
-Publicar un servicio de salud. Caso de uso UC-14-06: Publicar servicio de salud. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
+Listar los procedimientos que ofrecen las sedes de la práctica. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:105`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /practices/{practiceId}/healthcare-services` la atiende `PracticesController.publishHealthcareService` (src/modules/practice/controllers/practices.controller.ts:262). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateHealthcareServiceDto` (7 campos, 0 obligatorios). Delega en `ClinicalStructureService.publishHealthcareService`. Crea filas en practice.healthcare_services. Lee practice.clinical_units, practice.practice_sites, practice.practices.
+`GET /practices/{practiceId}/healthcare-services` la atiende `PracticesController.listHealthcareServices` (src/modules/practice/controllers/practices.controller.ts:312). Exige sesión; el controlador no declara roles. Delega en `HealthcareServiceOffersService.listOffers`. Lee billing.service_catalog, directory.tenant_memberships, practice.healthcare_services, practice.practices, terminology.catalog_concepts, terminology.concept_properties.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:262` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:262` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/practice/controllers/practices.controller.ts:312` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:312` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | DIRECTA | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → HealthcareServiceOffersService.toOffers → ServiceCatalogRepository.findByIds | `src/modules/billing/repositories/service-catalog.repository.ts:104` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → HealthcareServicesRepository.listByPractice | `src/modules/practice/repositories/healthcare-services.repository.ts:111` |
+| `practice.practices` | LEE | LEE | DIRECTA | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → PracticeAdministrationService.assertCanAdministerPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → HealthcareServiceOffersService.toOffers | `src/modules/practice/services/healthcare-service-offers.service.ts:158` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → HealthcareServiceOffersService.toOffers → ProcedureReferenceReader.referencesFor | `src/modules/billing/services/procedure-reference.reader.ts:78` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `practiceId` | path | Sí | `string` | — |
+| `practiceSiteId` | query | No | `string` | Solo la oferta de esa sede |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<HealthcareServiceOffersResponseDto>` · DTO `HealthcareServiceOffersResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<HealthcareServiceOfferDto>` | Sí | — | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:68` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:11` |
+| `items[].practiceSiteId` | `string` | Sí | formato uuid | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:15` |
+| `items[].serviceConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:19` |
+| `items[].serviceDisplay` | `string` | Sí | — | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:23` |
+| `items[].serviceCatalogId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:28` |
+| `items[].price` | `number` | Sí | admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:32` |
+| `items[].currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:37` |
+| `items[].referencePrice` | `number` | Sí | admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:41` |
+| `items[].referenceUnit` | `string` | Sí | valores: UMA, USD; admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:46` |
+| `items[].overMargin` | `boolean` | Sí | admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:51` |
+| `items[].visibleInSearch` | `boolean` | Sí | — | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:55` |
+| `items[].active` | `boolean` | Sí | — | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:59` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/practice.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:453` |
+
+### Flujos
+
+- Módulo Practice (14) — etapa `ctrl:PracticesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. POST /practices/{practiceId}/healthcare-services
+
+- **Origen:** CONTRATO
+- **Nombre:** Publicar un procedimiento del nomenclador en una sede
+- **Bloque:** Práctica y Agenda
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PracticesController.publishHealthcareService` — `src/modules/practice/controllers/practices.controller.ts:287`
+
+### Qué es y para qué sirve (negocio)
+
+Publicar un procedimiento del nomenclador en una sede. Caso de uso UC-14-06: Publicar servicio de salud. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:88`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+
+### Cómo se atiende (sistema)
+
+`POST /practices/{practiceId}/healthcare-services` la atiende `PracticesController.publishHealthcareService` (src/modules/practice/controllers/practices.controller.ts:287). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateHealthcareServiceDto` (8 campos, 3 obligatorios). Delega en `ClinicalStructureService.publishHealthcareService`. Crea filas en practice.healthcare_services. Lee directory.tenant_memberships, practice.clinical_units, practice.healthcare_services, practice.practice_sites, practice.practices, terminology.value_set_members.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/practice/controllers/practices.controller.ts:287` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:287` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:57` |
-| `practice.healthcare_services` | ESCRIBE | CREA | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → HealthcareServicesRepository.create | `src/modules/practice/repositories/healthcare-services.repository.ts:89` |
+| `practice.healthcare_services` | ESCRIBE | CREA | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → HealthcareServicesRepository.create | `src/modules/practice/repositories/healthcare-services.repository.ts:131` |
+| `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → HealthcareServicesRepository.findBySiteAndConcept | `src/modules/practice/repositories/healthcare-services.repository.ts:95` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
-| `practice.practices` | LEE | LEE | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practices` | LEE | LEE | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → PracticeAdministrationService.assertCanAdministerPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `terminology.value_set_members` | LEE | LEE | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → ProcedureReferenceReader.isProcedure | `src/modules/billing/services/procedure-reference.reader.ts:47` |
 
 ### Parámetros
 
@@ -598,18 +702,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sitio donde se presta | `src/modules/practice/dto/create-healthcare-service.dto.ts:12` |
-| `clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Unidad clínica que lo presta | `src/modules/practice/dto/create-healthcare-service.dto.ts:23` |
-| `serviceConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto de servicio | `src/modules/practice/dto/create-healthcare-service.dto.ts:31` |
-| `specialtyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto de especialidad | `src/modules/practice/dto/create-healthcare-service.dto.ts:42` |
-| `referralRequired` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿Requiere derivación? | `src/modules/practice/dto/create-healthcare-service.dto.ts:50` |
-| `appointmentRequired` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿Requiere cita? | `src/modules/practice/dto/create-healthcare-service.dto.ts:58` |
-| `telehealthAvailable` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿Disponible por telesalud? | `src/modules/practice/dto/create-healthcare-service.dto.ts:66` |
+| `practiceSiteId` | `string` | Sí | formato uuid | `@IsUUID()` | Sitio donde se presta | `src/modules/practice/dto/create-healthcare-service.dto.ts:11` |
+| `clinicalUnitId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Unidad clínica que lo presta | `src/modules/practice/dto/create-healthcare-service.dto.ts:22` |
+| `serviceConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Procedimiento del nomenclador (`VS_BO_MEDICAL_PROCEDURE`) que se ofrece | `src/modules/practice/dto/create-healthcare-service.dto.ts:33` |
+| `serviceCatalogId` | `string` | Sí | formato uuid | `@IsUUID()` | Ítem del catálogo de precios de la práctica; su concepto debe ser el mismo `serviceConceptId` | `src/modules/practice/dto/create-healthcare-service.dto.ts:44` |
+| `specialtyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto de especialidad | `src/modules/practice/dto/create-healthcare-service.dto.ts:55` |
+| `referralRequired` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿Requiere derivación? | `src/modules/practice/dto/create-healthcare-service.dto.ts:63` |
+| `appointmentRequired` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿Requiere cita? | `src/modules/practice/dto/create-healthcare-service.dto.ts:71` |
+| `telehealthAvailable` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿Disponible por telesalud? | `src/modules/practice/dto/create-healthcare-service.dto.ts:79` |
 
 **Payload mínimo** (sólo los obligatorios):
 
 ```json
-{}
+{
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001"
+}
 ```
 
 <details><summary>Payload completo de ejemplo</summary>
@@ -619,6 +728,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
   "practiceSiteId": "00000000-0000-4000-8000-000000000001",
   "clinicalUnitId": "00000000-0000-4000-8000-000000000001",
   "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
   "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
   "referralRequired": true,
   "appointmentRequired": true,
@@ -632,10 +742,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:128` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:132` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:136` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:140` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:129` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:133` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:137` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:141` |
 
 ### Respuestas posibles
 
@@ -644,16 +754,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica; PreconditionFailedException: La unidad clínica no existe |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica; PreconditionFailedException: La unidad clínica no existe; PreconditionFailedException: El concepto no es un procedimiento del nomenclador |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:297` |
 
 ### Flujos
 
@@ -661,36 +772,151 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 7. POST /practices/{practiceId}/inventory-items
+## 8. PATCH /practices/{practiceId}/healthcare-services/{id}
 
 - **Origen:** CONTRATO
-- **Nombre:** Dar de alta un insumo de inventario de práctica
+- **Nombre:** Actualizar el precio o el estado de un procedimiento de la sede
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.createInventoryItem` — `src/modules/practice/controllers/practices.controller.ts:329`
+- **Implementación:** `PracticesController.updateHealthcareService` — `src/modules/practice/controllers/practices.controller.ts:332`
 
 ### Qué es y para qué sirve (negocio)
 
-Dar de alta un insumo de inventario de práctica. Caso de uso UC-14-10: Alta de insumo (stock 0). Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
+Actualizar el precio o el estado de un procedimiento de la sede. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:109`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /practices/{practiceId}/inventory-items` la atiende `PracticesController.createInventoryItem` (src/modules/practice/controllers/practices.controller.ts:329). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateInventoryItemDto` (6 campos, 1 obligatorio). Delega en `PracticeInventoryService.createItem`. Crea filas en practice.inventory_items.
+`PATCH /practices/{practiceId}/healthcare-services/{id}` la atiende `PracticesController.updateHealthcareService` (src/modules/practice/controllers/practices.controller.ts:332). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateHealthcareServiceDto` (2 campos, 0 obligatorios). Delega en `HealthcareServiceOffersService.updateOffer`. Actualiza practice.healthcare_services. Lee billing.service_catalog, directory.tenant_memberships, practice.healthcare_services, practice.practices, terminology.catalog_concepts, terminology.concept_properties.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:329` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:329` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/practice/controllers/practices.controller.ts:332` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId, id | `src/modules/practice/controllers/practices.controller.ts:332` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `billing.service_catalog` | LEE | LEE | DIRECTA | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → HealthcareServiceOffersService.toOffers → ServiceCatalogRepository.findByIds | `src/modules/billing/repositories/service-catalog.repository.ts:104` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `practice.healthcare_services` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer | `src/modules/practice/services/healthcare-service-offers.service.ts:120` |
+| `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → HealthcareServicesRepository.findById | `src/modules/practice/repositories/healthcare-services.repository.ts:65` |
+| `practice.practices` | LEE | LEE | DIRECTA | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → PracticeAdministrationService.assertCanAdministerPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → HealthcareServiceOffersService.toOffers | `src/modules/practice/services/healthcare-service-offers.service.ts:158` |
+| `terminology.concept_properties` | LEE | LEE | POR_SQL | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → HealthcareServiceOffersService.toOffers → ProcedureReferenceReader.referencesFor | `src/modules/billing/services/procedure-reference.reader.ts:78` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `practiceId` | path | Sí | `string` | — |
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `UpdateHealthcareServiceDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `serviceCatalogId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Nuevo ítem del catálogo de precios de la práctica; su concepto debe coincidir con el del servicio | `src/modules/practice/dto/update-healthcare-service.dto.ts:16` |
+| `active` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | ¿El procedimiento está activo? | `src/modules/practice/dto/update-healthcare-service.dto.ts:24` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "serviceCatalogId": "00000000-0000-4000-8000-000000000001",
+  "active": true
+}
+```
+
+</details>
+
+### Respuesta — `Promise<HealthcareServiceOfferDto>` · DTO `HealthcareServiceOfferDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:11` |
+| `practiceSiteId` | `string` | Sí | formato uuid | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:15` |
+| `serviceConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:19` |
+| `serviceDisplay` | `string` | Sí | — | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:23` |
+| `serviceCatalogId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:28` |
+| `price` | `number` | Sí | admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:32` |
+| `currencyConceptId` | `string` | Sí | formato uuid; admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:37` |
+| `referencePrice` | `number` | Sí | admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:41` |
+| `referenceUnit` | `string` | Sí | valores: UMA, USD; admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:46` |
+| `overMargin` | `boolean` | Sí | admite null | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:51` |
+| `visibleInSearch` | `boolean` | Sí | — | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:55` |
+| `active` | `boolean` | Sí | — | — | — | `src/modules/practice/dto/healthcare-service-offer.dto.ts:59` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/practice.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:457` |
+
+### Flujos
+
+- Módulo Practice (14) — etapa `ctrl:PracticesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 9. POST /practices/{practiceId}/inventory-items
+
+- **Origen:** CONTRATO
+- **Nombre:** Dar de alta un insumo de inventario de práctica
+- **Bloque:** Práctica y Agenda
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PracticesController.createInventoryItem` — `src/modules/practice/controllers/practices.controller.ts:418`
+
+### Qué es y para qué sirve (negocio)
+
+Dar de alta un insumo de inventario de práctica. Caso de uso UC-14-10: Alta de insumo (stock 0). Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:92`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+
+### Cómo se atiende (sistema)
+
+`POST /practices/{practiceId}/inventory-items` la atiende `PracticesController.createInventoryItem` (src/modules/practice/controllers/practices.controller.ts:418). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateInventoryItemDto` (6 campos, 1 obligatorio). Delega en `PracticeInventoryService.createItem`. Crea filas en practice.inventory_items.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:418` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:418` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -742,12 +968,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:244` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:248` |
-| `name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:252` |
-| `quantityOnHand` | `string` | Sí | — | — | Valor de quantity on hand mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:256` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:260` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:264` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:245` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:249` |
+| `name` | `string` | Sí | — | — | Valor de name mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:253` |
+| `quantityOnHand` | `string` | Sí | — | — | Valor de quantity on hand mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:257` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:261` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:265` |
 
 ### Respuestas posibles
 
@@ -771,14 +997,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 8. GET /practices/{practiceId}/organization
+## 10. GET /practices/{practiceId}/organization
 
 - **Origen:** CONTRATO
 - **Nombre:** Consola de organización médica: estructura, plantilla y legajo
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.getOrganizationConsole` — `src/modules/practice/controllers/practices.controller.ts:132`
+- **Implementación:** `PracticesController.getOrganizationConsole` — `src/modules/practice/controllers/practices.controller.ts:133`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -788,17 +1014,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /practices/{practiceId}/organization` la atiende `PracticesController.getOrganizationConsole` (src/modules/practice/controllers/practices.controller.ts:132). Exige sesión con alguno de los roles SECURITY_ADMIN, PERIOP_ADMIN, SURGERY_SCHEDULER, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER. Delega en `PracticeOrganizationReadService.getConsole`. Lee practice.care_spaces, practice.clinical_units, practice.healthcare_services, practice.inventory_items, practice.practice_accreditations, practice.practice_sites, practice.practices, practice.practitioner_role_assignments y 1 más.
+`GET /practices/{practiceId}/organization` la atiende `PracticesController.getOrganizationConsole` (src/modules/practice/controllers/practices.controller.ts:133). Exige sesión con alguno de los roles SECURITY_ADMIN, PERIOP_ADMIN, SURGERY_SCHEDULER, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER. Delega en `PracticeOrganizationReadService.getConsole`. Lee practice.care_spaces, practice.clinical_units, practice.healthcare_services, practice.inventory_items, practice.practice_accreditations, practice.practice_sites, practice.practices, practice.practitioner_role_assignments y 1 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, PERIOP_ADMIN, SURGERY_SCHEDULER, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER | `src/modules/practice/controllers/practices.controller.ts:132` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:132` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN, PERIOP_ADMIN, SURGERY_SCHEDULER, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER | `src/modules/practice/controllers/practices.controller.ts:133` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:133` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -977,7 +1203,9 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/practice-ownership.int-spec.ts:99` |
 
 ### Flujos
 
@@ -985,14 +1213,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 9. GET /practices/{practiceId}/role-assignments
+## 11. GET /practices/{practiceId}/role-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las vinculaciones profesional-organización de la práctica
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.listRoleAssignments` — `src/modules/practice/controllers/practices.controller.ts:178`
+- **Implementación:** `PracticesController.listRoleAssignments` — `src/modules/practice/controllers/practices.controller.ts:180`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1002,23 +1230,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /practices/{practiceId}/role-assignments` la atiende `PracticesController.listRoleAssignments` (src/modules/practice/controllers/practices.controller.ts:178). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `PracticeWorkforceService.listPracticeAssignments`. Lee practice.practices, practice.practitioner_role_assignments.
+`GET /practices/{practiceId}/role-assignments` la atiende `PracticesController.listRoleAssignments` (src/modules/practice/controllers/practices.controller.ts:180). Exige sesión; el controlador no declara roles. Delega en `PracticeWorkforceService.listPracticeAssignments`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:178` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/practice/controllers/practices.controller.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:180` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `practice.practices` | LEE | LEE | DIRECTA | PracticesController.listRoleAssignments → PracticeWorkforceService.listPracticeAssignments → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listRoleAssignments → PracticeWorkforceService.listPracticeAssignments → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `practice.practices` | LEE | LEE | DIRECTA | PracticesController.listRoleAssignments → PracticeWorkforceService.listPracticeAssignments → PracticeAdministrationService.assertCanAdministerPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PracticesController.listRoleAssignments → PracticeWorkforceService.listPracticeAssignments → PractitionerRoleAssignmentsRepository.findByPracticePage | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:242` |
 
 ### Parámetros
@@ -1038,15 +1267,12 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<RoleAssignmentResponseDto>` | Sí | — | — | Vinculaciones de esta página, ordenadas por `id`. | `src/modules/practice/dto/responses.dto.ts:200` |
-| `items[].id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:169` |
-| `items[].practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:173` |
-| `items[].practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:177` |
-| `items[].status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:181` |
-| `items[].createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:185` |
-| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página. | `src/modules/practice/dto/responses.dto.ts:205` |
-| `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/practice/dto/responses.dto.ts:210` |
-| `nextCursor` | `string` | Sí | admite null | — | Cursor opaco de continuación, o `null` si ésta es la última página. | `src/modules/practice/dto/responses.dto.ts:216` |
+| `items` | `array<PracticeRoleAssignmentItemDto>` | Sí | — | — | Vinculaciones de esta página, ordenadas por `id`. | `src/modules/practice/dto/responses.dto.ts:201` |
+| `items[].status` | `string` | Sí | — | — | Estado como uuid de concepto, igual que antes de las filas por procedimiento. | `src/modules/practice/dto/role-assignment-row.dto.ts:92` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | Fecha de creación de la vinculación. | `src/modules/practice/dto/role-assignment-row.dto.ts:94` |
+| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página. | `src/modules/practice/dto/responses.dto.ts:206` |
+| `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/practice/dto/responses.dto.ts:211` |
+| `nextCursor` | `string` | Sí | admite null | — | Cursor opaco de continuación, o `null` si ésta es la última página. | `src/modules/practice/dto/responses.dto.ts:217` |
 
 ### Respuestas posibles
 
@@ -1055,8 +1281,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/practice.md).
@@ -1066,6 +1291,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 | Tipo | Archivo |
 |---|---|
 | INTEGRACION | `test/integration/admin-listados.int-spec.ts:129` |
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:616` |
 
 ### Flujos
 
@@ -1073,44 +1299,45 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 10. POST /practices/{practiceId}/role-assignments
+## 12. POST /practices/{practiceId}/role-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Asignar un rol de profesional a sitio/unidad/servicio
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.assignRole` — `src/modules/practice/controllers/practices.controller.ts:293`
+- **Implementación:** `PracticesController.assignRole` — `src/modules/practice/controllers/practices.controller.ts:372`
 
 ### Qué es y para qué sirve (negocio)
 
 Asignar un rol de profesional a sitio/unidad/servicio. Caso de uso UC-14-08: Asignar rol de profesional. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:107`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:90`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /practices/{practiceId}/role-assignments` la atiende `PracticesController.assignRole` (src/modules/practice/controllers/practices.controller.ts:293). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeCreateRoleAssignmentDto` (11 campos, 1 obligatorio). Delega en `PracticeWorkforceService.assignRole`. Crea filas en practice.practitioner_role_assignments. Lee practice.practice_sites, practice.practices.
+`POST /practices/{practiceId}/role-assignments` la atiende `PracticesController.assignRole` (src/modules/practice/controllers/practices.controller.ts:372). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeCreateRoleAssignmentDto` (11 campos, 1 obligatorio). Delega en `PracticeWorkforceService.assignRole`. Crea filas en practice.practitioner_role_assignments. Lee practice.clinical_units, practice.healthcare_services, practice.practice_sites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:293` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:293` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:372` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:372` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `practice.clinical_units` | LEE | LEE | DIRECTA | PracticesController.assignRole → PracticeWorkforceService.assignRole → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:57` |
+| `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticesController.assignRole → PracticeWorkforceService.assignRole → HealthcareServicesRepository.findById | `src/modules/practice/repositories/healthcare-services.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PracticesController.assignRole → PracticeWorkforceService.assignRole → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
-| `practice.practices` | LEE | LEE | DIRECTA | PracticesController.assignRole → PracticeWorkforceService.assignRole → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
-| `practice.practitioner_role_assignments` | ESCRIBE | CREA | DIRECTA | PracticesController.assignRole → PracticeWorkforceService.assignRole → PractitionerRoleAssignmentsRepository.create | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:259` |
+| `practice.practitioner_role_assignments` | ESCRIBE | CREA | DIRECTA | PracticesController.assignRole → PracticeWorkforceService.assignRole → PractitionerRoleAssignmentsRepository.create | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:311` |
 
 ### Parámetros
 
@@ -1166,11 +1393,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:169` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:173` |
-| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:177` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:181` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:185` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:170` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:174` |
+| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:178` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:182` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:186` |
 
 ### Respuestas posibles
 
@@ -1180,8 +1407,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica; PreconditionFailedException: La unidad no pertenece a la práctica; PreconditionFailedException: El servicio no pertenece a la práctica |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/practice.md).
@@ -1196,14 +1422,140 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 11. POST /practices/{practiceId}/role-assignments/self-request
+## 13. POST /practices/{practiceId}/role-assignments/invitations
+
+- **Origen:** CONTRATO
+- **Nombre:** Invitar a un profesional a procedimientos de una sede
+- **Bloque:** Práctica y Agenda
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PracticeInvitationsController.invite` — `src/modules/practice/controllers/practice-invitations.controller.ts:39`
+
+### Qué es y para qué sirve (negocio)
+
+Invitar a un profesional a procedimientos de una sede. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+
+### Cómo se atiende (sistema)
+
+`POST /practices/{practiceId}/role-assignments/invitations` la atiende `PracticeInvitationsController.invite` (src/modules/practice/controllers/practice-invitations.controller.ts:39). Exige sesión; el controlador no declara roles. Valida el cuerpo como `InvitePractitionerDto` (3 campos, 3 obligatorios). Delega en `PracticeAffiliationInvitationsService.invite`. Crea filas en practice.practitioner_role_assignments. Lee directory.tenant_memberships, practice.healthcare_services, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/practice/controllers/practice-invitations.controller.ts:39` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practice-invitations.controller.ts:39` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → HealthcareServicesRepository.findById | `src/modules/practice/repositories/healthcare-services.repository.ts:65` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
+| `practice.practices` | LEE | LEE | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → PracticeAdministrationService.assertCanAdministerPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | ESCRIBE | CREA | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → PractitionerRoleAssignmentsRepository.create | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:311` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → PractitionerRoleAssignmentsRepository.findOpenForServices | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:292` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `practiceId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `InvitePractitionerDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `practitionerProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/practice/dto/role-assignment-row.dto.ts:67` |
+| `practiceSiteId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/practice/dto/role-assignment-row.dto.ts:72` |
+| `healthcareServiceIds` | `array<string>` | Sí | formato uuid; mínimo 1 elemento(s); máximo 50 elemento(s) | `@IsArray()` `@ArrayMinSize(1)` `@ArrayMaxSize(MAX_INVITED_SERVICES)` `@ArrayUnique()` `@IsUUID('all', { each: true })` | — | `src/modules/practice/dto/role-assignment-row.dto.ts:86` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "healthcareServiceIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "healthcareServiceIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<RoleAssignmentRowsResponseDto>` · DTO `RoleAssignmentRowsResponseDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<RoleAssignmentRowDto>` | Sí | — | — | Filas creadas, en el orden pedido. | `src/modules/practice/dto/role-assignment-row.dto.ts:59` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador de la afiliación. | `src/modules/practice/dto/role-assignment-row.dto.ts:24` |
+| `items[].practitionerProfileId` | `string` | Sí | formato uuid | — | Profesional afiliado. | `src/modules/practice/dto/role-assignment-row.dto.ts:26` |
+| `items[].practitionerName` | `string` | Sí | — | — | Nombre legible del profesional. | `src/modules/practice/dto/role-assignment-row.dto.ts:28` |
+| `items[].practiceId` | `string` | Sí | formato uuid | — | Organización. | `src/modules/practice/dto/role-assignment-row.dto.ts:30` |
+| `items[].practiceSiteId` | `string` | Sí | formato uuid; admite null | — | Sede; `null` en una vinculación antigua que no declara sede. | `src/modules/practice/dto/role-assignment-row.dto.ts:33` |
+| `items[].healthcareServiceId` | `string` | Sí | formato uuid; admite null | — | Servicio ofrecido por la sede; `null` si la vinculación no es por procedimiento. | `src/modules/practice/dto/role-assignment-row.dto.ts:36` |
+| `items[].serviceConceptId` | `string` | Sí | formato uuid; admite null | — | Procedimiento del nomenclador del servicio; `null` sin servicio. | `src/modules/practice/dto/role-assignment-row.dto.ts:39` |
+| `items[].serviceDisplay` | `string` | Sí | admite null | — | Nombre del procedimiento para mostrar; `null` sin servicio. | `src/modules/practice/dto/role-assignment-row.dto.ts:42` |
+| `items[].statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado (uuid). | `src/modules/practice/dto/role-assignment-row.dto.ts:44` |
+| `items[].statusCode` | `string` | Sí | — | — | Código del concepto del estado (`ROLE_ASG_ACTIVE`, …); el front compara por código. | `src/modules/practice/dto/role-assignment-row.dto.ts:46` |
+| `items[].initiatedBy` | `object` | Sí | — | — | Quién abrió la afiliación. Se deriva de la cuenta que creó la fila: si es la del propio profesional, `PRACTITIONER`; si no, `PRACTICE`. | `src/modules/practice/dto/role-assignment-row.dto.ts:52` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 409 | `CONFLICT` | ConflictException: El profesional ya tiene una vinculación en curso con ese procedimiento |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica; PreconditionFailedException: El profesional no existe; PreconditionFailedException: El procedimiento no está publicado y activo en esa sede |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/practice.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:548` |
+
+### Flujos
+
+- Módulo Practice (14) — etapa `ctrl:PracticeInvitationsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 14. POST /practices/{practiceId}/role-assignments/self-request
 
 - **Origen:** CONTRATO
 - **Nombre:** Solicitar la propia vinculación a una organización
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.selfRequestRoleAssignment` — `src/modules/practice/controllers/practices.controller.ts:312`
+- **Implementación:** `PracticesController.selfRequestRoleAssignment` — `src/modules/practice/controllers/practices.controller.ts:396`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1213,27 +1565,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /practices/{practiceId}/role-assignments/self-request` la atiende `PracticesController.selfRequestRoleAssignment` (src/modules/practice/controllers/practices.controller.ts:312). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `PracticeSelfRequestRoleAssignmentDto` (5 campos, 0 obligatorios). Delega en `PracticeWorkforceService.selfRequestAffiliation`. Crea filas en practice.practitioner_role_assignments. Lee practice.practice_sites, practice.practices.
+`POST /practices/{practiceId}/role-assignments/self-request` la atiende `PracticesController.selfRequestRoleAssignment` (src/modules/practice/controllers/practices.controller.ts:396). Exige sesión con alguno de los roles PRACTITIONER. Valida el cuerpo como `PracticeSelfRequestRoleAssignmentDto` (6 campos, 0 obligatorios). Delega en `PracticeWorkforceService.selfRequestAffiliation`. Crea filas en practice.practitioner_role_assignments. Lee practice.healthcare_services, practice.practice_sites, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER | `src/modules/practice/controllers/practices.controller.ts:312` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:312` |
+| ROL | Alguno de: PRACTITIONER | `src/modules/practice/controllers/practices.controller.ts:396` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:396` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticesController.selfRequestRoleAssignment → PracticeWorkforceService.selfRequestAffiliation → PracticeWorkforceService.assertServiceOfferedBySite → HealthcareServicesRepository.findById | `src/modules/practice/repositories/healthcare-services.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PracticesController.selfRequestRoleAssignment → PracticeWorkforceService.selfRequestAffiliation → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
 | `practice.practices` | LEE | LEE | DIRECTA | PracticesController.selfRequestRoleAssignment → PracticeWorkforceService.selfRequestAffiliation → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
-| `practice.practitioner_role_assignments` | ESCRIBE | CREA | DIRECTA | PracticesController.selfRequestRoleAssignment → PracticeWorkforceService.selfRequestAffiliation → PractitionerRoleAssignmentsRepository.create | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:259` |
+| `practice.practitioner_role_assignments` | ESCRIBE | CREA | DIRECTA | PracticesController.selfRequestRoleAssignment → PracticeWorkforceService.selfRequestAffiliation → PractitionerRoleAssignmentsRepository.create | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:311` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PracticesController.selfRequestRoleAssignment → PracticeWorkforceService.selfRequestAffiliation → PractitionerRoleAssignmentsRepository.findOpenForServices | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:292` |
 
 ### Parámetros
 
@@ -1245,11 +1599,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sitio de la práctica | `src/modules/practice/dto/self-request-role-assignment.dto.ts:24` |
-| `roleConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto de cargo/rol | `src/modules/practice/dto/self-request-role-assignment.dto.ts:30` |
-| `specialtyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto de especialidad | `src/modules/practice/dto/self-request-role-assignment.dto.ts:39` |
-| `validFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Vigente desde (ISO date) | `src/modules/practice/dto/self-request-role-assignment.dto.ts:45` |
-| `note` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/practice/dto/self-request-role-assignment.dto.ts:52` |
+| `practiceSiteId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Sitio de la práctica | `src/modules/practice/dto/self-request-role-assignment.dto.ts:25` |
+| `roleConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto de cargo/rol | `src/modules/practice/dto/self-request-role-assignment.dto.ts:31` |
+| `specialtyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concepto de especialidad | `src/modules/practice/dto/self-request-role-assignment.dto.ts:40` |
+| `validFrom` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Vigente desde (ISO date) | `src/modules/practice/dto/self-request-role-assignment.dto.ts:46` |
+| `healthcareServiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Servicio de salud (procedimiento) de la sede | `src/modules/practice/dto/self-request-role-assignment.dto.ts:58` |
+| `note` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/practice/dto/self-request-role-assignment.dto.ts:65` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1265,6 +1620,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "roleConceptId": "00000000-0000-4000-8000-000000000001",
   "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
   "validFrom": "2026-07-31T12:00:00.000Z",
+  "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
   "note": "valor-ejemplo"
 }
 ```
@@ -1275,11 +1631,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:169` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:173` |
-| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:177` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:181` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:185` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:170` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:174` |
+| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:178` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:182` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:186` |
 
 ### Respuestas posibles
 
@@ -1290,14 +1646,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica |
+| 409 | `CONFLICT` | ConflictException: Ya tenés una vinculación en curso con ese procedimiento |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: La práctica no está activa; PreconditionFailedException: El sitio no pertenece a la práctica; PreconditionFailedException: El procedimiento no está publicado y activo en esa sede |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:699` |
 
 ### Flujos
 
@@ -1305,45 +1664,44 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. PUT /practices/{practiceId}/settings/{settingKey}
+## 15. PUT /practices/{practiceId}/settings/{settingKey}
 
 - **Origen:** CONTRATO
 - **Nombre:** Configurar un ajuste de práctica (upsert)
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.upsertSetting` — `src/modules/practice/controllers/practices.controller.ts:279`
+- **Implementación:** `PracticesController.upsertSetting` — `src/modules/practice/controllers/practices.controller.ts:353`
 
 ### Qué es y para qué sirve (negocio)
 
 Configurar un ajuste de práctica (upsert). Caso de uso UC-14-07: Configurar ajuste (upsert). Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:106`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:89`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`PUT /practices/{practiceId}/settings/{settingKey}` la atiende `PracticesController.upsertSetting` (src/modules/practice/controllers/practices.controller.ts:279). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpsertSettingDto` (2 campos, 1 obligatorio). Delega en `PracticeSettingsService.upsert`. Crea filas en practice.practice_settings. Actualiza practice.practice_settings. Lee practice.practice_settings, practice.practices.
+`PUT /practices/{practiceId}/settings/{settingKey}` la atiende `PracticesController.upsertSetting` (src/modules/practice/controllers/practices.controller.ts:353). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpsertSettingDto` (2 campos, 1 obligatorio). Delega en `PracticeSettingsService.upsert`. Crea filas en practice.practice_settings. Actualiza practice.practice_settings. Lee practice.practice_settings.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:279` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:279` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:353` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:353` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `practice.practice_settings` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.upsertSetting → PracticeSettingsService.upsert | `src/modules/practice/services/practice-settings.service.ts:60` |
+| `practice.practice_settings` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.upsertSetting → PracticeSettingsService.upsert | `src/modules/practice/services/practice-settings.service.ts:58` |
 | `practice.practice_settings` | ESCRIBE | CREA | DIRECTA | PracticesController.upsertSetting → PracticeSettingsService.upsert → PracticeSettingsRepository.create | `src/modules/practice/repositories/practice-settings.repository.ts:57` |
 | `practice.practice_settings` | LEE | LEE | DIRECTA | PracticesController.upsertSetting → PracticeSettingsService.upsert → PracticeSettingsRepository.findByPracticeAndKey | `src/modules/practice/repositories/practice-settings.repository.ts:46` |
-| `practice.practices` | LEE | LEE | DIRECTA | PracticesController.upsertSetting → PracticeSettingsService.upsert → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Parámetros
 
@@ -1382,10 +1740,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:148` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:152` |
-| `settingKey` | `string` | Sí | — | — | Valor de setting key mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:156` |
-| `created` | `boolean` | Sí | — | — | true si se creó, false si se actualizó | `src/modules/practice/dto/responses.dto.ts:161` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:149` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:153` |
+| `settingKey` | `string` | Sí | — | — | Valor de setting key mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:157` |
+| `created` | `boolean` | Sí | — | — | true si se creó, false si se actualizó | `src/modules/practice/dto/responses.dto.ts:162` |
 
 ### Respuestas posibles
 
@@ -1395,7 +1753,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/practice.md).
@@ -1410,14 +1767,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. GET /practices/{practiceId}/sites
+## 16. GET /practices/{practiceId}/sites
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las sedes de una práctica
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.listSites` — `src/modules/practice/controllers/practices.controller.ts:155`
+- **Implementación:** `PracticesController.listSites` — `src/modules/practice/controllers/practices.controller.ts:164`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1427,22 +1784,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /practices/{practiceId}/sites` la atiende `PracticesController.listSites` (src/modules/practice/controllers/practices.controller.ts:155). Exige sesión con alguno de los roles SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN. Delega en `PracticeSitesService.listSites`. Lee practice.practice_sites, practice.practices.
+`GET /practices/{practiceId}/sites` la atiende `PracticesController.listSites` (src/modules/practice/controllers/practices.controller.ts:164). Exige sesión; el controlador no declara roles. Delega en `PracticeSitesService.listSites`. Lee directory.tenant_memberships, practice.practice_sites, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN | `src/modules/practice/controllers/practices.controller.ts:155` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:155` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/practice/controllers/practices.controller.ts:164` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:164` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listSites → PracticeSitesService.listSites → PracticeSitesService.assertCanReadPractices → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PracticesController.listSites → PracticeSitesService.listSites → PracticeSitesRepository.findByPractice | `src/modules/practice/repositories/practice-sites.repository.ts:99` |
 | `practice.practices` | LEE | LEE | DIRECTA | PracticesController.listSites → PracticeSitesService.listSites → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
@@ -1460,11 +1818,11 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:315` |
-| `practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:317` |
-| `code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:319` |
-| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:321` |
-| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:323` |
+| `id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:316` |
+| `practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:318` |
+| `code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:320` |
+| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:322` |
+| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:324` |
 
 ### Respuestas posibles
 
@@ -1481,7 +1839,9 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/medical-center-registration.int-spec.ts:171` |
 
 ### Flujos
 
@@ -1489,36 +1849,36 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. POST /practices/{practiceId}/sites
+## 17. POST /practices/{practiceId}/sites
 
 - **Origen:** CONTRATO
 - **Nombre:** Dar de alta un sitio de práctica
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.createSite` — `src/modules/practice/controllers/practices.controller.ts:223`
+- **Implementación:** `PracticesController.createSite` — `src/modules/practice/controllers/practices.controller.ts:230`
 
 ### Qué es y para qué sirve (negocio)
 
 Dar de alta un sitio de práctica. Caso de uso UC-14-01: Alta de sitio (op. status PLANNED). Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:100`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:83`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /practices/{practiceId}/sites` la atiende `PracticesController.createSite` (src/modules/practice/controllers/practices.controller.ts:223). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeCreateSiteDto` (8 campos, 2 obligatorios). Delega en `PracticeSitesService.createSite`. Crea filas en practice.practice_sites. Lee practice.practice_sites, practice.practices.
+`POST /practices/{practiceId}/sites` la atiende `PracticesController.createSite` (src/modules/practice/controllers/practices.controller.ts:230). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeCreateSiteDto` (8 campos, 2 obligatorios). Delega en `PracticeSitesService.createSite`. Crea filas en practice.practice_sites. Lee practice.practice_sites.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:223` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:223` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:230` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId | `src/modules/practice/controllers/practices.controller.ts:230` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1526,7 +1886,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 |---|---|---|---|---|---|
 | `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | PracticesController.createSite → PracticeSitesService.createSite → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:111` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PracticesController.createSite → PracticeSitesService.createSite → PracticeSitesRepository.findByPracticeAndCode | `src/modules/practice/repositories/practice-sites.repository.ts:85` |
-| `practice.practices` | LEE | LEE | DIRECTA | PracticesController.createSite → PracticeSitesService.createSite → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
 ### Parámetros
 
@@ -1577,12 +1936,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:28` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:32` |
-| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:36` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:40` |
-| `operationalStatus` | `string` | Sí | — | — | Valor de operational status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:44` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:48` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:29` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:33` |
+| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:37` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:41` |
+| `operationalStatus` | `string` | Sí | — | — | Valor de operational status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:45` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:49` |
 
 ### Respuestas posibles
 
@@ -1592,7 +1951,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe un sitio con ese código en la práctica |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La práctica no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1611,48 +1969,48 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 15. DELETE /practices/{practiceId}/sites/{siteId}
+## 18. DELETE /practices/{practiceId}/sites/{siteId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Desmantelar un sitio en cascada (soft-delete)
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PracticesController.decommissionSite` — `src/modules/practice/controllers/practices.controller.ts:236`
+- **Implementación:** `PracticesController.decommissionSite` — `src/modules/practice/controllers/practices.controller.ts:248`
 
 ### Qué es y para qué sirve (negocio)
 
 Desmantelar un sitio en cascada (soft-delete). Caso de uso UC-14-12: Desmantelar sitio en cascada. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:111`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:94`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`DELETE /practices/{practiceId}/sites/{siteId}` la atiende `PracticesController.decommissionSite` (src/modules/practice/controllers/practices.controller.ts:236). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `PracticeSitesService.decommissionSite`. Actualiza practice.care_spaces, practice.clinical_units, practice.healthcare_services, practice.practice_sites, practice.practitioner_role_assignments. Lee practice.care_spaces, practice.clinical_units, practice.healthcare_services, practice.practice_sites, practice.practitioner_role_assignments.
+`DELETE /practices/{practiceId}/sites/{siteId}` la atiende `PracticesController.decommissionSite` (src/modules/practice/controllers/practices.controller.ts:248). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `PracticeSitesService.decommissionSite`. Actualiza practice.care_spaces, practice.clinical_units, practice.healthcare_services, practice.practice_sites, practice.practitioner_role_assignments. Lee practice.care_spaces, practice.clinical_units, practice.healthcare_services, practice.practice_sites, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:236` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId, siteId | `src/modules/practice/controllers/practices.controller.ts:236` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/practices.controller.ts:248` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: practiceId, siteId | `src/modules/practice/controllers/practices.controller.ts:248` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `practice.care_spaces` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:314` |
+| `practice.care_spaces` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:383` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PracticesController.decommissionSite → PracticeSitesService.decommissionSite → CareSpacesRepository.findBySite | `src/modules/practice/repositories/care-spaces.repository.ts:72` |
-| `practice.clinical_units` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:308` |
+| `practice.clinical_units` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:377` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PracticesController.decommissionSite → PracticeSitesService.decommissionSite → ClinicalUnitsRepository.findBySite | `src/modules/practice/repositories/clinical-units.repository.ts:71` |
-| `practice.healthcare_services` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:321` |
-| `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticesController.decommissionSite → PracticeSitesService.decommissionSite → HealthcareServicesRepository.findBySite | `src/modules/practice/repositories/healthcare-services.repository.ts:75` |
-| `practice.practice_sites` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:300` |
+| `practice.healthcare_services` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:390` |
+| `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticesController.decommissionSite → PracticeSitesService.decommissionSite → HealthcareServicesRepository.findBySite | `src/modules/practice/repositories/healthcare-services.repository.ts:79` |
+| `practice.practice_sites` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:369` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PracticesController.decommissionSite → PracticeSitesService.decommissionSite → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
-| `practice.practitioner_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:327` |
+| `practice.practitioner_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:396` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PracticesController.decommissionSite → PracticeSitesService.decommissionSite → PractitionerRoleAssignmentsRepository.findBySite | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:96` |
 
 ### Parámetros
@@ -1670,7 +2028,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/practice/dto/responses.dto.ts:292` |
+| `ok` | `boolean` | Sí | — | — | true si la operación se aplicó | `src/modules/practice/dto/responses.dto.ts:293` |
 
 ### Respuestas posibles
 
@@ -1696,7 +2054,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. GET /practitioners/{profileId}/sites
+## 19. GET /practitioners/{profileId}/sites
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultorios donde atiende el profesional
@@ -1721,9 +2079,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT | `src/modules/practice/controllers/practitioner-sites.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/practice/controllers/practitioner-sites.controller.ts:86` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1749,20 +2107,20 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<PractitionerSiteDto>` | Sí | — | — | Las sedes donde atiende, la principal primero. | `src/modules/practice/dto/responses.dto.ts:393` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:340` |
-| `items[].practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:342` |
-| `items[].code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:344` |
-| `items[].name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:346` |
-| `items[].timeZone` | `string` | No | admite null | — | Zona horaria IANA de la sede, si la declara. | `src/modules/practice/dto/responses.dto.ts:349` |
-| `items[].addressText` | `string` | No | admite null | — | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `src/modules/practice/dto/responses.dto.ts:352` |
-| `items[].latitude` | `number` | No | admite null | — | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `src/modules/practice/dto/responses.dto.ts:355` |
-| `items[].longitude` | `number` | No | admite null | — | Longitud del punto de la sede. Va siempre junto a `latitude`. | `src/modules/practice/dto/responses.dto.ts:358` |
-| `items[].contactPhone` | `string` | No | admite null | — | Teléfono de este profesional en esta sede, si lo declaró. | `src/modules/practice/dto/responses.dto.ts:361` |
-| `items[].isOwnSite` | `boolean` | Sí | — | — | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `src/modules/practice/dto/responses.dto.ts:373` |
-| `items[].bankQrFileId` | `string` | No | formato uuid; admite null | — | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `src/modules/practice/dto/responses.dto.ts:384` |
-| `items[].status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:386` |
-| `count` | `number` | Sí | — | — | Cantidad devuelta. | `src/modules/practice/dto/responses.dto.ts:397` |
+| `items` | `array<PractitionerSiteDto>` | Sí | — | — | Las sedes donde atiende, la principal primero. | `src/modules/practice/dto/responses.dto.ts:394` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:341` |
+| `items[].practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:343` |
+| `items[].code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:345` |
+| `items[].name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:347` |
+| `items[].timeZone` | `string` | No | admite null | — | Zona horaria IANA de la sede, si la declara. | `src/modules/practice/dto/responses.dto.ts:350` |
+| `items[].addressText` | `string` | No | admite null | — | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `src/modules/practice/dto/responses.dto.ts:353` |
+| `items[].latitude` | `number` | No | admite null | — | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `src/modules/practice/dto/responses.dto.ts:356` |
+| `items[].longitude` | `number` | No | admite null | — | Longitud del punto de la sede. Va siempre junto a `latitude`. | `src/modules/practice/dto/responses.dto.ts:359` |
+| `items[].contactPhone` | `string` | No | admite null | — | Teléfono de este profesional en esta sede, si lo declaró. | `src/modules/practice/dto/responses.dto.ts:362` |
+| `items[].isOwnSite` | `boolean` | Sí | — | — | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `src/modules/practice/dto/responses.dto.ts:374` |
+| `items[].bankQrFileId` | `string` | No | formato uuid; admite null | — | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `src/modules/practice/dto/responses.dto.ts:385` |
+| `items[].status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:387` |
+| `count` | `number` | Sí | — | — | Cantidad devuelta. | `src/modules/practice/dto/responses.dto.ts:398` |
 
 ### Respuestas posibles
 
@@ -1788,7 +2146,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ---
 
-## 17. GET /practitioners/me/role-assignments
+## 20. GET /practitioners/me/role-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis vinculaciones con organizaciones
@@ -1813,14 +2171,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER | `src/modules/practice/controllers/practitioner-sites.controller.ts:72` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.public_profiles` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments | `src/modules/practice/services/practice-workforce.service.ts:294` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments | `src/modules/practice/services/practice-workforce.service.ts:357` |
 | `practice.practices` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments → PractitionerRoleAssignmentsRepository.findByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:151` |
 
@@ -1832,19 +2190,16 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador de la vinculación. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:69` |
-| `practiceId` | `string` | Sí | formato uuid | — | Organización (`practice.practices`). | `src/modules/practice/dto/self-request-role-assignment.dto.ts:71` |
-| `practiceName` | `string` | Sí | — | — | Nombre legible de la organización. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:73` |
-| `practiceType` | `string` | No | formato uuid; admite null | — | Tipo de organización (concepto). | `src/modules/practice/dto/self-request-role-assignment.dto.ts:76` |
-| `practiceSiteId` | `string` | No | formato uuid; admite null | — | Sede, si la vinculación la declara. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:79` |
-| `roleConceptId` | `string` | Sí | formato uuid | — | Cargo. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:81` |
-| `specialtyConceptId` | `string` | No | formato uuid; admite null | — | Especialidad, si la vinculación la declara. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:84` |
-| `status` | `string` | Sí | formato uuid | — | Estado de la vinculación (pendiente/activa/suspendida/rechazada/finalizada). | `src/modules/practice/dto/self-request-role-assignment.dto.ts:86` |
-| `isPrimary` | `boolean` | Sí | — | — | ¿Es la organización principal del profesional? | `src/modules/practice/dto/self-request-role-assignment.dto.ts:88` |
-| `validFrom` | `string` | No | formato date-time; admite null | — | Vigente desde. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:90` |
-| `validTo` | `string` | No | formato date-time; admite null | — | Vigente hasta (null = sigue vigente). | `src/modules/practice/dto/self-request-role-assignment.dto.ts:92` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha de creación de la vinculación (o de la solicitud). | `src/modules/practice/dto/self-request-role-assignment.dto.ts:94` |
-| `avatarUrl` | `string` | No | admite null | — | Logo de la organización, tomado de su ficha pública (`community.public_profiles`), o `null` si no tiene una. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:99` |
+| `practiceName` | `string` | Sí | — | — | Nombre legible de la organización. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:82` |
+| `practiceType` | `string` | No | formato uuid; admite null | — | Tipo de organización (concepto). | `src/modules/practice/dto/self-request-role-assignment.dto.ts:85` |
+| `roleConceptId` | `string` | Sí | formato uuid | — | Cargo. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:87` |
+| `specialtyConceptId` | `string` | No | formato uuid; admite null | — | Especialidad, si la vinculación la declara. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:90` |
+| `status` | `string` | Sí | formato uuid | — | Estado de la vinculación (pendiente/activa/suspendida/rechazada/finalizada). | `src/modules/practice/dto/self-request-role-assignment.dto.ts:92` |
+| `isPrimary` | `boolean` | Sí | — | — | ¿Es la organización principal del profesional? | `src/modules/practice/dto/self-request-role-assignment.dto.ts:94` |
+| `validFrom` | `string` | No | formato date-time; admite null | — | Vigente desde. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:96` |
+| `validTo` | `string` | No | formato date-time; admite null | — | Vigente hasta (null = sigue vigente). | `src/modules/practice/dto/self-request-role-assignment.dto.ts:98` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha de creación de la vinculación (o de la solicitud). | `src/modules/practice/dto/self-request-role-assignment.dto.ts:100` |
+| `avatarUrl` | `string` | No | admite null | — | Logo de la organización, tomado de su ficha pública (`community.public_profiles`), o `null` si no tiene una. | `src/modules/practice/dto/self-request-role-assignment.dto.ts:105` |
 
 ### Respuestas posibles
 
@@ -1860,7 +2215,9 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:661` |
 
 ### Flujos
 
@@ -1868,7 +2225,181 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 18. POST /practitioners/me/sites
+## 21. POST /practitioners/me/role-assignments/{roleId}/accept
+
+- **Origen:** CONTRATO
+- **Nombre:** Aceptar una invitación de un centro
+- **Bloque:** Práctica y Agenda
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PractitionerInvitationsController.accept` — `src/modules/practice/controllers/practitioner-invitations.controller.ts:40`
+
+### Qué es y para qué sirve (negocio)
+
+Aceptar una invitación de un centro. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+
+### Cómo se atiende (sistema)
+
+`POST /practitioners/me/role-assignments/{roleId}/accept` la atiende `PractitionerInvitationsController.accept` (src/modules/practice/controllers/practitioner-invitations.controller.ts:40). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PracticeAffiliationInvitationsService.accept`. Actualiza practice.practitioner_role_assignments. Lee practice.practitioner_role_assignments.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER | `src/modules/practice/controllers/practitioner-invitations.controller.ts:40` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/practitioner-invitations.controller.ts:40` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `practice.practitioner_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerInvitationsController.accept → PracticeAffiliationInvitationsService.accept → PracticeAffiliationInvitationsService.resolve | `src/modules/practice/services/practice-affiliation-invitations.service.ts:238` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PractitionerInvitationsController.accept → PracticeAffiliationInvitationsService.accept → PracticeAffiliationInvitationsService.resolve → PractitionerRoleAssignmentsRepository.findByIdForPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:264` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `roleId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<RoleAssignmentRowDto>` · DTO `RoleAssignmentRowDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador de la afiliación. | `src/modules/practice/dto/role-assignment-row.dto.ts:24` |
+| `practitionerProfileId` | `string` | Sí | formato uuid | — | Profesional afiliado. | `src/modules/practice/dto/role-assignment-row.dto.ts:26` |
+| `practitionerName` | `string` | Sí | — | — | Nombre legible del profesional. | `src/modules/practice/dto/role-assignment-row.dto.ts:28` |
+| `practiceId` | `string` | Sí | formato uuid | — | Organización. | `src/modules/practice/dto/role-assignment-row.dto.ts:30` |
+| `practiceSiteId` | `string` | Sí | formato uuid; admite null | — | Sede; `null` en una vinculación antigua que no declara sede. | `src/modules/practice/dto/role-assignment-row.dto.ts:33` |
+| `healthcareServiceId` | `string` | Sí | formato uuid; admite null | — | Servicio ofrecido por la sede; `null` si la vinculación no es por procedimiento. | `src/modules/practice/dto/role-assignment-row.dto.ts:36` |
+| `serviceConceptId` | `string` | Sí | formato uuid; admite null | — | Procedimiento del nomenclador del servicio; `null` sin servicio. | `src/modules/practice/dto/role-assignment-row.dto.ts:39` |
+| `serviceDisplay` | `string` | Sí | admite null | — | Nombre del procedimiento para mostrar; `null` sin servicio. | `src/modules/practice/dto/role-assignment-row.dto.ts:42` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado (uuid). | `src/modules/practice/dto/role-assignment-row.dto.ts:44` |
+| `statusCode` | `string` | Sí | — | — | Código del concepto del estado (`ROLE_ASG_ACTIVE`, …); el front compara por código. | `src/modules/practice/dto/role-assignment-row.dto.ts:46` |
+| `initiatedBy` | `object` | Sí | — | — | Quién abrió la afiliación. Se deriva de la cuenta que creó la fila: si es la del propio profesional, `PRACTITIONER`; si no, `PRACTICE`. | `src/modules/practice/dto/role-assignment-row.dto.ts:52` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: La vinculación no admite esa acción desde su estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/practice.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:648` |
+
+### Flujos
+
+- Módulo Practice (14) — etapa `ctrl:PractitionerInvitationsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 22. POST /practitioners/me/role-assignments/{roleId}/decline
+
+- **Origen:** CONTRATO
+- **Nombre:** Declinar una invitación de un centro
+- **Bloque:** Práctica y Agenda
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PractitionerInvitationsController.decline` — `src/modules/practice/controllers/practitioner-invitations.controller.ts:57`
+
+### Qué es y para qué sirve (negocio)
+
+Declinar una invitación de un centro. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+
+### Cómo se atiende (sistema)
+
+`POST /practitioners/me/role-assignments/{roleId}/decline` la atiende `PractitionerInvitationsController.decline` (src/modules/practice/controllers/practitioner-invitations.controller.ts:57). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PracticeAffiliationInvitationsService.decline`. Actualiza practice.practitioner_role_assignments. Lee practice.practitioner_role_assignments.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PRACTITIONER | `src/modules/practice/controllers/practitioner-invitations.controller.ts:57` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/practitioner-invitations.controller.ts:57` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `practice.practitioner_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerInvitationsController.decline → PracticeAffiliationInvitationsService.decline → PracticeAffiliationInvitationsService.resolve | `src/modules/practice/services/practice-affiliation-invitations.service.ts:238` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PractitionerInvitationsController.decline → PracticeAffiliationInvitationsService.decline → PracticeAffiliationInvitationsService.resolve → PractitionerRoleAssignmentsRepository.findByIdForPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:264` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `roleId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<RoleAssignmentRowDto>` · DTO `RoleAssignmentRowDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador de la afiliación. | `src/modules/practice/dto/role-assignment-row.dto.ts:24` |
+| `practitionerProfileId` | `string` | Sí | formato uuid | — | Profesional afiliado. | `src/modules/practice/dto/role-assignment-row.dto.ts:26` |
+| `practitionerName` | `string` | Sí | — | — | Nombre legible del profesional. | `src/modules/practice/dto/role-assignment-row.dto.ts:28` |
+| `practiceId` | `string` | Sí | formato uuid | — | Organización. | `src/modules/practice/dto/role-assignment-row.dto.ts:30` |
+| `practiceSiteId` | `string` | Sí | formato uuid; admite null | — | Sede; `null` en una vinculación antigua que no declara sede. | `src/modules/practice/dto/role-assignment-row.dto.ts:33` |
+| `healthcareServiceId` | `string` | Sí | formato uuid; admite null | — | Servicio ofrecido por la sede; `null` si la vinculación no es por procedimiento. | `src/modules/practice/dto/role-assignment-row.dto.ts:36` |
+| `serviceConceptId` | `string` | Sí | formato uuid; admite null | — | Procedimiento del nomenclador del servicio; `null` sin servicio. | `src/modules/practice/dto/role-assignment-row.dto.ts:39` |
+| `serviceDisplay` | `string` | Sí | admite null | — | Nombre del procedimiento para mostrar; `null` sin servicio. | `src/modules/practice/dto/role-assignment-row.dto.ts:42` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Concepto del estado (uuid). | `src/modules/practice/dto/role-assignment-row.dto.ts:44` |
+| `statusCode` | `string` | Sí | — | — | Código del concepto del estado (`ROLE_ASG_ACTIVE`, …); el front compara por código. | `src/modules/practice/dto/role-assignment-row.dto.ts:46` |
+| `initiatedBy` | `object` | Sí | — | — | Quién abrió la afiliación. Se deriva de la cuenta que creó la fila: si es la del propio profesional, `PRACTITIONER`; si no, `PRACTICE`. | `src/modules/practice/dto/role-assignment-row.dto.ts:52` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: La vinculación no admite esa acción desde su estado actual |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/practice.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Practice (14) — etapa `ctrl:PractitionerInvitationsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 23. POST /practitioners/me/sites
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un consultorio propio
@@ -1893,10 +2424,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:114` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1905,9 +2436,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.addresses` | ESCRIBE | CREA | DIRECTA | PractitionerSitesController.createOwnSite → PractitionerSitesService.createOwnSite → OwnSiteProvisioningService.provision → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:118` |
 | `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | PractitionerSitesController.createOwnSite → PractitionerSitesService.createOwnSite → OwnSiteProvisioningService.provision → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:111` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PractitionerSitesController.createOwnSite → PractitionerSitesService.createOwnSite → OwnSiteProvisioningService.provision → OwnSiteProvisioningService.uniqueSiteCode → PracticeSitesRepository.findByPracticeAndCode | `src/modules/practice/repositories/practice-sites.repository.ts:85` |
-| `practice.practices` | ESCRIBE | CREA | DIRECTA | PractitionerSitesController.createOwnSite → PractitionerSitesService.createOwnSite → OwnSiteProvisioningService.provision → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:130` |
-| `practice.practices` | LEE | LEE | DIRECTA | PractitionerSitesController.createOwnSite → PractitionerSitesService.createOwnSite → OwnSiteProvisioningService.provision → PracticesRepository.findOwnOffice | `src/modules/practice/repositories/practices.repository.ts:115` |
-| `practice.practitioner_role_assignments` | ESCRIBE | CREA | DIRECTA | PractitionerSitesController.createOwnSite → PractitionerSitesService.createOwnSite → OwnSiteProvisioningService.provision → PractitionerRoleAssignmentsRepository.create | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:259` |
+| `practice.practices` | ESCRIBE | CREA | DIRECTA | PractitionerSitesController.createOwnSite → PractitionerSitesService.createOwnSite → OwnSiteProvisioningService.provision → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:150` |
+| `practice.practices` | LEE | LEE | DIRECTA | PractitionerSitesController.createOwnSite → PractitionerSitesService.createOwnSite → OwnSiteProvisioningService.provision → PracticesRepository.findOwnOffice | `src/modules/practice/repositories/practices.repository.ts:135` |
+| `practice.practitioner_role_assignments` | ESCRIBE | CREA | DIRECTA | PractitionerSitesController.createOwnSite → PractitionerSitesService.createOwnSite → OwnSiteProvisioningService.provision → PractitionerRoleAssignmentsRepository.create | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:311` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PractitionerSitesController.createOwnSite → PractitionerSitesService.createOwnSite → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PractitionerSitesController.createOwnSite → PractitionerSitesService.createOwnSite → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
@@ -1915,16 +2446,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `name` | `string` | Sí | longitud mínima 2; longitud máxima 200 | `@IsString()` `@MinLength(2)` `@MaxLength(200)` | Nombre del consultorio | `src/modules/practice/dto/create-own-site.dto.ts:113` |
-| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/practice/dto/create-own-site.dto.ts:120` |
-| `address` | `OwnSiteAddressDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => OwnSiteAddressDto)` | — | `src/modules/practice/dto/create-own-site.dto.ts:127` |
-| `address.lines` | `array<string>` | No | longitud máxima 500 | `@IsArray()` `@IsString({ each: true })` `@MaxLength(500, { each: true })` | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `src/modules/practice/dto/create-own-site.dto.ts:44` |
-| `address.city` | `string` | No | longitud máxima 255 | `@IsOptional()` `@IsString()` `@MaxLength(255)` | — | `src/modules/practice/dto/create-own-site.dto.ts:51` |
-| `address.municipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/practice/dto/create-own-site.dto.ts:57` |
-| `address.administrativeAreaConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/practice/dto/create-own-site.dto.ts:63` |
-| `address.latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/practice/dto/create-own-site.dto.ts:84` |
-| `address.longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/practice/dto/create-own-site.dto.ts:95` |
-| `contactPhone` | `string` | No | longitud máxima 40; patrón runtime SITE_CONTACT_PHONE_PATTERN | `@IsOptional()` `@IsString()` `@Matches(SITE_CONTACT_PHONE_PATTERN)` `@MaxLength(40)` | — | `src/modules/practice/dto/create-own-site.dto.ts:135` |
+| `name` | `string` | Sí | longitud mínima 2; longitud máxima 200 | `@IsString()` `@MinLength(2)` `@MaxLength(200)` | Nombre del consultorio | `src/common/dto/create-own-site.dto.ts:113` |
+| `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/common/dto/create-own-site.dto.ts:120` |
+| `address` | `OwnSiteAddressDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => OwnSiteAddressDto)` | — | `src/common/dto/create-own-site.dto.ts:127` |
+| `address.lines` | `array<string>` | No | longitud máxima 500 | `@IsArray()` `@IsString({ each: true })` `@MaxLength(500, { each: true })` | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `src/common/dto/create-own-site.dto.ts:44` |
+| `address.city` | `string` | No | longitud máxima 255 | `@IsOptional()` `@IsString()` `@MaxLength(255)` | — | `src/common/dto/create-own-site.dto.ts:51` |
+| `address.municipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/common/dto/create-own-site.dto.ts:57` |
+| `address.administrativeAreaConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/common/dto/create-own-site.dto.ts:63` |
+| `address.latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/common/dto/create-own-site.dto.ts:84` |
+| `address.longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/common/dto/create-own-site.dto.ts:95` |
+| `contactPhone` | `string` | No | longitud máxima 40; patrón runtime SITE_CONTACT_PHONE_PATTERN | `@IsOptional()` `@IsString()` `@Matches(SITE_CONTACT_PHONE_PATTERN)` `@MaxLength(40)` | — | `src/common/dto/create-own-site.dto.ts:135` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1960,18 +2491,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:340` |
-| `practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:342` |
-| `code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:344` |
-| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:346` |
-| `timeZone` | `string` | No | admite null | — | Zona horaria IANA de la sede, si la declara. | `src/modules/practice/dto/responses.dto.ts:349` |
-| `addressText` | `string` | No | admite null | — | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `src/modules/practice/dto/responses.dto.ts:352` |
-| `latitude` | `number` | No | admite null | — | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `src/modules/practice/dto/responses.dto.ts:355` |
-| `longitude` | `number` | No | admite null | — | Longitud del punto de la sede. Va siempre junto a `latitude`. | `src/modules/practice/dto/responses.dto.ts:358` |
-| `contactPhone` | `string` | No | admite null | — | Teléfono de este profesional en esta sede, si lo declaró. | `src/modules/practice/dto/responses.dto.ts:361` |
-| `isOwnSite` | `boolean` | Sí | — | — | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `src/modules/practice/dto/responses.dto.ts:373` |
-| `bankQrFileId` | `string` | No | formato uuid; admite null | — | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `src/modules/practice/dto/responses.dto.ts:384` |
-| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:386` |
+| `id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:341` |
+| `practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:343` |
+| `code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:345` |
+| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:347` |
+| `timeZone` | `string` | No | admite null | — | Zona horaria IANA de la sede, si la declara. | `src/modules/practice/dto/responses.dto.ts:350` |
+| `addressText` | `string` | No | admite null | — | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `src/modules/practice/dto/responses.dto.ts:353` |
+| `latitude` | `number` | No | admite null | — | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `src/modules/practice/dto/responses.dto.ts:356` |
+| `longitude` | `number` | No | admite null | — | Longitud del punto de la sede. Va siempre junto a `latitude`. | `src/modules/practice/dto/responses.dto.ts:359` |
+| `contactPhone` | `string` | No | admite null | — | Teléfono de este profesional en esta sede, si lo declaró. | `src/modules/practice/dto/responses.dto.ts:362` |
+| `isOwnSite` | `boolean` | Sí | — | — | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `src/modules/practice/dto/responses.dto.ts:374` |
+| `bankQrFileId` | `string` | No | formato uuid; admite null | — | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `src/modules/practice/dto/responses.dto.ts:385` |
+| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:387` |
 
 ### Respuestas posibles
 
@@ -1995,14 +2526,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 19. DELETE /practitioners/me/sites/{siteId}
+## 24. DELETE /practitioners/me/sites/{siteId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar un consultorio propio
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.deleteOwnSite` — `src/modules/practice/controllers/practitioner-sites.controller.ts:198`
+- **Implementación:** `PractitionerSitesController.deleteOwnSite` — `src/modules/practice/controllers/practitioner-sites.controller.ts:213`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2012,17 +2543,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`DELETE /practitioners/me/sites/{siteId}` la atiende `PractitionerSitesController.deleteOwnSite` (src/modules/practice/controllers/practitioner-sites.controller.ts:198). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `PractitionerSitesService.deleteOwnSite`. Actualiza practice.practitioner_role_assignments. Lee practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
+`DELETE /practitioners/me/sites/{siteId}` la atiende `PractitionerSitesController.deleteOwnSite` (src/modules/practice/controllers/practitioner-sites.controller.ts:213). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Delega en `PractitionerSitesService.deleteOwnSite`. Actualiza practice.practitioner_role_assignments. Lee practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:198` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:198` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:213` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:213` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2070,14 +2601,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 20. PATCH /practitioners/me/sites/{siteId}
+## 25. PATCH /practitioners/me/sites/{siteId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir un consultorio propio
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.updateOwnSite` — `src/modules/practice/controllers/practitioner-sites.controller.ts:136`
+- **Implementación:** `PractitionerSitesController.updateOwnSite` — `src/modules/practice/controllers/practitioner-sites.controller.ts:141`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2087,19 +2618,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /practitioners/me/sites/{siteId}` la atiende `PractitionerSitesController.updateOwnSite` (src/modules/practice/controllers/practitioner-sites.controller.ts:136). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `UpdateOwnSiteDto` (9 campos, 0 obligatorios). Delega en `PractitionerSitesService.updateOwnSite`. Crea filas en common.addresses. Actualiza common.addresses, practice.practice_sites. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
+`PATCH /practitioners/me/sites/{siteId}` la atiende `PractitionerSitesController.updateOwnSite` (src/modules/practice/controllers/practitioner-sites.controller.ts:141). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `UpdateOwnSiteDto` (9 campos, 0 obligatorios). Delega en `PractitionerSitesService.updateOwnSite`. Crea filas en common.addresses. Actualiza common.addresses, practice.practice_sites. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:136` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:136` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:141` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:141` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2110,7 +2641,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.addresses` | LEE | LEE | DIRECTA | PractitionerSitesController.updateOwnSite → PractitionerSitesService.updateOwnSite → PractitionerSitesService.moveAddress | `src/modules/practice/services/practitioner-sites.service.ts:659` |
 | `practice.practice_sites` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerSitesController.updateOwnSite → PractitionerSitesService.updateOwnSite | `src/modules/practice/services/practitioner-sites.service.ts:202` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PractitionerSitesController.updateOwnSite → PractitionerSitesService.updateOwnSite → PractitionerSitesService.requireOwnSite → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
-| `practice.practices` | LEE | LEE | DIRECTA | PractitionerSitesController.updateOwnSite → PractitionerSitesService.updateOwnSite → PractitionerSitesService.requireOwnSite → PractitionerSitesService.isOwnPractice → PracticesRepository.findOwnOffice | `src/modules/practice/repositories/practices.repository.ts:115` |
+| `practice.practices` | LEE | LEE | DIRECTA | PractitionerSitesController.updateOwnSite → PractitionerSitesService.updateOwnSite → PractitionerSitesService.requireOwnSite → PractitionerSitesService.isOwnPractice → PracticesRepository.findOwnOffice | `src/modules/practice/repositories/practices.repository.ts:135` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PractitionerSitesController.updateOwnSite → PractitionerSitesService.updateOwnSite → PractitionerRoleAssignmentsRepository.findCurrentBySite | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:202` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PractitionerSitesController.updateOwnSite → PractitionerSitesService.updateOwnSite → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PractitionerSitesController.updateOwnSite → PractitionerSitesService.updateOwnSite → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
@@ -2128,12 +2659,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `name` | `string` | No | longitud mínima 2; longitud máxima 200 | `@IsOptional()` `@IsString()` `@MinLength(2)` `@MaxLength(200)` | Nombre del consultorio | `src/modules/practice/dto/update-own-site.dto.ts:43` |
 | `timeZone` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/practice/dto/update-own-site.dto.ts:50` |
 | `address` | `OwnSiteAddressDto` | No | — | `@IsOptional()` `@ValidateNested()` `@Type(() => OwnSiteAddressDto)` | — | `src/modules/practice/dto/update-own-site.dto.ts:63` |
-| `address.lines` | `array<string>` | No | longitud máxima 500 | `@IsArray()` `@IsString({ each: true })` `@MaxLength(500, { each: true })` | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `src/modules/practice/dto/create-own-site.dto.ts:44` |
-| `address.city` | `string` | No | longitud máxima 255 | `@IsOptional()` `@IsString()` `@MaxLength(255)` | — | `src/modules/practice/dto/create-own-site.dto.ts:51` |
-| `address.municipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/practice/dto/create-own-site.dto.ts:57` |
-| `address.administrativeAreaConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/practice/dto/create-own-site.dto.ts:63` |
-| `address.latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/practice/dto/create-own-site.dto.ts:84` |
-| `address.longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/practice/dto/create-own-site.dto.ts:95` |
+| `address.lines` | `array<string>` | No | longitud máxima 500 | `@IsArray()` `@IsString({ each: true })` `@MaxLength(500, { each: true })` | Líneas de la dirección; puede ir vacía si la sede se ubica sólo por municipio o coordenadas | `src/common/dto/create-own-site.dto.ts:44` |
+| `address.city` | `string` | No | longitud máxima 255 | `@IsOptional()` `@IsString()` `@MaxLength(255)` | — | `src/common/dto/create-own-site.dto.ts:51` |
+| `address.municipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/common/dto/create-own-site.dto.ts:57` |
+| `address.administrativeAreaConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/common/dto/create-own-site.dto.ts:63` |
+| `address.latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/common/dto/create-own-site.dto.ts:84` |
+| `address.longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: OwnSiteAddressDto) => dto.latitude !== undefined \|\| dto.longitude !== undefined, )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/common/dto/create-own-site.dto.ts:95` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2166,18 +2697,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:340` |
-| `practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:342` |
-| `code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:344` |
-| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:346` |
-| `timeZone` | `string` | No | admite null | — | Zona horaria IANA de la sede, si la declara. | `src/modules/practice/dto/responses.dto.ts:349` |
-| `addressText` | `string` | No | admite null | — | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `src/modules/practice/dto/responses.dto.ts:352` |
-| `latitude` | `number` | No | admite null | — | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `src/modules/practice/dto/responses.dto.ts:355` |
-| `longitude` | `number` | No | admite null | — | Longitud del punto de la sede. Va siempre junto a `latitude`. | `src/modules/practice/dto/responses.dto.ts:358` |
-| `contactPhone` | `string` | No | admite null | — | Teléfono de este profesional en esta sede, si lo declaró. | `src/modules/practice/dto/responses.dto.ts:361` |
-| `isOwnSite` | `boolean` | Sí | — | — | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `src/modules/practice/dto/responses.dto.ts:373` |
-| `bankQrFileId` | `string` | No | formato uuid; admite null | — | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `src/modules/practice/dto/responses.dto.ts:384` |
-| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:386` |
+| `id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:341` |
+| `practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:343` |
+| `code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:345` |
+| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:347` |
+| `timeZone` | `string` | No | admite null | — | Zona horaria IANA de la sede, si la declara. | `src/modules/practice/dto/responses.dto.ts:350` |
+| `addressText` | `string` | No | admite null | — | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `src/modules/practice/dto/responses.dto.ts:353` |
+| `latitude` | `number` | No | admite null | — | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `src/modules/practice/dto/responses.dto.ts:356` |
+| `longitude` | `number` | No | admite null | — | Longitud del punto de la sede. Va siempre junto a `latitude`. | `src/modules/practice/dto/responses.dto.ts:359` |
+| `contactPhone` | `string` | No | admite null | — | Teléfono de este profesional en esta sede, si lo declaró. | `src/modules/practice/dto/responses.dto.ts:362` |
+| `isOwnSite` | `boolean` | Sí | — | — | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `src/modules/practice/dto/responses.dto.ts:374` |
+| `bankQrFileId` | `string` | No | formato uuid; admite null | — | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `src/modules/practice/dto/responses.dto.ts:385` |
+| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:387` |
 
 ### Respuestas posibles
 
@@ -2202,14 +2733,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 21. PUT /practitioners/me/sites/{siteId}/bank-qr
+## 26. PUT /practitioners/me/sites/{siteId}/bank-qr
 
 - **Origen:** CONTRATO
 - **Nombre:** Fijar o quitar el QR bancario de una sede
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.setSiteBankQr` — `src/modules/practice/controllers/practitioner-sites.controller.ts:158`
+- **Implementación:** `PractitionerSitesController.setSiteBankQr` — `src/modules/practice/controllers/practitioner-sites.controller.ts:168`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2219,19 +2750,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /practitioners/me/sites/{siteId}/bank-qr` la atiende `PractitionerSitesController.setSiteBankQr` (src/modules/practice/controllers/practitioner-sites.controller.ts:158). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SetSiteBankQrDto` (1 campo, 1 obligatorio). Delega en `PractitionerSitesService.setSiteBankQr`. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
+`PUT /practitioners/me/sites/{siteId}/bank-qr` la atiende `PractitionerSitesController.setSiteBankQr` (src/modules/practice/controllers/practitioner-sites.controller.ts:168). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SetSiteBankQrDto` (1 campo, 1 obligatorio). Delega en `PractitionerSitesService.setSiteBankQr`. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:158` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:158` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:168` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:168` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2239,7 +2770,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.addresses` | LEE | LEE | DIRECTA | PractitionerSitesController.setSiteBankQr → PractitionerSitesService.setSiteBankQr → PractitionerSitesService.projectSite | `src/modules/practice/services/practitioner-sites.service.ts:558` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PractitionerSitesController.setSiteBankQr → PractitionerSitesService.setSiteBankQr → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
-| `practice.practices` | LEE | LEE | DIRECTA | PractitionerSitesController.setSiteBankQr → PractitionerSitesService.setSiteBankQr → PractitionerSitesService.isOwnPractice → PracticesRepository.findOwnOffice | `src/modules/practice/repositories/practices.repository.ts:115` |
+| `practice.practices` | LEE | LEE | DIRECTA | PractitionerSitesController.setSiteBankQr → PractitionerSitesService.setSiteBankQr → PractitionerSitesService.isOwnPractice → PracticesRepository.findOwnOffice | `src/modules/practice/repositories/practices.repository.ts:135` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PractitionerSitesController.setSiteBankQr → PractitionerSitesService.setSiteBankQr → PractitionerRoleAssignmentsRepository.findCurrentBySite | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:202` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PractitionerSitesController.setSiteBankQr → PractitionerSitesService.setSiteBankQr → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PractitionerSitesController.setSiteBankQr → PractitionerSitesService.setSiteBankQr → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
@@ -2278,18 +2809,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:340` |
-| `practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:342` |
-| `code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:344` |
-| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:346` |
-| `timeZone` | `string` | No | admite null | — | Zona horaria IANA de la sede, si la declara. | `src/modules/practice/dto/responses.dto.ts:349` |
-| `addressText` | `string` | No | admite null | — | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `src/modules/practice/dto/responses.dto.ts:352` |
-| `latitude` | `number` | No | admite null | — | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `src/modules/practice/dto/responses.dto.ts:355` |
-| `longitude` | `number` | No | admite null | — | Longitud del punto de la sede. Va siempre junto a `latitude`. | `src/modules/practice/dto/responses.dto.ts:358` |
-| `contactPhone` | `string` | No | admite null | — | Teléfono de este profesional en esta sede, si lo declaró. | `src/modules/practice/dto/responses.dto.ts:361` |
-| `isOwnSite` | `boolean` | Sí | — | — | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `src/modules/practice/dto/responses.dto.ts:373` |
-| `bankQrFileId` | `string` | No | formato uuid; admite null | — | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `src/modules/practice/dto/responses.dto.ts:384` |
-| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:386` |
+| `id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:341` |
+| `practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:343` |
+| `code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:345` |
+| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:347` |
+| `timeZone` | `string` | No | admite null | — | Zona horaria IANA de la sede, si la declara. | `src/modules/practice/dto/responses.dto.ts:350` |
+| `addressText` | `string` | No | admite null | — | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `src/modules/practice/dto/responses.dto.ts:353` |
+| `latitude` | `number` | No | admite null | — | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `src/modules/practice/dto/responses.dto.ts:356` |
+| `longitude` | `number` | No | admite null | — | Longitud del punto de la sede. Va siempre junto a `latitude`. | `src/modules/practice/dto/responses.dto.ts:359` |
+| `contactPhone` | `string` | No | admite null | — | Teléfono de este profesional en esta sede, si lo declaró. | `src/modules/practice/dto/responses.dto.ts:362` |
+| `isOwnSite` | `boolean` | Sí | — | — | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `src/modules/practice/dto/responses.dto.ts:374` |
+| `bankQrFileId` | `string` | No | formato uuid; admite null | — | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `src/modules/practice/dto/responses.dto.ts:385` |
+| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:387` |
 
 ### Respuestas posibles
 
@@ -2314,14 +2845,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 22. PUT /practitioners/me/sites/{siteId}/contact-phone
+## 27. PUT /practitioners/me/sites/{siteId}/contact-phone
 
 - **Origen:** CONTRATO
 - **Nombre:** Guardar o quitar mi teléfono en una sede
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `PractitionerSitesController.setSiteContactPhone` — `src/modules/practice/controllers/practitioner-sites.controller.ts:174`
+- **Implementación:** `PractitionerSitesController.setSiteContactPhone` — `src/modules/practice/controllers/practitioner-sites.controller.ts:189`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2331,19 +2862,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PUT /practitioners/me/sites/{siteId}/contact-phone` la atiende `PractitionerSitesController.setSiteContactPhone` (src/modules/practice/controllers/practitioner-sites.controller.ts:174). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SetSiteContactPhoneDto` (1 campo, 1 obligatorio). Delega en `PractitionerSitesService.setSiteContactPhone`. Actualiza practice.practitioner_role_assignments. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
+`PUT /practitioners/me/sites/{siteId}/contact-phone` la atiende `PractitionerSitesController.setSiteContactPhone` (src/modules/practice/controllers/practitioner-sites.controller.ts:189). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `SetSiteContactPhoneDto` (1 campo, 1 obligatorio). Delega en `PractitionerSitesService.setSiteContactPhone`. Actualiza practice.practitioner_role_assignments. Lee common.addresses, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:174` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:174` |
+| ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/practice/controllers/practitioner-sites.controller.ts:189` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/practitioner-sites.controller.ts:189` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2367,7 +2898,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `contactPhone` | `object` | Sí | longitud máxima 40; patrón runtime SITE_CONTACT_PHONE_PATTERN; admite null | `@ValidateIf((dto: SetSiteContactPhoneDto) => dto.contactPhone !== null)` `@IsString()` `@Matches(SITE_CONTACT_PHONE_PATTERN)` `@MaxLength(40)` | — | `src/modules/practice/dto/update-own-site.dto.ts:99` |
+| `contactPhone` | `string` | Sí | longitud máxima 40; patrón runtime SITE_CONTACT_PHONE_PATTERN; admite null | `@ValidateIf((dto: SetSiteContactPhoneDto) => dto.contactPhone !== null)` `@IsString()` `@Matches(SITE_CONTACT_PHONE_PATTERN)` `@MaxLength(40)` | — | `src/modules/practice/dto/update-own-site.dto.ts:104` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2391,18 +2922,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:340` |
-| `practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:342` |
-| `code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:344` |
-| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:346` |
-| `timeZone` | `string` | No | admite null | — | Zona horaria IANA de la sede, si la declara. | `src/modules/practice/dto/responses.dto.ts:349` |
-| `addressText` | `string` | No | admite null | — | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `src/modules/practice/dto/responses.dto.ts:352` |
-| `latitude` | `number` | No | admite null | — | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `src/modules/practice/dto/responses.dto.ts:355` |
-| `longitude` | `number` | No | admite null | — | Longitud del punto de la sede. Va siempre junto a `latitude`. | `src/modules/practice/dto/responses.dto.ts:358` |
-| `contactPhone` | `string` | No | admite null | — | Teléfono de este profesional en esta sede, si lo declaró. | `src/modules/practice/dto/responses.dto.ts:361` |
-| `isOwnSite` | `boolean` | Sí | — | — | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `src/modules/practice/dto/responses.dto.ts:373` |
-| `bankQrFileId` | `string` | No | formato uuid; admite null | — | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `src/modules/practice/dto/responses.dto.ts:384` |
-| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:386` |
+| `id` | `string` | Sí | formato uuid | — | Identificador de la sede. | `src/modules/practice/dto/responses.dto.ts:341` |
+| `practiceId` | `string` | Sí | formato uuid | — | Práctica a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:343` |
+| `code` | `string` | Sí | — | — | Código único dentro de la práctica. | `src/modules/practice/dto/responses.dto.ts:345` |
+| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:347` |
+| `timeZone` | `string` | No | admite null | — | Zona horaria IANA de la sede, si la declara. | `src/modules/practice/dto/responses.dto.ts:350` |
+| `addressText` | `string` | No | admite null | — | Dirección en una línea, o `null` si la sede no tiene ninguna cargada. | `src/modules/practice/dto/responses.dto.ts:353` |
+| `latitude` | `number` | No | admite null | — | Latitud del punto de la sede, si la dirección la tiene cargada (ALV-006). | `src/modules/practice/dto/responses.dto.ts:356` |
+| `longitude` | `number` | No | admite null | — | Longitud del punto de la sede. Va siempre junto a `latitude`. | `src/modules/practice/dto/responses.dto.ts:359` |
+| `contactPhone` | `string` | No | admite null | — | Teléfono de este profesional en esta sede, si lo declaró. | `src/modules/practice/dto/responses.dto.ts:362` |
+| `isOwnSite` | `boolean` | Sí | — | — | Si la sede es el consultorio **propio** del profesional —su práctica personal— y no la de otra organización donde atiende (P32-a). La lista mezclaba las dos cosas sin distinguirlas: «Consultorio Dra. Rojas» y «Hospital San Lucas» llegaban con la misma forma, y retirar lo propio no es el mismo acto que desvincularse de un hospital. Sale de comparar la práctica de la sede con la práctica personal del profesional (tipo consultorio y él como cuenta administradora), no de adivinar por el nombre. | `src/modules/practice/dto/responses.dto.ts:374` |
+| `bankQrFileId` | `string` | No | formato uuid; admite null | — | Archivo del QR bancario con el que el profesional cobra **en esta sede**, o `null` si no configuró ninguno (P33). Es por sede y no por persona porque no se cobra igual en todos lados: en el consultorio propio cobra el profesional y en la clínica puede cobrar la clínica. Un QR único de perfil obligaría a corregirlo cada vez que cambia de establecimiento. | `src/modules/practice/dto/responses.dto.ts:385` |
+| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:387` |
 
 ### Respuestas posibles
 
@@ -2427,14 +2958,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 23. POST /role-assignments/{roleId}/approve
+## 28. POST /role-assignments/{roleId}/approve
 
 - **Origen:** CONTRATO
 - **Nombre:** Aprobar una vinculación pendiente
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RoleAssignmentsController.approve` — `src/modules/practice/controllers/role-assignments.controller.ts:54`
+- **Implementación:** `RoleAssignmentsController.approve` — `src/modules/practice/controllers/role-assignments.controller.ts:68`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2444,26 +2975,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /role-assignments/{roleId}/approve` la atiende `RoleAssignmentsController.approve` (src/modules/practice/controllers/role-assignments.controller.ts:54). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.approveAssignment`. Actualiza practice.practitioner_role_assignments. Lee practice.practitioner_role_assignments.
+`POST /role-assignments/{roleId}/approve` la atiende `RoleAssignmentsController.approve` (src/modules/practice/controllers/role-assignments.controller.ts:68). Exige sesión; el controlador no declara roles. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.approveAssignment`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/role-assignments.controller.ts:54` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/role-assignments.controller.ts:54` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/practice/controllers/role-assignments.controller.ts:68` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/role-assignments.controller.ts:68` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `practice.practitioner_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment | `src/modules/practice/services/practice-workforce.service.ts:475` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `practice.practices` | LEE | LEE | DIRECTA | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleInScope → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
 
 ### Parámetros
 
@@ -2475,7 +3007,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/practice/dto/self-request-role-assignment.dto.ts:63` |
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/practice/dto/self-request-role-assignment.dto.ts:76` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2497,11 +3029,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:169` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:173` |
-| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:177` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:181` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:185` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:170` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:174` |
+| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:178` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:182` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:186` |
 
 ### Respuestas posibles
 
@@ -2511,7 +3043,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación profesional-organización no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La vinculación no admite esa transición desde su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2519,7 +3050,9 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:640` |
 
 ### Flujos
 
@@ -2527,14 +3060,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. POST /role-assignments/{roleId}/end
+## 29. POST /role-assignments/{roleId}/end
 
 - **Origen:** CONTRATO
 - **Nombre:** Finalizar una vinculación
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RoleAssignmentsController.end` — `src/modules/practice/controllers/role-assignments.controller.ts:93`
+- **Implementación:** `RoleAssignmentsController.end` — `src/modules/practice/controllers/role-assignments.controller.ts:120`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2544,26 +3077,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /role-assignments/{roleId}/end` la atiende `RoleAssignmentsController.end` (src/modules/practice/controllers/role-assignments.controller.ts:93). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.endAssignment`. Actualiza practice.practitioner_role_assignments. Lee practice.practitioner_role_assignments.
+`POST /role-assignments/{roleId}/end` la atiende `RoleAssignmentsController.end` (src/modules/practice/controllers/role-assignments.controller.ts:120). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.endAssignment`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/role-assignments.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/role-assignments.controller.ts:93` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/role-assignments.controller.ts:120` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/role-assignments.controller.ts:120` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `practice.practitioner_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment | `src/modules/practice/services/practice-workforce.service.ts:475` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `practice.practices` | LEE | LEE | DIRECTA | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleInScope → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
 
 ### Parámetros
 
@@ -2575,7 +3109,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/practice/dto/self-request-role-assignment.dto.ts:63` |
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/practice/dto/self-request-role-assignment.dto.ts:76` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2597,11 +3131,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:169` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:173` |
-| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:177` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:181` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:185` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:170` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:174` |
+| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:178` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:182` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:186` |
 
 ### Respuestas posibles
 
@@ -2611,7 +3145,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación profesional-organización no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La vinculación no admite esa transición desde su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2627,14 +3160,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 25. POST /role-assignments/{roleId}/reject
+## 30. POST /role-assignments/{roleId}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar una vinculación pendiente
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RoleAssignmentsController.reject` — `src/modules/practice/controllers/role-assignments.controller.ts:67`
+- **Implementación:** `RoleAssignmentsController.reject` — `src/modules/practice/controllers/role-assignments.controller.ts:85`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2644,26 +3177,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /role-assignments/{roleId}/reject` la atiende `RoleAssignmentsController.reject` (src/modules/practice/controllers/role-assignments.controller.ts:67). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.rejectAssignment`. Actualiza practice.practitioner_role_assignments. Lee practice.practitioner_role_assignments.
+`POST /role-assignments/{roleId}/reject` la atiende `RoleAssignmentsController.reject` (src/modules/practice/controllers/role-assignments.controller.ts:85). Exige sesión; el controlador no declara roles. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.rejectAssignment`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/role-assignments.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/role-assignments.controller.ts:67` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/practice/controllers/role-assignments.controller.ts:85` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/role-assignments.controller.ts:85` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `practice.practitioner_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment | `src/modules/practice/services/practice-workforce.service.ts:475` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `practice.practices` | LEE | LEE | DIRECTA | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleInScope → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
 
 ### Parámetros
 
@@ -2675,7 +3209,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/practice/dto/self-request-role-assignment.dto.ts:63` |
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/practice/dto/self-request-role-assignment.dto.ts:76` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2697,11 +3231,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:169` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:173` |
-| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:177` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:181` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:185` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:170` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:174` |
+| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:178` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:182` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:186` |
 
 ### Respuestas posibles
 
@@ -2711,7 +3245,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación profesional-organización no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La vinculación no admite esa transición desde su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2719,7 +3252,9 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 
 ### Pruebas que la mencionan
 
-_Ninguna prueba existente menciona esta operación._
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/medical-centers.int-spec.ts:745` |
 
 ### Flujos
 
@@ -2727,42 +3262,43 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 26. POST /role-assignments/{roleId}/support-assignments
+## 31. POST /role-assignments/{roleId}/support-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Adjuntar personal de apoyo a un rol de profesional
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RoleAssignmentsController.attachSupport` — `src/modules/practice/controllers/role-assignments.controller.ts:39`
+- **Implementación:** `RoleAssignmentsController.attachSupport` — `src/modules/practice/controllers/role-assignments.controller.ts:44`
 
 ### Qué es y para qué sirve (negocio)
 
 Adjuntar personal de apoyo a un rol de profesional. Caso de uso UC-14-09: Adjuntar personal de apoyo. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:108`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:91`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /role-assignments/{roleId}/support-assignments` la atiende `RoleAssignmentsController.attachSupport` (src/modules/practice/controllers/role-assignments.controller.ts:39). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateSupportAssignmentDto` (5 campos, 1 obligatorio). Delega en `PracticeWorkforceService.attachSupport`. Crea filas en practice.practitioner_support_assignments. Lee practice.practitioner_role_assignments.
+`POST /role-assignments/{roleId}/support-assignments` la atiende `RoleAssignmentsController.attachSupport` (src/modules/practice/controllers/role-assignments.controller.ts:44). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateSupportAssignmentDto` (5 campos, 1 obligatorio). Delega en `PracticeWorkforceService.attachSupport`. Crea filas en practice.practitioner_support_assignments. Lee practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/role-assignments.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/role-assignments.controller.ts:39` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/role-assignments.controller.ts:44` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/role-assignments.controller.ts:44` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.attachSupport → PracticeWorkforceService.attachSupport → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
+| `practice.practices` | LEE | LEE | DIRECTA | RoleAssignmentsController.attachSupport → PracticeWorkforceService.attachSupport → PracticeWorkforceService.loadRoleInScope → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.attachSupport → PracticeWorkforceService.attachSupport → PracticeWorkforceService.loadRoleInScope → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
 | `practice.practitioner_support_assignments` | ESCRIBE | CREA | DIRECTA | RoleAssignmentsController.attachSupport → PracticeWorkforceService.attachSupport → PractitionerSupportAssignmentsRepository.create | `src/modules/practice/repositories/practitioner-support-assignments.repository.ts:70` |
 
 ### Parámetros
@@ -2807,10 +3343,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:224` |
-| `practitionerRoleAssignmentId` | `string` | Sí | — | — | Identificador asociado a practitioner role assignment. | `src/modules/practice/dto/responses.dto.ts:228` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:232` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:236` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:225` |
+| `practitionerRoleAssignmentId` | `string` | Sí | — | — | Identificador asociado a practitioner role assignment. | `src/modules/practice/dto/responses.dto.ts:229` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:233` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:237` |
 
 ### Respuestas posibles
 
@@ -2820,7 +3356,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Rol de profesional no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El rol de profesional no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2836,14 +3371,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 27. POST /role-assignments/{roleId}/suspend
+## 32. POST /role-assignments/{roleId}/suspend
 
 - **Origen:** CONTRATO
 - **Nombre:** Suspender una vinculación activa
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RoleAssignmentsController.suspend` — `src/modules/practice/controllers/role-assignments.controller.ts:80`
+- **Implementación:** `RoleAssignmentsController.suspend` — `src/modules/practice/controllers/role-assignments.controller.ts:102`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2853,26 +3388,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /role-assignments/{roleId}/suspend` la atiende `RoleAssignmentsController.suspend` (src/modules/practice/controllers/role-assignments.controller.ts:80). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.suspendAssignment`. Actualiza practice.practitioner_role_assignments. Lee practice.practitioner_role_assignments.
+`POST /role-assignments/{roleId}/suspend` la atiende `RoleAssignmentsController.suspend` (src/modules/practice/controllers/role-assignments.controller.ts:102). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.suspendAssignment`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/role-assignments.controller.ts:80` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/role-assignments.controller.ts:80` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/role-assignments.controller.ts:102` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/practice/controllers/role-assignments.controller.ts:102` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `practice.practitioner_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment | `src/modules/practice/services/practice-workforce.service.ts:475` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `practice.practices` | LEE | LEE | DIRECTA | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleInScope → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
 
 ### Parámetros
 
@@ -2884,7 +3420,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/practice/dto/self-request-role-assignment.dto.ts:63` |
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | — | `src/modules/practice/dto/self-request-role-assignment.dto.ts:76` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2906,11 +3442,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:169` |
-| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:173` |
-| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:177` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:181` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:185` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:170` |
+| `practiceId` | `string` | Sí | — | — | Identificador asociado a practice. | `src/modules/practice/dto/responses.dto.ts:174` |
+| `practitionerProfileId` | `string` | Sí | — | — | Identificador asociado a practitioner profile. | `src/modules/practice/dto/responses.dto.ts:178` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:182` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:186` |
 
 ### Respuestas posibles
 
@@ -2920,7 +3456,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Vinculación profesional-organización no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La vinculación no admite esa transición desde su estado actual |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2936,14 +3471,14 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 28. GET /sites/{siteId}/care-spaces
+## 33. GET /sites/{siteId}/care-spaces
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los espacios de atención de la sede
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SitesController.listCareSpaces` — `src/modules/practice/controllers/sites.controller.ts:63`
+- **Implementación:** `SitesController.listCareSpaces` — `src/modules/practice/controllers/sites.controller.ts:69`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -2953,17 +3488,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /sites/{siteId}/care-spaces` la atiende `SitesController.listCareSpaces` (src/modules/practice/controllers/sites.controller.ts:63). Exige sesión con alguno de los roles SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN. Delega en `PracticeSitesService.listCareSpaces`. Lee practice.care_spaces, practice.practice_sites, practice.practices.
+`GET /sites/{siteId}/care-spaces` la atiende `SitesController.listCareSpaces` (src/modules/practice/controllers/sites.controller.ts:69). Exige sesión con alguno de los roles SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN. Delega en `PracticeSitesService.listCareSpaces`. Lee practice.care_spaces, practice.practice_sites, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN | `src/modules/practice/controllers/sites.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:63` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN | `src/modules/practice/controllers/sites.controller.ts:69` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:69` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2987,12 +3522,12 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del espacio. | `src/modules/practice/dto/responses.dto.ts:409` |
-| `practiceSiteId` | `string` | Sí | formato uuid | — | Sede a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:411` |
-| `code` | `string` | Sí | — | — | Código único dentro de la sede. | `src/modules/practice/dto/responses.dto.ts:413` |
-| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:415` |
-| `spaceTypeConceptId` | `string` | No | formato uuid | — | Tipo de espacio (quirófano, consulta, box…). | `src/modules/practice/dto/responses.dto.ts:417` |
-| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:419` |
+| `id` | `string` | Sí | formato uuid | — | Identificador del espacio. | `src/modules/practice/dto/responses.dto.ts:410` |
+| `practiceSiteId` | `string` | Sí | formato uuid | — | Sede a la que pertenece. | `src/modules/practice/dto/responses.dto.ts:412` |
+| `code` | `string` | Sí | — | — | Código único dentro de la sede. | `src/modules/practice/dto/responses.dto.ts:414` |
+| `name` | `string` | Sí | — | — | Nombre legible. | `src/modules/practice/dto/responses.dto.ts:416` |
+| `spaceTypeConceptId` | `string` | No | formato uuid | — | Tipo de espacio (quirófano, consulta, box…). | `src/modules/practice/dto/responses.dto.ts:418` |
+| `status` | `string` | Sí | formato uuid | — | Concepto de estado. | `src/modules/practice/dto/responses.dto.ts:420` |
 
 ### Respuestas posibles
 
@@ -3017,36 +3552,36 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 29. POST /sites/{siteId}/care-spaces
+## 34. POST /sites/{siteId}/care-spaces
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear un espacio de atención bajo una unidad/sitio
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SitesController.createCareSpace` — `src/modules/practice/controllers/sites.controller.ts:81`
+- **Implementación:** `SitesController.createCareSpace` — `src/modules/practice/controllers/sites.controller.ts:87`
 
 ### Qué es y para qué sirve (negocio)
 
 Crear un espacio de atención bajo una unidad/sitio. Caso de uso UC-14-05: Crear espacio de atención (AVAILABLE). Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:104`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:87`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /sites/{siteId}/care-spaces` la atiende `SitesController.createCareSpace` (src/modules/practice/controllers/sites.controller.ts:81). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCareSpaceDto` (6 campos, 2 obligatorios). Delega en `ClinicalStructureService.createCareSpace`. Crea filas en practice.care_spaces. Lee practice.care_spaces, practice.clinical_units, practice.practice_sites.
+`POST /sites/{siteId}/care-spaces` la atiende `SitesController.createCareSpace` (src/modules/practice/controllers/sites.controller.ts:87). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCareSpaceDto` (6 campos, 2 obligatorios). Delega en `ClinicalStructureService.createCareSpace`. Crea filas en practice.care_spaces. Lee practice.care_spaces, practice.clinical_units.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/sites.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:81` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/sites.controller.ts:87` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:87` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -3055,7 +3590,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 | `practice.care_spaces` | ESCRIBE | CREA | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → CareSpacesRepository.create | `src/modules/practice/repositories/care-spaces.repository.ts:83` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:61` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:57` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
 
 ### Parámetros
 
@@ -3102,12 +3636,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:100` |
-| `practiceSiteId` | `string` | Sí | — | — | Identificador asociado a practice site. | `src/modules/practice/dto/responses.dto.ts:104` |
-| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:108` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:112` |
-| `operationalStatus` | `string` | Sí | — | — | Valor de operational status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:116` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:120` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:101` |
+| `practiceSiteId` | `string` | Sí | — | — | Identificador asociado a practice site. | `src/modules/practice/dto/responses.dto.ts:105` |
+| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:109` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:113` |
+| `operationalStatus` | `string` | Sí | — | — | Valor de operational status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:117` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:121` |
 
 ### Respuestas posibles
 
@@ -3117,7 +3651,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe un espacio con ese código en el sitio |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sitio no está activo; PreconditionFailedException: La unidad no pertenece al sitio; PreconditionFailedException: El espacio padre no pertenece al sitio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -3134,36 +3667,36 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 30. POST /sites/{siteId}/clinical-units
+## 35. POST /sites/{siteId}/clinical-units
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una unidad clínica jerárquica
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SitesController.createClinicalUnit` — `src/modules/practice/controllers/sites.controller.ts:44`
+- **Implementación:** `SitesController.createClinicalUnit` — `src/modules/practice/controllers/sites.controller.ts:45`
 
 ### Qué es y para qué sirve (negocio)
 
 Crear una unidad clínica jerárquica. Caso de uso UC-14-04: Crear unidad clínica jerárquica. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:103`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practice/README.md:86`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 
 ### Cómo se atiende (sistema)
 
-`POST /sites/{siteId}/clinical-units` la atiende `SitesController.createClinicalUnit` (src/modules/practice/controllers/sites.controller.ts:44). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateClinicalUnitDto` (6 campos, 2 obligatorios). Delega en `ClinicalStructureService.createClinicalUnit`. Crea filas en practice.clinical_units. Lee practice.clinical_units, practice.practice_sites.
+`POST /sites/{siteId}/clinical-units` la atiende `SitesController.createClinicalUnit` (src/modules/practice/controllers/sites.controller.ts:45). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateClinicalUnitDto` (6 campos, 2 obligatorios). Delega en `ClinicalStructureService.createClinicalUnit`. Crea filas en practice.clinical_units. Lee practice.clinical_units.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/sites.controller.ts:44` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:44` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/sites.controller.ts:45` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:45` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -3171,7 +3704,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 |---|---|---|---|---|---|
 | `practice.clinical_units` | ESCRIBE | CREA | DIRECTA | SitesController.createClinicalUnit → ClinicalStructureService.createClinicalUnit → ClinicalUnitsRepository.create | `src/modules/practice/repositories/clinical-units.repository.ts:82` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | SitesController.createClinicalUnit → ClinicalStructureService.createClinicalUnit → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:57` |
-| `practice.practice_sites` | LEE | LEE | DIRECTA | SitesController.createClinicalUnit → ClinicalStructureService.createClinicalUnit → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
 
 ### Parámetros
 
@@ -3218,11 +3750,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:76` |
-| `practiceSiteId` | `string` | Sí | — | — | Identificador asociado a practice site. | `src/modules/practice/dto/responses.dto.ts:80` |
-| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:84` |
-| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:88` |
-| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:92` |
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:77` |
+| `practiceSiteId` | `string` | Sí | — | — | Identificador asociado a practice site. | `src/modules/practice/dto/responses.dto.ts:81` |
+| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:85` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:89` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:93` |
 
 ### Respuestas posibles
 
@@ -3232,7 +3764,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ya existe una unidad con ese código en el sitio |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sitio no está activo; PreconditionFailedException: La unidad padre no pertenece al sitio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -3246,6 +3777,133 @@ _Ninguna prueba existente menciona esta operación._
 ### Flujos
 
 - Módulo Practice (14) — etapa `UC-14-04`
+
+---
+
+## 36. POST /tenants/{tenantId}/practices
+
+- **Origen:** CONTRATO
+- **Nombre:** Crear la práctica y la primera sede de una organización
+- **Bloque:** Práctica y Agenda
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `OrganizationPracticesController.create` — `src/modules/practice/controllers/organization-practices.controller.ts:41`
+
+### Qué es y para qué sirve (negocio)
+
+Crear la práctica y la primera sede de una organización. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+
+### Cómo se atiende (sistema)
+
+`POST /tenants/{tenantId}/practices` la atiende `OrganizationPracticesController.create` (src/modules/practice/controllers/organization-practices.controller.ts:41). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateOrganizationPracticeDto` (7 campos, 6 obligatorios). Delega en `OrganizationPracticeProvisioningService.provision`. Crea filas en common.addresses, practice.practice_sites, practice.practices. Lee directory.tenant_memberships, directory.tenants, practice.practice_sites, practice.practices.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/practice/controllers/organization-practices.controller.ts:41` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/practice/controllers/organization-practices.controller.ts:41` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | ESCRIBE | CREA | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:118` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenants` | LEE | LEE | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
+| `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:111` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → PracticeSitesRepository.findByPracticeAndCode | `src/modules/practice/repositories/practice-sites.repository.ts:85` |
+| `practice.practices` | ESCRIBE | CREA | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:150` |
+| `practice.practices` | LEE | LEE | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → PracticesRepository.findByTenantAndCode | `src/modules/practice/repositories/practices.repository.ts:112` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `tenantId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `CreateOrganizationPracticeDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `name` | `string` | Sí | longitud mínima 2; longitud máxima 200 | `@IsString()` `@MinLength(2)` `@MaxLength(200)` | Nombre del centro médico | `src/modules/practice/dto/create-organization-practice.dto.ts:77` |
+| `site` | `CreateOrganizationPracticeSiteDto` | Sí | — | `@IsDefined()` `@ValidateNested()` `@Type(() => CreateOrganizationPracticeSiteDto)` | — | `src/modules/practice/dto/create-organization-practice.dto.ts:84` |
+| `site.name` | `string` | Sí | longitud mínima 2; longitud máxima 200 | `@IsString()` `@MinLength(2)` `@MaxLength(200)` | Nombre de la sede | `src/modules/practice/dto/create-organization-practice.dto.ts:28` |
+| `site.addressText` | `string` | Sí | longitud mínima 2; longitud máxima 500 | `@IsString()` `@MinLength(2)` `@MaxLength(500)` | Dirección en una línea | `src/modules/practice/dto/create-organization-practice.dto.ts:39` |
+| `site.latitude` | `number` | Sí | mínimo -90; máximo 90 | `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/practice/dto/create-organization-practice.dto.ts:46` |
+| `site.longitude` | `number` | Sí | mínimo -180; máximo 180 | `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/practice/dto/create-organization-practice.dto.ts:53` |
+| `site.cityText` | `string` | No | longitud máxima 255 | `@IsOptional()` `@IsString()` `@MaxLength(255)` | — | `src/modules/practice/dto/create-organization-practice.dto.ts:60` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "name": "Nombre de ejemplo",
+  "site": {
+    "name": "Nombre de ejemplo",
+    "addressText": "Av. San Martín 123",
+    "latitude": -17.7833,
+    "longitude": -63.1821
+  }
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "name": "Nombre de ejemplo",
+  "site": {
+    "name": "Nombre de ejemplo",
+    "addressText": "Av. San Martín 123",
+    "latitude": -17.7833,
+    "longitude": -63.1821,
+    "cityText": "Santa Cruz de la Sierra"
+  }
+}
+```
+
+</details>
+
+### Respuesta — `Promise<OrganizationPracticeResponseDto>` · DTO `OrganizationPracticeResponseDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `practiceId` | `string` | Sí | formato uuid | — | Identificador de la práctica creada. | `src/modules/practice/dto/create-organization-practice.dto.ts:90` |
+| `practiceSiteId` | `string` | Sí | formato uuid | — | Identificador de su primera sede. | `src/modules/practice/dto/create-organization-practice.dto.ts:92` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Organización no encontrada |
+| 409 | `CONFLICT` | ConflictException: La organización ya tiene una práctica con ese nombre |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La organización todavía no fue verificada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/practice.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| INTEGRACION | `test/integration/medical-center-registration.int-spec.ts:182` |
+| CONTROLADOR | `src/modules/practice/controllers/organization-practices.controller.spec.ts:28` |
+
+### Flujos
+
+- Módulo Practice (14) — etapa `ctrl:OrganizationPracticesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
 
 ---
 

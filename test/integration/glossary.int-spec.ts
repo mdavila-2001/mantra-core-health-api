@@ -39,6 +39,15 @@ describe('Glosario médico (integración)', () => {
   const allTermsValueSetId = glossaryValueSetId(
     GLOSSARY_ALL_TERMS.internalCode,
   );
+  /**
+   * Términos curados de anatomía, tomados del propio catálogo. El número no se
+   * escribe a mano: el catálogo crece (de 6 a 16 términos de anatomía) y una
+   * cifra fija en la prueba la deja desfasada en cada ampliación sin que el
+   * producto haya cambiado.
+   */
+  const anatomyTerms = GLOSSARY_TERMS.filter(
+    (term) => term.categoryKey === anatomyCategory.key,
+  );
 
   beforeAll(async () => {
     ctx = await bootstrapTestApp();
@@ -67,19 +76,20 @@ describe('Glosario médico (integración)', () => {
       expect(res.body.items[0]).toMatchObject({
         id: anatomyValueSetId,
         internalCode: anatomyCategory.internalCode,
-        // 6 términos de anatomía en el catálogo curado (ver glossary-terms.catalog.spec.ts).
-        memberCount: 6,
+        // Los términos de anatomía del catálogo curado (ver glossary-terms.catalog.spec.ts).
+        memberCount: anatomyTerms.length,
       });
     });
 
-    it('GET /terminology/concepts?valueSetId=<anatomía> devuelve sólo los 6 términos de esa categoría', async () => {
+    it('GET /terminology/concepts?valueSetId=<anatomía> devuelve sólo los términos de esa categoría', async () => {
       const res = await http()
         .get('/terminology/concepts')
         .query({ valueSetId: anatomyValueSetId, lang: 'ES', limit: 50 })
         .set(bearer(ctx.adminToken))
         .expect(200);
 
-      expect(res.body.count).toBe(6);
+      expect(anatomyTerms.length).toBeGreaterThan(0);
+      expect(res.body.count).toBe(anatomyTerms.length);
       for (const item of res.body.items) {
         expect(item.category).toMatchObject({
           internalCode: anatomyCategory.internalCode,
@@ -261,7 +271,12 @@ describe('Glosario médico (integración)', () => {
     });
 
     it('respalda a castellano cuando el inglés no está cargado (locale fallback)', async () => {
-      // "pulmon" no tiene contenido en inglés en el catálogo curado.
+      // "pulmon" no tiene contenido en inglés en el catálogo curado: se
+      // comprueba contra el catálogo y la definición esperada sale de él, no de
+      // una frase copiada que la próxima revisión médica deja desfasada.
+      const pulmon = GLOSSARY_TERMS.find((term) => term.slug === 'pulmon')!;
+      expect(pulmon.clinicalDefinitionEn).toBeUndefined();
+      expect(pulmon.plainSummaryEn).toBeUndefined();
       const conceptId = glossaryTermConceptId('pulmon');
 
       const res = await http()
@@ -271,8 +286,8 @@ describe('Glosario médico (integración)', () => {
         .expect(200);
 
       expect(res.body.clinicalDefinition).toMatchObject({ translated: false });
-      expect(res.body.clinicalDefinition.text).toContain(
-        'esponjoso del sistema respiratorio',
+      expect(res.body.clinicalDefinition.text).toBe(
+        pulmon.clinicalDefinitionEs,
       );
       expect(res.body.plainSummary).toMatchObject({ translated: false });
     });

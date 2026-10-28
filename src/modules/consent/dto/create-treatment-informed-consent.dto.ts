@@ -25,7 +25,7 @@ export type TreatmentDecision = 'ACCEPTED' | 'DECLINED';
 /**
  * Cuerpo de `POST /consent/treatment-informed-consents` (UC-07-08).
  *
- * v4263: el consentimiento puede ir **dirigido** a un objeto clínico concreto
+ * v4266: el consentimiento puede ir **dirigido** a un objeto clínico concreto
  * (`targetType` + `targetId`) y llevar los elementos de información que exige
  * la norma. Todos los campos nuevos son opcionales (compatibilidad hacia
  * atrás); las reglas cruzadas (los dos de target o ninguno, información

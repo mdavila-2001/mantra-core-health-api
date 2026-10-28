@@ -22,6 +22,10 @@ import { CLIN } from '../clinical.concepts';
 import { ClinicalNotificationsService } from './clinical-notifications.service';
 import { EncounterSealService } from './encounter-seal.service';
 import { ClinicalReadService } from './clinical-read.service';
+import {
+  AuthzCareRelationshipsService,
+  type CareRelationshipRequestNotice,
+} from '../../authz/services';
 // P25 (BR-11): adjuntar un archivo ya subido al encuentro por su ruta clínica,
 // calcado de `ProceduresService.attachFile`.
 import { FilesService } from '../../common/services';
@@ -55,6 +59,7 @@ export class EncountersService {
    * @param logger - Valor de logger requerido por la operación.
    * @param clinicalRead - Política de escritura sobre la historia (MCH-007).
    * @param filesService - Vincula archivos ya subidos al encuentro (P25).
+   * @param careRelationships - Deja la relación asistencial que exige el cobro con seguro (REQ-16-035).
    */
   constructor(
     private readonly em: EntityManager,
@@ -65,6 +70,7 @@ export class EncountersService {
     private readonly logger: PinoLogger,
     private readonly clinicalRead: ClinicalReadService,
     private readonly filesService: FilesService,
+    private readonly careRelationships: AuthzCareRelationshipsService,
   ) {
     this.logger.setContext(EncountersService.name);
   }
@@ -142,7 +148,8 @@ export class EncountersService {
       },
       'Opening encounter',
     );
-    return this.em.transactional(async (tx) => {
+    const requests: CareRelationshipRequestNotice[] = [];
+    const response = await this.em.transactional(async (tx) => {
       if (dto.episodeId) {
         const episode = await this.episodesRepo.findById(tx, dto.episodeId);
         if (!episode) {
@@ -214,12 +221,35 @@ export class EncountersService {
       }
       await tx.flush();
 
+      // REQ-16-035: el cobro con seguro exige relación asistencial vigente y
+      // ningún otro flujo de atención la crea. Nace con el encuentro.
+      requests.push(
+        ...(await this.careRelationships.recordEncounterCareRelationships(
+          tx,
+          {
+            patientProfileId: dto.patientProfileId,
+            tenantId: dto.tenantId,
+            practitionerProfileIds: [
+              ...(dto.primaryPractitionerId ? [dto.primaryPractitionerId] : []),
+              ...(dto.participants ?? []).map((p) => p.practitionerProfileId),
+            ],
+          },
+          actor,
+        )),
+      );
+
       this.logger.info(
         { operation: 'clinical.encounter.check-in', encounterId: encounter.id },
         'Encounter opened',
       );
       return this.toResponse(encounter, participantIds, locationIds);
     });
+    // Con el encuentro ya confirmado: no se avisa de una solicitud que se deshizo.
+    await this.careRelationships.notifyEncounterCareRelationshipRequests(
+      requests,
+      actor,
+    );
+    return response;
   }
 
   /**

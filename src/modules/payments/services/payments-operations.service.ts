@@ -22,6 +22,14 @@ import {
   ReconciliationRunResponseDto,
 } from '../dto';
 import { PaymentsErrorReason } from '../payments.error-reasons';
+import {
+  addAmounts,
+  compareAmounts,
+  isPositiveAmount,
+  normalizeAmount,
+  roundAmount,
+  subtractAmounts,
+} from './payment-money';
 
 const CURRENCY_CONCEPT: Readonly<Record<'BOB' | 'USD', string>> = {
   BOB: CONCEPTS.CURRENCY_BOB,
@@ -231,12 +239,15 @@ export class PaymentsOperationsService {
       'Executing payout',
     );
 
-    const total = dto.items.reduce(
-      (sum, item) =>
-        sum + Number(item.amount) - Number(item.commissionAmount ?? 0),
-      0,
+    // Neto exacto a la escala de la moneda: los ítems llegan como cadena y no
+    // pasan por `Number` (0.30 - 0.20 daba 0.09999999999999998).
+    const total = roundAmount(
+      subtractAmounts(
+        addAmounts(dto.items.map((item) => item.amount)),
+        addAmounts(dto.items.map((item) => item.commissionAmount ?? '0')),
+      ),
     );
-    if (total <= 0) {
+    if (!isPositiveAmount(total)) {
       throw new PreconditionFailedException(
         'El importe neto del payout debe ser positivo',
         {
@@ -252,7 +263,7 @@ export class PaymentsOperationsService {
         payeeTypeConceptId: CONCEPTS.PAYOUT_PAYEE_ACCOUNT,
         payeeRefId: dto.payeeRefId,
         gatewayId: dto.gatewayId,
-        amount: total.toFixed(2),
+        amount: total,
         currencyConceptId: CURRENCY_CONCEPT[dto.currency],
         periodStart: new Date(dto.periodStart),
         periodEnd: new Date(dto.periodEnd),
@@ -276,7 +287,7 @@ export class PaymentsOperationsService {
 
       return {
         id: payout.id,
-        amount: total.toFixed(2),
+        amount: total,
         itemCount: dto.items.length,
         statusConceptId: CONCEPTS.PAYOUT_PAID,
       };
@@ -312,11 +323,11 @@ export class PaymentsOperationsService {
       let matched = 0;
       let unmatched = 0;
       let exceptions = 0;
-      let totalGateway = 0;
-      let totalLedger = 0;
+      const gatewayAmounts: string[] = [];
+      const ledgerAmounts: string[] = [];
 
       for (const record of dto.providerRecords) {
-        totalGateway += Number(record.providerAmount);
+        gatewayAmounts.push(record.providerAmount);
 
         const local = await this.transactionsRepo.findByGatewayRef(
           tx,
@@ -325,7 +336,7 @@ export class PaymentsOperationsService {
         const isMatch = local !== null;
         if (isMatch) {
           matched += 1;
-          totalLedger += Number(local.amount);
+          ledgerAmounts.push(local.amount);
         } else {
           unmatched += 1;
         }
@@ -358,14 +369,14 @@ export class PaymentsOperationsService {
           continue;
         }
 
-        const difference = Number(record.providerAmount) - Number(local.amount);
-        if (difference !== 0) {
+        const difference = subtractAmounts(record.providerAmount, local.amount);
+        if (compareAmounts(difference, '0') !== 0) {
           this.operationsRepo.createReconciliationException(tx, {
             reconciliationRunId: run.id,
             exceptionTypeConceptId: CONCEPTS.RECON_EXC_AMOUNT_MISMATCH,
             paymentTransactionId: local.id,
             externalRef: record.externalTransactionId,
-            amountDifference: difference.toFixed(2),
+            amountDifference: normalizeAmount(difference),
             statusConceptId: CONCEPTS.RECON_EXC_OPEN,
             actorUserId: actor.id,
           });
@@ -373,10 +384,12 @@ export class PaymentsOperationsService {
         }
       }
 
+      const totalGateway = normalizeAmount(addAmounts(gatewayAmounts));
+      const totalLedger = normalizeAmount(addAmounts(ledgerAmounts));
       run.matchedCount = matched;
       run.unmatchedCount = unmatched;
-      run.totalGateway = totalGateway.toFixed(2);
-      run.totalLedger = totalLedger.toFixed(2);
+      run.totalGateway = totalGateway;
+      run.totalLedger = totalLedger;
       run.statusConceptId = CONCEPTS.RECON_COMPLETED;
       run.finishedAt = new Date();
       touch(run, actor.id);
@@ -397,8 +410,8 @@ export class PaymentsOperationsService {
         matchedCount: matched,
         unmatchedCount: unmatched,
         exceptionCount: exceptions,
-        totalGateway: totalGateway.toFixed(2),
-        totalLedger: totalLedger.toFixed(2),
+        totalGateway,
+        totalLedger,
         statusConceptId: CONCEPTS.RECON_COMPLETED,
       };
     });

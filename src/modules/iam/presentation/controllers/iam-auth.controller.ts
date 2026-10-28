@@ -22,6 +22,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import {
+  Audited,
   CurrentUser,
   NotAudited,
   Public,
@@ -35,7 +36,7 @@ import {
   type AuthenticatedUser,
   type RefreshCookieEnv,
 } from '../../../../common';
-import type { UploadedFileBytes } from '../../../common/services';
+import type { RegistrationUploadedFile } from '../../application/ports/registration-files.port';
 import {
   IamAuthService,
   IamAssistedRegistrationService,
@@ -174,9 +175,41 @@ export class IamAuthController {
     summary: 'Pre-cargar una imagen de firma o sello para el registro',
   })
   uploadRegistrationSignatureImage(
-    @UploadedFile() file: UploadedFileBytes | undefined,
+    @UploadedFile() file: RegistrationUploadedFile | undefined,
   ): Promise<RegistrationDocumentUploadResponseDto> {
     return this.registrationDocumentUploadService.uploadSignatureImage(file);
+  }
+
+  /** Precarga del logo del consultorio propio: máximo 2 MB, imagen NORMAL. */
+  @NotAudited(
+    'Archivo anónimo previo al alta (common.files vía uploadAnonymous); se vincula al usuario al registrarse.',
+  )
+  @Post('upload-registration-logo')
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 2 * 1024 * 1024, files: 1 },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @ApiOperation({
+    summary: 'Pre-cargar el logo del consultorio propio para el registro',
+    description:
+      'png, jpeg o webp de hasta 2 MB. El `fileId` se reenvía en `ownSite.logoFileId` del alta, que lo reclama en su misma transacción.',
+  })
+  uploadRegistrationLogo(
+    @UploadedFile() file: RegistrationUploadedFile | undefined,
+  ): Promise<RegistrationDocumentUploadResponseDto> {
+    return this.registrationDocumentUploadService.uploadOwnSiteLogo(file);
   }
 
   /**
@@ -219,7 +252,7 @@ export class IamAuthController {
     summary: 'Pre-cargar un PDF para un registro de organización o profesional',
   })
   uploadRegistrationDocument(
-    @UploadedFile() file: UploadedFileBytes | undefined,
+    @UploadedFile() file: RegistrationUploadedFile | undefined,
   ): Promise<RegistrationDocumentUploadResponseDto> {
     return this.registrationDocumentUploadService.upload(file);
   }
@@ -441,6 +474,10 @@ export class IamAuthController {
    * aplicación sólo limpiaba el navegador y el refresh token seguía sirviendo
    * hasta caducar.
    */
+  @Audited({
+    action: 'SESSION_LOGGED_OUT',
+    entity: 'session',
+  })
   @Post('logout')
   @ApiBearerAuth()
   // Cerrar la sesión propia no toca datos de ningún tenant: exigir contexto de
@@ -461,6 +498,10 @@ export class IamAuthController {
   }
 
   /** UC-01-08. */
+  @Audited({
+    action: 'ALL_SESSIONS_LOGGED_OUT',
+    entity: 'session',
+  })
   @Post('logout-all')
   @ApiBearerAuth()
   @TenantAgnostic()
@@ -473,6 +514,10 @@ export class IamAuthController {
   }
 
   /** UC-01-11. */
+  @Audited({
+    action: 'SESSIONS_PURGED',
+    entity: 'session',
+  })
   @Post('sessions/purge')
   @Roles('SECURITY_ADMIN')
   @ApiBearerAuth()

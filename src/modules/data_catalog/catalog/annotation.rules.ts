@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import {
+  COLUMN_REQUIRED_SEMANTIC_FIELDS,
   FILLER_PATTERN,
   MIN_REJECTION_LENGTH,
   MIN_SEMANTIC_LENGTH,
@@ -91,15 +92,26 @@ export interface Violation {
   message: string;
 }
 
+/** A qué apunta una ficha: un objeto (tabla, vista) o una de sus columnas. */
+export type TargetKind = 'OBJECT' | 'COLUMN';
+
 /**
- * Qué le falta a una ficha para enviarse a revisión: propósito, razón de existir y grano de fila
- * contestados con algo que explique, o declarados como pregunta abierta con su campo.
+ * Qué le falta a una ficha para enviarse a revisión. La de un objeto: propósito, razón de existir
+ * y grano de fila; la de una columna: su definición. Cada uno contestado con algo que explique, o
+ * declarado como pregunta abierta con su campo.
  */
-export function submissionViolations(content: AnnotationContent): Violation[] {
+export function submissionViolations(
+  content: AnnotationContent,
+  targetKind: TargetKind = 'OBJECT',
+): Violation[] {
   const declaradas = new Set(content.openQuestions.map((q) => q.field));
   const violaciones: Violation[] = [];
-  for (const campo of REQUIRED_SEMANTIC_FIELDS) {
-    const valor = content[campo];
+  const requeridos: readonly (keyof AnnotationContent)[] =
+    targetKind === 'OBJECT'
+      ? REQUIRED_SEMANTIC_FIELDS
+      : COLUMN_REQUIRED_SEMANTIC_FIELDS;
+  for (const campo of requeridos) {
+    const valor = content[campo] as string | null;
     if (!valor) {
       if (!declaradas.has(campo))
         violaciones.push({

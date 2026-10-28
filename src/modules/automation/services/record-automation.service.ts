@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
+  DomainException,
+  ErrorCode,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -17,6 +19,11 @@ import {
   TargetRecordRepository,
   parseTargetResource,
 } from '../repositories';
+import {
+  AUTOMATION_SCOPE_FAILURES,
+  inTenantScope,
+  loadAgentRunInScope,
+} from './automation-scope';
 import {
   ExecuteRecordAutomationDto,
   ExecuteRecordAutomationResponseDto,
@@ -82,6 +89,11 @@ export class RecordAutomationService {
    * El orden importa: se comprueba que el run está en marcha —no en pausa
    * esperando una aprobación— **antes** de escribir nada. Escribir con el run
    * pausado sería exactamente lo que el guardrail acaba de impedir.
+   *
+   * Toda la cadena (run, workflow run, agente y automatización) tiene que ser del
+   * tenant del contexto, y se comprueba antes de mirar estados o escribir. Un
+   * UUID ajeno responde igual que uno inexistente. El destino se valida contra la
+   * lista de esquemas permitidos antes de ejecutar nada.
    */
   async executeRecordAutomation(
     agentRunId: string,
@@ -89,18 +101,15 @@ export class RecordAutomationService {
     dto: ExecuteRecordAutomationDto,
     _actor: AuthenticatedUser,
   ): Promise<ExecuteRecordAutomationResponseDto> {
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const agentRun = await this.runsRepo.findAgentRunForUpdate(
+      const { agentRun, agent } = await loadAgentRunInScope(
         tx,
+        this.runsRepo,
+        this.agentsRepo,
         agentRunId,
+        tenantId,
       );
-      if (!agentRun) {
-        throw new ResourceNotFoundException(
-          'Ejecución de agente no encontrada.',
-          { agentRunId },
-          AutomationErrorReason.AGENT_RUN_NOT_FOUND,
-        );
-      }
       if (agentRun.statusConceptId !== CONCEPTS.AUTO_AGENT_RUN_RUNNING) {
         throw new PreconditionFailedException(
           'La ejecución del agente no está en marcha; no puede escribir registros.',
@@ -109,20 +118,14 @@ export class RecordAutomationService {
         );
       }
 
-      const automation =
+      const automation = inTenantScope(
         await this.governanceRepo.findRecordAutomationForUpdate(
           tx,
           recordAutomationId,
-        );
-      if (!automation) {
-        throw new ResourceNotFoundException(
-          'Automatización de registro no encontrada.',
-          {
-            recordAutomationId,
-          },
-          AutomationErrorReason.RECORD_AUTOMATION_NOT_FOUND,
-        );
-      }
+        ),
+        tenantId,
+        AUTOMATION_SCOPE_FAILURES.recordAutomation,
+      );
       if (!automation.isActive) {
         throw new PreconditionFailedException(
           'La automatización de registro no está activa.',
@@ -142,10 +145,9 @@ export class RecordAutomationService {
         );
       }
 
-      const agent = await this.agentsRepo.findAgentById(tx, agentRun.agentId);
       // La escritura se atribuye a la identidad de servicio del agente. Es lo que
       // hace que, mirando la fila escrita, se sepa que la puso un agente y cuál.
-      const writerUserId = agent?.actsAsUserId;
+      const writerUserId = agent.actsAsUserId;
       if (!writerUserId) {
         throw new PreconditionFailedException(
           'El agente no tiene identidad de servicio; su escritura no sería atribuible.',
@@ -159,10 +161,15 @@ export class RecordAutomationService {
       const upsert =
         automation.writeModeConceptId === CONCEPTS.AUTO_WRITE_MODE_UPSERT;
 
+      // El destino se valida antes de construir nada: un esquema no permitido o
+      // un identificador inválido se rechaza también en modo borrador.
+      const target = parseTargetResource(automation.targetResourceType);
+
       const columns = this.applyFieldMapping(
         automation.fieldMappingJson,
         dto.payloadJson,
         writerUserId,
+        tenantId,
       );
       this.assertValidation(automation.validationJson, columns);
 
@@ -179,7 +186,6 @@ export class RecordAutomationService {
       let written = false;
 
       if (!draft) {
-        const target = parseTargetResource(automation.targetResourceType);
         const result = await this.targetRepo.writeRecord(
           tx,
           target,
@@ -255,6 +261,7 @@ export class RecordAutomationService {
     fieldMappingJson: unknown,
     payload: Record<string, unknown>,
     writerUserId: string,
+    tenantId: string,
   ): Record<string, unknown> {
     if (!fieldMappingJson || typeof fieldMappingJson !== 'object') {
       throw new PreconditionFailedException(
@@ -265,6 +272,15 @@ export class RecordAutomationService {
     }
 
     const mapping = fieldMappingJson as Record<string, FieldMapping>;
+    if (Object.keys(mapping).length === 0) {
+      throw new DomainException(
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_FAILED,
+        'La automatización de registro declara un mapeo de campos vacío.',
+        undefined,
+        AutomationErrorReason.AUTOMATION_RECORD_MAPPING_EMPTY,
+      );
+    }
     const columns: Record<string, unknown> = {};
 
     for (const [column, rule] of Object.entries(mapping)) {
@@ -312,6 +328,12 @@ export class RecordAutomationService {
     // de recorrerlo. Si el mapeo trajera estas columnas, quedarían pisadas.
     columns.created_by_user_id = writerUserId;
     columns.updated_by_user_id = writerUserId;
+    // Igual con el tenant propietario de la fila, y siempre: aunque el mapeo no
+    // declare la columna, la fila es del tenant de la automatización y no de lo
+    // que traiga el payload del agente. Una tabla destino sin `tenant_id` no
+    // admite escritura automática: la base rechaza la columna (400) en vez de
+    // dejar una fila que ningún tenant pueda reclamar como suya.
+    columns.tenant_id = tenantId;
 
     return columns;
   }

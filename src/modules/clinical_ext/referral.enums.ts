@@ -1,5 +1,5 @@
 /**
- * Enumeraciones de la derivación a servicios específicos (v4263).
+ * Enumeraciones de la derivación a servicios específicos (v4266).
  *
  * En la base son `varchar` + `CHECK` (`ck_referrals_referral_type`); los
  * estados legibles se derivan del concepto de estado.

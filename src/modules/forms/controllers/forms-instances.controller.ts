@@ -45,8 +45,10 @@ import {
  *
  * Las lecturas anclan la propiedad en el encuentro que la instancia referencia
  * (el frontend abre instancias con `resourceId` = encuentro): el service exige
- * que ese encuentro pertenezca al tenant del contexto y responde 404 ante lo
- * ajeno o lo que no pueda anclarse.
+ * que ese encuentro pertenezca al tenant del contexto, que el actor pueda leer
+ * la historia de su paciente (`ClinicalReadService.assertCanReadHistory`) y
+ * responde el mismo 404 ante lo ajeno, lo no autorizado o lo que no pueda
+ * anclarse.
  */
 @ApiTags('forms-instances')
 @ApiBearerAuth()
@@ -84,9 +86,14 @@ export class FormsInstancesController {
   })
   listInstances(
     @Query('encounter', ParseUUIDPipe) encounterId: string,
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<FormInstanceListResponseDto> {
-    return this.readService.listInstancesByEncounter(encounterId, limit ?? 50);
+    return this.readService.listInstancesByEncounter(
+      encounterId,
+      limit ?? 50,
+      actor,
+    );
   }
 
   /** Fase 1 de lecturas: la instancia con sus valores vigentes. */
@@ -97,8 +104,9 @@ export class FormsInstancesController {
   })
   getInstance(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<FormInstanceDetailResponseDto> {
-    return this.readService.getInstance(id);
+    return this.readService.getInstance(id, actor);
   }
 
   /** UC-09-07. */

@@ -9,7 +9,7 @@
 ## Proceso: app
 
 - **Código:** `app` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 6
-- **Actores:** Cualquier sesión válida · Público (sin sesión)
+- **Actores:** Cualquier sesión válida · PLATFORM_ADMIN · Público (sin sesión) · SECURITY_ADMIN · SRE
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** —
 
@@ -24,9 +24,9 @@ _Sin fuente: ni el README del módulo ni el modelo lo describen._
 | `ctrl:AppController` | Operaciones de AppController que el README no asigna a un caso de uso | GET / | Cualquier sesión válida | BAJO | 0 |
 |  |  | GET /health | Público (sin sesión) | BAJO | 0 |
 |  |  | GET /liveness | Público (sin sesión) | BAJO | 0 |
-|  |  | GET /readiness | Público (sin sesión) | BAJO | 0 |
-| `ctrl:DataSourcesController` | Operaciones de DataSourcesController que el README no asigna a un caso de uso | GET /health/data-sources | Cualquier sesión válida | BAJO | 0 |
-|  |  | GET /health/data-sources/metrics | Cualquier sesión válida | BAJO | 0 |
+|  |  | GET /readiness | Público (sin sesión) | BAJO | 1 |
+| `ctrl:DataSourcesController` | Operaciones de DataSourcesController que el README no asigna a un caso de uso | GET /health/data-sources | PLATFORM_ADMIN · SRE · SECURITY_ADMIN | BAJO | 0 |
+|  |  | GET /health/data-sources/metrics | PLATFORM_ADMIN · SRE · SECURITY_ADMIN | BAJO | 0 |
 
 ### Diagrama — etapas `ctrl:AppController`, `ctrl:DataSourcesController`
 
@@ -34,6 +34,8 @@ _Sin fuente: ni el README del módulo ni el modelo lo describen._
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a4(["Público (sin sesión)"]):::actor
+  a9(["PLATFORM_ADMIN · SRE · SECURITY_ADMIN"]):::actor
+  t7[("terminology.catalog_concepts")]:::tabla
   subgraph s0["ctrl:AppController · Operaciones de AppController que el README no asigna a un…"]
     o1["GET /"]:::op
     o3["GET /health"]:::op
@@ -41,15 +43,16 @@ flowchart LR
     o6["GET /readiness"]:::op
   end
   subgraph s1["ctrl:DataSourcesController · Operaciones de DataSourcesController que el README…"]
-    o7["GET /health/data-sources"]:::op
-    o8["GET /health/data-sources/metrics"]:::op
+    o8["GET /health/data-sources"]:::op
+    o10["GET /health/data-sources/metrics"]:::op
   end
   a2 --> o1
   a4 --> o3
   a4 --> o5
   a4 --> o6
-  a2 --> o7
-  a2 --> o8
+  o6 -->|"LEE"| t7
+  a9 --> o8
+  a9 --> o10
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -117,8 +120,7 @@ Sonda de readiness de dependencias obligatorias
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
-| 500 | `INTERNAL` | Error: MongoDB no confirmó el ping; Error: Redis no respondió PONG; Error: OpenSearch está en estado red; Error: RLS_ENFORCE=true pero el rol de runtime "{role.rolsuper ? 'es superusua…}": las políticas no aíslan nada / RLS_ENFORCE=true pero no se pudo resolver el rol de… |
-| 503 | `DEPENDENCY_UNAVAILABLE` | ServiceUnavailableException: {{ code: ErrorCode.DEPENDENCY_UNAVAILABLE, message: 'Una o m…} |
+| 500 | `INTERNAL` | SchemaIntegrityIncompleteError: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar; SeedCoreIncompleteError: Seeds núcleo fallidos: {failed.join(', ')}; SeedCoreIncompleteError: Catálogo de conceptos sin materializar: faltan {ids.length - present} de {ids.length}; Error: MongoDB no confirmó el ping; Error: Redis no respondió PONG; Error: OpenSearch está en estado red; Error: El rol de runtime {violations.join('; ')}: las políticas no aíslan nada |
 
 ```mermaid
 flowchart TD
@@ -127,40 +129,60 @@ flowchart TD
   n1 --> n2
   n3["Llama a AppReadinessService.check"]:::llamada
   n2 --> n3
-  n4["Llama a DocumentStoreService.ping"]:::llamada
+  n4["Transacción: probe(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a DocumentStoreRepository.ping"]:::llamada
+  n5["Llama a AppReadinessService.checkSchemaIntegrity"]:::llamada
   n4 --> n5
-  n6["Llama a MongoConnection.ping"]:::llamada
+  n6{"this.schemaIntegrity && !this.schemaIntegrity.isComplete()"}:::decision
   n5 --> n6
-  n7{"result.ok !== 1"}:::decision
-  n6 --> n7
-  n8(["500 INTERNAL MongoDB no confirmó el ping"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a RedisRuntimeService.ping"]:::llamada
-  n7 -->|"no"| n9
-  n10{"response !== 'PONG'"}:::decision
-  n9 --> n10
-  n11(["500 INTERNAL Redis no respondió PONG"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a SearchIndexService.ping"]:::llamada
-  n10 -->|"no"| n12
-  n13{"response.body.status === 'red'"}:::decision
-  n12 --> n13
-  n14(["500 INTERNAL OpenSearch está en estado red"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a AppReadinessService.checkRls"]:::llamada
-  n13 -->|"no"| n15
-  n16{"!role || role.rolbypassrls || role.rolsuper"}:::decision
+  n7(["500 INTERNAL Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a AppReadinessService.checkSeedCore"]:::llamada
+  n6 -->|"no"| n8
+  n9{"failed.length › 0"}:::decision
+  n8 --> n9
+  n10(["500 INTERNAL Seeds núcleo fallidos: {failed.join(', ')}"]):::error
+  n9 -->|"sí"| n10
+  n11[("LEE terminology.catalog_concepts")]:::efecto
+  n9 -->|"no"| n11
+  n12{"present ‹ ids.length"}:::decision
+  n11 --> n12
+  n13(["500 INTERNAL Catálogo de conceptos sin materializar: faltan {ids.length - present} de {ids.length}"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a DocumentStoreService.ping"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a DocumentStoreRepository.ping"]:::llamada
+  n14 --> n15
+  n16["Llama a MongoConnection.ping"]:::llamada
   n15 --> n16
-  n17(["500 INTERNAL RLS_ENFORCE=true pero el rol de runtime '{role.rolsuper ? 'es superusua…}': las políticas no aís…"]):::error
-  n16 -->|"sí"| n17
-  n18{"Object.values(checks).some((check) =› check.status === 'down')"}:::decision
-  n16 -->|"no"| n18
-  n19(["503 DEPENDENCY_UNAVAILABLE {{ code: ErrorCode.DEPENDENCY_UNAVAILABLE, message: 'Una o m…}"]):::error
-  n18 -->|"sí"| n19
-  n20(("200 Responde con éxito")):::ok
-  n18 -->|"no"| n20
+  n17{"result.ok !== 1"}:::decision
+  n16 --> n17
+  n18(["500 INTERNAL MongoDB no confirmó el ping"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a RedisRuntimeService.ping"]:::llamada
+  n17 -->|"no"| n19
+  n20{"response !== 'PONG'"}:::decision
+  n19 --> n20
+  n21(["500 INTERNAL Redis no respondió PONG"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a SearchIndexService.ping"]:::llamada
+  n20 -->|"no"| n22
+  n23{"response.body.status === 'red'"}:::decision
+  n22 --> n23
+  n24(["500 INTERNAL OpenSearch está en estado red"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a AppReadinessService.checkRls"]:::llamada
+  n23 -->|"no"| n25
+  n26{"violations.length › 0"}:::decision
+  n25 --> n26
+  n27(["500 INTERNAL El rol de runtime {violations.join('; ')}: las políticas no aíslan nada"]):::error
+  n26 -->|"sí"| n27
+  n28{"Object.values(checks).some((check) =› check.status === 'down')"}:::decision
+  n26 -->|"no"| n28
+  n29(["↩ (relanza el error capturado)"]):::error
+  n28 -->|"sí"| n29
+  n30(("200 Responde con éxito")):::ok
+  n28 -->|"no"| n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

@@ -49,6 +49,7 @@ function build() {
   const inventoryRepo = {
     findActiveLocationsBySites: mockFn().mockResolvedValue([]),
     findStockPositions: mockFn().mockResolvedValue([]),
+    findSiteProductAvailability: mockFn().mockResolvedValue([]),
   };
   const pharmacyRepo = {
     findVisibleByTenant: mockFn().mockResolvedValue([]),
@@ -56,6 +57,7 @@ function build() {
     findActiveSites: mockFn().mockResolvedValue([]),
     findActiveSiteById: mockFn().mockResolvedValue(null),
     findActiveProductsByIds: mockFn().mockResolvedValue([]),
+    findSellableProductsByIds: mockFn().mockResolvedValue([]),
     findCurrentPublicPriceLists: mockFn().mockResolvedValue([]),
     findCurrentPrices: mockFn().mockResolvedValue([]),
     findPracticeSites: mockFn().mockResolvedValue([]),
@@ -160,8 +162,9 @@ describe('PharmacyInventoryReadService', () => {
     /** Dos sedes con stock y direcciones; la más lejana tiene TODO. */
     function withTwoSites(d: ReturnType<typeof build>) {
       d.pharmacyRepo.findVisibleByTenant.mockResolvedValue([PHARMACY]);
-      // Como el repo real: sólo devuelve los ids pedidos que existen activos.
-      d.pharmacyRepo.findActiveProductsByIds.mockImplementation(
+      // Como el repo real: sólo devuelve los ids pedidos que existen activos
+      // y vendibles (sin el «no tengo» del catálogo, P47).
+      d.pharmacyRepo.findSellableProductsByIds.mockImplementation(
         async (_em: unknown, ids: readonly string[]) =>
           [product('prod-1'), product('prod-2')].filter((row) =>
             ids.includes(row.id),
@@ -181,38 +184,40 @@ describe('PharmacyInventoryReadService', () => {
           name: 'Sede Lejos',
         },
       ]);
+      // Cada sede tiene su ubicación: las posiciones sólo fechan lo
+      // disponible (`stockUpdatedAt`); qué hay lo decide la regla de abajo.
       d.inventoryRepo.findActiveLocationsBySites.mockResolvedValue([
         { id: 'loc-cerca', pharmacySiteId: 'site-cerca' },
         { id: 'loc-lejos', pharmacySiteId: 'site-lejos' },
       ]);
-      d.inventoryRepo.findStockPositions.mockResolvedValue([
-        // La cercana sólo tiene un producto…
-        {
-          inventoryLocationId: 'loc-cerca',
-          pharmacyProductId: 'prod-1',
-          onHandQuantity: '5',
-          reservedQuantity: '0',
-          quarantineQuantity: '0',
-          availableQuantity: '5',
-        },
-        // …la lejana tiene los dos.
-        {
-          inventoryLocationId: 'loc-lejos',
-          pharmacyProductId: 'prod-1',
-          onHandQuantity: '5',
-          reservedQuantity: '0',
-          quarantineQuantity: '0',
-          availableQuantity: '5',
-        },
-        {
-          inventoryLocationId: 'loc-lejos',
-          pharmacyProductId: 'prod-2',
-          onHandQuantity: '2',
-          reservedQuantity: '0',
-          quarantineQuantity: '0',
-          availableQuantity: '2',
-        },
-      ]);
+      // Como el repo real (regla única de existencias por sede, A1): sólo
+      // filas disponibles, con la cantidad de la sede.
+      d.inventoryRepo.findSiteProductAvailability.mockImplementation(
+        async (
+          _em: unknown,
+          _sites: readonly string[],
+          ids: readonly string[],
+        ) =>
+          [
+            // La cercana sólo tiene un producto…
+            {
+              siteId: 'site-cerca',
+              productId: 'prod-1',
+              availableQuantity: '5',
+            },
+            // …la lejana tiene los dos.
+            {
+              siteId: 'site-lejos',
+              productId: 'prod-1',
+              availableQuantity: '5',
+            },
+            {
+              siteId: 'site-lejos',
+              productId: 'prod-2',
+              availableQuantity: '2',
+            },
+          ].filter((row) => ids.includes(row.productId)),
+      );
       d.pharmacyRepo.findPracticeSites.mockResolvedValue([
         { id: 'ps-1', addressId: 'addr-cerca' },
         { id: 'ps-2', addressId: 'addr-lejos' },
@@ -273,6 +278,26 @@ describe('PharmacyInventoryReadService', () => {
       expect(result.items[0].siteId).toBe('site-lejos');
       // Sin lat/lng en la consulta no se inventa distancia.
       expect(result.items[0].distanceKm).toBeNull();
+    });
+
+    it('a site without lots that declared «hay» without a count offers the product with a null quantity (A1)', async () => {
+      const d = build();
+      withTwoSites(d);
+      d.inventoryRepo.findSiteProductAvailability.mockResolvedValue([
+        { siteId: 'site-cerca', productId: 'prod-2', availableQuantity: null },
+      ]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.availability(['prod-2'], undefined),
+      );
+
+      expect(result.count).toBe(1);
+      expect(result.items[0]).toMatchObject({
+        siteId: 'site-cerca',
+        complete: true,
+        missingProductIds: [],
+      });
+      expect(result.items[0].products[0].availableQuantity).toBeNull();
     });
 
     it('an unknown or retired product id counts as missing everywhere', async () => {
@@ -364,6 +389,64 @@ describe('PharmacyInventoryReadService', () => {
         code: CURRENCY.code,
         display: CURRENCY.display,
       });
+    });
+
+    it('dates each site by the oldest stock position that backs what it has available', async () => {
+      const d = build();
+      withTwoSites(d);
+      const at = (iso: string) => new Date(iso);
+      d.inventoryRepo.findStockPositions.mockResolvedValue([
+        {
+          inventoryLocationId: 'loc-cerca',
+          pharmacyProductId: 'prod-1',
+          availableQuantity: '5',
+          updatedAt: at('2026-10-25T08:00:00.000Z'),
+        },
+        // Sin cantidad disponible no respalda nada: su fecha vieja no cuenta.
+        {
+          inventoryLocationId: 'loc-cerca',
+          pharmacyProductId: 'prod-2',
+          availableQuantity: '0',
+          updatedAt: at('2026-01-01T00:00:00.000Z'),
+        },
+        {
+          inventoryLocationId: 'loc-lejos',
+          pharmacyProductId: 'prod-1',
+          availableQuantity: '5',
+          updatedAt: at('2026-10-25T09:00:00.000Z'),
+        },
+        // La más vieja de las que respaldan stock es la que manda.
+        {
+          inventoryLocationId: 'loc-lejos',
+          pharmacyProductId: 'prod-2',
+          availableQuantity: '2',
+          updatedAt: at('2026-10-22T09:00:00.000Z'),
+        },
+      ]);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.availability(['prod-1', 'prod-2'], undefined),
+      );
+
+      const far = result.items.find((item) => item.siteId === 'site-lejos')!;
+      const nearby = result.items.find((item) => item.siteId === 'site-cerca')!;
+      expect(far.stockUpdatedAt).toBe('2026-10-22T09:00:00.000Z');
+      expect(nearby.stockUpdatedAt).toBe('2026-10-25T08:00:00.000Z');
+    });
+
+    it('leaves the stock date null when no position declares one', async () => {
+      const d = build();
+      withTwoSites(d);
+
+      const result = await runWithTenant('tenant-a', () =>
+        d.service.availability(['prod-1', 'prod-2'], undefined),
+      );
+
+      // Sin fecha no se inventa una antigüedad.
+      expect(result.items.map((item) => item.stockUpdatedAt)).toEqual([
+        null,
+        null,
+      ]);
     });
 
     it('sums money exactly instead of drifting in floating point', async () => {

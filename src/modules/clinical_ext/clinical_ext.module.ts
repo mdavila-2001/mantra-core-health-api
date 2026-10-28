@@ -17,6 +17,7 @@ import {
   ClinicalAlertsService,
   OrderSetsService,
   ReferralsService,
+  ReferralNotifier,
   CareGapsService,
   VirtualEncountersService,
   PrescriptionFavoritesService,
@@ -43,6 +44,7 @@ import {
 // resuelve) para exigir acceso al paciente en `cds/evaluate` y
 // `cds/check-interactions`.
 import { ClinicalModule } from '../clinical/clinical.module';
+import { MessagingModule } from '../messaging/messaging.module';
 // Los favoritos de prescripción cuelgan del perfil profesional de quien pide, y
 // `ProfileOwnershipService` es quien resuelve de quién es la sesión. Se provee la
 // clase con sus tres repositorios —todos sin estado, reciben el EntityManager por
@@ -54,6 +56,7 @@ import {
   PersonAccountLinksRepository,
   HealthPractitionerProfilesRepository,
   PatientProfilesRepository,
+  PersonsRepository,
 } from '../profiles/infrastructure/repositories';
 
 /**
@@ -69,6 +72,8 @@ import {
     // necesita a `ClinicalReadService` visible como export propio de
     // `ClinicalModule` (mismo motivo documentado en `chart.module.ts`).
     ClinicalModule,
+    // El aviso a la paciente cuando su médico la deriva sale por la campana.
+    MessagingModule,
   ],
   controllers: [
     CareTeamsController,
@@ -102,12 +107,15 @@ import {
     PersonAccountLinksRepository,
     HealthPractitionerProfilesRepository,
     PatientProfilesRepository,
+    // Fecha de nacimiento canónica para proyectar el plan de inmunización
+    PersonsRepository,
     // Servicios
     CareTeamsService,
     CdsService,
     ClinicalAlertsService,
     OrderSetsService,
     ReferralsService,
+    ReferralNotifier,
     CareGapsService,
     VirtualEncountersService,
     PrescriptionFavoritesService,

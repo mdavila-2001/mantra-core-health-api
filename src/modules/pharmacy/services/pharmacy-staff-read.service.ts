@@ -10,17 +10,33 @@ import { TenantAdministrationService } from '../../directory/services/tenant-adm
 import { DirectoryReadService } from '../../directory/services/directory-read.service';
 import { PharmacyProducts } from '../entities';
 import type { Pharmacies, PharmacyLicenses, PharmacySites } from '../entities';
-import { PHARM } from '../pharmacy.concepts';
+import {
+  catalogStatusOf,
+  fromCents,
+  isInStock,
+  isLowStock,
+  toCents,
+} from './pharmacy-catalog-rules';
+import { displayName, PharmacyReadService } from './pharmacy-read.service';
 import type {
   PharmacyConceptDto,
   PharmacyContactPersonDto,
   PharmacyContactsResponseDto,
   PharmacyLicenseDto,
-  PharmacyCategoryListDto,
   PharmacyLicenseListResponseDto,
+  PharmacyProductSearchResponseDto,
+  PharmacyRecentActivityDto,
   PharmacySummaryDto,
 } from '../dto';
-import { PharmacyReadRepository } from '../repositories';
+import {
+  PharmacyCatalogRepository,
+  PharmacyReadRepository,
+  type CatalogAuditRow,
+  type ProductSearchFilter,
+} from '../repositories';
+
+/** Cuántas actividades recientes muestra el resumen. */
+const RECENT_ACTIVITY_LIMIT = 8;
 
 /** Un día en milisegundos, para contar días de calendario. */
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -49,13 +65,54 @@ export class PharmacyStaffReadService {
    * @param readRepo - Consultas de la cara de lectura.
    * @param tenantAdmin - Comprobación de pertenencia a la organización.
    * @param directoryRead - Lectura del representante y las gerencias.
+   * @param catalogRepo - Precio, categorías y bitácora del catálogo (P47).
+   * @param readService - Proyección del producto como lo lista la búsqueda.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly readRepo: PharmacyReadRepository,
     private readonly tenantAdmin: TenantAdministrationService,
     private readonly directoryRead: DirectoryReadService,
+    private readonly catalogRepo: PharmacyCatalogRepository,
+    private readonly readService: PharmacyReadService,
   ) {}
+
+  /**
+   * P47 `managed=true`: todo el catálogo de la farmacia —borradores y
+   * retirados incluidos— con estado, existencias, umbral e imágenes. Sólo para
+   * su personal (o la plataforma); cualquier otro recibe el 404 de siempre.
+   *
+   * @param pharmacyId - La farmacia.
+   * @param filter - Texto y medicamento del vademécum.
+   * @param limit - Tope del listado.
+   * @param actor - Quien pide la lectura.
+   */
+  async listManagedProducts(
+    pharmacyId: string,
+    filter: ProductSearchFilter,
+    limit: number,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyProductSearchResponseDto> {
+    const em = this.em.fork();
+    const pharmacy = await this.requireStaffPharmacy(em, pharmacyId, actor);
+    const rows = await this.readRepo.findCatalogProducts(
+      em,
+      pharmacy.id,
+      filter,
+      limit + 1,
+    );
+    const page = rows.slice(0, limit);
+    return {
+      items: await this.readService.toCatalogDtos(
+        em,
+        page,
+        new Map([[pharmacy.id, displayName(pharmacy)]]),
+        true,
+      ),
+      limit,
+      truncated: rows.length > limit,
+    };
+  }
 
   /**
    * La carpeta de licencias de la farmacia, de la farmacia entera y de cada
@@ -135,10 +192,16 @@ export class PharmacyStaffReadService {
   }
 
   /**
-   * Los números del resumen del portal (P47). Lo que el modelo ya guarda se
-   * cuenta de verdad —productos publicados y retirados—; lo que todavía no
-   * tiene dónde vivir (borradores, existencias, valor del inventario,
-   * categorías) sale en cero y vacío en vez de inventarse.
+   * Los números del resumen del portal (P47), contados sobre el catálogo:
+   *
+   * - publicados, borradores y retirados por estado;
+   * - sin stock y bajo umbral entre lo publicado, con la declaración de
+   *   existencias (umbral por defecto 5 mientras la farmacia no fija el suyo);
+   * - valor del inventario = Σ existencias × precio vigente de lo publicado que
+   *   lleva conteo y tiene precio, en centavos enteros (nunca coma flotante);
+   * - por categoría, los vivos (publicados y borradores);
+   * - actividad reciente: lo último que `@Audited` selló con éxito en el
+   *   catálogo de este tenant.
    *
    * @param pharmacyId - La farmacia.
    * @param actor - Quien pide la lectura.
@@ -152,35 +215,59 @@ export class PharmacyStaffReadService {
     const products = await em.find(PharmacyProducts, {
       pharmacyId: pharmacy.id,
     });
-    return {
-      published: products.filter(
-        (product) => product.statusConceptId === PHARM.PRODUCT_ACTIVE,
-      ).length,
-      drafts: 0,
-      withdrawn: products.filter(
-        (product) => product.statusConceptId === PHARM.PRODUCT_RETIRED,
-      ).length,
-      outOfStock: 0,
-      lowStock: 0,
-      inventoryValue: '0.00',
-      byCategory: [],
-      recentActivity: [],
-    };
-  }
+    const status = (product: PharmacyProducts) =>
+      catalogStatusOf(product.statusConceptId);
+    const published = products.filter((p) => status(p) === 'PUBLISHED');
+    const live = products.filter((p) => status(p) !== 'WITHDRAWN');
+    const stockOf = (p: PharmacyProducts) => ({
+      stockQuantity: p.stockQuantity,
+      minStockQuantity: p.minStockQuantity,
+      outOfStockDeclared: p.outOfStockDeclared ?? false,
+    });
 
-  /**
-   * Las categorías de la farmacia: el modelo todavía no las guarda, así que la
-   * lista es vacía (verdadera) y no un 404 que el portal leería como error.
-   *
-   * @param pharmacyId - La farmacia.
-   * @param actor - Quien pide la lectura.
-   */
-  async listCategories(
-    pharmacyId: string,
-    actor: AuthenticatedUser,
-  ): Promise<PharmacyCategoryListDto> {
-    await this.requireStaffPharmacy(this.em.fork(), pharmacyId, actor);
-    return { items: [] };
+    const [prices, categories, activity] = await Promise.all([
+      this.catalogRepo.findCurrentPrices(
+        em,
+        published.map((p) => p.id),
+      ),
+      this.catalogRepo.listCategories(em, pharmacy.id),
+      this.catalogRepo.findRecentActivity(
+        em,
+        pharmacy.tenantId,
+        RECENT_ACTIVITY_LIMIT,
+      ),
+    ]);
+
+    let valueCents = 0n;
+    for (const product of published) {
+      const price = prices.get(product.id);
+      if (!price || !isInStock(stockOf(product))) continue;
+      if (product.stockQuantity == null) continue;
+      valueCents += toCents(price.amount) * BigInt(product.stockQuantity);
+    }
+
+    const categoryName = new Map(categories.map((c) => [c.id, c.name]));
+    const byCategory = new Map<string, number>();
+    for (const product of live) {
+      const name =
+        (product.pharmacyProductCategoryId &&
+          categoryName.get(product.pharmacyProductCategoryId)) ||
+        'Sin categoría';
+      byCategory.set(name, (byCategory.get(name) ?? 0) + 1);
+    }
+
+    return {
+      published: published.length,
+      drafts: live.length - published.length,
+      withdrawn: products.length - live.length,
+      outOfStock: published.filter((p) => !isInStock(stockOf(p))).length,
+      lowStock: published.filter((p) => isLowStock(stockOf(p))).length,
+      inventoryValue: fromCents(valueCents),
+      byCategory: [...byCategory.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es'))
+        .map(([category, count]) => ({ category, count })),
+      recentActivity: describeActivity(activity, products, categoryName),
+    };
   }
 
   /**
@@ -306,4 +393,51 @@ function optionalConcept(
 
 function unique(values: readonly string[]): string[] {
   return [...new Set(values)];
+}
+
+/** Cómo se cuenta cada acción de la bitácora en el resumen. */
+const ACTIVITY_KIND: Readonly<Record<string, string>> = {
+  PHARMACY_PRODUCT_PUBLISHED: 'ALTA',
+  PHARMACY_PRODUCT_UPDATED: 'EDICION',
+  PHARMACY_PRODUCT_RETIRED: 'RETIRO',
+  PHARMACY_INVENTORY_UPDATED: 'INVENTARIO',
+  PHARMACY_CATEGORY_CREATED: 'CATEGORIA',
+  PHARMACY_CATEGORY_RENAMED: 'CATEGORIA',
+  PHARMACY_CATEGORY_DELETED: 'CATEGORIA',
+};
+
+/**
+ * La actividad reciente en palabras, con el nombre actual del producto o de la
+ * categoría. Lo que ya no existe (una categoría eliminada) se nombra en
+ * genérico: la bitácora guarda el id, no el nombre.
+ */
+export function describeActivity(
+  rows: readonly CatalogAuditRow[],
+  products: readonly PharmacyProducts[],
+  categoryName: ReadonlyMap<string, string>,
+): PharmacyRecentActivityDto[] {
+  const productName = new Map(
+    products.map((p) => [p.id, p.brandName ?? p.genericName ?? p.productCode]),
+  );
+  return rows.map((row) => {
+    const product = row.entityId ? productName.get(row.entityId) : undefined;
+    const category = row.entityId ? categoryName.get(row.entityId) : undefined;
+    const quoted = (name: string | undefined, fallback: string) =>
+      name ? `«${name}»` : fallback;
+    const text: Record<string, string> = {
+      PHARMACY_PRODUCT_PUBLISHED: `Cargó ${quoted(product, 'un producto')}.`,
+      PHARMACY_PRODUCT_UPDATED: `Editó ${quoted(product, 'un producto')}.`,
+      PHARMACY_PRODUCT_RETIRED: `Retiró ${quoted(product, 'un producto')}.`,
+      PHARMACY_INVENTORY_UPDATED: 'Actualizó el inventario.',
+      PHARMACY_CATEGORY_CREATED: `Creó la categoría ${quoted(category, 'una categoría')}.`,
+      PHARMACY_CATEGORY_RENAMED: `Renombró la categoría ${quoted(category, 'una categoría')}.`,
+      PHARMACY_CATEGORY_DELETED: 'Eliminó una categoría.',
+    };
+    return {
+      id: row.id,
+      at: row.recordedAt.toISOString(),
+      kind: ACTIVITY_KIND[row.action] ?? 'EDICION',
+      text: text[row.action] ?? 'Cambió el catálogo.',
+    };
+  });
 }

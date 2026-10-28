@@ -4,10 +4,10 @@ Lógica de negocio. Cada método público resuelve un caso de uso en **una trans
 
 ## Servicios
 
-| Servicio | Casos de uso | Responsabilidad |
-| --- | --- | --- |
-| `PromotionsLoyaltyService` | 01 … 06, 12, 13 | Programas, membresías, ledger de puntos y referidos |
-| `PromotionsDiscountsService` | 07 … 11 | Promociones, cupones, redenciones y checkout |
+| Servicio                     | Casos de uso    | Responsabilidad                                     |
+| ---------------------------- | --------------- | --------------------------------------------------- |
+| `PromotionsLoyaltyService`   | 01 … 06, 12, 13 | Programas, membresías, ledger de puntos y referidos |
+| `PromotionsDiscountsService` | 07 … 11         | Promociones, cupones, redenciones y checkout        |
 
 ## Reglas de negocio
 

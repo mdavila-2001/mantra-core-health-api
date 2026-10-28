@@ -78,6 +78,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `ListContentPacksResponseDto` | No |
 | 429 | Consulta completada correctamente. | `ListContentPacksResponseDto` | No |
 | 500 | Consulta completada correctamente. | `ListContentPacksResponseDto` | No |
+| 504 | Consulta completada correctamente. | `ListContentPacksResponseDto` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListContentPacksResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -210,6 +211,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ApplyContentPackResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ApplyContentPackResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ApplyContentPackResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ApplyContentPackResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ApplyContentPackResponseDto`. Ejemplo completo derivado de ese DTO:
 

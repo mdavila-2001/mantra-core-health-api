@@ -8,6 +8,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { TELE } from '../telemetry.concepts';
+import { TelemetryErrorReason } from '../telemetry.error-reasons';
 import {
   TrackingDisclosureVersionsRepository,
   TrackingDisclosureAcceptancesRepository,
@@ -90,7 +91,10 @@ export class TelemetryConsentService {
     dto: CreateDisclosureAcceptanceDto,
     actor: AuthenticatedUser,
   ): Promise<DisclosureAcceptanceResponseDto> {
-    const userId = dto.userId ?? actor.id;
+    // La aceptación es siempre del actor autenticado: el cuerpo no puede
+    // nombrar a otra persona (el DTO no declara `userId` y el pipe global
+    // rechaza la propiedad).
+    const userId = actor.id;
     this.logger.info(
       {
         operation: 'telemetry.disclosure.accept',
@@ -154,7 +158,8 @@ export class TelemetryConsentService {
     dto: CreateTrackingConsentDto,
     actor: AuthenticatedUser,
   ): Promise<TrackingConsentResponseDto> {
-    const userId = dto.userId ?? actor.id;
+    // El consentimiento es siempre del actor autenticado (ver `acceptDisclosure`).
+    const userId = actor.id;
     this.logger.info(
       {
         operation: 'telemetry.consent.grant',
@@ -259,10 +264,15 @@ export class TelemetryConsentService {
     );
     return this.em.transactional(async (tx) => {
       const consent = await this.consentsRepo.findById(tx, consentId);
-      if (!consent) {
-        throw new ResourceNotFoundException('Consentimiento no encontrado', {
-          consentId,
-        });
+      // Un consentimiento ajeno responde igual que uno inexistente: mismo
+      // mensaje, mismo `reason` y sin `details`, para no confirmar que el UUID
+      // existe ni de quién es.
+      if (!consent || consent.userId !== actor.id) {
+        throw new ResourceNotFoundException(
+          'Consentimiento no encontrado',
+          undefined,
+          TelemetryErrorReason.CONSENT_NOT_OWNED,
+        );
       }
 
       // El estado efectivo lo define la última decisión de (user, purpose).
@@ -274,9 +284,8 @@ export class TelemetryConsentService {
       if (!latest || latest.decisionConceptId !== TELE.DECISION_GRANTED) {
         throw new PreconditionFailedException(
           'No hay un consentimiento vigente que retirar',
-          {
-            consentId,
-          },
+          { consentId },
+          TelemetryErrorReason.CONSENT_NOT_ACTIVE,
         );
       }
 

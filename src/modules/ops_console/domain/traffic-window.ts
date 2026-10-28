@@ -2,7 +2,7 @@ import {
   resolveWindow,
   type AnalyticsWindow,
   type Interval,
-} from '../../telemetry/domain/analytics-window';
+} from '../../../common/time/analytics-window';
 
 const DAY_MS = 86_400_000;
 

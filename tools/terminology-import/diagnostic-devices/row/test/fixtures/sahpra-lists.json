@@ -1,0 +1,63 @@
+{
+ "molecular": {
+  "sheet": "Molecular Tests",
+  "rows": [
+   [
+    "No.",
+    "Application Date",
+    "SAHPRA Licence Holder",
+    "Product Name ",
+    "Product Description",
+    "Original Manufacturer",
+    "Date Authorised"
+   ],
+   [
+    "1",
+    "25/03/2020",
+    "Abbott Laboratories South Africa (Pty) Ltd \n",
+    "Abbott RealTime SARS-CoV-2  Assay          ",
+    "RT-PCR",
+    "Abbott Molecular Inc",
+    "30/03/2020"
+   ],
+   [
+    "2",
+    "23/04/2020",
+    "ACS Pharma Access Health Solutions (Pty)Ltd",
+    "ACS 2019-nCovid Nucleic acid-based diagnostic reagent kit",
+    "PCR",
+    "Sansure Biotech Inc",
+    "25/06/2020"
+   ]
+  ]
+ },
+ "antigen-self-test": {
+  "sheet": "Antigen Self-Tests",
+  "rows": [
+   [
+    "No.",
+    "SAHPRA Licence Holder",
+    "Product Name ",
+    "Product Description",
+    "Original Manufacturer",
+    "Date Authorised"
+   ],
+   [
+    "1",
+    "Humor Diagnostica Pty Ltd",
+    "Orient Gene Rapid Covid-19 (Antigen) Self-Test\n",
+    "Antigen  Rapid  Self-Test kit",
+    "Zhejiang Orient Gene Biotech",
+    "04/11/2022"
+   ],
+   [
+    "2",
+    "IDT Diagnostics t/a ICT International",
+    "Orient Gene Rapid Covid-19 (Antigen) Self-Test\n",
+    "Antigen  Rapid  Self-Test kit",
+    "Zhejiang Orient Gene Biotech",
+    "04/11/2022"
+   ]
+  ]
+ }
+}

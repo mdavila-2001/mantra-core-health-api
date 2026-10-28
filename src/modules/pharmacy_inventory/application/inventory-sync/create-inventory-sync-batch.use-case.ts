@@ -8,6 +8,7 @@ import type {
   SyncBatchResponseDto,
 } from '../../presentation/dto';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 /** Ingiere un lote recibido con idempotencia por item. */
 @Injectable()
@@ -15,6 +16,7 @@ export class CreateInventorySyncBatchUseCase {
   constructor(
     private readonly em: EntityManager,
     private readonly sync: SyncRepository,
+    private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
   ) {}
 
@@ -30,6 +32,19 @@ export class CreateInventorySyncBatchUseCase {
       'Ingesting sync batch',
     );
     return this.em.transactional(async (tx) => {
+      // La conexión es de una farmacia del actor; los productos del lote, de esa
+      // misma farmacia.
+      const pharmacy = await this.scope.requireManagedConnection(
+        tx,
+        dto.pharmacyIntegrationConnectionId,
+        actor,
+      );
+      for (const item of dto.items) {
+        if (item.pharmacyProductId !== undefined) {
+          await this.scope.requireProduct(tx, pharmacy, item.pharmacyProductId);
+        }
+      }
+
       const batch = this.sync.createBatch(tx, {
         pharmacyIntegrationConnectionId: dto.pharmacyIntegrationConnectionId,
         directionConceptId: PINV.SYNC_DIRECTION_INBOUND,
@@ -48,6 +63,20 @@ export class CreateInventorySyncBatchUseCase {
             item.idempotencyKey,
           );
           if (existing) {
+            // La clave no es de la farmacia: un ítem de otra no se devuelve.
+            const existingBatch = await this.sync.findBatchById(
+              tx,
+              existing.pharmacyInventorySyncBatchId,
+            );
+            if (!existingBatch) throw this.scope.notAvailable();
+            const owner = await this.scope.requireManagedConnection(
+              tx,
+              existingBatch.pharmacyIntegrationConnectionId,
+              actor,
+            );
+            if (owner.pharmacyId !== pharmacy.pharmacyId) {
+              throw this.scope.notAvailable();
+            }
             itemIds.push(existing.id);
             continue;
           }

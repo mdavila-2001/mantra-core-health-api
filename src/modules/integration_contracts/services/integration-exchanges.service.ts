@@ -4,10 +4,14 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
+  requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
 import { ICON } from '../integration_contracts.concepts';
+import {
+  assertContractInTenant,
+  integrationResourceOutOfScope,
+} from '../integration_contracts.tenant-scope';
 import {
   ContractsRepository,
   ContractVersionsRepository,
@@ -85,13 +89,12 @@ export class IntegrationExchangesService {
         },
       );
     }
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const contract = await this.contractsRepo.findById(tx, contractId);
-      if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', {
-          contractId,
-        });
-      }
+      assertContractInTenant(
+        await this.contractsRepo.findByIdInTenant(tx, tenantId, contractId),
+        tenantId,
+      );
       // UC-31-05 include UC-31-10: se resuelve la versión ACTIVE vigente.
       const version = await this.versionsRepo.findActiveByContract(
         tx,
@@ -211,14 +214,14 @@ export class IntegrationExchangesService {
       },
       'Recording exchange attempt',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const record = await this.recordsRepo.findById(tx, recordId);
-      if (!record) {
-        throw new ResourceNotFoundException(
-          'Registro de intercambio no encontrado',
-          { recordId },
-        );
-      }
+      const record = await this.resolveRecordInTenant(
+        tx,
+        tenantId,
+        recordId,
+        contractId,
+      );
 
       const now = new Date();
       const success = dto.outcome === 'SUCCESS';
@@ -285,14 +288,11 @@ export class IntegrationExchangesService {
       { operation: 'integration.exchange.retry', recordId, actorId: actor.id },
       'Retrying failed exchange',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const record = await this.recordsRepo.findById(tx, recordId);
-      if (!record) {
-        throw new ResourceNotFoundException(
-          'Registro de intercambio no encontrado',
-          { recordId },
-        );
-      }
+      // Intercambio → versión → contrato → tenant, con el registro bloqueado:
+      // dos reintentos concurrentes se serializan y sólo uno ve FAILED.
+      const record = await this.resolveRecordInTenant(tx, tenantId, recordId);
 
       const last = await this.attemptsRepo.lastAttempt(tx, recordId);
       if (!last || last.outcomeConceptId !== ICON.ATTEMPT_FAILED) {
@@ -377,13 +377,17 @@ export class IntegrationExchangesService {
       },
       'Advancing sync cursor',
     );
+    const tenantId = requireTenantId();
     return this.em.transactional(async (tx) => {
-      const contract = await this.contractsRepo.findById(tx, contractId);
-      if (!contract) {
-        throw new ResourceNotFoundException('Contrato no encontrado', {
+      // El bloqueo del contrato serializa los avances del cursor del contrato.
+      assertContractInTenant(
+        await this.contractsRepo.findByIdInTenantForUpdate(
+          tx,
+          tenantId,
           contractId,
-        });
-      }
+        ),
+        tenantId,
+      );
 
       const watermarkAt = dto.watermarkAt
         ? new Date(dto.watermarkAt)
@@ -439,6 +443,43 @@ export class IntegrationExchangesService {
    * @param decision - Valor de decision requerido por la operación.
    * @returns Resultado de map retry decision conforme al contrato `string`.
    */
+  /**
+   * Resuelve un intercambio por la cadena registro → versión → contrato → tenant
+   * y lo devuelve bloqueado. Un registro inexistente, de otro tenant, o que no
+   * cuelga del contrato indicado responden igual.
+   */
+  private async resolveRecordInTenant(
+    tx: EntityManager,
+    tenantId: string,
+    recordId: string,
+    expectedContractId?: string,
+  ) {
+    const message = 'Registro de intercambio no encontrado';
+    const record = await this.recordsRepo.findByIdForUpdate(tx, recordId);
+    if (!record) throw integrationResourceOutOfScope(message);
+    const version = await this.versionsRepo.findById(
+      tx,
+      record.integrationContractVersionId,
+    );
+    if (!version) throw integrationResourceOutOfScope(message);
+    const contract = assertContractInTenant(
+      await this.contractsRepo.findByIdInTenant(
+        tx,
+        tenantId,
+        version.integrationContractId,
+      ),
+      tenantId,
+      message,
+    );
+    if (
+      expectedContractId !== undefined &&
+      contract.id !== expectedContractId
+    ) {
+      throw integrationResourceOutOfScope(message);
+    }
+    return record;
+  }
+
   private mapRetryDecision(decision?: 'RETRYABLE' | 'PERMANENT'): string {
     return decision === 'PERMANENT'
       ? ICON.RETRY_PERMANENT

@@ -5,7 +5,6 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -27,6 +26,13 @@ import {
 } from '../dto';
 import { AUTHZ } from '../authz.concepts';
 import { AuthzErrorReason } from '../authz.error-reasons';
+import { AuthzClinicalScopeService } from './authz-clinical-scope.service';
+
+/** Cómo se informa un acceso clínico inexistente o de otro tenant. */
+const CLINICAL_ACCESS_NOT_FOUND = {
+  message: 'Acceso clínico no encontrado',
+  reason: AuthzErrorReason.CLINICAL_ACCESS_NOT_FOUND,
+} as const;
 
 const PURPOSE_CONCEPT: Record<PurposeOfUse, string> = {
   TREATMENT: AUTHZ.PURPOSE_TREATMENT,
@@ -56,6 +62,9 @@ export class AuthzClinicalService {
    * @param grantsRepo - Valor de grants repo requerido por la operación.
    * @param btgRepo - Valor de btg repo requerido por la operación.
    * @param dataAccessLogRepo - Valor de data access log repo requerido por la operación.
+   * @param auditTrail - Sello WORM de la concesión, la emergencia y la revocación.
+   * @param outbox - Evento transaccional de la emergencia.
+   * @param scope - Política de alcance: tenant del contexto, paciente, encuentro y consentimiento.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -65,6 +74,7 @@ export class AuthzClinicalService {
     private readonly dataAccessLogRepo: DataAccessLogRepository,
     private readonly auditTrail: AuditTrailService,
     private readonly outbox: OutboxService,
+    private readonly scope: AuthzClinicalScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(AuthzClinicalService.name);
@@ -103,10 +113,34 @@ export class AuthzClinicalService {
         );
       }
 
-      const existing = await this.grantsRepo.findActive(
+      // El tenant sale del contexto verificado, no del cuerpo. El paciente, el
+      // encuentro y el consentimiento se prueban del tenant y del mismo paciente
+      // antes de leer o persistir nada: un 409 por «ya existe» sobre un paciente
+      // ajeno confirmaría que ese UUID existe en otra organización.
+      const tenantId = this.scope.resolveTenant(dto.tenantId);
+      await this.scope.assertPatientInTenant(tx, patientProfileId, tenantId);
+      if (dto.encounterId) {
+        await this.scope.assertEncounterOfPatient(
+          tx,
+          dto.encounterId,
+          patientProfileId,
+          tenantId,
+        );
+      }
+      if (dto.consentId) {
+        await this.scope.assertConsentOfPatient(
+          tx,
+          dto.consentId,
+          patientProfileId,
+          tenantId,
+        );
+      }
+
+      const existing = await this.grantsRepo.findActiveInTenant(
         tx,
         patientProfileId,
         dto.grantedUserId,
+        tenantId,
       );
       if (existing) {
         throw new ConflictException(
@@ -122,7 +156,7 @@ export class AuthzClinicalService {
       const grant = this.grantsRepo.create(tx, {
         patientProfileId,
         grantedUserId: dto.grantedUserId,
-        tenantId: dto.tenantId,
+        tenantId,
         branchId: dto.branchId,
         encounterId: dto.encounterId,
         consentId: dto.consentId,
@@ -137,7 +171,7 @@ export class AuthzClinicalService {
         action: 'CLINICAL_ACCESS_GRANTED',
         entity: 'clinical_access_grant',
         entityId: grant.id,
-        tenantId: dto.tenantId,
+        tenantId,
       });
       return { id: grant.id, status: 'ACTIVE', createdAt: grant.createdAt };
     });
@@ -162,6 +196,19 @@ export class AuthzClinicalService {
       'Break-the-glass emergency access invoked',
     );
     return this.em.transactional(async (tx) => {
+      // Misma política que la concesión: ni el grant elevado, ni la sesión, ni el
+      // evento de auditoría se crean sobre un paciente o encuentro ajeno al tenant.
+      const tenantId = this.scope.resolveTenant(dto.tenantId);
+      await this.scope.assertPatientInTenant(tx, patientProfileId, tenantId);
+      if (dto.encounterId) {
+        await this.scope.assertEncounterOfPatient(
+          tx,
+          dto.encounterId,
+          patientProfileId,
+          tenantId,
+        );
+      }
+
       const now = new Date();
       const windowMinutes = dto.windowMinutes ?? DEFAULT_BTG_WINDOW_MINUTES;
       const expiresAt = new Date(now.getTime() + windowMinutes * 60_000);
@@ -169,7 +216,7 @@ export class AuthzClinicalService {
       const grant = this.grantsRepo.create(tx, {
         patientProfileId,
         grantedUserId: actor.id,
-        tenantId: dto.tenantId,
+        tenantId,
         encounterId: dto.encounterId,
         consentId: undefined,
         reasonConceptId: AUTHZ.PURPOSE_EMERGENCY,
@@ -184,7 +231,7 @@ export class AuthzClinicalService {
       // queda para REVISIÓN posterior (campos reviewed_*/review_outcome en
       // authz.break_glass_sessions, que resuelve el Oficial de Privacidad).
       this.btgRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         userId: actor.id,
         patientRefId: patientProfileId,
         patientRefTypeConceptId: AUTHZ.RESOURCE_TYPE_PATIENT,
@@ -201,7 +248,7 @@ export class AuthzClinicalService {
       // Se persiste en la MISMA transacción que el grant y la sesión BTG.
       this.dataAccessLogRepo.record(tx, {
         userId: actor.id,
-        tenantId: dto.tenantId,
+        tenantId,
         patientProfileId,
         purpose: 'EMERGENCY',
         legalBasisConceptId: AUD.LEGAL_BASIS_LEGAL_OBLIGATION,
@@ -219,7 +266,7 @@ export class AuthzClinicalService {
       // tras el COMMIT para notificar al paciente/representante, sin acoplar el
       // acceso clínico al canal de envío. Antes esto era solo un comentario.
       await this.outbox.publishDomainEvent(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         eventType: 'authz.break_glass.activated',
         aggregateType: 'clinical_access_grant',
         aggregateId: grant.id,
@@ -237,7 +284,7 @@ export class AuthzClinicalService {
         action: 'BREAK_GLASS_ACTIVATED',
         entity: 'clinical_access_grant',
         entityId: grant.id,
-        tenantId: dto.tenantId,
+        tenantId,
       });
 
       return { id: grant.id, status: 'ACTIVE', createdAt: grant.createdAt };
@@ -254,15 +301,13 @@ export class AuthzClinicalService {
       'Revoking clinical access',
     );
     return this.em.transactional(async (tx) => {
-      const grant = await this.grantsRepo.findById(tx, grantId);
-      if (!grant)
-        throw new ResourceNotFoundException(
-          'Acceso clínico no encontrado',
-          {
-            grantId,
-          },
-          AuthzErrorReason.CLINICAL_ACCESS_NOT_FOUND,
-        );
+      // Inexistente y de otro tenant responden igual (404 sin `details`). El
+      // titular del expediente sí revoca lo suyo desde cualquier organización.
+      const grant = this.scope.scopeRevocation(
+        await this.grantsRepo.findById(tx, grantId),
+        actor,
+        CLINICAL_ACCESS_NOT_FOUND,
+      );
       if (grant.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'El acceso clínico no está activo',

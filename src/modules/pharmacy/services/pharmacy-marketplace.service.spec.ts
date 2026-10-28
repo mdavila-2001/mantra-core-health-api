@@ -31,6 +31,8 @@ function offer(extra: Partial<PublishedOffer> = {}): PublishedOffer {
     price: '78.00',
     currency: 'BOB',
     availableQuantity: 12,
+    // Como el repo real con lotes: hay si queda algo (la regla vive en SQL).
+    inStock: (extra.availableQuantity ?? 12) > 0,
     homeDelivery: true,
     pickup: true,
     requiresPrescription: true,
@@ -249,6 +251,16 @@ describe('PharmacyMarketplaceService · la disponibilidad', () => {
     expect(offers).toHaveLength(1);
     expect(offers[0].inStock).toBe(false);
     expect(offers[0].price).toBe('78.00');
+  });
+
+  it('una sede sin lotes que declaró «hay» sin conteo está en stock aunque no informe unidades (A1)', async () => {
+    const { service } = build([
+      offer({ availableQuantity: 0, inStock: true, price: '80.00' }),
+    ]);
+
+    const { offers } = await service.getAvailability('concepto-losartan', {});
+
+    expect(offers[0].inStock).toBe(true);
   });
 
   it('la ficha se arma con TODAS las ofertas, aunque el radio recorte la lista', async () => {

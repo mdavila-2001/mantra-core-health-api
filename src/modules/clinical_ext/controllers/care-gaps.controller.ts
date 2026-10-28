@@ -49,6 +49,7 @@ export class CareGapsController {
     entityId: 'result.id',
   })
   @Post('care-gaps/recompute')
+  @Roles('CLINICIAN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Detectar y abrir brechas de cuidado (batch)' })
   recompute(
@@ -65,6 +66,7 @@ export class CareGapsController {
     entityId: 'param:id',
   })
   @Patch('care-gaps/:id/close')
+  @Roles('CLINICIAN', 'PRACTITIONER')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cerrar una brecha de cuidado por evento clínico' })
   close(
@@ -82,6 +84,7 @@ export class CareGapsController {
     entityId: 'param:id',
   })
   @Post('patients/:id/immunization-plan/project')
+  @Roles('CLINICIAN', 'PRACTITIONER')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Proyectar el plan de inmunización y abrir brechas',

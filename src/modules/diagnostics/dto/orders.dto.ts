@@ -1,4 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  ANALYSIS_CATEGORIES,
+  type AnalysisCategory,
+} from '../../clinical/service-request-category';
 
 /**
  * Una orden diagnóstica del paciente — la fila de `clinical.service_requests`
@@ -28,6 +32,14 @@ export class DiagnosticOrderSummaryDto {
   /** Laboratorio o imagenología (concept id). */
   @ApiPropertyOptional({ format: 'uuid' }) categoryConceptId?: string;
 
+  /** P40: categoría de análisis derivada del concepto; ausente = sin clasificar. */
+  @ApiPropertyOptional({ enum: ANALYSIS_CATEGORIES })
+  category?: AnalysisCategory;
+
+  /** P40: notas médicas que motivan la orden, en el orden en que se citaron. */
+  @ApiProperty({ type: [String], format: 'uuid' })
+  basedOnNoteIds!: string[];
+
   /** Estado de la orden (concept id). */
   @ApiProperty({ format: 'uuid' }) statusConceptId!: string;
 
@@ -36,6 +48,22 @@ export class DiagnosticOrderSummaryDto {
 
   /** Profesional que la solicitó. */
   @ApiPropertyOptional({ format: 'uuid' }) requesterProfileId?: string;
+
+  /** Modo de ejecutor recomendado (concept id); `null` en una orden anterior a ese dato. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerSelectionConceptId!: string | null;
+
+  /** Médico ejecutor («lo hago yo»), o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  performerPractitionerProfileId!: string | null;
+
+  /** Sede sugerida, o `null`. */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  suggestedPracticeSiteId!: string | null;
+
+  /** Nombre de la sede sugerida, o `null`. */
+  @ApiProperty({ nullable: true, type: String })
+  suggestedPracticeSiteName!: string | null;
 
   /** Cuándo se pidió. */
   @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
