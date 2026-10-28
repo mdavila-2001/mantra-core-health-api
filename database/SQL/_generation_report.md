@@ -22,7 +22,7 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 | 15 | chart | 11 | 70 | 0 | 80 | 1 |
 | 16 | accounting | 42 | 304 | 1 | 356 | 13 |
 | 17 | billing | 22 | 150 | 0 | 167 | 17 |
-| 18 | clinical_ext | 13 | 91 | 0 | 101 | 1 |
+| 18 | clinical_ext | 13 | 93 | 1 | 103 | 2 |
 | 19 | community | 40 | 242 | 4 | 254 | 1 |
 | 20 | diagnostics | 36 | 251 | 0 | 301 | 0 |
 | 21 | deployment _(especializado/no-SQL)_ | 0 | 0 | 0 | 0 | 0 |
@@ -135,6 +135,7 @@ Generado fielmente desde los `.puml`. Solo se emiten tablas PostgreSQL; las vist
 
 ### 18 · clinical_ext
 - `vital_signs_view` — vista (sin SELECT en el .puml)
+- `billing_service_catalog` — stub de cruce (tabla real en su módulo dueño)
 
 ### 19 · community
 - `rating_aggregates` — vista materializada (sin SELECT en el .puml)
