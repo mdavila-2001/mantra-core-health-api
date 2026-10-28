@@ -36,6 +36,7 @@ export class PrimaryPractitionerController {
   constructor(private readonly primary: PrimaryPractitionerService) {}
 
   @Get('patients/me/primary-practitioner')
+  @AccessLogged({ resourceType: 'PRIMARY_PRACTITIONER', patient: 'actor' })
   @ApiOperation({ summary: 'Consultar el propio médico de cabecera' })
   @ApiOkResponse({ type: OwnPrimaryPractitionerDto })
   getOwn(
