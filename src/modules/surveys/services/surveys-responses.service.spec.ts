@@ -56,6 +56,26 @@ function build() {
     listByBooking: mockFn().mockResolvedValue([]),
     listByVersions: mockFn().mockResolvedValue([]),
     listByExtensionVersions: mockFn().mockResolvedValue([]),
+    // Contexto de tarjeta por defecto: una consulta sin más datos. Cada prueba
+    // que lo necesite lo reemplaza.
+    listCardContext: mockFn((_em: unknown, ids: string[]) =>
+      Promise.resolve(
+        new Map(
+          ids.map((id) => [
+            id,
+            {
+              invitationId: id,
+              title: 'Cómo fue su consulta',
+              description: null,
+              kind: 'CONSULTATION',
+              serviceName: null,
+              practitionerDisplayName: null,
+              attendedAt: null,
+            },
+          ]),
+        ),
+      ),
+    ),
     create: mockFn(),
   };
   // El envío bloquea la fila; en el doble el bloqueo lee lo que lea `findById`.
@@ -215,6 +235,106 @@ describe('SurveysResponsesService', () => {
           status: 'PENDING',
         }),
       ]);
+    });
+
+    it('distingue consulta de servicio y trae profesional y fecha de la atención', async () => {
+      const d = build();
+      d.invitationsRepo.listByPatient.mockResolvedValue([
+        pendingInvitation({ id: 'inv-c' }),
+        pendingInvitation({ id: 'inv-s' }),
+      ]);
+      d.invitationsRepo.listCardContext.mockResolvedValue(
+        new Map([
+          [
+            'inv-c',
+            {
+              invitationId: 'inv-c',
+              title: 'Cómo fue su consulta',
+              description: null,
+              kind: 'CONSULTATION',
+              serviceName: null,
+              practitionerDisplayName: 'Dra. Ana Pérez',
+              attendedAt: '2026-10-01T14:00:00.000Z',
+            },
+          ],
+          [
+            'inv-s',
+            {
+              invitationId: 'inv-s',
+              title: 'Cómo fue su servicio',
+              description: 'Una pregunta',
+              kind: 'SERVICE',
+              serviceName: 'Ecografía abdominal',
+              practitionerDisplayName: 'Dr. Luis Gómez',
+              attendedAt: '2026-10-02T09:30:00.000Z',
+            },
+          ],
+        ]),
+      );
+
+      const result = await d.service.listMyInvitations(patientActor);
+
+      expect(result).toEqual([
+        expect.objectContaining({
+          id: 'inv-c',
+          kind: 'CONSULTATION',
+          serviceName: null,
+          practitionerDisplayName: 'Dra. Ana Pérez',
+          attendedAt: '2026-10-01T14:00:00.000Z',
+        }),
+        expect.objectContaining({
+          id: 'inv-s',
+          kind: 'SERVICE',
+          serviceName: 'Ecografía abdominal',
+          description: 'Una pregunta',
+        }),
+      ]);
+    });
+
+    it('sin N+1: una sola lectura de contexto para toda la lista, sin leer plantillas una por una', async () => {
+      const d = build();
+      d.invitationsRepo.listByPatient.mockResolvedValue(
+        ['a', 'b', 'c', 'd'].map((id) => pendingInvitation({ id })),
+      );
+
+      const result = await d.service.listMyInvitations(patientActor);
+
+      expect(result).toHaveLength(4);
+      expect(d.invitationsRepo.listCardContext).toHaveBeenCalledTimes(1);
+      expect(d.invitationsRepo.listCardContext).toHaveBeenCalledWith(
+        expect.anything(),
+        ['a', 'b', 'c', 'd'],
+      );
+      expect(d.templatesRepo.findVersionById).not.toHaveBeenCalled();
+      expect(d.templatesRepo.findTemplateById).not.toHaveBeenCalled();
+    });
+
+    it('una invitación cuya plantilla ya no existe no aparece en la lista', async () => {
+      const d = build();
+      d.invitationsRepo.listByPatient.mockResolvedValue([
+        pendingInvitation({ id: 'inv-ok' }),
+        pendingInvitation({ id: 'inv-huerfana' }),
+      ]);
+      d.invitationsRepo.listCardContext.mockResolvedValue(
+        new Map([
+          [
+            'inv-ok',
+            {
+              invitationId: 'inv-ok',
+              title: 'T',
+              description: null,
+              kind: 'CONSULTATION',
+              serviceName: null,
+              practitionerDisplayName: null,
+              attendedAt: null,
+            },
+          ],
+        ]),
+      );
+
+      const result = await d.service.listMyInvitations(patientActor);
+
+      expect(result.map((i) => i.id)).toEqual(['inv-ok']);
     });
 
     it('un paciente sin invitaciones recibe una lista vacía, no un error', async () => {
@@ -760,6 +880,37 @@ describe('SurveysResponsesService · invitación única: base del sistema + exte
     it('las del médico son opcionales aunque su versión las guarde obligatorias; las del sistema conservan su obligatoriedad', async () => {
       const d = build();
       merged(d);
+    it('la invitación abierta lleva el mismo contexto que la tarjeta de la lista', async () => {
+      const d = build();
+      merged(d);
+      d.invitationsRepo.listCardContext.mockResolvedValue(
+        new Map([
+          [
+            'inv-1',
+            {
+              invitationId: 'inv-1',
+              title: 'Cómo fue su servicio',
+              description: null,
+              kind: 'SERVICE',
+              serviceName: 'Ecografía abdominal',
+              practitionerDisplayName: 'Dr. Luis Gómez',
+              attendedAt: '2026-10-02T09:30:00.000Z',
+            },
+          ],
+        ]),
+      );
+
+      const res = await d.service.getMyQuestionnaire('inv-1', patientActor);
+
+      expect(res).toMatchObject({
+        kind: 'SERVICE',
+        serviceName: 'Ecografía abdominal',
+        practitionerDisplayName: 'Dr. Luis Gómez',
+        attendedAt: '2026-10-02T09:30:00.000Z',
+      });
+      expect(d.invitationsRepo.listCardContext).toHaveBeenCalledTimes(1);
+    });
+
 
       const res = await d.service.getMyQuestionnaire('inv-1', patientActor);
 

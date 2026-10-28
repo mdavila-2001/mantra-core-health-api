@@ -296,6 +296,47 @@ export class PatientInvitationDto {
    */
   @ApiProperty({ format: 'uuid', description: 'Atención que la originó' })
   appointmentBookingId!: string;
+
+  /**
+   * Tipo de atención que la originó, para distinguir las tarjetas.
+   */
+  @ApiPropertyOptional({
+    enum: ['CONSULTATION', 'SERVICE'],
+    description:
+      'Tipo de atención: SERVICE si la reserva fue de un servicio ofrecido, CONSULTATION si fue una consulta',
+  })
+  kind?: 'CONSULTATION' | 'SERVICE';
+
+  /**
+   * Nombre del servicio reservado.
+   */
+  @ApiPropertyOptional({
+    type: String,
+    nullable: true,
+    description: 'Servicio reservado; null en una consulta',
+  })
+  serviceName?: string | null;
+
+  /**
+   * Nombre visible de quien atendió.
+   */
+  @ApiPropertyOptional({
+    type: String,
+    nullable: true,
+    description: 'Profesional que atendió; null si no se pudo determinar',
+  })
+  practitionerDisplayName?: string | null;
+
+  /**
+   * Fecha y hora de la atención.
+   */
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    nullable: true,
+    description: 'Fecha y hora de la atención de la reserva',
+  })
+  attendedAt?: string | null;
 }
 
 /** El cuestionario a responder: la invitación más sus preguntas. */
