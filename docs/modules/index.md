@@ -21,13 +21,13 @@
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
 | [`chart`](chart.md) | 7 | 9 | 4 | 11 | 6 |
 | [`diagnostics`](diagnostics.md) | 7 | 10 | 8 | 36 | 9 |
+| [`profiles`](profiles.md) | 7 | 13 | 15 | 20 | 32 |
 | [`terminology`](terminology.md) | 7 | 9 | 9 | 16 | 19 |
 | [`audit`](audit.md) | 6 | 8 | 9 | 131 | 11 |
 | [`billing`](billing.md) | 6 | 14 | 12 | 24 | 15 |
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
 | [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 17 | 21 | 17 |
-| [`profiles`](profiles.md) | 6 | 12 | 14 | 19 | 31 |
 | [`delegated_access`](delegated_access.md) | 5 | 6 | 8 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 9 | 12 | 10 | 13 |
 | [`geo`](geo.md) | 5 | 5 | 6 | 6 | 14 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **293** | **476** | **439** | **1280** | **543** |
+| **Total** | **294** | **477** | **440** | **1281** | **544** |

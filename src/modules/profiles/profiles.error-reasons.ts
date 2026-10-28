@@ -25,6 +25,10 @@ export enum ProfilesErrorReason {
   PATIENT_HOME_ADDRESS_REQUIRED = 'PATIENT_HOME_ADDRESS_REQUIRED',
   /** Se llegó al tope de direcciones guardadas. */
   PATIENT_ADDRESS_BOOK_FULL = 'PATIENT_ADDRESS_BOOK_FULL',
+  /** El paciente se eligió a sí mismo como médico de cabecera. */
+  PRIMARY_PRACTITIONER_SELF = 'PRIMARY_PRACTITIONER_SELF',
+  /** El profesional declaró que no acepta pacientes nuevos. */
+  PRIMARY_PRACTITIONER_NOT_ACCEPTING_PATIENTS = 'PRIMARY_PRACTITIONER_NOT_ACCEPTING_PATIENTS',
   /** El padrón no se puede listar sin nombre, código o documento. */
   PATIENT_SEARCH_CRITERIA_REQUIRED = 'PATIENT_SEARCH_CRITERIA_REQUIRED',
   /** No existe la persona (`profiles.persons`) referenciada. */
