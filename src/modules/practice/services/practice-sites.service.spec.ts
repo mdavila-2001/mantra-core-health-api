@@ -314,6 +314,89 @@ describe('PracticeSitesService.listPractices — acceso por vinculación', () =>
     );
   });
 
+  describe('consultorio propio (coherente con el alta del catálogo)', () => {
+    const MY_OFFICE = {
+      id: 'prac-office',
+      code: 'OFFICE-user-doc',
+      name: 'Consultorio propio',
+      adminUserId: 'user-doc',
+      typeConceptId: PRAC.PRACTICE_TYPE_OFFICE,
+    };
+    const OTHERS_OFFICE = {
+      ...MY_OFFICE,
+      id: 'prac-office-2',
+      code: 'OFFICE-otro',
+      adminUserId: 'user-otro',
+    };
+    const MY_CLINIC = {
+      id: 'prac-clinic',
+      code: 'CLI',
+      name: 'Clínica que administro',
+      adminUserId: 'user-doc',
+      typeConceptId: PRAC.PRACTICE_TYPE_CLINIC,
+    };
+
+    /**
+     * Servicio con consultorios y una clínica; el médico no tiene vinculación alguna.
+     * @param assignments - Vinculaciones existentes.
+     * @returns El servicio y sus dobles.
+     */
+    function withOffices(assignments: AssignmentRow[] = []) {
+      const d = build(assignments);
+      d.practicesRepo.findByTenant.mockResolvedValue(
+        [OWN, OTHER, MY_OFFICE, OTHERS_OFFICE, MY_CLINIC].map((p) => ({
+          ...p,
+          tenantId: 'DEFAULT',
+          statusConceptId: PRAC.PRACTICE_ACTIVE,
+        })),
+      );
+      return d;
+    }
+
+    it('el médico sin ninguna vinculación ACTIVE ve igual su consultorio propio', async () => {
+      const d = withOffices();
+      const newcomer = { ...doctor, practitionerProfileId: 'hp-new' };
+
+      const list = await d.service.listPractices('DEFAULT', newcomer);
+
+      expect(list.map((p) => p.id)).toEqual([MY_OFFICE.id]);
+    });
+
+    it('el médico sin perfil profesional en el token ve igual su consultorio propio', async () => {
+      const d = withOffices();
+      const noProfile = { id: 'user-doc', roles: ['PRACTITIONER'] } as any;
+
+      const list = await d.service.listPractices('DEFAULT', noProfile);
+
+      expect(list.map((p) => p.id)).toEqual([MY_OFFICE.id]);
+    });
+
+    it('suma el consultorio propio a las prácticas donde está vinculado, sin duplicarlo', async () => {
+      const d = withOffices([
+        ...rows,
+        {
+          practitionerProfileId: 'hp-doc',
+          practiceId: MY_OFFICE.id,
+          statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+          validTo: null,
+        },
+      ]);
+
+      const list = await d.service.listPractices('DEFAULT', doctor);
+
+      expect(list.map((p) => p.id)).toEqual([OWN.id, MY_OFFICE.id]);
+    });
+
+    it('no abre el consultorio de otro ni una práctica que sólo administra y no es consultorio', async () => {
+      const d = withOffices();
+
+      const list = await d.service.listPractices('DEFAULT', doctor);
+
+      expect(list.map((p) => p.id)).not.toContain(OTHERS_OFFICE.id);
+      expect(list.map((p) => p.id)).not.toContain(MY_CLINIC.id);
+    });
+  });
+
   it('el administrador ve todas las prácticas del tenant', async () => {
     const d = withPractices();
 

@@ -23,6 +23,7 @@ import {
   KpiSnapshotsService,
   BillingServiceCatalogService,
   ProcedureNomenclatureService,
+  ProcedureImportService,
   BillingSimulatedService,
 } from './services';
 import {
@@ -87,6 +88,7 @@ import {
     KpiSnapshotsService,
     BillingServiceCatalogService,
     ProcedureNomenclatureService,
+    ProcedureImportService,
     BillingSimulatedService,
   ],
   // Carril 18 — `accounting` reutiliza `LedgerService.postToLedger` (anclar

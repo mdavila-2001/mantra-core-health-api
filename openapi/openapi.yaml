@@ -22439,6 +22439,44 @@ paths:
       summary: Dar de alta un servicio en el catálogo maestro
       tags:
         - billing-service-catalog
+  /billing/service-catalog/import-procedures:
+    post:
+      description: >-
+        Crea en el catálogo de la práctica todos los procedimientos del arancel que cumplan el filtro (especialidades,
+        códigos y/o texto, combinados con Y; al menos uno). Idempotente: salta los códigos que la práctica ya tiene.
+        Tope de 5000 coincidencias (400 si lo excede).
+      operationId: BillingServiceCatalogController_importProcedures
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportProceduresDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Importar en lote procedimientos del arancel al catálogo
+      tags:
+        - billing-service-catalog
   /billing/service-catalog/{id}:
     patch:
       operationId: BillingServiceCatalogController_update
@@ -22508,6 +22546,31 @@ paths:
       description: >-
         Listar las especialidades del nomenclador de procedimientos. Requiere JWT y los roles o alcances declarados por
         el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /billing/service-catalog/procedure-specialties/mine:
+    get:
+      operationId: BillingServiceCatalogController_listMyProcedureSpecialties
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Listar las especialidades del arancel que corresponden al médico
+      tags:
+        - billing-service-catalog
+      description: >-
+        Listar las especialidades del arancel que corresponden al médico. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /billing/service-catalog/procedures:
     get:
       operationId: BillingServiceCatalogController_searchProcedures
@@ -22521,7 +22584,9 @@ paths:
         - name: q
           required: false
           in: query
-          description: Texto a buscar en el nombre del procedimiento
+          description: >-
+            Palabras a buscar (todas deben aparecer), sin distinguir tildes ni mayúsculas, en el nombre, el código, el
+            grupo o la especialidad
           schema:
             type: string
         - name: cursor
@@ -75562,6 +75627,33 @@ components:
         - code
         - name
         - defaultPrice
+      additionalProperties: false
+    ImportProceduresDto:
+      type: object
+      properties:
+        practiceId:
+          type: string
+          description: Práctica (practice.practices) cuyo catálogo recibe los servicios
+          format: uuid
+        specialties:
+          description: Nombres exactos de especialidad del arancel (`GET procedure-specialties`)
+          example:
+            - Cardiología
+          type: array
+          items:
+            type: string
+        codes:
+          description: Códigos del arancel (`procedure:...`) a importar
+          example:
+            - procedure:bo:BO_ARM_AUDITORIA_MEDICA_I_GENERAL
+          type: array
+          items:
+            type: string
+        q:
+          type: string
+          description: Texto a buscar en el nombre del procedimiento; sin tildes ni mayúsculas, todas las palabras
+      required:
+        - practiceId
       additionalProperties: false
     UpdateServiceCatalogItemDto:
       type: object

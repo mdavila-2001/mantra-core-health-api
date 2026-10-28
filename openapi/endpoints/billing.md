@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `billing`
 
-Referencia exhaustiva de 34 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 36 operación(es) del módulo `billing`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `billing-operations`, `billing-payables`, `billing-receivables`, `billing-service-catalog`, `billing-simulated`
 - **Controladores:** `BillingOperationsController`, `BillingPayablesController`, `BillingReceivablesController`, `BillingServiceCatalogController`, `BillingSimulatedController`
@@ -30,21 +30,23 @@ Referencia exhaustiva de 34 operación(es) del módulo `billing`, derivada del c
 17. [GET /billing/service-catalog](#17-get-billing-service-catalog) — Listar el catálogo de servicios de la práctica
 18. [POST /billing/service-catalog](#18-post-billing-service-catalog) — Dar de alta un servicio en el catálogo maestro
 19. [PATCH /billing/service-catalog/{id}](#19-patch-billing-service-catalog-id) — Corregir un servicio del catálogo de mi práctica
-20. [GET /billing/service-catalog/procedure-specialties](#20-get-billing-service-catalog-procedure-specialties) — Listar las especialidades del nomenclador de procedimientos
-21. [GET /billing/service-catalog/procedures](#21-get-billing-service-catalog-procedures) — Listar el nomenclador de procedimientos (arancel de referencia)
-22. [GET /billing/simulated/catalogs](#22-get-billing-simulated-catalogs) — Catálogos paramétricos del SIAT simulado
-23. [GET /billing/simulated/charges](#23-get-billing-simulated-charges) — Cobros de consultas (opcionalmente de una persona)
-24. [POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments](#24-post-billing-simulated-charges-chargeid-instances-instanceid-payments) — Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
-25. [POST /billing/simulated/charges/{chargeId}/invoices](#25-post-billing-simulated-charges-chargeid-invoices) — Emitir la factura SIAT simulada de un cobro pagado
-26. [POST /billing/simulated/charges/{chargeId}/payment](#26-post-billing-simulated-charges-chargeid-payment) — Registrar el pago real de un cobro
-27. [GET /billing/simulated/invoices/{invoiceId}](#27-get-billing-simulated-invoices-invoiceid) — Una factura simulada, dentro del alcance de quien la pide
-28. [POST /billing/simulated/invoices/{invoiceId}/annulment](#28-post-billing-simulated-invoices-invoiceid-annulment) — Anular la factura (sólo administración)
-29. [POST /billing/simulated/invoices/{invoiceId}/annulment-reversal](#29-post-billing-simulated-invoices-invoiceid-annulment-reversal) — Revertir la anulación (sólo administración)
-30. [POST /billing/simulated/invoices/{invoiceId}/email](#30-post-billing-simulated-invoices-invoiceid-email) — Encolar el envío (simulado, no se envía) de la factura
-31. [GET /billing/simulated/my-invoices](#31-get-billing-simulated-my-invoices) — Mis facturas: recibidas (paciente) o emitidas (quien factura)
-32. [GET /billing/simulated/my-invoices/{invoiceId}](#32-get-billing-simulated-my-invoices-invoiceid) — Una de mis facturas
-33. [GET /billing/simulated/outbox](#33-get-billing-simulated-outbox) — Bandeja de correo simulada (sólo administración)
-34. [GET /billing/simulated/status](#34-get-billing-simulated-status) — Estado fiscal simulado: emisores y credenciales sintéticas
+20. [POST /billing/service-catalog/import-procedures](#20-post-billing-service-catalog-import-procedures) — Importar en lote procedimientos del arancel al catálogo
+21. [GET /billing/service-catalog/procedure-specialties](#21-get-billing-service-catalog-procedure-specialties) — Listar las especialidades del nomenclador de procedimientos
+22. [GET /billing/service-catalog/procedure-specialties/mine](#22-get-billing-service-catalog-procedure-specialties-mine) — Listar las especialidades del arancel que corresponden al médico
+23. [GET /billing/service-catalog/procedures](#23-get-billing-service-catalog-procedures) — Listar el nomenclador de procedimientos (arancel de referencia)
+24. [GET /billing/simulated/catalogs](#24-get-billing-simulated-catalogs) — Catálogos paramétricos del SIAT simulado
+25. [GET /billing/simulated/charges](#25-get-billing-simulated-charges) — Cobros de consultas (opcionalmente de una persona)
+26. [POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments](#26-post-billing-simulated-charges-chargeid-instances-instanceid-payments) — Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
+27. [POST /billing/simulated/charges/{chargeId}/invoices](#27-post-billing-simulated-charges-chargeid-invoices) — Emitir la factura SIAT simulada de un cobro pagado
+28. [POST /billing/simulated/charges/{chargeId}/payment](#28-post-billing-simulated-charges-chargeid-payment) — Registrar el pago real de un cobro
+29. [GET /billing/simulated/invoices/{invoiceId}](#29-get-billing-simulated-invoices-invoiceid) — Una factura simulada, dentro del alcance de quien la pide
+30. [POST /billing/simulated/invoices/{invoiceId}/annulment](#30-post-billing-simulated-invoices-invoiceid-annulment) — Anular la factura (sólo administración)
+31. [POST /billing/simulated/invoices/{invoiceId}/annulment-reversal](#31-post-billing-simulated-invoices-invoiceid-annulment-reversal) — Revertir la anulación (sólo administración)
+32. [POST /billing/simulated/invoices/{invoiceId}/email](#32-post-billing-simulated-invoices-invoiceid-email) — Encolar el envío (simulado, no se envía) de la factura
+33. [GET /billing/simulated/my-invoices](#33-get-billing-simulated-my-invoices) — Mis facturas: recibidas (paciente) o emitidas (quien factura)
+34. [GET /billing/simulated/my-invoices/{invoiceId}](#34-get-billing-simulated-my-invoices-invoiceid) — Una de mis facturas
+35. [GET /billing/simulated/outbox](#35-get-billing-simulated-outbox) — Bandeja de correo simulada (sólo administración)
+36. [GET /billing/simulated/status](#36-get-billing-simulated-status) — Estado fiscal simulado: emisores y credenciales sintéticas
 
 ---
 
@@ -2925,7 +2927,143 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /billing/service-catalog/procedure-specialties
+## 20. POST /billing/service-catalog/import-procedures
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-service-catalog`
+- **Nombre:** Importar en lote procedimientos del arancel al catálogo
+- **Operation ID:** `BillingServiceCatalogController_importProcedures`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingServiceCatalogController.importProcedures](../../src/modules/billing/controllers/billing-service-catalog.controller.ts)
+
+### Descripción de negocio
+
+Crea en el catálogo de la práctica todos los procedimientos del arancel que cumplan el filtro (especialidades, códigos y/o texto, combinados con Y; al menos uno). Idempotente: salta los códigos que la práctica ya tiene. Tope de 5000 coincidencias (400 si lo excede).
+
+Contexto declarado en el controlador: Importa en lote al catálogo de una práctica los procedimientos del arancel. Mismo `@Roles` y mismo alcance que el alta individual: la administración en cualquier práctica de su organización, un profesional sólo en su consultorio propio, y 404 en cualquier otra. Declarada antes de `:id` junto con el resto de las rutas estáticas.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /billing/service-catalog/import-procedures` en `BillingServiceCatalogController_importProcedures`. El controlador delega en `ProcedureImportService.importProcedures`. Valida el body como `ImportProceduresDto` y consume `application/json`. El tipo de retorno estático es `Promise<ImportProceduresResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ImportProceduresDto`; los campos opcionales se omiten.
+
+```http
+POST /billing/service-catalog/import-procedures HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `practiceId` | Sí | `string` | formato `uuid` | Práctica (practice.practices) cuyo catálogo recibe los servicios | `00000000-0000-4000-8000-000000000001` |
+| `specialties` | No | `array<string>` | longitud máxima 200; máximo 100 elemento(s) | Nombres exactos de especialidad del arancel (`GET procedure-specialties`) | `["Cardiología"]` |
+| `codes` | No | `array<string>` | longitud máxima 300; máximo PROCEDURE_IMPORT_MAX elemento(s) | Códigos del arancel (`procedure:...`) a importar | `["procedure:bo:BO_ARM_AUDITORIA_MEDICA_I_GENERAL"]` |
+| `q` | No | `string` | longitud máxima 200 | Texto a buscar en el nombre del procedimiento; sin tildes ni mayúsculas, todas las palabras | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /billing/service-catalog/import-procedures HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practiceId": "00000000-0000-4000-8000-000000000001",
+  "specialties": [
+    "Cardiología"
+  ],
+  "codes": [
+    "procedure:bo:BO_ARM_AUDITORIA_MEDICA_I_GENERAL"
+  ],
+  "q": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ImportProceduresResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ImportProceduresResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ImportProceduresResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ImportProceduresResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ImportProceduresResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ImportProceduresResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ImportProceduresResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ImportProceduresResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ImportProceduresResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ImportProceduresResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "created": 1,
+  "skipped": 1,
+  "total": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `created` | Sí | `number` | Sin restricción adicional declarada | Servicios creados | `1` |
+| `skipped` | Sí | `number` | Sin restricción adicional declarada | Coincidencias que ya existían en la práctica y se saltaron | `1` |
+| `total` | Sí | `number` | Sin restricción adicional declarada | Procedimientos del arancel que cumplen el filtro | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 400 | `VALIDATION_FAILED` | El filtro abarca más de ${PROCEDURE_IMPORT_MAX} procedimientos; acotalo por especialidad o texto | Excepción explícita en src/modules/billing/services/procedure-import.service.ts |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Práctica no encontrada | Excepción explícita en src/modules/billing/services/billing-service-catalog.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/service-catalog/import-procedures"
+}
+```
+
+---
+
+## 21. GET /billing/service-catalog/procedure-specialties
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -3033,7 +3171,115 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /billing/service-catalog/procedures
+## 22. GET /billing/service-catalog/procedure-specialties/mine
+
+- **Módulo:** `billing`
+- **Etiqueta OpenAPI:** `billing-service-catalog`
+- **Nombre:** Listar las especialidades del arancel que corresponden al médico
+- **Operation ID:** `BillingServiceCatalogController_listMyProcedureSpecialties`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [BillingServiceCatalogController.listMyProcedureSpecialties](../../src/modules/billing/controllers/billing-service-catalog.controller.ts)
+
+### Descripción de negocio
+
+Listar las especialidades del arancel que corresponden al médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Las especialidades del arancel que corresponden al médico autenticado. Sale de las especialidades que el profesional cargó en su perfil, cruzadas con las del arancel sin tildes ni mayúsculas. Vacío si no tiene ninguna cargada o el usuario no es profesional. Declarada antes de `:id`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /billing/service-catalog/procedure-specialties/mine` en `BillingServiceCatalogController_listMyProcedureSpecialties`. El controlador delega en `ProcedureImportService.listMySpecialties`. No recibe body. El tipo de retorno estático es `Promise<MyProcedureSpecialtiesResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /billing/service-catalog/procedure-specialties/mine HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /billing/service-catalog/procedure-specialties/mine HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyProcedureSpecialtiesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyProcedureSpecialtiesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyProcedureSpecialtiesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyProcedureSpecialtiesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyProcedureSpecialtiesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyProcedureSpecialtiesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyProcedureSpecialtiesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "specialty": "Cardiología",
+      "count": 1
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<MyProcedureSpecialtyDto>` | Sin restricción adicional declarada | Especialidades del arancel que corresponden al médico autenticado. | `[{"specialty":"Cardiología","count":1}]` |
+| `items[].specialty` | Sí | `string` | Sin restricción adicional declarada | Nombre exacto de la especialidad, tal cual lo publica el arancel. | `Cardiología` |
+| `items[].count` | Sí | `number` | Sin restricción adicional declarada | Procedimientos que el arancel agrupa bajo esa especialidad. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/billing/service-catalog/procedure-specialties/mine"
+}
+```
+
+---
+
+## 23. GET /billing/service-catalog/procedures
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-service-catalog`
@@ -3057,7 +3303,7 @@ NestJS resuelve `GET /billing/service-catalog/procedures` en `BillingServiceCata
 | Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|---|:---:|---|---|---|---|
 | `specialty` | query | No | `string` | Sin restricción adicional declarada | Especialidad exacta, tal cual la publica el arancel | `valor-ejemplo` |
-| `q` | query | No | `string` | Sin restricción adicional declarada | Texto a buscar en el nombre del procedimiento | `valor-ejemplo` |
+| `q` | query | No | `string` | Sin restricción adicional declarada | Palabras a buscar (todas deben aparecer), sin distinguir tildes ni mayúsculas, en el nombre, el código, el grupo o la especialidad | `valor-ejemplo` |
 | `cursor` | query | No | `string` | Sin restricción adicional declarada | Cursor opaco devuelto por la página anterior | `valor-ejemplo` |
 | `limit` | query | No | `number` | Sin restricción adicional declarada | Entradas por página | `1` |
 
@@ -3161,7 +3407,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /billing/simulated/catalogs
+## 24. GET /billing/simulated/catalogs
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3250,7 +3496,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /billing/simulated/charges
+## 25. GET /billing/simulated/charges
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3343,7 +3589,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+## 26. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3459,7 +3705,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /billing/simulated/charges/{chargeId}/invoices
+## 27. POST /billing/simulated/charges/{chargeId}/invoices
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3594,7 +3840,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /billing/simulated/charges/{chargeId}/payment
+## 28. POST /billing/simulated/charges/{chargeId}/payment
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3713,7 +3959,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /billing/simulated/invoices/{invoiceId}
+## 29. GET /billing/simulated/invoices/{invoiceId}
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3808,7 +4054,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /billing/simulated/invoices/{invoiceId}/annulment
+## 30. POST /billing/simulated/invoices/{invoiceId}/annulment
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -3920,7 +4166,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+## 31. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4017,7 +4263,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /billing/simulated/invoices/{invoiceId}/email
+## 32. POST /billing/simulated/invoices/{invoiceId}/email
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4129,7 +4375,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. GET /billing/simulated/my-invoices
+## 33. GET /billing/simulated/my-invoices
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4218,7 +4464,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /billing/simulated/my-invoices/{invoiceId}
+## 34. GET /billing/simulated/my-invoices/{invoiceId}
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4311,7 +4557,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /billing/simulated/outbox
+## 35. GET /billing/simulated/outbox
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
@@ -4402,7 +4648,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. GET /billing/simulated/status
+## 36. GET /billing/simulated/status
 
 - **Módulo:** `billing`
 - **Etiqueta OpenAPI:** `billing-simulated`
