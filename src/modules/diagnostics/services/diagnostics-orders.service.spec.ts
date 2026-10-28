@@ -100,7 +100,10 @@ describe('DiagnosticsOrdersService', () => {
       );
     });
 
-    it('pide exactamente las dos categorías diagnósticas', async () => {
+    // Además de las dos diagnósticas, los estudios cardiológicos, de patología
+    // y la imagen de `clinical` que el formulario de la ficha pide. Siguen
+    // fuera procedimientos, derivaciones e interconsultas.
+    it('pide las categorías de estudio que la ficha pide', async () => {
       const d = build();
 
       await d.service.getPatientOrders(TENANT, PATIENT, 50);
@@ -109,7 +112,11 @@ describe('DiagnosticsOrdersService', () => {
       expect(categories).toEqual([
         CLIN.SERVICE_REQUEST_CATEGORY_LAB,
         DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+        CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
+        CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
+        CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
       ]);
+      expect(categories).not.toContain(CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE);
     });
 
     it('proyecta órdenes e informes con el tope aplicado', async () => {

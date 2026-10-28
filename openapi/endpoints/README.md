@@ -2,7 +2,7 @@
 
 # Referencia ultra detallada de endpoints
 
-Esta referencia documenta **1568 de 1568 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **73 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
+Esta referencia documenta **1575 de 1575 operaciones HTTP** registradas en `openapi/openapi.json`, agrupadas en **73 módulos**. Cada endpoint incluye módulo, nombre, descripciones de negocio y sistema, parámetros, payload mínimo, restricciones, payload completo, respuesta exitosa y errores posibles.
 
 ## Cómo interpretar la referencia
 
@@ -75,7 +75,7 @@ Esta referencia documenta **1568 de 1568 operaciones HTTP** registradas en `open
 | [graph_intelligence](graph-intelligence.md) | 15 | `graph_intelligence` | 2 |
 | [health_context](health-context.md) | 13 | `health-context` | 1 |
 | [health_data](health-data.md) | 16 | `fhir-r5`, `health-data` | 2 |
-| [iam](iam.md) | 39 | `iam-auth`, `iam-onboarding-drafts`, `iam-users` | 4 |
+| [iam](iam.md) | 40 | `iam-auth`, `iam-onboarding-drafts`, `iam-users` | 4 |
 | [identity_assurance](identity-assurance.md) | 28 | `identity-assertions`, `identity-authorities`, `identity-checks`, `identity-manual-review`, `identity-policies`, `identity-self-service`, `identity-verification-cases`, `identity_assurance` | 8 |
 | [insurance](insurance.md) | 56 | `insurance`, `insurance-analytics`, `insurance-appeals`, `insurance-backbone`, `insurance-broker-commission`, `insurance-catalog`, `insurance-claims`, `insurance-claims-read`, `insurance-coverage`, `insurance-portability`, `insurance-portability-public`, `insurance-practitioner-settlement`, `insurance-prior-auth`, `insurance-read`, `insurance-reconciliation`, `insurer-patients`, `insurer-received-claims`, `my-insurance-claims` | 18 |
 | [insurance-campaigns](insurance-campaigns.md) | 16 | `insurance-campaigns` | 0 |
@@ -95,7 +95,7 @@ Esta referencia documenta **1568 de 1568 operaciones HTTP** registradas en `open
 | [pharmacy_inventory](pharmacy-inventory.md) | 29 | `pharmacy-inventory`, `pharmacy-inventory-directory`, `pharmacy-inventory-internal`, `pharmacy-orders` | 6 |
 | [platform_ops](platform-ops.md) | 15 | `platform-ops` | 1 |
 | [polyglot_storage](polyglot-storage.md) | 15 | `polyglot-finops`, `polyglot-governance`, `polyglot-ops` | 3 |
-| [practice](practice.md) | 36 | `practice` | 9 |
+| [practice](practice.md) | 37 | `practice` | 9 |
 | [procedures_perioperative](procedures-perioperative.md) | 32 | `dental-procedures`, `procedure-cases` | 2 |
 | [profiles](profiles.md) | 57 | `profiles-affiliations`, `profiles-patients`, `profiles-practitioners` | 5 |
 | [promotions](promotions.md) | 19 | `loyalty`, `promotions` | 2 |
@@ -106,7 +106,7 @@ Esta referencia documenta **1568 de 1568 operaciones HTTP** registradas en `open
 | [read_models](read-models.md) | 15 | `read-models`, `read-models-public`, `read-models-views` | 3 |
 | [redis_runtime](redis-runtime.md) | 5 | `redis-runtime` | 1 |
 | [reporting](reporting.md) | 12 | `reporting` | 1 |
-| [scheduling](scheduling.md) | 59 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda` | 7 |
+| [scheduling](scheduling.md) | 64 | `scheduling`, `scheduling-agenda`, `scheduling-bookings`, `scheduling-confirmation`, `scheduling-internal`, `scheduling-tenant-agenda` | 7 |
 | [search_platform](search-platform.md) | 3 | `search_platform` | 1 |
 | [surveys](surveys.md) | 17 | `surveys-assignments`, `surveys-patient`, `surveys-templates` | 3 |
 | [system_context](system-context.md) | 13 | `system-context` | 1 |
@@ -124,4 +124,4 @@ Esta referencia documenta **1568 de 1568 operaciones HTTP** registradas en `open
 yarn docs:endpoints:generate
 ```
 
-La generación falla si la cantidad documentada difiere de las 1568 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.
+La generación falla si la cantidad documentada difiere de las 1575 operaciones encontradas. Los archivos de esta carpeta son derivados; los cambios permanentes deben hacerse en decoradores, DTOs, controladores, servicios o en el generador.

@@ -15,12 +15,12 @@
 | [`accounting`](accounting.md) | 10 | 12 | 10 | 45 | 13 |
 | [`authz`](authz.md) | 9 | 12 | 16 | 15 | 21 |
 | [`practice`](practice.md) | 9 | 15 | 12 | 11 | 21 |
-| [`clinical_ext`](clinical_ext.md) | 8 | 9 | 12 | 13 | 9 |
+| [`clinical_ext`](clinical_ext.md) | 8 | 9 | 13 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 12 | 10 | 11 | 17 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
 | [`chart`](chart.md) | 7 | 9 | 4 | 11 | 6 |
 | [`diagnostics`](diagnostics.md) | 7 | 10 | 8 | 36 | 9 |
-| [`scheduling`](scheduling.md) | 7 | 14 | 7 | 18 | 8 |
+| [`scheduling`](scheduling.md) | 7 | 15 | 8 | 19 | 8 |
 | [`terminology`](terminology.md) | 7 | 9 | 9 | 16 | 19 |
 | [`audit`](audit.md) | 6 | 8 | 9 | 131 | 11 |
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **291** | **466** | **435** | **1276** | **536** |
+| **Total** | **291** | **467** | **437** | **1277** | **536** |

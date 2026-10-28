@@ -483,6 +483,8 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       PROF.JURISDICTION_SEDES_TARIJA,
       PROF.JURISDICTION_SEDES_BENI,
       PROF.JURISDICTION_SEDES_PANDO,
+      // Al final: el seed numera por posición y sólo inserta.
+      PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
     ],
     defaultConceptId: PROF.JURISDICTION_NATIONAL,
     targets: ['profiles.jurisdiction_authorizations.jurisdiction_concept_id'],

@@ -1,8 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
+  LOGO_IMAGE_MIME_TYPES,
+  PreconditionFailedException,
+  assertLogoImage,
   requireTenantId,
   ResourceNotFoundException,
   touch,
@@ -13,6 +16,7 @@ import {
 // (P32-b) desde acá, que es donde vive el caso de uso de «mudé mi consultorio».
 import { Addresses } from '../../common/entities';
 import { AddressesRepository } from '../../common/repositories';
+import { AttachableFileService } from '../../common/services/attachable-file.service';
 // Mismo patrón que `clinical_ext` con `ProfileOwnershipService`: se importa la
 // clase puntual, no `ProfilesModule`, para no cerrar un ciclo entre módulos.
 import { ProfileOwnershipService } from '../../profiles/application/services/profile-ownership.service';
@@ -112,6 +116,7 @@ export class PractitionerSitesService {
     private readonly provisioning: OwnSiteProvisioningService,
     private readonly ownership: ProfileOwnershipService,
     private readonly logger: PinoLogger,
+    private readonly attachable: AttachableFileService,
   ) {
     this.logger.setContext(PractitionerSitesService.name);
   }
@@ -144,6 +149,9 @@ export class PractitionerSitesService {
     return this.em.transactional(async (tx) => {
       const practitionerProfileId =
         await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+      if (dto.logoFileId) {
+        await this.assertUsableLogo(tx, dto.logoFileId, actor);
+      }
 
       const { site } = await this.provisioning.provision(
         tx,
@@ -168,6 +176,7 @@ export class PractitionerSitesService {
         contactPhone: dto.contactPhone ?? null,
         isOwnSite: true,
         bankQrFileId: site.bankQrFileId ?? null,
+        logoFileId: site.logoFileId ?? null,
         status: site.statusConceptId,
       };
     });
@@ -285,6 +294,58 @@ export class PractitionerSitesService {
         await this.isOwnPractice(tx, site.practiceId, actor.id, tenantId),
         assignment?.contactPhone,
       );
+    });
+  }
+
+  /**
+   * Fija —o quita— el logo del consultorio propio, el que sale en el membrete
+   * de sus PDF.
+   *
+   * A diferencia del QR, alcanza sólo al consultorio **propio**: el logo es de
+   * la sede, no de con qué cobra el profesional en ella, y la sede de otra
+   * organización la administra ella.
+   *
+   * @param actor - El profesional autenticado.
+   * @param siteId - El consultorio.
+   * @param fileId - La imagen ya subida, o `null` para dejar la sede sin logo.
+   * @returns La sede con el logo aplicado, en el formato de la lista.
+   * @throws ResourceNotFoundException (404) si la sede no es un consultorio propio del actor.
+   * @throws PreconditionFailedException (422) si el archivo no sirve como logo.
+   */
+  async setSiteLogo(
+    actor: AuthenticatedUser,
+    siteId: string,
+    fileId: string | null,
+  ): Promise<PractitionerSiteDto> {
+    const tenantId = requireTenantId();
+    return this.em.transactional(async (tx) => {
+      const site = await this.requireOwnSite(tx, actor, siteId, tenantId);
+      if (fileId !== null) {
+        await this.assertUsableLogo(tx, fileId, actor);
+      }
+
+      // `undefined` y no `null`: la propiedad de la entidad es opcional, y
+      // MikroORM traduce la ausencia a `NULL` en la columna.
+      site.logoFileId = fileId ?? undefined;
+      touch(site, actor.id);
+      await tx.flush();
+
+      this.logger.info(
+        {
+          operation: 'practice.sites.setLogo',
+          siteId,
+          cleared: fileId === null,
+        },
+        'Practitioner own site logo updated',
+      );
+      const practitionerProfileId =
+        await this.ownership.requireOwnPractitionerProfileId(tx, actor);
+      const assignment = await this.rolesRepo.findCurrentBySite(
+        tx,
+        practitionerProfileId,
+        siteId,
+      );
+      return this.projectSite(tx, site, true, assignment?.contactPhone);
     });
   }
 
@@ -571,6 +632,7 @@ export class PractitionerSitesService {
       contactPhone: contactPhone ?? null,
       isOwnSite,
       bankQrFileId: site.bankQrFileId ?? null,
+      logoFileId: site.logoFileId ?? null,
       status: site.statusConceptId,
     };
   }
@@ -605,6 +667,57 @@ export class PractitionerSitesService {
       );
     }
     return site;
+  }
+
+  /**
+   * Comprueba que el archivo sirve como logo del consultorio: del actor, vivo,
+   * imagen png, jpeg o webp de categoría IMAGE, sensibilidad NORMAL y hasta
+   * 2 MB —las reglas del logo de una organización—.
+   *
+   * Todo rechazo del archivo es 422, también «no existe» o «es de otro»: el
+   * 404 de esta superficie queda para la sede, y separar los motivos dejaría
+   * enumerar qué uuids son archivos ajenos.
+   *
+   * @param em - Transacción activa.
+   * @param fileId - El archivo que se quiere usar como logo.
+   * @param actor - El profesional autenticado.
+   * @throws PreconditionFailedException si el archivo no sirve como logo.
+   */
+  private async assertUsableLogo(
+    em: EntityManager,
+    fileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    let usable: Awaited<ReturnType<AttachableFileService['assertUsableBy']>>;
+    try {
+      usable = await this.attachable.assertUsableBy(
+        em,
+        fileId,
+        actor,
+        {
+          allowedMimeTypes: LOGO_IMAGE_MIME_TYPES,
+          operation: 'practice.sites.logo',
+        },
+        { subject: 'El logo', notFound: 'El logo no existe' },
+      );
+    } catch (err) {
+      if (
+        err instanceof ForbiddenException ||
+        err instanceof ResourceNotFoundException
+      ) {
+        throw new PreconditionFailedException(
+          'El logo no es un archivo suyo que se pueda usar',
+          { fileId },
+        );
+      }
+      throw err;
+    }
+    if (usable.file.categoryConceptId !== CONCEPTS.FILE_CATEGORY_IMAGE) {
+      throw new PreconditionFailedException('El logo debe ser una imagen', {
+        fileId,
+      });
+    }
+    assertLogoImage(usable.file, usable.version);
   }
 
   /**

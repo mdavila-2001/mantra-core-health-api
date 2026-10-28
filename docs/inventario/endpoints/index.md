@@ -2,11 +2,11 @@
 
 # Inventario de endpoints
 
-Se inventarían **1574 operaciones HTTP** en **72 módulos**: 1565 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
+Se inventarían **1582 operaciones HTTP** en **72 módulos**: 1573 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1513
-- Riesgo ALTO 189 · MEDIO 887 · BAJO 498
-- Mencionadas por al menos una prueba: 916
+- Con al menos una tabla identificada: 1520
+- Riesgo ALTO 189 · MEDIO 889 · BAJO 504
+- Mencionadas por al menos una prueba: 917
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
@@ -39,13 +39,13 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `education` | 14 | 0 | [education.md](education.md) |
 | `erp` | 17 | 0 | [erp.md](erp.md) |
 | `forms` | 25 | 0 | [forms.md](forms.md) |
-| `geo` | 10 | 0 | [geo.md](geo.md) |
+| `geo` | 11 | 0 | [geo.md](geo.md) |
 | `graph_intelligence` | 15 | 4 | [graph_intelligence.md](graph_intelligence.md) |
 | `health_context` | 13 | 0 | [health_context.md](health_context.md) |
 | `health_data` | 16 | 0 | [health_data.md](health_data.md) |
-| `iam` | 39 | 18 | [iam.md](iam.md) |
+| `iam` | 40 | 18 | [iam.md](iam.md) |
 | `identity_assurance` | 28 | 5 | [identity_assurance.md](identity_assurance.md) |
-| `insurance` | 71 | 27 | [insurance.md](insurance.md) |
+| `insurance` | 72 | 27 | [insurance.md](insurance.md) |
 | `integration_contracts` | 12 | 0 | [integration_contracts.md](integration_contracts.md) |
 | `integrations` | 15 | 2 | [integrations.md](integrations.md) |
 | `lakehouse` | 13 | 0 | [lakehouse.md](lakehouse.md) |
@@ -73,7 +73,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `read_models` | 15 | 1 | [read_models.md](read_models.md) |
 | `redis_runtime` | 6 | 0 | [redis_runtime.md](redis_runtime.md) |
 | `reporting` | 12 | 0 | [reporting.md](reporting.md) |
-| `scheduling` | 59 | 3 | [scheduling.md](scheduling.md) |
+| `scheduling` | 64 | 3 | [scheduling.md](scheduling.md) |
 | `search_platform` | 4 | 0 | [search_platform.md](search_platform.md) |
 | `surveys` | 17 | 2 | [surveys.md](surveys.md) |
 | `system_context` | 13 | 0 | [system_context.md](system_context.md) |

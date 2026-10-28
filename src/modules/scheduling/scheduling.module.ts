@@ -25,6 +25,7 @@ import {
   SchedulingServiceOfferingsService,
   SchedulingServiceAgendaService,
   SchedulingServiceBookingService,
+  SchedulingPaymentReceiptsService,
 } from './application';
 import {
   SchedulingCatalogRepository,
@@ -34,6 +35,7 @@ import {
   SchedulingAgendaRepository,
   SchedulingNoticeRepository,
   SchedulingOfferingsRepository,
+  SchedulingPaymentReceiptsRepository,
 } from './infrastructure/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { DirectoryModule } from '../directory/directory.module';
@@ -79,6 +81,7 @@ import {
   BookingTransitionRecorder,
   ClinicalAppointmentSync,
   DisplacedRequestsCanceller,
+  PaymentReceiptAccess,
   ServiceSlotLifecycle,
   SlotPolicyResolver,
 } from './application/bookings/support';
@@ -115,6 +118,8 @@ import { AGENDA_NOTICE_PORT } from './application/ports/agenda-notice.port';
 import { BOOKING_CHAT_PORT } from './application/ports/booking-chat.port';
 import { CommunityBookingChatAdapter } from './infrastructure/adapters/community-booking-chat.adapter';
 import { MessagingAgendaNoticeAdapter } from './infrastructure/adapters/messaging-agenda-notice.adapter';
+import { PAYMENT_RECEIPT_FILES_PORT } from './application/ports/payment-receipt-files.port';
+import { CommonPaymentReceiptFilesAdapter } from './infrastructure/adapters/common-payment-receipt-files.adapter';
 import { SupportAdminNoticeAdapter } from './infrastructure/adapters/support-admin-notice.adapter';
 // P43 — la reconsulta puede declarar de qué formulario médico cerrado sale.
 // Clase sin estado de `forms` (`EntityManager` por parámetro): se provee suelta,
@@ -173,6 +178,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     SchedulingAgendaRepository,
     SchedulingNoticeRepository,
     SchedulingOfferingsRepository,
+    SchedulingPaymentReceiptsRepository,
     AppointmentsRepository,
     // AC-3.3: mismo patrón que `AppointmentsRepository` — clase sin estado,
     // provista acá para no importar `ClinicalModule` entero sólo para abrir
@@ -255,6 +261,15 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     DisplacedRequestsCanceller,
     BookingItemAssembler,
     ...bookingUseCases,
+    // v4.2.64 · comprobantes de pago: el paciente los sube y el prestador los
+    // revisa. Los archivos son de `common`, detrás de su puerto.
+    PaymentReceiptAccess,
+    SchedulingPaymentReceiptsService,
+    CommonPaymentReceiptFilesAdapter,
+    {
+      provide: PAYMENT_RECEIPT_FILES_PORT,
+      useExisting: CommonPaymentReceiptFilesAdapter,
+    },
     // Catálogo de agenda: colaboradores compartidos y un caso de uso por operación.
     CatalogAccess,
     AgendaOverlapGuard,

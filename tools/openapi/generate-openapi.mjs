@@ -142,6 +142,8 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // `security-defined` (2026-10-24). Firma del alta (`iam-auth.controller.ts`) y
   // catálogo de la ficha pública (`public-catalog.controller.ts`, líneas 30-45).
   ['post', '/iam/auth/upload-registration-signature-image'],
+  // Logo del consultorio propio en el alta del médico (`iam-auth.controller.ts`).
+  ['post', '/iam/auth/upload-registration-logo'],
   ['get', '/public/profiles/o/{slug}/services'],
   ['get', '/public/profiles/f/{slug}/products'],
   // Borradores del alta y eventos del embudo de onboarding: llevan `@Public()` en
