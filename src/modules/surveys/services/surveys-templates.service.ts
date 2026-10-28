@@ -12,6 +12,7 @@ import {
 } from '../../../common';
 import { TemplatesRepository } from '../repositories';
 import { SurveysErrorReason } from '../surveys.error-reasons';
+import { assertNotSystemTemplate } from '../surveys.system-guard';
 import {
   AddQuestionDto,
   CreateTemplateDto,
@@ -152,7 +153,7 @@ export class SurveysTemplatesService {
   ): Promise<TemplateCreatedDto> {
     return this.em
       .transactional(async (tx) => {
-        const template = await this.loadOwnedTemplate(tx, templateId, actor);
+        const template = await this.loadMutableTemplate(tx, templateId, actor);
         // Dos aperturas simultáneas leerían la misma «última versión» y
         // numerarían igual: la plantilla se bloquea antes de leerla.
         await this.templatesRepo.lockTemplate(tx, template.id);
@@ -221,7 +222,7 @@ export class SurveysTemplatesService {
     this.validateQuestionShape(dto);
 
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.loadDraftVersion(tx, template);
 
       const position =
@@ -231,7 +232,9 @@ export class SurveysTemplatesService {
         position,
         questionText: dto.questionText,
         answerTypeConceptId: ANSWER_TYPE_BY_CODE[dto.answerType],
-        required: dto.required ?? false,
+        // Las preguntas del profesional son siempre opcionales: el servidor
+        // ignora `required`. Las obligatorias son las de la encuesta base.
+        required: false,
         options: dto.answerType === 'TEXT' ? undefined : dto.options,
         scaleMin: dto.answerType === 'SCALE' ? (dto.scaleMin ?? 1) : undefined,
         scaleMax: dto.answerType === 'SCALE' ? (dto.scaleMax ?? 5) : undefined,
@@ -261,7 +264,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.loadDraftVersion(tx, template);
 
       if (dto.title !== undefined) template.title = dto.title;
@@ -299,7 +302,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.loadDraftVersion(tx, template);
       const question = await this.loadDraftQuestion(tx, version, questionId);
 
@@ -327,7 +330,8 @@ export class SurveysTemplatesService {
 
       if (dto.questionText !== undefined)
         question.questionText = dto.questionText;
-      if (dto.required !== undefined) question.required = dto.required;
+      // Siempre opcional, venga lo que venga en `dto.required` (ver `addQuestion`).
+      question.required = false;
       question.answerTypeConceptId = ANSWER_TYPE_BY_CODE[answerType];
       question.options = options;
       question.scaleMin = scaleMin;
@@ -353,7 +357,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.loadDraftVersion(tx, template);
       const question = await this.loadDraftQuestion(tx, version, questionId);
 
@@ -382,7 +386,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.loadDraftVersion(tx, template);
       const current = await this.templatesRepo.listQuestions(tx, version.id);
       const byId = new Map(current.map((q) => [q.id, q]));
@@ -418,7 +422,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       const version = await this.templatesRepo.findVersionByNumber(
         tx,
         template.id,
@@ -494,7 +498,7 @@ export class SurveysTemplatesService {
     actor: AuthenticatedUser,
   ): Promise<OkResultDto> {
     return this.em.transactional(async (tx) => {
-      const template = await this.loadOwnedTemplate(tx, templateId, actor);
+      const template = await this.loadMutableTemplate(tx, templateId, actor);
       if (template.statusConceptId === SURVEYS.TEMPLATE_INACTIVE) {
         throw new ConflictException('La plantilla ya está desactivada', {
           templateId,
@@ -578,6 +582,27 @@ export class SurveysTemplatesService {
       effectiveTo: version.effectiveTo,
       questions: questions.map((q) => this.toQuestionDto(q)),
     };
+  }
+
+  /**
+   * Carga la plantilla para **modificarla**: además de la pertenencia, exige
+   * que no sea la encuesta base del sistema.
+   *
+   * La guarda va antes que la comprobación de dueño y responde 403: la plantilla
+   * de sistema no es de ningún profesional, y sin ella el 404 de «no es suya»
+   * ocultaría que la regla es otra. Es defensa en profundidad —ningún
+   * profesional es dueño de una plantilla de sistema—, no el único freno.
+   */
+  private async loadMutableTemplate(
+    em: EntityManager,
+    templateId: string,
+    actor: AuthenticatedUser,
+  ): Promise<SurveyTemplates> {
+    const template = await this.templatesRepo.findTemplateById(em, templateId);
+    if (template && template.tenantId === requireTenantId()) {
+      assertNotSystemTemplate(template, templateId);
+    }
+    return this.loadOwnedTemplate(em, templateId, actor);
   }
 
   /**

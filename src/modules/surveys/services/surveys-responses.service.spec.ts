@@ -13,6 +13,7 @@ import { UniqueConstraintViolationException } from '@mikro-orm/core';
 import { SurveysResponsesService } from './surveys-responses.service';
 import { SurveysErrorReason } from '../surveys.error-reasons';
 import { SURVEYS, ANSWER_TYPE_BY_CODE } from '../surveys.concepts';
+import { DomainException } from '../../../common';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -54,6 +55,7 @@ function build() {
     listByPatient: mockFn().mockResolvedValue([]),
     listByBooking: mockFn().mockResolvedValue([]),
     listByVersions: mockFn().mockResolvedValue([]),
+    listByExtensionVersions: mockFn().mockResolvedValue([]),
     create: mockFn(),
   };
   // El envío bloquea la fila; en el doble el bloqueo lee lo que lea `findById`.
@@ -689,6 +691,317 @@ describe('SurveysResponsesService', () => {
       expect(error).toBeInstanceOf(ConflictException);
       expect(error.getStatus()).toBe(409);
       expect(error.reason).toBe(SurveysErrorReason.ANSWER_DUPLICATE);
+    });
+  });
+});
+
+describe('SurveysResponsesService · invitación única: base del sistema + extensión del profesional (F3)', () => {
+  /** Pregunta de la base del sistema (versión `ver-base`). */
+  const baseQuestion = (id: string, position: number, required: boolean) =>
+    textQuestion({
+      id,
+      surveyVersionId: 'ver-base',
+      position,
+      questionText: `Base ${id}`,
+      required,
+    });
+  /** Pregunta del profesional (versión `ver-ext`), guardada como obligatoria a propósito. */
+  const extQuestion = (id: string, position: number) =>
+    textQuestion({
+      id,
+      surveyVersionId: 'ver-ext',
+      position,
+      questionText: `Médico ${id}`,
+      required: true,
+    });
+
+  /** Una invitación base con la versión del profesional detrás. */
+  function merged(d: ReturnType<typeof build>) {
+    const invitation = pendingInvitation({
+      surveyVersionId: 'ver-base',
+      extensionSurveyVersionId: 'ver-ext',
+    });
+    d.invitationsRepo.findById.mockResolvedValue(invitation);
+    d.templatesRepo.listQuestions.mockImplementation(
+      async (_: unknown, versionId: string) =>
+        versionId === 'ver-base'
+          ? [baseQuestion('b-1', 1, true), baseQuestion('b-2', 2, false)]
+          : [extQuestion('e-1', 1), extQuestion('e-2', 2)],
+    );
+    d.templatesRepo.findVersionById.mockResolvedValue({
+      id: 'ver-base',
+      surveyTemplateId: 'tpl-base',
+    });
+    d.templatesRepo.findTemplateById.mockResolvedValue({
+      id: 'tpl-base',
+      title: 'Encuesta de su consulta médica',
+      ownerTypeConceptId: SURVEYS.SYSTEM_BASE_CONSULTATION,
+    });
+    return invitation;
+  }
+
+  describe('getMyQuestionnaire', () => {
+    it('devuelve primero las preguntas del sistema y después las del médico, con su origen', async () => {
+      const d = build();
+      merged(d);
+
+      const res = await d.service.getMyQuestionnaire('inv-1', patientActor);
+
+      expect(res.questions.map((q) => [q.id, q.source])).toEqual([
+        ['b-1', 'SYSTEM'],
+        ['b-2', 'SYSTEM'],
+        ['e-1', 'PRACTITIONER'],
+        ['e-2', 'PRACTITIONER'],
+      ]);
+      // Posiciones corridas sobre la unión.
+      expect(res.questions.map((q) => q.position)).toEqual([1, 2, 3, 4]);
+    });
+
+    it('las del médico son opcionales aunque su versión las guarde obligatorias; las del sistema conservan su obligatoriedad', async () => {
+      const d = build();
+      merged(d);
+
+      const res = await d.service.getMyQuestionnaire('inv-1', patientActor);
+
+      expect(res.questions.map((q) => q.required)).toEqual([
+        true,
+        false,
+        false,
+        false,
+      ]);
+    });
+
+    it('una invitación sólo de la base marca todas como SYSTEM', async () => {
+      const d = build();
+      d.invitationsRepo.findById.mockResolvedValue(
+        pendingInvitation({ surveyVersionId: 'ver-base' }),
+      );
+      d.templatesRepo.listQuestions.mockResolvedValue([
+        baseQuestion('b-1', 1, true),
+      ]);
+      d.templatesRepo.findVersionById.mockResolvedValue({
+        id: 'ver-base',
+        surveyTemplateId: 'tpl-base',
+      });
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-base',
+        title: 'Encuesta de su servicio de salud',
+        ownerTypeConceptId: SURVEYS.SYSTEM_BASE_SERVICE,
+      });
+
+      const res = await d.service.getMyQuestionnaire('inv-1', patientActor);
+
+      expect(res.questions.map((q) => q.source)).toEqual(['SYSTEM']);
+      expect(d.templatesRepo.listQuestions).toHaveBeenCalledTimes(1);
+    });
+
+    it('una invitación suelta del profesional (anterior a la base) conserva su obligatoriedad y se marca PRACTITIONER', async () => {
+      const d = build();
+      d.invitationsRepo.findById.mockResolvedValue(pendingInvitation());
+      d.templatesRepo.listQuestions.mockResolvedValue([textQuestion()]);
+      d.templatesRepo.findVersionById.mockResolvedValue({
+        id: 'ver-1',
+        surveyTemplateId: 'tpl-1',
+      });
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-1',
+        title: 'Satisfacción',
+        ownerPractitionerId: OWNER,
+      });
+
+      const res = await d.service.getMyQuestionnaire('inv-1', patientActor);
+
+      expect(res.questions).toEqual([
+        expect.objectContaining({
+          id: 'q-1',
+          source: 'PRACTITIONER',
+          required: true,
+          position: 1,
+        }),
+      ]);
+    });
+  });
+
+  describe('submitResponse valida contra la unión', () => {
+    it('acepta responder preguntas de la base y del médico en el mismo envío', async () => {
+      const d = build();
+      const invitation = merged(d);
+
+      const res = await withTenant(() =>
+        d.service.submitResponse(
+          'inv-1',
+          {
+            answers: [
+              { questionId: 'b-1', valueText: 'Bien' },
+              { questionId: 'e-2', valueText: 'Sí' },
+            ],
+          },
+          patientActor,
+        ),
+      );
+
+      expect(res).toEqual({ id: 'res-1' });
+      expect(d.responsesRepo.createAnswer).toHaveBeenCalledTimes(2);
+      expect(invitation.statusConceptId).toBe(SURVEYS.INVITATION_ANSWERED);
+      // La cabecera de la respuesta queda en la versión base.
+      expect(d.responsesRepo.createResponse).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ surveyVersionId: 'ver-base' }),
+      );
+    });
+
+    it('exige las obligatorias de la base', async () => {
+      const d = build();
+      merged(d);
+
+      const error = await withTenant(() =>
+        d.service.submitResponse(
+          'inv-1',
+          { answers: [{ questionId: 'e-1', valueText: 'Sí' }] },
+          patientActor,
+        ),
+      ).catch((e) => e);
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(error.details.questionIds).toEqual(['b-1']);
+    });
+
+    it('no exige las del médico, aunque su versión las guarde obligatorias', async () => {
+      const d = build();
+      merged(d);
+
+      await expect(
+        withTenant(() =>
+          d.service.submitResponse(
+            'inv-1',
+            { answers: [{ questionId: 'b-1', valueText: 'Bien' }] },
+            patientActor,
+          ),
+        ),
+      ).resolves.toEqual({ id: 'res-1' });
+    });
+
+    it('rechaza una pregunta que no es de la base ni de la extensión', async () => {
+      const d = build();
+      merged(d);
+
+      await expect(
+        withTenant(() =>
+          d.service.submitResponse(
+            'inv-1',
+            {
+              answers: [
+                { questionId: 'b-1', valueText: 'Bien' },
+                { questionId: 'q-de-otra-version', valueText: 'x' },
+              ],
+            },
+            patientActor,
+          ),
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('listTemplateResponses: el médico sólo recibe lo suyo', () => {
+    /** Respuesta de la invitación `inv-1` con dos respuestas de la base y una del médico. */
+    function withMergedResponse(d: ReturnType<typeof build>) {
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-1',
+        tenantId: TENANT,
+        ownerPractitionerId: OWNER,
+      });
+      d.templatesRepo.findLatestVersion.mockResolvedValue({ id: 'ver-ext' });
+      d.invitationsRepo.listByVersions.mockResolvedValue([]);
+      d.invitationsRepo.listByExtensionVersions.mockResolvedValue([
+        pendingInvitation({
+          statusConceptId: SURVEYS.INVITATION_ANSWERED,
+          surveyVersionId: 'ver-base',
+          extensionSurveyVersionId: 'ver-ext',
+        }),
+      ]);
+      d.responsesRepo.listByInvitations.mockResolvedValue([
+        {
+          id: 'res-1',
+          surveyInvitationId: 'inv-1',
+          patientProfileId: PATIENT,
+          submittedAt: new Date(),
+        },
+      ]);
+      d.templatesRepo.listQuestions.mockResolvedValue([extQuestion('e-1', 1)]);
+    }
+
+    it('busca también las invitaciones que llevan su versión como extensión', async () => {
+      const d = build();
+      withMergedResponse(d);
+      d.responsesRepo.listAnswers.mockResolvedValue([
+        { surveyResponseId: 'res-1', surveyQuestionId: 'e-1', valueText: 'Sí' },
+      ]);
+
+      await withTenant(() =>
+        d.service.listTemplateResponses('tpl-1', practitionerActor),
+      );
+
+      expect(d.invitationsRepo.listByExtensionVersions).toHaveBeenCalledWith(
+        d.em,
+        ['ver-ext'],
+      );
+    });
+
+    it('descarta las respuestas a las preguntas del sistema: no las lee una por una', async () => {
+      const d = build();
+      withMergedResponse(d);
+      d.responsesRepo.listAnswers.mockResolvedValue([
+        {
+          surveyResponseId: 'res-1',
+          surveyQuestionId: 'b-1',
+          valueText: 'Mal',
+        },
+        { surveyResponseId: 'res-1', surveyQuestionId: 'e-1', valueText: 'Sí' },
+      ]);
+
+      const res = await withTenant(() =>
+        d.service.listTemplateResponses('tpl-1', practitionerActor),
+      );
+
+      expect(res).toHaveLength(1);
+      expect(res[0].answers.map((a) => a.questionId)).toEqual(['e-1']);
+      expect(JSON.stringify(res)).not.toContain('Mal');
+    });
+
+    it('no lista la respuesta en la que sólo contestó la base', async () => {
+      const d = build();
+      withMergedResponse(d);
+      d.responsesRepo.listAnswers.mockResolvedValue([
+        {
+          surveyResponseId: 'res-1',
+          surveyQuestionId: 'b-1',
+          valueText: 'Mal',
+        },
+      ]);
+
+      const res = await withTenant(() =>
+        d.service.listTemplateResponses('tpl-1', practitionerActor),
+      );
+
+      expect(res).toEqual([]);
+    });
+
+    it('la plantilla de sistema no se lee por esta vía: 403 con su reason', async () => {
+      const d = build();
+      d.templatesRepo.findTemplateById.mockResolvedValue({
+        id: 'tpl-base',
+        tenantId: TENANT,
+        ownerTypeConceptId: SURVEYS.SYSTEM_BASE_CONSULTATION,
+      });
+
+      const error = await withTenant(() =>
+        d.service.listTemplateResponses('tpl-base', practitionerActor),
+      ).catch((e) => e);
+
+      expect(error).toBeInstanceOf(DomainException);
+      expect(error.getStatus()).toBe(403);
+      expect(error.reason).toBe(SurveysErrorReason.SYSTEM_TEMPLATE_IMMUTABLE);
+      expect(d.invitationsRepo.listByVersions).not.toHaveBeenCalled();
     });
   });
 });

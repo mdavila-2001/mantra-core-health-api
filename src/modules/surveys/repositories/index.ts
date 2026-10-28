@@ -8,6 +8,7 @@ export { AssignmentsRepository } from './assignments.repository';
 export type { CreateAssignmentData } from './assignments.repository';
 export { InvitationsRepository } from './invitations.repository';
 export type { CreateInvitationData } from './invitations.repository';
+export { TargetsRepository } from './targets.repository';
 export { ResponsesRepository } from './responses.repository';
 export type {
   CreateResponseData,

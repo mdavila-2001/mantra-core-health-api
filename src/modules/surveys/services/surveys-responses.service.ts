@@ -26,14 +26,38 @@ import {
   SurveyResponseDto,
 } from '../dto';
 import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
-import { ANSWER_TYPE_CODE_BY_ID, SURVEYS } from '../surveys.concepts';
+import {
+  ANSWER_TYPE_CODE_BY_ID,
+  isSystemOwnerType,
+  SURVEYS,
+  type QuestionSource,
+} from '../surveys.concepts';
 import { SurveysErrorReason } from '../surveys.error-reasons';
+import { assertNotSystemTemplate } from '../surveys.system-guard';
 import type {
   SurveyInvitations,
   SurveyQuestions,
   SurveyTemplates,
 } from '../entities';
 import type { AnswerTypeCode } from '../surveys.concepts';
+
+/**
+ * Una pregunta del cuestionario que ve el paciente, con quién la escribió y si
+ * esta vez hay que contestarla.
+ *
+ * Una invitación se responde sobre la **unión** de la versión principal (la
+ * base del sistema, cuando la hay) y la extensión del profesional: la
+ * obligatoriedad de una pregunta de la extensión es siempre falsa, aunque una
+ * versión anterior la guarde como obligatoria.
+ */
+interface QuestionnaireItem {
+  /** La pregunta. */
+  question: SurveyQuestions;
+  /** Quién la escribió. */
+  source: QuestionSource;
+  /** Si hay que contestarla para poder enviar. */
+  required: boolean;
+}
 
 /**
  * El lado de las respuestas: el paciente contesta, el profesional dueño lee.
@@ -111,14 +135,20 @@ export class SurveysResponsesService {
         invitationId,
       });
     }
-    const questions = await this.templatesRepo.listQuestions(
+    const items = await this.loadQuestionnaire(
       this.em,
-      invitation.surveyVersionId,
+      invitation,
+      isSystemOwnerType(template.ownerTypeConceptId)
+        ? 'SYSTEM'
+        : 'PRACTITIONER',
     );
 
     return {
       ...this.toInvitationDto(invitation, template, new Date()),
-      questions: questions.map((q) => this.toQuestionDto(q)),
+      // Posiciones corridas sobre la unión: la base primero, el profesional después.
+      questions: items.map((item, index) =>
+        this.toQuestionDto(item, index + 1),
+      ),
     };
   }
 
@@ -161,12 +191,13 @@ export class SurveysResponsesService {
           return { expiredAt: invitation.expiresAt };
         }
 
-        const questions = await this.templatesRepo.listQuestions(
+        const items = await this.loadQuestionnaire(
           tx,
-          invitation.surveyVersionId,
+          invitation,
+          'PRACTITIONER',
         );
-        const byId = new Map(questions.map((q) => [q.id, q]));
-        this.validateAnswers(dto.answers, questions, byId);
+        const byId = new Map(items.map((item) => [item.question.id, item]));
+        this.validateAnswers(dto.answers, items, byId);
 
         const response = this.responsesRepo.createResponse(tx, {
           surveyInvitationId: invitation.id,
@@ -181,7 +212,7 @@ export class SurveysResponsesService {
         await tx.flush();
 
         for (const answer of dto.answers) {
-          const question = byId.get(answer.questionId)!;
+          const question = byId.get(answer.questionId)!.question;
           this.responsesRepo.createAnswer(tx, {
             surveyResponseId: response.id,
             surveyQuestionId: question.id,
@@ -242,9 +273,14 @@ export class SurveysResponsesService {
     );
     if (!version) return [];
 
-    const invitations = await this.invitationsRepo.listByVersions(this.em, [
-      version.id,
-    ]);
+    // Las invitaciones sueltas de la versión y las que la llevan detrás de la
+    // base del sistema.
+    const invitations = [
+      ...(await this.invitationsRepo.listByVersions(this.em, [version.id])),
+      ...(await this.invitationsRepo.listByExtensionVersions(this.em, [
+        version.id,
+      ])),
+    ];
     if (invitations.length === 0) return [];
 
     const invitationById = new Map(invitations.map((i) => [i.id, i]));
@@ -264,18 +300,28 @@ export class SurveysResponsesService {
     );
     const questionById = new Map(questions.map((q) => [q.id, q]));
 
-    return responses.map((response) => ({
-      id: response.id,
-      invitationId: response.surveyInvitationId,
-      appointmentBookingId:
-        invitationById.get(response.surveyInvitationId)?.appointmentBookingId ??
-        '',
-      submittedAt: response.submittedAt,
-      answers: answers
-        .filter((a) => a.surveyResponseId === response.id)
-        .map((a) => this.toAnswerDto(a, questionById.get(a.surveyQuestionId)))
-        .sort((a, b) => a.questionText.localeCompare(b.questionText)),
-    }));
+    // Sólo las respuestas a SUS preguntas. Cuando la invitación lleva la base
+    // del sistema, esas respuestas no se leen una por una: el médico las ve
+    // agregadas, sin paciente ni reserva. Y una respuesta en la que no contestó
+    // ninguna pregunta suya no se lista: sólo diría que ese paciente respondió.
+    return responses
+      .map((response) => ({
+        id: response.id,
+        invitationId: response.surveyInvitationId,
+        appointmentBookingId:
+          invitationById.get(response.surveyInvitationId)
+            ?.appointmentBookingId ?? '',
+        submittedAt: response.submittedAt,
+        answers: answers
+          .filter(
+            (a) =>
+              a.surveyResponseId === response.id &&
+              questionById.has(a.surveyQuestionId),
+          )
+          .map((a) => this.toAnswerDto(a, questionById.get(a.surveyQuestionId)))
+          .sort((a, b) => a.questionText.localeCompare(b.questionText)),
+      }))
+      .filter((response) => response.answers.length > 0);
   }
 
   /**
@@ -365,6 +411,10 @@ export class SurveysResponsesService {
       this.em,
       templateId,
     );
+    if (template && template.tenantId === requireTenantId()) {
+      // Las respuestas a la base del sistema se leen agregadas, no por plantilla.
+      assertNotSystemTemplate(template, templateId);
+    }
     if (
       !template ||
       template.tenantId !== requireTenantId() ||
@@ -393,13 +443,53 @@ export class SurveysResponsesService {
   }
 
   /**
+   * Las preguntas de una invitación: las de la versión principal y, detrás, las
+   * de la extensión del profesional si la lleva. Las de la extensión nunca son
+   * obligatorias.
+   *
+   * @param mainSource - Quién escribió la versión principal (la base del
+   *   sistema, o el profesional en una invitación suelta). Si la invitación
+   *   lleva extensión, la principal es siempre la base.
+   */
+  private async loadQuestionnaire(
+    em: EntityManager,
+    invitation: SurveyInvitations,
+    mainSource: QuestionSource,
+  ): Promise<QuestionnaireItem[]> {
+    const main = await this.templatesRepo.listQuestions(
+      em,
+      invitation.surveyVersionId,
+    );
+    const hasExtension = Boolean(invitation.extensionSurveyVersionId);
+    const items: QuestionnaireItem[] = main.map((question) => ({
+      question,
+      source: hasExtension ? 'SYSTEM' : mainSource,
+      required: question.required,
+    }));
+    if (invitation.extensionSurveyVersionId) {
+      const extension = await this.templatesRepo.listQuestions(
+        em,
+        invitation.extensionSurveyVersionId,
+      );
+      items.push(
+        ...extension.map((question) => ({
+          question,
+          source: 'PRACTITIONER' as const,
+          required: false,
+        })),
+      );
+    }
+    return items;
+  }
+
+  /**
    * Comprueba que el envío sea contestable: obligatorias presentes, sin
    * preguntas ajenas, sin repetidas y con el valor del tipo correcto.
    */
   private validateAnswers(
     answers: AnswerInputDto[],
-    questions: SurveyQuestions[],
-    byId: Map<string, SurveyQuestions>,
+    items: QuestionnaireItem[],
+    byId: Map<string, QuestionnaireItem>,
   ): void {
     const seen = new Set<string>();
     for (const answer of answers) {
@@ -411,21 +501,21 @@ export class SurveysResponsesService {
       }
       seen.add(answer.questionId);
 
-      const question = byId.get(answer.questionId);
-      if (!question) {
+      const item = byId.get(answer.questionId);
+      if (!item) {
         throw new PreconditionFailedException(
           'La respuesta no corresponde a una pregunta de este cuestionario',
           { questionId: answer.questionId },
         );
       }
-      this.validateAnswerValue(answer, question);
+      this.validateAnswerValue(answer, item.question);
     }
 
-    const missing = questions.filter((q) => q.required && !seen.has(q.id));
+    const missing = items.filter((i) => i.required && !seen.has(i.question.id));
     if (missing.length > 0) {
       throw new PreconditionFailedException(
         'Faltan respuestas a preguntas obligatorias',
-        { questionIds: missing.map((q) => q.id) },
+        { questionIds: missing.map((i) => i.question.id) },
       );
     }
   }
@@ -585,14 +675,19 @@ export class SurveysResponsesService {
     return now > invitation.expiresAt ? 'EXPIRED' : 'PENDING';
   }
 
-  /** Proyecta la entidad de pregunta al contrato HTTP. */
-  private toQuestionDto(question: SurveyQuestions): QuestionDto {
+  /** Proyecta la pregunta del cuestionario al contrato HTTP del paciente. */
+  private toQuestionDto(
+    item: QuestionnaireItem,
+    position: number,
+  ): QuestionDto {
+    const { question } = item;
     return {
       id: question.id,
-      position: question.position,
+      position,
       questionText: question.questionText,
       answerType: ANSWER_TYPE_CODE_BY_ID[question.answerTypeConceptId],
-      required: question.required,
+      required: item.required,
+      source: item.source,
       options: question.options,
       scaleMin: question.scaleMin,
       scaleMax: question.scaleMax,
