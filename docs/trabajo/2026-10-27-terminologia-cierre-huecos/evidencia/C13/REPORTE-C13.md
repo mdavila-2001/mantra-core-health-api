@@ -16,4 +16,4 @@ LanguaL 455; FIDEO (host no alcanzable); Fineli 403; Frida sin respuesta; ONE si
 Open Food Facts (ODbL): no se agregó nada. Atribución obligatoria para CC BY y OGL-Canadá. CDNO: el archivo dice CC BY 3.0 y el repo CC0 (registrado CC BY 3.0). FOBI: archivo y repo CC BY 4.0, registro OBO CC BY 3.0 (registrado CC BY 4.0). Propuesta (no escrita, toca filas de otro carril): concept_map entre allergy-foodon (FOODON:…) y foodon (FOODON_…). Branded sin ingredientes ni nutrientes es un supuesto del implementador, a confirmar.
 
 ## Desvíos
-El primer intento de carga con el texto completo de licencia en cada ffila hizo crecer la base más de lo que soporta el disco compartido: se abortó, se pasó a un id corto y se repitió todo; la evidencia es la de la corrida final. fetch-sources.mjs necesita NODE_USE_ENV_PROXY=1 en este sandbox.
+El primer intento de carga con el texto completo de licencia en cada fila hizo crecer la base más de lo que soporta el disco compartido: se abortó, se pasó a un id corto y se repitió todo; la evidencia es la de la corrida final. fetch-sources.mjs necesita NODE_USE_ENV_PROXY=1 en este sandbox.
