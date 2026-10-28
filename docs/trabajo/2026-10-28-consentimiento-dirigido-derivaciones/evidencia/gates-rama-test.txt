@@ -1,0 +1,13 @@
+# Gates en claude/focused-euler-wgax45-test (sobre origin/test 9bdf321c)
+$ yarn typecheck
+EXIT 0
+$ yarn build
+EXIT 0
+$ eslint consent + clinical_ext + smoke clinical_ext
+EXIT 0
+$ node tools/clinical-forms/build-forms.mjs --check
+374 fichas ({"SPECIFIC":334,"BASE":36,"GENERAL":4}) · 6386 campos · 0 desactualizadas
+$ yarn test src/modules/consent src/modules/clinical_ext src/common/seed
+Test Suites: 64 passed, 64 total
+Tests:       650 passed, 650 total
+EXIT 0
