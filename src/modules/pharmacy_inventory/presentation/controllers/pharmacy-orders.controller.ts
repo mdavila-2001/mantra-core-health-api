@@ -24,6 +24,7 @@ import {
   Roles,
   type AuthenticatedUser,
   AccessLogged,
+  Audited,
 } from '../../../../common';
 import { PharmacyOrdersService } from '../../services';
 import {
@@ -155,6 +156,11 @@ export class PharmacyOrdersController {
    */
   @Post(':id/conversation')
   @AccessLogged({ resourceType: 'PHARMACY_ORDER', resourceId: 'param:id' })
+  @Audited({
+    action: 'PHARMACY_ORDER_CONVERSATION_OPENED',
+    entity: 'pharmacy_order',
+    entityId: 'param:id',
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Abrir el chat del pedido con la farmacia',
