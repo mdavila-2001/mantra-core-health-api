@@ -7,6 +7,7 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { runWithTenant } from '../../../../common';
 import { SurveysBookingCompletedAdapter } from './surveys-booking-completed.adapter';
 
 const actor = { id: 'usr-doc', roles: ['PRACTITIONER'] } as any;
@@ -14,12 +15,12 @@ const actor = { id: 'usr-doc', roles: ['PRACTITIONER'] } as any;
 /** Arma el adaptador sobre un doble del servicio de emisión de encuestas. */
 function build() {
   const surveys = {
-    issueForBooking: mockFn().mockResolvedValue({
+    issueForCompletedBooking: mockFn().mockResolvedValue({
       ids: ['inv-1'],
       alreadyIssued: 0,
     }),
   };
-  const logger = { setContext: mockFn(), warn: mockFn() };
+  const logger = { setContext: mockFn(), warn: mockFn(), error: mockFn() };
   const adapter = new SurveysBookingCompletedAdapter(
     surveys as any,
     logger as any,
@@ -33,28 +34,37 @@ describe('SurveysBookingCompletedAdapter', () => {
 
     await d.adapter.onBookingCompleted('bkg-1', actor);
 
-    expect(d.surveys.issueForBooking).toHaveBeenCalledWith(
-      { appointmentBookingId: 'bkg-1' },
+    expect(d.surveys.issueForCompletedBooking).toHaveBeenCalledWith(
+      'bkg-1',
       actor,
     );
   });
 
-  it('no lanza si la emisión falla: lo registra con el id de la reserva y sigue', async () => {
+  it('no lanza si la emisión falla: lo registra como error con reserva, tenant y razón, y sigue', async () => {
     const d = build();
-    d.surveys.issueForBooking.mockRejectedValue(new Error('base caída'));
+    d.surveys.issueForCompletedBooking.mockRejectedValue(
+      new Error('base caída'),
+    );
 
     await expect(
-      d.adapter.onBookingCompleted('bkg-1', actor),
+      runWithTenant('ten-1', () =>
+        d.adapter.onBookingCompleted('bkg-1', actor),
+      ),
     ).resolves.toBeUndefined();
 
-    expect(d.logger.warn).toHaveBeenCalledTimes(1);
-    const [fields] = d.logger.warn.mock.calls[0];
-    expect(fields).toMatchObject({ bookingId: 'bkg-1' });
+    expect(d.logger.warn).not.toHaveBeenCalled();
+    expect(d.logger.error).toHaveBeenCalledTimes(1);
+    const [fields] = d.logger.error.mock.calls[0];
+    expect(fields).toMatchObject({
+      bookingId: 'bkg-1',
+      tenantId: 'ten-1',
+      reason: 'base caída',
+    });
   });
 
   it('tampoco lanza ante un error que no es una Error', async () => {
     const d = build();
-    d.surveys.issueForBooking.mockRejectedValue('texto suelto');
+    d.surveys.issueForCompletedBooking.mockRejectedValue('texto suelto');
 
     await expect(
       d.adapter.onBookingCompleted('bkg-1', actor),

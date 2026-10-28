@@ -29,12 +29,17 @@ import {
 import { SurveysErrorReason } from '../surveys.error-reasons';
 import { assertNotSystemTemplate } from '../surveys.system-guard';
 import type { SystemSurveyKind } from '../surveys.base-definitions';
-import { SurveysSystemTemplatesService } from './surveys-system-templates.service';
+import {
+  SurveysSystemTemplatesService,
+  type SystemSurvey,
+} from './surveys-system-templates.service';
 import { AppointmentBookings } from '../../scheduling/entities/appointment_bookings.entity';
 import { BookableSlots } from '../../scheduling/entities/bookable_slots.entity';
 import { SCHED } from '../../scheduling/domain/scheduling.concepts';
+import { operatesAnyAgenda } from '../../scheduling/domain/booking/agenda-actors';
 import type {
   SurveyAssignments,
+  SurveyInvitations,
   SurveyTemplates,
   SurveyVersions,
 } from '../entities';
@@ -237,46 +242,109 @@ export class SurveysAssignmentsService {
     dto: IssueInvitationsDto,
     actor: AuthenticatedUser,
   ): Promise<InvitationsIssuedDto> {
+    return this.issue(dto, actor, true);
+  }
+
+  /**
+   * La emisión que dispara el cierre de la atención (`BOOKING_COMPLETED_PORT`).
+   *
+   * Es la misma que {@link issueForBooking} sin exigir que el actor haya
+   * atendido la reserva: quien la cerró ya pasó por `loadForOperation`, que
+   * admite también al mostrador y a la administración de agenda.
+   */
+  async issueForCompletedBooking(
+    appointmentBookingId: string,
+    actor: AuthenticatedUser,
+  ): Promise<InvitationsIssuedDto> {
+    return this.issue({ appointmentBookingId }, actor, false);
+  }
+
+  /**
+   * Reservas completadas del tenant que no tienen NINGUNA invitación: las
+   * emisiones que fallaron (la automática no reintenta). Es la consulta del
+   * runbook del README; no tiene endpoint. Cada una se reemite con
+   * `POST /surveys/invitations`, que es idempotente.
+   *
+   * @param limit - Tope de reservas por pasada (más recientes primero).
+   * @returns Los identificadores de las reservas.
+   */
+  async listCompletedBookingsWithoutInvitation(limit = 100): Promise<string[]> {
+    return this.targetsRepo.listCompletedBookingsWithoutInvitation(
+      this.em.fork(),
+      requireTenantId(),
+      SCHED.BOOKING_COMPLETED,
+      limit,
+    );
+  }
+
+  /**
+   * @param enforceAttendance - Exige que el actor haya atendido la reserva,
+   *   salvo que opere cualquier agenda por oficio (mostrador, administración).
+   */
+  private async issue(
+    dto: IssueInvitationsDto,
+    actor: AuthenticatedUser,
+    enforceAttendance: boolean,
+  ): Promise<InvitationsIssuedDto> {
     const tenantId = requireTenantId();
+
+    // La reserva se mira antes de abrir la transacción para saber qué base le
+    // toca y materializarla FUERA de ella: la base se escribe en su propia
+    // transacción (ver `ensureSystemTemplate`) y hacerlo con el candado de la
+    // reserva tomado ataría una conexión más mientras se espera. Las
+    // comprobaciones se repiten abajo, ya con la reserva bloqueada.
+    const preRead = await this.targetsRepo.findBooking(
+      this.em.fork(),
+      dto.appointmentBookingId,
+    );
+    const pre = this.assertIssuable(
+      preRead,
+      tenantId,
+      dto.appointmentBookingId,
+    );
+    // Una consulta no lleva oferta de servicio; un servicio sí. Cada una tiene
+    // su encuesta base.
+    const kind: SystemSurveyKind = pre.practitionerServiceOfferingId
+      ? 'SERVICE'
+      : 'CONSULTATION';
+    const base = await this.systemTemplates.ensureSystemTemplate(
+      tenantId,
+      kind,
+      actor.id,
+    );
 
     return this.em
       .transactional(async (tx) => {
         // Se bloquea la reserva antes de mirar qué invitaciones tiene: dos
         // emisiones simultáneas para la misma reserva se serializan y la segunda
         // las ve ya emitidas (`alreadyIssued`) en lugar de duplicarlas.
-        const booking = await tx.findOne(
+        const locked = await tx.findOne(
           AppointmentBookings,
           { id: dto.appointmentBookingId },
           { lockMode: LockMode.PESSIMISTIC_WRITE },
         );
-        if (!booking || booking.tenantId !== tenantId) {
-          throw new ResourceNotFoundException('Reserva no encontrada', {
-            appointmentBookingId: dto.appointmentBookingId,
-          });
-        }
-        if (booking.statusConceptId !== SCHED.BOOKING_COMPLETED) {
-          throw new PreconditionFailedException(
-            'Solo se emiten cuestionarios sobre una atención completada',
-            { appointmentBookingId: booking.id },
-          );
-        }
-
-        // Una consulta no lleva oferta de servicio; un servicio sí. Cada una
-        // tiene su encuesta base. Se materializa en su propia transacción: ver
-        // `ensureSystemTemplate`.
-        const kind: SystemSurveyKind = booking.practitionerServiceOfferingId
-          ? 'SERVICE'
-          : 'CONSULTATION';
-        const base = await this.systemTemplates.ensureSystemTemplate(
+        const booking = this.assertIssuable(
+          locked,
           tenantId,
-          kind,
-          actor.id,
+          dto.appointmentBookingId,
         );
 
         const { targetIds, practitionerProfileId } = await this.resolveTargets(
           tx,
           booking,
         );
+        if (enforceAttendance && !operatesAnyAgenda(actor)) {
+          // Un profesional emite sólo las encuestas de lo que atendió. 404 y no
+          // 403: una reserva ajena no se distingue de una inexistente.
+          if (
+            practitionerProfileId === null ||
+            practitionerProfileId !== actor.practitionerProfileId
+          ) {
+            throw new ResourceNotFoundException('Reserva no encontrada', {
+              appointmentBookingId: dto.appointmentBookingId,
+            });
+          }
+        }
         const assignments = await this.assignmentsRepo.listActiveByTargets(
           tx,
           tenantId,
@@ -296,7 +364,15 @@ export class SurveysAssignmentsService {
             alreadyByVersion.add(invitation.extensionSurveyVersionId);
           }
         }
-        const baseAlreadyIssued = alreadyByVersion.has(base.versionId);
+        // La base ya salió si alguna invitación de la reserva es de la plantilla
+        // de sistema, de la versión que sea: al subir el contenido
+        // (`SYSTEM_BASE_SURVEY_VERSION`) cambia la versión, no la plantilla, y
+        // un reintento no debe emitir otra base.
+        const baseAlreadyIssued = await this.hasInvitationOfTemplate(
+          tx,
+          existing,
+          base,
+        );
 
         const now = new Date();
         const ids: string[] = [];
@@ -384,6 +460,49 @@ export class SurveysAssignmentsService {
         );
         return { ids: [], alreadyIssued: existing.length };
       });
+  }
+
+  /**
+   * Que la reserva exista en el tenant y esté completada: sólo así hay a quién
+   * preguntarle. Una de otra organización es indistinguible de una inexistente.
+   */
+  private assertIssuable(
+    booking: AppointmentBookings | null,
+    tenantId: string,
+    appointmentBookingId: string,
+  ): AppointmentBookings {
+    if (!booking || booking.tenantId !== tenantId) {
+      throw new ResourceNotFoundException('Reserva no encontrada', {
+        appointmentBookingId,
+      });
+    }
+    if (booking.statusConceptId !== SCHED.BOOKING_COMPLETED) {
+      throw new PreconditionFailedException(
+        'Solo se emiten cuestionarios sobre una atención completada',
+        { appointmentBookingId: booking.id },
+      );
+    }
+    return booking;
+  }
+
+  /**
+   * Si alguna de las invitaciones de la reserva es de la plantilla de sistema
+   * (la versión vigente o una anterior, retirada al subir el contenido).
+   */
+  private async hasInvitationOfTemplate(
+    tx: EntityManager,
+    invitations: SurveyInvitations[],
+    base: SystemSurvey,
+  ): Promise<boolean> {
+    for (const invitation of invitations) {
+      if (invitation.surveyVersionId === base.versionId) return true;
+      const version = await this.templatesRepo.findVersionById(
+        tx,
+        invitation.surveyVersionId,
+      );
+      if (version?.surveyTemplateId === base.templateId) return true;
+    }
+    return false;
   }
 
   /**
@@ -488,7 +607,8 @@ export class SurveysAssignmentsService {
       (a, b) =>
         (TARGET_SPECIFICITY[a.targetTypeConceptId] ?? 3) -
           (TARGET_SPECIFICITY[b.targetTypeConceptId] ?? 3) ||
-        (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0),
+        // A igual especificidad gana la intención más reciente del médico.
+        (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0),
     );
 
     const candidates: PractitionerCandidate[] = [];
@@ -516,7 +636,24 @@ export class SurveysAssignmentsService {
       seen.add(version.id);
       candidates.push({ assignment, version });
     }
-    return candidates;
+
+    // De una misma plantilla sólo se reparte su versión más alta: dos versiones
+    // asignadas a la vez (la vieja y la corregida) le repetirían la encuesta al
+    // paciente.
+    const highest = new Map<string, number>();
+    for (const { version } of candidates) {
+      highest.set(
+        version.surveyTemplateId,
+        Math.max(
+          highest.get(version.surveyTemplateId) ?? 0,
+          version.versionNumber,
+        ),
+      );
+    }
+    return candidates.filter(
+      ({ version }) =>
+        version.versionNumber >= (highest.get(version.surveyTemplateId) ?? 0),
+    );
   }
 
   /** Si la plantilla es del profesional (y no una encuesta de sistema). */

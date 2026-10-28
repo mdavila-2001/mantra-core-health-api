@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
-import type { AuthenticatedUser } from '../../../../common';
+import { getCurrentTenantId, type AuthenticatedUser } from '../../../../common';
 import { SurveysAssignmentsService } from '../../../surveys/services';
 import type { BookingCompletedPort } from '../../application/ports/booking-completed.port';
 
@@ -28,13 +28,20 @@ export class SurveysBookingCompletedAdapter implements BookingCompletedPort {
     actor: AuthenticatedUser,
   ): Promise<void> {
     try {
-      await this.surveys.issueForBooking(
-        { appointmentBookingId: bookingId },
-        actor,
-      );
+      await this.surveys.issueForCompletedBooking(bookingId, actor);
     } catch (error) {
-      this.logger.warn(
-        { operation: 'scheduling.booking.survey', bookingId, err: error },
+      // `error` y no `warn`: es una emisión perdida que nadie reintenta sola.
+      // El runbook del README de surveys explica cómo listar y reemitir las
+      // reservas completadas sin invitación. Sólo ids y la razón: nada del
+      // paciente.
+      this.logger.error(
+        {
+          operation: 'scheduling.booking.survey',
+          bookingId,
+          tenantId: getCurrentTenantId(),
+          reason: error instanceof Error ? error.message : String(error),
+          err: error,
+        },
         'No se pudo emitir la encuesta de la atención completada',
       );
     }
