@@ -23,8 +23,8 @@
 ## Evidencia
 | Gate | Resultado | Archivo |
 |---|---|---|
-| Jest `src/modules/consent` + `src/modules/clinical_ext` | 28 suites, 202 tests, verde | [evidencia/jest-consent-clinical_ext.txt](evidencia/jest-consent-clinical_ext.txt) |
-| Jest completo | 10797 ok, 1 falla ajena (xlsx, ver archivo) | [evidencia/jest-full-resumen.txt](evidencia/jest-full-resumen.txt) |
+| Jest `src/modules/consent` + `src/modules/clinical_ext` (tras la corrección) | 28 suites, 211 tests, verde | [evidencia/jest-consent-clinical_ext.txt](evidencia/jest-consent-clinical_ext.txt) |
+| Jest completo (corrida previa a la corrección) | 10797 ok, 1 falla ajena (xlsx, ver archivo) | [evidencia/jest-full-resumen.txt](evidencia/jest-full-resumen.txt) |
 | `yarn typecheck` | exit 0 | [evidencia/typecheck.txt](evidencia/typecheck.txt) |
 | `yarn build` | exit 0 | [evidencia/build.txt](evidencia/build.txt) |
 | ESLint de los dos módulos | exit 0 | [evidencia/lint.txt](evidencia/lint.txt) |
@@ -32,9 +32,23 @@
 | Patch SQL contra Postgres | no se ejecutó | — |
 | OpenAPI regenerado | no se ejecutó (requiere app + infraestructura) | — |
 
+## Corrección de seguridad (revisión automática sobre b19cc52d)
+La respuesta de derivaciones ahora lleva datos clínicos, así que la política previa no alcanzaba:
+- `PATCH /referrals/:id/respond` exige ser destino (profesional, tenant o tenant de la sede):
+  403 `REFERRAL_RESPOND_FORBIDDEN`. Una derivación sólo externa no se responde en la plataforma.
+- `GET /referrals?patientProfileId=` exige `assertCanReadHistory`; `POST /referrals` exige
+  `assertCanWriteHistory`. `GET /referrals/me` ya resolvía el paciente desde la cuenta.
+- Vínculo consentimiento ↔ derivación: `POST /referrals` rechaza `informedConsentId`
+  (400 `REFERRAL_CONSENT_LINK_NOT_ALLOWED`), porque un consentimiento que apunte a esa derivación no
+  puede existir antes de crearla. El vínculo lo escribe `POST /consent/treatment-informed-consents` con
+  `targetType=REFERRAL` y decisión ACCEPTED, en la misma transacción, si el vínculo estaba vacío o
+  apuntaba a un consentimiento revocado o no aceptado. Revocar desvincula (`informed_consent_id = NULL`)
+  todas las derivaciones que lo usaban: se eligió desvincular porque deja la derivación sin
+  consentimiento visible en vez de depender de que cada cliente interprete una marca.
+- Smoke `test/smoke/modules/clinical_ext.smoke.ts`: el caso REJECT de 404 ahora envía `rejectReason`
+  (sin él el contrato devuelve 400). Los smoke no se corrieron (requieren la API levantada).
+
 ## Pendientes y anotaciones (fuera de alcance)
-- `GET /referrals` y `PATCH /referrals/:id/respond` siguen sin chequeo de historia/destino (comportamiento
-  previo, no se cambió la política). `POST /referrals` tampoco exige escritura sobre la historia.
 - `inventario/` y `schema-descriptions.generated.ts` ya estaban desactualizados antes del cambio; regenerar
   con la bóveda local quitaba módulos, así que no se tocaron.
 - `tools/clinical-forms/*` aparece modificado en el árbol por otro trabajo de la sesión; no forma parte de

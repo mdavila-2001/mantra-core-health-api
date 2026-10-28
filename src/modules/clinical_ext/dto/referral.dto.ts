@@ -233,11 +233,12 @@ export class CreateReferralDto {
   treatmentGivenText?: string;
 
   /**
-   * Consentimiento informado (ACCEPTED, vigente, mismo paciente)
+   * Reservado: el POST lo rechaza (el vínculo nace del consentimiento).
    */
   @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Consentimiento informado (ACCEPTED, vigente, mismo paciente)',
+    description:
+      'NO enviar: se rechaza con 400 REFERRAL_CONSENT_LINK_NOT_ALLOWED. El vínculo lo escribe el consentimiento registrado con targetType=REFERRAL y targetId=<derivación>.',
   })
   @IsOptional()
   @IsUUID()

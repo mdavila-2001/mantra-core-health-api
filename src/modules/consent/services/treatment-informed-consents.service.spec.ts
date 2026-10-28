@@ -34,6 +34,7 @@ function build() {
   const tx: any = {
     flush: mockFn().mockResolvedValue(undefined),
     findOne: mockFn().mockResolvedValue(null),
+    find: mockFn().mockResolvedValue([]),
   };
   const em: any = {
     transactional: mockFn((cb: any) => cb(tx)),
@@ -327,6 +328,70 @@ describe('TreatmentInformedConsentsService', () => {
     });
   });
 
+  describe('vínculo automático con la derivación (targetType=REFERRAL)', () => {
+    it('an ACCEPTED consent links an unlinked referral in the same transaction', async () => {
+      const d = build();
+      const referral: any = { id: 'ref1', patientProfileId: 'p1' };
+      d.tx.findOne.mockResolvedValue(referral);
+      await d.service.sign(directed as any, actor);
+      expect(referral.informedConsentId).toBe('t1');
+      expect(referral.updatedByUserId).toBe(actor.id);
+      expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('replaces a link to a withdrawn consent', async () => {
+      const d = build();
+      const referral: any = {
+        id: 'ref1',
+        patientProfileId: 'p1',
+        informedConsentId: 'c-old',
+      };
+      d.tx.findOne.mockResolvedValue(referral);
+      d.treatmentRepo.findById.mockResolvedValue({
+        id: 'c-old',
+        decisionConceptId: CONS.DECISION_ACCEPTED,
+        withdrawnAt: new Date(),
+      });
+      await d.service.sign(directed as any, actor);
+      expect(referral.informedConsentId).toBe('t1');
+    });
+
+    it('keeps an existing link to a valid ACCEPTED consent', async () => {
+      const d = build();
+      const referral: any = {
+        id: 'ref1',
+        patientProfileId: 'p1',
+        informedConsentId: 'c-old',
+      };
+      d.tx.findOne.mockResolvedValue(referral);
+      d.treatmentRepo.findById.mockResolvedValue({
+        id: 'c-old',
+        decisionConceptId: CONS.DECISION_ACCEPTED,
+      });
+      await d.service.sign(directed as any, actor);
+      expect(referral.informedConsentId).toBe('c-old');
+    });
+
+    it('a DECLINED consent never links', async () => {
+      const d = build();
+      const referral: any = { id: 'ref1', patientProfileId: 'p1' };
+      d.tx.findOne.mockResolvedValue(referral);
+      await d.service.sign({ ...directed, decision: 'DECLINED' } as any, actor);
+      expect(referral.informedConsentId).toBeUndefined();
+    });
+
+    it('a consent for another target type does not touch referrals', async () => {
+      const d = build();
+      const order: any = { id: 'sr1', patientProfileId: 'p1' };
+      d.tx.findOne.mockResolvedValue(order);
+      await d.service.sign(
+        { ...directed, targetType: 'SERVICE_REQUEST', targetId: 'sr1' } as any,
+        actor,
+      );
+      expect(order.informedConsentId).toBeUndefined();
+    });
+  });
+
   describe('create (autorización)', () => {
     it('SECURITY_ADMIN keeps the original path (no encounter lookup)', async () => {
       const d = build();
@@ -511,6 +576,23 @@ describe('TreatmentInformedConsentsService', () => {
   });
 
   describe('withdraw', () => {
+    it('unlinks the referrals that pointed to the withdrawn consent', async () => {
+      const d = build();
+      d.treatmentRepo.findById.mockResolvedValue({
+        id: 't1',
+        patientProfileId: 'p1',
+        statusConceptId: CONS.TREATMENT_SIGNED,
+        decisionConceptId: CONS.DECISION_ACCEPTED,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      const linked: any = { id: 'ref1', informedConsentId: 't1' };
+      d.tx.find.mockResolvedValue([linked]);
+      await d.service.withdraw('t1', { reason: 'Revoca' }, clinician);
+      expect(linked.informedConsentId).toBeUndefined();
+      expect(linked.updatedByUserId).toBe(clinician.id);
+    });
+
     it('sets withdrawn_at, reason, status and records the withdrawn event', async () => {
       const d = build();
       const row: any = {
@@ -535,6 +617,9 @@ describe('TreatmentInformedConsentsService', () => {
       expect(row.withdrawalReason).toBe('Prefiere otra alternativa');
       expect(row.statusConceptId).toBe(CONS.TREATMENT_WITHDRAWN);
       expect(res.status).toBe('WITHDRAWN');
+      expect(d.tx.find).toHaveBeenCalledWith(Referrals, {
+        informedConsentId: 't1',
+      });
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({

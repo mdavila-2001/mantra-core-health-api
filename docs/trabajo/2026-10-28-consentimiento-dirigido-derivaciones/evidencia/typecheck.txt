@@ -1,2 +1,2 @@
-$ yarn typecheck
+$ yarn typecheck (tras la corrección de seguridad)
 EXIT 0

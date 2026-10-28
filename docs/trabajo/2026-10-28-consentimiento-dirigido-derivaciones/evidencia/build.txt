@@ -1,2 +1,2 @@
-$ yarn build
+$ yarn build (tras la corrección de seguridad)
 EXIT 0
