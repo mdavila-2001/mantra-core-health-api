@@ -228,6 +228,27 @@ describe('PractitionerSitesService', () => {
 
       expect(res[0].addressText).toBe('Av. Brasil 1234, La Paz');
     });
+
+    it('ADR-0028: el distrito, en su propia columna, sigue apareciendo en el texto de la sede', async () => {
+      const d = build();
+      d.rolesRepo.findCurrentWithSite.mockResolvedValue([
+        { practitionerProfileId: 'prac-1', practiceSiteId: 'site-1' },
+      ]);
+      d.sitesRepo.findById.mockResolvedValue(
+        siteRecord({ addressId: 'addr-1' }),
+      );
+      d.fork.findOne.mockResolvedValue({
+        lines: 'Calle Warnes 45',
+        districtText: 'Equipetrol',
+        city: 'Santa Cruz de la Sierra',
+      });
+
+      const res = await d.service.listSitesOfPractitioner('prac-1', TENANT);
+
+      expect(res[0].addressText).toBe(
+        'Calle Warnes 45, Equipetrol, Santa Cruz de la Sierra',
+      );
+    });
   });
 
   describe('setSiteContactPhone', () => {

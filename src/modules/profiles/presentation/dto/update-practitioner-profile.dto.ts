@@ -351,6 +351,30 @@ export class UpdateOwnPractitionerProfileDto {
   @MaxLength(300)
   workAddressLines?: string;
 
+  /**
+   * Distrito o zona del domicilio (ADR-0028), tal como lo da el mapa. Vacío
+   * para quitarlo; ausente lo conserva. Mismo campo que en el perfil del
+   * paciente.
+   */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Distrito o zona del domicilio. Vacío para quitarlo.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  homeDistrict?: string;
+
+  /** Distrito o zona del trabajo. Ver {@link homeDistrict}. */
+  @ApiPropertyOptional({
+    maxLength: 200,
+    description: 'Distrito o zona del trabajo. Vacío para quitarlo.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  workDistrict?: string;
+
   /** Latitud del trabajo. Ambos-o-ninguno con {@link workLongitude}. */
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })
   @ValidateIf(

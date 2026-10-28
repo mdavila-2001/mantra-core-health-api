@@ -100,9 +100,13 @@ Lo que había hasta este ADR estaba atado a Bolivia en cuatro lugares:
 - **Escritura**: el servidor **deduce** la provincia del municipio
   (`adminDivisionLineage`), igual que ya deducía el departamento; no la recibe del
   cliente. El distrito llega como texto (`homeDistrict` y `workDistrict` en el alta
-  y el perfil del paciente, `homeDistrict` en el alta del profesional, `district`
-  en la libreta de direcciones) y se guarda en `district_text`, sin pegarse a
-  `lines`. Las lecturas de dirección devuelven `administrativeArea2ConceptId` y
-  `district`.
-- **Lo que no cambió**: la dirección del consultorio propio del profesional vive en
-  otra tabla y sigue llevando el distrito dentro de la línea de dirección.
+  y el perfil del paciente y en el perfil del profesional, `homeDistrict` en el
+  alta del profesional, `district` en la libreta de direcciones y en la dirección
+  del consultorio propio) y se guarda en `district_text`, sin pegarse a `lines`.
+  Las lecturas de dirección devuelven `administrativeArea2ConceptId` y `district`.
+- **Consultorio propio** (mdavila-2001/mantra-core-health-api#1036): su dirección
+  también es una fila de `common.addresses` (`practice.practice_sites.address_id`),
+  así que no hizo falta tocar el modelo. El alta y la mudanza de la sede guardan
+  la provincia deducida y el distrito; los textos de la sede y de la ficha pública
+  componen líneas, distrito y ciudad, para que el distrito no se pierda al dejar de
+  ir dentro de la línea.

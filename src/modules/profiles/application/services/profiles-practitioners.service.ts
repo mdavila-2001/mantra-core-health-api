@@ -811,6 +811,8 @@ export class ProfilesPractitionersService {
     changes: {
       municipalityConceptId?: string;
       lines?: string;
+      /** Distrito o zona; `''` lo quita (ADR-0028). */
+      district?: string;
       /** `null` en las dos quita el punto. Ver `ReplaceResidenceAddressData`. */
       latitude?: number | null;
       longitude?: number | null;
@@ -825,6 +827,7 @@ export class ProfilesPractitionersService {
         useConceptId,
         municipalityConceptId: changes.municipalityConceptId,
         lines: changes.lines,
+        district: changes.district,
         latitude: changes.latitude,
         longitude: changes.longitude,
         actorUserId,
@@ -1354,6 +1357,7 @@ export class ProfilesPractitionersService {
         if (
           dto.residenceMunicipalityConceptId !== undefined ||
           dto.homeAddressLines !== undefined ||
+          dto.homeDistrict !== undefined ||
           // `null` también cuenta: quitar el punto es un cambio.
           dto.homeLatitude !== undefined ||
           dto.homeLongitude !== undefined
@@ -1365,6 +1369,7 @@ export class ProfilesPractitionersService {
             {
               municipalityConceptId: dto.residenceMunicipalityConceptId,
               lines: dto.homeAddressLines,
+              district: dto.homeDistrict,
               latitude: dto.homeLatitude,
               longitude: dto.homeLongitude,
             },
@@ -1374,6 +1379,7 @@ export class ProfilesPractitionersService {
         }
         if (
           dto.workAddressLines !== undefined ||
+          dto.workDistrict !== undefined ||
           dto.workLatitude !== undefined ||
           dto.workLongitude !== undefined
         ) {
@@ -1383,6 +1389,7 @@ export class ProfilesPractitionersService {
             CONCEPTS.ADDR_USE_WORK,
             {
               lines: dto.workAddressLines,
+              district: dto.workDistrict,
               latitude: dto.workLatitude,
               longitude: dto.workLongitude,
             },

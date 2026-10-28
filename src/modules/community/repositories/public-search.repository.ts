@@ -234,6 +234,8 @@ export interface SitePublicRow {
   readonly practice_type_concept_id: string;
   readonly practice_admin_user_id: string;
   readonly lines: string | null;
+  /** Distrito o zona, aparte de las líneas desde ADR-0028. */
+  readonly district_text: string | null;
   readonly city: string | null;
   readonly postal_code: string | null;
   readonly latitude: string | null;
@@ -340,7 +342,7 @@ export function publicSitesOf(
  * lectura de sedes con sesión.
  */
 function addressText(row: SitePublicRow): string | null {
-  const parts = [row.lines, row.city, row.postal_code]
+  const parts = [row.lines, row.district_text, row.city, row.postal_code]
     .map((part) => part?.trim())
     .filter((part): part is string => Boolean(part));
   return parts.length === 0 ? null : parts.join(', ');
@@ -781,12 +783,13 @@ export class PublicSearchRepository {
       {
         owner_id: string;
         lines: string | null;
+        district_text: string | null;
         city: string | null;
         latitude: string | null;
         longitude: string | null;
       }[]
     >(
-      `SELECT DISTINCT ON (owner_id) owner_id, lines, city, latitude, longitude
+      `SELECT DISTINCT ON (owner_id) owner_id, lines, district_text, city, latitude, longitude
            FROM common.addresses
           WHERE owner_id IN (?)
             AND (valid_to IS NULL OR valid_to >= CURRENT_DATE)
@@ -805,12 +808,19 @@ export class PublicSearchRepository {
         lng !== null &&
         Number.isFinite(lat) &&
         Number.isFinite(lng);
+      // La calle con su distrito: desde ADR-0028 el distrito va en su propia
+      // columna, y la ficha lo sigue mostrando como cuando venía pegado.
+      const address =
+        [row.lines, row.district_text]
+          .map((part) => part?.trim())
+          .filter((part): part is string => Boolean(part))
+          .join(', ') || null;
       if (!geoValid) {
         // Sin punto pero con texto la dirección **sigue sirviendo**: la ficha
         // escribe dónde atiende aunque no pueda dibujar el mapa.
-        if (row.city || row.lines) {
+        if (row.city || address) {
           output.set(row.owner_id, {
-            address: row.lines,
+            address,
             city: row.city,
             lat: null,
             lng: null,
@@ -819,7 +829,7 @@ export class PublicSearchRepository {
         continue;
       }
       output.set(row.owner_id, {
-        address: row.lines,
+        address,
         city: row.city,
         lat,
         lng,
@@ -948,7 +958,7 @@ export class PublicSearchRepository {
               ps.name AS site_name,
               p.type_concept_id AS practice_type_concept_id,
               p.admin_user_id AS practice_admin_user_id,
-              a.lines, a.city, a.postal_code, a.latitude, a.longitude,
+              a.lines, a.district_text, a.city, a.postal_code, a.latitude, a.longitude,
               pal.user_id AS link_user_id,
               pal.status_concept_id AS link_status_concept_id
          FROM practice.practitioner_role_assignments pra
