@@ -3674,6 +3674,156 @@ paths:
       description: >-
         Registrar defunción y anonimización de una persona. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /profiles/patients/me/primary-practitioner:
+    get:
+      operationId: PrimaryPractitionerController_getOwn
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnPrimaryPractitionerDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Consultar el propio médico de cabecera
+      tags:
+        - profiles-primary-practitioner
+      description: >-
+        Consultar el propio médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+    put:
+      description: >-
+        Cierra la elección vigente (si la hay) y abre otra. Elegir al que ya es el vigente no cambia nada. No concede
+        acceso clínico.
+      operationId: PrimaryPractitionerController_setOwn
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetPrimaryPractitionerDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnPrimaryPractitionerDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Elegir o cambiar el propio médico de cabecera
+      tags:
+        - profiles-primary-practitioner
+    delete:
+      operationId: PrimaryPractitionerController_removeOwn
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnPrimaryPractitionerDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Quitar el propio médico de cabecera
+      tags:
+        - profiles-primary-practitioner
+      description: >-
+        Quitar el propio médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
+  /profiles/practitioners/me/primary-patients:
+    get:
+      description: 'Nombre, código de paciente y desde cuándo: ningún dato del expediente.'
+      operationId: PrimaryPractitionerController_listOwnPatients
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          schema:
+            maximum: 200
+            default: 50
+            type: number
+        - name: offset
+          required: false
+          in: query
+          schema:
+            minimum: 0
+            default: 0
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrimaryPatientsPageDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Listar los pacientes que me eligieron como médico de cabecera
+      tags:
+        - profiles-primary-practitioner
   /profiles/patients/me/dependent-requests:
     post:
       operationId: ProfilesDependentRequestsController_requestDependentLink
@@ -66718,6 +66868,10 @@ tags:
     description: >-
       Operaciones del dominio funcional profiles practitioners. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: profiles-primary-practitioner
+    description: >-
+      Operaciones del dominio funcional profiles primary practitioner. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: promotions
     description: >-
       Operaciones del dominio funcional promotions. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -69686,6 +69840,82 @@ components:
           description: Anonimiza la PII (borrado lógico del display_name) al registrar
           default: false
       additionalProperties: false
+    PrimaryPractitionerDto:
+      type: object
+      properties:
+        practitionerProfileId:
+          type: string
+          format: uuid
+          description: Con este id se abre su ficha en la guía
+        displayName:
+          type: string
+          description: Nombre visible del profesional
+        professionalTitle:
+          type: string
+          description: Título profesional declarado
+        since:
+          type: string
+          format: date-time
+          description: Desde cuándo es su médico de cabecera
+      required:
+        - practitionerProfileId
+        - since
+    OwnPrimaryPractitionerDto:
+      type: object
+      properties:
+        current:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PrimaryPractitionerDto'
+    SetPrimaryPractitionerDto:
+      type: object
+      properties:
+        practitionerProfileId:
+          type: string
+          format: uuid
+          description: Perfil profesional que el paciente elige como médico de cabecera
+      required:
+        - practitionerProfileId
+      additionalProperties: false
+    PrimaryPatientDto:
+      type: object
+      properties:
+        patientProfileId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+          description: Nombre visible del paciente
+        patientCode:
+          type: string
+          description: Código de paciente
+        since:
+          type: string
+          format: date-time
+          description: Desde cuándo lo tiene como médico de cabecera
+      required:
+        - patientProfileId
+        - since
+    PrimaryPatientsPageDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrimaryPatientDto'
+        total:
+          type: number
+          description: Pacientes de cabecera vigentes, en total
+        limit:
+          type: number
+        offset:
+          type: number
+      required:
+        - items
+        - total
+        - limit
+        - offset
     RequestDependentLinkDto:
       type: object
       properties:
