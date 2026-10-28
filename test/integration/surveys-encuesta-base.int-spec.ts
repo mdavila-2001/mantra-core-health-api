@@ -795,5 +795,151 @@ describeIfDb(
         });
       });
     });
+
+    describe('reservas completadas sin invitación (runbook)', () => {
+      it('lista las que no tienen ninguna invitación y deja de listar la que se reemite', async () => {
+        const booking = await insertBooking({});
+
+        const before = await inTenant(() =>
+          services().assignments.listCompletedBookingsWithoutInvitation(1000),
+        );
+        expect(before).toContain(booking);
+
+        await inTenant(() =>
+          services().assignments.issueForBooking(
+            { appointmentBookingId: booking },
+            doctorActor,
+          ),
+        );
+
+        const after = await inTenant(() =>
+          services().assignments.listCompletedBookingsWithoutInvitation(1000),
+        );
+        expect(after).not.toContain(booking);
+      });
+
+      it('no lista las que no están completadas ni las de otro tenant', async () => {
+        const inProgress = await insertBooking({
+          status: SCHED.BOOKING_IN_PROGRESS,
+        });
+
+        const mine = await inTenant(() =>
+          services().assignments.listCompletedBookingsWithoutInvitation(1000),
+        );
+        const other = await inTenant(
+          () =>
+            services().assignments.listCompletedBookingsWithoutInvitation(1000),
+          OTHER_TENANT,
+        );
+
+        expect(mine).not.toContain(inProgress);
+        expect(other).toEqual([]);
+      });
+    });
+
+    describe('el patch v4267 desactiva las asignaciones heredadas de FT-31', () => {
+      const patch = readFileSync(
+        join(
+          root,
+          'database/SQL/patches/2026-10-28_v4267_surveys_encuesta_base.sql',
+        ),
+        'utf8',
+      );
+
+      /** Una «Satisfacción — …» como la dejaba FT-31, con su asignación activa a un servicio. */
+      async function legacy(opts: {
+        title?: string;
+        questions?: number;
+        withInvitation?: boolean;
+      }) {
+        const template = randomUUID();
+        const version = randomUUID();
+        const assignment = randomUUID();
+        await sql(
+          `INSERT INTO surveys.survey_templates (id, tenant_id, owner_practitioner_id, title,
+             status_concept_id, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, now(), now())`,
+          [
+            template,
+            TENANT,
+            DOCTOR,
+            opts.title ?? 'Satisfacción — Laboratorio',
+            SURVEYS.TEMPLATE_ACTIVE,
+          ],
+        );
+        await sql(
+          `INSERT INTO surveys.survey_versions (id, survey_template_id, version_number,
+             publication_status_concept_id, response_window_days, created_at, updated_at)
+           VALUES ($1, $2, 1, $3, 30, now(), now())`,
+          [version, template, SURVEYS.VERSION_PUBLISHED],
+        );
+        for (let i = 1; i <= (opts.questions ?? 1); i++) {
+          await sql(
+            `INSERT INTO surveys.survey_questions (id, survey_version_id, position, question_text,
+               answer_type_concept_id, required, scale_min, scale_max, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, true, 1, 5, now(), now())`,
+            [
+              randomUUID(),
+              version,
+              i,
+              '¿Qué tan satisfecho quedó con la atención?',
+              SURVEYS.ANSWER_TYPE_SCALE,
+            ],
+          );
+        }
+        await sql(
+          `INSERT INTO surveys.survey_assignments (id, survey_version_id, tenant_id,
+             target_type_concept_id, target_id, active, created_at, updated_at)
+           VALUES ($1, $2, $3, $4, $5, true, now(), now())`,
+          [assignment, version, TENANT, SURVEYS.TARGET_SERVICE, randomUUID()],
+        );
+        if (opts.withInvitation) {
+          await sql(
+            `INSERT INTO surveys.survey_invitations (id, survey_version_id, survey_assignment_id,
+               tenant_id, patient_profile_id, appointment_booking_id, status_concept_id, issued_at,
+               expires_at, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, now(), now(), now(), now())`,
+            [
+              randomUUID(),
+              version,
+              assignment,
+              TENANT,
+              PATIENT,
+              await insertBooking({}),
+              SURVEYS.INVITATION_PENDING,
+            ],
+          );
+        }
+        return assignment;
+      }
+      const activeOf = async (assignment: string) =>
+        (
+          await rows(
+            `SELECT active FROM surveys.survey_assignments WHERE id = $1`,
+            [assignment],
+          )
+        )[0].active;
+
+      it('desactiva la heredada sin invitaciones; conserva la repartida, la de otro título y la de varias preguntas; es idempotente', async () => {
+        const heredada = await legacy({});
+        const repartida = await legacy({ withInvitation: true });
+        const otroTitulo = await legacy({
+          title: 'Mi encuesta de laboratorio',
+        });
+        const variasPreguntas = await legacy({ questions: 2 });
+
+        await sql(patch);
+
+        expect(await activeOf(heredada)).toBe(false);
+        expect(await activeOf(repartida)).toBe(true);
+        expect(await activeOf(otroTitulo)).toBe(true);
+        expect(await activeOf(variasPreguntas)).toBe(true);
+
+        // Segunda pasada: nada cambia y no falla.
+        await sql(patch);
+        expect(await activeOf(heredada)).toBe(false);
+        expect(await activeOf(repartida)).toBe(true);
+      });
+    });
   },
 );

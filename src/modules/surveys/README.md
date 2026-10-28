@@ -115,17 +115,22 @@ por dominio propio.
 - **Solo responde quien tuvo atención completada.** La invitación se emite contra
   una `scheduling.appointment_bookings` en `BOOKING_COMPLETED`; sin invitación no
   hay forma de responder. Es la regla que ALOVIDA fija explícitamente.
-- **Emisión secuencialmente idempotente.** El servicio detecta una invitación ya
-  emitida por `(reserva, versión)`, pero el DDL no impone la unicidad: dos
-  solicitudes concurrentes pueden duplicarla.
+- **Emisión idempotente, también bajo concurrencia.** El servicio bloquea la reserva
+  y detecta lo ya emitido (la base se reconoce por su plantilla de sistema, de la
+  versión que sea); además la base lo respalda con el índice único
+  `uq_survey_invitations_booking_version` `(reserva, versión)` (v4249): perder la
+  carrera responde como emisión previa, no como error.
 - **Ventana congelada al emitir.** `expires_at` se deriva de
   `response_window_days` en el momento de la emisión; cambiar el plazo después no
   mueve una ventana ya prometida.
 - **Envío único y atómico.** Todas las obligatorias o ninguna; una invitación
   respondida no admite un segundo envío.
 - **`value[x]` exclusivo en servicio**, igual que `forms.field_values`: el
-  servicio normaliza una única columna `value_*` por fila. La base no tiene un
-  `CHECK` de respaldo.
+  servicio normaliza una única columna `value_*` por fila, y la base lo respalda con
+  `ck_survey_answers_single_value` (v4249). Qué columna corresponde a cada tipo de
+  respuesta sigue siendo regla del servicio.
+- **Un texto en blanco en una pregunta opcional es «no contestó».** Se ignora (no
+  se valida ni se guarda); en una obligatoria sigue siendo 422.
 - **Desactivar ≠ borrar.** Corta las emisiones nuevas; lo ya emitido sigue siendo
   contestable y lo ya respondido, legible.
 
@@ -211,3 +216,21 @@ ALOVIDA los pide (`DOC-ENC-008`, `DOC-ENC-009`), pero publicar un agregado exige
 el umbral mínimo de participantes (decisión **D-13**), que no está definido: *«se
 puede modelar la encuesta sin el umbral, pero no se puede publicar ningún
 agregado sin él»*. El módulo no los ofrece.
+
+## Runbook: reservas completadas sin invitación
+
+La emisión automática no reintenta: si falla (base caída, conceptos sin sembrar), el
+cierre de la atención queda bien y se registra un `error` de
+`SurveysBookingCompletedAdapter` con `bookingId`, `tenantId` y `reason`. No hay
+barrido automático ni endpoint de listado.
+
+1. Listar las reservas completadas del tenant sin ninguna invitación:
+   `SurveysAssignmentsService.listCompletedBookingsWithoutInvitation(limit)` (más
+   recientes primero; consulta interna, hay que invocarla desde un script o consola
+   con el contexto del tenant).
+2. Reemitir cada una con `POST /surveys/invitations {appointmentBookingId}`. Es
+   idempotente y, para un profesional, exige haber atendido la reserva (la
+   administración de agenda emite sobre cualquiera).
+3. Si el fallo fue por conceptos sin sembrar o por la columna
+   `extension_survey_version_id` ausente, corregirlo antes (sembrar conceptos /
+   aplicar `2026-10-28_v4267_surveys_encuesta_base.sql`).
