@@ -27,6 +27,7 @@ import {
   BranchesRepository,
   BranchMembershipsRepository,
   DirectoryTenantLegalRepository,
+  TenantMedicalFacilitiesRepository,
 } from './repositories';
 
 /**
@@ -80,6 +81,7 @@ import {
     BranchesRepository,
     BranchMembershipsRepository,
     DirectoryTenantLegalRepository,
+    TenantMedicalFacilitiesRepository,
     // Servicios
     DirectoryTenantsService,
     DirectoryBranchesService,

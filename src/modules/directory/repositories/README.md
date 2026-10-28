@@ -12,6 +12,7 @@ negocio (solo consultas y construcción de entidades con `createdBy(...)` y
 | `BranchesRepository`          | `branches`           | `findById`, `findByTenantAndCode`, `findByTenantAndStatus`, `create`                        |
 | `TenantMembershipsRepository` | `tenant_memberships` | `findById`, `findByIdInTenant`, `findActiveByUserTenant`, `findByTenantAndStatus`, `create` |
 | `BranchMembershipsRepository` | `branch_memberships` | `findByMembershipAndStatus`, `findByMembershipBranchStatus`, `create`                       |
+| `TenantMedicalFacilitiesRepository` | `tenant_medical_facilities`, `tenant_medical_facility_sites` | `findByTenant`, `listSites`, `create`, `createSite` |
 
 Las FK son columnas uuid planas (no relaciones ORM): el servicio hace `flush` del
 padre antes de crear el hijo.
