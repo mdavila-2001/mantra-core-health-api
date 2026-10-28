@@ -570,7 +570,10 @@ export const DIAGNOSTICS_SMOKE: SmokeCase[] = [
       custodianTenantId: c.tenantId,
       targetTypeConceptId: CID,
       severityConceptId: CID,
-      provenanceSourceId: c.vars.diagAccessionId,
+      // La fuente de provenance es, como el objetivo, un espécimen, una observación o un estudio
+      // de imagen del tenant (`DiagnosticsScopeService.dataQualityTarget`): una acesión responde
+      // 404. Se usa el espécimen hermano del caso de rechazo.
+      provenanceSourceId: c.vars.diagRejectSpecimenId,
       provenanceSourceTypeConceptId: CID,
     }),
     expectedStatus: 201,

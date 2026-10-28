@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import { MockProviderClient } from '../../mock-provider-client.service';
+import { declareProviderCapability } from '../../provider-capability';
 import { DispatchIdentityChecksJob } from './dispatch-identity-checks.job';
 import { createMockIdentityVerificationAdapter } from './mock-identity-verification-provider.adapter';
 
@@ -20,7 +21,19 @@ export class MockProviderWiringService implements OnModuleInit {
   }
 
   onModuleInit(): void {
-    if (!this.client.isConfigured()) return;
+    if (!this.client.isConfigured()) {
+      declareProviderCapability(
+        this.logger,
+        'identity_assurance.identity_checks',
+        'none',
+      );
+      return;
+    }
+    declareProviderCapability(
+      this.logger,
+      'identity_assurance.identity_checks',
+      'mock',
+    );
 
     this.job.providerAdapter = createMockIdentityVerificationAdapter(
       this.client,

@@ -169,6 +169,11 @@ export {
   sniffMimeType,
 } from './storage/upload-content-type';
 export type { SniffedMimeType } from './storage/upload-content-type';
+export {
+  LOGO_IMAGE_MIME_TYPES,
+  LOGO_MAX_BYTES,
+  assertLogoImage,
+} from './storage/logo-image';
 export { appSecurityEnvSchema } from './security/app-security.env';
 
 // Bypass de verificación DEV/TEST (corrección #12, contrato DEV_VERIFICATION_BYPASS.md)
@@ -196,6 +201,11 @@ export type { ConceptName } from './constants/concepts';
 // Pack de stickers del producto (AG-17, BR-22)
 export { STICKER_PACK, STICKER_PACK_FILE_IDS } from './constants/sticker-pack';
 export type { StickerPackEntry } from './constants/sticker-pack';
+
+// Distancia en línea recta (ver el JSDoc del módulo: convive con las copias
+// locales de farmacia, comunidad y marketplace, no las reemplaza)
+export { straightLineKm, coordinateOf } from './geo/straight-line-distance';
+export type { GeoPoint } from './geo/straight-line-distance';
 
 // Dinero decimal exacto (ver el JSDoc del módulo: convive con las utilidades
 // de accounting y billing, no las reemplaza)

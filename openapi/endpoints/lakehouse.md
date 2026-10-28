@@ -114,6 +114,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CatalogResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CatalogResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CatalogResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CatalogResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CatalogResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -279,6 +280,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ProductVersionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ProductVersionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ProductVersionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ProductVersionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ProductVersionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -314,7 +316,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_PRODUCT_OWNER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | Ya existe un producto con ese código para el tenant, con otro identificador. | Excepción explícita en src/modules/lakehouse/services/lakehouse-catalog.service.ts |
-| 409 | `CONFLICT` | El producto existente tiene otro código o pertenece a otro tenant. | Excepción explícita en src/modules/lakehouse/services/lakehouse-catalog.service.ts |
+| 409 | `CONFLICT` | El producto existente tiene otro código. | Excepción explícita en src/modules/lakehouse/services/lakehouse-catalog.service.ts |
 | 409 | `CONFLICT` | Esa versión del producto ya está publicada. | Excepción explícita en src/modules/lakehouse/services/lakehouse-catalog.service.ts |
 | 409 | `CONFLICT` | Dos reglas de calidad comparten el mismo código. | Excepción explícita en src/modules/lakehouse/services/lakehouse-catalog.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -441,6 +443,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DatasetResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DatasetResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DatasetResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DatasetResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DatasetResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -473,7 +476,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Versión de producto no encontrada. | Excepción explícita en src/modules/lakehouse/services/lakehouse-catalog.service.ts |
 | 404 | `NOT_FOUND` | Zona no encontrada. | Excepción explícita en src/modules/lakehouse/services/lakehouse-catalog.service.ts |
 | 404 | `NOT_FOUND` | Catálogo no encontrado. | Excepción explícita en src/modules/lakehouse/services/lakehouse-catalog.service.ts |
 | 409 | `CONFLICT` | Ya hay un dataset registrado para esa tabla. | Excepción explícita en src/modules/lakehouse/services/lakehouse-catalog.service.ts |
@@ -534,6 +536,7 @@ Content-Type: application/json
 
 {
   "tenantId": "00000000-0000-4000-8000-000000000001",
+  "transformationRunId": "00000000-0000-4000-8000-000000000001",
   "evaluatedRecordCount": "valor-ejemplo"
 }
 ```
@@ -550,7 +553,7 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `transformationRunId` | No | `string` | formato `uuid` | Corrida de transformación evaluada | `00000000-0000-4000-8000-000000000001` |
+| `transformationRunId` | Sí | `string` | formato `uuid` | Corrida de transformación evaluada | `00000000-0000-4000-8000-000000000001` |
 | `evaluatedRecordCount` | Sí | `string` | Sin restricción adicional declarada | Registros evaluados; cadena por ser bigint | `valor-ejemplo` |
 | `findings` | No | `array<LakehouseQualityFindingDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"ruleCode":"CODIGO_EJEMPLO","partitionId":"00000000-0000-4000-8000-000000000001","issueCount":"valor-ejemplo","sampleObjectManifestId":"00000000-0000-4000-8000-000000000001"}]` |
 | `findings[].ruleCode` | No | `string` | longitud máxima 100 | Código de la regla violada | `CODIGO_EJEMPLO` |
@@ -597,6 +600,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<QualityRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<QualityRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<QualityRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<QualityRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `QualityRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -631,7 +635,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: DATA_STEWARD, SYSTEM, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Dataset no encontrado. | Excepción explícita en src/modules/lakehouse/services/transformation.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El hallazgo cita una regla que no está activa para la versión del producto. | Excepción explícita en src/modules/lakehouse/services/transformation.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -799,6 +802,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CuratedIngestionResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CuratedIngestionResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CuratedIngestionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CuratedIngestionResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CuratedIngestionResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -829,8 +833,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, DEIDENTIFICATION_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Perfil de de-identificación no encontrado. | Excepción explícita en src/modules/lakehouse/services/transformation.service.ts |
-| 404 | `NOT_FOUND` | Dataset objetivo no encontrado. | Excepción explícita en src/modules/lakehouse/services/transformation.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ingesta de-identificada sólo puede escribir en la zona curated. | Excepción explícita en src/modules/lakehouse/services/transformation.service.ts |
 | 422 | `PRECONDITION_FAILED` | El dataset objetivo no está activo; no admite escrituras. | Excepción explícita en src/modules/lakehouse/services/transformation.service.ts |
@@ -998,6 +1000,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<TransformationRunResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<TransformationRunResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<TransformationRunResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransformationRunResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransformationRunResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1034,8 +1037,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM, TRANSFORMATION_WORKER, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Definición de transformación no encontrada. | Excepción explícita en src/modules/lakehouse/services/transformation.service.ts |
-| 404 | `NOT_FOUND` | Dataset objetivo no encontrado. | Excepción explícita en src/modules/lakehouse/services/transformation.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La definición de transformación no está activa. | Excepción explícita en src/modules/lakehouse/services/transformation.service.ts |
 | 422 | `PRECONDITION_FAILED` | El dataset objetivo no está activo; no admite escrituras. | Excepción explícita en src/modules/lakehouse/services/transformation.service.ts |
@@ -1091,7 +1092,10 @@ Content-Type: application/json
 {
   "code": "CODIGO_EJEMPLO",
   "name": "Nombre de ejemplo",
-  "zoneType": "raw"
+  "zoneType": "raw",
+  "namespaceId": "00000000-0000-4000-8000-000000000001",
+  "encryptionProfileCode": "CODIGO_EJEMPLO",
+  "retentionPolicyCode": "CODIGO_EJEMPLO"
 }
 ```
 
@@ -1108,9 +1112,9 @@ Content-Type: application/json
 | `code` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `name` | Sí | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `zoneType` | Sí | `string` | valores: `raw`, `standardized`, `curated`, `research` | Sin descripción específica en el contrato OpenAPI. | `raw` |
-| `namespaceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
-| `encryptionProfileCode` | No | `string` | longitud máxima 100 | Perfil de cifrado en reposo | `CODIGO_EJEMPLO` |
-| `retentionPolicyCode` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `namespaceId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encryptionProfileCode` | Sí | `string` | longitud máxima 100 | Perfil de cifrado en reposo | `CODIGO_EJEMPLO` |
+| `retentionPolicyCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 
 ### Payload completo de ejemplo
 
@@ -1145,6 +1149,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ZoneResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ZoneResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ZoneResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ZoneResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ZoneResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1283,6 +1288,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReleaseRequestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReleaseRequestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReleaseRequestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReleaseRequestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReleaseRequestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1311,9 +1317,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Proyecto de investigación no encontrado. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
-| 404 | `NOT_FOUND` | La cohorte no pertenece a ese proyecto. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
-| 404 | `NOT_FOUND` | Versión de producto no encontrada. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El proyecto no está aprobado. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
 | 422 | `PRECONDITION_FAILED` | La ventana de aprobación ética del proyecto no está vigente. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
@@ -1373,7 +1376,9 @@ Content-Type: application/json
 {
   "purposeConceptId": "00000000-0000-4000-8000-000000000001",
   "recordCount": "valor-ejemplo",
-  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "objectManifestId": "00000000-0000-4000-8000-000000000001",
+  "schemaVersion": "valor-ejemplo"
 }
 ```
 
@@ -1391,8 +1396,8 @@ Content-Type: application/json
 | `purposeConceptId` | Sí | `string` | formato `uuid` | Propósito con el que corre la de-identificación | `00000000-0000-4000-8000-000000000001` |
 | `recordCount` | Sí | `string` | Sin restricción adicional declarada | Registros del manifiesto; cadena por ser bigint | `valor-ejemplo` |
 | `contentHash` | Sí | `string` | longitud máxima 200 | Hash del contenido materializado | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
-| `objectManifestId` | No | `string` | formato `uuid` | Manifiesto del objeto de-identificado | `00000000-0000-4000-8000-000000000001` |
-| `schemaVersion` | No | `string` | longitud máxima 50 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `objectManifestId` | Sí | `string` | formato `uuid` | Manifiesto del objeto de-identificado | `00000000-0000-4000-8000-000000000001` |
+| `schemaVersion` | Sí | `string` | longitud máxima 50 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `ttlDays` | No | `number` | mínimo 1; máximo 3650 | Días de vigencia del acceso; por omisión, 90 | `1` |
 
 ### Payload completo de ejemplo
@@ -1429,6 +1434,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<ReleaseManifestResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<ReleaseManifestResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<ReleaseManifestResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReleaseManifestResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReleaseManifestResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1463,8 +1469,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RESEARCH_GOVERNANCE, DPO, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Solicitud de release no encontrada. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
-| 404 | `NOT_FOUND` | Proyecto de investigación no encontrado. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La solicitud no está en un estado que admita aprobación. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
 | 422 | `PRECONDITION_FAILED` | La aprobación ética del proyecto caducó; el release no puede materializarse. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
@@ -1567,6 +1571,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<RevokeReleaseResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<RevokeReleaseResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<RevokeReleaseResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RevokeReleaseResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RevokeReleaseResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1595,7 +1600,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Solicitud de release no encontrada. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1635,16 +1639,14 @@ NestJS resuelve `GET /research/dataset-releases/expired` en `ResearchController_
 
 ### Parámetros
 
-| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
-|---|---|:---:|---|---|---|---|
-| `limit` | query | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `1` |
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
 La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
 
 ```http
-GET /research/dataset-releases/expired?limit=1 HTTP/1.1
+GET /research/dataset-releases/expired HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -1663,7 +1665,7 @@ Authorization: Bearer <access_token_jwt>
 No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
 
 ```http
-GET /research/dataset-releases/expired?limit=1 HTTP/1.1
+GET /research/dataset-releases/expired HTTP/1.1
 Host: localhost:3000
 Authorization: Bearer <access_token_jwt>
 ```
@@ -1678,6 +1680,7 @@ Authorization: Bearer <access_token_jwt>
 | 403 | Consulta completada correctamente. | `Promise<PendingExpiredReleasesResponseDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PendingExpiredReleasesResponseDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PendingExpiredReleasesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PendingExpiredReleasesResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PendingExpiredReleasesResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1706,7 +1709,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 
 | HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
 |---:|---|---|---|
-| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
@@ -1716,8 +1718,8 @@ Ejemplo de error normalizado:
 
 ```json
 {
-  "code": "VALIDATION_FAILED",
-  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/research/dataset-releases/expired"
@@ -1821,6 +1823,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DeidentificationProfileResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DeidentificationProfileResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -1911,6 +1914,7 @@ Content-Type: application/json
   "approvedTo": "2026-07-31T12:00:00.000Z",
   "cohortCode": "CODIGO_EJEMPLO",
   "cohortVersion": "valor-ejemplo",
+  "inclusionExpression": "valor-ejemplo",
   "deidentificationProfileId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -1936,7 +1940,7 @@ Content-Type: application/json
 | `approvedTo` | Sí | `string` | formato `date-time` | Fin de la ventana ética | `2026-07-31T12:00:00.000Z` |
 | `cohortCode` | Sí | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
 | `cohortVersion` | Sí | `string` | longitud máxima 50 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
-| `inclusionExpression` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `inclusionExpression` | Sí | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `exclusionExpression` | No | `string` | longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
 | `deidentificationProfileId` | Sí | `string` | formato `uuid` | Perfil de de-identificación con el que se materializará el release | `00000000-0000-4000-8000-000000000001` |
 
@@ -1981,6 +1985,7 @@ Content-Type: application/json
 | 422 | Operación completada correctamente. | `Promise<CohortResponseDto>` | No |
 | 429 | Operación completada correctamente. | `Promise<CohortResponseDto>` | No |
 | 500 | Operación completada correctamente. | `Promise<CohortResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CohortResponseDto>` | No |
 
 Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CohortResponseDto`. Ejemplo completo derivado de ese DTO:
 
@@ -2014,7 +2019,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRINCIPAL_INVESTIGATOR, RESEARCH_GOVERNANCE, PLATFORM_ADMIN. | Roles/tenant/guards de autorización |
 | 409 | `CONFLICT` | Ya existe un proyecto con ese código para el tenant, con otro identificador. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
-| 409 | `CONFLICT` | El proyecto existente tiene otro código o pertenece a otro tenant. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
+| 409 | `CONFLICT` | El proyecto existente tiene otro código. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
 | 409 | `CONFLICT` | Esa versión de la cohorte ya está definida. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La ventana de aprobación ética tiene que empezar antes de terminar. | Excepción explícita en src/modules/lakehouse/services/research-release.service.ts |

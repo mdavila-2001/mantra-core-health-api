@@ -6,6 +6,7 @@ import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
 // de @jest/globals bajo el tsconfig raíz.
 const mockFn = (impl?: unknown): any => (jest.fn as any)(impl);
 
+import { getCurrentTenantId } from '../../../../common';
 import { ClaimsController } from './claims.controller';
 import { CoverageController } from './coverage.controller';
 import { InsuranceBackboneController } from './insurance-backbone.controller';
@@ -30,6 +31,7 @@ import {
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as never;
 const dto = {} as never;
+const request = { headers: {} } as never;
 const ID = '00000000-0000-4000-8000-00000000abcd';
 
 /**
@@ -47,15 +49,108 @@ describe('Insurance controllers (delegación)', () => {
       reverse: mockFn().mockResolvedValue({ id: ID }),
       openDispute: mockFn().mockResolvedValue({ ok: true }),
     };
-    const c = new ClaimsController(service as never);
+    const quoteService = {
+      quote: mockFn().mockResolvedValue({ canSubmit: true }),
+    };
+    const patientInvoiceService = {
+      issue: mockFn().mockResolvedValue({ invoiceId: ID }),
+    };
+    const patientObjectionService = {
+      object: mockFn().mockResolvedValue({ id: ID }),
+    };
+    const c = new ClaimsController(
+      service as never,
+      quoteService as never,
+      patientInvoiceService as never,
+      patientObjectionService as never,
+    );
+    expect(await c.issuePatientInvoice(ID, dto, actor)).toEqual({
+      invoiceId: ID,
+    });
+    expect(patientInvoiceService.issue).toHaveBeenCalledWith(ID, dto, actor);
+    expect(await c.quote(dto, actor)).toEqual({ canSubmit: true });
+    expect(quoteService.quote).toHaveBeenCalledWith(dto, actor);
     expect(await c.submit(dto, actor)).toEqual({ ok: true });
     expect(service.submitClaim).toHaveBeenCalledWith(dto, actor);
     await c.adjudicate(ID, dto, actor);
     expect(service.adjudicate).toHaveBeenCalledWith(ID, dto, actor);
     await c.publishEob(ID, dto, actor);
     await c.reverse(ID, dto, actor);
-    await c.openDispute(ID, dto, actor);
+    await c.openDispute(ID, dto, actor, request);
     expect(service.openDispute).toHaveBeenCalledWith(ID, dto, actor);
+    expect(patientObjectionService.object).not.toHaveBeenCalled();
+  });
+
+  describe('POST /insurance-claims/:id/disputes: despacho por actor (carril 16, REQ-16-032)', () => {
+    const TENANT = '11111111-1111-4111-8111-111111111111';
+    const build = () => {
+      const service = {
+        openDispute: mockFn().mockResolvedValue({ via: 'provider' }),
+      };
+      const objection = {
+        object: mockFn().mockResolvedValue({ via: 'patient' }),
+      };
+      const controller = new ClaimsController(
+        service as never,
+        {} as never,
+        {} as never,
+        objection as never,
+      );
+      return { controller, service, objection };
+    };
+    const patientBody = { initiatedBy: 'PROVIDER' } as never;
+
+    it('un paciente objeta por la rama del paciente aunque el cuerpo diga PROVIDER', async () => {
+      const { controller, service, objection } = build();
+      const patient = { id: 'u-p', roles: ['PATIENT'] } as never;
+      await expect(
+        controller.openDispute(ID, patientBody, patient, request),
+      ).resolves.toEqual({ via: 'patient' });
+      expect(objection.object).toHaveBeenCalledWith(ID, patientBody, patient);
+      expect(service.openDispute).not.toHaveBeenCalled();
+    });
+
+    it('el prestador sin rol de paciente sigue por el camino de siempre, sin tocar el request', async () => {
+      const { controller, service, objection } = build();
+      await controller.openDispute(ID, dto, actor, undefined as never);
+      expect(service.openDispute).toHaveBeenCalledWith(ID, dto, actor);
+      expect(objection.object).not.toHaveBeenCalled();
+    });
+
+    it('personal que además es paciente va como prestador y con el tenant que declara', async () => {
+      const { controller, service, objection } = build();
+      const staff = {
+        id: 'u-s',
+        roles: ['SECURITY_ADMIN', 'PATIENT'],
+        tenantIds: [TENANT],
+      } as never;
+      let tenantSeen: string | undefined;
+      service.openDispute.mockImplementation(async () => {
+        tenantSeen = getCurrentTenantId();
+        return { via: 'provider' };
+      });
+      await controller.openDispute(ID, dto, staff, {
+        headers: { 'x-tenant-id': TENANT },
+      } as never);
+      expect(service.openDispute).toHaveBeenCalledWith(ID, dto, staff);
+      expect(tenantSeen).toBe(TENANT);
+      expect(objection.object).not.toHaveBeenCalled();
+    });
+
+    it('personal que además es paciente no puede declarar un tenant ajeno', async () => {
+      const { controller, service } = build();
+      const staff = {
+        id: 'u-s',
+        roles: ['SECURITY_ADMIN', 'PATIENT'],
+        tenantIds: [TENANT],
+      } as never;
+      expect(() =>
+        controller.openDispute(ID, dto, staff, {
+          headers: { 'x-tenant-id': '22222222-2222-4222-8222-222222222222' },
+        } as never),
+      ).toThrow('no pertenece al tenant');
+      expect(service.openDispute).not.toHaveBeenCalled();
+    });
   });
 
   it('ClaimsReadController delega en ClaimsReadService', async () => {
@@ -270,13 +365,31 @@ describe('Insurance controllers (delegación)', () => {
         (ClaimsController.prototype as never as Record<string, object>)[name],
       );
 
+    // El rol PATIENT se suma para la objeción del paciente (carril 16); la
+    // rama del prestador conserva sus dos roles y su alcance de organización.
     expect(method('openDispute')).toEqual([
       'BILLING_OPERATOR',
       'SECURITY_ADMIN',
+      'PATIENT',
     ]);
+    expect(
+      Reflect.getMetadata(
+        'platformTenantOptionalRoles',
+        (ClaimsController.prototype as never as Record<string, object>)[
+          'openDispute'
+        ],
+      ),
+    ).toEqual(['PATIENT']);
 
     // Los servicios distinguen OWNER/ADMIN por tenant de los roles genéricos históricos.
-    for (const write of ['submit', 'adjudicate', 'publishEob', 'reverse']) {
+    for (const write of [
+      'quote',
+      'issuePatientInvoice',
+      'submit',
+      'adjudicate',
+      'publishEob',
+      'reverse',
+    ]) {
       expect(method(write)).toEqual([]);
     }
     for (const operation of ['submit', 'determine', 'inbox', 'getById']) {

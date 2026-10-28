@@ -188,7 +188,8 @@ export class ReadPharmacyInventoryUseCase {
     // o retirado simplemente no aparece — y contará como faltante en cada sede.
     const [pharmacies, requested] = await Promise.all([
       this.pharmacyRepo.findVisibleByTenant(em, tenantId),
-      this.pharmacyRepo.findActiveProductsByIds(em, productIds),
+      // Lo que la farmacia marcó «no tengo» no surte un pedido (P47).
+      this.pharmacyRepo.findSellableProductsByIds(em, productIds),
     ]);
     const visiblePharmacyIds = new Set(
       pharmacies.map((pharmacy) => pharmacy.id),
@@ -205,17 +206,29 @@ export class ReadPharmacyInventoryUseCase {
     const sites = await this.pharmacyRepo.findActiveSites(em, ownerIds);
 
     const now = new Date();
-    const [locations, allPriceLists, practiceContext] = await Promise.all([
-      this.inventoryRepo.findActiveLocationsBySites(
-        em,
-        sites.map((site) => site.id),
-      ),
-      this.pharmacyRepo.findCurrentPublicPriceLists(em, ownerIds, now),
-      this.resolveAddresses(em, sites),
-    ]);
+    const [availabilityRows, locations, allPriceLists, practiceContext] =
+      await Promise.all([
+        // La regla única de existencias por sede (A1): lotes si la sede los
+        // lleva, lo declarado en el catálogo si no.
+        this.inventoryRepo.findSiteProductAvailability(
+          em,
+          sites.map((site) => site.id),
+          products.map((product) => product.id),
+        ),
+        this.inventoryRepo.findActiveLocationsBySites(
+          em,
+          sites.map((site) => site.id),
+        ),
+        this.pharmacyRepo.findCurrentPublicPriceLists(em, ownerIds, now),
+        this.resolveAddresses(em, sites),
+      ]);
     // El repo ya excluye lo ligado a aseguradora; el filtro acá vuelve a
     // afirmarlo: al directorio sólo llega precio de mostrador.
     const priceLists = allPriceLists.filter(isRetailList);
+    // Las posiciones del libro ya no deciden qué hay (eso es la regla de
+    // arriba): sólo fechan lo que respalda el stock de cada sede que lleva
+    // lotes (`stockUpdatedAt`). Una sede sin lotes no tiene posiciones, y su
+    // fecha queda en `null`: no se inventa una antigüedad.
     const [positions, prices] = await Promise.all([
       this.inventoryRepo.findStockPositions(
         em,
@@ -229,6 +242,9 @@ export class ReadPharmacyInventoryUseCase {
         now,
       ),
     ]);
+    const siteByLocation = new Map(
+      locations.map((location) => [location.id, location.pharmacySiteId]),
+    );
     const concepts = await this.pharmacyRepo.findConcepts(
       em,
       unique(
@@ -245,29 +261,28 @@ export class ReadPharmacyInventoryUseCase {
     const pharmacyById = new Map(
       pharmacies.map((pharmacy) => [pharmacy.id, pharmacy]),
     );
-    const siteByLocation = new Map(
-      locations.map((location) => [location.id, location.pharmacySiteId]),
-    );
     const listById = new Map(priceLists.map((list) => [list.id, list]));
 
-    // available por sede y producto, sumando las ubicaciones de la sede.
-    const availableBySite = new Map<string, Map<string, number>>();
-    for (const position of positions) {
-      const siteId = siteByLocation.get(position.inventoryLocationId);
-      if (!siteId) continue;
+    // Disponible por sede y producto: la fila existe sólo si está disponible;
+    // la cantidad es `null` si la sede no lleva lotes y no declaró conteo.
+    const availableBySite = new Map<string, Map<string, number | null>>();
+    for (const row of availabilityRows) {
       const perProduct =
-        availableBySite.get(siteId) ?? new Map<string, number>();
+        availableBySite.get(row.siteId) ?? new Map<string, number | null>();
       perProduct.set(
-        position.pharmacyProductId,
-        (perProduct.get(position.pharmacyProductId) ?? 0) +
-          quantity(position.availableQuantity),
+        row.productId,
+        row.availableQuantity === null ? null : quantity(row.availableQuantity),
       );
-      availableBySite.set(siteId, perProduct);
+      availableBySite.set(row.siteId, perProduct);
     }
+    const stockUpdatedAtBySite = oldestStockUpdateBySite(
+      positions,
+      siteByLocation,
+    );
 
     const items = sites
-      .map((site) =>
-        this.toAvailabilitySite(
+      .map((site): AvailabilitySiteDto => ({
+        ...this.toAvailabilitySite(
           site,
           pharmacyById.get(site.pharmacyId)!,
           productIds,
@@ -279,7 +294,9 @@ export class ReadPharmacyInventoryUseCase {
           practiceContext.get(site.id),
           origin,
         ),
-      )
+        stockUpdatedAt:
+          stockUpdatedAtBySite.get(site.id)?.toISOString() ?? null,
+      }))
       // Una sede sin ninguno de los solicitados no es una candidata: servirla
       // sería ruido, no información.
       .filter((item) => item.availableCount > 0)
@@ -334,17 +351,17 @@ export class ReadPharmacyInventoryUseCase {
     pharmacy: PharmacySnapshot,
     requestedIds: readonly string[],
     requested: readonly PharmacyProductSnapshot[],
-    availableByProduct: ReadonlyMap<string, number>,
+    availableByProduct: ReadonlyMap<string, number | null>,
     prices: readonly PharmacyProductPriceSnapshot[],
     listById: ReadonlyMap<string, PharmacyPriceListSnapshot>,
     conceptById: ReadonlyMap<string, PharmacyConceptSnapshot>,
     address: PharmacyAddressSnapshot | undefined,
     origin: GeoPoint | undefined,
-  ): AvailabilitySiteDto {
+  ): Omit<AvailabilitySiteDto, 'stockUpdatedAt'> {
     const available = requested.filter(
       (product) =>
         product.pharmacyId === site.pharmacyId &&
-        (availableByProduct.get(product.id) ?? 0) > 0,
+        availableByProduct.has(product.id),
     );
     const availableIds = new Set(available.map((product) => product.id));
     const missing = requestedIds.filter((id) => !availableIds.has(id));
@@ -357,7 +374,7 @@ export class ReadPharmacyInventoryUseCase {
       strengthText: product.strengthText ?? null,
       packageSizeText: product.packageSizeText ?? null,
       medication: optionalConcept(conceptById, product.medicationConceptId),
-      availableQuantity: availableByProduct.get(product.id) ?? 0,
+      availableQuantity: availableByProduct.get(product.id) ?? null,
       price: currentPriceFor(
         product.id,
         site.id,
@@ -414,6 +431,33 @@ function coordinate(value: string | undefined): number | null {
   if (value === undefined) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+/**
+ * Por sede, el `updated_at` más viejo de las posiciones que respaldan stock
+ * disponible. Una posición sin cantidad disponible no afirma nada y no cuenta;
+ * una fecha ausente o ilegible tampoco: no se inventa una antigüedad.
+ */
+function oldestStockUpdateBySite(
+  positions: readonly InventoryStockPositions[],
+  siteByLocation: ReadonlyMap<string, string>,
+): Map<string, Date> {
+  const oldest = new Map<string, Date>();
+  for (const position of positions) {
+    const siteId = siteByLocation.get(position.inventoryLocationId);
+    const updatedAt: Date | undefined = position.updatedAt;
+    if (
+      !siteId ||
+      quantity(position.availableQuantity) <= 0 ||
+      !(updatedAt instanceof Date) ||
+      Number.isNaN(updatedAt.getTime())
+    ) {
+      continue;
+    }
+    const current = oldest.get(siteId);
+    if (!current || updatedAt < current) oldest.set(siteId, updatedAt);
+  }
+  return oldest;
 }
 
 /** Una cantidad `numeric` (string de BD) como número; lo ilegible cuenta 0. */

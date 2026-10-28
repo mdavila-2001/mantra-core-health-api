@@ -1,0 +1,12 @@
+[Unit]
+Description=ALOVIDA: sonda de disponibilidad de demo y test cada 2 s
+After=docker.service
+
+[Service]
+ExecStart=/usr/local/sbin/alovida-uptime-probe
+Restart=always
+RestartSec=5
+Nice=15
+
+[Install]
+WantedBy=multi-user.target

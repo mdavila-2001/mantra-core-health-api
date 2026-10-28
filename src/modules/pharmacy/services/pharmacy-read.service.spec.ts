@@ -47,7 +47,7 @@ function build() {
     findActiveSiteById: mockFn().mockResolvedValue(null),
     findActiveProducts: mockFn().mockResolvedValue([]),
     findActiveProductOwners: mockFn().mockResolvedValue([]),
-    findActiveProductsByIds: mockFn().mockResolvedValue([]),
+    findSellableProductsByIds: mockFn().mockResolvedValue([]),
     findCurrentPublicPriceLists: mockFn().mockResolvedValue([]),
     findCurrentPrices: mockFn().mockResolvedValue([]),
     findPracticeSites: mockFn().mockResolvedValue([]),
@@ -57,9 +57,19 @@ function build() {
     findActiveAffiliationDocuments: mockFn().mockResolvedValue([]),
     findIdentifiers: mockFn().mockResolvedValue([]),
     findHeadquartersAddress: mockFn().mockResolvedValue(null),
+    findCurrentOnCallShifts: mockFn().mockResolvedValue([]),
   };
-  const service = new PharmacyReadService(em as any, repo as any);
-  return { service, repo, fork };
+  const catalogRepo = {
+    findCurrentPrices: mockFn().mockResolvedValue(new Map()),
+    findCategoriesByIds: mockFn().mockResolvedValue([]),
+    findImageFileIds: mockFn().mockResolvedValue(new Map()),
+  };
+  const service = new PharmacyReadService(
+    em as any,
+    repo as any,
+    catalogRepo as any,
+  );
+  return { service, repo, fork, catalogRepo };
 }
 
 describe('PharmacyReadService', () => {
@@ -420,7 +430,7 @@ describe('PharmacyReadService', () => {
         effectiveFrom: new Date('2026-08-01T00:00:00.000Z'),
       },
     ]);
-    d.repo.findActiveProductsByIds.mockResolvedValue([
+    d.repo.findSellableProductsByIds.mockResolvedValue([
       {
         id: 'prod-1',
         productCode: 'AMOX-500',
@@ -482,7 +492,7 @@ describe('PharmacyReadService', () => {
         effectiveFrom: new Date('2026-08-01T00:00:00.000Z'),
       },
     ]);
-    d.repo.findActiveProductsByIds.mockResolvedValue([
+    d.repo.findSellableProductsByIds.mockResolvedValue([
       { id: 'prod-1', productCode: 'AMOX-500', genericName: 'Amoxicilina' },
     ]);
     d.repo.findConcepts.mockResolvedValue([CURRENCY]);
@@ -724,7 +734,7 @@ describe('PharmacyReadService', () => {
           effectiveFrom: new Date('2026-08-01T00:00:00.000Z'),
         },
       ]);
-      d.repo.findActiveProductsByIds.mockResolvedValue([
+      d.repo.findSellableProductsByIds.mockResolvedValue([
         {
           id: 'prod-con-receta',
           productCode: 'AMX-500',

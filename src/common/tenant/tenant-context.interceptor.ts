@@ -1,7 +1,6 @@
 import {
   CallHandler,
   ExecutionContext,
-  ForbiddenException,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
@@ -20,6 +19,8 @@ import {
   hasOptionalPlatformTenant,
 } from './platform-tenant-optional.decorator';
 import { IS_PUBLIC_KEY } from '../auth/public.decorator';
+import { forbiddenWithReason } from '../errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../errors/system-error-reasons';
 import { IS_TENANT_AGNOSTIC_KEY } from './tenant-agnostic.decorator';
 import type { AuthenticatedRequest } from '../auth/authenticated-user.interface';
 
@@ -206,7 +207,8 @@ export class TenantContextInterceptor implements NestInterceptor {
    * distinto del resuelto. Los roles privilegiados pueden elegir el tenant,
    * pero una vez resuelto tampoco pueden mezclar propietarios.
    *
-   * @throws ForbiddenException con el campo y el valor en conflicto.
+   * @throws ForbiddenException (`TENANT_SCOPE_CONFLICT`) con el origen y el campo en
+   *         conflicto; nunca con los valores.
    */
   private assertInputStaysInTenant(
     input: unknown,
@@ -215,9 +217,13 @@ export class TenantContextInterceptor implements NestInterceptor {
   ): void {
     const violation = findTenantScopeViolation(input, tenantId);
     if (violation) {
-      throw new ForbiddenException(
-        `La ${source} declara ${violation.field}=${violation.declared}, ajeno al ` +
-          `tenant del actor (${tenantId}).`,
+      // Ni el valor declarado ni el tenant del actor viajan en la respuesta:
+      // el primero es un UUID ajeno que el cliente no debería poder sondear
+      // y el segundo no le aporta nada. Basta con saber dónde y en qué campo.
+      throw forbiddenWithReason(
+        `La ${source} declara ${violation.field} con un tenant ajeno al del actor.`,
+        SystemErrorReason.TENANT_SCOPE_CONFLICT,
+        { source, field: violation.field },
       );
     }
   }

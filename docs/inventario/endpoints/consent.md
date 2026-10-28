@@ -5,7 +5,7 @@
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 - **Operaciones:** 22 (22 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 0 · MEDIO 16 · BAJO 6
-- **Tablas distintas que tocan:** 39
+- **Tablas distintas que tocan:** 40
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/consent.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -13,25 +13,25 @@
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
 | 1 | POST | `/consent/consent-evidence` | Registrar evidencia inmutable de consentimiento | MEDIO | 1 | SECURITY_ADMIN |
-| 2 | POST | `/consent/consents` | Capturar consentimiento de directiva de privacidad | MEDIO | 4 | SECURITY_ADMIN |
+| 2 | POST | `/consent/consents` | Capturar consentimiento de directiva de privacidad | MEDIO | 7 | SECURITY_ADMIN |
 | 3 | PATCH | `/consent/consents/{id}/provisions` | Actualizar provisiones granulares (data class / actor / acción) | MEDIO | 5 | SECURITY_ADMIN |
-| 4 | POST | `/consent/consents/{id}/withdraw` | Revocar/retirar consentimiento y disparar re-evaluación de accesos | MEDIO | 8 | SECURITY_ADMIN |
+| 4 | POST | `/consent/consents/{id}/withdraw` | Revocar/retirar consentimiento y disparar re-evaluación de accesos | MEDIO | 7 | SECURITY_ADMIN |
 | 5 | GET | `/consent/encounters/{encounterId}/informed-consent` | Consentimientos informados registrados en el encuentro | BAJO | 20 | CLINICIAN, PRACTITIONER |
 | 6 | POST | `/consent/encounters/{encounterId}/informed-consent` | Registrar el consentimiento informado del encuentro | MEDIO | 19 | CLINICIAN, PRACTITIONER |
-| 7 | POST | `/consent/hipaa-authorizations` | Otorgar autorización HIPAA de divulgación | MEDIO | 2 | SECURITY_ADMIN |
-| 8 | POST | `/consent/hipaa-authorizations/{id}/revoke` | Revocar autorización HIPAA | MEDIO | 3 | SECURITY_ADMIN |
+| 7 | POST | `/consent/hipaa-authorizations` | Otorgar autorización HIPAA de divulgación | MEDIO | 5 | SECURITY_ADMIN |
+| 8 | POST | `/consent/hipaa-authorizations/{id}/revoke` | Revocar autorización HIPAA | MEDIO | 2 | SECURITY_ADMIN |
 | 9 | POST | `/consent/internal/expiration-sweep` | Expirar consentimientos y autorizaciones vencidas (barrido) | MEDIO | 7 | SYSTEM, SECURITY_ADMIN |
 | 10 | GET | `/consent/me/consents` | Mis consentimientos (vigentes y retirados) | BAJO | 4 | PATIENT |
-| 11 | POST | `/consent/me/consents/{id}/withdraw` | Retirar uno de mis consentimientos | MEDIO | 10 | PATIENT |
+| 11 | POST | `/consent/me/consents/{id}/withdraw` | Retirar uno de mis consentimientos | MEDIO | 9 | PATIENT |
 | 12 | GET | `/consent/me/hipaa-authorizations` | Mis autorizaciones de divulgación | BAJO | 4 | PATIENT |
 | 13 | GET | `/consent/me/objections` | Mis objeciones (abiertas y resueltas) | BAJO | 4 | PATIENT |
 | 14 | GET | `/consent/me/treatment-informed-consents` | Mis consentimientos informados de tratamiento | BAJO | 3 | PATIENT |
 | 15 | POST | `/consent/patient-objections` | Registrar objeción del paciente y materializar restricción | MEDIO | 4 | SECURITY_ADMIN |
 | 16 | POST | `/consent/patient-objections/{id}/resolve` | Resolver objeción del paciente | MEDIO | 5 | SECURITY_ADMIN |
-| 17 | POST | `/consent/practitioner-access-requests` | Pedir acceso al expediente de un paciente encontrado en la búsqueda | MEDIO | 19 | PRACTITIONER, CLINICIAN |
-| 18 | POST | `/consent/practitioner-access-requests/{id}/decision` | Aceptar (con las especialidades autorizadas) o rechazar la solicitud | MEDIO | 23 | PATIENT |
+| 17 | POST | `/consent/practitioner-access-requests` | Pedir acceso al expediente de un paciente encontrado en la búsqueda | MEDIO | 21 | PRACTITIONER, CLINICIAN |
+| 18 | POST | `/consent/practitioner-access-requests/{id}/decision` | Aceptar (con las especialidades autorizadas) o rechazar la solicitud | MEDIO | 25 | PATIENT |
 | 19 | GET | `/consent/practitioner-access-requests/mine` | Mis solicitudes de vínculo pendientes de decisión | BAJO | 4 | PATIENT |
-| 20 | POST | `/consent/privacy-restrictions` | Aplicar restricción de privacidad que afecta RLS clínico | MEDIO | 2 | SECURITY_ADMIN |
+| 20 | POST | `/consent/privacy-restrictions` | Aplicar restricción de privacidad que afecta RLS clínico | MEDIO | 3 | SECURITY_ADMIN |
 | 21 | POST | `/consent/processing-legal-bases` | Establecer/versionar base legal de procesamiento | MEDIO | 3 | SECURITY_ADMIN |
 | 22 | POST | `/consent/treatment-informed-consents` | Capturar consentimiento informado de tratamiento | MEDIO | 2 | SECURITY_ADMIN |
 
@@ -62,10 +62,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/consent-evidence.controller.ts:25` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -159,7 +159,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/consents` la atiende `ConsentsController.capture` (src/modules/consent/controllers/consents.controller.ts:43). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateConsentDto` (21 campos, 2 obligatorios). Delega en `ConsentsService.capture`. Crea filas en consent.consent_events, consent.consent_provisions, consent.consents. Lee consent.consents.
+`POST /consent/consents` la atiende `ConsentsController.capture` (src/modules/consent/controllers/consents.controller.ts:43). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateConsentDto` (21 campos, 2 obligatorios). Delega en `ConsentsService.capture`. Crea filas en consent.consent_events, consent.consent_provisions, consent.consents. Lee consent.consents, consent.processing_legal_bases, consent.processing_purposes, profiles.patient_profiles.
 
 ### Requerimientos
 
@@ -167,10 +167,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/consents.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -180,6 +180,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `consent.consent_provisions` | ESCRIBE | CREA | DIRECTA | ConsentsController.capture → ConsentsService.capture → ConsentsService.createProvision → ConsentProvisionsRepository.create | `src/modules/consent/repositories/consent-provisions.repository.ts:77` |
 | `consent.consents` | ESCRIBE | CREA | DIRECTA | ConsentsController.capture → ConsentsService.capture → ConsentsRepository.create | `src/modules/consent/repositories/consents.repository.ts:150` |
 | `consent.consents` | LEE | LEE | DIRECTA | ConsentsController.capture → ConsentsService.capture → ConsentsRepository.findActiveByPurpose | `src/modules/consent/repositories/consents.repository.ts:88` |
+| `consent.processing_legal_bases` | LEE | LEE | DIRECTA | ConsentsController.capture → ConsentsService.capture → ConsentScopeService.assertPurposeScope → ProcessingLegalBasesRepository.findById | `src/modules/consent/repositories/processing-legal-bases.repository.ts:64` |
+| `consent.processing_purposes` | LEE | LEE | DIRECTA | ConsentsController.capture → ConsentsService.capture → ConsentScopeService.assertPurposeScope → ProcessingPurposesRepository.findById | `src/modules/consent/repositories/processing-purposes.repository.ts:16` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | ConsentsController.capture → ConsentsService.capture → ConsentScopeService.assertPatientExists → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 
 ### Cuerpo — DTO `CreateConsentDto` · `application/json`
 
@@ -205,7 +208,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `provisions[].securityLabelConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Etiqueta de seguridad (concept id) | `src/modules/consent/dto/consent-provision.dto.ts:75` |
 | `provisions[].validFrom` | `string` | No | — | `@IsOptional()` `@IsISO8601()` | Inicio de vigencia (ISO-8601) | `src/modules/consent/dto/consent-provision.dto.ts:83` |
 | `provisions[].validTo` | `string` | No | — | `@IsOptional()` `@IsISO8601()` | Fin de vigencia (ISO-8601) | `src/modules/consent/dto/consent-provision.dto.ts:91` |
-| `provisions[].provisionTypeConceptId` | `string` | No | — | `@IsOptional()` `@IsString()` | Tipo de provisión (concept id); por defecto la base | `src/modules/consent/dto/consent-provision.dto.ts:101` |
+| `provisions[].provisionTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de provisión (concept id); por defecto la base | `src/modules/consent/dto/consent-provision.dto.ts:102` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -267,8 +270,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado; ResourceNotFoundException: Propósito de tratamiento no encontrado; ResourceNotFoundException: Base legal no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe un consentimiento activo para este propósito |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La base legal no corresponde al propósito indicado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 El árbol de decisión completo está en [flujos](../flujos/consent.md).
 
@@ -310,18 +316,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/consents.controller.ts:83` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/consents.controller.ts:83` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `consent.consent_events` | ESCRIBE | CREA | DIRECTA | ConsentsController.amendProvisions → ConsentsService.amendProvisions → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
-| `consent.consent_provisions` | ESCRIBE | ACTUALIZA | POR_TIPO | ConsentsController.amendProvisions → ConsentsService.amendProvisions | `src/modules/consent/services/consents.service.ts:232` |
+| `consent.consent_provisions` | ESCRIBE | ACTUALIZA | POR_TIPO | ConsentsController.amendProvisions → ConsentsService.amendProvisions | `src/modules/consent/services/consents.service.ts:301` |
 | `consent.consent_provisions` | ESCRIBE | CREA | DIRECTA | ConsentsController.amendProvisions → ConsentsService.amendProvisions → ConsentsService.createProvision → ConsentProvisionsRepository.create | `src/modules/consent/repositories/consent-provisions.repository.ts:77` |
 | `consent.consent_provisions` | LEE | LEE | DIRECTA | ConsentsController.amendProvisions → ConsentsService.amendProvisions → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
 | `consent.consents` | LEE | LEE | DIRECTA | ConsentsController.amendProvisions → ConsentsService.amendProvisions → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
@@ -345,7 +351,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | `provisions[].securityLabelConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Etiqueta de seguridad (concept id) | `src/modules/consent/dto/consent-provision.dto.ts:75` |
 | `provisions[].validFrom` | `string` | No | — | `@IsOptional()` `@IsISO8601()` | Inicio de vigencia (ISO-8601) | `src/modules/consent/dto/consent-provision.dto.ts:83` |
 | `provisions[].validTo` | `string` | No | — | `@IsOptional()` `@IsISO8601()` | Fin de vigencia (ISO-8601) | `src/modules/consent/dto/consent-provision.dto.ts:91` |
-| `provisions[].provisionTypeConceptId` | `string` | No | — | `@IsOptional()` `@IsString()` | Tipo de provisión (concept id); por defecto la base | `src/modules/consent/dto/consent-provision.dto.ts:101` |
+| `provisions[].provisionTypeConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Tipo de provisión (concept id); por defecto la base | `src/modules/consent/dto/consent-provision.dto.ts:102` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -395,7 +401,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento no encontrado |
 | 409 | `CONFLICT` | ConflictException: El consentimiento no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -428,7 +433,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/consents/{id}/withdraw` la atiende `ConsentsController.withdraw` (src/modules/consent/controllers/consents.controller.ts:62). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `WithdrawConsentDto` (1 campo, 0 obligatorios). Delega en `ConsentsService.withdraw`. Crea filas en audit.audit_log, consent.consent_events. Actualiza authz.clinical_access_grants, consent.consents. Lee audit.audit_log, authz.clinical_access_grants, consent.consents, iam.sessions.
+`POST /consent/consents/{id}/withdraw` la atiende `ConsentsController.withdraw` (src/modules/consent/controllers/consents.controller.ts:62). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `WithdrawConsentDto` (1 campo, 0 obligatorios). Delega en `ConsentsService.withdraw`. Crea filas en audit.audit_log, consent.consent_events. Actualiza authz.clinical_access_grants. Lee audit.audit_log, authz.clinical_access_grants, consent.consents, iam.sessions.
 
 ### Requerimientos
 
@@ -436,24 +441,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/consents.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/consents.controller.ts:62` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ConsentsController.withdraw → ConsentsService.withdraw → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ConsentsController.withdraw → ConsentsService.withdraw → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `authz.clinical_access_grants` | ESCRIBE | ACTUALIZA | POR_TIPO | ConsentsController.withdraw → ConsentsService.withdraw → ClinicalAccessGrantsRepository.revokeForConsent | `src/modules/authz/repositories/clinical-access-grants.repository.ts:134` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ConsentsController.withdraw → ConsentsService.withdraw → ClinicalAccessGrantsRepository.revokeForConsent → ClinicalAccessGrantsRepository.findActiveByConsent | `src/modules/authz/repositories/clinical-access-grants.repository.ts:114` |
-| `consent.consent_events` | ESCRIBE | CREA | DIRECTA | ConsentsController.withdraw → ConsentsService.withdraw → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
-| `consent.consents` | ESCRIBE | ACTUALIZA | POR_TIPO | ConsentsController.withdraw → ConsentsService.withdraw | `src/modules/consent/services/consents.service.ts:157` |
-| `consent.consents` | LEE | LEE | DIRECTA | ConsentsController.withdraw → ConsentsService.withdraw → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ConsentsController.withdraw → ConsentsService.withdraw → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ConsentsController.withdraw → ConsentsService.withdraw → ConsentsService.withdrawScoped → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ConsentsController.withdraw → ConsentsService.withdraw → ConsentsService.withdrawScoped → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `authz.clinical_access_grants` | ESCRIBE | ACTUALIZA | POR_TIPO | ConsentsController.withdraw → ConsentsService.withdraw → ConsentsService.withdrawScoped → ClinicalAccessGrantsRepository.revokeForConsent | `src/modules/authz/repositories/clinical-access-grants.repository.ts:149` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ConsentsController.withdraw → ConsentsService.withdraw → ConsentsService.withdrawScoped → ClinicalAccessGrantsRepository.revokeForConsent → ClinicalAccessGrantsRepository.findActiveByConsent | `src/modules/authz/repositories/clinical-access-grants.repository.ts:129` |
+| `consent.consent_events` | ESCRIBE | CREA | DIRECTA | ConsentsController.withdraw → ConsentsService.withdraw → ConsentsService.withdrawScoped → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
+| `consent.consents` | LEE | LEE | DIRECTA | ConsentsController.withdraw → ConsentsService.withdraw → ConsentsService.withdrawScoped → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ConsentsController.withdraw → ConsentsService.withdraw → ConsentsService.withdrawScoped → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 
 ### Parámetros
 
@@ -497,7 +501,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento no encontrado |
 | 409 | `CONFLICT` | ConflictException: El consentimiento no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -539,19 +542,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/encounter-informed-consents.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: encounterId | `src/modules/consent/controllers/encounter-informed-consents.controller.ts:61` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.access_policies` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:81` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:90` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:78` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
@@ -564,9 +567,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.patient_portal_proxies` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientRepresentationService.representsPatient → PatientPortalProxiesRepository.findActiveByProxyUserAndPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:233` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.assertOwnRecord → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:969` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:995` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:969` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.list → EncounterInformedConsentsService.listForEncounter → ClinicalReadService.assertCanReadHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
 
 ### Parámetros
 
@@ -638,21 +641,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/consent/controllers/encounter-informed-consents.controller.ts:42` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: encounterId | `src/modules/consent/controllers/encounter-informed-consents.controller.ts:42` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `authz.access_policies` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AccessPoliciesRepository.findActiveForTarget | `src/modules/authz/repositories/access-policies.repository.ts:62` |
-| `authz.care_relationships` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:81` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:90` |
+| `authz.care_relationships` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.hasCareCurrentRelation → CareRelationshipsRepository.findActiveForPractitionerPatient | `src/modules/authz/repositories/care-relationships.repository.ts:100` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ClinicalAccessGrantsRepository.findActiveForUserPatient | `src/modules/authz/repositories/clinical-access-grants.repository.ts:105` |
 | `authz.field_permissions` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → AuthzPdpService.computeMaskedFields → FieldPermissionsRepository.findForRoles | `src/modules/authz/repositories/field-permissions.repository.ts:61` |
-| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:78` |
+| `authz.patient_legal_representations` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PatientLegalRepresentationsRepository.findActiveForRepresentativePatient | `src/modules/authz/repositories/patient-legal-representations.repository.ts:96` |
 | `authz.permissions` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → PermissionsRepository.findByResourceAction | `src/modules/authz/repositories/permissions.repository.ts:89` |
 | `authz.resource_scope_grants` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → ResourceScopeGrantsRepository.findForSubjectResource | `src/modules/authz/repositories/resource-scope-grants.repository.ts:73` |
 | `authz.role_permissions` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.hasAuthorizedAccess → AuthzPdpService.evaluate → RolePermissionsRepository.findActiveForRoles | `src/modules/authz/repositories/role-permissions.repository.ts:47` |
@@ -664,9 +667,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `consent.treatment_informed_consents` | ESCRIBE | CREA | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → TreatmentInformedConsentsService.sign → TreatmentInformedConsentsRepository.create | `src/modules/consent/repositories/treatment-informed-consents.repository.ts:82` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:969` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:995` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:969` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → ClinicalReadService.attendsToday → SchedulingBookingsRepository.findConfirmedWithPatientBetween | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:1007` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | EncounterInformedConsentsController.register → EncounterInformedConsentsService.register → ClinicalReadService.assertCanWriteHistory → ClinicalReadService.isAttending → SchedulingBookingsRepository.hasConsultationInProgress | `src/modules/scheduling/infrastructure/repositories/scheduling-bookings.repository.ts:981` |
 
 ### Parámetros
 
@@ -756,7 +759,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/hipaa-authorizations` la atiende `HipaaAuthorizationsController.grant` (src/modules/consent/controllers/hipaa-authorizations.controller.ts:37). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateHipaaAuthorizationDto` (8 campos, 5 obligatorios). Delega en `HipaaAuthorizationsService.grant`. Crea filas en consent.consent_events, consent.hipaa_authorizations.
+`POST /consent/hipaa-authorizations` la atiende `HipaaAuthorizationsController.grant` (src/modules/consent/controllers/hipaa-authorizations.controller.ts:37). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateHipaaAuthorizationDto` (8 campos, 5 obligatorios). Delega en `HipaaAuthorizationsService.grant`. Crea filas en consent.consent_events, consent.hipaa_authorizations. Lee consent.processing_legal_bases, consent.processing_purposes, profiles.patient_profiles.
 
 ### Requerimientos
 
@@ -764,10 +767,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/hipaa-authorizations.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -775,6 +778,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|---|---|---|
 | `consent.consent_events` | ESCRIBE | CREA | DIRECTA | HipaaAuthorizationsController.grant → HipaaAuthorizationsService.grant → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
 | `consent.hipaa_authorizations` | ESCRIBE | CREA | DIRECTA | HipaaAuthorizationsController.grant → HipaaAuthorizationsService.grant → HipaaAuthorizationsRepository.create | `src/modules/consent/repositories/hipaa-authorizations.repository.ts:91` |
+| `consent.processing_legal_bases` | LEE | LEE | DIRECTA | HipaaAuthorizationsController.grant → HipaaAuthorizationsService.grant → ConsentScopeService.assertPurposeScope → ProcessingLegalBasesRepository.findById | `src/modules/consent/repositories/processing-legal-bases.repository.ts:64` |
+| `consent.processing_purposes` | LEE | LEE | DIRECTA | HipaaAuthorizationsController.grant → HipaaAuthorizationsService.grant → ConsentScopeService.assertPurposeScope → ProcessingPurposesRepository.findById | `src/modules/consent/repositories/processing-purposes.repository.ts:16` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | HipaaAuthorizationsController.grant → HipaaAuthorizationsService.grant → ConsentScopeService.assertPatientExists → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 
 ### Cuerpo — DTO `CreateHipaaAuthorizationDto` · `application/json`
 
@@ -835,8 +841,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: expiresAt es obligatorio cuando expirationType=DATE; PreconditionFailedException: expirationEventText es obligatorio cuando expirationType=EVENT |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado; ResourceNotFoundException: Propósito de tratamiento no encontrado; ResourceNotFoundException: Base legal no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: expiresAt es obligatorio cuando expirationType=DATE; PreconditionFailedException: expirationEventText es obligatorio cuando expirationType=EVENT; PreconditionFailedException: La base legal no corresponde al propósito indicado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 El árbol de decisión completo está en [flujos](../flujos/consent.md).
 
@@ -868,7 +876,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/hipaa-authorizations/{id}/revoke` la atiende `HipaaAuthorizationsController.revoke` (src/modules/consent/controllers/hipaa-authorizations.controller.ts:54). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `HipaaAuthorizationsService.revoke`. Crea filas en consent.consent_events. Actualiza consent.hipaa_authorizations. Lee consent.hipaa_authorizations.
+`POST /consent/hipaa-authorizations/{id}/revoke` la atiende `HipaaAuthorizationsController.revoke` (src/modules/consent/controllers/hipaa-authorizations.controller.ts:54). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `HipaaAuthorizationsService.revoke`. Crea filas en consent.consent_events. Lee consent.hipaa_authorizations.
 
 ### Requerimientos
 
@@ -876,16 +884,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/hipaa-authorizations.controller.ts:54` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/hipaa-authorizations.controller.ts:54` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `consent.consent_events` | ESCRIBE | CREA | DIRECTA | HipaaAuthorizationsController.revoke → HipaaAuthorizationsService.revoke → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
-| `consent.hipaa_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | HipaaAuthorizationsController.revoke → HipaaAuthorizationsService.revoke | `src/modules/consent/services/hipaa-authorizations.service.ts:136` |
 | `consent.hipaa_authorizations` | LEE | LEE | DIRECTA | HipaaAuthorizationsController.revoke → HipaaAuthorizationsService.revoke → HipaaAuthorizationsRepository.findById | `src/modules/consent/repositories/hipaa-authorizations.repository.ts:65` |
 
 ### Parámetros
@@ -912,7 +919,6 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Autorización HIPAA no encontrada |
 | 409 | `CONFLICT` | ConflictException: La autorización no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -954,8 +960,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/consent/controllers/consent-sweep.controller.ts:29` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1028,15 +1034,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/consent-me.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `consent.consents` | LEE | LEE | DIRECTA | ConsentMeController.listConsents → ConsentMeService.listConsents | `src/modules/consent/services/consent-me.service.ts:87` |
-| `consent.processing_purposes` | LEE | LEE | DIRECTA | ConsentMeController.listConsents → ConsentMeService.listConsents → ConsentMeService.purposesById | `src/modules/consent/services/consent-me.service.ts:301` |
+| `consent.processing_purposes` | LEE | LEE | DIRECTA | ConsentMeController.listConsents → ConsentMeService.listConsents → ConsentMeService.purposesById | `src/modules/consent/services/consent-me.service.ts:307` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ConsentMeController.listConsents → ConsentMeService.listConsents → ConsentMeService.ownPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ConsentMeController.listConsents → ConsentMeService.listConsents → ConsentMeService.ownPatientProfileId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
@@ -1101,7 +1107,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/me/consents/{id}/withdraw` la atiende `ConsentMeController.withdraw` (src/modules/consent/controllers/consent-me.controller.ts:83). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `WithdrawConsentDto` (1 campo, 0 obligatorios). Delega en `ConsentMeService.withdrawOwn`. Crea filas en audit.audit_log, consent.consent_events. Actualiza authz.clinical_access_grants, consent.consents. Lee audit.audit_log, authz.clinical_access_grants, consent.consents, iam.sessions, profiles.patient_profiles, profiles.person_account_links.
+`POST /consent/me/consents/{id}/withdraw` la atiende `ConsentMeController.withdraw` (src/modules/consent/controllers/consent-me.controller.ts:83). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `WithdrawConsentDto` (1 campo, 0 obligatorios). Delega en `ConsentMeService.withdrawOwn`. Crea filas en audit.audit_log, consent.consent_events. Actualiza authz.clinical_access_grants. Lee audit.audit_log, authz.clinical_access_grants, consent.consents, iam.sessions, profiles.patient_profiles, profiles.person_account_links.
 
 ### Requerimientos
 
@@ -1109,24 +1115,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/consent-me.controller.ts:83` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/consent-me.controller.ts:83` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdraw → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdraw → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `authz.clinical_access_grants` | ESCRIBE | ACTUALIZA | POR_TIPO | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdraw → ClinicalAccessGrantsRepository.revokeForConsent | `src/modules/authz/repositories/clinical-access-grants.repository.ts:134` |
-| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdraw → ClinicalAccessGrantsRepository.revokeForConsent → ClinicalAccessGrantsRepository.findActiveByConsent | `src/modules/authz/repositories/clinical-access-grants.repository.ts:114` |
-| `consent.consent_events` | ESCRIBE | CREA | DIRECTA | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdraw → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
-| `consent.consents` | ESCRIBE | ACTUALIZA | POR_TIPO | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdraw | `src/modules/consent/services/consents.service.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdrawAsOwner → ConsentsService.withdrawScoped → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdrawAsOwner → ConsentsService.withdrawScoped → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `authz.clinical_access_grants` | ESCRIBE | ACTUALIZA | POR_TIPO | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdrawAsOwner → ConsentsService.withdrawScoped → ClinicalAccessGrantsRepository.revokeForConsent | `src/modules/authz/repositories/clinical-access-grants.repository.ts:149` |
+| `authz.clinical_access_grants` | LEE | LEE | DIRECTA | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdrawAsOwner → ConsentsService.withdrawScoped → ClinicalAccessGrantsRepository.revokeForConsent → ClinicalAccessGrantsRepository.findActiveByConsent | `src/modules/authz/repositories/clinical-access-grants.repository.ts:129` |
+| `consent.consent_events` | ESCRIBE | CREA | DIRECTA | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdrawAsOwner → ConsentsService.withdrawScoped → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
 | `consent.consents` | LEE | LEE | DIRECTA | ConsentMeController.withdraw → ConsentMeService.withdrawOwn | `src/modules/consent/services/consent-me.service.ts:251` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdraw → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentsService.withdrawAsOwner → ConsentsService.withdrawScoped → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentMeService.ownPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ConsentMeController.withdraw → ConsentMeService.withdrawOwn → ConsentMeService.ownPatientProfileId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
@@ -1172,8 +1177,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento no encontrado |
-| 409 | `CONFLICT` | ConflictException: El consentimiento no está activo |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Consentimiento no encontrado; ResourceNotFoundException: {CONSENT_NOT_FOUND.message} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/consent.md).
@@ -1215,15 +1219,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/consent-me.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `consent.hipaa_authorizations` | LEE | LEE | DIRECTA | ConsentMeController.listHipaaAuthorizations → ConsentMeService.listHipaaAuthorizations | `src/modules/consent/services/consent-me.service.ts:128` |
-| `consent.processing_purposes` | LEE | LEE | DIRECTA | ConsentMeController.listHipaaAuthorizations → ConsentMeService.listHipaaAuthorizations → ConsentMeService.purposesById | `src/modules/consent/services/consent-me.service.ts:301` |
+| `consent.processing_purposes` | LEE | LEE | DIRECTA | ConsentMeController.listHipaaAuthorizations → ConsentMeService.listHipaaAuthorizations → ConsentMeService.purposesById | `src/modules/consent/services/consent-me.service.ts:307` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ConsentMeController.listHipaaAuthorizations → ConsentMeService.listHipaaAuthorizations → ConsentMeService.ownPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ConsentMeController.listHipaaAuthorizations → ConsentMeService.listHipaaAuthorizations → ConsentMeService.ownPatientProfileId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
@@ -1294,15 +1298,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/consent-me.controller.ts:65` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `consent.patient_objections` | LEE | LEE | DIRECTA | ConsentMeController.listObjections → ConsentMeService.listObjections | `src/modules/consent/services/consent-me.service.ts:171` |
-| `consent.processing_purposes` | LEE | LEE | DIRECTA | ConsentMeController.listObjections → ConsentMeService.listObjections → ConsentMeService.purposesById | `src/modules/consent/services/consent-me.service.ts:301` |
+| `consent.processing_purposes` | LEE | LEE | DIRECTA | ConsentMeController.listObjections → ConsentMeService.listObjections → ConsentMeService.purposesById | `src/modules/consent/services/consent-me.service.ts:307` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ConsentMeController.listObjections → ConsentMeService.listObjections → ConsentMeService.ownPatientProfileId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ConsentMeController.listObjections → ConsentMeService.listObjections → ConsentMeService.ownPatientProfileId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 
@@ -1371,8 +1375,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/consent-me.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1444,10 +1448,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/patient-objections.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1554,11 +1558,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/patient-objections.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/patient-objections.controller.ts:57` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1650,7 +1654,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/practitioner-access-requests` la atiende `PractitionerAccessRequestsController.request` (src/modules/consent/controllers/practitioner-access-requests.controller.ts:36). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `RequestPractitionerAccessDto` (3 campos, 2 obligatorios). Delega en `PractitionerAccessRequestsService.request`. Crea filas en audit.audit_log, consent.consent_events, consent.consent_provisions, consent.consents, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza messaging.notification_requests. Lee audit.audit_log, consent.consents, iam.sessions, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries, messaging.notification_requests y 3 más.
+`POST /consent/practitioner-access-requests` la atiende `PractitionerAccessRequestsController.request` (src/modules/consent/controllers/practitioner-access-requests.controller.ts:36). Exige sesión con alguno de los roles PRACTITIONER, CLINICIAN. Valida el cuerpo como `RequestPractitionerAccessDto` (3 campos, 2 obligatorios). Delega en `PractitionerAccessRequestsService.request`. Crea filas en audit.audit_log, consent.consent_events, consent.consent_provisions, consent.consents, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza iam.devices, messaging.notification_requests. Lee audit.audit_log, consent.consents, iam.devices, iam.sessions, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries y 4 más.
 
 ### Requerimientos
 
@@ -1658,10 +1662,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PRACTITIONER, CLINICIAN | `src/modules/consent/controllers/practitioner-access-requests.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1673,6 +1677,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `consent.consent_provisions` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → ConsentProvisionsRepository.create | `src/modules/consent/repositories/consent-provisions.repository.ts:77` |
 | `consent.consents` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → ConsentsRepository.create | `src/modules/consent/repositories/consents.repository.ts:150` |
 | `consent.consents` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → ConsentsRepository.findByPatientCreatorCategory | `src/modules/consent/repositories/consents.repository.ts:105` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.sessions` | LEE | LEE | POR_SQL | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
@@ -1681,7 +1687,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:489` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:519` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.request → PractitionerAccessRequestsService.request → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -1743,7 +1749,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Solicitud de notificación no encontrada; ResourceNotFoundException: El proveedor configurado para el canal no existe |
 | 409 | `CONFLICT` | ConflictException: Ya existe una solicitud pendiente o un vínculo activo con este paciente |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/consent.md).
@@ -1775,7 +1781,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/practitioner-access-requests/{id}/decision` la atiende `PractitionerAccessRequestsController.decide` (src/modules/consent/controllers/practitioner-access-requests.controller.ts:68). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `DecidePractitionerAccessRequestDto` (3 campos, 1 obligatorio). Delega en `PractitionerAccessRequestsService.decide`. Crea filas en audit.audit_log, authz.clinical_access_grants, consent.consent_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza consent.consent_provisions, consent.consents, messaging.notification_requests. Lee audit.audit_log, authz.clinical_access_grants, consent.consent_provisions, consent.consents, iam.sessions, messaging.message_channels, messaging.message_templates, messaging.messaging_providers y 6 más.
+`POST /consent/practitioner-access-requests/{id}/decision` la atiende `PractitionerAccessRequestsController.decide` (src/modules/consent/controllers/practitioner-access-requests.controller.ts:68). Exige sesión con alguno de los roles PATIENT. Valida el cuerpo como `DecidePractitionerAccessRequestDto` (3 campos, 1 obligatorio). Delega en `PractitionerAccessRequestsService.decide`. Crea filas en audit.audit_log, authz.clinical_access_grants, consent.consent_events, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza consent.consent_provisions, consent.consents, iam.devices, messaging.notification_requests. Lee audit.audit_log, authz.clinical_access_grants, consent.consent_provisions, consent.consents, iam.devices, iam.sessions, messaging.message_channels, messaging.message_templates y 7 más.
 
 ### Requerimientos
 
@@ -1783,11 +1789,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/practitioner-access-requests.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/consent/controllers/practitioner-access-requests.controller.ts:68` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1795,13 +1801,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
 | `audit.audit_log` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `authz.clinical_access_grants` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → ClinicalAccessGrantsRepository.create | `src/modules/authz/repositories/clinical-access-grants.repository.ts:152` |
+| `authz.clinical_access_grants` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → ClinicalAccessGrantsRepository.create | `src/modules/authz/repositories/clinical-access-grants.repository.ts:167` |
 | `authz.clinical_access_grants` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → ClinicalAccessGrantsRepository.findActive | `src/modules/authz/repositories/clinical-access-grants.repository.ts:77` |
 | `consent.consent_events` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
 | `consent.consent_provisions` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide | `src/modules/consent/services/practitioner-access-requests.service.ts:270` |
 | `consent.consent_provisions` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → ConsentProvisionsRepository.findOpenByConsent | `src/modules/consent/repositories/consent-provisions.repository.ts:66` |
 | `consent.consents` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide | `src/modules/consent/services/practitioner-access-requests.service.ts:265` |
 | `consent.consents` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → ConsentsRepository.findById | `src/modules/consent/repositories/consents.repository.ts:78` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `iam.sessions` | LEE | LEE | POR_SQL | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.message_channels` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
@@ -1810,7 +1818,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:489` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:519` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | PractitionerAccessRequestsController.decide → PractitionerAccessRequestsService.decide → MessagingPractitionerAccessNoticeAdapter.emit → MessagingPractitionerAccessNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -1876,7 +1884,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada; ResourceNotFoundException: Solicitud de notificación no encontrada; ResourceNotFoundException: El proveedor configurado para el canal no existe |
 | 409 | `CONFLICT` | ConflictException: Esta solicitud ya fue decidida |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud no tiene profesional asociado; PreconditionFailedException: Sólo se pueden autorizar especialidades que el profesional pidió; PreconditionFailedException: Aceptar exige autorizar al menos una especialidad; si no autoriza ninguna, rechace la solicitud; PreconditionFailedException: La notificación necesita destinatario interno o dirección de destino; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud no tiene profesional asociado; PreconditionFailedException: Sólo se pueden autorizar especialidades que el profesional pidió; PreconditionFailedException: Aceptar exige autorizar al menos una especialidad; si no autoriza ninguna, rechace la solicitud; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal; PreconditionFailedException: La notificación está suprimida; PreconditionFailedException: La notificación ya no admite intentos; PreconditionFailedException: El canal no tiene configuración de proveedor activa; PreconditionFailedException: Una notificación in-app necesita destinatario interno |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/consent.md).
@@ -1916,8 +1924,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/consent/controllers/practitioner-access-requests.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -1983,7 +1991,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 
 ### Cómo se atiende (sistema)
 
-`POST /consent/privacy-restrictions` la atiende `PrivacyRestrictionsController.apply` (src/modules/consent/controllers/privacy-restrictions.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePrivacyRestrictionDto` (8 campos, 2 obligatorios). Delega en `PrivacyRestrictionsService.apply`. Crea filas en consent.consent_events, consent.privacy_restrictions.
+`POST /consent/privacy-restrictions` la atiende `PrivacyRestrictionsController.apply` (src/modules/consent/controllers/privacy-restrictions.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePrivacyRestrictionDto` (8 campos, 2 obligatorios). Delega en `PrivacyRestrictionsService.apply`. Crea filas en consent.consent_events, consent.privacy_restrictions. Lee profiles.patient_profiles.
 
 ### Requerimientos
 
@@ -1991,10 +1999,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/privacy-restrictions.controller.ts:30` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2002,6 +2010,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|---|---|---|
 | `consent.consent_events` | ESCRIBE | CREA | DIRECTA | PrivacyRestrictionsController.apply → PrivacyRestrictionsService.apply → ConsentEventsRepository.record | `src/modules/consent/repositories/consent-events.repository.ts:55` |
 | `consent.privacy_restrictions` | ESCRIBE | CREA | DIRECTA | PrivacyRestrictionsController.apply → PrivacyRestrictionsService.apply → PrivacyRestrictionsRepository.create | `src/modules/consent/repositories/privacy-restrictions.repository.ts:103` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PrivacyRestrictionsController.apply → PrivacyRestrictionsService.apply → ConsentScopeService.assertPatientExists → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 
 ### Cuerpo — DTO `CreatePrivacyRestrictionDto` · `application/json`
 
@@ -2059,7 +2068,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.FORBIDDEN} |
 
 El árbol de decisión completo está en [flujos](../flujos/consent.md).
 
@@ -2098,10 +2109,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/processing-legal-bases.controller.ts:30` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 
@@ -2204,10 +2215,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/consent
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/consent/controllers/treatment-informed-consents.controller.ts:30` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
 

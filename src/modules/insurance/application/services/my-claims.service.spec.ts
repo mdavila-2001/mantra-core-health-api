@@ -60,15 +60,18 @@ function build(
     ),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  const breakdowns = { read: mockFn(() => Promise.resolve(new Map())) };
   return {
     em,
     received,
     logger,
     claimReadRepo,
+    breakdowns,
     service: new MyClaimsService(
       em,
       received as never,
       claimReadRepo as never,
+      breakdowns as never,
       logger as never,
     ),
   };
@@ -81,7 +84,7 @@ describe('MyClaimsService', () => {
       const result = await d.service.list(actor);
       expect(result).toEqual({
         view: 'PATIENT',
-        items: [{ id: 'c-own' }],
+        items: [{ id: 'c-own', breakdown: null, patientObjection: null }],
         truncated: false,
       });
       expect(d.em.find).toHaveBeenCalledWith(PatientCoverages, {
@@ -100,6 +103,66 @@ describe('MyClaimsService', () => {
           limit: 501,
         },
       );
+    });
+
+    it('el paciente recibe el desglose y la objeción de cada solicitud', async () => {
+      const d = build();
+      const breakdown = { patientTotal: '50.00' };
+      const patientObjection = { id: 'd-1', reason: 'AMOUNT_DIFFERS' };
+      d.breakdowns.read.mockResolvedValueOnce(
+        new Map([['c-own', { breakdown, patientObjection }]]),
+      );
+      const result = await d.service.list(actor);
+      expect(result.items).toEqual([
+        { id: 'c-own', breakdown, patientObjection },
+      ]);
+      expect(d.breakdowns.read).toHaveBeenCalledWith(d.em, [{ id: 'c-own' }]);
+    });
+
+    it('una solicitud sin desglose conocido sale con ambos campos en null', async () => {
+      const d = build();
+      d.breakdowns.read.mockResolvedValueOnce(new Map());
+      const result = await d.service.list(actor);
+      expect(result.items[0]).toEqual({
+        id: 'c-own',
+        breakdown: null,
+        patientObjection: null,
+      });
+    });
+
+    it('el desglose y la objeción son del titular: el profesional no los pide', async () => {
+      const d = build();
+      const result = await d.service.list({
+        ...actor,
+        practitionerProfileId: 'hp-own',
+      });
+      expect(result.view).toBe('PRACTITIONER');
+      expect(result.items[0]).toEqual({
+        id: 'c-own',
+        breakdown: null,
+        patientObjection: null,
+      });
+      expect(d.breakdowns.read).not.toHaveBeenCalled();
+    });
+
+    it('el centro tampoco pide el desglose del paciente', async () => {
+      const d = build({
+        units: [
+          {
+            id: 'u-lab',
+            diagnosticUnitTypeConceptId: DUNIT.UNIT_TYPE_LABORATORY,
+          },
+        ],
+      });
+      d.em.find.mockImplementation((entity: unknown) =>
+        Promise.resolve(entity === InsuranceClaims ? [{ id: 'c-own' }] : []),
+      );
+      const result = await d.service.list(
+        { ...actor, tenantIds: [TENANT] } as never,
+        TENANT,
+      );
+      expect(result.view).toBe('LABORATORY');
+      expect(d.breakdowns.read).not.toHaveBeenCalled();
     });
 
     it('el profesional precede al paciente y sólo lee sus encuentros', async () => {

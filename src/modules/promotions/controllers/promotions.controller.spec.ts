@@ -156,6 +156,27 @@ describe('LoyaltyController', () => {
     expect(d.loyaltyService.listActivePrograms).toHaveBeenCalledWith(20);
   });
 
+  it('a SYSTEM granted with tenant scope does not sweep programs of other tenants', async () => {
+    const d = build();
+    d.loyaltyService.listActivePrograms.mockResolvedValue({ programs: [] });
+    const scopedSystem = {
+      id: 'user-9',
+      roles: ['SYSTEM'],
+      scopedRoles: { 'tenant-1': ['SYSTEM'] },
+    };
+
+    await runWithTenant('tenant-1', () =>
+      d.loyalty.listActivePrograms({ limit: 20 }, scopedSystem),
+    );
+    expect(d.loyaltyService.listActivePrograms).toHaveBeenCalledWith(
+      20,
+      'tenant-1',
+    );
+    expect(() =>
+      d.loyalty.listActivePrograms({ limit: 20 }, scopedSystem),
+    ).toThrow('Se requiere X-Tenant-Id');
+  });
+
   it('delegates referral creation and qualification (UC-51-12, UC-51-13)', async () => {
     const d = build();
     const createDto = {} as any;

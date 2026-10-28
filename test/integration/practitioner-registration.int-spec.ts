@@ -19,15 +19,14 @@ import { Addresses } from '../../src/modules/common/entities';
 import { AuthenticationCredentials } from '../../src/modules/iam/entities';
 
 /**
- * Un municipio del esquema `SC-<NOMBRE>` (el que sembró el generador del
- * modelo), con su departamento.
+ * Un municipio de Santa Cruz y su departamento, para P19.
  *
- * `createResidenceAddress` sólo deriva `administrative_area_concept_id` de
- * este esquema (`departmentSiglaFromMunicipalityCode` matchea `^[A-Z]{2}-`):
- * el otro juego sembrado, `geo:bo:municipality:NNNNNN`
- * (`camposObligatoriosDePaciente` devuelve ese), pasa la validación de
- * catálogo igual pero deja el departamento sin derivar. Para P19, que sí
- * afirma el departamento, hace falta este esquema específico.
+ * El catálogo de municipios tiene dos formas de código según quién sembró la
+ * base: `SC-<NOMBRE>` (generador del modelo) y `geo:bo:municipality:07NNNN`
+ * (INE, la que siembra la propia API en el arranque). `createResidenceAddress`
+ * deriva el departamento de las dos (`departmentSiglaOfMunicipalityCode`), así
+ * que sirve cualquiera. Una base sembrada sólo por la API no tiene `SC-%`: el
+ * helper anterior devolvía `''` y el alta respondía 400 (`must be a UUID`).
  */
 async function municipioConSigla(ctx: TestContext): Promise<{
   municipalityConceptId: string;
@@ -38,7 +37,8 @@ async function municipioConSigla(ctx: TestContext): Promise<{
     .getConnection()
     .execute<{ id: string; display: string }[]>(
       `select id, display from terminology.catalog_concepts
-        where code like 'SC-%' order by code limit 1`,
+        where code like 'SC-%' or code like 'geo:bo:municipality:07%'
+        order by code limit 1`,
     );
   const departamentos = await ctx.orm.em
     .getConnection()

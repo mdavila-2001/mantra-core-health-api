@@ -14,38 +14,41 @@ equipo de datos curó encima (fichas, evidencia, revisiones), sobre el esquema `
   find src/modules/data_catalog -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **2 controllers, 22 rutas HTTP, 8 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **3 controllers, 37 rutas HTTP, 8 entidades y 6 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
-Su `*.module.ts` no declara `imports` de otros módulos.
+Su `*.module.ts` importa sólo `RouteIndexModule` (para leer los roles de cada ruta en la deriva de permisos).
 
-Entidades (`tableName`, 8 de 8 archivos `*.entity.ts`): `catalog_annotation_revisions`, `catalog_annotations`, `catalog_change_events`, `catalog_columns`, `catalog_evidence_items`, `catalog_objects`, `catalog_review_decisions`, `catalog_scan_runs`.
+Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `catalog_annotation_revisions`, `catalog_annotations`, `catalog_change_events`, `catalog_columns`, `catalog_evidence_items`, `catalog_objects`, `catalog_operation_impacts`, `catalog_operations`, `catalog_process_step_operations`, `catalog_process_steps`, `catalog_processes`, `catalog_review_decisions`, `catalog_scan_runs`.
+
+Roles (`data_catalog.constants.ts`): `PORTAL_READ_ROLES` = `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`; `CATALOG_WRITE_ROLES` = `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DATA_STEWARD`. Los cinco roles de `data_catalog.roles.ts` (todos de ámbito `GLOBAL`) los siembra la API; se asignan **sin tenant**.
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
 | `POST /internal/catalog/scans/run-next` | SYSTEM | `data-catalog-internal` |
-| `GET /admin/catalog/schemas` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `GET /admin/catalog/objects` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `GET /admin/catalog/objects/:objectId` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `GET /admin/catalog/objects/:objectId/columns` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `GET /admin/catalog/objects/:objectId/changes` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `GET /admin/catalog/objects/:objectId/impact` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `GET /admin/catalog/objects/:objectId/history` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `GET /admin/catalog/columns/:columnId/history` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `PUT /admin/catalog/objects/:objectId/annotation` | ...CATALOG_EDIT_ROLES | `data-catalog` |
-| `PUT /admin/catalog/columns/:columnId/annotation` | ...CATALOG_EDIT_ROLES | `data-catalog` |
-| `POST /admin/catalog/annotations/:annotationId/review` | ...CATALOG_REVIEW_ROLES | `data-catalog` |
-| `GET /admin/catalog/objects/:objectId/evidence` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `POST /admin/catalog/objects/:objectId/evidence` | ...CATALOG_EDIT_ROLES | `data-catalog` |
-| `GET /admin/catalog/columns/:columnId/evidence` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `POST /admin/catalog/columns/:columnId/evidence` | ...CATALOG_EDIT_ROLES | `data-catalog` |
-| `GET /admin/catalog/coverage` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `POST /admin/catalog/scans` | ...CATALOG_SCAN_ROLES | `data-catalog` |
-| `GET /admin/catalog/scans` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `GET /admin/catalog/scans/:scanId` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `GET /admin/catalog/scans/:scanId/changes` | ...CATALOG_READ_ROLES | `data-catalog` |
-| `POST /admin/catalog/scans/:scanId/cancel` | ...CATALOG_SCAN_ROLES | `data-catalog` |
+| `POST /internal/catalog/inventory/import` | SYSTEM | `data-catalog-internal` |
+| `GET /admin/catalog/schemas` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `GET /admin/catalog/objects` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `GET /admin/catalog/objects/:id` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `GET /admin/catalog/objects/:id/columns` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `GET /admin/catalog/objects/:id/evidence` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `POST /admin/catalog/objects/:id/evidence` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
+| `GET /admin/catalog/columns/:id/evidence` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `POST /admin/catalog/columns/:id/evidence` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
+| `GET /admin/catalog/objects/:id/history` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `GET /admin/catalog/objects/:id/changes` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `GET /admin/catalog/objects/:id/impact` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `PUT /admin/catalog/objects/:id/annotation` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
+| `PUT /admin/catalog/columns/:id/annotation` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
+| `POST /admin/catalog/annotations/:id/review` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
+| `POST /admin/catalog/classification/run` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
+| `GET /admin/catalog/permission-drift` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `GET /admin/catalog/coverage` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `GET /admin/catalog/scans` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `GET /admin/catalog/scans/:id` | ...PORTAL_READ_ROLES | `admin-catalog` |
+| `POST /admin/catalog/scans` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
+| 16 rutas `GET /admin/portal/*` (versión, operaciones, flujos, catálogo estático, deriva, linaje, glosario) | ...PORTAL_READ_ROLES | `admin-portal` |
 
 ## Endpoints
 
@@ -106,6 +109,22 @@ ficha de un objeto:   PUT annotation (expectedVersion) ──> revisión N inmut
   └─ submit=true: exige propósito, razón de existir y grano de fila (o una pregunta abierta por campo)
        └─ NEEDS_REVIEW ──> POST review (otro usuario, con evidencia) ──> APPROVED | REJECTED
             └─ editar una ficha aprobada la devuelve a DRAFT: la aprobación deja de ser vigente
+
+sonda (worker scan-tick, cada pocos segundos): POST /internal/catalog/scans/run-next
+  ├─ cierra los escaneos abandonados (lease vencido) ── failAbandoned
+  ├─ retoma el escaneo en cola, si lo hay
+  └─ si no hay ninguno y pasaron PROBE_INTERVAL_MS desde que terminó el último → pide uno y lo ejecuta
+       └─ al terminar bien: clasificación automática de las columnas nuevas o cambiadas
+
+importación del inventario (worker scan-tick, tras un escaneo SUCCEEDED): POST /internal/catalog/inventory/import
+  └─ pg_advisory_xact_lock: una importación a la vez
+       └─ planImport: compara inventario/ con las cinco tablas -> altas / cambios / sin cambios / NOT_OBSERVED / reaparecidas
+            └─ catalog_operations + catalog_operation_impacts + catalog_processes + catalog_process_steps + catalog_process_step_operations
+               (todo en una transacción; lo que no cambió no se toca ni sube row_version)
+
+columna: PUT columns/:id/annotation  /  POST columns/:id/evidence   (mismas reglas que la tabla)
+clasificación automática ──> ficha de columna en AUTO_DETECTED (certeza) o NEEDS_REVIEW (duda)
+  └─ una persona que guarda la ficha la saca de AUTO_DETECTED (queda DRAFT o NEEDS_REVIEW, origin MANUAL)
 ```
 
 ## Reglas de negocio
@@ -113,6 +132,44 @@ ficha de un objeto:   PUT annotation (expectedVersion) ──> revisión N inmut
 - **Un escaneo activo por fuente**: lo decide un índice único parcial, no un `if`. Dos pedidos
   simultáneos: uno se acepta (202) y el otro recibe 409. Un escaneo `RUNNING` cuyo lease venció
   se cierra como `FAILED` en el siguiente pedido.
+- **La sonda no duplica**: `run-next` toma el escaneo con `claimScan` (atómico) y lo cierra con
+  fencing: `finishScan`/`failScan` sólo actualizan si el escaneo sigue `RUNNING` **y** con el
+  `lease_owner` de quien lo ejecuta. Con 0 filas la respuesta lleva `fenced: true`, lo aplicado se
+  revierte y no se pisa lo que otro proceso cerró. Intervalo: `PROBE_INTERVAL_MS` (15 min, medido
+  desde que terminó el último escaneo que llegó a ejecutarse). El disparo en proceso de
+  `POST /admin/catalog/scans` se conserva: ambas vías compiten por `claimScan`.
+- **El inventario se importa, no se reemplaza**: el detalle de cada operación (contrato, árboles,
+  grafos, glosario) sigue saliendo de los archivos de `inventario/`, que viajan en la imagen; las
+  cinco tablas `catalog_operation*` / `catalog_process*` guardan el índice consultable (qué
+  operaciones existen, qué objetos tocan y con qué acceso, y los procesos que las agrupan) para
+  cruzarlo con `catalog_objects`, las fichas y la sonda. `InventoryImportService` es **idempotente**:
+  la huella (`technical_hash`) es de lo que se guarda, incluido el objeto resuelto de cada impacto,
+  y una operación con la misma huella no se toca (ni `row_version` ni `updated_at`). Una operación
+  que deja de aparecer queda `NOT_OBSERVED`, no se borra; si vuelve, vuelve a `OBSERVED`.
+- **Orden: primero el escaneo.** Cada impacto apunta a un objeto de `catalog_objects`. Si la sonda
+  aún no observó la tabla, el impacto se salta y se cuenta en `skippedUnresolved` (o en
+  `skippedNotCataloged` si el inventario tampoco la tiene catalogada); como la huella incluye el
+  objeto resuelto, la siguiente importación lo recupera sola. Sin `inventario/` en la instancia, la
+  ruta responde 503.
+- **Valores sin CHECK**: `risk_level` (`ALTO`/`MEDIO`/`BAJO`), `access_kind` (`LEE`/`ESCRIBE`/`BORRA`),
+  `kind` de proceso (`MODULO`/`CRITICO`) y `observation_status` (`OBSERVED`/`NOT_OBSERVED`) no tienen
+  CHECK en el modelo (decisión del parche v4.2.48): el importador escribe sólo esos valores y
+  `import-plan.spec.ts` los fija contra los archivos del inventario.
+- **Estados de revisión**: `AUTO_DETECTED` (lo detectó la clasificación automática y nadie lo curó),
+  `DRAFT` (borrador **humano**), `NEEDS_REVIEW`, `APPROVED`, `REJECTED`. Sólo la clasificación
+  automática crea `AUTO_DETECTED`, con `origin = AUTO_CLASSIFIER`. `AUTO_DETECTED` no se revisa:
+  nadie la envió a revisión.
+- **Clasificación automática** (`classification/`): una tabla de reglas por nombre y tipo de columna
+  (los 18 identificadores de Safe Harbor → `PHI_IDENTIFIER`, datos clínicos → `PHI_SENSITIVE`,
+  categorías del art. 11 de la LGPD → `PHI_SPECIAL`, contraseñas/tokens/secretos → `CREDENTIAL`).
+  Ante duda, el nivel más alto y `NEEDS_REVIEW`; con certeza, `AUTO_DETECTED`. **Nunca baja un nivel
+  y nunca pisa** una ficha `MANUAL` ni una que ya salió de `AUTO_DETECTED`. `confidence` y
+  `classified_by` viajan en `catalog_annotation_revisions.content_json.classification`; la autora es
+  la cuenta del worker. Se dispara al terminar cada escaneo y con `POST classification/run`.
+- **Deriva de permisos** (`permission-drift/`): compara los `@Roles(...)` de las rutas (leídos al
+  arrancar por `RouteMetadataService`) con los roles que siembran los `*.roles.ts` y con
+  `authz.roles`. La lógica es pura (`computePermissionDrift`, `blockingDrift`) para que un script de
+  CI la use con las mismas entradas.
 - **Idempotencia**: la misma `Idempotency-Key` del mismo usuario devuelve el escaneo ya aceptado
   (`created: false`); no crea otro.
 - **El escaneo no pisa lo curado**: sólo toca lo observado. Un objeto que desaparece pasa a

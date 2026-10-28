@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
@@ -49,6 +50,11 @@ export class IntegrationsMessagesController {
   ) {}
 
   /** UC-12-05. Productor de negocio (usuario autenticado). */
+  @Audited({
+    action: 'INTEGRATION_OUTBOUND_MESSAGE_ENQUEUED',
+    entity: 'outbound_message',
+    entityId: 'result.id',
+  })
   @Post('messages\\:outbound')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Encolar un mensaje saliente (idempotente)' })
@@ -68,12 +74,18 @@ export class IntegrationsMessagesController {
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @ApiOperation({ summary: 'Listar mensajes QUEUED listos para despachar' })
   listPendingDispatch(
-    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('limit', new ParseOptionalLimitPipe()) limit: number | undefined,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PendingDispatchResponseDto> {
-    return this.messagingService.listQueuedForDispatch(limit);
+    return this.messagingService.listQueuedForDispatch(actor, limit);
   }
 
   /** UC-12-06. Worker de envío: el rol `SYSTEM` sólo lo firma `SystemApiClient`. */
+  @Audited({
+    action: 'INTEGRATION_MESSAGE_DISPATCHED',
+    entity: 'outbound_message',
+    entityId: 'param:id',
+  })
   @Post('messages/:id\\:dispatch')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -97,12 +109,18 @@ export class IntegrationsMessagesController {
     summary: 'Listar mensajes FAILED candidatos a reintento o dead-letter',
   })
   listPendingRetry(
-    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('limit', new ParseOptionalLimitPipe()) limit: number | undefined,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PendingRetryResponseDto> {
-    return this.messagingService.listFailedForRetry(limit);
+    return this.messagingService.listFailedForRetry(actor, limit);
   }
 
   /** UC-12-07. Worker de reintentos. */
+  @Audited({
+    action: 'INTEGRATION_MESSAGE_RETRIED',
+    entity: 'message_retry',
+    entityId: 'param:id',
+  })
   @Post('messages/:id\\:retry')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -115,6 +133,11 @@ export class IntegrationsMessagesController {
   }
 
   /** UC-12-08. Worker de reintentos. */
+  @Audited({
+    action: 'INTEGRATION_MESSAGE_DEAD_LETTERED',
+    entity: 'outbound_message',
+    entityId: 'param:id',
+  })
   @Post('messages/:id\\:dead-letter')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -136,12 +159,18 @@ export class IntegrationsMessagesController {
     summary: 'Listar mensajes entrantes RECEIVED listos para correlacionar',
   })
   listPendingCorrelation(
-    @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('limit', new ParseOptionalLimitPipe()) limit: number | undefined,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PendingCorrelationResponseDto> {
-    return this.messagingService.listReceivedForCorrelation(limit);
+    return this.messagingService.listReceivedForCorrelation(actor, limit);
   }
 
   /** UC-12-10. Worker de correlación ({id} = mensaje entrante). */
+  @Audited({
+    action: 'INTEGRATION_MESSAGE_CORRELATED',
+    entity: 'inbound_message',
+    entityId: 'param:id',
+  })
   @Post('messages/:id\\:correlate')
   @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

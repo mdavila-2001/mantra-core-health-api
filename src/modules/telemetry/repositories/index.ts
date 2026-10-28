@@ -13,3 +13,4 @@ export * from './funnel-definitions.repository';
 export * from './funnel-steps.repository';
 export * from './conversion-events.repository';
 export * from './telemetry-analytics.repository';
+export * from './actor-sessions.repository';

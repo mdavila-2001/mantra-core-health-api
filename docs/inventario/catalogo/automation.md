@@ -13,17 +13,17 @@
 | [agent_guardrails](#agent_guardrails) | Asocia reglas de control a agentes para evitar acciones fuera de su alcance permitido. | 9 | 4 | 3 | COINCIDE |
 | [agent_memory](#agent_memory) | Conserva memoria operativa autorizada de agentes para dar continuidad controlada entre interacciones. | 15 | 6 | 3 | COINCIDE |
 | [agent_run_steps](#agent_run_steps) | Detalla pasos de cada ejecución de agente para reconstruir herramientas invocadas y resultados. | 13 | 6 | 6 | COINCIDE |
-| [agent_runs](#agent_runs) | Conserva ejecuciones de agentes para auditar solicitudes, resultados y comportamiento. | 19 | 7 | 10 | COINCIDE |
+| [agent_runs](#agent_runs) | Conserva ejecuciones de agentes para auditar solicitudes, resultados y comportamiento. | 19 | 7 | 5 | COINCIDE |
 | [agent_tool_bindings](#agent_tool_bindings) | Vincula herramientas con agentes para determinar qué acciones puede invocar cada uno. | 11 | 5 | 3 | COINCIDE |
 | [agent_tools](#agent_tools) | Registra herramientas disponibles para agentes y sus contratos de operación. | 16 | 6 | 5 | COINCIDE |
 | [agent_versions](#agent_versions) | Preserva versiones de agentes para mantener trazabilidad de configuración y comportamiento. | 16 | 6 | 5 | COINCIDE |
-| [agents](#agents) | Cataloga agentes automatizados utilizados para asistir tareas operativas o de información del sistema médico. | 17 | 11 | 11 | COINCIDE |
+| [agents](#agents) | Cataloga agentes automatizados utilizados para asistir tareas operativas o de información del sistema médico. | 17 | 11 | 8 | COINCIDE |
 | [automation_approvals](#automation_approvals) | Gestiona aprobaciones humanas requeridas antes de que una automatización realice acciones sensibles. | 16 | 7 | 6 | COINCIDE |
 | [automation_triggers](#automation_triggers) | Configura eventos o condiciones que inician workflows y automatizaciones. | 19 | 8 | 4 | COINCIDE |
 | [guardrail_policies](#guardrail_policies) | Define políticas de seguridad y límites que gobiernan la ejecución de agentes y automatizaciones. | 15 | 8 | 4 | COINCIDE |
 | [knowledge_sources](#knowledge_sources) | Cataloga fuentes de conocimiento disponibles para agentes, incluyendo procedencia y condiciones de uso. | 14 | 7 | 0 | COINCIDE |
 | [record_automations](#record_automations) | Define acciones automáticas asociadas a tipos o cambios de registros de negocio. | 17 | 8 | 1 | COINCIDE |
-| [workflow_runs](#workflow_runs) | Registra ejecuciones de workflows para mantener estado, resultado y evidencia operativa. | 19 | 9 | 13 | COINCIDE |
+| [workflow_runs](#workflow_runs) | Registra ejecuciones de workflows para mantener estado, resultado y evidencia operativa. | 19 | 9 | 12 | COINCIDE |
 | [workflow_steps](#workflow_steps) | Detalla pasos ejecutables de un workflow y sus dependencias. | 15 | 8 | 2 | COINCIDE |
 | [workflows](#workflows) | Define automatizaciones compuestas por pasos que coordinan procesos y servicios. | 14 | 7 | 5 | COINCIDE |
 
@@ -424,7 +424,7 @@ Conserva ejecuciones de agentes para auditar solicitudes, resultados y comportam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_48_automation.puml: agent_runs`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_48_automation.puml` · **DDL:** `SQL/48_automation/02_tables.sql`
 - **Entidad del ORM:** `AgentRuns` — `src/modules/automation/entities/agent_runs.entity.ts`
-- **Resumen:** 19 columnas · 7 índices · 7 FK salientes · 2 entrantes · 10 operaciones
+- **Resumen:** 19 columnas · 7 índices · 7 FK salientes · 2 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -481,12 +481,7 @@ Conserva ejecuciones de agentes para auditar solicitudes, resultados y comportam
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /automation/agent-runs/{id}/approvals | ACTUALIZA | POR_TIPO |
-| POST /automation/agent-runs/{id}/approvals | LEE | DIRECTA |
-| POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute | LEE | DIRECTA |
 | POST /automation/agent-runs/{id}/steps | ACTUALIZA | POR_TIPO |
-| POST /automation/agent-runs/{id}/steps | LEE | DIRECTA |
-| POST /automation/approvals/{id}/decide | ACTUALIZA | POR_TIPO |
-| POST /automation/approvals/{id}/decide | LEE | DIRECTA |
 | POST /automation/runs/{workflowRunId}/agent-runs | CREA | DIRECTA |
 | POST /automation/runs/{workflowRunId}/finalize | ACTUALIZA | POR_TIPO |
 | POST /automation/runs/{workflowRunId}/finalize | LEE | DIRECTA |
@@ -755,7 +750,7 @@ Cataloga agentes automatizados utilizados para asistir tareas operativas o de in
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_48_automation.puml: agents`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_48_automation.puml` · **DDL:** `SQL/48_automation/02_tables.sql`
 - **Entidad del ORM:** `Agents` — `src/modules/automation/entities/agents.entity.ts`
-- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 11 entrantes · 11 operaciones
+- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 11 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -830,14 +825,11 @@ Cataloga agentes automatizados utilizados para asistir tareas operativas o de in
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /automation/agent-runs/{id}/approvals | LEE | DIRECTA |
-| POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute | LEE | DIRECTA |
-| POST /automation/agent-runs/{id}/steps | LEE | DIRECTA |
 | POST /automation/agents | CREA | DIRECTA |
 | POST /automation/agents | LEE | DIRECTA |
 | POST /automation/agents/{id}/guardrails | LEE | DIRECTA |
 | POST /automation/agents/{id}/memory | LEE | DIRECTA |
-| POST /automation/agents/{id}/versions/publish | ACTUALIZA | POR_TIPO |
+| POST /automation/agents/{id}/versions/{versionId}/tool-bindings | LEE | DIRECTA |
 | POST /automation/agents/{id}/versions/publish | LEE | DIRECTA |
 | POST /automation/runs/{workflowRunId}/agent-runs | LEE | DIRECTA |
 | POST /automation/workflows | LEE | DIRECTA |
@@ -1273,7 +1265,7 @@ Registra ejecuciones de workflows para mantener estado, resultado y evidencia op
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_48_automation.puml: workflow_runs`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_48_automation.puml` · **DDL:** `SQL/48_automation/02_tables.sql`
 - **Entidad del ORM:** `WorkflowRuns` — `src/modules/automation/entities/workflow_runs.entity.ts`
-- **Resumen:** 19 columnas · 9 índices · 7 FK salientes · 1 entrantes · 13 operaciones
+- **Resumen:** 19 columnas · 9 índices · 7 FK salientes · 1 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -1343,7 +1335,6 @@ Registra ejecuciones de workflows para mantener estado, resultado y evidencia op
 | POST /automation/approvals/{id}/decide | ACTUALIZA | POR_TIPO |
 | POST /automation/approvals/{id}/decide | LEE | DIRECTA |
 | POST /automation/runs/{workflowRunId}/agent-runs | LEE | DIRECTA |
-| POST /automation/runs/{workflowRunId}/finalize | ACTUALIZA | POR_TIPO |
 | POST /automation/runs/{workflowRunId}/finalize | LEE | DIRECTA |
 | POST /automation/triggers/calendar/tick | CREA | DIRECTA |
 | POST /automation/triggers/calendar/tick | LEE | DIRECTA |

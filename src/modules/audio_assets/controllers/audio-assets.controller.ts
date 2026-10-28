@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { CurrentUser, type AuthenticatedUser } from '../../../common';
+import { Audited, CurrentUser, type AuthenticatedUser } from '../../../common';
 import { AudioAssetsFacade } from '../audio-assets.facade';
 import { AudioContentService } from '../audio-content.service';
 import { ResolveAudioAssetDto } from '../dto/audio-assets.dto';
@@ -25,6 +25,11 @@ export class AudioAssetsController {
     private readonly content: AudioContentService,
   ) {}
 
+  @Audited({
+    action: 'AUDIO_ASSET_RESOLVED',
+    entity: 'audio_asset',
+    entityId: 'result.id',
+  })
   @Post('resolve')
   @ApiOperation({
     summary: 'Resuelve un asset TTS desde caché o agenda su generación',

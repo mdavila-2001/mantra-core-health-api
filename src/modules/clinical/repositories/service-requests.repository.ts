@@ -52,6 +52,18 @@ export interface CreateServiceRequestData {
    */
   performerTenantId?: string;
   /**
+   * Modo de ejecutor recomendado (concepto del conjunto `service-request-performer-selection`).
+   */
+  performerSelectionConceptId?: string;
+  /**
+   * Médico ejecutor («lo hago yo»).
+   */
+  performerPractitionerProfileId?: string;
+  /**
+   * Sede sugerida. Es una recomendación: no concede acceso a la orden.
+   */
+  suggestedPracticeSiteId?: string;
+  /**
    * El informe diagnóstico previo que satisface este pedido, si el motor de
    * duplicidad encontró uno y el médico decidió (antiduplicación, v4.2.17).
    */
@@ -103,6 +115,9 @@ export class ServiceRequestsRepository {
         statusConceptId: data.statusConceptId,
         requesterProfileId: data.requesterProfileId,
         performerTenantId: data.performerTenantId,
+        performerSelectionConceptId: data.performerSelectionConceptId,
+        performerPractitionerProfileId: data.performerPractitionerProfileId,
+        suggestedPracticeSiteId: data.suggestedPracticeSiteId,
         previousDiagnosticReportId: data.previousDiagnosticReportId,
         duplicateOverrideReason: data.duplicateOverrideReason,
         ...createdBy(data.actorUserId),

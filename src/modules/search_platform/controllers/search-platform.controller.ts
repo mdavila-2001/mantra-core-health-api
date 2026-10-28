@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Roles, getCurrentTenantId } from '../../../common';
+import { Audited, Roles, getCurrentTenantId } from '../../../common';
 import { SearchIndexService } from '../services';
 import {
   DeleteDocumentResponseDto,
@@ -37,6 +37,10 @@ export class SearchPlatformController {
   constructor(private readonly searchService: SearchIndexService) {}
 
   /** Indexa (upsert) un documento en el índice indicado. */
+  @Audited({
+    action: 'SEARCH_DOCUMENT_INDEXED',
+    entity: 'search_document',
+  })
   @Post(':index/documents')
   @Roles('PLATFORM_ADMIN', 'SEARCH_ADMIN', 'SYSTEM')
   @HttpCode(HttpStatus.OK)
@@ -60,6 +64,10 @@ export class SearchPlatformController {
   }
 
   /** Busca en el índice; devuelve aciertos y facetas (con allowlist de campos). */
+  @Audited({
+    action: 'SEARCH_INDEX_QUERIED',
+    entity: 'search_document',
+  })
   @Post(':index/_search')
   @Roles('PLATFORM_ADMIN', 'SEARCH_ADMIN', 'SEARCH_READER', 'SYSTEM')
   @HttpCode(HttpStatus.OK)
@@ -85,6 +93,10 @@ export class SearchPlatformController {
   }
 
   /** Elimina un documento por id dentro del índice. */
+  @Audited({
+    action: 'SEARCH_DOCUMENT_DELETED',
+    entity: 'search_document',
+  })
   @Delete(':index/documents/:id')
   @Roles('PLATFORM_ADMIN', 'SEARCH_ADMIN', 'SYSTEM')
   @HttpCode(HttpStatus.OK)

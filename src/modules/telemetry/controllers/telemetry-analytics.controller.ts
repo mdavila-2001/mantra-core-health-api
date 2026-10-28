@@ -16,7 +16,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { Roles } from '../../../common';
+import { Roles, requireTenantId } from '../../../common';
 import {
   PORTAL_CODES,
   TelemetryAnalyticsService,
@@ -107,6 +107,9 @@ export class SessionsQueryDto extends AnalyticsWindowQueryDto {
 /**
  * Analítica de producto y RUM para el portal administrativo. Sólo lectura, con
  * ventana obligatoria (máx. 92 días) y agregados calculados en el backend.
+ * Toda lectura se acota al tenant que resolvió el guard (`requireTenantId()`):
+ * no hay barrido global, ni siquiera para `SUPERADMIN`, que debe indicar
+ * `X-Tenant-Id`.
  * La ingesta sigue en `/telemetry/*`; esto no la sustituye.
  */
 @ApiTags('telemetry-analytics')
@@ -121,7 +124,7 @@ export class TelemetryAnalyticsController {
     summary: 'Totales, rutas y eventos principales de la ventana',
   })
   overview(@Query() query: AnalyticsWindowQueryDto) {
-    return this.analytics.overview(query);
+    return this.analytics.overview(query, requireTenantId());
   }
 
   @Get('timeseries')
@@ -130,7 +133,7 @@ export class TelemetryAnalyticsController {
     summary: 'Eventos y sesiones por hora o día (UTC), cubos vacíos en 0',
   })
   timeseries(@Query() query: AnalyticsWindowQueryDto) {
-    return this.analytics.timeseries(query);
+    return this.analytics.timeseries(query, requireTenantId());
   }
 
   @Get('web-vitals')
@@ -140,7 +143,7 @@ export class TelemetryAnalyticsController {
       'p50/p75/p95 por métrica sobre la distribución, con tamaño de muestra',
   })
   webVitals(@Query() query: WebVitalsQueryDto) {
-    return this.analytics.webVitals(query);
+    return this.analytics.webVitals(query, requireTenantId());
   }
 
   @Get('funnels')
@@ -160,7 +163,7 @@ export class TelemetryAnalyticsController {
     @Param('funnelId', ParseUUIDPipe) funnelId: string,
     @Query() query: AnalyticsWindowQueryDto,
   ) {
-    return this.analytics.funnelReport(funnelId, query);
+    return this.analytics.funnelReport(funnelId, query, requireTenantId());
   }
 
   @Get('pipeline-health')
@@ -170,7 +173,7 @@ export class TelemetryAnalyticsController {
       'Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara',
   })
   pipelineHealth(@Query() query: AnalyticsWindowQueryDto) {
-    return this.analytics.pipelineHealth(query);
+    return this.analytics.pipelineHealth(query, requireTenantId());
   }
 
   @Get('sessions')
@@ -179,7 +182,7 @@ export class TelemetryAnalyticsController {
     summary: 'Sesiones de la ventana (sin identificadores de sesión ni sujeto)',
   })
   listSessions(@Query() query: SessionsQueryDto) {
-    return this.analytics.listSessions(query);
+    return this.analytics.listSessions(query, requireTenantId());
   }
 
   @Get('sessions/:id')
@@ -189,6 +192,6 @@ export class TelemetryAnalyticsController {
       'Timeline de una sesión: eventos y nombres de propiedad, sin valores',
   })
   getSession(@Param('id', ParseUUIDPipe) id: string) {
-    return this.analytics.getSession(id);
+    return this.analytics.getSession(id, requireTenantId());
   }
 }

@@ -6,6 +6,21 @@ import type {
   LoggerOptions,
 } from '@mikro-orm/core';
 import { QueryMetrics } from './query-metrics';
+import {
+  redactDriverMessage,
+  sqlShapeHash,
+  statementClass,
+} from './sql-redaction';
+
+/**
+ * ¿Se puede volcar el SQL literal? Sólo con `ORM_LOG_SQL=true` **y** fuera de
+ * producción (ORMN-02): el SQL del ORM lleva los parámetros ya interpolados.
+ */
+export function isRawSqlLoggingAllowed(
+  source: NodeJS.ProcessEnv = process.env,
+): boolean {
+  return source.ORM_LOG_SQL === 'true' && source.NODE_ENV !== 'production';
+}
 
 /**
  * Puente entre el logger interno de MikroORM y el logger de NestJS.
@@ -78,7 +93,7 @@ export class OrmLogger extends DefaultLogger {
         tookMs: Math.round(took),
         thresholdMs: this.slowQueryMs,
         rows: context.results ?? context.affected,
-        query: context.query,
+        ...this.describe(context.query),
       });
       return;
     }
@@ -88,9 +103,21 @@ export class OrmLogger extends DefaultLogger {
         msg: 'consulta',
         tookMs: Math.round(took),
         rows: context.results ?? context.affected,
-        query: context.query,
+        ...this.describe(context.query),
       });
     }
+  }
+
+  /**
+   * Campos de log de una consulta: clase de sentencia y hash de su forma. El SQL
+   * literal sólo viaja con `ORM_LOG_SQL=true` fuera de producción.
+   */
+  private describe(sql: string): Record<string, string> {
+    const base = {
+      statement: statementClass(sql),
+      queryHash: sqlShapeHash(sql),
+    };
+    return isRawSqlLoggingAllowed() ? { ...base, query: sql } : base;
   }
 
   /**
@@ -106,7 +133,7 @@ export class OrmLogger extends DefaultLogger {
     context?: LogContext,
   ): void {
     if (!this.isEnabled(namespace, context)) return;
-    this.nest.log(`[${namespace}] ${message}`);
+    this.nest.log(`[${namespace}] ${redactDriverMessage(message)}`);
   }
 
   // Las advertencias y los errores del ORM se registran siempre, sin consultar
@@ -119,7 +146,7 @@ export class OrmLogger extends DefaultLogger {
    * @param message - Valor de message requerido por la operación.
    */
   override warn(namespace: LoggerNamespace, message: string): void {
-    this.nest.warn(`[${namespace}] ${message}`);
+    this.nest.warn(`[${namespace}] ${redactDriverMessage(message)}`);
   }
 
   /**
@@ -130,7 +157,7 @@ export class OrmLogger extends DefaultLogger {
    */
   override error(namespace: LoggerNamespace, message: string): void {
     this.metrics.recordFailure();
-    this.nest.error(`[${namespace}] ${message}`);
+    this.nest.error(`[${namespace}] ${redactDriverMessage(message)}`);
   }
 }
 

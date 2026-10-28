@@ -11,7 +11,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { QueuesService, NotificationsService } from '../services';
 import {
   EnqueueJobDto,
@@ -45,6 +50,11 @@ export class MessagingController {
   ) {}
 
   /** UC-35-05. */
+  @Audited({
+    action: 'QUEUED_JOB_ENQUEUED',
+    entity: 'queued_job',
+    entityId: 'result.id',
+  })
   @Post('queues/:code/jobs')
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -62,6 +72,11 @@ export class MessagingController {
   }
 
   /** UC-35-09. */
+  @Audited({
+    action: 'DEAD_LETTER_JOB_REDRIVEN',
+    entity: 'dead_letter_job',
+    entityId: 'param:deadLetterJobId',
+  })
   @Post('queues/dead-letter/:deadLetterJobId/redrive')
   @Roles('MESSAGING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -79,6 +94,11 @@ export class MessagingController {
   }
 
   /** UC-35-10. */
+  @Audited({
+    action: 'NOTIFICATION_REQUESTED',
+    entity: 'notification_request',
+    entityId: 'result.id',
+  })
   @Post('notifications/requests')
   @Roles('SYSTEM', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -126,6 +146,10 @@ export class MessagingController {
    * y quien tiene cuarenta avisos viejos no los abre: aprende a ignorar la
    * campana. Una campana que se ignora no notifica.
    */
+  @Audited({
+    action: 'ALL_IN_APP_NOTIFICATIONS_READ',
+    entity: 'in_app_notification',
+  })
   @Post('notifications/in-app/read-all')
   @Roles('USER', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -163,6 +187,10 @@ export class MessagingController {
    * Reemplazo **por categoría**: lo que no viene no se toca. `quietHours`
    * ausente significa «no la toques» y `null`, «quitala».
    */
+  @Audited({
+    action: 'RECIPIENT_PREFERENCES_UPDATED',
+    entity: 'recipient_preference',
+  })
   @Put('notifications/preferences/me')
   @Roles('USER', 'MESSAGING_ADMIN')
   @ApiOperation({
@@ -177,6 +205,11 @@ export class MessagingController {
   }
 
   /** UC-35-13. */
+  @Audited({
+    action: 'IN_APP_NOTIFICATION_READ',
+    entity: 'in_app_notification',
+    entityId: 'param:id',
+  })
   @Post('notifications/in-app/:id/read')
   @Roles('USER', 'MESSAGING_ADMIN')
   @HttpCode(HttpStatus.OK)

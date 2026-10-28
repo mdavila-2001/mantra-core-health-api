@@ -1,9 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { CONCEPTS, type AuthenticatedUser } from '../../../common';
+import {
+  CONCEPTS,
+  DomainException,
+  ErrorCode,
+  type AuthenticatedUser,
+} from '../../../common';
 import { AuditLogRepository, DataAccessLogRepository } from '../repositories';
 import { AUD } from '../audit.concepts';
+import { AuditErrorReason } from '../audit.error-reasons';
 import {
   RecordDataAccessDto,
   DataAccessResultDto,
@@ -37,6 +43,11 @@ const LEGAL_BASIS: Record<string, string> = {
  */
 const outcomeConcept = (o: string): string =>
   o === 'FAILURE' ? CONCEPTS.OUTCOME_FAILURE : CONCEPTS.OUTCOME_SUCCESS;
+
+/** Eslabones leídos por página al recorrer una partición de la cadena. */
+const INTEGRITY_PAGE_SIZE = 5000;
+/** Tope del modo diagnóstico acotado de `verifyIntegrity`. */
+const INTEGRITY_MAX_DIAGNOSTIC_LIMIT = 100000;
 
 /** Umbral simple de accesos por ventana para marcar un patrón como anómalo. */
 const ANOMALY_THRESHOLD = 100;
@@ -170,59 +181,109 @@ export class AuditEventsService {
     });
   }
 
-  /** UC-10-06: recomputa la cadena y registra un evento de atestación. */
+  /**
+   * UC-10-06: recomputa la cadena y registra un evento de atestación.
+   *
+   * Sin `limit` recorre TODA la partición, página a página con una misma
+   * definición de orden; sólo entonces puede declarar `verified: true` y sellar
+   * la atestación positiva. Con `limit` (diagnóstico) examina a lo sumo ese
+   * prefijo: si quedan eslabones sin examinar el resultado es `complete: false`,
+   * nunca `verified` y no se sella atestación positiva. Un eslabón roto sí se
+   * atesta como falla aunque el recorrido sea parcial: la rotura es real.
+   */
   async verifyIntegrity(
     dto: VerifyIntegrityDto,
     actor: AuthenticatedUser,
   ): Promise<IntegrityReportDto> {
+    const limit = dto.limit;
+    if (
+      limit !== undefined &&
+      (!Number.isInteger(limit) ||
+        limit < 1 ||
+        limit > INTEGRITY_MAX_DIAGNOSTIC_LIMIT)
+    ) {
+      throw new DomainException(
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.VALIDATION_FAILED,
+        'El límite de verificación debe ser un entero entre 1 y 100000.',
+        undefined,
+        AuditErrorReason.INTEGRITY_RANGE_INVALID,
+      );
+    }
     this.logger.info(
       {
         operation: 'audit.integrity.verify',
         actorId: actor.id,
         tenantId: dto.tenantId,
+        diagnosticLimit: limit ?? null,
       },
       'Verifying hash-chain integrity',
     );
     return this.em.transactional(async (tx) => {
-      const chain = await this.auditLogRepo.findChain(
-        tx,
-        dto.tenantId,
-        dto.limit ?? 1000,
-      );
       let prev: string | undefined;
       let brokenAt: string | null = null;
       let checkedCount = 0;
-      for (const link of chain) {
-        const expected = AuditLogRepository.hash(
-          link.previousHash,
-          AuditLogRepository.content(link),
-          link.recordedAt,
+      let truncated = false;
+      let fetched = 0;
+      let cursor: { id: string; recordedAt: Date } | undefined;
+
+      scan: for (;;) {
+        // En modo diagnóstico se pide un eslabón de más para saber si el
+        // límite dejó la cadena sin examinar.
+        const want =
+          limit === undefined
+            ? INTEGRITY_PAGE_SIZE
+            : Math.min(INTEGRITY_PAGE_SIZE, limit + 1 - fetched);
+        const page = await this.auditLogRepo.findChain(
+          tx,
+          dto.tenantId,
+          want,
+          cursor,
         );
-        const linkOk =
-          (link.previousHash ?? undefined) === prev &&
-          expected === link.recordHash;
-        if (!linkOk) {
-          brokenAt = link.id;
-          break;
+        fetched += page.length;
+        for (const link of page) {
+          if (limit !== undefined && checkedCount >= limit) {
+            truncated = true;
+            break scan;
+          }
+          const expected = AuditLogRepository.hash(
+            link.previousHash,
+            AuditLogRepository.content(link),
+            link.recordedAt,
+          );
+          const linkOk =
+            (link.previousHash ?? undefined) === prev &&
+            expected === link.recordHash;
+          if (!linkOk) {
+            brokenAt = link.id;
+            break scan;
+          }
+          prev = link.recordHash;
+          checkedCount += 1;
         }
-        prev = link.recordHash;
-        checkedCount += 1;
+        if (page.length < want) break;
+        cursor = page[page.length - 1];
       }
 
-      const verified = brokenAt === null;
-      const attestation = await this.auditLogRepo.append(tx, {
-        userId: actor.id,
-        action: 'INTEGRITY_ATTESTATION',
-        entity: 'audit_log',
-        entityId: brokenAt ?? undefined,
-        outcomeConceptId: verified
-          ? CONCEPTS.OUTCOME_SUCCESS
-          : CONCEPTS.OUTCOME_FAILURE,
-        tenantId: dto.tenantId,
-        recordedByUserId: actor.id,
-      });
+      const complete = !truncated;
+      const verified = brokenAt === null && complete;
+      // Un resultado parcial e íntegro no atestigua nada de lo no examinado.
+      const attestation =
+        brokenAt === null && !complete
+          ? null
+          : await this.auditLogRepo.append(tx, {
+              userId: actor.id,
+              action: 'INTEGRITY_ATTESTATION',
+              entity: 'audit_log',
+              entityId: brokenAt ?? undefined,
+              outcomeConceptId: verified
+                ? CONCEPTS.OUTCOME_SUCCESS
+                : CONCEPTS.OUTCOME_FAILURE,
+              tenantId: dto.tenantId,
+              recordedByUserId: actor.id,
+            });
 
-      if (!verified) {
+      if (brokenAt !== null) {
         this.logger.warn(
           { operation: 'audit.integrity.verify', brokenAt },
           'Hash chain integrity broken',
@@ -230,9 +291,10 @@ export class AuditEventsService {
       }
       return {
         verified,
+        complete,
         checkedCount,
         brokenAt,
-        attestationId: attestation.id,
+        attestationId: attestation?.id ?? null,
       };
     });
   }

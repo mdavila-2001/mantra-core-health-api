@@ -94,5 +94,23 @@ export const { seeds: BILLING_CONCEPT_SEEDS, ids: BILL } = defineModuleConcepts(
       display: 'Dunning notice issued',
     },
     DUNNING_LEVEL_1: { code: 'DUN_LEVEL_1', display: 'Dunning level 1' },
+
+    // --- Categorías de gasto del paciente (P44, `GET /patient-spending/me`) ---
+    // No se guardan en ninguna columna: rotulan cada movimiento de la lectura.
+    // Se siembran igual para que el código y el `display` sean un concepto del
+    // catálogo y no una etiqueta escrita en el cliente.
+    SPEND_CONSULTATION: {
+      code: 'SPEND_CONSULTATION',
+      display: 'Consultations',
+    },
+    SPEND_PHARMACY: { code: 'SPEND_PHARMACY', display: 'Pharmacy' },
+    SPEND_LABORATORY: { code: 'SPEND_LABORATORY', display: 'Laboratory' },
+    SPEND_IMAGING: { code: 'SPEND_IMAGING', display: 'Imaging' },
+    SPEND_PROCEDURE: { code: 'SPEND_PROCEDURE', display: 'Procedures' },
+    SPEND_INSURANCE_PREMIUM: {
+      code: 'SPEND_INSURANCE_PREMIUM',
+      display: 'Insurance premium',
+    },
+    SPEND_OTHER: { code: 'SPEND_OTHER', display: 'Other health expenses' },
   },
 );

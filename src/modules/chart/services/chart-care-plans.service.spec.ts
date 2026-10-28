@@ -13,11 +13,35 @@ import { CHART } from '../chart.concepts';
 import {
   PreconditionFailedException,
   ResourceNotFoundException,
+  runWithTenant,
 } from '../../../common';
+import { ChartEncounterScopeService } from './chart-encounter-scope.service';
+import { ChartErrorReason } from '../chart.error-reasons';
+
+const TENANT_A = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+const TENANT_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 
 // CL-29 (BR-13): el autor del plan sale de la sesión, así que quien crea
 // planes en estas pruebas tiene perfil profesional.
 const actor = { id: 'clin-1', roles: [], practitionerProfileId: 's1' } as any;
+
+/**
+ * Ejecuta cada método del servicio dentro del contexto de tenant A, como lo hace
+ * `TenantContextInterceptor` en una petición real.
+ *
+ * @param service - Servicio bajo prueba.
+ * @returns Un proxy que ejecuta cada método dentro de `runWithTenant`.
+ */
+function inTenantA<T extends object>(service: T): T {
+  return new Proxy(service, {
+    get(target, property, receiver) {
+      const value = Reflect.get(target, property, receiver);
+      if (typeof value !== 'function') return value;
+      return (...args: unknown[]) =>
+        runWithTenant(TENANT_A, () => value.apply(target, args));
+    },
+  });
+}
 
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
@@ -48,6 +72,27 @@ function build() {
   const formOrigin = {
     assertUsableOrigin: mockFn().mockResolvedValue(undefined),
   };
+  // CHART-01: el alcance real, con repositorios de prueba. Por defecto el
+  // encuentro `enc-1` existe, está abierto y es del paciente `p1`.
+  const encountersRepo = {
+    findById: mockFn(async (_tx: unknown, id: string) => ({
+      id,
+      patientProfileId: 'p1',
+      tenantId: TENANT_A,
+      sealedAt: undefined,
+    })),
+  };
+  const conditionsRepo = {
+    findById: mockFn(async (_tx: unknown, id: string) => ({
+      id,
+      patientProfileId: 'p1',
+      custodianTenantId: TENANT_A,
+    })),
+  };
+  const encounterScope = new ChartEncounterScopeService(
+    encountersRepo as any,
+    conditionsRepo as any,
+  );
   const service = new ChartCarePlansService(
     em as any,
     carePlansRepo,
@@ -55,14 +100,17 @@ function build() {
     clinicalRead as any,
     encounterSealGuard as any,
     formOrigin as any,
+    encounterScope,
   );
   return {
-    service,
+    service: inTenantA(service),
     tx,
     carePlansRepo,
     clinicalRead,
     encounterSealGuard,
     formOrigin,
+    encountersRepo,
+    conditionsRepo,
   };
 }
 
@@ -330,5 +378,148 @@ describe('ChartCarePlansService · MCH-007, actividad por id', () => {
     );
     expect(activity.detailText).toBe('antes');
     expect(d.tx.flush).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * Captura el rechazo para inspeccionar status, reason y details.
+ *
+ * @param promise - Operación que debe fallar.
+ * @returns La excepción lanzada.
+ */
+async function rejection(promise: Promise<unknown>): Promise<any> {
+  try {
+    await promise;
+  } catch (error) {
+    return error;
+  }
+  throw new Error('Se esperaba un rechazo');
+}
+
+describe('ChartCarePlansService.createCarePlan · encuentro y diagnóstico del paciente (CHART-01)', () => {
+  const dto = (extra: Record<string, unknown> = {}) =>
+    ({ patientProfileId: 'p1', ...extra }) as any;
+
+  /**
+   * Plan que devuelve el repositorio al crearlo.
+   *
+   * @param d - Doble del servicio.
+   */
+  function withPlan(d: ReturnType<typeof build>) {
+    d.carePlansRepo.createPlan.mockReturnValue({
+      id: 'cp1',
+      statusConceptId: CHART.CAREPLAN_ACTIVE,
+      createdAt: new Date(),
+    });
+  }
+
+  it('correcto: el plan de A con encuentro y diagnóstico de A conserva las relaciones', async () => {
+    const d = build();
+    withPlan(d);
+
+    await d.service.createCarePlan(
+      dto({ encounterId: 'enc-1', conditionId: 'cond-1' }),
+      actor,
+    );
+
+    expect(d.carePlansRepo.createPlan.mock.calls[0][1]).toMatchObject({
+      patientProfileId: 'p1',
+      encounterId: 'enc-1',
+      conditionId: 'cond-1',
+    });
+  });
+
+  it('límite: sin encounterId ni conditionId el plan se crea sin consultar nada', async () => {
+    const d = build();
+    withPlan(d);
+
+    await d.service.createCarePlan(dto(), actor);
+
+    expect(d.encountersRepo.findById).not.toHaveBeenCalled();
+    expect(d.conditionsRepo.findById).not.toHaveBeenCalled();
+  });
+
+  it('error: el encuentro abierto de B usado desde A responde como inexistente, sin plan ni actividades', async () => {
+    const foreign = build();
+    foreign.encountersRepo.findById.mockResolvedValue({
+      id: 'enc-b',
+      patientProfileId: 'p2',
+      tenantId: TENANT_A,
+    });
+    const absent = build();
+    absent.encountersRepo.findById.mockResolvedValue(null);
+
+    const a = await rejection(
+      foreign.service.createCarePlan(dto({ encounterId: 'enc-b' }), actor),
+    );
+    const b = await rejection(
+      absent.service.createCarePlan(dto({ encounterId: 'enc-b' }), actor),
+    );
+
+    expect(a).toBeInstanceOf(ResourceNotFoundException);
+    expect(a.reason).toBe(ChartErrorReason.CHART_ENCOUNTER_OUT_OF_SCOPE);
+    expect(a.details).toBeUndefined();
+    expect(a.getResponse()).toEqual(b.getResponse());
+    expect(foreign.carePlansRepo.createPlan).not.toHaveBeenCalled();
+    expect(foreign.carePlansRepo.createActivity).not.toHaveBeenCalled();
+  });
+
+  it('un encuentro del mismo paciente pero de otro tenant también es ajeno', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      id: 'enc-1',
+      patientProfileId: 'p1',
+      tenantId: TENANT_B,
+    });
+
+    const error = await rejection(
+      runWithTenant(TENANT_A, () =>
+        d.service.createCarePlan(dto({ encounterId: 'enc-1' }), actor),
+      ),
+    );
+
+    expect(error.reason).toBe(ChartErrorReason.CHART_ENCOUNTER_OUT_OF_SCOPE);
+    expect(d.carePlansRepo.createPlan).not.toHaveBeenCalled();
+  });
+
+  it('falla catalogada: un encuentro sellado responde 422 CHART_ENCOUNTER_SEALED y no escribe', async () => {
+    const d = build();
+    d.encountersRepo.findById.mockResolvedValue({
+      id: 'enc-1',
+      patientProfileId: 'p1',
+      tenantId: TENANT_A,
+      sealedAt: new Date(),
+    });
+
+    const error = await rejection(
+      d.service.createCarePlan(dto({ encounterId: 'enc-1' }), actor),
+    );
+
+    expect(error).toBeInstanceOf(PreconditionFailedException);
+    expect(error.getStatus()).toBe(422);
+    expect(error.reason).toBe(ChartErrorReason.CHART_ENCOUNTER_SEALED);
+    expect(d.carePlansRepo.createPlan).not.toHaveBeenCalled();
+  });
+
+  it('el diagnóstico de otro paciente o inexistente responde igual y no crea el plan', async () => {
+    const foreign = build();
+    foreign.conditionsRepo.findById.mockResolvedValue({
+      id: 'cond-b',
+      patientProfileId: 'p2',
+    });
+    const absent = build();
+    absent.conditionsRepo.findById.mockResolvedValue(null);
+
+    const a = await rejection(
+      foreign.service.createCarePlan(dto({ conditionId: 'cond-b' }), actor),
+    );
+    const b = await rejection(
+      absent.service.createCarePlan(dto({ conditionId: 'cond-b' }), actor),
+    );
+
+    expect(a.getStatus()).toBe(404);
+    expect(a.reason).toBe(ChartErrorReason.CHART_CONDITION_OUT_OF_SCOPE);
+    expect(a.getResponse()).toEqual(b.getResponse());
+    expect(foreign.carePlansRepo.createPlan).not.toHaveBeenCalled();
   });
 });

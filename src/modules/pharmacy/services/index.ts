@@ -8,3 +8,6 @@ export * from './pharmacy-read.service';
 export * from './pharmacy-staff-read.service';
 export * from './pharmacy-marketplace.service';
 export * from './medicine-catalog-search.service';
+export * from './pharmacy-categories.service';
+export * from './pharmacy-opening-hours.service';
+export * from './pharmacy-provisioning.service';

@@ -8,7 +8,12 @@ import {
   Put,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { TenantCatalogService } from '../services';
 import {
   TenantCatalogPolicyResponseDto,
@@ -38,6 +43,11 @@ export class TerminologyTenantCatalogController {
    * @param user - Usuario autenticado que ejecuta la operación.
    * @returns Resultado de upsert policy conforme al contrato `Promise<TenantCatalogPolicyResponseDto>`.
    */
+  @Audited({
+    action: 'TENANT_CATALOG_POLICY_UPSERTED',
+    entity: 'tenant_catalog_policy',
+    entityId: 'result.id',
+  })
   @Put(':tenantId/catalog-policies')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.OK)

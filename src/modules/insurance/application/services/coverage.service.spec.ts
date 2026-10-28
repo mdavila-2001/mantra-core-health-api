@@ -7,7 +7,9 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import { ResourceNotFoundException, runWithTenant } from '../../../../common';
 import { CoverageService } from './coverage.service';
+import { INS } from '../../domain/insurance.concepts';
 
 const actor = { id: 'patient-user-1', roles: ['PATIENT'] } as any;
 
@@ -21,7 +23,10 @@ const actor = { id: 'patient-user-1', roles: ['PATIENT'] } as any;
 function build() {
   const em: any = { transactional: mockFn() };
   em.fork = mockFn(() => em);
-  const repo = { findByPatient: mockFn(() => Promise.resolve([])) };
+  const repo = {
+    findByPatient: mockFn(() => Promise.resolve([])),
+    findOptionsByPatient: mockFn(() => Promise.resolve([])),
+  };
   const catalog = {};
   const accountLinksRepo = {
     findActiveByUser: mockFn(() => Promise.resolve(null)),
@@ -32,14 +37,25 @@ function build() {
     findPatientProfile: patientProfilesRepo.findById,
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  const careGate = {
+    assertCareRelationship: mockFn(() => Promise.resolve()),
+  };
   const service = new CoverageService(
     em as any,
     repo as any,
     catalog as any,
     patientAccounts as any,
+    careGate as any,
     logger as any,
   );
-  return { service, repo, accountLinksRepo, patientProfilesRepo };
+  return {
+    service,
+    repo,
+    accountLinksRepo,
+    patientProfilesRepo,
+    logger,
+    careGate,
+  };
 }
 
 describe('CoverageService.listMine (CV-11)', () => {
@@ -92,5 +108,136 @@ describe('CoverageService.listMine (CV-11)', () => {
         status: 'coverage-active',
       }),
     ]);
+  });
+});
+
+describe('CoverageService.listForPatient (carril 16, REQ-16-026)', () => {
+  const PATIENT = '11111111-1111-4111-8111-111111111111';
+  const billing = { id: 'billing-user-1', roles: ['BILLING'] } as any;
+  const TENANT = '22222222-2222-4222-8222-222222222222';
+
+  /** La lectura corre dentro de la organización activa, como en la petición real. */
+  const list = (d: ReturnType<typeof build>, patient: string, who: any) =>
+    runWithTenant(TENANT, () => d.service.listForPatient(patient, who));
+
+  /** Una cobertura vigente de la persona, con las columnas que lee el repositorio. */
+  function row(overrides: Record<string, unknown> = {}) {
+    return {
+      coverage_id: 'coverage-1',
+      carrier_id: 'carrier-1',
+      carrier_name: 'Seguros Andina',
+      plan_name: 'Plan Integral',
+      status_concept_id: INS.COVERAGE_ACTIVE,
+      plan_status_concept_id: INS.PLAN_ACTIVE,
+      effective_from: '2020-01-01',
+      effective_to: null,
+      plan_effective_from: '2020-01-01',
+      plan_effective_to: null,
+      currency_code: null,
+      currency_concept_id: null,
+      ...overrides,
+    };
+  }
+
+  it.each([['PATIENT'], ['PRACTITIONER'], ['SECURITY_ADMIN']])(
+    'rechaza con 403 al rol %s y no lee nada',
+    async (role) => {
+      const d = build();
+      await expect(
+        list(d, PATIENT, { id: 'u', roles: [role] }),
+      ).rejects.toThrow('Rol insuficiente');
+      expect(d.repo.findOptionsByPatient).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([['BILLING'], ['FINANCE'], ['SUPERADMIN']])(
+    'deja leer al rol %s',
+    async (role) => {
+      const d = build();
+      const res = await list(d, PATIENT, { id: 'u', roles: [role] });
+      expect(res).toEqual({ items: [] });
+      expect(d.repo.findOptionsByPatient).toHaveBeenCalledWith(
+        expect.anything(),
+        PATIENT,
+      );
+    },
+  );
+
+  it('devuelve solo lo que la cotización usa: sin póliza ni afiliado', async () => {
+    const d = build();
+    d.repo.findOptionsByPatient.mockResolvedValueOnce([
+      row({ policy_identifier: 'POL-1', member_identifier: 'AF-1' }),
+    ] as never);
+    const res = await list(d, PATIENT, billing);
+    expect(res.items).toHaveLength(1);
+    expect(Object.keys(res.items[0]!).sort()).toEqual([
+      'carrierName',
+      'currencyCode',
+      'id',
+      'insuranceCarrierId',
+      'planName',
+      'validityStatus',
+    ]);
+    expect(res.items[0]).toMatchObject({
+      id: 'coverage-1',
+      insuranceCarrierId: 'carrier-1',
+      carrierName: 'Seguros Andina',
+      planName: 'Plan Integral',
+      validityStatus: 'CURRENT',
+    });
+  });
+
+  it('marca la vigencia: vencida, por vencer e inactiva', async () => {
+    const d = build();
+    d.repo.findOptionsByPatient.mockResolvedValueOnce([
+      row({ coverage_id: 'vencida', effective_to: '2020-12-31' }),
+      row({ coverage_id: 'futura', effective_from: '2999-01-01' }),
+      row({ coverage_id: 'inactiva', status_concept_id: 'otro-estado' }),
+    ] as never);
+    const res = await list(d, PATIENT, billing);
+    expect(res.items.map((i) => [i.id, i.validityStatus])).toEqual([
+      ['vencida', 'EXPIRED'],
+      ['futura', 'UPCOMING'],
+      ['inactiva', 'INACTIVE'],
+    ]);
+  });
+
+  it('no registra en el log el número de póliza ni el de afiliado', async () => {
+    const d = build();
+    d.repo.findOptionsByPatient.mockResolvedValueOnce([
+      row({ policy_identifier: 'POL-1', member_identifier: 'AF-1' }),
+    ] as never);
+    await list(d, PATIENT, billing);
+    const logged = JSON.stringify(d.logger.info.mock.calls);
+    expect(logged).not.toContain('POL-1');
+    expect(logged).not.toContain('AF-1');
+  });
+
+  it('corre la puerta de relación asistencial con la persona y la organización activa', async () => {
+    const d = build();
+    await list(d, PATIENT, billing);
+    expect(d.careGate.assertCareRelationship).toHaveBeenCalledWith(
+      expect.anything(),
+      { patientProfileId: PATIENT },
+      TENANT,
+      expect.any(Date),
+    );
+  });
+
+  it('sin relación asistencial responde el 404 uniforme y no lee las coberturas', async () => {
+    const d = build();
+    d.careGate.assertCareRelationship.mockRejectedValueOnce(
+      new ResourceNotFoundException('Cobertura no encontrada'),
+    );
+    await expect(list(d, PATIENT, billing)).rejects.toThrow(
+      'Cobertura no encontrada',
+    );
+    expect(d.repo.findOptionsByPatient).not.toHaveBeenCalled();
+  });
+
+  it('sin organización activa no lee nada', async () => {
+    const d = build();
+    await expect(d.service.listForPatient(PATIENT, billing)).rejects.toThrow();
+    expect(d.repo.findOptionsByPatient).not.toHaveBeenCalled();
   });
 });

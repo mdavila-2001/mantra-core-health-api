@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ConflictException,
+  getCurrentTenantId,
   PreconditionFailedException,
   ResourceNotFoundException,
   touch,
@@ -31,6 +32,19 @@ import {
 } from '../dto';
 import { AUTHZ } from '../authz.concepts';
 import { AuthzErrorReason } from '../authz.error-reasons';
+import { AuthzClinicalScopeService } from './authz-clinical-scope.service';
+
+/** Cómo se informa una relación asistencial inexistente o de otro tenant. */
+const CARE_RELATIONSHIP_NOT_FOUND = {
+  message: 'Relación asistencial no encontrada',
+  reason: AuthzErrorReason.CARE_RELATIONSHIP_NOT_FOUND,
+} as const;
+
+/** Cómo se informa una representación legal inexistente o de otro tenant. */
+const LEGAL_REPRESENTATION_NOT_FOUND = {
+  message: 'Representación legal no encontrada',
+  reason: AuthzErrorReason.LEGAL_REPRESENTATION_NOT_FOUND,
+} as const;
 
 const CARE_REL_TYPE_CONCEPT: Record<CareRelationshipType, string> = {
   TREATING: AUTHZ.CARE_REL_TREATING,
@@ -52,6 +66,13 @@ const REPRESENTATION_TYPE_CONCEPT: Record<LegalRepresentationType, string> = {
   CURATOR: AUTHZ.REPRESENTATION_CURATOR,
 };
 
+/** Una solicitud `PENDING` creada y todavía sin avisar al paciente. */
+export interface CareRelationshipRequestNotice {
+  relId: string;
+  patientProfileId: string;
+  tenantId: string;
+}
+
 /**
  * Relación asistencial (C-06 / CAN-AUTH-001) y representación legal del paciente
  * (C-07 / A-03). Estos vínculos son bases legítimas de acceso a los datos del
@@ -69,6 +90,7 @@ export class AuthzCareRelationshipsService {
    * @param accountLinksRepo - Resuelve el usuario dueño de un perfil de paciente, para notificarlo (FT-07-R05).
    * @param auditTrail - Deja constancia WORM de la solicitud/respuesta.
    * @param notifications - Emite el aviso in-app al paciente.
+   * @param scope - Política de alcance: tenant del contexto y vínculo del paciente con él.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
@@ -79,6 +101,7 @@ export class AuthzCareRelationshipsService {
     private readonly auditTrail: AuditTrailService,
     private readonly outbox: OutboxService,
     private readonly notifications: NotificationsService,
+    private readonly scope: AuthzClinicalScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(AuthzCareRelationshipsService.name);
@@ -111,31 +134,41 @@ export class AuthzCareRelationshipsService {
     );
 
     const { relId, tenantId } = await this.em.transactional(async (tx) => {
-      const active = await this.careRepo.findActive(
+      // El tenant sale del contexto. A diferencia del alta directa, acá el paciente
+      // se encontró en el padrón y aún no tiene vínculo con el tenant: alcanza con
+      // que exista, porque la relación nace `PENDING` y no concede nada hasta que
+      // el propio paciente la acepte.
+      const tenantId = this.scope.resolveTenant(dto.tenantId);
+      await this.scope.assertPatientExists(tx, dto.patientProfileId);
+
+      // Los duplicados se buscan sólo en el tenant activo: una relación o una
+      // solicitud de otra organización no es duplicado de ésta, y un 409 por ella
+      // delataría que el vínculo existe allí. Sin `details`: ni ids de vuelta.
+      const active = await this.careRepo.findActiveInTenant(
         tx,
         dto.patientProfileId,
         practitionerProfileId,
+        tenantId,
       );
       if (active) {
         throw new ConflictException(
           'Ya existe una relación asistencial activa con ese paciente',
-          { patientProfileId: dto.patientProfileId, practitionerProfileId },
         );
       }
-      const pending = await this.careRepo.findPending(
+      const pending = await this.careRepo.findPendingInTenant(
         tx,
         dto.patientProfileId,
         practitionerProfileId,
+        tenantId,
       );
       if (pending) {
         throw new ConflictException(
           'Ya hay una solicitud pendiente de respuesta para ese paciente',
-          { patientProfileId: dto.patientProfileId, practitionerProfileId },
         );
       }
 
       const rel = this.careRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         patientProfileId: dto.patientProfileId,
         practitionerProfileId,
         relationshipTypeConceptId:
@@ -150,36 +183,21 @@ export class AuthzCareRelationshipsService {
         action: 'CARE_RELATIONSHIP_REQUESTED',
         entity: 'care_relationship',
         entityId: rel.id,
-        tenantId: dto.tenantId,
+        tenantId,
       });
 
-      return { relId: rel.id, tenantId: dto.tenantId };
+      return { relId: rel.id, tenantId };
     });
 
-    const recipientUserId = await this.resolvePatientUserId(
-      dto.patientProfileId,
-    );
-    if (recipientUserId) {
-      await this.notifications.emitInApp({
-        recipientUserId,
-        category: 'CLINICAL',
-        subject: 'Un profesional pide ver su historia clínica',
-        bodyText:
-          dto.reasonText ??
-          'Un profesional le encontró en la red y pide su autorización para ver su expediente. Puede elegir qué áreas autorizar, o rechazarlo.',
-        destination: { type: 'CARE_RELATIONSHIP_REQUEST', id: relId },
+    await this.notifyRequest(
+      {
+        relId,
+        patientProfileId: dto.patientProfileId,
         tenantId,
-        actorUserId: actor.id,
-      });
-    } else {
-      this.logger.warn(
-        {
-          operation: 'authz.care-relationship.request.notify-missing',
-          patientProfileId: dto.patientProfileId,
-        },
-        'No se encontró cuenta activa del paciente: la solicitud queda creada sin notificación',
-      );
-    }
+        reasonText: dto.reasonText,
+      },
+      actor,
+    );
 
     return { id: relId, status: CONCEPTS.STATE_PENDING, createdAt: new Date() };
   }
@@ -275,6 +293,144 @@ export class AuthzCareRelationshipsService {
     });
   }
 
+  /**
+   * Deja constancia, en la misma transacción del check-in de un encuentro, de la
+   * relación asistencial entre cada profesional que atiende y el paciente.
+   *
+   * El cobro con seguro la exige (REQ-16-035) y ningún otro flujo de atención la
+   * creaba. Que el check-in la cree **no** puede probar el vínculo por sí
+   * mismo: `POST /clinical/encounters/check-in` lo hace el personal para
+   * cualquier paciente existente, y aceptarlo dejaría que un tenant ajeno se
+   * fabricara el vínculo y luego cobrara (`patientHasFootprintInTenant`). Por
+   * eso, por cada profesional sin relación ACTIVA ni solicitud PENDING en el
+   * tenant:
+   *
+   * - si el paciente deja huella propia en el tenant, nace `ACTIVE` y acotada a
+   *   `PAYMENT`: habilita cobrar y nada más, no abre la historia clínica (el PDP
+   *   y la lectura clínica descartan una relación acotada a otro propósito);
+   * - si no, nace `PENDING` como una solicitud que el propio paciente responde:
+   *   no concede nada hasta que acepta.
+   *
+   * No hace nada si el tenant del encuentro no es el activo del actor, o si el
+   * encuentro no nombra ningún profesional.
+   *
+   * @param tx - Transacción del check-in: la relación nace o no nace con el encuentro.
+   * @param input - Paciente, tenant del encuentro y profesionales que lo atienden.
+   * @param actor - Quien abre el encuentro.
+   * @returns Las solicitudes `PENDING` creadas, para avisar al paciente tras el commit.
+   */
+  async recordEncounterCareRelationships(
+    tx: EntityManager,
+    input: {
+      patientProfileId: string;
+      tenantId: string;
+      practitionerProfileIds: readonly string[];
+    },
+    actor: AuthenticatedUser,
+  ): Promise<CareRelationshipRequestNotice[]> {
+    const { patientProfileId, tenantId } = input;
+    // El tenant del cuerpo del check-in no se persiste por su cuenta: sólo vale
+    // si coincide con el del contexto verificado.
+    if (getCurrentTenantId() !== tenantId) return [];
+
+    const practitioners = [...new Set(input.practitionerProfileIds)];
+    if (practitioners.length === 0) return [];
+
+    const ownFootprint = await this.scope.isPatientInTenant(
+      tx,
+      patientProfileId,
+      tenantId,
+    );
+    const requested: CareRelationshipRequestNotice[] = [];
+    for (const practitionerProfileId of practitioners) {
+      const active = await this.careRepo.findActiveInTenant(
+        tx,
+        patientProfileId,
+        practitionerProfileId,
+        tenantId,
+      );
+      if (active) continue;
+      const pending = await this.careRepo.findPendingInTenant(
+        tx,
+        patientProfileId,
+        practitionerProfileId,
+        tenantId,
+      );
+      if (pending) continue;
+
+      const rel = this.careRepo.create(tx, {
+        tenantId,
+        patientProfileId,
+        practitionerProfileId,
+        relationshipTypeConceptId: CARE_REL_TYPE_CONCEPT.TREATING,
+        validFrom: new Date(),
+        actorUserId: actor.id,
+        ...(ownFootprint
+          ? { purposeConceptId: CARE_REL_PURPOSE_CONCEPT.PAYMENT }
+          : { statusConceptId: CONCEPTS.STATE_PENDING }),
+      });
+      await tx.flush();
+      await this.auditTrail.record(tx, actor, {
+        action: ownFootprint
+          ? 'CARE_RELATIONSHIP_ESTABLISHED_BY_ENCOUNTER'
+          : 'CARE_RELATIONSHIP_REQUESTED_BY_ENCOUNTER',
+        entity: 'care_relationship',
+        entityId: rel.id,
+        tenantId,
+      });
+      if (!ownFootprint) {
+        requested.push({ relId: rel.id, patientProfileId, tenantId });
+      }
+    }
+    return requested;
+  }
+
+  /**
+   * Avisa al paciente de las solicitudes que dejó `recordEncounterCareRelationships`.
+   * Va después del commit del encuentro: no existe aviso de una solicitud que se
+   * deshizo.
+   *
+   * @param notices - Las solicitudes `PENDING` creadas.
+   * @param actor - Quien abrió el encuentro.
+   */
+  async notifyEncounterCareRelationshipRequests(
+    notices: readonly CareRelationshipRequestNotice[],
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    for (const notice of notices) await this.notifyRequest(notice, actor);
+  }
+
+  /** Avisa in-app al paciente titular de una solicitud de acceso a su expediente. */
+  private async notifyRequest(
+    notice: CareRelationshipRequestNotice & { reasonText?: string },
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const recipientUserId = await this.resolvePatientUserId(
+      notice.patientProfileId,
+    );
+    if (recipientUserId) {
+      await this.notifications.emitInApp({
+        recipientUserId,
+        category: 'CLINICAL',
+        subject: 'Un profesional pide ver su historia clínica',
+        bodyText:
+          notice.reasonText ??
+          'Un profesional le encontró en la red y pide su autorización para ver su expediente. Puede elegir qué áreas autorizar, o rechazarlo.',
+        destination: { type: 'CARE_RELATIONSHIP_REQUEST', id: notice.relId },
+        tenantId: notice.tenantId,
+        actorUserId: actor.id,
+      });
+    } else {
+      this.logger.warn(
+        {
+          operation: 'authz.care-relationship.request.notify-missing',
+          patientProfileId: notice.patientProfileId,
+        },
+        'No se encontró cuenta activa del paciente: la solicitud queda creada sin notificación',
+      );
+    }
+  }
+
   /** Resuelve el `userId` de la cuenta activa de un perfil de paciente. */
   private async resolvePatientUserId(
     patientProfileId: string,
@@ -314,24 +470,34 @@ export class AuthzCareRelationshipsService {
         );
       }
 
-      const existing = await this.careRepo.findActive(
+      // El tenant sale del contexto y el paciente tiene que tener vínculo con él
+      // antes de leer o persistir nada (un 409 sobre un paciente ajeno lo delataría).
+      const tenantId = this.scope.resolveTenant(dto.tenantId);
+      await this.scope.assertPatientInTenant(
+        tx,
+        dto.patientProfileId,
+        tenantId,
+      );
+
+      // El duplicado se busca sólo en el tenant activo (como en los accesos
+      // clínicos): una relación de otra organización no bloquea ésta ni se delata
+      // con un 409. La respuesta no lleva `details`: no devuelve ids.
+      const existing = await this.careRepo.findActiveInTenant(
         tx,
         dto.patientProfileId,
         dto.practitionerProfileId,
+        tenantId,
       );
       if (existing) {
         throw new ConflictException(
           'Ya existe una relación asistencial activa para ese practicante',
-          {
-            patientProfileId: dto.patientProfileId,
-            practitionerProfileId: dto.practitionerProfileId,
-          },
+          undefined,
           AuthzErrorReason.CARE_RELATIONSHIP_ALREADY_ACTIVE,
         );
       }
 
       const rel = this.careRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         patientProfileId: dto.patientProfileId,
         practitionerProfileId: dto.practitionerProfileId,
         relationshipTypeConceptId: CARE_REL_TYPE_CONCEPT[dto.relationshipType],
@@ -361,13 +527,13 @@ export class AuthzCareRelationshipsService {
       'Revoking care relationship',
     );
     return this.em.transactional(async (tx) => {
-      const rel = await this.careRepo.findById(tx, id);
-      if (!rel)
-        throw new ResourceNotFoundException(
-          'Relación asistencial no encontrada',
-          { id },
-          AuthzErrorReason.CARE_RELATIONSHIP_NOT_FOUND,
-        );
+      // Inexistente y de otro tenant responden igual (404 sin `details`). El
+      // paciente titular sí revoca lo suyo desde cualquier organización.
+      const rel = this.scope.scopeRevocation(
+        await this.careRepo.findById(tx, id),
+        actor,
+        CARE_RELATIONSHIP_NOT_FOUND,
+      );
       if (rel.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'La relación asistencial no está activa',
@@ -470,24 +636,30 @@ export class AuthzCareRelationshipsService {
         );
       }
 
-      const existing = await this.legalRepo.findActive(
+      const tenantId = this.scope.resolveTenant(dto.tenantId);
+      await this.scope.assertPatientInTenant(
+        tx,
+        dto.patientProfileId,
+        tenantId,
+      );
+
+      // Sólo en el tenant activo y sin `details`, igual que la relación asistencial.
+      const existing = await this.legalRepo.findActiveInTenant(
         tx,
         dto.patientProfileId,
         dto.representativeUserId,
+        tenantId,
       );
       if (existing) {
         throw new ConflictException(
           'Ya existe una representación legal activa para ese usuario',
-          {
-            patientProfileId: dto.patientProfileId,
-            representativeUserId: dto.representativeUserId,
-          },
+          undefined,
           AuthzErrorReason.LEGAL_REPRESENTATION_ALREADY_ACTIVE,
         );
       }
 
       const rep = this.legalRepo.create(tx, {
-        tenantId: dto.tenantId,
+        tenantId,
         patientProfileId: dto.patientProfileId,
         representativeUserId: dto.representativeUserId,
         representationTypeConceptId:
@@ -516,13 +688,11 @@ export class AuthzCareRelationshipsService {
       'Revoking legal representation',
     );
     return this.em.transactional(async (tx) => {
-      const rep = await this.legalRepo.findById(tx, id);
-      if (!rep)
-        throw new ResourceNotFoundException(
-          'Representación legal no encontrada',
-          { id },
-          AuthzErrorReason.LEGAL_REPRESENTATION_NOT_FOUND,
-        );
+      const rep = this.scope.scopeRevocation(
+        await this.legalRepo.findById(tx, id),
+        actor,
+        LEGAL_REPRESENTATION_NOT_FOUND,
+      );
       if (rep.statusConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException(
           'La representación legal no está activa',

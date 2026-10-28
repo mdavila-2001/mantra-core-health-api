@@ -7,6 +7,7 @@ import {
   OpsIncidentsService,
   OpsReliabilityService,
   OpsPracticesService,
+  PlatformOpsScope,
 } from './services';
 import {
   OpsReleasesRepository,
@@ -35,6 +36,7 @@ import {
     OpsIncidentsService,
     OpsReliabilityService,
     OpsPracticesService,
+    PlatformOpsScope,
   ],
 })
 export class PlatformOpsModule {}

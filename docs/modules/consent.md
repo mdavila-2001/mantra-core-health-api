@@ -9,7 +9,7 @@
 # Módulo `consent`
 
 **Fuente:** [`src/modules/consent/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/consent/README.md)
-· 11 controllers · 11 services · 9 repositories · 10 entidades · 16 DTO
+· 11 controllers · 12 services · 10 repositories · 10 entidades · 16 DTO
 
 ---
 
@@ -128,8 +128,18 @@ npx tsc --noEmit -p tsconfig.json | grep modules/consent   # vacío
 NODE_OPTIONS=--experimental-vm-modules npx jest src/modules/consent   # verde
 ```
 
-## Revisión backend 2026-10-05
+## Alcance de las decisiones de privacidad
 
-Las decisiones, el retiro y la revocación de consentimiento no acotan el alcance
-del actor, y existe el fallback al tenant seed. La corrida dirigida pasó 13
-suites y 54 tests; no hay pruebas de dos tenants ni de titularidad del paciente.
+`ConsentScopeService` es la política común de captura de consentimiento,
+restricción de privacidad y autorización HIPAA: el tenant sale de
+`requireTenantId()` (no hay fallback al tenant seed) y el `tenantId` del cuerpo
+sólo se contrasta (403 `CONSENT_TENANT_SCOPE_REQUIRED`). El paciente y el
+propósito tienen que existir, y la base legal tiene que ser del tenant activo y
+del mismo propósito (422 `CONSENT_LEGAL_BASIS_PURPOSE_MISMATCH`).
+
+Retiro, enmienda de provisiones y revocación HIPAA cargan la fila por
+`(id, tenant activo)`: una de otro tenant responde igual que una inexistente
+(404, mismo mensaje y `reason`, sin `details`) y la denegación queda en el log.
+El titular retira lo suyo por `ConsentsService.withdrawAsOwner`, acotado por
+`(id, patientProfileId)` de su sesión. Hay pruebas de dos tenants en los specs
+de los tres servicios.

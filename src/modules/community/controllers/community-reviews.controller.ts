@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
   type AuthenticatedUser,
@@ -47,6 +48,11 @@ export class CommunityReviewsController {
   ) {}
 
   /** UC-19-11. */
+  @Audited({
+    action: 'SERVICE_REVIEW_PUBLISHED',
+    entity: 'service_review',
+    entityId: 'result.id',
+  })
   @Post(':profileId/reviews')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar una review verificada de servicio' })
@@ -84,6 +90,11 @@ export class CommunityReviewsController {
    * respuestas, pero no había forma de crear ninguna: un profesional podía ser
    * calificado en público sin poder contestar.
    */
+  @Audited({
+    action: 'SERVICE_REVIEW_RESPONDED',
+    entity: 'review_response',
+    entityId: 'result.id',
+  })
   @Post(':profileId/reviews/:reviewId/responses')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Responder una reseña de la propia vitrina' })

@@ -1269,21 +1269,21 @@ Guarda avisos dirigidos a usuarios de un laboratorio con plantilla y asunto, par
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:32`)_ | coincide |
-| 2 | `recipient_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | Cuenta destinataria. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:38`)_ | coincide |
-| 3 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | Organización bajo la que se emite, cuando aplica. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:44`)_ | coincide |
-| 4 | `template_code` | `varchar` | Obligatoria | Código estable de plantilla, con el que la interfaz rotula el aviso. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:50`)_ | coincide |
-| 5 | `subject` | `varchar` | Obligatoria | Asunto legible. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:56`)_ | coincide |
-| 6 | `body_text` | `text` | Obligatoria | Cuerpo legible. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:62`)_ | coincide |
-| 7 | `related_resource_type` | `varchar` | Obligatoria | Tipo del recurso que originó el aviso (`visit_request`, `regulatory_document`…). _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:68`)_ | coincide |
-| 8 | `related_resource_id` | `uuid` | Obligatoria | Identificador de ese recurso. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:74`)_ | coincide |
-| 9 | `is_read` | `boolean = false` | Obligatoria | Si la persona ya lo leyó. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:80`)_ | coincide |
-| 10 | `read_at` | `timestamptz` | Opcional | Momento de la lectura. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:86`)_ | coincide |
-| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:92`)_ | coincide |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:98`)_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:31`)_ | coincide |
+| 2 | `recipient_user_id` | `uuid` | Clave foránea → iam.users.id; Obligatoria | Cuenta destinataria. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:37`)_ | coincide |
+| 3 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | Organización bajo la que se emite, cuando aplica. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:43`)_ | coincide |
+| 4 | `template_code` | `varchar` | Obligatoria | Código estable de plantilla, con el que la interfaz rotula el aviso. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:49`)_ | coincide |
+| 5 | `subject` | `varchar` | Obligatoria | Asunto legible. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:55`)_ | coincide |
+| 6 | `body_text` | `text` | Obligatoria | Cuerpo legible. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:61`)_ | coincide |
+| 7 | `related_resource_type` | `varchar` | Obligatoria | Tipo del recurso que originó el aviso (`visit_request`, `regulatory_document`…). _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:67`)_ | coincide |
+| 8 | `related_resource_id` | `uuid` | Obligatoria | Identificador de ese recurso. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:73`)_ | coincide |
+| 9 | `is_read` | `boolean = false` | Obligatoria | Si la persona ya lo leyó. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:79`)_ | coincide |
+| 10 | `read_at` | `timestamptz` | Opcional | Momento de la lectura. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:85`)_ | coincide |
+| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:91`)_ | coincide |
+| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:97`)_ | coincide |
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:116`)_ | coincide |
+| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharma_lab/entities/pharma_lab_notices.entity.ts:115`)_ | coincide |
 
 #### Relaciones
 

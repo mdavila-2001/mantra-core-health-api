@@ -14,6 +14,7 @@ import {
 } from '../../entities';
 import { createdBy, touch } from '../../../../common';
 import { bookableStart } from '../../domain/time/scheduling-time';
+import { isFlexibleBand } from '../../domain/catalog/flexible-band';
 
 /**
  * Describe el contrato estructural de create resource data.
@@ -147,6 +148,8 @@ export interface CreateTemplateData {
    * Valor de slot minutes mantenido por la instancia.
    */
   slotMinutes?: number;
+  /** Horario flexible, sin turnos fijos (P36). Ausente ≡ `false`. */
+  flexibleHours?: boolean;
   /**
    * Identificador asociado a booking policy.
    */
@@ -195,6 +198,10 @@ export interface CreateRuleData {
   gapMinutes?: number;
   /** Qué admite la franja (concepto). Ausente ≡ solo consultas. */
   bookingModeConceptId?: string;
+  /** La franja atiende también por telemedicina. Ausente ≡ `false`. */
+  telemedicineEnabled?: boolean;
+  /** Horario flexible de la franja (v4.2.64). Ausente ≡ `false`. */
+  flexibleHours?: boolean;
   /**
    * Identificador asociado a actor user.
    */
@@ -402,6 +409,7 @@ export class SchedulingCatalogRepository {
         validFrom: data.validFrom,
         validTo: data.validTo,
         slotMinutes: data.slotMinutes,
+        flexibleHours: data.flexibleHours ?? false,
         bookingPolicyId: data.bookingPolicyId,
         statusConceptId: data.statusConceptId,
         ...createdBy(data.actorUserId),
@@ -486,6 +494,8 @@ export class SchedulingCatalogRepository {
         capacityPerSlot: data.capacityPerSlot,
         gapMinutes: data.gapMinutes,
         bookingModeConceptId: data.bookingModeConceptId,
+        telemedicineEnabled: data.telemedicineEnabled === true,
+        flexibleHours: data.flexibleHours === true,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
@@ -504,6 +514,41 @@ export class SchedulingCatalogRepository {
     scheduleTemplateId: string,
   ): Promise<ScheduleRules[]> {
     return em.find(ScheduleRules, { scheduleTemplateId });
+  }
+
+  /**
+   * Las plantillas publicadas de un recurso que tienen **al menos una** franja
+   * de horario flexible (P36, por franja desde v4.2.64), cada una con sus
+   * franjas flexibles.
+   *
+   * Es lo que lee la disponibilidad flexible: qué ratos declaró el médico sin
+   * cortarlos en turnos. Una plantilla flexible trae todas sus franjas; una de
+   * turnos fijos, sólo las que se declararon flexibles —las fijas las ofrece
+   * la grilla de `generate-slots`—. Una plantilla retirada no ofrece nada.
+   */
+  async findFlexibleTemplatesOfResource(
+    em: EntityManager,
+    resourceId: string,
+    publishedStatusConceptId: string,
+  ): Promise<{ template: ScheduleTemplates; rules: ScheduleRules[] }[]> {
+    const templates = await em.find(ScheduleTemplates, {
+      resourceId,
+      statusConceptId: publishedStatusConceptId,
+    });
+    if (templates.length === 0) return [];
+    const rules = await em.find(ScheduleRules, {
+      scheduleTemplateId: { $in: templates.map((template) => template.id) },
+    });
+    return templates
+      .map((template) => ({
+        template,
+        rules: rules.filter(
+          (rule) =>
+            rule.scheduleTemplateId === template.id &&
+            isFlexibleBand(template.flexibleHours === true, rule),
+        ),
+      }))
+      .filter(({ rules: flexibleRules }) => flexibleRules.length > 0);
   }
 
   /**
@@ -878,16 +923,35 @@ export class SchedulingCatalogRepository {
     }
   }
 
+  /**
+   * Retira la plantilla: suelta los cupos libres y cierra los que tienen historia.
+   *
+   * ## Cambiar de horario con citas, sin carreras (P23)
+   *
+   * - **Los cupos se toman `FOR UPDATE` antes de mirar sus citas**, en el mismo
+   *   orden que el resto del módulo (`startAt`). Una retención o una reserva
+   *   concurrente toma el mismo cupo con `findSlotForUpdate`: o termina antes y
+   *   este retiro ve su cita —y conserva el cupo—, o espera y encuentra el cupo
+   *   borrado o cerrado. Sin el bloqueo, la cita llegaba entre la lectura y el
+   *   borrado, y el retiro entero caía por la FK hacia `bookable_slots`.
+   * - **Los cupos conservados quedan `keptSlotStatusConceptId`** (`SLOT_BLOCKED`):
+   *   siguen sosteniendo su cita, pero dejan de ofrecerse. Quedaban abiertos, y un
+   *   cupo del horario retirado cuya cita se cancelaba —o que sólo tenía historia,
+   *   o capacidad para más de una— volvía a ofrecerse con la hora y la duración
+   *   viejas, al lado del cupo nuevo del mismo instante: el turno de las 08:00
+   *   terminando a las 08:30 y una doble reserva posible. Cancelar, reprogramar
+   *   o proponer no reabren un cupo bloqueado, y retenerlo se rechaza.
+   */
   async retireTemplate(
     em: EntityManager,
     scheduleTemplateId: string,
     retiredStatusConceptId: string,
     actorUserId: string,
+    keptSlotStatusConceptId: string,
   ): Promise<{ releasedSlots: number; keptSlots: number }> {
-    const slots = await em.find(
-      BookableSlots,
-      { scheduleTemplateId },
-      { fields: ['id'] },
+    const slots = await this.findSlotsOfTemplateForUpdate(
+      em,
+      scheduleTemplateId,
     );
 
     let releasedSlots = 0;
@@ -918,6 +982,16 @@ export class SchedulingCatalogRepository {
       ]);
       const freeOnes = ids.filter((id) => !untouchable.has(id));
       keptSlots = ids.length - freeOnes.length;
+
+      for (const slot of slots) {
+        if (
+          untouchable.has(slot.id) &&
+          slot.statusConceptId !== keptSlotStatusConceptId
+        ) {
+          slot.statusConceptId = keptSlotStatusConceptId;
+          touch(slot, actorUserId);
+        }
+      }
 
       if (freeOnes.length > 0) {
         await em.nativeDelete(SlotHolds, {
@@ -1087,5 +1161,53 @@ export class SchedulingCatalogRepository {
       startAt: { $lt: endAt },
       endAt: { $gt: startAt },
     });
+  }
+
+  /**
+   * Los cupos que **pisan** la ventana, bloqueados para escribir.
+   *
+   * Distinto de `findSlotsOfResourceForUpdate`, que exige que el cupo
+   * *empiece* dentro: un bloqueo que arranca a mitad de una cita también la
+   * alcanza, y es exactamente la cita que hay que cancelar.
+   */
+  findSlotsOverlappingForUpdate(
+    em: EntityManager,
+    resourceId: string,
+    startAt: Date,
+    endAt: Date,
+  ): Promise<BookableSlots[]> {
+    return em.find(
+      BookableSlots,
+      {
+        resourceId,
+        startAt: { $lt: endAt },
+        endAt: { $gt: startAt },
+      },
+      { lockMode: LockMode.PESSIMISTIC_WRITE, orderBy: { startAt: 'ASC' } },
+    );
+  }
+
+  /** Todos los cupos de una plantilla, para describir sus citas vivas. */
+  findSlotsOfTemplate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+  ): Promise<BookableSlots[]> {
+    return em.find(
+      BookableSlots,
+      { scheduleTemplateId },
+      { orderBy: { startAt: 'ASC' } },
+    );
+  }
+
+  /** Los mismos, bloqueados para escribir: el retiro que cancela sus citas. */
+  findSlotsOfTemplateForUpdate(
+    em: EntityManager,
+    scheduleTemplateId: string,
+  ): Promise<BookableSlots[]> {
+    return em.find(
+      BookableSlots,
+      { scheduleTemplateId },
+      { lockMode: LockMode.PESSIMISTIC_WRITE, orderBy: { startAt: 'ASC' } },
+    );
   }
 }

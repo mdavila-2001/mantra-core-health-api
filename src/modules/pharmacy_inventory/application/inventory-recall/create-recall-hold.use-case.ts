@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import {
-  ResourceNotFoundException,
-  touch,
-  type AuthenticatedUser,
-} from '../../../../common';
+import { touch, type AuthenticatedUser } from '../../../../common';
 import {
   LedgerRepository,
   LotsRepository,
@@ -21,6 +17,7 @@ import {
   numericQuantity,
   recomputeAvailableQuantity,
 } from '../../domain/counting/stock-quantity';
+import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 /** Pone en cuarentena el stock de un lote alcanzado por recall. */
 @Injectable()
@@ -31,6 +28,7 @@ export class CreateRecallHoldUseCase {
     private readonly lots: LotsRepository,
     private readonly stock: StockPositionsRepository,
     private readonly ledger: LedgerRepository,
+    private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
   ) {}
 
@@ -47,12 +45,25 @@ export class CreateRecallHoldUseCase {
       'Applying recall hold',
     );
     return this.em.transactional(async (tx) => {
+      // Farmacia del tenant, sede, ubicación, producto y lote forman una sola
+      // cadena: el cuerpo no puede mezclar la farmacia propia con el lote ajeno.
+      const pharmacy = await this.scope.requireManagedPharmacy(
+        tx,
+        dto.pharmacyId,
+        actor,
+      );
+      const site = await this.scope.requireSite(
+        tx,
+        pharmacy,
+        dto.pharmacySiteId,
+      );
+      await this.scope.requireStockKey(tx, site, {
+        inventoryLocationId: dto.inventoryLocationId,
+        pharmacyProductId: dto.pharmacyProductId,
+        inventoryLotId: dto.inventoryLotId,
+      });
       const lot = await this.lots.findById(tx, dto.inventoryLotId);
-      if (!lot) {
-        throw new ResourceNotFoundException('Lote no encontrado', {
-          lotId: dto.inventoryLotId,
-        });
-      }
+      if (!lot) throw this.scope.notAvailable();
 
       const hold = this.holds.create(tx, {
         pharmacyProductId: dto.pharmacyProductId,

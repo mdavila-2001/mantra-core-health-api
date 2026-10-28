@@ -14,7 +14,7 @@ Junie, goose, y otras). Claude Code lee además `.claude/`.
 ## 1. Reglas no negociables
 
 Aplican a **todo** trabajo, sin excepción por tamaño, urgencia ni obviedad. Si una instrucción de
-sesión las contradice, **ganan estas** y el conflicto se registra en el reporte.
+sesión las contradice, **ganan estas** y el conflicto se registra en la descripción del PR.
 
 ### 1.1 Verificar es observar el artefacto corriendo
 
@@ -44,15 +44,16 @@ persistencia son correctas · no vi errores ≠ no hay errores.
 - **Prohibido inventar APIs de terceros.** Todo método, decorador, flag o versión se verifica
   contra la documentación de la versión instalada. Si no lo verificaste, no lo escribas.
 - "Seguramente ya hay algo así" no es evidencia.
-- **Prohibido resolver una ambigüedad por conveniencia.** Se registra en el plan y el reporte, con
-  el supuesto tomado y a quién confirmárselo. Nunca se presenta como hecho.
+- **Prohibido resolver una ambigüedad por conveniencia.** Se registra en el plan y en la
+  descripción del PR, con el supuesto tomado. Si la confirmación depende de otra persona, va a un
+  issue que la nombra. Nunca se presenta como hecho.
 - **Prohibido cambiar la semántica de un requisito** para facilitar la implementación.
 
 ### 1.3 Diff mínimo
 
 - **Prohibido tocar archivos fuera del alcance declarado** en el plan.
 - **Prohibido el refactor, renombre, reformateo o upgrade no solicitado.** Lo que encontrás roto o
-  feo fuera de alcance se **anota**, no se arregla.
+  feo fuera de alcance va a un **issue** en el repo que corresponde (§2.1), no se arregla.
 - Trabajo no previsto que aparezca en el camino **se agrega al plan** como microtarea con su
   criterio de aceptación y su Definition of Done. Nada se hace "de paso".
 
@@ -60,8 +61,8 @@ persistencia son correctas · no vi errores ≠ no hay errores.
 
 Esta plataforma maneja datos clínicos. Estas prohibiciones **no admiten excepción operativa**:
 
-- **Nunca** en logs, trazas, métricas, mensajes de error, analytics, capturas ni en el plan o el
-  reporte. Se loguean identificadores, no contenidos.
+- **Nunca** en logs, trazas, métricas, mensajes de error, analytics, capturas, issues ni en la
+  descripción del PR. Se loguean identificadores, no contenidos.
 - **Nunca en la URL** (path ni query): quedan en historiales, proxies y logs de acceso.
 - **Nunca a servicios de terceros** no acordados: incluye túneles de desarrollo, herramientas de
   depuración y modelos externos.
@@ -84,17 +85,54 @@ Esta plataforma maneja datos clínicos. Estas prohibiciones **no admiten excepci
 
 Si solo leés una sección de este archivo, que sea esta.
 
-### 2.1 Ningún trabajo empieza sin plan escrito en disco
+### 2.1 El repo describe lo que existe — no declara pendientes
 
-Prohibido escribir la primera línea de código antes de que exista el archivo de plan. Si el pedido
+El repo es la descripción del sistema **tal como es hoy**. No guarda el estado del trabajo:
+
+- **Prohibido versionar** planes, reportes de sesión, tableros de estado, secciones
+  «Pendiente», «Próximos pasos», «Falta» o «TODO», ni listas de tareas sin tildar que
+  describan trabajo por hacer. Tampoco carpetas como `docs/trabajo/`, `docs/progress/` o
+  `docs/tareas/`, ni archivos `PLAN.md`, `REPORTE.md` o `PENDIENTES*.md`.
+- **Prohibidos los comentarios `TODO` y `FIXME`** en el código.
+- Una página de `docs/` que describe un límite real lo dice en presente («no valida X»,
+  «no expone Y») y, si hay trabajo previsto, enlaza el issue. No lo anuncia como pendiente.
+
+Dónde va cada cosa:
+
+| Qué | Dónde |
+|---|---|
+| El plan y la evidencia de un trabajo | La descripción del PR: **Resumen** y **Verificación** de [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md) |
+| Lo que quedó sin hacer, a medias o bloqueado | Un **issue** de GitHub, enlazado desde el PR |
+| Un bug encontrado de paso, fuera de alcance | Un issue en el repo que corresponde |
+| Una decisión que depende de otra persona | Un issue que la nombra y dice qué supuesto se tomó mientras tanto |
+| Un hallazgo de seguridad | Un issue con la etiqueta `seguridad` |
+
+El issue va en el repo donde vive el cambio:
+
+| Repo | Para |
+|---|---|
+| `mdavila-2001/mantra-core-health-api` | Esta API |
+| `mdavila-2001/mantra-core-health` | El front |
+| `mantra-core-technologies/mantra-core-health-model` | El modelo de datos (`.puml`, DDL) |
+| `mdavila-2001/mantra_core_technologies_health_docs` | El vault de documentación |
+
+**En el código**, una limitación intencional se describe en presente y con su porqué, sin
+`TODO`: `// No reintenta: el proveedor ya deduplica por clave de idempotencia.` El
+trabajo que falta de verdad es un issue; el comentario puede apuntarlo: `// ver #123`.
+
+**Los checklists de procedimiento sí van.** La lista de *Verificación* de la plantilla del PR
+o los pasos de un runbook se tildan cada vez que se usan: son procedimiento, no trabajo
+pendiente.
+
+### 2.2 Ningún trabajo empieza sin plan escrito
+
+Prohibido escribir la primera línea de código antes de que exista el plan escrito. Si el pedido
 es tan chico que el plan parece ridículo, el plan es de un hito con una microtarea y se escribe
 igual.
 
-```
-docs/trabajo/<AAAA-MM-DD>-<slug>/PLAN.md       ← primero esto
-docs/trabajo/<AAAA-MM-DD>-<slug>/REPORTE.md    ← al cerrar, siempre
-docs/trabajo/<AAAA-MM-DD>-<slug>/evidencia/    ← salidas, capturas, traces
-```
+El plan vive **fuera del repo**: en el issue que origina el trabajo o en la descripción del PR.
+Si el trabajo dura más de una sesión, abrí el PR temprano como borrador y mantené el plan
+actualizado ahí. Nunca en un archivo versionado.
 
 **Tres capas obligatorias.** Un plan de hitos sueltos sin microtareas no sirve: sin microtareas no
 hay unidad de verificación, y "a medias" se vuelve imposible de expresar con honestidad.
@@ -117,34 +155,27 @@ observación**, partila. Si necesitás la palabra "y" para describir lo que hace
 
 Un CA sin DoD es una intención. Un DoD sin CA es un checklist sin propósito.
 
-#### Esqueleto de `PLAN.md`
+#### Esqueleto del plan (en el issue o en el PR)
 
 ```markdown
-# Plan — <título>
+## Plan — <título>
 
-- Fecha: <AAAA-MM-DD> · Repos afectados: <lista> · Predecesor: <trabajo previo o "ninguno">
+- Repos afectados: <lista> · Issue: #<n> o "ninguno"
 - Resultado observable: <quién ve o puede hacer qué, dónde>
 - Kill-test: <la comprobación más barata que demostraría que esto NO está hecho>
 
-## Alcance
+### Alcance
 - IN: <lista explícita>
-- OUT: <lo que NO se toca aunque se vea roto>
-- Ambigüedades registradas: <pregunta + supuesto tomado + a quién confirmar>
+- OUT: <lo que NO se toca aunque se vea roto — cada hallazgo, a su issue>
+- Ambigüedades: <pregunta + supuesto tomado + issue donde se confirma>
 
-## H1 — <hito>
+### H1 — <hito>
 **CA:** Dado … cuando … entonces …
 **DoD:** <comandos + gates aplicables>
-**Estado:** TODO
-
-### H1.S1 — <subtarea>
-**CA:** … **DoD:** … **Estado:** TODO
 
 | ID | Microtarea | CA (binario) | DoD (comando de verificación) | Estado |
 |---|---|---|---|---|
 | H1.S1.M1 | … | … | `<comando>` → <salida esperada> | TODO |
-
-## Riesgos y bloqueos previstos
-| Riesgo | Impacto | Mitigación |
 ```
 
 **Estados permitidos, exactamente estos seis:** `TODO` · `EN CURSO` · `HECHO` · `A MEDIAS` ·
@@ -153,63 +184,44 @@ Un CA sin DoD es una intención. Un DoD sin CA es un checklist sin propósito.
 `A MEDIAS` es un estado **legítimo y esperado**. Lo prohibido es disfrazarlo de `HECHO`. Una
 microtarea cuyo DoD no se ejecutó nunca es `HECHO`, aunque el código esté escrito.
 
-### 2.2 Ningún trabajo se cierra sin reporte escrito en disco
+### 2.3 Ningún trabajo se cierra sin reporte escrito — en el PR
 
-El chat no es entregable: se pierde, no se versiona y nadie lo lee dos semanas después.
+El chat no es entregable: se pierde y nadie lo lee dos semanas después. El reporte es la
+descripción del PR, y se escribe **también cuando el trabajo quedó incompleto** — ese es el caso
+más importante, porque es lo que permite retomarlo sin arqueología.
 
-El reporte se escribe **también cuando el trabajo quedó incompleto** — ese es el caso más
-importante, porque es lo que permite retomarlo sin arqueología.
+En **Resumen** va qué cambia y por qué; en **Verificación**, la evidencia. Lo que no se terminó
+no se describe como «pendiente» en el PR ni en el repo: **se abre un issue y el PR lo enlaza**.
 
-**Tres secciones obligatorias.** Una sección vacía se escribe con "ninguna": **borrarla está
-prohibido**, porque su ausencia se lee como que no hubo nada que decir.
-
-#### Esqueleto de `REPORTE.md`
+#### Qué lleva la descripción del PR
 
 ```markdown
-# Reporte — <título>
+## Resumen
+<qué cambia y por qué> · Peldaño de evidencia alcanzado: <ver §1.1>
+Avance: <microtareas HECHO> / <total> (% calculado, nunca estimado a ojo)
 
-- Fecha: <AAAA-MM-DD> · Plan: [PLAN.md](./PLAN.md) · Rama(s): <lista>
-- Peldaño de evidencia alcanzado: <ver §1.1>
-- Avance: <microtareas HECHO> / <total> (% calculado, nunca estimado a ojo)
+Issues abiertos por este trabajo: #<n> (a medias: <qué>), #<m> (bloqueado: <por qué>)
 
-## Completado
-| ID | Qué se logró | Comando | Resultado |
-<!-- Solo entra lo que tiene DoD demostrado con salida literal.
-     Si no podés pegar la salida, va en A medias. -->
+## Verificación
+<!-- comandos con su salida literal recortada, nunca parafraseada.
+     Solo cuenta como hecho lo que tiene DoD demostrado con salida literal. -->
 
-## A medias
-### <ID> — <título>
-- Qué anda:
-- Qué no anda:
-- Qué falta exactamente:
-- Dónde quedó:
-
-## Pendiente
-| ID | Estado | Qué lo destraba |
-
-## Evidencia
-<!-- comandos con su salida literal recortada, nunca parafraseada -->
-
-## No cubierto
-<!-- lo que se hizo pero NO se probó. Distinto de Pendiente. -->
-
-## Desvíos del plan
-## Riesgos residuales
-## Decisiones y ambigüedades
+No cubierto: <lo que se hizo pero NO se probó>
+Desvíos del plan · Riesgos residuales · Decisiones y ambigüedades: <o "ninguno">
 ```
 
-**A MEDIAS exige las cuatro respuestas.** "Casi listo, falta pulir" está prohibido. Así se ve un
-ítem aceptable:
+**Un `A MEDIAS` es un issue con las cuatro respuestas.** "Casi listo, falta pulir" está
+prohibido. Así se ve el cuerpo de un issue aceptable:
 
-> `H2.S1.M3` — El endpoint devuelve 409 ante solapamiento y el test unitario pasa. La UI todavía
-> muestra el error genérico en vez del mensaje de conflicto; falta mapear el código
-> `APPOINTMENT_OVERLAP` en el interceptor de errores del front. Quedó en
-> `feature/agenda-conflictos`, compila, E2E `reserva-conflicto` en rojo por esto.
+> El endpoint devuelve 409 ante solapamiento y el test unitario pasa. La UI todavía muestra el
+> error genérico en vez del mensaje de conflicto; falta mapear el código `APPOINTMENT_OVERLAP` en
+> el interceptor de errores del front. Quedó en `feature/agenda-conflictos`, compila, E2E
+> `reserva-conflicto` en rojo por esto.
 
 **Reglas de honestidad:** el porcentaje se calcula (`HECHO / total`), no se estima · prohibido el
-resumen optimista cuando hay algo en rojo · prohibido omitir una microtarea que no se hizo ·
-prohibido reescribir el reporte eliminando lo que salió mal · escrito para alguien que no vio la
-sesión.
+resumen optimista cuando hay algo en rojo · prohibido omitir una microtarea que no se hizo: se
+declara en el PR y tiene su issue · prohibido reescribir la descripción eliminando lo que salió
+mal · escrito para alguien que no vio la sesión · sin datos de pacientes, secretos ni tokens.
 
 ---
 
@@ -217,19 +229,18 @@ sesión.
 
 | Qué | Dónde |
 |---|---|
-| **Las 14 reglas completas** | [`.claude/rules/`](.claude/rules/) — empezá por [`README.md`](.claude/rules/README.md) |
-| **Catálogo de 176 skills** | [`.claude/skills/`](.claude/skills/) |
-| **Índice de skills** | [`.claude/skills/skills-router/SKILL.md`](.claude/skills/skills-router/SKILL.md) |
-| **Espejo cross-tool** | [`.agents/skills/`](.agents/skills/) y [`.agents/rules/`](.agents/rules/) |
+| **Las 14 reglas completas** | [`.agents/rules/`](.agents/rules/) — empezá por [`README.md`](.agents/rules/README.md) |
+| **Catálogo de 176 skills** | [`.agents/skills/`](.agents/skills/) |
+| **Índice de skills** | [`.agents/skills/skills-router/SKILL.md`](.agents/skills/skills-router/SKILL.md) |
 | **Panorama del repo** | [`README.md`](README.md) |
 
 **No leas el catálogo entero: no sirve.** Entrá por `skills-router`, que mapea la situación
 concreta ("voy a tocar un endpoint", "voy a diseñar una pantalla", "voy a desplegar") a la skill
 que corresponde, y fija la precedencia cuando dos se pisan.
 
-`.agents/` es un **espejo generado** de `.claude/skills/` y `.claude/rules/`, para herramientas que
-no leen la carpeta de Claude Code. **No lo edites a mano**: lo que escribas ahí se pierde en la
-próxima sincronización. La fuente única de verdad es `.claude/`.
+`.agents/` nació como espejo de las carpetas `.claude/skills/` y `.claude/rules/` del estándar de
+la casa, generado por `tools/sync_agents.py`. **Ni esa fuente ni el script están en este repo**:
+acá `.agents/` es la copia que rige y se edita directamente, en el mismo PR que cambia la regla.
 
 ---
 
@@ -237,16 +248,19 @@ próxima sincronización. La fuente única de verdad es `.claude/`.
 
 Sé honesto sobre esto, porque una falsa sensación de protección es peor que ninguna.
 
-Los candados de [`.claude/hooks/`](.claude/hooks/) (`plan_gate.py`, `report_gate.py`) usan la API
-de hooks de **Claude Code**. Interceptan la escritura y el cierre de sesión, y bloquean de verdad:
-si no existe el plan, la escritura de código **no ocurre**.
+En este repo **no hay candados** que hagan cumplir el plan o el reporte: `.claude/` solo trae
+`settings.json`, sin hooks de plan ni de cierre. Los candados del estándar (`plan_gate.py`,
+`report_gate.py`) exigían `PLAN.md` y `REPORTE.md` en disco, y esa forma de trabajo quedó
+reemplazada por la de §2.
 
-**Ninguna otra herramienta tiene ese mecanismo.** En Cursor, Codex, Copilot o cualquier otra:
+En cualquier herramienta —Claude Code, Cursor, Codex, Copilot u otra—:
 
-- El plan y el reporte **siguen siendo obligatorios** — la regla no cambia.
+- El plan y el reporte **siguen siendo obligatorios**, en el issue y en la descripción del PR.
 - **Nadie te va a frenar** si los salteás. Depende de la disciplina de quien trabaja y de quien
   revisa el PR.
-- Por eso el reviewer tiene que **rechazar el PR** que no traiga `PLAN.md` y `REPORTE.md`.
+- Por eso quien revisa tiene que **rechazar el PR** que no traiga *Resumen* y *Verificación*
+  con evidencia, que deje trabajo sin hacer sin su issue enlazado, o que agregue al repo un
+  plan, un reporte, una sección de pendientes o un `TODO`/`FIXME`.
 
 Tampoco se portan: las skills siguen siendo texto legible por cualquier herramienta, pero el
 mecanismo de **carga automática por descripción** es específico de cada una. En herramientas sin
@@ -256,20 +270,9 @@ ese mecanismo, abrí la skill que corresponda a mano usando `skills-router`.
 
 ## 5. Cómo se mantiene
 
-La fuente única es `.claude/`. Después de editar cualquier skill o regla:
-
-```bash
-python tools/sync_agents.py          # regenera el espejo .agents/
-python tools/sync_agents.py --check  # falla con salida 1 si hay deriva
-```
-
-`--check` es lo que hay que correr en CI: detecta que alguien editó `.claude/` sin sincronizar, o
-que alguien editó `.agents/` a mano. Sin ese chequeo, las dos copias divergen en silencio y el
-espejo empieza a mentir.
-
-```bash
-python tools/sync_agents.py --self-test   # prueba el propio script
-```
+Una regla o una skill se cambia editando su archivo en `.agents/` y este `AGENTS.md` en el mismo
+PR, para que no se contradigan. Antes de mergear, buscá con `git grep` que la regla vieja no
+siga escrita en otra regla, en una skill o en `docs/governance/`.
 
 Antes de editar una skill, leé `prompt-governance-versioning`. Antes de publicar el cambio,
 `prompt-evals`.

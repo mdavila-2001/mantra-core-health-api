@@ -15,7 +15,10 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-/** Propiedad minimizada de un evento (solo props permitidas por el esquema). */
+/**
+ * Propiedad minimizada de un evento. Sólo se admiten las que el esquema del
+ * evento declara; el servicio rechaza el resto (`TELEMETRY_EVENT_PROPERTY_NOT_ALLOWED`).
+ */
 export class ActivityEventPropertyDto {
   /**
    * Valor de property name mantenido por la instancia.
@@ -65,8 +68,10 @@ export class ActivityEventPropertyDto {
    * Identificador asociado a data classification concept.
    */
   @ApiPropertyOptional({
-    description: 'Clasificación de dato (concept id)',
+    description:
+      'Ignorado: la clasificación del dato la fija el servidor desde el esquema del evento',
     format: 'uuid',
+    deprecated: true,
   })
   @IsOptional()
   @IsUUID()
@@ -110,7 +115,8 @@ export class ActivityEventItemDto {
    * Identificador asociado a analytics subject.
    */
   @ApiPropertyOptional({
-    description: 'Sujeto de analítica pseudónimo',
+    description:
+      'Sujeto de analítica pseudónimo; debe ser del usuario autenticado',
     format: 'uuid',
   })
   @IsOptional()
@@ -118,42 +124,16 @@ export class ActivityEventItemDto {
   analyticsSubjectId?: string;
 
   /**
-   * Identificador asociado a user.
-   */
-  @ApiPropertyOptional({
-    description: 'Usuario (para gate de consentimiento)',
-    format: 'uuid',
-  })
-  @IsOptional()
-  @IsUUID()
-  userId?: string;
-
-  /**
-   * Identificador asociado a session.
-   */
-  @ApiPropertyOptional({ description: 'Sesión asociada', format: 'uuid' })
-  @IsOptional()
-  @IsUUID()
-  sessionId?: string;
-
-  /**
    * Identificador asociado a session journey.
    */
   @ApiPropertyOptional({
-    description: 'Journey de sesión existente a enlazar',
+    description:
+      'Journey de sesión existente a enlazar; debe ser de una sesión del usuario autenticado',
     format: 'uuid',
   })
   @IsOptional()
   @IsUUID()
   sessionJourneyId?: string;
-
-  /**
-   * Identificador asociado a tenant.
-   */
-  @ApiPropertyOptional({ description: 'Tenant', format: 'uuid' })
-  @IsOptional()
-  @IsUUID()
-  tenantId?: string;
 
   /**
    * Identificador asociado a portal type concept.
@@ -199,10 +179,13 @@ export class ActivityEventItemDto {
    */
   @ApiPropertyOptional({
     type: [ActivityEventPropertyDto],
-    description: 'Propiedades permitidas y minimizadas',
+    maxItems: 25,
+    description:
+      'Propiedades declaradas por el esquema del evento (máximo 25, el tope del proveedor)',
   })
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(25)
   @ValidateNested({ each: true })
   @Type(() => ActivityEventPropertyDto)
   properties?: ActivityEventPropertyDto[];
